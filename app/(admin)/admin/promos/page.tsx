@@ -1,0 +1,2 @@
+import { PromosManager } from "@/components/admin/promos-manager";import { createAdminClient } from "@/lib/supabase/admin";
+export default async function AdminPromosPage(){const {data}=await createAdminClient().from("promo_codes").select("*").order("created_at",{ascending:false});return <div><h1 className="text-3xl font-semibold">Promo codes</h1><p className="mt-2 mb-7 text-muted-foreground">Create incentives and monitor redemption.</p><PromosManager promos={data??[]}/></div>}
