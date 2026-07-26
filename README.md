@@ -12,6 +12,15 @@ notification services.
 
 Use `npm run typecheck`, `npm run lint`, and `npm run build` before shipping.
 
+## Production scheduled jobs
+
+CleanScape uses cron-job.org for scheduled production operations when deployed
+on Vercel Hobby. Vercel-managed Cron Jobs are disabled in `vercel.json` so Hobby
+deployments are not blocked by frequent schedules.
+
+Configure the external jobs with `CRON_SECRET` and the bearer-token header shown
+in [`docs/cron-job-org.md`](docs/cron-job-org.md).
+
 ## Database
 
 The complete Supabase schema is in
