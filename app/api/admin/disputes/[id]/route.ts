@@ -5,7 +5,7 @@ import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 import { getStripe } from "@/lib/stripe/server";
 
 const schema = z.object({
-  action: z.enum(["refund", "deduct", "resolve", "close"]),
+  action: z.enum(["refund", "deduct", "resolve", "close", "uphold_rating", "reject_rating"]),
   amount: z.number().int().positive().optional(),
   notes: z.string().trim().min(3),
 });
@@ -58,6 +58,22 @@ export async function POST(
         .update({ net_amount: Math.max(0, pending.net_amount - deduction) })
         .eq("id", pending.id);
     }
+  }
+  if (action === "uphold_rating" && dispute.rating_id) {
+    const { error } = await auth.admin.rpc("void_rating_from_medallion", {
+      actor_id: auth.user.id,
+      resolution_notes: notes,
+      target_rating_id: dispute.rating_id,
+    });
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+  if (action === "reject_rating" && dispute.rating_id) {
+    const { error } = await auth.admin.rpc("apply_rating_to_medallion", {
+      actor_id: auth.user.id,
+      resolution_notes: notes,
+      target_rating_id: dispute.rating_id,
+    });
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   }
   const status = action === "close" ? "closed" : "resolved";
   await auth.admin

@@ -36,6 +36,7 @@ export function UpdatePasswordForm() {
       return;
     }
 
+    await fetch("/api/auth/password-updated", { method: "POST" });
     await createBrowserClient().auth.signOut();
     router.replace("/login?message=Password%20updated.%20You%20can%20sign%20in.");
     router.refresh();

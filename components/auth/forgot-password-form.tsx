@@ -12,7 +12,6 @@ import {
   forgotPasswordSchema,
   type ForgotPasswordValues,
 } from "@/lib/auth/schemas";
-import { createBrowserClient } from "@/lib/supabase/client";
 
 export function ForgotPasswordForm() {
   const [formError, setFormError] = useState<string | null>(null);
@@ -30,15 +29,15 @@ export function ForgotPasswordForm() {
     setFormError(null);
     setSuccess(null);
 
-    const callback = new URL("/auth/callback", window.location.origin);
-    callback.searchParams.set("next", "/update-password");
-    const { error } = await createBrowserClient().auth.resetPasswordForEmail(
-      email,
-      { redirectTo: callback.toString() },
-    );
+    const response = await fetch("/api/auth/forgot-password", {
+      body: JSON.stringify({ email }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as { error?: string };
 
-    if (error) {
-      setFormError(error.message);
+    if (!response.ok) {
+      setFormError(result.error ?? "Unable to send reset link.");
       return;
     }
 

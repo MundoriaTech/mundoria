@@ -41,7 +41,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
         </label>
         <select className="rounded-md border px-3 text-sm" onChange={(event) => setStatus(event.target.value)}>
           <option value="">All statuses</option>
-          {["pending_match","matched","confirmed","cleaner_en_route","in_progress","completed","cancelled","no_show","disputed"].map((value) => <option key={value}>{value}</option>)}
+          {["pending_match","matched","confirmed","cleaner_en_route","in_progress","awaiting_customer_confirmation","completed","cancelled","no_show","disputed"].map((value) => <option key={value}>{value}</option>)}
         </select>
         <select className="rounded-md border px-3 text-sm" onChange={(event) => setService(event.target.value)}>
           <option value="">All services</option>

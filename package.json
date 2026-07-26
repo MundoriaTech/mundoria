@@ -12,7 +12,6 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-slot": "^1.1.1",
-    "@react-google-maps/api": "^2.20.3",
     "@sentry/nextjs": "^8.47.0",
     "@stripe/react-stripe-js": "^3.10.0",
     "@stripe/stripe-js": "^5.5.0",
@@ -22,6 +21,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.468.0",
+    "maplibre-gl": "^5.24.0",
     "next": "14.2.35",
     "onesignal-node": "^3.4.0",
     "react": "^18.3.1",

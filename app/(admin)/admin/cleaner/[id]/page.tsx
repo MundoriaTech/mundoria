@@ -11,12 +11,14 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
     { data: profile },
     { data: cleaner },
     { data: history },
+    { data: medallionEvents },
     { data: bookings },
     { data: ratings },
   ] = await Promise.all([
     admin.from("profiles").select("*").eq("id", params.id).single(),
     admin.from("cleaner_profiles").select("*").eq("id", params.id).single(),
     admin.from("performance_history").select("*").eq("cleaner_id", params.id).order("month", { ascending: false }),
+    admin.from("cleaner_medallion_events").select("*").eq("cleaner_id", params.id).order("created_at", { ascending: false }),
     admin.from("bookings").select("*").eq("cleaner_id", params.id).order("scheduled_date", { ascending: false }),
     admin.from("ratings").select("*").eq("cleaner_id", params.id).order("created_at", { ascending: false }),
   ]);
@@ -50,9 +52,9 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
             <TierBadge tier={cleaner.tier} />
           </div>
           <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-            <Metric label="Rating" value={Number(cleaner.rating).toFixed(1)} />
+            <Metric label="Medallion score" value={cleaner.medallion_score ?? 0} />
             <Metric label="Jobs" value={cleaner.total_jobs} />
-            <Metric label="Score" value={cleaner.performance_score} />
+            <Metric label="Certification" value={cleaner.certification_score ?? "—"} />
           </div>
         </section>
         <CleanerActions cleanerId={params.id} currentTier={cleaner.tier} />
@@ -71,6 +73,17 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
           )}
         </div>
       </section>
+      <DataTable
+        headers={["Date", "Event", "Score", "Tier change", "Notes"]}
+        rows={(medallionEvents ?? []).map((item) => [
+          new Date(item.created_at).toLocaleDateString("en-GB"),
+          item.event_type.replaceAll("_", " "),
+          `${item.score_before ?? "—"} → ${item.score_after ?? "—"}`,
+          `${item.tier_before ?? "—"} → ${item.tier_after ?? "—"}`,
+          item.notes ?? "—",
+        ])}
+        title="Medallion and certification history"
+      />
       <DataTable
         headers={["Month", "Score", "Tier change", "Jobs"]}
         rows={(history ?? []).map((item) => [
@@ -92,13 +105,15 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         title="Booking history"
       />
       <DataTable
-        headers={["Date", "Score", "Comment"]}
+        headers={["Date", "Mood", "Internal score", "Status", "Comment"]}
         rows={(ratings ?? []).map((item) => [
           new Date(item.created_at).toLocaleDateString("en-GB"),
-          item.overall_score,
+          item.mood ?? item.overall_score,
+          item.internal_score ?? "—",
+          item.application_status ?? "applied",
           item.comment ?? "—",
         ])}
-        title="Ratings and reviews"
+        title="Mood ratings"
       />
     </div>
   );

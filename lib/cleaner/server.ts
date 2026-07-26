@@ -62,7 +62,7 @@ export async function getAvailableJobs(cleanerId: string) {
       admin.from("cleaner_availability").select("*").eq("cleaner_id", cleanerId).eq("is_available", true),
       admin.from("cleaner_job_responses").select("booking_id,response").eq("cleaner_id", cleanerId),
     ]);
-  if (cleaner?.status !== "active") return [];
+  if (cleaner?.status !== "certified" && cleaner?.status !== "active") return [];
   const { data: bookings } = await admin
     .from("bookings")
     .select("*, address:addresses(*)")
@@ -73,7 +73,7 @@ export async function getAvailableJobs(cleanerId: string) {
   const serviceSet = new Set((services ?? []).map((item) => item.service_type));
   const prefixes = (areas ?? []).map((item) => item.postcode_prefix?.toUpperCase()).filter(Boolean) as string[];
   const declined = new Set((responses ?? []).filter((item) => item.response === "declined").map((item) => item.booking_id));
-  const tierRank = { bronze: 0, silver: 1, gold: 2, elite: 3 };
+  const tierRank = { bronze: 0, silver: 1, gold: 2, rose_gold: 3, elite: 3 };
   const minimumTier: Record<string, keyof typeof tierRank> = {
     regular: "bronze",
     one_off: "bronze",

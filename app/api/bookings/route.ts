@@ -2,7 +2,6 @@ import * as Sentry from "@sentry/nextjs";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import twilio from "twilio";
 
 import { createBookingSchema } from "@/lib/customer/booking-schema";
@@ -11,6 +10,7 @@ import {
   formatServiceName,
   serviceDefinition,
 } from "@/lib/customer/services";
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -137,12 +137,20 @@ export async function POST(request: Request) {
 
   try {
     if (preferences.email !== false && process.env.RESEND_API_KEY) {
-      await new Resend(process.env.RESEND_API_KEY).emails.send({
-        from:
-          process.env.RESEND_FROM_EMAIL ??
-          "CleanScape <onboarding@resend.dev>",
-        html: `<h1>Booking confirmed</h1><p>${message}</p><p><a href="${appUrl}/booking/${booking.id}">View booking</a></p>`,
-        subject: "Your CleanScape booking is confirmed",
+      await sendBrandedEmail({
+        data: {
+          address: `${address.address_line_1}, ${address.city}, ${address.postcode}`,
+          amount: formatMoney(paymentIntent.amount),
+          appUrl,
+          bookingId: booking.id,
+          bookingUrl: `${appUrl}/booking/${booking.id}`,
+          firstName: profile.full_name?.split(" ")[0],
+          fullName: profile.full_name,
+          scheduledDate: parsed.data.scheduledDate,
+          scheduledTime: parsed.data.scheduledTime,
+          serviceName: formatServiceName(parsed.data.serviceType),
+        },
+        template: "customer.booking_confirmed",
         to: profile.email,
       });
     }

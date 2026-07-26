@@ -1,9 +1,9 @@
 import { addHours } from "date-fns";
 
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { alertAdmins } from "@/lib/notifications/admin";
 import {
-  sendEmail,
   sendPushNotification,
 } from "@/lib/notifications/send";
 import { refundBookingPayment } from "@/lib/payments/service";
@@ -90,12 +90,18 @@ export async function cancelExpiredReplacement(bookingId: string) {
     { booking_id: bookingId },
   );
   if (customer?.email) {
-    await sendEmail(
-      customer.email,
-      "Your CleanScape booking was cancelled",
-      "replacement_failed",
-      { booking_id: bookingId },
-    );
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    await sendBrandedEmail({
+      data: {
+        appUrl,
+        bookingId,
+        bookingUrl: `${appUrl}/booking/${bookingId}`,
+        reason:
+          "We could not find a replacement within one hour. Your payment authorization has been voided.",
+      },
+      template: "customer.booking_cancelled",
+      to: customer.email,
+    });
   }
   return true;
 }

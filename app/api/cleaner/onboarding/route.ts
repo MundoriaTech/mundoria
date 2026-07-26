@@ -2,9 +2,9 @@ import * as Sentry from "@sentry/nextjs";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { z } from "zod";
 
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
@@ -34,6 +34,10 @@ const schema = z.object({
   dbs_document_url: requiredString("DBS certificate"),
   full_name: z.string().trim().min(2, "Full name is required"),
   id_document_url: requiredString("Government-issued ID"),
+  location_tracking_consent_accepted: z.literal(true, {
+    errorMap: () => ({ message: "Location consent is required" }),
+  }),
+  location_tracking_consent_version: z.string().trim().default("cleaner-location-consent-v1"),
   payout_preference: z.enum(["weekly", "monthly"]),
   phone: z.string().trim().min(7, "Enter a valid phone number"),
   services: requiredStringList("Select at least one service"),
@@ -89,6 +93,9 @@ export async function POST(request: Request) {
       dbs_document_url: value.dbs_document_url,
       id_document_status: "pending",
       id_document_url: value.id_document_url,
+      location_tracking_consent_at: new Date().toISOString(),
+      location_tracking_consent_version:
+        value.location_tracking_consent_version,
       onboarding_complete: true,
       payout_preference: value.payout_preference,
       stripe_onboarding_complete: stripeOnboardingComplete,
@@ -148,12 +155,33 @@ export async function POST(request: Request) {
   });
 
   try {
+    if (process.env.RESEND_API_KEY && profile.email) {
+      await sendBrandedEmail({
+        data: {
+          appUrl: process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin,
+          firstName: value.full_name.split(" ")[0],
+          fullName: value.full_name,
+          payoutPreference: value.payout_preference,
+          workingAreas: value.working_areas.join(", "),
+        },
+        template: "cleaner.application_submitted",
+        to: profile.email,
+      });
+    }
+
     if (process.env.RESEND_API_KEY && process.env.ADMIN_NOTIFICATION_EMAIL) {
-      await new Resend(process.env.RESEND_API_KEY).emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? "CleanScape <onboarding@resend.dev>",
+      const appUrl =
+        process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+      await sendBrandedEmail({
+        data: {
+          appUrl,
+          cleanerEmail: profile.email,
+          cleanerName: value.full_name,
+          cleanerUrl: `${appUrl}/admin/cleaner/${user.id}`,
+          yearsExperience: value.years_experience,
+        },
+        template: "admin.cleaner_application_submitted",
         to: process.env.ADMIN_NOTIFICATION_EMAIL,
-        subject: `New cleaner application: ${value.full_name}`,
-        html: `<h1>New cleaner application</h1><p>${value.full_name} (${profile.email}) has submitted documents for review.</p>`,
       });
     }
   } catch (emailError) {

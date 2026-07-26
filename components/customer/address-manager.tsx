@@ -1,15 +1,17 @@
 "use client";
 
-import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { Check, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { cloneElement, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  type GeoapifyFeature,
+  type GeoapifyAutocompleteResponse,
+  getGeoapifyApiKey,
+} from "@/lib/maps/geoapify";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { Address } from "@/types/customer";
-
-const libraries: "places"[] = ["places"];
 
 export interface AddressFormValues {
   address_line_1: string;
@@ -235,7 +237,7 @@ export function AddressForm({
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+  const mapsKey = getGeoapifyApiKey();
 
   function update<K extends keyof AddressFormValues>(
     key: K,
@@ -244,28 +246,23 @@ export function AddressForm({
     setValues((current) => ({ ...current, [key]: value }));
   }
 
-  function useSelectedPlace(place: google.maps.places.PlaceResult) {
-    if (!place?.address_components) return;
-
-    const component = (type: string) =>
-      place.address_components?.find((item) => item.types.includes(type))
-        ?.long_name ?? "";
-    const streetNumber = component("street_number");
-    const route = component("route");
+  function useSelectedPlace(place: GeoapifyFeature) {
+    const properties = place.properties;
 
     setValues((current) => ({
       ...current,
       address_line_1:
-        [streetNumber, route].filter(Boolean).join(" ") ||
-        place.formatted_address ||
+        properties.address_line1 ||
+        properties.street ||
+        properties.formatted ||
         current.address_line_1,
       city:
-        component("postal_town") ||
-        component("locality") ||
-        component("administrative_area_level_2"),
-      latitude: place.geometry?.location?.lat() ?? null,
-      longitude: place.geometry?.location?.lng() ?? null,
-      postcode: component("postal_code"),
+        properties.city ||
+        properties.address_line2 ||
+        current.city,
+      latitude: properties.lat ?? null,
+      longitude: properties.lon ?? null,
+      postcode: properties.postcode ?? current.postcode,
     }));
   }
 
@@ -464,28 +461,111 @@ function AddressAutocompleteInput({
 }: {
   apiKey: string;
   input: React.ReactElement;
-  onPlaceSelected: (place: google.maps.places.PlaceResult) => void;
+  onPlaceSelected: (place: GeoapifyFeature) => void;
 }) {
-  const [autocomplete, setAutocomplete] =
-    useState<google.maps.places.Autocomplete | null>(null);
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: apiKey,
-    id: "cleanscape-google-maps",
-    libraries,
-  });
+  const [query, setQuery] = useState(String(input.props.value ?? ""));
+  const [suggestions, setSuggestions] = useState<GeoapifyFeature[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  if (!isLoaded) return input;
+  useEffect(() => {
+    setQuery(String(input.props.value ?? ""));
+  }, [input.props.value]);
+
+  useEffect(() => {
+    if (query.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const url = new URL("https://api.geoapify.com/v1/geocode/autocomplete");
+        url.searchParams.set("apiKey", apiKey);
+        url.searchParams.set("filter", "countrycode:gb");
+        url.searchParams.set("format", "geojson");
+        url.searchParams.set("limit", "6");
+        url.searchParams.set("text", query);
+
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) return;
+
+        const data = (await response.json()) as GeoapifyAutocompleteResponse;
+        setSuggestions(data.features ?? []);
+        setOpen(true);
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setSuggestions([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, [apiKey, query]);
 
   return (
-    <Autocomplete
-      onLoad={setAutocomplete}
-      onPlaceChanged={() => {
-        const place = autocomplete?.getPlace();
-        if (place) onPlaceSelected(place);
-      }}
-    >
-      {input}
-    </Autocomplete>
+    <div className="relative">
+      {/** Clone the app's normal input so styling/validation stays identical. */}
+      {cloneElement(input, {
+        autoComplete: "off",
+        onBlur: () => {
+          blurTimer.current = setTimeout(() => setOpen(false), 150);
+        },
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+          setQuery(event.target.value);
+          input.props.onChange?.(event);
+        },
+        onFocus: () => {
+          if (blurTimer.current) clearTimeout(blurTimer.current);
+          if (suggestions.length) setOpen(true);
+        },
+        value: query,
+      })}
+      {open && (suggestions.length || loading) ? (
+        <div className="absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-xl border bg-background p-1 shadow-lg">
+          {loading ? (
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              Searching addresses…
+            </div>
+          ) : null}
+          {suggestions.map((suggestion) => (
+            <button
+              className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+              key={`${suggestion.properties.lat}-${suggestion.properties.lon}-${suggestion.properties.formatted}`}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onPlaceSelected(suggestion);
+                setQuery(
+                  suggestion.properties.address_line1 ||
+                    suggestion.properties.formatted ||
+                    query,
+                );
+                setOpen(false);
+              }}
+              type="button"
+            >
+              <span className="font-medium">
+                {suggestion.properties.address_line1 ||
+                  suggestion.properties.formatted}
+              </span>
+              {suggestion.properties.address_line2 ? (
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {suggestion.properties.address_line2}
+                </span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

@@ -45,7 +45,7 @@ export function BookingActions({
       </div>
       <div className="mt-3 flex gap-2">
         <select className="h-10 flex-1 rounded-md border px-3 text-sm" onChange={(event) => setStatus(event.target.value)} value={status}>
-          {["pending_match","matched","confirmed","cleaner_en_route","in_progress","completed","cancelled","disputed"].map((value) => <option key={value}>{value}</option>)}
+          {["pending_match","matched","confirmed","cleaner_en_route","in_progress","awaiting_customer_confirmation","completed","cancelled","disputed"].map((value) => <option key={value}>{value}</option>)}
         </select>
         <Button disabled={note.length < 3} onClick={() => void act("status")} variant="outline">Update status</Button>
       </div>

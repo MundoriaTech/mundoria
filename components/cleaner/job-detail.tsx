@@ -1,11 +1,6 @@
 "use client";
 
 import {
-  GoogleMap,
-  MarkerF,
-  useJsApiLoader,
-} from "@react-google-maps/api";
-import {
   Camera,
   MapPin,
   MessageCircle,
@@ -16,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { Button } from "@/components/ui/button";
 import {
   formatMoney,
@@ -230,6 +226,11 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
               </Button>
             </>
           ) : null}
+          {job.status === "awaiting_customer_confirmation" ? (
+            <p className="font-medium text-primary">
+              Job marked complete. Waiting for customer checklist confirmation.
+            </p>
+          ) : null}
           {job.status === "completed" ? (
             <p className="font-medium text-primary">
               Job completed and payment captured.
@@ -242,45 +243,31 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
 }
 
 function RouteMap({ job }: { job: CleanerJob }) {
-  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
-  if (!key || job.address?.latitude == null || job.address.longitude == null) {
+  if (job.address?.latitude == null || job.address.longitude == null) {
     return (
       <div className="flex h-64 items-center justify-center rounded-xl bg-muted text-sm text-muted-foreground">
         Map unavailable for this address.
       </div>
     );
   }
-  return (
-    <LoadedMap
-      apiKey={key}
-      lat={Number(job.address.latitude)}
-      lng={Number(job.address.longitude)}
-    />
-  );
-}
+  const position = {
+    lat: Number(job.address.latitude),
+    lng: Number(job.address.longitude),
+  };
 
-function LoadedMap({
-  apiKey,
-  lat,
-  lng,
-}: {
-  apiKey: string;
-  lat: number;
-  lng: number;
-}) {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: apiKey,
-    id: "cleanscape-google-maps",
-    libraries: ["places"],
-  });
-  if (!isLoaded) return <div className="h-64 rounded-xl bg-muted" />;
   return (
-    <GoogleMap
-      center={{ lat, lng }}
-      mapContainerClassName="h-64 rounded-xl"
+    <GeoapifyMapView
+      center={position}
+      className="h-64"
+      markers={[
+        {
+          color: "#047857",
+          id: "job-address",
+          position,
+          title: `${job.address.address_line_1}, ${job.address.postcode}`,
+        },
+      ]}
       zoom={14}
-    >
-      <MarkerF position={{ lat, lng }} />
-    </GoogleMap>
+    />
   );
 }

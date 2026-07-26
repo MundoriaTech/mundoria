@@ -4,6 +4,7 @@ import { BookingDetail } from "@/components/customer/booking-detail";
 import { createServerClient } from "@/lib/supabase/server";
 import type {
   Booking,
+  BookingChecklistItem,
   CleanerPublicProfile,
 } from "@/types/customer";
 
@@ -16,7 +17,7 @@ export default async function CustomerBookingPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [{ data }, { data: rating }] = await Promise.all([
+  const [{ data }, { data: rating }, { data: checklist }, { data: confirmation }] = await Promise.all([
     supabase
       .from("bookings")
       .select("*, address:addresses(*)")
@@ -25,6 +26,16 @@ export default async function CustomerBookingPage({
       .single(),
     supabase
       .from("ratings")
+      .select("id")
+      .eq("booking_id", params.id)
+      .maybeSingle(),
+    supabase
+      .from("booking_checklist_items")
+      .select("*")
+      .eq("booking_id", params.id)
+      .order("sort_order"),
+    supabase
+      .from("booking_completion_confirmations")
       .select("id")
       .eq("booking_id", params.id)
       .maybeSingle(),
@@ -45,6 +56,8 @@ export default async function CustomerBookingPage({
   return (
     <BookingDetail
       customerId={user!.id}
+      checklistItems={(checklist ?? []) as BookingChecklistItem[]}
+      hasCompletionConfirmation={Boolean(confirmation)}
       hasRating={Boolean(rating)}
       initialBooking={booking}
     />

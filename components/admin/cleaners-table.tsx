@@ -44,13 +44,13 @@ export function CleanersTable({
   return (
     <div>
       <div className="flex flex-wrap gap-2">
-        {["all", "pending", "active", "suspended"].map((value) => (
+        {["all", "pending", "in_training", "certified", "suspended"].map((value) => (
           <button
             className={`rounded-lg px-3 py-2 text-sm capitalize ${tab === value ? "bg-primary text-white" : "bg-white"}`}
             key={value}
             onClick={() => setTab(value)}
           >
-            {value === "pending" ? "Pending Approval" : value}
+            {value === "pending" ? "Pending Review" : value.replace("_", " ")}
           </button>
         ))}
       </div>
@@ -65,8 +65,10 @@ export function CleanersTable({
         </label>
         <select className="rounded-md border px-3 text-sm" onChange={(event) => setTier(event.target.value)}>
           <option value="">All tiers</option>
-          {["bronze", "silver", "gold", "elite"].map((value) => (
-            <option key={value}>{value}</option>
+          {["bronze", "silver", "gold", "rose_gold"].map((value) => (
+            <option key={value} value={value}>
+              {value.replace("_", " ")}
+            </option>
           ))}
         </select>
         <Input onChange={(event) => setArea(event.target.value)} placeholder="Working area" />
@@ -77,7 +79,7 @@ export function CleanersTable({
             <tr>
               <th className="p-3">Name</th>
               <th>Tier</th>
-              <th>Rating</th>
+              <th>Medallion score</th>
               <th>Total Jobs</th>
               <th>Status</th>
               <th>Applied</th>
@@ -96,7 +98,7 @@ export function CleanersTable({
                     <TierBadge tier={cleaner.cleaner_profiles.tier} />
                   ) : null}
                 </td>
-                <td>{Number(cleaner.cleaner_profiles?.rating ?? 0).toFixed(1)}</td>
+                <td>{cleaner.cleaner_profiles?.medallion_score ?? 0}</td>
                 <td>{cleaner.cleaner_profiles?.total_jobs ?? 0}</td>
                 <td className="capitalize">{cleaner.cleaner_profiles?.status}</td>
                 <td>{new Date(cleaner.created_at).toLocaleDateString("en-GB")}</td>

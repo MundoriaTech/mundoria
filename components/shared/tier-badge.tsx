@@ -1,4 +1,4 @@
-import { TIER_COLORS } from "@/lib/cleaner/tier";
+import { cleanerTierLabel, TIER_COLORS } from "@/lib/cleaner/tier";
 import { cn } from "@/lib/utils";
 import type { CleanerTier } from "@/types/cleaner";
 
@@ -9,7 +9,7 @@ export function TierBadge({
   className?: string;
   tier: CleanerTier;
 }) {
-  const darkText = tier !== "elite";
+  const darkText = tier !== "elite" && tier !== "rose_gold";
 
   return (
     <span
@@ -20,7 +20,7 @@ export function TierBadge({
       )}
       style={{ backgroundColor: TIER_COLORS[tier] }}
     >
-      {tier}
+      {cleanerTierLabel(tier)}
     </span>
   );
 }

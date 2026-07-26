@@ -14,6 +14,7 @@ export type BookingStatus =
   | "confirmed"
   | "cleaner_en_route"
   | "in_progress"
+  | "awaiting_customer_confirmation"
   | "completed"
   | "cancelled"
   | "no_show"
@@ -43,7 +44,7 @@ export interface CleanerPublicProfile {
   full_name: string;
   avatar_url: string | null;
   bio: string | null;
-  tier: "bronze" | "silver" | "gold" | "elite";
+  tier: "bronze" | "silver" | "gold" | "rose_gold" | "elite";
   rating: number;
   total_jobs: number;
   years_experience: number | null;
@@ -81,6 +82,30 @@ export interface Booking {
   updated_at: string;
   address?: Address | null;
   cleaner?: CleanerPublicProfile | null;
+}
+
+export interface BookingChecklistItem {
+  id: string;
+  booking_id: string;
+  item_key: string;
+  label: string;
+  description: string | null;
+  is_required: boolean;
+  sort_order: number;
+}
+
+export interface BookingCompletionConfirmation {
+  id: string;
+  booking_id: string;
+  customer_id: string;
+  all_confirmed: boolean;
+  unchecked_items: Array<{
+    item_key: string;
+    label: string;
+    reason: string;
+  }>;
+  notes: string | null;
+  confirmed_at: string;
 }
 
 export interface Notification {

@@ -1,11 +1,12 @@
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const tierRank = { bronze: 0, silver: 1, gold: 2, elite: 3 };
+const tierRank = { bronze: 0, silver: 1, gold: 2, rose_gold: 3, elite: 3 };
 
 interface MatchingOptions {
   excludeCleanerIds?: string[];
@@ -18,7 +19,9 @@ export async function runMatchingEngine(
   const admin = createAdminClient();
   const { data: booking } = await admin
     .from("bookings")
-    .select("*,address:addresses(*)")
+    .select(
+      "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
+    )
     .eq("id", bookingId)
     .single();
   if (!booking?.address) throw new Error("Booking or address not found.");
@@ -28,10 +31,10 @@ export async function runMatchingEngine(
     admin
       .from("profiles")
       .select(
-        "id,onesignal_player_id,cleaner_profiles!inner(tier,status,dbs_verified,working_radius_km),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
+        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!inner(tier,status,dbs_verified,working_radius_km),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
       )
       .eq("role", "cleaner")
-      .eq("cleaner_profiles.status", "active")
+      .in("cleaner_profiles.status", ["certified", "active"])
       .eq("cleaner_profiles.dbs_verified", true)
       .eq("cleaner_services.service_type", booking.service_type)
       .eq("cleaner_services.is_active", true)
@@ -122,7 +125,12 @@ export async function runMatchingEngine(
     return [
       {
         cleanerId: candidate.id,
+        cleanerName: candidate.full_name as string | null,
         distance,
+        email: candidate.email as string | null,
+        emailPreference: (
+          candidate.notification_preferences as { email?: boolean } | null
+        )?.email,
         eligible,
         playerId: candidate.onesignal_player_id as string | null,
         preferred: booking.preferred_cleaner_id === candidate.id,
@@ -213,6 +221,59 @@ export async function runMatchingEngine(
       "A cleaner has been matched to your booking.",
       { booking_id: bookingId },
     ),
+    sendCleanerJobOfferEmail(),
+    sendCustomerCleanerMatchedEmail(),
   ]);
   return { cleanerId: winner.cleanerId, considered, matched: true as const };
+
+  function sendCleanerJobOfferEmail() {
+    if (winner.emailPreference === false || !winner.email) return false;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    return sendBrandedEmail({
+      data: {
+        address: boroughOnly(booking.address.city, booking.address.postcode),
+        appUrl,
+        bookingId,
+        earnings: booking.amount_cleaner ? `£${(Number(booking.amount_cleaner) / 100).toFixed(2)}` : undefined,
+        jobUrl: `${appUrl}/cleaner/job/${bookingId}`,
+        respondBy: addMinutes(new Date(), 30).toLocaleString("en-GB"),
+        scheduledDate: booking.scheduled_date,
+        scheduledTime: booking.scheduled_start_time?.slice(0, 5),
+        serviceName: String(booking.service_type).replaceAll("_", " "),
+      },
+      template: "cleaner.job_offer",
+      to: winner.email,
+    });
+  }
+
+  function sendCustomerCleanerMatchedEmail() {
+    const customer = Array.isArray(booking.customer)
+      ? booking.customer[0]
+      : booking.customer;
+    const preferences = customer?.notification_preferences as
+      | { email?: boolean }
+      | undefined;
+    if (!customer?.email || preferences?.email === false) return false;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    return sendBrandedEmail({
+      data: {
+        address: `${booking.address.address_line_1}, ${booking.address.city}, ${booking.address.postcode}`,
+        appUrl,
+        bookingId,
+        bookingUrl: `${appUrl}/booking/${bookingId}`,
+        cleanerName: winner.cleanerName,
+        firstName: customer.full_name?.split(" ")[0],
+        fullName: customer.full_name,
+        scheduledDate: booking.scheduled_date,
+        scheduledTime: booking.scheduled_start_time?.slice(0, 5),
+        serviceName: String(booking.service_type).replaceAll("_", " "),
+      },
+      template: "customer.cleaner_matched",
+      to: customer.email,
+    });
+  }
+}
+
+function boroughOnly(city?: string | null, postcode?: string | null) {
+  return [city, postcode?.split(/\s+/)[0]].filter(Boolean).join(", ");
 }

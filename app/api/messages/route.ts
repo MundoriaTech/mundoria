@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { sendOneSignalNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
     admin.from("profiles").select("full_name").eq("id", user.id).single(),
     admin
       .from("profiles")
-      .select("onesignal_player_id, notification_preferences")
+      .select("email, full_name, onesignal_player_id, notification_preferences, role")
       .eq("id", receiverId)
       .single(),
   ]);
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
   });
 
   const preferences = receiver?.notification_preferences as
-    | { push?: boolean }
+    | { email?: boolean; push?: boolean }
     | undefined;
   if (preferences?.push !== false) {
     await sendOneSignalNotification({
@@ -84,6 +85,28 @@ export async function POST(request: Request) {
       data: { booking_id: parsed.data.bookingId },
       playerId: receiver?.onesignal_player_id ?? null,
       title: `New message from ${sender?.full_name ?? "CleanScape"}`,
+    });
+  }
+
+  if (preferences?.email !== false && receiver?.email) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+    await sendBrandedEmail({
+      data: {
+        appUrl,
+        bookingId: parsed.data.bookingId,
+        firstName: receiver.full_name?.split(" ")[0],
+        fullName: receiver.full_name,
+        messageUrl:
+          receiver.role === "cleaner"
+            ? `${appUrl}/cleaner/messages/${parsed.data.bookingId}`
+            : `${appUrl}/messages/${parsed.data.bookingId}`,
+        senderName: sender?.full_name ?? "CleanScape",
+      },
+      template:
+        receiver.role === "cleaner"
+          ? "cleaner.message_received"
+          : "customer.message_received",
+      to: receiver.email,
     });
   }
 

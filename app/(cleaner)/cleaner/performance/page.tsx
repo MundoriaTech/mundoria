@@ -1,4 +1,5 @@
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { RatingDisputeList } from "@/components/cleaner/rating-dispute-list";
 import { getCleanerContext } from "@/lib/cleaner/server";
 import { nextTier, TIER_REQUIREMENTS } from "@/lib/cleaner/tier";
 import { createServerClient } from "@/lib/supabase/server";
@@ -9,13 +10,19 @@ export default async function CleanerPerformancePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [context, { data: history }] = await Promise.all([
+  const [context, { data: history }, { data: heldRatings }] = await Promise.all([
     getCleanerContext(supabase, user!.id),
     supabase
       .from("performance_history")
       .select("*")
       .eq("cleaner_id", user!.id)
       .order("month"),
+    supabase
+      .from("ratings")
+      .select("id,booking_id,mood,dispute_deadline")
+      .eq("cleaner_id", user!.id)
+      .eq("application_status", "pending_hold")
+      .order("dispute_deadline"),
   ]);
   const cleaner = context.cleanerProfile;
   const next = nextTier(cleaner.tier);
@@ -26,6 +33,8 @@ export default async function CleanerPerformancePage() {
   return (
     <div className="space-y-7">
       <h1 className="text-3xl font-semibold">Performance</h1>
+
+      <RatingDisputeList ratings={heldRatings ?? []} />
 
       <section className="rounded-2xl bg-emerald-950 p-6 text-white">
         <div className="flex justify-between gap-4">

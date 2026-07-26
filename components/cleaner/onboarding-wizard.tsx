@@ -1,13 +1,14 @@
 "use client";
 
-import { GoogleMap, CircleF, useJsApiLoader } from "@react-google-maps/api";
 import { ArrowLeft, ArrowRight, FileUp, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SERVICES } from "@/lib/customer/services";
+import { LONDON_CENTER } from "@/lib/maps/geoapify";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/auth";
 import type {
@@ -29,6 +30,8 @@ type OnboardingData = {
   dbs_document_url: string;
   full_name: string;
   id_document_url: string;
+  location_tracking_consent_accepted: boolean;
+  location_tracking_consent_version: string;
   payout_preference: "weekly" | "monthly";
   phone: string;
   services: string[];
@@ -58,6 +61,8 @@ export function OnboardingWizard({
     dbs_document_url: cleaner.dbs_document_url ?? "",
     full_name: profile.full_name,
     id_document_url: cleaner.id_document_url ?? "",
+    location_tracking_consent_accepted: Boolean(cleaner.location_tracking_consent_at),
+    location_tracking_consent_version: "cleaner-location-consent-v1",
     payout_preference: cleaner.payout_preference,
     phone: profile.phone ?? "",
     services: [] as string[],
@@ -151,7 +156,7 @@ export function OnboardingWizard({
   async function submit() {
     const normalized = sanitizeOnboardingData(data);
 
-    for (let stepToValidate = 1; stepToValidate <= 6; stepToValidate += 1) {
+    for (let stepToValidate = 1; stepToValidate <= 7; stepToValidate += 1) {
       const validationError = validateStep(stepToValidate, normalized);
 
       if (validationError) {
@@ -196,8 +201,8 @@ export function OnboardingWizard({
       <div className="mx-auto max-w-3xl">
         <p className="text-sm font-semibold text-primary">Cleaner onboarding</p>
         <h1 className="mt-1 text-3xl font-semibold">Build your CleanScape profile</h1>
-        <div className="mt-6 grid grid-cols-7 gap-2">
-          {Array.from({ length: 7 }, (_, index) => (
+        <div className="mt-6 grid grid-cols-8 gap-2">
+          {Array.from({ length: 8 }, (_, index) => (
             <span
               className={`h-1.5 rounded-full ${index < step ? "bg-primary" : "bg-slate-200"}`}
               key={index}
@@ -273,6 +278,36 @@ export function OnboardingWizard({
           ) : null}
           {step === 6 ? (
             <div>
+              <Heading title="Location consent" />
+              <div className="rounded-xl border bg-muted/40 p-5 text-sm leading-6">
+                <p>
+                  CleanScape records your GPS position only when you check in
+                  and check out of an active job. This creates an audit trail for
+                  no-show and completion disputes. We do not track your location
+                  outside active job actions.
+                </p>
+                <label className="mt-5 flex items-start gap-3 rounded-lg bg-background p-4">
+                  <input
+                    checked={data.location_tracking_consent_accepted}
+                    className="mt-1"
+                    onChange={(event) =>
+                      update(
+                        "location_tracking_consent_accepted",
+                        event.target.checked,
+                      )
+                    }
+                    type="checkbox"
+                  />
+                  <span>
+                    I understand and agree that CleanScape may capture my GPS
+                    coordinates when I check in and check out of an active job.
+                  </span>
+                </label>
+              </div>
+            </div>
+          ) : null}
+          {step === 7 ? (
+            <div>
               <Heading title="Getting paid" />
               <div className="grid gap-3 sm:grid-cols-2">
                 {(["weekly", "monthly"] as const).map((value) => <button className={`rounded-xl border p-5 text-left ${data.payout_preference === value ? "border-primary bg-primary/5" : ""}`} key={value} onClick={() => update("payout_preference", value)} type="button"><b className="capitalize">{value}</b><p className="mt-1 text-sm text-muted-foreground">{value === "weekly" ? "Faster, regular payouts." : "One consolidated monthly payout."}</p></button>)}
@@ -281,7 +316,7 @@ export function OnboardingWizard({
               <p className="mt-2 text-xs text-muted-foreground">Optional for now. You can submit your application and connect Stripe later from your profile before receiving payouts.</p>
             </div>
           ) : null}
-          {step === 7 ? (
+          {step === 8 ? (
             <div>
               <Heading title="Ready to submit" />
               <div className="space-y-3 rounded-xl bg-muted/50 p-5 text-sm">
@@ -291,6 +326,7 @@ export function OnboardingWizard({
                 <p><b>Available days:</b> {data.availability.filter((day) => day.is_available).length}</p>
                 <p><b>Documents:</b> {data.dbs_document_url && data.id_document_url ? "Uploaded" : "Missing"}</p>
                 <p><b>Payout:</b> {data.payout_preference}</p>
+                <p><b>Location consent:</b> {data.location_tracking_consent_accepted ? "Accepted" : "Missing"}</p>
                 <p><b>Stripe:</b> {profile.stripe_account_id ? "Connected" : "Not connected yet"}</p>
               </div>
               <Button className="mt-6 w-full" disabled={submitting} onClick={() => void submit()} size="lg">{submitting ? "Submitting…" : "Submit Application"}</Button>
@@ -299,7 +335,7 @@ export function OnboardingWizard({
           {error ? <p className="mt-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
           <div className="mt-7 flex justify-between border-t pt-5">
             <Button disabled={step === 1} onClick={() => setStep(step - 1)} variant="ghost"><ArrowLeft className="mr-2 h-4 w-4" />Back</Button>
-            {step < 7 ? <Button onClick={goNext}>Continue<ArrowRight className="ml-2 h-4 w-4" /></Button> : null}
+            {step < 8 ? <Button onClick={goNext}>Continue<ArrowRight className="ml-2 h-4 w-4" /></Button> : null}
           </div>
         </section>
       </div>
@@ -326,6 +362,13 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     dbs_document_url: String(value.dbs_document_url ?? "").trim(),
     full_name: String(value.full_name ?? "").trim(),
     id_document_url: String(value.id_document_url ?? "").trim(),
+    location_tracking_consent_accepted: Boolean(
+      value.location_tracking_consent_accepted,
+    ),
+    location_tracking_consent_version: String(
+      value.location_tracking_consent_version ??
+        "cleaner-location-consent-v1",
+    ).trim(),
     phone: String(value.phone ?? "").trim(),
     services: value.services.map((service) => service.trim()).filter(Boolean),
     working_areas: value.working_areas
@@ -379,6 +422,10 @@ function validateStep(step: number, value: OnboardingData) {
     if (!data.id_document_url) return "Upload your government-issued ID.";
   }
 
+  if (step === 6 && !data.location_tracking_consent_accepted) {
+    return "Accept location consent to continue.";
+  }
+
   return null;
 }
 
@@ -399,13 +446,20 @@ async function parseJsonResponse(response: Response) {
 }
 
 function CoverageMap({ count }: { count: number }) {
-  const key=process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
-  if(!key) return <div className="flex h-56 items-center justify-center rounded-xl bg-muted text-sm text-muted-foreground">Configure Google Maps to preview coverage.</div>;
-  return <LoadedCoverageMap apiKey={key} count={count} />;
-}
-function LoadedCoverageMap({ apiKey, count }: { apiKey:string; count:number }) {
-  const {isLoaded}=useJsApiLoader({googleMapsApiKey:apiKey,id:"cleanscape-google-maps",libraries:["places"]});
-  if(!isLoaded) return <div className="h-56 rounded-xl bg-muted" />;
-  const center={lat:51.5074,lng:-0.1278};
-  return <GoogleMap center={center} mapContainerClassName="h-56 rounded-xl" options={{disableDefaultUI:true}} zoom={10}><CircleF center={center} radius={Math.max(5000,count*3500)} options={{fillColor:"#047857",fillOpacity:.18,strokeColor:"#047857"}} /></GoogleMap>;
+  return (
+    <GeoapifyMapView
+      center={LONDON_CENTER}
+      circles={[
+        {
+          center: LONDON_CENTER,
+          color: "#047857",
+          id: "coverage",
+          radiusMeters: Math.max(5000, count * 3500),
+        },
+      ]}
+      className="h-56"
+      markers={[]}
+      zoom={10}
+    />
+  );
 }

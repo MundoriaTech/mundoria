@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { sendOneSignalNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -37,10 +37,18 @@ export async function GET(request: Request) {
         });
       }
       if (preferences.email !== false && process.env.RESEND_API_KEY) {
-        await new Resend(process.env.RESEND_API_KEY).emails.send({
-          from: process.env.RESEND_FROM_EMAIL ?? "CleanScape <alerts@resend.dev>",
-          html: `<h1>${alert.title}</h1><p>${alert.body}</p>`,
+        await sendBrandedEmail({
+          data: {
+            actionUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin}/admin/dashboard`,
+            body: alert.body,
+            createdAt: alert.created_at,
+            subject: `[CleanScape] ${alert.title}`,
+            title: alert.title,
+            type: alert.type,
+            ...(alert.data as Record<string, unknown> | null),
+          },
           subject: `[CleanScape] ${alert.title}`,
+          template: "admin.alert",
           to: recipient.email,
         });
       }

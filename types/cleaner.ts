@@ -1,6 +1,13 @@
 import type { Address, Booking, ServiceType } from "@/types/customer";
 
-export type CleanerTier = "bronze" | "silver" | "gold" | "elite";
+export type CleanerTier = "bronze" | "silver" | "gold" | "rose_gold" | "elite";
+export type CleanerStatus =
+  | "pending"
+  | "in_training"
+  | "certified"
+  | "active"
+  | "suspended"
+  | "removed";
 
 export interface CleanerProfile {
   id: string;
@@ -10,6 +17,8 @@ export interface CleanerProfile {
   performance_score: number;
   rating: number;
   total_jobs: number;
+  medallion_score: number;
+  medallion_under_review_at: string | null;
   acceptance_rate: number;
   on_time_rate: number;
   cancellation_count: number;
@@ -21,7 +30,14 @@ export interface CleanerProfile {
   id_document_url: string | null;
   id_document_status: "missing" | "pending" | "verified" | "rejected";
   onboarding_complete: boolean;
-  status: "pending" | "active" | "suspended" | "removed";
+  status: CleanerStatus;
+  certification_score: number | null;
+  certification_notes: string | null;
+  certification_passed: boolean;
+  certification_assessed_by: string | null;
+  certification_assessed_at: string | null;
+  location_tracking_consent_at: string | null;
+  location_tracking_consent_version: string | null;
   payout_preference: "weekly" | "monthly";
   stripe_onboarding_complete: boolean;
   working_radius_km: number;
@@ -63,6 +79,36 @@ export interface PerformanceHistory {
   jobs_completed: number;
   tier_before: CleanerTier;
   tier_after: CleanerTier;
+}
+
+export type RatingMood = "excellent" | "good" | "fair" | "bad" | "awful";
+export type RatingApplicationStatus =
+  | "pending_hold"
+  | "disputed"
+  | "applied"
+  | "voided";
+
+export interface CleanerMedallionEvent {
+  id: string;
+  cleaner_id: string;
+  rating_id: string | null;
+  changed_by: string | null;
+  event_type:
+    | "rating_applied"
+    | "rating_voided"
+    | "tier_changed"
+    | "manual_adjustment"
+    | "certification_passed"
+    | "certification_failed"
+    | "under_review";
+  score_delta: number;
+  score_before: number | null;
+  score_after: number | null;
+  tier_before: CleanerTier | null;
+  tier_after: CleanerTier | null;
+  notes: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
 }
 
 export interface Payout {

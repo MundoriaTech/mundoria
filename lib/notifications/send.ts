@@ -1,6 +1,6 @@
-import { Resend } from "resend";
 import twilio from "twilio";
 
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function sendOneSignalNotification({
@@ -88,19 +88,18 @@ export async function sendEmail(
   templateName: string,
   data: Record<string, unknown> = {},
 ) {
-  if (!process.env.RESEND_API_KEY) return false;
-  const rows = Object.entries(data)
-    .map(([key, value]) => `<p><strong>${escapeHtml(key)}:</strong> ${escapeHtml(String(value))}</p>`)
-    .join("");
-  const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
-    from:
-      process.env.RESEND_FROM_EMAIL ??
-      "CleanScape <notifications@resend.dev>",
-    html: `<h1>${escapeHtml(subject)}</h1><p>Template: ${escapeHtml(templateName)}</p>${rows}`,
+  return sendBrandedEmail({
+    data: {
+      ...data,
+      subject,
+      templateName,
+      title: subject,
+      type: templateName,
+    },
     subject,
+    template: "system.generic",
     to,
   });
-  return !error;
 }
 
 export async function sendSMS(phoneNumber: string, message: string) {
@@ -120,18 +119,4 @@ export async function sendSMS(phoneNumber: string, message: string) {
     to: phoneNumber,
   });
   return true;
-}
-
-function escapeHtml(value: string) {
-  return value.replace(
-    /[&<>"']/g,
-    (character) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;",
-      })[character] ?? character,
-  );
 }

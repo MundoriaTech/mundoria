@@ -1,19 +1,51 @@
 "use client";
 
-import { X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { StarRating } from "@/components/shared/star-rating";
 import { Button } from "@/components/ui/button";
-import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import type { RatingMood } from "@/types/cleaner";
 
-const areas = ["Kitchen", "Bathroom", "Living Room", "Bedroom", "Other"];
+const moods: Array<{
+  description: string;
+  emoji: string;
+  label: string;
+  value: RatingMood;
+}> = [
+  {
+    description: "Everything was completed to a high standard.",
+    emoji: "🤩",
+    label: "Excellent",
+    value: "excellent",
+  },
+  {
+    description: "Good work with only minor issues, if any.",
+    emoji: "🙂",
+    label: "Good",
+    value: "good",
+  },
+  {
+    description: "Acceptable, but there is room to improve.",
+    emoji: "😐",
+    label: "Fair",
+    value: "fair",
+  },
+  {
+    description: "Something important was missed.",
+    emoji: "🙁",
+    label: "Bad",
+    value: "bad",
+  },
+  {
+    description: "The job fell far below expectations.",
+    emoji: "😣",
+    label: "Awful",
+    value: "awful",
+  },
+];
 
 export function RatingForm({
   bookingId,
-  cleanerId,
-  customerId,
   onSubmitted,
 }: {
   bookingId: string;
@@ -21,48 +53,47 @@ export function RatingForm({
   customerId: string;
   onSubmitted: () => void;
 }) {
-  const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [mood, setMood] = useState<RatingMood | null>(null);
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const overall = useMemo(() => {
-    const values = Object.values(ratings);
-    return values.length
-      ? values.reduce((sum, rating) => sum + rating, 0) / values.length
-      : 0;
-  }, [ratings]);
-
-  function toggleArea(area: string) {
-    const key = area.toLowerCase().replaceAll(" ", "_");
-    setRatings((current) => {
-      const next = { ...current };
-      if (key in next) delete next[key];
-      else next[key] = 5;
-      return next;
-    });
-  }
 
   async function submit() {
-    if (!Object.keys(ratings).length) {
-      setError("Select at least one area that was cleaned.");
+    if (!mood) {
+      setError("Choose the option that best describes the job.");
       return;
     }
+
     setSubmitting(true);
     setError(null);
-    const { error: saveError } = await createBrowserClient()
-      .from("ratings")
-      .insert({
+    setNotice(null);
+
+    const response = await fetch("/api/ratings", {
+      body: JSON.stringify({
         booking_id: bookingId,
-        cleaner_id: cleanerId,
-        comment: comment.trim() || null,
-        customer_id: customerId,
-        overall_score: overall,
-        room_ratings: ratings,
-      });
+        comment: comment.trim() || undefined,
+        mood,
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as {
+      error?: string;
+      heldForDispute?: boolean;
+    };
     setSubmitting(false);
 
-    if (saveError) {
-      setError(saveError.message);
+    if (!response.ok) {
+      setError(result.error ?? "Unable to submit rating.");
+      return;
+    }
+
+    if (result.heldForDispute) {
+      setNotice(
+        "Thanks — this feedback is held for 48 hours so the cleaner can dispute it if needed.",
+      );
+      setTimeout(onSubmitted, 1200);
       return;
     }
 
@@ -72,46 +103,36 @@ export function RatingForm({
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-sm font-medium">Which areas were cleaned?</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {areas.map((area) => {
-            const key = area.toLowerCase().replaceAll(" ", "_");
-            const selected = key in ratings;
-            return (
-              <button
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-sm",
-                  selected && "border-primary bg-primary text-primary-foreground",
-                )}
-                key={area}
-                onClick={() => toggleArea(area)}
-                type="button"
-              >
-                {area}
-                {selected ? <X className="ml-1 inline h-3 w-3" /> : null}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {Object.entries(ratings).map(([area, score]) => (
-        <div className="flex items-center justify-between gap-4" key={area}>
-          <span className="text-sm capitalize">{area.replaceAll("_", " ")}</span>
-          <StarRating
-            onChange={(value) =>
-              setRatings((current) => ({ ...current, [area]: value }))
-            }
-            value={score}
-          />
-        </div>
-      ))}
-
-      <div className="rounded-lg bg-emerald-50 p-4 text-center">
-        <p className="text-sm text-emerald-800">Overall score</p>
-        <p className="text-3xl font-bold text-emerald-950">
-          {overall ? overall.toFixed(1) : "—"}
+        <p className="text-sm font-medium">How did this clean feel?</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Customers see medallions, not scores. This helps CleanScape track
+          quality fairly behind the scenes.
         </p>
+        <div className="mt-4 grid gap-3">
+          {moods.map((option) => (
+            <button
+              className={cn(
+                "rounded-xl border p-4 text-left transition",
+                mood === option.value
+                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                  : "hover:border-primary/50",
+              )}
+              key={option.value}
+              onClick={() => setMood(option.value)}
+              type="button"
+            >
+              <span className="flex items-center gap-3">
+                <span className="text-2xl">{option.emoji}</span>
+                <span>
+                  <b>{option.label}</b>
+                  <small className="mt-0.5 block text-muted-foreground">
+                    {option.description}
+                  </small>
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <textarea
@@ -120,13 +141,14 @@ export function RatingForm({
         placeholder="Anything else you'd like us to know? (optional)"
         value={comment}
       />
+      {notice ? <p className="text-sm text-amber-700">{notice}</p> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <Button
         className="w-full"
         disabled={submitting}
         onClick={() => void submit()}
       >
-        {submitting ? "Submitting…" : "Submit rating"}
+        {submitting ? "Submitting…" : "Submit feedback"}
       </Button>
     </div>
   );

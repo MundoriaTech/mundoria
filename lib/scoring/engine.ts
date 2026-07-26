@@ -11,7 +11,7 @@ export async function calculateCleanerScores(referenceDate = new Date()) {
   const { data: cleaners } = await admin
     .from("cleaner_profiles")
     .select("*")
-    .eq("status", "active");
+    .in("status", ["certified", "active"]);
   const results: Record<string, unknown>[] = [];
 
   for (const cleaner of cleaners ?? []) {
@@ -83,7 +83,7 @@ export async function calculateCleanerScores(referenceDate = new Date()) {
       averageRating >= 4.9 &&
       totalJobs >= 60 &&
       Number(cleaner.no_show_count) === 0
-        ? "elite"
+        ? "rose_gold"
         : totalScore >= 75 && averageRating >= 4.7 && totalJobs >= 30
           ? "gold"
           : totalScore >= 60 && averageRating >= 4.3 && totalJobs >= 10

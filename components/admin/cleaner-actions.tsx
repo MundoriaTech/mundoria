@@ -15,12 +15,20 @@ export function CleanerActions({
 }) {
   const router = useRouter();
   const [reason, setReason] = useState("");
+  const [certificationScore, setCertificationScore] = useState("75");
   const [tier, setTier] = useState(currentTier);
   const [message, setMessage] = useState<string | null>(null);
 
   async function act(action: string) {
     const response = await fetch(`/api/admin/cleaners/${cleanerId}`, {
-      body: JSON.stringify({ action, reason, tier }),
+      body: JSON.stringify({
+        action,
+        certificationScore: certificationScore
+          ? Number(certificationScore)
+          : undefined,
+        reason,
+        tier,
+      }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
@@ -38,14 +46,25 @@ export function CleanerActions({
         placeholder="Required reason"
         value={reason}
       />
+      <Input
+        className="mt-3"
+        max={100}
+        min={0}
+        onChange={(event) => setCertificationScore(event.target.value)}
+        placeholder="Certification score"
+        type="number"
+        value={certificationScore}
+      />
       <div className="mt-3 flex gap-2">
         <select
           className="h-10 rounded-md border px-3 text-sm"
           onChange={(event) => setTier(event.target.value)}
           value={tier}
         >
-          {["bronze", "silver", "gold", "elite"].map((value) => (
-            <option key={value}>{value}</option>
+          {["bronze", "silver", "gold", "rose_gold"].map((value) => (
+            <option key={value} value={value}>
+              {value.replace("_", " ")}
+            </option>
           ))}
         </select>
         <Button disabled={reason.length < 3} onClick={() => void act("set_tier")} variant="outline">
@@ -54,10 +73,13 @@ export function CleanerActions({
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Button disabled={reason.length < 3} onClick={() => void act("approve")}>
-          Approve
+          Pass certification
         </Button>
         <Button disabled={reason.length < 3} onClick={() => void act("reject")} variant="outline">
-          Reject
+          Needs training
+        </Button>
+        <Button disabled={reason.length < 3} onClick={() => void act("start_training")} variant="outline">
+          Start training
         </Button>
         <Button disabled={reason.length < 3} onClick={() => void act("suspend")} variant="outline">
           Suspend

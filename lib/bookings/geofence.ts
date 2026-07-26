@@ -1,3 +1,4 @@
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
@@ -18,10 +19,12 @@ export async function validateBookingGeofence({
   longitude: number;
 }) {
   const admin = createAdminClient();
-  const [{ data: booking }, { data: settings }] = await Promise.all([
+  const [{ data: booking }, { data: settings }, { data: cleanerProfile }] = await Promise.all([
     admin
       .from("bookings")
-      .select("*,address:addresses(*)")
+      .select(
+        "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
+      )
       .eq("id", bookingId)
       .eq("cleaner_id", cleanerId)
       .single(),
@@ -30,8 +33,16 @@ export async function validateBookingGeofence({
       .select("geofence_radius_meters")
       .eq("id", true)
       .single(),
+    admin
+      .from("cleaner_profiles")
+      .select("location_tracking_consent_at,location_tracking_consent_version")
+      .eq("id", cleanerId)
+      .single(),
   ]);
   if (!booking?.address) throw new Error("Booking not found.");
+  if (!cleanerProfile?.location_tracking_consent_at) {
+    throw new Error("Location consent is required before check-in/check-out.");
+  }
   const allowedStatuses =
     action === "checkin"
       ? ["confirmed", "cleaner_en_route", "matched"]
@@ -51,6 +62,16 @@ export async function validateBookingGeofence({
     Number(booking.address.longitude),
   );
   const radius = settings?.geofence_radius_meters ?? 200;
+  await admin.from("booking_location_events").insert({
+    booking_id: bookingId,
+    cleaner_id: cleanerId,
+    consent_version: cleanerProfile.location_tracking_consent_version,
+    distance_meters: distance,
+    event_type: action,
+    is_verified: distance <= radius,
+    latitude,
+    longitude,
+  });
   if (distance > radius) {
     await admin.from("location_override_requests").insert({
       booking_id: bookingId,
@@ -95,17 +116,19 @@ export async function validateBookingGeofence({
       "Your cleaner has arrived and started the job.",
       { booking_id: bookingId },
     );
+    await sendCustomerGeofenceEmail("customer.cleaner_checked_in");
   } else {
     await captureBookingPayment(bookingId);
     await admin
       .from("bookings")
       .update({
         actual_end_time: new Date().toISOString(),
+        cleaner_marked_complete_at: new Date().toISOString(),
         checkout_latitude: latitude,
         checkout_longitude: longitude,
         checkout_verified: true,
         payment_status: "released",
-        status: "completed",
+        status: "awaiting_customer_confirmation",
       })
       .eq("id", bookingId);
     const { data: cleaner } = await admin
@@ -119,10 +142,39 @@ export async function validateBookingGeofence({
       .eq("id", cleanerId);
     await sendPushNotification(
       booking.customer_id,
-      "Cleaning complete",
-      "Your clean is complete. You can now leave a rating.",
+      "Confirm your completed clean",
+      "Your cleaner has checked out. Please review the completed checklist.",
       { booking_id: bookingId },
     );
+    await sendCustomerGeofenceEmail("customer.checklist_confirmation");
   }
   return { distance, radius, valid: true as const };
+
+  function sendCustomerGeofenceEmail(
+    template: "customer.cleaner_checked_in" | "customer.checklist_confirmation",
+  ) {
+    const customer = Array.isArray(booking.customer)
+      ? booking.customer[0]
+      : booking.customer;
+    const preferences = customer?.notification_preferences as
+      | { email?: boolean }
+      | undefined;
+    if (!customer?.email || preferences?.email === false) return false;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    return sendBrandedEmail({
+      data: {
+        address: `${booking.address.address_line_1}, ${booking.address.city}, ${booking.address.postcode}`,
+        appUrl,
+        bookingId,
+        bookingUrl: `${appUrl}/booking/${bookingId}`,
+        firstName: customer.full_name?.split(" ")[0],
+        fullName: customer.full_name,
+        scheduledDate: booking.scheduled_date,
+        scheduledTime: booking.scheduled_start_time?.slice(0, 5),
+        serviceName: String(booking.service_type).replaceAll("_", " "),
+      },
+      template,
+      to: customer.email,
+    });
+  }
 }

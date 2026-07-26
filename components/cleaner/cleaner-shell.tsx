@@ -52,7 +52,7 @@ export function CleanerShell({
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-        {cleaner.status !== "active" ? (
+        {cleaner.status !== "certified" && cleaner.status !== "active" ? (
           <CleanerAccountBanner cleaner={cleaner} />
         ) : null}
         {children}
@@ -83,16 +83,21 @@ export function CleanerShell({
 }
 
 function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
-  if (cleaner.status === "pending") {
+  if (cleaner.status === "pending" || cleaner.status === "in_training") {
     return (
       <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
         <div className="flex gap-3">
           <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
           <div>
-            <p className="font-semibold">Application under review</p>
+            <p className="font-semibold">
+              {cleaner.status === "in_training"
+                ? "Certification in progress"
+                : "Application under review"}
+            </p>
             <p className="mt-1 text-sm text-amber-900/80">
               You can explore your dashboard, update your profile, and connect
-              Stripe now. New job offers will appear after admin approval.
+              Stripe now. New job offers will appear after your CleanScape
+              certification is complete.
             </p>
             {!cleaner.stripe_onboarding_complete ? (
               <p className="mt-2 text-xs text-amber-900/70">

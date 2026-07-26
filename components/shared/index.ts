@@ -4,7 +4,7 @@ export * from "@/components/shared/chat-message";
 export * from "@/components/shared/confirm-modal";
 export * from "@/components/shared/empty-state";
 export * from "@/components/shared/file-upload";
-export * from "@/components/shared/google-map-view";
+export * from "@/components/shared/geoapify-map-view";
 export * from "@/components/shared/loading-spinner";
 export * from "@/components/shared/notification-bell";
 export * from "@/components/shared/price-display";

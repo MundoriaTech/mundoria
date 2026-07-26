@@ -18,7 +18,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("booking_status_history").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("messages").select("*,sender:profiles!messages_sender_id_fkey(full_name)").eq("booking_id", params.id).order("created_at"),
-    admin.from("profiles").select("id,full_name,cleaner_profiles!inner(status)").eq("role", "cleaner").eq("cleaner_profiles.status", "active"),
+    admin.from("profiles").select("id,full_name,cleaner_profiles!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
   ]);
   if (!booking) notFound();
   let payment: { id: string; status: string; amount: number; amount_capturable: number } | null = null;

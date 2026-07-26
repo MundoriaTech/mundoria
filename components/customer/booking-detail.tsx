@@ -7,7 +7,6 @@ import {
   MapPin,
   MessageCircle,
   ShieldCheck,
-  Star,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -15,16 +14,19 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { CleanerMap } from "@/components/customer/cleaner-map";
+import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
 import { RatingForm } from "@/components/customer/rating-form";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
+import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
 import { Button } from "@/components/ui/button";
 import {
   formatMoney,
   formatServiceName,
 } from "@/lib/customer/services";
+import { cleanerTierLabel } from "@/lib/cleaner/tier";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import type { Booking } from "@/types/customer";
+import type { Booking, BookingChecklistItem } from "@/types/customer";
 
 const progress = [
   "pending_match",
@@ -32,21 +34,27 @@ const progress = [
   "confirmed",
   "cleaner_en_route",
   "in_progress",
+  "awaiting_customer_confirmation",
   "completed",
 ] as const;
 
 export function BookingDetail({
+  checklistItems,
   customerId,
+  hasCompletionConfirmation,
   hasRating,
   initialBooking,
 }: {
+  checklistItems: BookingChecklistItem[];
   customerId: string;
+  hasCompletionConfirmation: boolean;
   hasRating: boolean;
   initialBooking: Booking;
 }) {
   const router = useRouter();
   const [booking, setBooking] = useState(initialBooking);
   const [showCancel, setShowCancel] = useState(false);
+  const [showDispute, setShowDispute] = useState(false);
   const [showRating, setShowRating] = useState(
     booking.status === "completed" && !hasRating,
   );
@@ -154,6 +162,9 @@ export function BookingDetail({
           <p className="mt-2 text-sm text-muted-foreground">#{booking.id.slice(0, 8)}</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={() => setShowDispute(true)} variant="outline">
+            Report issue
+          </Button>
           {booking.cleaner_id ? (
             <Button asChild variant="outline">
               <Link href={`/messages/${booking.id}`}>
@@ -276,11 +287,10 @@ export function BookingDetail({
                 <p className="font-semibold">{booking.cleaner.full_name}</p>
                 <div className="mt-1 flex items-center gap-2 text-sm">
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold capitalize text-amber-800">
-                    {booking.cleaner.tier}
+                    {cleanerTierLabel(booking.cleaner.tier)}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    {Number(booking.cleaner.rating).toFixed(1)}
+                  <span className="text-xs text-muted-foreground">
+                    CleanScape medallion
                   </span>
                 </div>
               </div>
@@ -309,13 +319,27 @@ export function BookingDetail({
         </section>
       ) : null}
 
+      {["awaiting_customer_confirmation", "completed"].includes(booking.status) &&
+      checklistItems.length > 0 &&
+      !hasCompletionConfirmation ? (
+        <CompletionChecklistConfirmation
+          bookingId={booking.id}
+          items={checklistItems}
+          onConfirmed={() => {
+            setBooking((current) => ({ ...current, status: "completed" }));
+            router.refresh();
+          }}
+        />
+      ) : null}
+
       {booking.status === "completed" && booking.cleaner_id ? (
         <section className="rounded-xl border bg-background p-5">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">How was your clean?</h2>
               <p className="text-sm text-muted-foreground">
-                Room-by-room feedback helps cleaners grow.
+                Share a simple mood rating. CleanScape uses this internally for
+                fair medallion scoring.
               </p>
             </div>
             {!hasRating ? (
@@ -354,6 +378,18 @@ export function BookingDetail({
             customerId={customerId}
             onSubmitted={() => {
               setShowRating(false);
+              router.refresh();
+            }}
+          />
+        </Modal>
+      ) : null}
+
+      {showDispute ? (
+        <Modal title="Report an issue" onClose={() => setShowDispute(false)}>
+          <GuidedDisputeForm
+            bookingId={booking.id}
+            onSubmitted={() => {
+              setShowDispute(false);
               router.refresh();
             }}
           />

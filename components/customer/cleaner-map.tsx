@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleMapView } from "@/components/shared/google-map-view";
+import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 
 export function CleanerMap({
   cleaner,
@@ -10,11 +10,23 @@ export function CleanerMap({
   destination: { lat: number; lng: number };
 }) {
   return (
-    <GoogleMapView
+    <GeoapifyMapView
       center={cleaner}
       markers={[
-        { id: "cleaner", label: "Cleaner", position: cleaner },
-        { id: "destination", label: "You", position: destination },
+        {
+          color: "#2563eb",
+          id: "cleaner",
+          label: "Cleaner",
+          position: cleaner,
+          title: "Cleaner",
+        },
+        {
+          color: "#16a34a",
+          id: "destination",
+          label: "You",
+          position: destination,
+          title: "Your address",
+        },
       ]}
     />
   );

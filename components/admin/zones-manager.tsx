@@ -1,12 +1,13 @@
 "use client";
 
-import { CircleF, GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LONDON_CENTER } from "@/lib/maps/geoapify";
 
 interface Zone {
   id: string;
@@ -32,8 +33,23 @@ export function ZonesManager({ zones }: { zones: Zone[] }) {
 }
 
 function ZoneMap({ zones }: { zones: Zone[] }) {
-  const key=process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY??"";
-  if(!key)return <div className="flex h-[32rem] items-center justify-center rounded-xl bg-muted text-sm text-muted-foreground">Configure Google Maps for zone coverage preview.</div>;
-  return <LoadedZoneMap apiKey={key} zones={zones}/>;
+  return (
+    <GeoapifyMapView
+      center={LONDON_CENTER}
+      circles={zones
+        .filter((zone) => zone.is_active)
+        .map((zone, index) => ({
+          center: {
+            lat: LONDON_CENTER.lat + (index % 3) * 0.035,
+            lng: LONDON_CENTER.lng + (index % 4) * 0.045,
+          },
+          color: "#059669",
+          id: zone.id,
+          radiusMeters: 5000 + zone.postcode_prefixes.length * 1000,
+        }))}
+      className="h-[32rem]"
+      markers={[]}
+      zoom={10}
+    />
+  );
 }
-function LoadedZoneMap({apiKey,zones}:{apiKey:string;zones:Zone[]}){const {isLoaded}=useJsApiLoader({googleMapsApiKey:apiKey,id:"cleanscape-google-maps",libraries:["places"]});if(!isLoaded)return <div className="h-[32rem] rounded-xl bg-muted"/>;const center={lat:51.5074,lng:-.1278};return <GoogleMap center={center} mapContainerClassName="h-[32rem] rounded-xl" zoom={10}>{zones.filter(z=>z.is_active).map((zone,index)=><CircleF center={{lat:center.lat+(index%3)*.035,lng:center.lng+(index%4)*.045}} key={zone.id} options={{fillColor:"#059669",fillOpacity:.14,strokeColor:"#059669"}} radius={5000+zone.postcode_prefixes.length*1000}/>)}</GoogleMap>}

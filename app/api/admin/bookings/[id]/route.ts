@@ -14,6 +14,7 @@ const schema = z.object({
       "confirmed",
       "cleaner_en_route",
       "in_progress",
+      "awaiting_customer_confirmation",
       "completed",
       "cancelled",
       "disputed",
