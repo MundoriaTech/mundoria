@@ -16,7 +16,11 @@ export async function POST(request: Request) {
   }
 
   const { email } = parsed.data;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+  const requestOrigin = new URL(request.url).origin;
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const appUrl = requestOrigin.includes("localhost")
+    ? requestOrigin
+    : configuredAppUrl ?? requestOrigin;
   const redirectTo = `${appUrl}/auth/callback?next=${encodeURIComponent("/update-password")}`;
 
   try {

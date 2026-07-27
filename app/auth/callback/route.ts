@@ -34,12 +34,14 @@ export async function GET(request: Request) {
         ? dashboardForRole(profile.role)
         : "/";
       const next = safeRedirectPath(requestedNext, fallback);
+      const isPasswordReset = next === "/update-password";
 
       if (
         user &&
         isUserRole(profile?.role) &&
         !profile?.phone?.trim() &&
-        next !== "/complete-profile"
+        next !== "/complete-profile" &&
+        !isPasswordReset
       ) {
         const completionUrl = new URL("/complete-profile", requestUrl.origin);
         completionUrl.searchParams.set("next", next);
@@ -91,7 +93,7 @@ async function bootstrapOAuthProfile({
     email.split("@")[0] ||
     "CleanScape user";
   const avatarUrl =
-    string(metadata.avatar_url) || string(metadata.picture) || existing?.avatar_url;
+    existing?.avatar_url || string(metadata.avatar_url) || string(metadata.picture);
   const existingRole = isUserRole(existing?.role) ? existing.role : null;
   const role = resolveOAuthRole(existingRole, requestedRole);
   const phone = existing?.phone ?? user.phone ?? null;

@@ -25,13 +25,26 @@ export function AvatarUpload({
 
   async function completeUpload(result: FileUploadResult) {
     const supabase = createBrowserClient();
-    const { error } = await supabase
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || user.id !== userId) {
+      throw new Error("You can only update your own avatar.");
+    }
+
+    const { data, error } = await supabase
       .from("profiles")
       .update({ avatar_url: result.publicUrl })
-      .eq("id", userId);
+      .eq("id", user.id)
+      .select("avatar_url")
+      .single();
     if (error) throw new Error(error.message);
-    setUrl(result.publicUrl);
-    await onUpload(result.publicUrl);
+    if (!data?.avatar_url) {
+      throw new Error("The avatar uploaded, but your profile was not updated.");
+    }
+    setUrl(data.avatar_url);
+    await onUpload(data.avatar_url);
   }
 
   return (

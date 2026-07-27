@@ -44,7 +44,7 @@ export function CleanersTable({
   return (
     <div>
       <div className="flex flex-wrap gap-2">
-        {["all", "pending", "in_training", "certified", "suspended"].map((value) => (
+        {["all", "pending", "in_training", "certified", "active", "suspended", "removed"].map((value) => (
           <button
             className={`rounded-lg px-3 py-2 text-sm capitalize ${tab === value ? "bg-primary text-white" : "bg-white"}`}
             key={value}

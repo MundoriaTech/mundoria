@@ -5,6 +5,8 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  Bar,
+  BarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -18,6 +20,7 @@ import type { RevenuePoint } from "@/types/admin";
 export function RevenueChart({ points }: { points: RevenuePoint[] }) {
   const [period, setPeriod] = useState<"daily" | "weekly" | "monthly">("daily");
   const data = aggregate(points, period);
+  const hasRevenue = data.some((point) => point.revenue > 0);
 
   return (
     <section className="rounded-xl border bg-white p-5">
@@ -41,31 +44,55 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
         </div>
       </div>
       <div className="mt-5 h-72">
-        <ResponsiveContainer height="100%" width="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="revenue" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="5%" stopColor="#059669" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#059669" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="date" fontSize={11} tickLine={false} />
-            <YAxis
-              fontSize={11}
-              tickFormatter={(value) => `£${Math.round(value / 100)}`}
-              tickLine={false}
-            />
-            <Tooltip formatter={(value) => formatMoney(Number(value))} />
-            <Area
-              dataKey="revenue"
-              fill="url(#revenue)"
-              stroke="#059669"
-              strokeWidth={2}
-              type="monotone"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {hasRevenue ? (
+          <ResponsiveContainer height="100%" width="100%">
+            {period === "daily" ? (
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="date" fontSize={11} tickLine={false} />
+                <YAxis
+                  fontSize={11}
+                  tickFormatter={(value) => `£${Math.round(value / 100)}`}
+                  tickLine={false}
+                />
+                <Tooltip formatter={(value) => formatMoney(Number(value))} />
+                <Bar dataKey="revenue" fill="#5a51aa" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            ) : (
+              <AreaChart data={data}>
+                <defs>
+                  <linearGradient id="revenue" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="5%" stopColor="#059669" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="date" fontSize={11} tickLine={false} />
+                <YAxis
+                  fontSize={11}
+                  tickFormatter={(value) => `£${Math.round(value / 100)}`}
+                  tickLine={false}
+                />
+                <Tooltip formatter={(value) => formatMoney(Number(value))} />
+                <Area
+                  dataKey="revenue"
+                  fill="url(#revenue)"
+                  stroke="#059669"
+                  strokeWidth={2}
+                  type="monotone"
+                />
+              </AreaChart>
+            )}
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 text-center">
+            <p className="font-semibold text-[#221f50]">No captured revenue yet</p>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+              This chart starts filling after jobs are completed and their held
+              Stripe payments are captured.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

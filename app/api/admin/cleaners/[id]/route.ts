@@ -18,18 +18,25 @@ export async function POST(
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success) {
-    return NextResponse.json({ error: "A reason is required." }, { status: 400 });
+    return NextResponse.json(
+      {
+        error:
+          parsed.error.issues[0]?.message ??
+          "A reason of at least 3 characters is required.",
+      },
+      { status: 400 },
+    );
   }
   const { action, certificationScore, reason, tier } = parsed.data;
   const status =
     action === "approve"
-      ? "certified"
+      ? "active"
       : action === "reject"
         ? "in_training"
         : action === "suspend"
           ? "suspended"
         : action === "remove"
-            ? "suspended"
+            ? "removed"
             : action === "start_training"
               ? "in_training"
             : undefined;
