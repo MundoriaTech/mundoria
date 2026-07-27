@@ -84,7 +84,15 @@ export function SignupForm() {
 
   return (
     <div className="space-y-6">
-      <OAuthButton />
+      <OAuthButton
+        label={
+          selectedRole === "cleaner"
+            ? "Continue with Google as a cleaner"
+            : "Continue with Google as a customer"
+        }
+        next={dashboardForRole(selectedRole)}
+        role={selectedRole}
+      />
       <Divider />
       <form className="space-y-5" onSubmit={onSubmit}>
         <FormStatus message={formError} />

@@ -67,12 +67,12 @@ interface TemplateContext {
 }
 
 const toneStyles: Record<Tone, { accent: string; badge: string; name: string }> = {
-  admin: { accent: "#334155", badge: "#e2e8f0", name: "Admin" },
-  cleaner: { accent: "#047857", badge: "#d1fae5", name: "Cleaner" },
-  customer: { accent: "#0f766e", badge: "#ccfbf1", name: "Customer" },
+  admin: { accent: "#221f50", badge: "#e7e4ff", name: "Admin" },
+  cleaner: { accent: "#5a51aa", badge: "#e7e4ff", name: "Cleaner" },
+  customer: { accent: "#5a51aa", badge: "#e7e4ff", name: "Customer" },
   security: { accent: "#4f46e5", badge: "#e0e7ff", name: "Security" },
-  success: { accent: "#16a34a", badge: "#dcfce7", name: "Success" },
-  warning: { accent: "#d97706", badge: "#fef3c7", name: "Action needed" },
+  success: { accent: "#5a51aa", badge: "#e7e4ff", name: "Success" },
+  warning: { accent: "#b45309", badge: "#fff4ec", name: "Action needed" },
 };
 
 export function renderEmailTemplate(
@@ -516,6 +516,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const tone = toneStyles[context.tone ?? "customer"];
   const cards = (context.cards ?? []).filter((card) => card.value !== undefined && card.value !== null && String(card.value).trim() !== "");
   const supportEmail = process.env.SUPPORT_EMAIL || "support@cleanscape.local";
+  const brandMarkUrl = `${emailAssetBaseUrl(data)}/images/brand/cleanscape-mark.png`;
 
   const html = `<!doctype html>
 <html>
@@ -524,33 +525,42 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${escapeHtml(context.subject)}</title>
   </head>
-  <body style="margin:0;background:#f1f5f3;font-family:Arial,Helvetica,sans-serif;color:#17352d;">
+  <body style="margin:0;background:#f7f5ff;font-family:Poppins,Inter,Arial,Helvetica,sans-serif;color:#221f50;">
     <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0;">${escapeHtml(context.preview)}</div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f1f5f3;padding:32px 12px;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f5ff;padding:32px 12px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 18px 45px rgba(15,118,110,0.10);">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(90,81,170,0.14);">
             <tr>
-              <td style="background:linear-gradient(135deg,#064e3b,#0f766e);padding:28px 32px;color:#ffffff;">
-                <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;">CleanScape</div>
-                <div style="margin-top:8px;font-size:14px;color:#d1fae5;">Trusted cleaning, clearly managed.</div>
+              <td style="background:linear-gradient(135deg,#ffc79f 0%,#7669d1 48%,#221f50 100%);padding:30px 32px;color:#ffffff;">
+                <table role="presentation" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="vertical-align:middle;">
+                      <img src="${escapeAttribute(brandMarkUrl)}" width="50" height="46" alt="CleanScape" style="display:block;width:50px;height:46px;border:0;outline:none;text-decoration:none;">
+                    </td>
+                    <td style="vertical-align:middle;padding-left:12px;">
+                      <div style="font-size:25px;font-weight:900;letter-spacing:-0.06em;text-transform:lowercase;">cleanscape</div>
+                      <div style="margin-top:5px;font-size:13px;color:rgba(255,255,255,0.76);">Trusted cleaning, clearly managed.</div>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
               <td style="padding:32px;">
                 <div style="display:inline-block;background:${tone.badge};color:${tone.accent};border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">${escapeHtml(tone.name)}</div>
-                <h1 style="margin:18px 0 10px;font-size:30px;line-height:1.15;color:#10231f;letter-spacing:-0.04em;">${escapeHtml(context.title)}</h1>
-                ${context.intro ? `<p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#39534c;">${escapeHtml(context.intro)}</p>` : ""}
-                <p style="margin:0;font-size:16px;line-height:1.65;color:#39534c;">${escapeHtml(context.body)}</p>
+                <h1 style="margin:18px 0 10px;font-size:31px;line-height:1.12;color:#221f50;letter-spacing:-0.05em;">${escapeHtml(context.title)}</h1>
+                ${context.intro ? `<p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#4e486e;">${escapeHtml(context.intro)}</p>` : ""}
+                <p style="margin:0;font-size:16px;line-height:1.65;color:#4e486e;">${escapeHtml(context.body)}</p>
                 ${cards.length ? renderCards(cards) : ""}
                 ${context.buttonHref ? renderButton(context.buttonHref, context.buttonLabel ?? "Open CleanScape", tone.accent) : ""}
                 ${renderSecurityNote(data)}
               </td>
             </tr>
             <tr>
-              <td style="padding:24px 32px;background:#f8faf9;border-top:1px solid #e5eee9;color:#58716a;font-size:12px;line-height:1.6;">
+              <td style="padding:24px 32px;background:#fbfaff;border-top:1px solid #dedbfd;color:#6c668d;font-size:12px;line-height:1.6;">
                 <p style="margin:0 0 8px;">CleanScape sends service, account, and marketplace updates related to your account.</p>
-                <p style="margin:0;">Need help? Contact <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#0f766e;">${escapeHtml(supportEmail)}</a>.</p>
+                <p style="margin:0;">Need help? Contact <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#5a51aa;font-weight:700;">${escapeHtml(supportEmail)}</a>.</p>
               </td>
             </tr>
           </table>
@@ -568,13 +578,35 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   };
 }
 
+function emailAssetBaseUrl(data: Record<string, unknown>) {
+  const explicit =
+    process.env.EMAIL_ASSET_BASE_URL ||
+    process.env.NEXT_PUBLIC_EMAIL_ASSET_BASE_URL;
+  const candidate =
+    explicit ||
+    string(data.appUrl) ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://www.cleanscapeuk.com";
+  const url = candidate.replace(/\/$/, "");
+
+  if (
+    url.startsWith("https://") &&
+    !url.includes("localhost") &&
+    !url.includes("127.0.0.1")
+  ) {
+    return url;
+  }
+
+  return "https://www.cleanscapeuk.com";
+}
+
 function renderCards(cards: Array<{ label: string; value?: unknown }>) {
-  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;border:1px solid #e5eee9;border-radius:18px;overflow:hidden;">
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;border:1px solid #dedbfd;border-radius:20px;overflow:hidden;">
     ${cards
       .map(
         (card) => `<tr>
-          <td style="padding:14px 16px;background:#fbfdfc;border-bottom:1px solid #edf3f0;color:#6b8079;font-size:13px;width:38%;">${escapeHtml(card.label)}</td>
-          <td style="padding:14px 16px;border-bottom:1px solid #edf3f0;color:#17352d;font-size:14px;font-weight:700;">${escapeHtml(formatValue(card.value))}</td>
+          <td style="padding:14px 16px;background:#fbfaff;border-bottom:1px solid #eeeafd;color:#6c668d;font-size:13px;width:38%;">${escapeHtml(card.label)}</td>
+          <td style="padding:14px 16px;border-bottom:1px solid #eeeafd;color:#221f50;font-size:14px;font-weight:800;">${escapeHtml(formatValue(card.value))}</td>
         </tr>`,
       )
       .join("")}
@@ -583,13 +615,13 @@ function renderCards(cards: Array<{ label: string; value?: unknown }>) {
 
 function renderButton(href: string, label: string, color: string) {
   return `<div style="margin-top:28px;">
-    <a href="${escapeAttribute(href)}" style="display:inline-block;background:${color};color:#ffffff;text-decoration:none;border-radius:14px;padding:14px 20px;font-weight:800;font-size:15px;">${escapeHtml(label)}</a>
+    <a href="${escapeAttribute(href)}" style="display:inline-block;background:${color};color:#ffffff;text-decoration:none;border-radius:999px;padding:14px 22px;font-weight:900;font-size:15px;box-shadow:0 12px 24px rgba(90,81,170,0.22);">${escapeHtml(label)}</a>
   </div>`;
 }
 
 function renderSecurityNote(data: Record<string, unknown>) {
   if (!data.securityNote) return "";
-  return `<p style="margin:22px 0 0;padding:14px 16px;border-radius:14px;background:#eef2ff;color:#3730a3;font-size:13px;line-height:1.55;">${escapeHtml(String(data.securityNote))}</p>`;
+  return `<p style="margin:22px 0 0;padding:14px 16px;border-radius:16px;background:#e7e4ff;color:#37306c;font-size:13px;line-height:1.55;">${escapeHtml(String(data.securityNote))}</p>`;
 }
 
 function renderText(context: TemplateContext, cards: Array<{ label: string; value?: unknown }>, supportEmail: string) {

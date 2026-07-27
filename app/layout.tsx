@@ -9,6 +9,10 @@ export const metadata: Metadata = {
     template: "%s | CleanScape",
   },
   description: "Book trusted local cleaning professionals.",
+  icons: {
+    apple: "/images/brand/cleanscape-mark.png",
+    icon: "/images/brand/cleanscape-mark.png",
+  },
 };
 
 export default function RootLayout({

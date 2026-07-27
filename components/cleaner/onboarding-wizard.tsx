@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, FileUp, Plus, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileUp, Plus, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
+import { BrandMark } from "@/components/shared/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SERVICES } from "@/lib/customer/services";
@@ -197,19 +198,35 @@ export function OnboardingWizard({
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8">
+    <main className="min-h-screen bg-[#f7f5ff] px-4 py-8">
       <div className="mx-auto max-w-3xl">
-        <p className="text-sm font-semibold text-primary">Cleaner onboarding</p>
-        <h1 className="mt-1 text-3xl font-semibold">Build your CleanScape profile</h1>
+        <div className="rounded-[2rem] bg-[#221f50] p-6 text-white shadow-2xl shadow-[#221f50]/15 sm:p-8">
+          <div className="flex items-center gap-3">
+            <BrandMark />
+            <div>
+              <p className="text-sm font-semibold text-white/70">
+                CleanScape Pro
+              </p>
+              <h1 className="text-2xl font-semibold tracking-[-0.04em] sm:text-4xl">
+                Build your cleaner profile
+              </h1>
+            </div>
+          </div>
+          <p className="mt-5 flex items-center gap-2 text-sm leading-6 text-white/75">
+            <Sparkles className="h-4 w-4 text-[#ffc79f]" />
+            Set your services, working areas, availability, documents, and
+            payout preference before certification.
+          </p>
+        </div>
         <div className="mt-6 grid grid-cols-8 gap-2">
           {Array.from({ length: 8 }, (_, index) => (
             <span
-              className={`h-1.5 rounded-full ${index < step ? "bg-primary" : "bg-slate-200"}`}
+              className={`h-1.5 rounded-full ${index < step ? "bg-[#5a51aa]" : "bg-[#dedbfd]"}`}
               key={index}
             />
           ))}
         </div>
-        <section className="mt-6 rounded-2xl border bg-background p-6 shadow-sm">
+        <section className="mt-6 rounded-[2rem] border border-[#dedbfd] bg-white p-6 shadow-xl shadow-[#5a51aa]/10">
           {step === 1 ? (
             <div className="space-y-4">
               <Heading title="Tell us about yourself" />
@@ -224,13 +241,13 @@ export function OnboardingWizard({
               <Heading title="Services you offer" />
               <div className="grid gap-3 sm:grid-cols-2">
                 {SERVICES.map((service) => (
-                  <label className="flex gap-3 rounded-xl border p-4" key={service.value}>
+                  <label className="flex gap-3 rounded-2xl border border-[#dedbfd] p-4 transition hover:border-[#5a51aa]/50" key={service.value}>
                     <input
                       checked={data.services.includes(service.value)}
                       onChange={(e) => update("services", e.target.checked ? [...data.services, service.value] : data.services.filter((item) => item !== service.value))}
                       type="checkbox"
                     />
-                    <span><b>{service.label}</b><small className="mt-1 block text-muted-foreground">{service.description}</small></span>
+                    <span><b>{service.label}</b><small className="mt-1 block leading-5 text-muted-foreground">{service.description}</small></span>
                   </label>
                 ))}
               </div>
@@ -245,7 +262,7 @@ export function OnboardingWizard({
               </div>
               <div className="my-4 flex flex-wrap gap-2">
                 {data.working_areas.map((area) => (
-                  <button className="rounded-full bg-emerald-100 px-3 py-1 text-sm" key={area} onClick={() => update("working_areas", data.working_areas.filter((item) => item !== area))} type="button">{area} <X className="inline h-3 w-3" /></button>
+                  <button className="rounded-full bg-[#e7e4ff] px-3 py-1 text-sm font-medium text-[#5a51aa]" key={area} onClick={() => update("working_areas", data.working_areas.filter((item) => item !== area))} type="button">{area} <X className="inline h-3 w-3" /></button>
                 ))}
               </div>
               <CoverageMap count={data.working_areas.length} />
@@ -256,7 +273,7 @@ export function OnboardingWizard({
               <Heading title="Weekly availability" />
               <div className="space-y-2">
                 {data.availability.map((day, index) => (
-                  <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 rounded-lg bg-muted/50 p-3" key={day.day_of_week}>
+                  <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 rounded-2xl bg-[#f7f5ff] p-3" key={day.day_of_week}>
                     <label className="text-sm font-medium"><input checked={day.is_available} className="mr-2" onChange={(e) => { const next=[...data.availability]; next[index]={...day,is_available:e.target.checked}; update("availability",next); }} type="checkbox" />{days[index]}</label>
                     <Input disabled={!day.is_available} type="time" value={day.start_time} onChange={(e) => { const next=[...data.availability]; next[index]={...day,start_time:e.target.value}; update("availability",next); }} />
                     <span>to</span>
@@ -279,14 +296,14 @@ export function OnboardingWizard({
           {step === 6 ? (
             <div>
               <Heading title="Location consent" />
-              <div className="rounded-xl border bg-muted/40 p-5 text-sm leading-6">
+              <div className="rounded-2xl border border-[#dedbfd] bg-[#f7f5ff] p-5 text-sm leading-6">
                 <p>
                   CleanScape records your GPS position only when you check in
                   and check out of an active job. This creates an audit trail for
                   no-show and completion disputes. We do not track your location
                   outside active job actions.
                 </p>
-                <label className="mt-5 flex items-start gap-3 rounded-lg bg-background p-4">
+                <label className="mt-5 flex items-start gap-3 rounded-2xl bg-white p-4">
                   <input
                     checked={data.location_tracking_consent_accepted}
                     className="mt-1"
@@ -310,7 +327,7 @@ export function OnboardingWizard({
             <div>
               <Heading title="Getting paid" />
               <div className="grid gap-3 sm:grid-cols-2">
-                {(["weekly", "monthly"] as const).map((value) => <button className={`rounded-xl border p-5 text-left ${data.payout_preference === value ? "border-primary bg-primary/5" : ""}`} key={value} onClick={() => update("payout_preference", value)} type="button"><b className="capitalize">{value}</b><p className="mt-1 text-sm text-muted-foreground">{value === "weekly" ? "Faster, regular payouts." : "One consolidated monthly payout."}</p></button>)}
+                {(["weekly", "monthly"] as const).map((value) => <button className={`rounded-2xl border p-5 text-left transition ${data.payout_preference === value ? "border-[#5a51aa] bg-[#e7e4ff]" : "border-[#dedbfd] hover:border-[#5a51aa]/50"}`} key={value} onClick={() => update("payout_preference", value)} type="button"><b className="capitalize">{value}</b><p className="mt-1 text-sm text-muted-foreground">{value === "weekly" ? "Faster, regular payouts." : "One consolidated monthly payout."}</p></button>)}
               </div>
               <Button className="mt-5" onClick={() => void connectStripe()} type="button" variant="outline">Connect Stripe Express</Button>
               <p className="mt-2 text-xs text-muted-foreground">Optional for now. You can submit your application and connect Stripe later from your profile before receiving payouts.</p>
@@ -319,7 +336,7 @@ export function OnboardingWizard({
           {step === 8 ? (
             <div>
               <Heading title="Ready to submit" />
-              <div className="space-y-3 rounded-xl bg-muted/50 p-5 text-sm">
+              <div className="space-y-3 rounded-2xl bg-[#f7f5ff] p-5 text-sm">
                 <p><b>Name:</b> {data.full_name}</p>
                 <p><b>Services:</b> {data.services.length}</p>
                 <p><b>Areas:</b> {data.working_areas.join(", ")}</p>
@@ -333,7 +350,7 @@ export function OnboardingWizard({
             </div>
           ) : null}
           {error ? <p className="mt-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
-          <div className="mt-7 flex justify-between border-t pt-5">
+          <div className="mt-7 flex justify-between border-t border-[#dedbfd] pt-5">
             <Button disabled={step === 1} onClick={() => setStep(step - 1)} variant="ghost"><ArrowLeft className="mr-2 h-4 w-4" />Back</Button>
             {step < 8 ? <Button onClick={goNext}>Continue<ArrowRight className="ml-2 h-4 w-4" /></Button> : null}
           </div>
@@ -452,7 +469,7 @@ function CoverageMap({ count }: { count: number }) {
       circles={[
         {
           center: LONDON_CENTER,
-          color: "#047857",
+          color: "#5a51aa",
           id: "coverage",
           radiusMeters: Math.max(5000, count * 3500),
         },

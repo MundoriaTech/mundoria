@@ -28,6 +28,19 @@ export const forgotPasswordSchema = z.object({
   email: z.string().trim().email("Enter a valid email address"),
 });
 
+export const completeProfileSchema = z.object({
+  full_name: z
+    .string()
+    .trim()
+    .min(2, "Enter your full name")
+    .max(100, "Name is too long"),
+  phone: z
+    .string()
+    .trim()
+    .min(7, "Enter a valid phone number")
+    .max(30, "Phone number is too long"),
+});
+
 export const updatePasswordSchema = z
   .object({
     password: z
@@ -44,4 +57,5 @@ export const updatePasswordSchema = z
 export type SignupValues = z.infer<typeof signupSchema>;
 export type LoginValues = z.infer<typeof loginSchema>;
 export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+export type CompleteProfileValues = z.infer<typeof completeProfileSchema>;
 export type UpdatePasswordValues = z.infer<typeof updatePasswordSchema>;

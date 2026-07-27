@@ -20,11 +20,12 @@ export async function updateSession(request: NextRequest) {
   const { data: profile } = user
     ? await supabase
         .from("profiles")
-        .select("role")
+        .select("phone,role")
         .eq("id", user.id)
         .maybeSingle()
     : { data: null };
   const role = isUserRole(profile?.role) ? profile.role : null;
+  const phone = typeof profile?.phone === "string" ? profile.phone.trim() : "";
 
-  return { response, user, role };
+  return { phone, response, role, user };
 }

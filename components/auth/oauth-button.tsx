@@ -4,12 +4,19 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
+import type { UserRole } from "@/types/auth";
 
 interface OAuthButtonProps {
+  label?: string;
   next?: string;
+  role?: Extract<UserRole, "customer" | "cleaner">;
 }
 
-export function OAuthButton({ next = "/dashboard" }: OAuthButtonProps) {
+export function OAuthButton({
+  label = "Continue with Google",
+  next = "/dashboard",
+  role,
+}: OAuthButtonProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,6 +26,9 @@ export function OAuthButton({ next = "/dashboard" }: OAuthButtonProps) {
 
     const callback = new URL("/auth/callback", window.location.origin);
     callback.searchParams.set("next", next);
+    if (role) {
+      callback.searchParams.set("role", role);
+    }
     const { error: oauthError } = await createBrowserClient().auth.signInWithOAuth(
       {
         provider: "google",
@@ -44,7 +54,7 @@ export function OAuthButton({ next = "/dashboard" }: OAuthButtonProps) {
         variant="outline"
       >
         <GoogleMark />
-        {isLoading ? "Opening Google…" : "Continue with Google"}
+        {isLoading ? "Opening Google…" : label}
       </Button>
       {error ? (
         <p className="mt-2 text-sm text-destructive" role="alert">

@@ -1,5 +1,6 @@
 export * from "@/components/shared/avatar-upload";
 export * from "@/components/shared/booking-status-badge";
+export * from "@/components/shared/brand-mark";
 export * from "@/components/shared/chat-message";
 export * from "@/components/shared/confirm-modal";
 export * from "@/components/shared/empty-state";

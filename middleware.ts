@@ -66,7 +66,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { response, user, role } = await updateSession(request);
+  const { phone, response, user, role } = await updateSession(request);
   const protectedRole = requiredRole(pathname);
 
   if (protectedRole && !user) {
@@ -80,6 +80,18 @@ export async function middleware(request: NextRequest) {
       new URL(role ? ROLE_DASHBOARDS[role] : "/", request.url),
       response,
     );
+  }
+
+  if (
+    user &&
+    protectedRole &&
+    role &&
+    !phone &&
+    pathname !== "/complete-profile"
+  ) {
+    const completionUrl = new URL("/complete-profile", request.url);
+    completionUrl.searchParams.set("next", pathname);
+    return redirectWithSession(completionUrl, response);
   }
 
   if (user && protectedRole && role !== protectedRole) {

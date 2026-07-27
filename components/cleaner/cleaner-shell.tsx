@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { BrandMark } from "@/components/shared/brand-mark";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
@@ -37,16 +38,22 @@ export function CleanerShell({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24">
-      <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
+    <div className="min-h-screen bg-[#f7f5ff] pb-24">
+      <header className="sticky top-0 z-30 border-b border-[#dedbfd] bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div>
-            <Link className="font-bold text-emerald-950" href="/cleaner/dashboard">
-              CleanScape Pro
+            <Link className="flex items-center gap-3" href="/cleaner/dashboard">
+              <BrandMark className="h-10 w-10 rounded-[0.95rem]" />
+              <span>
+                <span className="block font-bold tracking-tight text-[#221f50]">
+                  CleanScape Pro
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {profile.full_name.split(" ")[0]} ·{" "}
+                  {cleaner.status.replace("_", " ")}
+                </span>
+              </span>
             </Link>
-            <p className="text-xs text-muted-foreground">
-              {profile.full_name.split(" ")[0]} · {cleaner.status.replace("_", " ")}
-            </p>
           </div>
           <TierBadge tier={cleaner.tier} />
         </div>
@@ -57,7 +64,7 @@ export function CleanerShell({
         ) : null}
         {children}
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#dedbfd] bg-white/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
         <div className="mx-auto grid h-16 max-w-xl grid-cols-5">
           {nav.map((item) => {
             const active =
@@ -66,7 +73,7 @@ export function CleanerShell({
               <Link
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 text-[11px] font-medium",
-                  active ? "text-primary" : "text-muted-foreground",
+                  active ? "text-[#5a51aa]" : "text-muted-foreground",
                 )}
                 href={item.href}
                 key={item.href}
@@ -85,22 +92,22 @@ export function CleanerShell({
 function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
   if (cleaner.status === "pending" || cleaner.status === "in_training") {
     return (
-      <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
+      <div className="mb-6 rounded-[1.5rem] border border-[#ffe0c7] bg-gradient-to-br from-[#fff4ec] to-white p-5 text-[#4e3766] shadow-sm">
         <div className="flex gap-3">
-          <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
+          <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#5a51aa]" />
           <div>
             <p className="font-semibold">
               {cleaner.status === "in_training"
                 ? "Certification in progress"
                 : "Application under review"}
             </p>
-            <p className="mt-1 text-sm text-amber-900/80">
+            <p className="mt-1 text-sm leading-6 text-[#6c668d]">
               You can explore your dashboard, update your profile, and connect
               Stripe now. New job offers will appear after your CleanScape
               certification is complete.
             </p>
             {!cleaner.stripe_onboarding_complete ? (
-              <p className="mt-2 text-xs text-amber-900/70">
+              <p className="mt-2 text-xs text-[#6c668d]">
                 Payout setup is incomplete. You can finish it later from Profile.
               </p>
             ) : null}
@@ -111,7 +118,7 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
   }
 
   return (
-    <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive">
+    <div className="mb-6 rounded-[1.5rem] border border-destructive/30 bg-destructive/10 p-5 text-destructive">
       <div className="flex gap-3">
         <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
         <div>
