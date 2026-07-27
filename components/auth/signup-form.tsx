@@ -142,7 +142,7 @@ export function SignupForm() {
           <input type="hidden" {...register("role")} />
           <div
             aria-label="Account type"
-            className="mt-2 grid grid-cols-2 gap-3"
+            className="mt-2 grid gap-3 sm:grid-cols-2"
             role="radiogroup"
           >
             <RoleOption

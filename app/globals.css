@@ -36,4 +36,84 @@
       BlinkMacSystemFont, "Segoe UI", sans-serif;
     @apply bg-background text-foreground antialiased;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal-on-scroll {
+      animation: reveal-up both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 32%;
+    }
+
+    .reveal-on-scroll-soft {
+      animation: reveal-soft both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 28%;
+    }
+
+    .scroll-card {
+      animation: card-rise both;
+      animation-timeline: view();
+      animation-range: entry 4% cover 26%;
+      transition:
+        transform 260ms ease,
+        box-shadow 260ms ease,
+        border-color 260ms ease;
+    }
+
+    .image-ease {
+      transition:
+        transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+        filter 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @supports not (animation-timeline: view()) {
+      .reveal-on-scroll,
+      .reveal-on-scroll-soft,
+      .scroll-card {
+        animation: reveal-up 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+    }
+  }
+
+  @keyframes reveal-up {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes reveal-soft {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes card-rise {
+    from {
+      opacity: 0;
+      transform: translateY(22px) scale(0.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 }
