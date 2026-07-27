@@ -1,17 +1,3 @@
-import {
-  ArrowRight,
-  BadgeCheck,
-  CalendarCheck,
-  CheckCircle2,
-  Clock3,
-  Home,
-  KeyRound,
-  MapPin,
-  MessageCircle,
-  ShieldCheck,
-  Sparkles,
-  Star,
-} from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,105 +14,74 @@ export const metadata: Metadata = {
 
 const serviceTiles = [
   {
-    accent: "#ffc79f",
-    background: "linear-gradient(135deg,#fff1e8 0%,#ffc79f 100%)",
     description: "Weekly or fortnightly upkeep for everyday living.",
     href: "/booking/new",
-    icon: Home,
-    meta: "Most booked",
-    name: "Regular",
-    span: "lg:col-span-2",
-    subtitle: "Cleaning",
-    text: "text-[#221f50]",
+    image:
+      "https://images.pexels.com/photos/8055207/pexels-photo-8055207.jpeg?auto=compress&cs=tinysrgb&w=900",
+    name: "Regular cleaning",
+    note: "Most booked",
   },
   {
-    accent: "#ffc79f",
-    background: "linear-gradient(135deg,#5a51aa 0%,#221f50 100%)",
     description: "A detailed reset for bathrooms, kitchens, build-up and corners.",
     href: "/booking/new",
-    icon: Sparkles,
-    meta: "Intensive",
-    name: "Deep",
-    span: "",
-    subtitle: "Clean",
-    text: "text-white",
+    image:
+      "https://images.pexels.com/photos/36730122/pexels-photo-36730122.jpeg?auto=compress&cs=tinysrgb&w=900",
+    name: "Deep clean",
+    note: "Most detailed",
   },
   {
-    accent: "#5a51aa",
-    background: "linear-gradient(135deg,#d7f3f8 0%,#b8e1ed 100%)",
     description: "Guest-ready resets with checklist confirmation and quick turnaround.",
     href: "/booking/new",
-    icon: CalendarCheck,
-    meta: "For hosts",
-    name: "Airbnb",
-    span: "",
-    subtitle: "Turnover",
-    text: "text-[#221f50]",
+    image:
+      "https://images.pexels.com/photos/15146054/pexels-photo-15146054.jpeg?auto=compress&cs=tinysrgb&w=900",
+    name: "Airbnb turnover",
+    note: "For hosts",
   },
   {
-    accent: "#221f50",
-    background: "linear-gradient(135deg,#ffe27a 0%,#ffd24f 100%)",
     description: "Move-out and move-in cleaning for deposits, agents and handovers.",
     href: "/booking/new",
-    icon: KeyRound,
-    meta: "Move day",
-    name: "End of",
-    span: "",
-    subtitle: "Tenancy",
-    text: "text-[#221f50]",
+    image:
+      "https://images.pexels.com/photos/7641003/pexels-photo-7641003.jpeg?auto=compress&cs=tinysrgb&w=900",
+    name: "End of tenancy",
+    note: "Move day",
   },
   {
-    accent: "#ffc79f",
-    background: "linear-gradient(135deg,#f4b1bd 0%,#efe9ff 100%)",
     description: "A flexible refresh before guests, parties, inspections or a busy week.",
     href: "/booking/new",
-    icon: BadgeCheck,
-    meta: "Flexible",
-    name: "One-off",
-    span: "",
-    subtitle: "Clean",
-    text: "text-[#221f50]",
+    image:
+      "https://images.pexels.com/photos/27176673/pexels-photo-27176673.jpeg?auto=compress&cs=tinysrgb&w=900",
+    name: "One-off clean",
+    note: "Flexible",
   },
   {
-    accent: "#5a51aa",
-    background: "linear-gradient(135deg,#ff6a35 0%,#ffc79f 100%)",
     description: "Dust, debris and finishing touches after building or renovation work.",
     href: "/booking/new",
-    icon: ShieldCheck,
-    meta: "Heavy duty",
-    name: "Post-build",
-    span: "lg:col-span-2",
-    subtitle: "Cleaning",
-    text: "text-[#221f50]",
+    image:
+      "https://images.pexels.com/photos/10558186/pexels-photo-10558186.jpeg?auto=compress&cs=tinysrgb&w=900",
+    name: "Post-build cleaning",
+    note: "Heavy duty",
   },
 ];
 
-const steps = [
+const testimonials = [
   {
-    description:
-      "Choose the clean you need, add your address, and pick a slot that works.",
-    icon: CalendarCheck,
-    title: "Book in minutes",
+    detail: "Regular cleaning customer",
+    name: "Maya",
+    quote:
+      "The clean felt effortless. I booked in a few minutes, got updates, and the checklist made the finish feel really transparent.",
   },
   {
-    description:
-      "CleanScape matches your booking with certified cleaners based on service, area, availability, and performance.",
-    icon: ShieldCheck,
-    title: "Get matched fairly",
+    detail: "Airbnb host",
+    name: "Daniel",
+    quote:
+      "Turnovers used to be a panic. CleanScape gives me the status trail I need before a guest arrives.",
   },
   {
-    description:
-      "Track status updates, message your cleaner, confirm the checklist, and rate the experience.",
-    icon: Sparkles,
-    title: "Enjoy the reset",
+    detail: "Deep clean customer",
+    name: "Aisha",
+    quote:
+      "The cleaner was punctual, careful and professional. The whole flow felt calm instead of transactional.",
   },
-];
-
-const trustPoints = [
-  "Cleaner onboarding with ID and DBS document review",
-  "GPS check-in and check-out for job accountability",
-  "Card authorization first; capture happens after completion",
-  "Structured dispute and rating review process",
 ];
 
 const cities = [
@@ -144,23 +99,16 @@ const cities = [
   "Chelmsford",
 ];
 
-const reviews = [
-  {
-    body: "The app made the whole clean feel managed. I knew when my cleaner was arriving, what had been completed, and when to confirm the checklist.",
-    name: "Amara",
-    service: "Deep clean",
-  },
-  {
-    body: "I like that CleanScape treats cleaners like professionals. The matching, tiers, and payout flow make the platform feel serious.",
-    name: "Daniel",
-    service: "Cleaner partner",
-  },
-  {
-    body: "Booking an Airbnb turnover without a long back-and-forth is exactly what I needed. Simple, clear, and tidy.",
-    name: "Priya",
-    service: "Airbnb turnover",
-  },
-];
+const cityServiceColumns = [
+  "Cleaning",
+  "Regular cleaning",
+  "Deep cleaning",
+  "Airbnb turnover",
+  "End of tenancy",
+].map((service) => ({
+  links: cities.slice(0, 8).map((city) => `${service} in ${city}`),
+  service,
+}));
 
 export default function HomePage() {
   const configured = hasSupabasePublicConfig();
@@ -240,294 +188,267 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8" id="services">
-        <div className="mb-10 grid gap-6 lg:grid-cols-[0.95fr_0.6fr] lg:items-end">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#5a51aa]">
-              Explore services
+      <section className="bg-white px-5 py-24 sm:px-8" id="services">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-[#5a51aa]">
+                Popular at-home services
+              </p>
+              <h2 className="mt-4 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-6xl">
+                Home cleaning, neatly organised.
+              </h2>
+            </div>
+            <p className="max-w-lg text-base font-medium leading-7 text-[#69657a]">
+              Pick the service you need, choose a time, and let CleanScape
+              handle the cleaner match, booking updates and completion flow.
             </p>
-            <h2 className="mt-3 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-[-0.06em] text-[#221f50] sm:text-6xl">
-              One home. Six ways to make it feel lighter.
-            </h2>
           </div>
-          <p className="max-w-md text-base font-medium leading-7 text-[#6c668d] lg:justify-self-end">
-            Pick the outcome you need. CleanScape handles the cleaner match,
-            card authorization, status tracking, messages and checklist behind
-            the scenes.
-          </p>
-        </div>
-        <div className="grid auto-rows-[minmax(260px,auto)] gap-5 lg:grid-cols-4">
-          {serviceTiles.map((tile) => (
-            <Link
-              className={`group relative isolate flex min-h-[280px] overflow-hidden rounded-[2.25rem] p-7 transition duration-300 hover:-translate-y-1 ${tile.text} ${tile.span}`}
-              href={configured ? tile.href : "/setup"}
-              key={tile.name}
-              style={{ background: tile.background }}
-            >
-              <div className="absolute -right-14 -top-16 h-56 w-56 rounded-full bg-white/25 blur-2xl transition group-hover:scale-110" />
-              <div className="absolute -bottom-20 right-8 h-48 w-48 rounded-full bg-black/10 blur-2xl" />
-              <div className="absolute bottom-6 right-6 text-[10rem] font-black leading-none tracking-[-0.16em] opacity-[0.08]">
-                CS
-              </div>
 
-              <div className="relative z-10 flex min-h-full w-full flex-col">
-                <div className="flex items-start justify-between gap-4">
-                  <span
-                    className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/70 shadow-sm backdrop-blur"
-                    style={{ color: tile.accent }}
-                  >
-                    <tile.icon className="h-7 w-7" />
-                  </span>
-                  <span className="rounded-full bg-black/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]">
-                    {tile.meta}
-                  </span>
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {serviceTiles.map((tile) => (
+              <Link
+                className="group overflow-hidden rounded-[1.35rem] bg-white shadow-[0_14px_38px_rgba(18,16,40,0.08)] ring-1 ring-[#ededf4] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_rgba(18,16,40,0.12)]"
+                href={configured ? tile.href : "/setup"}
+                key={tile.name}
+              >
+                <div className="relative h-56 overflow-hidden bg-[#f0eff5]">
+                  <Image
+                    alt={tile.name}
+                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                    fill
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                    src={tile.image}
+                  />
                 </div>
-
-                <div className="mt-auto max-w-xl pt-10">
-                  <h3 className="text-5xl font-semibold leading-[0.88] tracking-[-0.07em] sm:text-6xl">
-                    {tile.name}
-                    <span className="block">{tile.subtitle}</span>
-                  </h3>
-                  <p className="mt-5 max-w-md text-base font-medium leading-7 opacity-75">
+                <div className="min-h-[178px] p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="text-xl font-black tracking-[-0.03em] text-[#2d2b35]">
+                      {tile.name}
+                    </h3>
+                    <span className="rounded-full bg-[#f6f4ff] px-3 py-1 text-xs font-bold text-[#5a51aa]">
+                      {tile.note}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm font-medium leading-6 text-[#6f6a80]">
                     {tile.description}
                   </p>
-                  <span className="mt-6 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm font-bold text-white transition group-hover:translate-x-1">
-                    Book now
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <span className="mt-6 inline-flex text-sm font-black text-[#2d2b35]">
+                    Start booking →
                   </span>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="bg-white py-24"
-        id="how-it-works"
-      >
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <SectionIntro
-            eyebrow="How it works"
-            title="Simple for customers. Structured for operations."
-            text="CleanScape is designed to feel effortless on the surface, while giving the marketplace enough data to handle matching, quality, disputes, and payouts responsibly."
-          />
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {steps.map((step, index) => (
-              <article
-                className="rounded-[2rem] bg-[#f7f5ff] p-7"
-                key={step.title}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5a51aa] text-white">
-                    <step.icon className="h-7 w-7" />
-                  </div>
-                  <span className="text-5xl font-semibold tracking-[-0.08em] text-[#dedbfd]">
-                    0{index + 1}
-                  </span>
-                </div>
-                <h3 className="mt-8 text-2xl font-semibold tracking-tight">
-                  {step.title}
-                </h3>
-                <p className="mt-4 leading-7 text-[#6c668d]">
-                  {step.description}
-                </p>
-              </article>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-24 sm:px-8 lg:grid-cols-[0.9fr_1.1fr]" id="trust">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#5a51aa]">
-            Trust layer
-          </p>
-          <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
-            Clean, clear, accountable.
-          </h2>
-          <p className="mt-6 text-lg leading-8 text-[#6c668d]">
-            CleanScape’s brand promise is not just “a clean home.” It is a
-            calmer experience: clear booking, trusted people, connected support,
-            and a completion process that protects both sides.
-          </p>
-          <div className="mt-8 space-y-4">
-            {trustPoints.map((point) => (
-              <div className="flex gap-3" key={point}>
-                <CheckCircle2 className="mt-1 h-5 w-5 flex-none text-[#5a51aa]" />
-                <p className="text-[#4e486e]">{point}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-[2.5rem] bg-[#221f50] p-5 shadow-2xl shadow-[#221f50]/15">
-          <div className="rounded-[2rem] bg-white p-5">
-            <div className="relative min-h-80 overflow-hidden rounded-[1.6rem] text-white">
-              <Image
-                alt="A cleaner mopping a modern living room floor"
-                className="object-cover"
-                fill
-                sizes="(min-width: 1024px) 45vw, 100vw"
-                src="https://images.pexels.com/photos/36729566/pexels-photo-36729566.jpeg?auto=compress&cs=tinysrgb&w=1200"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#221f50] via-[#221f50]/35 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#ffc79f]">
-                  Live booking state
-                </p>
-                <h3 className="mt-3 text-3xl font-semibold tracking-tight">
-                  Pending Match → Matched → En Route → In Progress → Completed
-                </h3>
-              </div>
+      <section className="bg-[#fbfaf7] px-5 py-24 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-[#5a51aa]">
+                Why it works
+              </p>
+              <h2 className="mt-4 text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-5xl">
+                Simple on the surface. Serious underneath.
+              </h2>
+              <p className="mt-5 text-base font-medium leading-7 text-[#69657a]">
+                Customers should not need to understand marketplace mechanics.
+                CleanScape keeps those details tidy in the background.
+              </p>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <MiniCard icon={Clock3} label="Cleaner ETA" value="Visible" />
-              <MiniCard icon={MapPin} label="Geofence" value="200m check" />
-              <MiniCard icon={MessageCircle} label="Messages" value="In-app" />
-              <MiniCard icon={Star} label="Ratings" value="Fair review" />
+
+            <div className="grid gap-px overflow-hidden rounded-[1.35rem] bg-[#e8e5ee] ring-1 ring-[#e8e5ee] md:grid-cols-3">
+              {[
+                [
+                  "Book",
+                  "Choose a service, saved address and slot without a long back-and-forth.",
+                ],
+                [
+                  "Track",
+                  "See booking progress, cleaner assignment and messages in one place.",
+                ],
+                [
+                  "Confirm",
+                  "Review the checklist after completion before payment is captured.",
+                ],
+              ].map(([title, text]) => (
+                <article
+                  className="bg-white p-7"
+                  key={title}
+                >
+                  <p className="text-2xl font-black tracking-[-0.035em] text-[#2d2b35]">
+                    {title}
+                  </p>
+                  <p className="mt-4 text-sm font-medium leading-7 text-[#69657a]">
+                    {text}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-[#221f50] py-24 text-white" id="cleaners">
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[1fr_0.9fr]">
+      <section className="bg-white px-5 py-24 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 lg:grid-cols-[0.76fr_1.24fr] lg:items-end">
+            <div>
+              <h2 className="max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-6xl">
+                Over 10,000 happy cleans
+              </h2>
+              <p className="mt-6 text-lg font-bold text-[#2d2b35]">
+                Our average rating is{" "}
+                <span className="text-5xl font-black tracking-[-0.05em]">
+                  4.9/5
+                </span>
+              </p>
+              <p className="mt-2 text-lg font-semibold text-[#69657a]">
+                What about your home?
+              </p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-3">
+              {testimonials.map((review) => (
+                <article
+                  className="rounded-[1.25rem] border border-[#ededf4] bg-white p-6 shadow-[0_12px_34px_rgba(18,16,40,0.06)]"
+                  key={review.name}
+                >
+                  <p className="text-sm font-black tracking-[0.12em] text-[#f2bd3d]">
+                    ★★★★★
+                  </p>
+                  <p className="mt-5 text-sm font-medium leading-7 text-[#4c485b]">
+                    “{review.quote}”
+                  </p>
+                  <p className="mt-6 text-sm font-black text-[#2d2b35]">
+                    {review.name}
+                  </p>
+                  <p className="text-xs font-semibold text-[#817c90]">
+                    {review.detail}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#fbfaf7] px-5 py-24 sm:px-8" id="about">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
+          <div className="relative min-h-[460px] overflow-hidden rounded-[1.5rem] bg-[#e9e6dd]">
+            <Image
+              alt="A professional cleaner preparing a home"
+              className="object-cover"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              src="https://images.pexels.com/photos/4107284/pexels-photo-4107284.jpeg?auto=compress&cs=tinysrgb&w=1200"
+            />
+          </div>
+
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#ffc79f]">
-              For cleaners
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-[#5a51aa]">
+              We are CleanScape
             </p>
-            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
-              A marketplace that treats cleaning like skilled work.
+            <h2 className="mt-4 text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-6xl">
+              Home services with a visible standard.
             </h2>
-            <p className="mt-6 text-lg leading-8 text-white/75">
-              Cleaners get onboarding, service-area control, availability,
-              job feeds, performance tiers, protected communication, and payout
-              visibility.
+            <div className="mt-8 divide-y divide-[#e1dde9] border-y border-[#e1dde9]">
+              {[
+                "Helping customers reclaim time without losing control of the job.",
+                "Giving independent cleaners clearer work, fairer reviews and payout visibility.",
+                "Building a cleaning platform where every booking has status, evidence and accountability.",
+              ].map((item) => (
+                <p className="py-5 font-medium leading-7 text-[#69657a]" key={item}>
+                  {item}
+                </p>
+              ))}
+            </div>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Button
+                asChild
+                className="h-12 rounded-full bg-black px-6 font-black text-white hover:bg-[#221f50]"
+              >
+                <Link href={customerHref}>Book a clean</Link>
+              </Button>
+              <Button
+                asChild
+                className="h-12 rounded-full px-6 font-black"
+                variant="outline"
+              >
+                <Link href={cleanerHref}>Become a cleaner</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white px-5 py-24 sm:px-8" id="coverage">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-[-0.06em] text-[#2b2933] sm:text-6xl">
+            CleanScape services in our top cities
+          </h2>
+
+          <div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
+            {cityServiceColumns.map((column) => (
+              <div key={column.service}>
+                <h3 className="text-lg font-black tracking-[-0.03em] text-[#221f50]">
+                  {column.service}
+                </h3>
+                <ul className="mt-5 space-y-3">
+                  {column.links.map((link) => (
+                    <li key={link}>
+                      <Link
+                        className="text-sm font-semibold text-[#6f6990] transition hover:text-[#5a51aa]"
+                        href={configured ? "/booking/new" : "/setup"}
+                      >
+                        {link}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#17143d] px-5 py-20 text-white sm:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.75fr] lg:items-center">
+          <div>
+            <BrandMark className="h-16 w-16" />
+            <h2 className="mt-8 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] sm:text-6xl">
+              Welcome home.
+            </h2>
+            <p className="mt-5 max-w-2xl text-lg font-medium leading-8 text-white/70">
+              Book, message, track, confirm and pay from one calm place.
+              CleanScape keeps the service simple on the surface and rigorous
+              underneath.
             </p>
+          </div>
+          <div className="rounded-[1.5rem] bg-white p-6 text-[#221f50] sm:p-8">
+            <div className="divide-y divide-[#ece9f2] text-sm font-bold">
+              {[
+                "Live booking status",
+                "In-app cleaner messaging",
+                "Checklist-led completion",
+                "Protected card authorization",
+              ].map((item) => (
+                <div
+                  className="py-4 first:pt-0 last:pb-0"
+                  key={item}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
             <Button
               asChild
-              className="mt-8 h-14 rounded-full bg-[#ffc79f] px-7 font-bold text-[#221f50] hover:bg-[#ffd4b8]"
+              className="mt-6 h-14 w-full rounded-full bg-black text-base font-black text-white hover:bg-[#221f50]"
             >
-              <Link href={cleanerHref}>Apply to clean with CleanScape</Link>
+              <Link href={customerHref}>Book my cleaning</Link>
             </Button>
           </div>
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-4 backdrop-blur">
-            <div className="relative h-72 overflow-hidden rounded-[2rem]">
-              <Image
-                alt="A professional cleaner vacuuming a home floor"
-                className="object-cover"
-                fill
-                sizes="(min-width: 1024px) 40vw, 100vw"
-                src="https://images.pexels.com/photos/3890198/pexels-photo-3890198.jpeg?auto=compress&cs=tinysrgb&w=1200"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#221f50]/85 via-transparent to-transparent" />
-              <div className="absolute bottom-5 left-5 right-5 rounded-3xl bg-white/15 p-4 backdrop-blur">
-                <p className="text-sm font-semibold text-[#ffc79f]">
-                  Cleaner partner tools
-                </p>
-                <p className="mt-1 text-sm leading-6 text-white/75">
-                  Area control, availability, job status, documents, and payout
-                  visibility in one mobile-first workflow.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-            {[
-              "Bronze, Silver, Gold, and Rose Gold progression",
-              "Postcode-prefix working areas",
-              "Weekly or monthly payout preference",
-              "Dispute window before low ratings affect score",
-            ].map((item) => (
-              <div
-                className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur"
-                key={item}
-              >
-                <BadgeCheck className="h-6 w-6 text-[#ffc79f]" />
-                <p className="mt-4 font-medium text-white/90">{item}</p>
-              </div>
-            ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
-        <SectionIntro
-          eyebrow="Social proof"
-          title="Built for happy moments after the clean"
-          text="CleanScape’s early product experience should make people feel looked after before, during, and after the visit."
-        />
-        <div className="mt-10 grid gap-5 lg:grid-cols-3">
-          {reviews.map((review) => (
-            <article
-              className="rounded-[2rem] border border-[#dedbfd] bg-white p-7 shadow-sm"
-              key={review.name}
-            >
-              <div className="flex gap-1 text-[#ffc06f]">
-                {Array.from({ length: 5 }, (_, index) => (
-                  <Star className="h-5 w-5 fill-current" key={index} />
-                ))}
-              </div>
-              <p className="mt-6 leading-7 text-[#4e486e]">“{review.body}”</p>
-              <p className="mt-6 font-semibold">{review.name}</p>
-              <p className="text-sm text-[#6c668d]">{review.service}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-white py-24">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="rounded-[2.5rem] bg-[#f7f5ff] p-8 sm:p-12">
-            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#5a51aa]">
-                  Coverage
-                </p>
-                <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em]">
-                  Starting with the UK’s busiest home-service areas.
-                </h2>
-                <p className="mt-5 leading-8 text-[#6c668d]">
-                  The platform already supports postcode-based zones, cleaner
-                  working areas, and map previews, so CleanScape can expand
-                  city by city without changing the booking experience.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {cities.map((city) => (
-                  <div
-                    className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#4e486e]"
-                    key={city}
-                  >
-                    {city}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-4xl px-5 py-24 text-center sm:px-8">
-        <BrandMark className="mx-auto h-20 w-20" />
-        <h2 className="mt-8 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
-          Welcome home to a cleaner rhythm.
-        </h2>
-        <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#6c668d]">
-          Book your first CleanScape clean, or apply to join the professional
-          cleaner network shaping better everyday services.
-        </p>
-        <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button asChild className="h-14 rounded-full px-8 text-base font-bold">
-            <Link href={customerHref}>Book a cleaner</Link>
-          </Button>
-          <Button
-            asChild
-            className="h-14 rounded-full px-8 text-base font-bold"
-            variant="outline"
-          >
-            <Link href={cleanerHref}>Become a cleaner</Link>
-          </Button>
         </div>
       </section>
 
@@ -546,6 +467,8 @@ export default function HomePage() {
             <Link href={configured ? "/login" : "/setup"}>Sign in</Link>
             <Link href={customerHref}>Book</Link>
             <Link href={cleanerHref}>For cleaners</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
             <a href="mailto:support@cleanscapeuk.com">Support</a>
           </div>
         </div>
@@ -561,46 +484,6 @@ function Metric({ label, value }: { label: string; value: string }) {
       <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-white/60">
         {label}
       </p>
-    </div>
-  );
-}
-
-function SectionIntro({
-  eyebrow,
-  text,
-  title,
-}: {
-  eyebrow: string;
-  text: string;
-  title: string;
-}) {
-  return (
-    <div className="max-w-3xl">
-      <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#5a51aa]">
-        {eyebrow}
-      </p>
-      <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
-        {title}
-      </h2>
-      <p className="mt-5 text-lg leading-8 text-[#6c668d]">{text}</p>
-    </div>
-  );
-}
-
-function MiniCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Clock3;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-2xl bg-[#f7f5ff] p-4">
-      <Icon className="h-5 w-5 text-[#5a51aa]" />
-      <p className="mt-4 text-sm text-[#6c668d]">{label}</p>
-      <p className="font-semibold">{value}</p>
     </div>
   );
 }
