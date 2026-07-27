@@ -4,7 +4,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/middleware";
 import { ROLE_DASHBOARDS, type UserRole } from "@/types/auth";
 
-const AUTH_ROUTES = ["/login", "/signup", "/forgot-password"];
+const AUTH_ROUTES = ["/login", "/admin/login", "/signup", "/forgot-password"];
 
 const CUSTOMER_PREFIXES = [
   "/dashboard",
@@ -25,6 +25,10 @@ function pathMatches(pathname: string, prefixes: string[]) {
 function requiredRole(pathname: string): UserRole | null {
   if (pathname === "/cleaner" || pathname.startsWith("/cleaner/")) {
     return "cleaner";
+  }
+
+  if (pathname === "/admin/login") {
+    return null;
   }
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {

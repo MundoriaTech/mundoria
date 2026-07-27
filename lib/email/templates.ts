@@ -8,6 +8,7 @@ export type EmailTemplateId =
   | "admin.payout_failure"
   | "admin.refund_action_required"
   | "auth.account_closed"
+  | "auth.admin_invitation"
   | "auth.email_changed"
   | "auth.password_changed"
   | "auth.password_reset"
@@ -164,6 +165,22 @@ function resolveTemplate(
         preview: "Your CleanScape account has been closed.",
         subject: "Your CleanScape account has been closed",
         title: "Account closed",
+        tone: "security",
+      };
+    case "auth.admin_invitation":
+      return {
+        body:
+          `${string(data.invitedBy) || "A CleanScape admin"} invited you to join the CleanScape admin panel. This invitation is private, expires soon, and should not be forwarded.`,
+        buttonHref: string(data.actionUrl),
+        buttonLabel: "Accept admin invitation",
+        cards: [
+          { label: "Invited email", value: data.email },
+          { label: "Expires", value: data.expiresAt },
+        ],
+        intro: firstName ? `Hi ${firstName},` : "Hi there,",
+        preview: "You have been invited to administer CleanScape.",
+        subject: "Your CleanScape admin invitation",
+        title: "Admin invitation",
         tone: "security",
       };
     case "customer.booking_confirmed":

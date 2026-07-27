@@ -19,13 +19,17 @@ import { isUserRole } from "@/types/auth";
 interface LoginFormProps {
   initialError?: string;
   initialMessage?: string;
+  requiredRole?: "admin";
   redirectTo?: string;
+  showOAuth?: boolean;
 }
 
 export function LoginForm({
   initialError,
   initialMessage,
+  requiredRole,
   redirectTo,
+  showOAuth = true,
 }: LoginFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(
@@ -65,6 +69,12 @@ export function LoginForm({
       return;
     }
 
+    if (requiredRole && profile.role !== requiredRole) {
+      await supabase.auth.signOut();
+      setFormError("This sign-in page is only for CleanScape administrators.");
+      return;
+    }
+
     const dashboard = dashboardForRole(profile.role);
     router.replace(safeRedirectPath(redirectTo ?? null, dashboard));
     router.refresh();
@@ -72,12 +82,16 @@ export function LoginForm({
 
   return (
     <div className="space-y-6">
-      <OAuthButton next={safeRedirectPath(redirectTo ?? null, "/dashboard")} />
-      <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        or use email
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      {showOAuth ? (
+        <>
+          <OAuthButton next={safeRedirectPath(redirectTo ?? null, "/dashboard")} />
+          <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            or use email
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </>
+      ) : null}
 
       <form className="space-y-5" onSubmit={onSubmit}>
         <FormStatus message={formError} />
