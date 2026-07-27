@@ -124,30 +124,40 @@ export default function HomePage() {
         customerHref={customerHref}
       />
 
-      <section className="relative isolate bg-[#e9e8f7] px-4 pb-24 pt-5 sm:px-8 lg:pb-32">
-        <div className="relative mx-auto mt-5 max-w-7xl overflow-hidden rounded-[2rem] bg-[#dcd9ee] px-5 pt-8 shadow-2xl shadow-[#5a51aa]/10 sm:px-10 sm:pt-10 lg:min-h-[820px] lg:pt-12">
+      <section className="relative isolate bg-[#e9e8f7] px-3 pb-16 pt-3 min-[380px]:px-4 sm:px-8 sm:pb-24 sm:pt-5 lg:pb-32">
+        <div className="relative mx-auto mt-3 max-w-7xl overflow-hidden rounded-[1.5rem] bg-[#dcd9ee] px-4 pt-7 shadow-2xl shadow-[#5a51aa]/10 min-[380px]:px-5 sm:mt-5 sm:rounded-[2rem] sm:px-10 sm:pt-10 lg:min-h-[820px] lg:pt-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_70%,#eefaf0_0,transparent_30%),radial-gradient(circle_at_85%_28%,#eeeaff_0,transparent_42%)]" />
           <div className="relative z-10 mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl font-semibold leading-[1.05] tracking-[-0.055em] text-black sm:text-6xl lg:text-7xl">
+            <h1 className="text-[2.45rem] font-semibold leading-[0.98] tracking-[-0.06em] text-black min-[380px]:text-5xl sm:text-6xl sm:leading-[1.05] sm:tracking-[-0.055em] lg:text-7xl">
               Book Trusted Home Cleaning in Minutes
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-base font-medium leading-7 text-[#252236] sm:text-lg">
+            <p className="mx-auto mt-3 max-w-2xl text-sm font-medium leading-6 text-[#252236] min-[380px]:text-base sm:mt-4 sm:text-lg sm:leading-7">
               From regular home cleaning to deep cleans, tenancy handovers and
               Airbnb turnovers, book certified professionals, track every
               booking in real time, and pay only after the job is complete.
             </p>
             <Button
               asChild
-              className="mt-5 rounded-full bg-black px-7 py-5 text-sm font-bold text-white shadow-xl shadow-black/20 hover:bg-[#221f50]"
+              className="mt-4 rounded-full bg-black px-6 py-4 text-sm font-bold text-white shadow-xl shadow-black/20 hover:bg-[#221f50] sm:mt-5 sm:px-7 sm:py-5"
             >
               <Link href={customerHref}>Book a Service</Link>
             </Button>
           </div>
 
-          <div className="relative z-10 mx-auto -mt-6 h-[430px] max-w-7xl sm:-mt-10 sm:h-[540px] lg:-mt-20 lg:h-[610px]">
+          <div className="relative z-10 mx-auto mt-0 h-[320px] max-w-7xl min-[380px]:h-[360px] sm:-mt-10 sm:h-[540px] lg:-mt-20 lg:h-[610px]">
             <Image
               alt="CleanScape home cleaning professionals"
-              className="-translate-y-32 scale-[1.22] object-contain object-bottom sm:-translate-y-44 sm:scale-[1.28] lg:-translate-y-64 lg:scale-[1.35]"
+              className="absolute left-1/2 top-[-190px] h-auto w-[650px] max-w-none -translate-x-1/2 min-[380px]:top-[-220px] min-[380px]:w-[760px] sm:hidden"
+              height={958}
+              priority
+              sizes="760px"
+              src="/images/brand/cleaners-hero.png"
+              width={1440}
+            />
+            <Image
+              alt=""
+              aria-hidden="true"
+              className="hidden object-contain object-bottom sm:block sm:-translate-y-44 sm:scale-[1.28] lg:-translate-y-64 lg:scale-[1.35]"
               fill
               priority
               sizes="(min-width: 1024px) 1220px, 100vw"
@@ -155,8 +165,8 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="relative z-20 mx-auto -mt-28 max-w-5xl rounded-full bg-black px-6 py-5 text-white shadow-2xl shadow-black/25 sm:-mt-36 sm:px-10 sm:py-7 lg:-mt-44">
-            <div className="grid gap-4 text-center sm:grid-cols-3 sm:text-left">
+          <div className="relative z-20 mx-auto -mt-20 max-w-5xl rounded-[1.5rem] bg-black px-5 py-5 text-white shadow-2xl shadow-black/25 min-[380px]:-mt-24 sm:-mt-36 sm:rounded-full sm:px-10 sm:py-7 lg:-mt-44">
+            <div className="grid gap-4 text-center min-[380px]:grid-cols-3 min-[380px]:text-left">
               <Metric label="service types" value="6" />
               <Metric label="protected payments" value="Pay later" />
               <Metric label="status visibility" value="Live" />
