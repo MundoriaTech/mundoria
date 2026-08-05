@@ -29,15 +29,30 @@ import { TimeSlotPicker } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  availableAddOns,
+  allowedStandards,
+  categoryDefinition,
+  CLEANING_STANDARDS,
   estimatePrice,
   formatMoney,
   formatServiceName,
+  getSmartRecommendation,
+  normalizeStandard,
+  recommendedStandardFor,
+  selectedAddOnTotal,
   SERVICES,
+  SERVICE_ADD_ONS,
+  SERVICE_CATEGORIES,
+  servicesForCategory,
+  standardLabel,
 } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
 import type {
   Address,
   BookingDraft,
+  CleaningStandard,
+  PropertyCondition,
+  ServiceCategory,
   ServiceType,
 } from "@/types/customer";
 
@@ -47,17 +62,36 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
 const blankDraft: BookingDraft = {
   addressId: null,
+  cleaningStandard: null,
   isRecurring: false,
   preferSameCleaner: false,
+  propertyCondition: null,
   promoCode: "",
   recurrencePattern: null,
+  recommendationOutcome: "not_shown",
+  recommendedCleaningStandard: null,
+  recommendedServiceType: null,
+  recentlyMoved: null,
   scheduledDate: "",
   scheduledTime: "",
+  selectedAddOns: [],
+  serviceCategory: null,
   serviceType: null,
+  specialAttentionAreas: [],
   specialInstructions: "",
 };
 
-const steps = ["Service", "Address", "Schedule", "Review", "Payment"];
+const steps = [
+  "Category",
+  "Service",
+  "Standard",
+  "Questions",
+  "Add-ons",
+  "Address",
+  "Schedule",
+  "Review",
+  "Payment",
+];
 
 export function BookingWizard({
   initialAddresses,
@@ -80,10 +114,24 @@ export function BookingWizard({
   const selectedAddress = addresses.find(
     (address) => address.id === draft.addressId,
   );
+  const selectedStandard = draft.serviceType
+    ? normalizeStandard(draft.serviceType, draft.cleaningStandard)
+    : null;
   const estimatedAmount =
-    draft.serviceType && selectedAddress
-      ? estimatePrice(draft.serviceType, selectedAddress)
+    draft.serviceType && selectedAddress && selectedStandard
+      ? estimatePrice(
+          draft.serviceType,
+          selectedAddress,
+          selectedStandard,
+          draft.selectedAddOns,
+        )
       : 0;
+  const recommendation = getSmartRecommendation({
+    propertyCondition: draft.propertyCondition,
+    recentlyMoved: draft.recentlyMoved,
+    selectedStandard,
+    serviceType: draft.serviceType,
+  });
 
   useEffect(() => {
     const stored = window.localStorage.getItem("cleanscape-booking-draft");
@@ -115,9 +163,18 @@ export function BookingWizard({
   }
 
   function canContinue() {
-    if (step === 1) return Boolean(draft.serviceType);
-    if (step === 2) return Boolean(draft.addressId);
-    if (step === 3) {
+    if (step === 1) return Boolean(draft.serviceCategory);
+    if (step === 2) return Boolean(draft.serviceType);
+    if (step === 3) return Boolean(draft.cleaningStandard);
+    if (step === 4) {
+      return Boolean(
+        draft.propertyCondition &&
+          draft.recentlyMoved !== null &&
+          draft.specialAttentionAreas.length,
+      );
+    }
+    if (step === 6) return Boolean(draft.addressId);
+    if (step === 7) {
       return Boolean(
         draft.scheduledDate &&
           draft.scheduledTime &&
@@ -127,13 +184,72 @@ export function BookingWizard({
     return true;
   }
 
+  function selectCategory(category: ServiceCategory) {
+    setDraft((current) => ({
+      ...current,
+      cleaningStandard: null,
+      recommendationOutcome: "not_shown",
+      recommendedCleaningStandard: null,
+      recommendedServiceType: null,
+      selectedAddOns: [],
+      serviceCategory: category,
+      serviceType: null,
+    }));
+  }
+
+  function selectService(serviceType: ServiceType) {
+    const standard = recommendedStandardFor(serviceType);
+    setDraft((current) => ({
+      ...current,
+      cleaningStandard: normalizeStandard(serviceType, standard),
+      recommendationOutcome: "not_shown",
+      recommendedCleaningStandard: null,
+      recommendedServiceType: null,
+      selectedAddOns: [],
+      serviceCategory: SERVICES.find((service) => service.value === serviceType)?.category ?? current.serviceCategory,
+      serviceType,
+    }));
+  }
+
+  function applyRecommendation() {
+    if (!recommendation) return;
+    const service = SERVICES.find(
+      (item) => item.value === recommendation.recommendedServiceType,
+    );
+    setDraft((current) => ({
+      ...current,
+      cleaningStandard: recommendation.recommendedStandard,
+      recommendationOutcome: recommendation.autoApplied ? "auto_applied" : "accepted",
+      recommendedCleaningStandard: recommendation.recommendedStandard,
+      recommendedServiceType: recommendation.recommendedServiceType,
+      selectedAddOns:
+        current.serviceType === recommendation.recommendedServiceType
+          ? current.selectedAddOns
+          : [],
+      serviceCategory: service?.category ?? current.serviceCategory,
+      serviceType: recommendation.recommendedServiceType,
+    }));
+  }
+
+  function continueWithSelection() {
+    setDraft((current) => ({
+      ...current,
+      recommendationOutcome: recommendation?.shouldShow ? "overridden" : "not_shown",
+      recommendedCleaningStandard: recommendation?.recommendedStandard ?? null,
+      recommendedServiceType: recommendation?.recommendedServiceType ?? null,
+    }));
+    setStep((current) => current + 1);
+  }
+
   async function validatePromo() {
-    if (!draft.promoCode || !draft.addressId || !draft.serviceType) return;
+    if (!draft.promoCode || !draft.addressId || !draft.serviceType || !selectedStandard) return;
     setPromoFeedback("Checking…");
     const response = await fetch("/api/promos/validate", {
       body: JSON.stringify({
         addressId: draft.addressId,
+        cleaningStandard: selectedStandard,
         code: draft.promoCode,
+        selectedAddOns: draft.selectedAddOns,
         serviceType: draft.serviceType,
       }),
       headers: { "Content-Type": "application/json" },
@@ -155,7 +271,7 @@ export function BookingWizard({
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">
           Book your cleaner
         </h1>
-        <div className="mt-6 grid grid-cols-5 gap-2">
+        <div className="mt-6 grid grid-cols-9 gap-2">
           {steps.map((label, index) => (
             <div key={label}>
               <div
@@ -174,12 +290,37 @@ export function BookingWizard({
 
       <section className="rounded-2xl border bg-background p-5 shadow-sm sm:p-8">
         {step === 1 ? (
-          <ServiceStep
-            selected={draft.serviceType}
-            select={(value) => update("serviceType", value)}
+          <CategoryStep
+            selected={draft.serviceCategory}
+            select={selectCategory}
           />
         ) : null}
         {step === 2 ? (
+          <ServiceStep
+            category={draft.serviceCategory}
+            selected={draft.serviceType}
+            select={selectService}
+          />
+        ) : null}
+        {step === 3 && draft.serviceType ? (
+          <StandardStep
+            selected={selectedStandard}
+            select={(value) => update("cleaningStandard", value)}
+            serviceType={draft.serviceType}
+          />
+        ) : null}
+        {step === 4 ? (
+          <QuestionsStep draft={draft} update={update} />
+        ) : null}
+        {step === 5 ? (
+          <RecommendationAndAddOnsStep
+            applyRecommendation={applyRecommendation}
+            draft={draft}
+            recommendation={recommendation}
+            update={update}
+          />
+        ) : null}
+        {step === 6 ? (
           <AddressStep
             addresses={addresses}
             selectedId={draft.addressId}
@@ -194,26 +335,34 @@ export function BookingWizard({
             }}
           />
         ) : null}
-        {step === 3 ? (
+        {step === 7 ? (
           <ScheduleStep draft={draft} update={update} />
         ) : null}
-        {step === 4 && draft.serviceType && selectedAddress ? (
+        {step === 8 && draft.serviceType && selectedAddress && selectedStandard ? (
           <ReviewStep
             address={selectedAddress}
             amount={promoAmount ?? estimatedAmount}
-            draft={{ ...draft, serviceType: draft.serviceType }}
+            draft={{
+              ...draft,
+              cleaningStandard: selectedStandard,
+              serviceType: draft.serviceType,
+            }}
             promoFeedback={promoFeedback}
             update={update}
             validatePromo={() => void validatePromo()}
           />
         ) : null}
-        {step === 5 && draft.serviceType && selectedAddress ? (
+        {step === 9 && draft.serviceType && selectedAddress && selectedStandard ? (
           stripePromise ? (
             <Elements stripe={stripePromise}>
               <PaymentStep
                 address={selectedAddress}
                 amount={promoAmount ?? estimatedAmount}
-                draft={{ ...draft, serviceType: draft.serviceType }}
+                draft={{
+                  ...draft,
+                  cleaningStandard: selectedStandard,
+                  serviceType: draft.serviceType,
+                }}
               />
             </Elements>
           ) : (
@@ -223,7 +372,7 @@ export function BookingWizard({
           )
         ) : null}
 
-        {step < 5 ? (
+        {step < 9 ? (
           <div className="mt-8 flex justify-between border-t pt-5">
             <Button
               disabled={step === 1}
@@ -235,9 +384,13 @@ export function BookingWizard({
             </Button>
             <Button
               disabled={!canContinue()}
-              onClick={() => setStep((current) => current + 1)}
+              onClick={() =>
+                step === 5
+                  ? continueWithSelection()
+                  : setStep((current) => current + 1)
+              }
             >
-              {step === 4 ? "Continue to payment" : "Continue"}
+              {step === 8 ? "Continue to payment" : "Continue"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -247,21 +400,74 @@ export function BookingWizard({
   );
 }
 
-function ServiceStep({
+function CategoryStep({
   select,
   selected,
 }: {
-  select: (service: ServiceType) => void;
-  selected: ServiceType | null;
+  select: (category: ServiceCategory) => void;
+  selected: ServiceCategory | null;
 }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold">What needs cleaning?</h2>
+      <h2 className="text-xl font-semibold">What type of cleaning do you need?</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Choose the service that best fits your space.
+        Start broad — CleanScape will guide you to the right service and standard.
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {SERVICES.map((service) => {
+        {SERVICE_CATEGORIES.map((category) => {
+          const Icon = category.icon;
+          const active = selected === category.value;
+          return (
+            <button
+              className={cn(
+                "rounded-xl border p-4 text-left transition hover:border-primary",
+                active && "border-primary bg-primary/5 ring-1 ring-primary",
+              )}
+              key={category.value}
+              onClick={() => select(category.value)}
+              type="button"
+            >
+              <div className="flex items-start gap-3">
+                <span className="rounded-lg bg-emerald-100 p-2 text-primary">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-semibold">{category.label}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {category.description}
+                  </p>
+                </div>
+                {active ? <Check className="ml-auto h-5 w-5 text-primary" /> : null}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ServiceStep({
+  category,
+  select,
+  selected,
+}: {
+  category: ServiceCategory | null;
+  select: (service: ServiceType) => void;
+  selected: ServiceType | null;
+}) {
+  const services = category ? servicesForCategory(category) : SERVICES;
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold">
+        Choose your {category ? categoryDefinition(category).label.toLowerCase() : "cleaning"} service
+      </h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Each service includes a recommended standard based on CleanScape guidance.
+      </p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {services.map((service) => {
           const Icon = service.icon;
           const active = selected === service.value;
           return (
@@ -283,12 +489,292 @@ function ServiceStep({
                   <p className="mt-1 text-sm text-muted-foreground">
                     {service.description}
                   </p>
+                  <p className="mt-2 text-xs font-semibold text-primary">
+                    Recommended: {standardLabel(service.recommendedStandard)}
+                  </p>
                 </div>
                 {active ? <Check className="ml-auto h-5 w-5 text-primary" /> : null}
               </div>
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function StandardStep({
+  select,
+  selected,
+  serviceType,
+}: {
+  select: (standard: CleaningStandard) => void;
+  selected: CleaningStandard | null;
+  serviceType: ServiceType;
+}) {
+  const service = SERVICES.find((item) => item.value === serviceType)!;
+  const standards = allowedStandards(serviceType);
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold">Choose your cleaning standard</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {service.fixedStandard
+          ? `${service.label} uses a fixed ${standardLabel(service.fixedStandard)} Standard.`
+          : "Pick the level of detail you want. We’ll advise you if a different standard seems better."}
+      </p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        {CLEANING_STANDARDS.map((standard) => {
+          const disabled = !standards.some((item) => item.value === standard.value);
+          const active = selected === standard.value;
+
+          return (
+            <button
+              className={cn(
+                "rounded-xl border p-4 text-left transition",
+                active && "border-primary bg-primary/5 ring-1 ring-primary",
+                disabled
+                  ? "cursor-not-allowed opacity-40"
+                  : "hover:border-primary",
+              )}
+              disabled={disabled}
+              key={standard.value}
+              onClick={() => select(standard.value)}
+              type="button"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{standard.label}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {standard.description}
+                  </p>
+                  {service.recommendedStandard === standard.value ? (
+                    <p className="mt-3 text-xs font-semibold text-primary">
+                      Recommended standard
+                    </p>
+                  ) : null}
+                </div>
+                {active ? <Check className="h-5 w-5 text-primary" /> : null}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const propertyConditionOptions: Array<{
+  label: string;
+  value: PropertyCondition;
+}> = [
+  { label: "It is cleaned regularly.", value: "maintained" },
+  { label: "It needs a little extra attention.", value: "extra_attention" },
+  {
+    label: "It hasn't been cleaned for quite some time.",
+    value: "neglected",
+  },
+];
+
+const attentionAreas = [
+  "Kitchen",
+  "Bathroom",
+  "Windows",
+  "Bedrooms",
+  "Living Areas",
+  "Other",
+];
+
+function QuestionsStep({
+  draft,
+  update,
+}: {
+  draft: BookingDraft;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
+}) {
+  function toggleArea(area: string) {
+    const selected = new Set(draft.specialAttentionAreas);
+    if (selected.has(area)) selected.delete(area);
+    else selected.add(area);
+    update("specialAttentionAreas", Array.from(selected));
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold">A few quick property questions</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        These help us give professional guidance before you confirm.
+      </p>
+
+      <div className="mt-6 space-y-6">
+        <div>
+          <p className="font-medium">How would you describe the current condition?</p>
+          <div className="mt-3 grid gap-3">
+            {propertyConditionOptions.map((option) => (
+              <button
+                className={cn(
+                  "rounded-xl border p-4 text-left text-sm transition hover:border-primary",
+                  draft.propertyCondition === option.value &&
+                    "border-primary bg-primary/5 ring-1 ring-primary",
+                )}
+                key={option.value}
+                onClick={() => update("propertyCondition", option.value)}
+                type="button"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="font-medium">Have you recently moved into or out of the property?</p>
+          <div className="mt-3 flex gap-3">
+            {[true, false].map((value) => (
+              <Button
+                key={String(value)}
+                onClick={() => update("recentlyMoved", value)}
+                type="button"
+                variant={draft.recentlyMoved === value ? "default" : "outline"}
+              >
+                {value ? "Yes" : "No"}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="font-medium">Any areas requiring special attention?</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {attentionAreas.map((area) => {
+              const selected = draft.specialAttentionAreas.includes(area);
+              return (
+                <button
+                  className={cn(
+                    "rounded-xl border p-3 text-left text-sm transition hover:border-primary",
+                    selected && "border-primary bg-primary/5 ring-1 ring-primary",
+                  )}
+                  key={area}
+                  onClick={() => toggleArea(area)}
+                  type="button"
+                >
+                  {selected ? "✓ " : ""}
+                  {area}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecommendationAndAddOnsStep({
+  applyRecommendation,
+  draft,
+  recommendation,
+  update,
+}: {
+  applyRecommendation: () => void;
+  draft: BookingDraft;
+  recommendation: ReturnType<typeof getSmartRecommendation>;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
+}) {
+  const addOns = draft.serviceType ? availableAddOns(draft.serviceType) : [];
+
+  function toggleAddOn(id: string) {
+    const selected = new Set(draft.selectedAddOns);
+    if (selected.has(id)) selected.delete(id);
+    else selected.add(id);
+    update("selectedAddOns", Array.from(selected));
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold">Smart recommendation and add-ons</h2>
+
+      {recommendation?.shouldShow ? (
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+          <p className="text-sm font-semibold">CleanScape recommendation</p>
+          <p className="mt-2 text-sm leading-6">{recommendation.message}</p>
+          {recommendation.autoApplied ? (
+            <p className="mt-4 rounded-lg bg-white/70 p-3 text-sm font-semibold">
+              We’ve automatically updated the standard for this service.
+            </p>
+          ) : (
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Button onClick={applyRecommendation} type="button">
+                Switch to recommendation
+              </Button>
+              <Button
+                onClick={() => {
+                  update("recommendationOutcome", "overridden");
+                  update("recommendedServiceType", recommendation.recommendedServiceType);
+                  update("recommendedCleaningStandard", recommendation.recommendedStandard);
+                }}
+                type="button"
+                variant="outline"
+              >
+                Continue with my choice
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mt-5 rounded-2xl border bg-emerald-50 p-5 text-emerald-950">
+          <p className="text-sm font-semibold">Your selection looks suitable</p>
+          <p className="mt-2 text-sm leading-6">
+            Based on your answers, this service and standard look appropriate.
+          </p>
+        </div>
+      )}
+
+      <div className="mt-7">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h3 className="font-semibold">Add-ons</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Optional extras. You can skip these.
+            </p>
+          </div>
+          <p className="text-sm font-semibold">
+            {formatMoney(selectedAddOnTotal(draft.selectedAddOns))}
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {addOns.map((addOn) => {
+            const selected = draft.selectedAddOns.includes(addOn.id);
+
+            return (
+              <button
+                className={cn(
+                  "rounded-xl border p-4 text-left transition hover:border-primary",
+                  selected && "border-primary bg-primary/5 ring-1 ring-primary",
+                )}
+                key={addOn.id}
+                onClick={() => toggleAddOn(addOn.id)}
+                type="button"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold">{addOn.label}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {addOn.description}
+                    </p>
+                  </div>
+                  <p className="text-sm font-bold">{formatMoney(addOn.amount)}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -430,7 +916,10 @@ function ReviewStep({
 }: {
   address: Address;
   amount: number;
-  draft: BookingDraft & { serviceType: ServiceType };
+  draft: BookingDraft & {
+    cleaningStandard: CleaningStandard;
+    serviceType: ServiceType;
+  };
   promoFeedback: string | null;
   update: <K extends keyof BookingDraft>(
     key: K,
@@ -443,6 +932,33 @@ function ReviewStep({
       <h2 className="text-xl font-semibold">Review your booking</h2>
       <div className="mt-6 divide-y rounded-xl border">
         <SummaryRow label="Service" value={formatServiceName(draft.serviceType)} />
+        <SummaryRow
+          label="Standard"
+          value={standardLabel(draft.cleaningStandard)}
+        />
+        <SummaryRow
+          label="Recommendation"
+          value={
+            draft.recommendationOutcome === "accepted"
+              ? "Switched to CleanScape recommendation"
+              : draft.recommendationOutcome === "overridden"
+                ? "Continued with original selection"
+                : draft.recommendationOutcome === "auto_applied"
+                  ? "Standard automatically applied"
+                  : "Selection looked suitable"
+          }
+        />
+        <SummaryRow
+          label="Add-ons"
+          value={
+            draft.selectedAddOns.length
+              ? draft.selectedAddOns
+                  .map((id) => SERVICE_ADD_ONS.find((addOn) => addOn.id === id)?.label)
+                  .filter(Boolean)
+                  .join(", ")
+              : "None"
+          }
+        />
         <SummaryRow
           label="Address"
           value={`${address.address_line_1}, ${address.city}, ${address.postcode}`}
@@ -515,7 +1031,10 @@ function PaymentStep({
 }: {
   address: Address;
   amount: number;
-  draft: BookingDraft & { serviceType: ServiceType };
+  draft: BookingDraft & {
+    cleaningStandard: CleaningStandard;
+    serviceType: ServiceType;
+  };
 }) {
   const stripe = useStripe();
   const elements = useElements();

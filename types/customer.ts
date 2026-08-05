@@ -5,8 +5,43 @@ export type ServiceType =
   | "one_off"
   | "deep_clean"
   | "end_of_tenancy"
+  | "move_in"
+  | "move_out"
   | "airbnb_turnover"
-  | "post_construction";
+  | "holiday_let"
+  | "serviced_accommodation"
+  | "post_construction"
+  | "office"
+  | "retail_hospitality"
+  | "educational_facility"
+  | "communal_area"
+  | "window_cleaning"
+  | "pregnancy_support"
+  | "postpartum"
+  | "illness_recovery"
+  | "post_injury"
+  | "hospital_discharge"
+  | "bereavement_support";
+
+export type ServiceCategory =
+  | "residential"
+  | "commercial"
+  | "short_term_rental"
+  | "exterior"
+  | "recovery";
+
+export type CleaningStandard = "essential" | "enhanced" | "comprehensive";
+
+export type PropertyCondition =
+  | "maintained"
+  | "extra_attention"
+  | "neglected";
+
+export type RecommendationOutcome =
+  | "not_shown"
+  | "accepted"
+  | "overridden"
+  | "auto_applied";
 
 export type BookingStatus =
   | "pending_match"
@@ -56,6 +91,14 @@ export interface Booking {
   cleaner_id: string | null;
   address_id: string;
   service_type: ServiceType;
+  service_category: ServiceCategory | null;
+  cleaning_standard: CleaningStandard;
+  recommended_service_type: ServiceType | null;
+  recommended_cleaning_standard: CleaningStandard | null;
+  recommendation_outcome: RecommendationOutcome;
+  property_condition: PropertyCondition | null;
+  recently_moved: boolean | null;
+  special_attention_areas: string[];
   status: BookingStatus;
   scheduled_date: string;
   scheduled_start_time: string;
@@ -134,7 +177,16 @@ export interface Message {
 }
 
 export interface BookingDraft {
+  serviceCategory: ServiceCategory | null;
   serviceType: ServiceType | null;
+  cleaningStandard: CleaningStandard | null;
+  propertyCondition: PropertyCondition | null;
+  recentlyMoved: boolean | null;
+  specialAttentionAreas: string[];
+  recommendationOutcome: RecommendationOutcome;
+  recommendedServiceType: ServiceType | null;
+  recommendedCleaningStandard: CleaningStandard | null;
+  selectedAddOns: string[];
   addressId: string | null;
   scheduledDate: string;
   scheduledTime: string;

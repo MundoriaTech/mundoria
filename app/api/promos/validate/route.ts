@@ -3,22 +3,21 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { estimatePrice } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Address, ServiceType } from "@/types/customer";
+import type { Address } from "@/types/customer";
 
-const schema = z.object({
-  addressId: z.string().uuid(),
-  code: z.string().trim().min(1).max(40),
-  serviceType: z.enum([
-    "regular",
-    "one_off",
-    "deep_clean",
-    "end_of_tenancy",
-    "airbnb_turnover",
-    "post_construction",
-  ]),
-});
+const schema = bookingDraftSchema
+  .pick({
+    addressId: true,
+    cleaningStandard: true,
+    selectedAddOns: true,
+    serviceType: true,
+  })
+  .extend({
+    code: z.string().trim().min(1).max(40),
+  });
 
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json());
@@ -62,8 +61,10 @@ export async function POST(request: Request) {
   }
 
   const baseAmount = estimatePrice(
-    parsed.data.serviceType as ServiceType,
+    parsed.data.serviceType,
     address as Address,
+    parsed.data.cleaningStandard,
+    parsed.data.selectedAddOns,
   );
   const discount =
     promo.discount_type === "percentage"
