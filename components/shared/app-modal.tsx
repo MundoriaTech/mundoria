@@ -62,7 +62,7 @@ export function AppModal({
       aria-describedby={description ? descriptionId : undefined}
       aria-labelledby={titleId}
       aria-modal="true"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-[2px] sm:items-center sm:p-4"
       role="dialog"
     >
       <button
@@ -76,35 +76,36 @@ export function AppModal({
       />
       <div
         className={cn(
-          "relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-xl outline-none",
+          "relative flex max-h-[min(92dvh,40rem)] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-border bg-card text-card-foreground shadow-xl outline-none sm:rounded-2xl",
           "animate-in fade-in zoom-in-95 duration-200",
+          "pb-[env(safe-area-inset-bottom)] sm:pb-0",
           className,
         )}
         ref={panelRef}
         tabIndex={-1}
       >
         {accent === "peach" ? (
-          <div aria-hidden className="h-1 w-full bg-[#ffc79f]" />
+          <div aria-hidden className="h-1 w-full shrink-0 bg-[#ffc79f]" />
         ) : null}
         {accent === "destructive" ? (
-          <div aria-hidden className="h-1 w-full bg-destructive" />
+          <div aria-hidden className="h-1 w-full shrink-0 bg-destructive" />
         ) : null}
 
-        <div className="p-6">
+        <div className="overflow-y-auto overscroll-contain p-5 sm:p-6">
           {showClose ? (
             <button
               aria-label="Close"
-              className="absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+              className="absolute right-2 top-2 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
               disabled={closeDisabled}
               onClick={onClose}
               type="button"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </button>
           ) : null}
 
           <h2
-            className="pr-8 text-xl font-semibold tracking-tight text-foreground"
+            className="pr-10 text-xl font-semibold tracking-tight text-foreground"
             id={titleId}
           >
             {title}

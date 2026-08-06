@@ -121,7 +121,7 @@ function SectionHeading({ href, title }: { href: string; title: string }) {
         {title}
       </h2>
       <Link
-        className="flex items-center gap-1 text-sm font-medium text-primary"
+        className="inline-flex min-h-11 items-center gap-1 px-1 text-sm font-medium text-primary"
         href={href}
       >
         See all <ArrowRight className="h-4 w-4" />

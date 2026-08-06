@@ -40,27 +40,27 @@ export function CleanerShell({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-[calc(4rem+env(safe-area-inset-bottom)+1rem)]">
       <SessionTimeoutGuard audience="cleaner" />
-      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div>
+      <header className="sticky top-0 z-30 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+          <div className="min-w-0">
             <Link className="flex items-center gap-3" href="/cleaner/dashboard">
-              <BrandMark className="h-10 w-7" />
-              <span>
-                <span className="block font-bold tracking-tight text-foreground">
+              <BrandMark className="h-10 w-7 shrink-0" />
+              <span className="min-w-0">
+                <span className="block truncate font-bold tracking-tight text-foreground">
                   CleanScape Pro
                 </span>
-                <span className="block text-xs text-muted-foreground">
+                <span className="block truncate text-xs text-muted-foreground">
                   {profile.full_name.split(" ")[0]} ·{" "}
                   {cleaner.status.replace("_", " ")}
                 </span>
               </span>
             </Link>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <TierBadge tier={cleaner.tier} />
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <ThemeToggle className="h-11 w-11" />
+            <TierBadge className="hidden min-[380px]:inline-flex" size="sm" tier={cleaner.tier} />
           </div>
         </div>
       </header>

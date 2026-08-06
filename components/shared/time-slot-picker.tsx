@@ -39,7 +39,12 @@ export function TimeSlotPicker({
   const available = new Set(availableSlots);
 
   return (
-    <div className={cn("grid grid-cols-3 gap-2 min-[420px]:grid-cols-4", className)}>
+    <div
+      className={cn(
+        "grid grid-cols-2 gap-2 min-[380px]:grid-cols-3 min-[420px]:grid-cols-4",
+        className,
+      )}
+    >
       {defaultSlots.map((slot) => {
         const enabled = available.has(slot);
         const selected = value === slot;
@@ -48,7 +53,7 @@ export function TimeSlotPicker({
           <button
             aria-pressed={selected}
             className={cn(
-              "flex min-h-11 flex-col items-center justify-center rounded-md border px-2 py-2 text-sm transition-colors touch-manipulation",
+              "flex min-h-12 flex-col items-center justify-center rounded-md border px-1.5 py-2 text-sm transition-colors touch-manipulation sm:px-2",
               selected && "border-primary bg-primary text-primary-foreground",
               !enabled && "cursor-not-allowed bg-muted text-muted-foreground opacity-50",
             )}

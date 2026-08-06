@@ -79,9 +79,9 @@ export function BookingActions({
         onChange={(event) => setNote(event.target.value)}
         placeholder="Required audit note"
       />
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <select
-          className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          className="h-11 min-w-0 w-full flex-1 rounded-md border border-input bg-background px-3 text-sm text-foreground"
           onChange={(event) => setCleanerId(event.target.value)}
         >
           <option value="">Select cleaner</option>
@@ -92,6 +92,7 @@ export function BookingActions({
           ))}
         </select>
         <Button
+          className="min-h-11 w-full sm:w-auto"
           disabled={!cleanerId || note.length < 3}
           onClick={() => void act("reassign")}
           variant="outline"
@@ -99,27 +100,30 @@ export function BookingActions({
           Reassign
         </Button>
       </div>
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <select
-          className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          className="h-11 min-w-0 w-full flex-1 rounded-md border border-input bg-background px-3 text-sm text-foreground"
           onChange={(event) => setStatus(event.target.value)}
           value={status}
         >
           {[
-            "pending_match",
-            "matched",
-            "confirmed",
-            "cleaner_en_route",
-            "in_progress",
-            "awaiting_customer_confirmation",
-            "completed",
-            "cancelled",
-            "disputed",
-          ].map((value) => (
-            <option key={value}>{value}</option>
+            ["pending_match", "Pending match"],
+            ["matched", "Matched"],
+            ["confirmed", "Confirmed"],
+            ["cleaner_en_route", "En route"],
+            ["in_progress", "In progress"],
+            ["awaiting_customer_confirmation", "Awaiting confirmation"],
+            ["completed", "Completed"],
+            ["cancelled", "Cancelled"],
+            ["disputed", "Disputed"],
+          ].map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
           ))}
         </select>
         <Button
+          className="min-h-11 w-full sm:w-auto"
           disabled={note.length < 3}
           onClick={() => void act("status")}
           variant="outline"
@@ -128,7 +132,7 @@ export function BookingActions({
         </Button>
       </div>
       <Button
-        className="mt-3 w-full"
+        className="mt-3 min-h-11 w-full"
         disabled={note.length < 3}
         onClick={() => void act("rematch")}
         variant="destructive"

@@ -118,7 +118,7 @@ export function Chat({
   }
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] min-h-[32rem] flex-col overflow-hidden rounded-2xl border bg-background shadow-sm">
+    <div className="flex h-[calc(100dvh-11rem-env(safe-area-inset-bottom))] min-h-[18rem] flex-col overflow-hidden rounded-2xl border bg-background shadow-sm sm:h-[calc(100vh-12rem)] sm:min-h-[28rem]">
       <div className="border-b px-5 py-4">
         <h1 className="font-semibold">Booking conversation</h1>
         <p className="text-xs text-muted-foreground">

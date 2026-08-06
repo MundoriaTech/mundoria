@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import type { Notification } from "@/types/customer";
 
 export function NotificationBell({
@@ -85,17 +86,25 @@ export function NotificationBell({
 
   useEffect(() => {
     if (!open) return;
+
     function close(event: MouseEvent) {
       if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
     }
     function escape(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
     }
+
     document.addEventListener("mousedown", close);
     document.addEventListener("keydown", escape);
+
+    const mobile = window.matchMedia("(max-width: 639px)").matches;
+    const previousOverflow = document.body.style.overflow;
+    if (mobile) document.body.style.overflow = "hidden";
+
     return () => {
       document.removeEventListener("mousedown", close);
       document.removeEventListener("keydown", escape);
+      if (mobile) document.body.style.overflow = previousOverflow;
     };
   }, [open]);
 
@@ -124,12 +133,25 @@ export function NotificationBell({
     );
   }
 
+  function notificationHref(notification: Notification) {
+    const bookingId =
+      typeof notification.data.booking_id === "string"
+        ? notification.data.booking_id
+        : null;
+    if (typeof notification.data.href === "string") return notification.data.href;
+    if (!bookingId) return null;
+    if (pathname.startsWith("/admin")) return `/admin/booking/${bookingId}`;
+    if (pathname.startsWith("/cleaner")) return `/cleaner/job/${bookingId}`;
+    return `/booking/${bookingId}`;
+  }
+
   return (
     <div className="relative" ref={containerRef}>
       <Button
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label="Notifications"
+        className="h-11 w-11"
         onClick={() => setOpen((value) => !value)}
         size="icon"
         type="button"
@@ -144,94 +166,115 @@ export function NotificationBell({
       </Button>
 
       {open ? (
-        <div
-          aria-label="Notifications"
-          className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border bg-background shadow-xl"
-          role="dialog"
-        >
-          <div className="flex items-center justify-between border-b px-4 py-3">
-            <p className="font-semibold">Notifications</p>
-            {unreadCount ? (
-              <button
-                className="flex items-center gap-1 text-xs font-medium text-primary"
-                onClick={() => void markAllRead()}
-                type="button"
-              >
-                <CheckCheck className="h-3.5 w-3.5" />
-                Mark all read
-              </button>
-            ) : null}
-          </div>
-          <div className="max-h-96 overflow-y-auto">
-            {loading ? (
-              <div className="flex justify-center p-8">
-                <LoadingSpinner label="Loading notifications" />
-              </div>
-            ) : notifications.length ? (
-              notifications.map((notification) => {
-                const bookingId =
-                  typeof notification.data.booking_id === "string"
-                    ? notification.data.booking_id
-                    : null;
-                const href =
-                  typeof notification.data.href === "string"
-                    ? notification.data.href
-                    : bookingId
-                      ? pathname.startsWith("/admin")
-                        ? `/admin/booking/${bookingId}`
-                        : pathname.startsWith("/cleaner")
-                          ? `/cleaner/job/${bookingId}`
-                          : `/booking/${bookingId}`
-                      : null;
-                const content = (
-                  <div
-                    className={`border-b px-4 py-3 last:border-0 ${
-                      notification.is_read ? "" : "bg-emerald-50"
-                    }`}
-                  >
-                    <p className="text-sm font-medium">{notification.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {notification.body}
-                    </p>
-                    <time className="mt-2 block text-[10px] text-muted-foreground">
-                      {new Date(notification.created_at).toLocaleString("en-GB", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </time>
-                  </div>
-                );
-                return href ? (
-                  <Link
-                    href={href}
-                    key={notification.id}
-                    onClick={() => {
-                      void markRead(notification);
-                      setOpen(false);
-                    }}
-                  >
-                    {content}
-                  </Link>
-                ) : (
+        <>
+          <button
+            aria-label="Close notifications"
+            className="fixed inset-0 z-40 bg-slate-950/40 sm:hidden"
+            onClick={() => setOpen(false)}
+            type="button"
+          />
+          <div
+            aria-label="Notifications"
+            className={cn(
+              "z-50 flex flex-col overflow-hidden border border-border bg-background shadow-xl",
+              // Mobile: full-width bottom sheet
+              "fixed inset-x-0 bottom-0 max-h-[min(85dvh,36rem)] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
+              // Desktop: anchored dropdown
+              "sm:absolute sm:inset-auto sm:right-0 sm:top-12 sm:max-h-96 sm:w-[min(22rem,calc(100vw-2rem))] sm:rounded-xl sm:pb-0",
+            )}
+            role="dialog"
+          >
+            <div className="flex shrink-0 items-center justify-center py-2 sm:hidden">
+              <span className="h-1 w-10 rounded-full bg-muted-foreground/30" />
+            </div>
+            <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+              <p className="font-semibold text-foreground">Notifications</p>
+              <div className="flex items-center gap-1">
+                {unreadCount ? (
                   <button
-                    className="block w-full text-left"
-                    key={notification.id}
-                    onClick={() => void markRead(notification)}
+                    className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-xs font-medium text-primary"
+                    onClick={() => void markAllRead()}
                     type="button"
                   >
-                    {content}
+                    <CheckCheck className="h-3.5 w-3.5" />
+                    Mark all read
                   </button>
-                );
-              })
-            ) : (
-              <EmptyState
-                className="m-4 border-0 p-5"
-                message="You’re all caught up."
-                title="No notifications"
-              />
-            )}
+                ) : null}
+                <button
+                  aria-label="Close"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted sm:hidden"
+                  onClick={() => setOpen(false)}
+                  type="button"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+              {loading ? (
+                <div className="flex justify-center p-8">
+                  <LoadingSpinner label="Loading notifications" />
+                </div>
+              ) : notifications.length ? (
+                notifications.map((notification) => {
+                  const href = notificationHref(notification);
+                  const content = (
+                    <div
+                      className={cn(
+                        "border-b border-border px-4 py-3.5 last:border-0",
+                        !notification.is_read && "bg-primary/10",
+                      )}
+                    >
+                      <p className="text-sm font-medium text-foreground">
+                        {notification.title}
+                      </p>
+                      <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">
+                        {notification.body}
+                      </p>
+                      <time className="mt-2 block text-[10px] text-muted-foreground">
+                        {new Date(notification.created_at).toLocaleString(
+                          "en-GB",
+                          {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          },
+                        )}
+                      </time>
+                    </div>
+                  );
+                  return href ? (
+                    <Link
+                      className="block min-h-11"
+                      href={href}
+                      key={notification.id}
+                      onClick={() => {
+                        void markRead(notification);
+                        setOpen(false);
+                      }}
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <button
+                      className="block w-full min-h-11 text-left"
+                      key={notification.id}
+                      onClick={() => void markRead(notification)}
+                      type="button"
+                    >
+                      {content}
+                    </button>
+                  );
+                })
+              ) : (
+                <EmptyState
+                  className="m-4 border-0 p-5"
+                  message="You’re all caught up."
+                  title="No notifications"
+                />
+              )}
+            </div>
           </div>
-        </div>
+        </>
       ) : null}
     </div>
   );

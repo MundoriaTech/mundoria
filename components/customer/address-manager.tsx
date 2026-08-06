@@ -113,9 +113,9 @@ export function AddressManager({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             Saved addresses
           </h1>
           <p className="mt-2 text-muted-foreground">
@@ -123,6 +123,7 @@ export function AddressManager({
           </p>
         </div>
         <Button
+          className="min-h-11 w-full sm:w-auto"
           onClick={() => {
             setEditing(null);
             setShowForm(true);

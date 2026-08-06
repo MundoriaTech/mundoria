@@ -51,13 +51,13 @@ export default async function CustomerPaymentsPage() {
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {usableVouchers.map((voucher) => (
               <div
-                className="rounded-xl border border-amber-200 bg-amber-50 p-4"
+                className="rounded-xl border border-border bg-muted p-4"
                 key={voucher.code}
               >
                 <p className="font-mono text-lg font-bold tracking-wider text-foreground">
                   {voucher.code}
                 </p>
-                <p className="mt-1 text-sm text-amber-900">
+                <p className="mt-1 text-sm text-muted-foreground">
                   £{(Number(voucher.discount_value) / 100).toFixed(2)} off ·{" "}
                   {voucher.kind === "referral_reward"
                     ? "Referral reward"
@@ -85,43 +85,79 @@ export default async function CustomerPaymentsPage() {
       <section>
         <h2 className="font-semibold">Past receipts</h2>
         {receipts.length ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border bg-card">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead className="bg-muted/40 text-left">
-                <tr>
-                  <th className="p-3">Date</th>
-                  <th>Service</th>
-                  <th>Location</th>
-                  <th>Amount</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {receipts.map((booking) => (
-                  <tr className="border-t" key={booking.id}>
-                    <td className="p-3">{booking.scheduled_date}</td>
-                    <td>{formatServiceName(booking.service_type)}</td>
-                    <td>
-                      {booking.address
-                        ? `${booking.address.city}, ${booking.address.postcode}`
-                        : "—"}
-                    </td>
-                    <td>
-                      <PriceDisplay amount={booking.amount_total} />
-                    </td>
-                    <td className="p-3 text-right">
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={`/booking/${booking.id}/receipt`}>
-                          <FileText className="mr-1.5 h-3.5 w-3.5" />
-                          Receipt
-                        </Link>
-                      </Button>
-                    </td>
+          <>
+            <div className="mt-4 space-y-3 md:hidden">
+              {receipts.map((booking) => (
+                <article
+                  className="rounded-2xl border border-border bg-card p-4"
+                  key={booking.id}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground">
+                        {formatServiceName(booking.service_type)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {booking.scheduled_date}
+                        {booking.address
+                          ? ` · ${booking.address.city}, ${booking.address.postcode}`
+                          : ""}
+                      </p>
+                    </div>
+                    <PriceDisplay amount={booking.amount_total} />
+                  </div>
+                  <Button
+                    asChild
+                    className="mt-4 min-h-11 w-full"
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Link href={`/booking/${booking.id}/receipt`}>
+                      <FileText className="mr-1.5 h-3.5 w-3.5" />
+                      View receipt
+                    </Link>
+                  </Button>
+                </article>
+              ))}
+            </div>
+            <div className="mt-4 hidden overflow-x-auto rounded-2xl border bg-card md:block">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead className="bg-muted/40 text-left">
+                  <tr>
+                    <th className="p-3">Date</th>
+                    <th>Service</th>
+                    <th>Location</th>
+                    <th>Amount</th>
+                    <th />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {receipts.map((booking) => (
+                    <tr className="border-t" key={booking.id}>
+                      <td className="p-3">{booking.scheduled_date}</td>
+                      <td>{formatServiceName(booking.service_type)}</td>
+                      <td>
+                        {booking.address
+                          ? `${booking.address.city}, ${booking.address.postcode}`
+                          : "—"}
+                      </td>
+                      <td>
+                        <PriceDisplay amount={booking.amount_total} />
+                      </td>
+                      <td className="p-3 text-right">
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={`/booking/${booking.id}/receipt`}>
+                            <FileText className="mr-1.5 h-3.5 w-3.5" />
+                            Receipt
+                          </Link>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           <p className="mt-3 rounded-2xl border bg-card p-5 text-sm text-muted-foreground">
             Receipts appear here after a cleaning is completed and payment is

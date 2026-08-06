@@ -273,11 +273,48 @@ export function OnboardingWizard({
               <Heading title="Weekly availability" />
               <div className="space-y-2">
                 {data.availability.map((day, index) => (
-                  <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 rounded-2xl bg-background p-3" key={day.day_of_week}>
-                    <label className="text-sm font-medium"><input checked={day.is_available} className="mr-2" onChange={(e) => { const next=[...data.availability]; next[index]={...day,is_available:e.target.checked}; update("availability",next); }} type="checkbox" />{days[index]}</label>
-                    <Input disabled={!day.is_available} type="time" value={day.start_time} onChange={(e) => { const next=[...data.availability]; next[index]={...day,start_time:e.target.value}; update("availability",next); }} />
-                    <span>to</span>
-                    <Input disabled={!day.is_available} type="time" value={day.end_time} onChange={(e) => { const next=[...data.availability]; next[index]={...day,end_time:e.target.value}; update("availability",next); }} />
+                  <div
+                    className="flex flex-col gap-3 rounded-2xl bg-background p-3 sm:grid sm:grid-cols-[1fr_auto_auto_auto] sm:items-center sm:gap-2"
+                    key={day.day_of_week}
+                  >
+                    <label className="flex min-h-11 items-center text-sm font-medium">
+                      <input
+                        checked={day.is_available}
+                        className="mr-2 h-4 w-4"
+                        onChange={(e) => {
+                          const next = [...data.availability];
+                          next[index] = { ...day, is_available: e.target.checked };
+                          update("availability", next);
+                        }}
+                        type="checkbox"
+                      />
+                      {days[index]}
+                    </label>
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                      <Input
+                        className="min-h-11"
+                        disabled={!day.is_available}
+                        type="time"
+                        value={day.start_time}
+                        onChange={(e) => {
+                          const next = [...data.availability];
+                          next[index] = { ...day, start_time: e.target.value };
+                          update("availability", next);
+                        }}
+                      />
+                      <span className="text-sm text-muted-foreground">to</span>
+                      <Input
+                        className="min-h-11"
+                        disabled={!day.is_available}
+                        type="time"
+                        value={day.end_time}
+                        onChange={(e) => {
+                          const next = [...data.availability];
+                          next[index] = { ...day, end_time: e.target.value };
+                          update("availability", next);
+                        }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

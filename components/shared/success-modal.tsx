@@ -83,7 +83,7 @@ export function SuccessModal({
         onMouseLeave={() => setPaused(false)}
       >
         <Button
-          className="bg-[#ffc79f] font-semibold text-[#221f50] hover:bg-[#ffd4b8]"
+          className="min-h-11 w-full bg-[#ffc79f] font-semibold text-[#221f50] hover:bg-[#ffd4b8] sm:w-auto"
           onClick={onClose}
         >
           {actionLabel}

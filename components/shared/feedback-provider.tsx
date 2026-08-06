@@ -114,7 +114,11 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
           title={errorState.title}
         >
           <div className="mt-6 flex justify-end">
-            <Button onClick={() => setErrorState(null)} variant="outline">
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => setErrorState(null)}
+              variant="outline"
+            >
               {errorState.actionLabel ?? "Close"}
             </Button>
           </div>

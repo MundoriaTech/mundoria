@@ -10,23 +10,23 @@ type DayPart = "morning" | "afternoon" | "evening" | "night";
 
 const TIDBITS: Record<DayPart, string[]> = {
   morning: [
-    "Rise and shine — shall we get a cleaner in while the day’s still young?",
+    "Rise and shine! Shall we get a cleaner in while the day’s still young?",
     "Morning’s the best time to book. What’s getting a tidy-up today?",
     "Fresh day, fresh start. Fancy a clean before noon?",
   ],
   afternoon: [
     "Afternoon lull? Perfect moment to book a midweek clean.",
-    "Still daylight left — got time to schedule a quick tidy?",
+    "Still daylight left, got time to schedule a quick tidy?",
     "Post-lunch energy check: any room crying out for a clean?",
   ],
   evening: [
     "Evening in? Book a clean now and wake up to a sorted home.",
-    "After a long day — leave the chores to us tonight.",
+    "After a long day, leave the chores to us tonight.",
     "Dinner’s done. One tap and tomorrow’s tidy is sorted.",
   ],
   night: [
     "Burning the midnight oil? Future-you will love a booked clean.",
-    "Late night, calm mind — plan tomorrow’s clean before you sleep.",
+    "Late night, calm mind, plan tomorrow’s clean before you sleep.",
     "Quiet hours. Book now, sleep better knowing it’s handled.",
   ],
 };
@@ -108,7 +108,7 @@ export function DashboardGreeting({ firstName }: { firstName: string }) {
     <section className="relative isolate overflow-hidden rounded-[2rem] bg-[#221f50] px-6 py-8 text-white shadow-2xl shadow-[#221f50]/15 sm:px-10 sm:py-10">
       <div className="absolute -right-20 top-0 -z-10 h-56 w-56 rounded-full bg-[#7669d1]/45 blur-3xl" />
       <div className="absolute -bottom-20 left-10 -z-10 h-44 w-44 rounded-full bg-[#ffc79f]/30 blur-3xl" />
-      <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
+      <h1 className="break-words text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
         {greeting}, {firstName}.
       </h1>
       <p className="mt-3 max-w-xl text-lg leading-7 text-white/75 sm:text-xl">

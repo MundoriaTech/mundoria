@@ -17,9 +17,9 @@ export function RecurringToggle({
 }) {
   return (
     <div className="space-y-4 rounded-xl bg-muted/50 p-4">
-      <label className="flex cursor-pointer items-center justify-between gap-4 text-sm font-medium">
+      <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4 text-sm font-medium">
         <span className="flex items-center gap-2">
-          <Repeat2 className="h-4 w-4 text-primary" />
+          <Repeat2 className="h-4 w-4 shrink-0 text-primary" />
           Make this a recurring booking
         </span>
         <input
@@ -58,7 +58,7 @@ export function RecurringToggle({
             <option value="fortnightly">Fortnightly</option>
             <option value="monthly">Monthly</option>
           </select>
-          <label className="flex cursor-pointer items-center justify-between gap-4 text-sm">
+          <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4 text-sm">
             Prefer the same cleaner each time
             <input
               checked={value.preferSameCleaner}

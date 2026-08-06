@@ -49,11 +49,17 @@ export function ConfirmModal({
       title={title}
     >
       {children ? <div className="mt-4">{children}</div> : null}
-      <div className="mt-6 flex justify-end gap-3">
-        <Button disabled={working} onClick={onCancel} variant="outline">
+      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+        <Button
+          className="min-h-11 w-full sm:w-auto"
+          disabled={working}
+          onClick={onCancel}
+          variant="outline"
+        >
           Cancel
         </Button>
         <Button
+          className="min-h-11 w-full sm:w-auto"
           disabled={working || confirmDisabled}
           onClick={() => void confirm()}
           variant={variant}

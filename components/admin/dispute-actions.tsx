@@ -85,8 +85,9 @@ export function DisputeActions({ disputeId }: { disputeId: string }) {
         placeholder="Optional amount (£)"
         type="number"
       />
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Button
+          className="min-h-11 whitespace-normal"
           disabled={notes.length < 3}
           onClick={() => void act("uphold_rating")}
           variant="outline"
@@ -94,16 +95,22 @@ export function DisputeActions({ disputeId }: { disputeId: string }) {
           Uphold rating dispute
         </Button>
         <Button
+          className="min-h-11 whitespace-normal"
           disabled={notes.length < 3}
           onClick={() => void act("reject_rating")}
           variant="outline"
         >
           Reject rating dispute
         </Button>
-        <Button disabled={notes.length < 3} onClick={() => void act("refund")}>
+        <Button
+          className="min-h-11"
+          disabled={notes.length < 3}
+          onClick={() => void act("refund")}
+        >
           Issue refund
         </Button>
         <Button
+          className="min-h-11 whitespace-normal"
           disabled={notes.length < 3}
           onClick={() => void act("deduct")}
           variant="outline"
@@ -111,6 +118,7 @@ export function DisputeActions({ disputeId }: { disputeId: string }) {
           Deduct earnings
         </Button>
         <Button
+          className="min-h-11"
           disabled={notes.length < 3}
           onClick={() => void act("resolve")}
           variant="outline"
@@ -118,6 +126,7 @@ export function DisputeActions({ disputeId }: { disputeId: string }) {
           Resolve
         </Button>
         <Button
+          className="min-h-11 whitespace-normal"
           disabled={notes.length < 3}
           onClick={() => void act("close")}
           variant="ghost"

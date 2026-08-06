@@ -191,10 +191,10 @@ export function AdminShell({
         </div>
       </aside>
 
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/95 px-3 backdrop-blur sm:h-16 sm:px-6">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/95 px-3 pt-[env(safe-area-inset-top)] backdrop-blur sm:h-16 sm:px-6">
         <button
           aria-label="Open menu"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card lg:hidden"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-card lg:hidden"
           onClick={() => setOpen(true)}
           type="button"
         >
@@ -206,7 +206,7 @@ export function AdminShell({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-          <ThemeToggle />
+          <ThemeToggle className="h-11 w-11" />
           <UserAvatar
             className="hidden sm:inline-flex"
             name={admin.full_name}

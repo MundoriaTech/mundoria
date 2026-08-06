@@ -128,7 +128,7 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
           <div className="mt-3 space-y-3 rounded-xl bg-muted/50 p-4">
             {(["email", "sms", "push"] as const).map((preference) => (
               <label
-                className="flex items-center justify-between text-sm capitalize"
+                className="flex min-h-11 items-center justify-between text-sm capitalize"
                 key={preference}
               >
                 {preference} notifications

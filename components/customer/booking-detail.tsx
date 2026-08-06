@@ -556,11 +556,11 @@ function Detail({
   value: string;
 }) {
   return (
-    <div className="flex gap-3">
-      <Icon className="mt-0.5 h-5 w-5 text-primary" />
-      <div>
+    <div className="flex min-w-0 gap-3">
+      <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+      <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-0.5 font-medium">{value}</p>
+        <p className="mt-0.5 break-words font-medium">{value}</p>
       </div>
     </div>
   );
@@ -577,10 +577,17 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
-      <div className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-background p-5 shadow-xl sm:rounded-2xl sm:p-6">
+      <div className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-background p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl sm:rounded-2xl sm:p-6 sm:pb-6">
         <div className="mb-5 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold sm:text-xl">{title}</h2>
-          <Button onClick={onClose} size="icon" variant="ghost">
+          <h2 className="min-w-0 break-words text-lg font-semibold sm:text-xl">
+            {title}
+          </h2>
+          <Button
+            className="h-11 w-11 shrink-0"
+            onClick={onClose}
+            size="icon"
+            variant="ghost"
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>

@@ -39,27 +39,27 @@ export function CustomerShell({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-[calc(4rem+env(safe-area-inset-bottom)+1rem)]">
       <SessionTimeoutGuard audience="customer" />
-      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div>
+          <div className="min-w-0">
             <Link className="flex items-center gap-3" href="/dashboard">
-              <BrandMark className="h-10 w-7" />
-              <span className="text-lg font-bold tracking-tight text-foreground">
+              <BrandMark className="h-10 w-7 shrink-0" />
+              <span className="truncate text-lg font-bold tracking-tight text-foreground">
                 cleanscape
               </span>
             </Link>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <ThemeToggle className="h-11 w-11" />
             <NotificationBell
               initialNotifications={initialNotifications}
               userId={profile.id}
             />
             <Link
               aria-label="Open profile"
-              className="rounded-full ring-offset-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full ring-offset-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               href="/profile"
             >
               <UserAvatar

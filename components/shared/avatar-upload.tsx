@@ -105,7 +105,7 @@ export function AvatarUpload({
 
       <div>
         <p className="text-sm font-medium text-foreground">CleanScape looks</p>
-        <div className="mt-3 grid grid-cols-4 gap-x-2 gap-y-3 sm:grid-cols-6">
+        <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-6">
           {DEFAULT_AVATARS.map((avatar) => {
             const selected = selectedDefaultId === avatar.id;
             return (
