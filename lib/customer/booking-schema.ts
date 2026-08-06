@@ -10,7 +10,6 @@ const serviceType = z.enum([
   "airbnb_turnover",
   "holiday_let",
   "serviced_accommodation",
-  "post_construction",
   "office",
   "retail_hospitality",
   "educational_facility",

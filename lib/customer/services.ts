@@ -4,7 +4,6 @@ import {
   BriefcaseBusiness,
   Building2,
   GraduationCap,
-  Hammer,
   HeartHandshake,
   Home,
   Hotel,
@@ -213,16 +212,6 @@ export const SERVICES: ServiceDefinition[] = [
     value: "serviced_accommodation",
   },
   {
-    basePrice: 14500,
-    category: "residential",
-    description: "Dust and debris removal after building work.",
-    duration: 6,
-    icon: Hammer,
-    label: "Post-Construction Cleaning",
-    recommendedStandard: "comprehensive",
-    value: "post_construction",
-  },
-  {
     basePrice: 7000,
     category: "commercial",
     description: "Routine workplace cleaning for offices and studios.",
@@ -427,9 +416,23 @@ const serviceAliases: Partial<Record<ServiceType, ServiceType[]>> = {
 
 export function serviceDefinition(serviceType: ServiceType) {
   const service = SERVICES.find((item) => item.value === serviceType);
-  if (!service) throw new Error(`Unknown service type: ${serviceType}`);
+  if (service) return service;
 
-  return service;
+  // Legacy DB values no longer offered in booking (not in Smart Service PDF).
+  if (serviceType === "post_construction") {
+    return {
+      basePrice: 14500,
+      category: "residential" as const,
+      description: "Dust and debris removal after building work.",
+      duration: 6,
+      icon: Home,
+      label: "Post-Construction Cleaning",
+      recommendedStandard: "comprehensive" as const,
+      value: "post_construction" as const,
+    } satisfies ServiceDefinition;
+  }
+
+  throw new Error(`Unknown service type: ${serviceType}`);
 }
 
 export function categoryDefinition(category: ServiceCategory) {
