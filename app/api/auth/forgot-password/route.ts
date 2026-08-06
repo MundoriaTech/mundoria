@@ -17,11 +17,13 @@ export async function POST(request: Request) {
 
   const { email } = parsed.data;
   const requestOrigin = new URL(request.url).origin;
-  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
   const appUrl = requestOrigin.includes("localhost")
     ? requestOrigin
     : configuredAppUrl ?? requestOrigin;
-  const redirectTo = `${appUrl}/auth/callback?next=${encodeURIComponent("/update-password")}`;
+  // Prefer the update-password page directly so recovery works even when
+  // Supabase falls back to hash tokens on the redirect target.
+  const redirectTo = `${appUrl}/update-password`;
 
   try {
     const admin = createAdminClient();

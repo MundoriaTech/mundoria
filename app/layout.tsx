@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
 
 export const metadata: Metadata = {
   title: {
@@ -29,24 +29,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <Script
-        id="theme-init"
-        strategy="beforeInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function () {
-              try {
-                var saved = localStorage.getItem('cleanscape-theme');
-                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                var shouldDark = saved === 'dark' || ((saved === 'system' || !saved) && prefersDark);
-                document.documentElement.classList.toggle('dark', !!shouldDark);
-              } catch (e) {}
-            })();
-          `,
-        }}
-      />
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('cleanscape-theme');document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="font-sans">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AuthHashHandler />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

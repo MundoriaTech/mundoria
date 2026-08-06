@@ -8,76 +8,50 @@ import React, {
   useState,
 } from "react";
 
-export type ThemeMode = "light" | "dark" | "system";
+export type ThemeMode = "light" | "dark";
 
 type ThemeContextValue = {
   theme: ThemeMode;
-  resolvedTheme: "light" | "dark";
+  resolvedTheme: ThemeMode;
   setTheme: (mode: ThemeMode) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const THEME_KEY = "cleanscape-theme";
+export const THEME_KEY = "cleanscape-theme";
 
-function readInitialTheme(): ThemeMode {
-  if (typeof window === "undefined") return "system";
+function readStoredTheme(): ThemeMode {
+  if (typeof window === "undefined") return "light";
 
-  const saved = window.localStorage.getItem(THEME_KEY);
-  if (saved === "light" || saved === "dark" || saved === "system") return saved;
+  try {
+    const saved = window.localStorage.getItem(THEME_KEY);
+    if (saved === "dark") return "dark";
+    // "light", "system", missing, or anything else → light (app default)
+    if (saved === "system") {
+      window.localStorage.setItem(THEME_KEY, "light");
+    }
+  } catch {
+    // Ignore storage errors.
+  }
 
-  return "system";
-}
-
-function getSystemPrefersDark(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false;
+  return "light";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>(() => readInitialTheme());
-  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() =>
-    getSystemPrefersDark(),
-  );
+  const [theme, setThemeState] = useState<ThemeMode>("light");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const mql = window.matchMedia?.("(prefers-color-scheme: dark)");
-    if (!mql) return;
-
-    const onChange = function (
-      this: MediaQueryList,
-      e: MediaQueryListEvent,
-    ) {
-      setSystemPrefersDark(e.matches);
-    };
-    // Safari < 14
-    if (typeof mql.addEventListener === "function") {
-      mql.addEventListener("change", onChange);
-      return () => mql.removeEventListener("change", onChange);
-    }
-
-    // Safari < 14 fallback API
-    const legacyMql = mql as MediaQueryList & {
-      addListener: (
-        listener: (this: MediaQueryList, ev: MediaQueryListEvent) => void,
-      ) => void;
-      removeListener: (
-        listener: (this: MediaQueryList, ev: MediaQueryListEvent) => void,
-      ) => void;
-    };
-
-    legacyMql.addListener(onChange);
-    return () => legacyMql.removeListener(onChange);
+    const stored = readStoredTheme();
+    setThemeState(stored);
+    document.documentElement.classList.toggle("dark", stored === "dark");
+    setReady(true);
   }, []);
 
-  const resolvedTheme = useMemo<"light" | "dark">(() => {
-    if (theme === "system") return systemPrefersDark ? "dark" : "light";
-    return theme;
-  }, [theme, systemPrefersDark]);
-
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
-  }, [resolvedTheme]);
+    if (!ready) return;
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [ready, theme]);
 
   const setTheme = (mode: ThemeMode) => {
     setThemeState(mode);
@@ -86,11 +60,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore storage errors (incognito / blocked cookies).
     }
+    document.documentElement.classList.toggle("dark", mode === "dark");
   };
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme, resolvedTheme, setTheme }),
-    [theme, resolvedTheme],
+    () => ({ theme, resolvedTheme: theme, setTheme }),
+    [theme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -101,4 +76,3 @@ export function useTheme() {
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
   return ctx;
 }
-
