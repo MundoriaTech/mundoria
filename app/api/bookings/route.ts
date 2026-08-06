@@ -6,9 +6,10 @@ import twilio from "twilio";
 
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import {
+  estimateDuration,
   formatMoney,
   formatServiceName,
-  serviceDefinition,
+  SERVICE_ADD_ONS,
 } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
@@ -39,11 +40,22 @@ export async function POST(request: Request) {
   const paymentIntent = await stripe.paymentIntents.retrieve(
     parsed.data.paymentIntentId,
   );
+  const metadataAddOns = (paymentIntent.metadata.selected_add_ons ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .sort()
+    .join(",");
+  const requestAddOns = [...parsed.data.selectedAddOns].sort().join(",");
 
   if (
     paymentIntent.metadata.supabase_user_id !== user.id ||
     paymentIntent.metadata.address_id !== parsed.data.addressId ||
     paymentIntent.metadata.service_type !== parsed.data.serviceType ||
+    (paymentIntent.metadata.cleaning_standard &&
+      paymentIntent.metadata.cleaning_standard !== parsed.data.cleaningStandard) ||
+    (paymentIntent.metadata.selected_add_ons !== undefined &&
+      metadataAddOns !== requestAddOns) ||
     !["requires_capture", "requires_confirmation"].includes(paymentIntent.status)
   ) {
     return NextResponse.json(
@@ -70,6 +82,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Booking details not found" }, { status: 404 });
   }
 
+  const selectedAddOnDefs = SERVICE_ADD_ONS.filter((addOn) =>
+    parsed.data.selectedAddOns.includes(addOn.id),
+  );
   const platformAmount = Math.round(paymentIntent.amount * 0.2);
   const cleanerAmount = paymentIntent.amount - platformAmount;
   const { data: booking, error } = await admin
@@ -79,19 +94,31 @@ export async function POST(request: Request) {
       amount_cleaner: cleanerAmount,
       amount_platform: platformAmount,
       amount_total: paymentIntent.amount,
+      cleaning_standard: parsed.data.cleaningStandard,
       customer_id: user.id,
-      estimated_duration_hours: serviceDefinition(parsed.data.serviceType).duration,
+      estimated_duration_hours: estimateDuration(
+        parsed.data.serviceType,
+        parsed.data.cleaningStandard,
+        parsed.data.selectedAddOns,
+      ),
       is_recurring: parsed.data.isRecurring,
       payment_status: "held",
       promo_code_id: paymentIntent.metadata.promo_code_id || null,
       prefer_same_cleaner:
         parsed.data.isRecurring && parsed.data.preferSameCleaner,
+      property_condition: parsed.data.propertyCondition,
+      recently_moved: parsed.data.recentlyMoved,
+      recommendation_outcome: parsed.data.recommendationOutcome,
+      recommended_cleaning_standard: parsed.data.recommendedCleaningStandard,
+      recommended_service_type: parsed.data.recommendedServiceType,
       recurrence_pattern: parsed.data.isRecurring
         ? parsed.data.recurrencePattern
         : null,
       scheduled_date: parsed.data.scheduledDate,
       scheduled_start_time: parsed.data.scheduledTime,
+      service_category: parsed.data.serviceCategory,
       service_type: parsed.data.serviceType,
+      special_attention_areas: parsed.data.specialAttentionAreas,
       special_instructions: parsed.data.specialInstructions || null,
       status: "pending_match",
       stripe_payment_intent_id: paymentIntent.id,
@@ -104,6 +131,29 @@ export async function POST(request: Request) {
       await stripe.paymentIntents.cancel(paymentIntent.id);
     }
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (selectedAddOnDefs.length) {
+    const { error: addOnError } = await admin.from("booking_add_ons").insert(
+      selectedAddOnDefs.map((addOn) => ({
+        add_on_id: addOn.id,
+        amount: addOn.amount,
+        booking_id: booking.id,
+        label: addOn.label,
+      })),
+    );
+
+    if (addOnError) {
+      Sentry.captureException(addOnError);
+      await admin.from("bookings").delete().eq("id", booking.id);
+      if (!["canceled", "succeeded"].includes(paymentIntent.status)) {
+        await stripe.paymentIntents.cancel(paymentIntent.id);
+      }
+      return NextResponse.json(
+        { error: "Unable to save booking add-ons." },
+        { status: 400 },
+      );
+    }
   }
 
   await admin.from("notifications").insert({

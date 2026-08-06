@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
+import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { estimatePrice } from "@/lib/customer/services";
-import { createAdminClient } from "@/lib/supabase/admin";
 import type { Address } from "@/types/customer";
 
 const schema = bookingDraftSchema
@@ -43,19 +43,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Address not found." }, { status: 404 });
   }
 
-  const now = new Date().toISOString();
-  const { data: promo } = await createAdminClient()
-    .from("promo_codes")
-    .select("discount_type, discount_value, max_uses, uses_count")
-    .eq("code", parsed.data.code.toUpperCase())
-    .eq("is_active", true)
-    .or(`valid_from.is.null,valid_from.lte.${now}`)
-    .or(`valid_until.is.null,valid_until.gte.${now}`)
-    .maybeSingle();
-
-  if (!promo || (promo.max_uses !== null && promo.uses_count >= promo.max_uses)) {
+  let promo: {
+    discount_type: "fixed" | "percentage";
+    discount_value: number;
+    id: string;
+  };
+  try {
+    const resolved = await resolvePromoForCheckout({
+      code: parsed.data.code,
+      customerId: user.id,
+    });
+    if (!resolved) {
+      return NextResponse.json(
+        { error: "That promo code is invalid or has expired." },
+        { status: 400 },
+      );
+    }
+    promo = resolved;
+  } catch (error) {
     return NextResponse.json(
-      { error: "That promo code is invalid or has expired." },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "That promo code is invalid or has expired.",
+      },
       { status: 400 },
     );
   }
@@ -74,6 +86,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     amount: Math.max(100, baseAmount - discount),
     discount,
-    message: "Promo code applied.",
+    message: "Promo or referral code applied.",
   });
 }

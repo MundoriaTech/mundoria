@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { signupSchema } from "@/lib/auth/schemas";
+import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 
 export async function POST(request: Request) {
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { full_name, email, password, phone, role } = parsed.data;
+  const { full_name, email, password, phone, role, referral_code } = parsed.data;
   const supabase = createRouteHandlerClient({ cookies });
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
@@ -39,6 +40,33 @@ export async function POST(request: Request) {
   }
 
   let welcomeEmailSent = false;
+  let referralPromoCode: string | null = null;
+
+  if (
+    role === "customer" &&
+    data.user?.id &&
+    referral_code?.trim()
+  ) {
+    try {
+      const referral = await applyReferralAtSignup({
+        appUrl,
+        refereeId: data.user.id,
+        referralCode: referral_code,
+      });
+      referralPromoCode = referral?.promoCode ?? null;
+    } catch (referralError) {
+      Sentry.captureException(referralError);
+      return NextResponse.json(
+        {
+          error:
+            referralError instanceof Error
+              ? referralError.message
+              : "Invalid referral code",
+        },
+        { status: 400 },
+      );
+    }
+  }
 
   if (process.env.RESEND_API_KEY) {
     try {
@@ -62,6 +90,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     role,
     hasSession: Boolean(data.session),
+    referralPromoCode,
     requiresEmailConfirmation: Boolean(data.user && !data.session),
     welcomeEmailSent,
   });

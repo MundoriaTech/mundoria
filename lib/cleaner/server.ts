@@ -78,19 +78,35 @@ export async function getAvailableJobs(cleanerId: string) {
     regular: "bronze",
     one_off: "bronze",
     deep_clean: "silver",
-    airbnb_turnover: "silver",
     end_of_tenancy: "gold",
+    move_in: "gold",
+    move_out: "gold",
+    airbnb_turnover: "silver",
+    holiday_let: "silver",
+    serviced_accommodation: "silver",
     post_construction: "gold",
+    office: "bronze",
+    retail_hospitality: "bronze",
+    educational_facility: "silver",
+    communal_area: "silver",
+    window_cleaning: "bronze",
+    pregnancy_support: "silver",
+    postpartum: "gold",
+    illness_recovery: "gold",
+    post_injury: "gold",
+    hospital_discharge: "gold",
+    bereavement_support: "silver",
   };
 
   return ((bookings ?? []) as CleanerJob[]).filter((booking) => {
     const day = new Date(`${booking.scheduled_date}T12:00:00`).getDay();
     const slot = (availability ?? []).find((item) => item.day_of_week === day);
     const postcode = booking.address?.postcode?.toUpperCase() ?? "";
+    const requiredTier = minimumTier[booking.service_type] ?? "bronze";
     return (
       serviceSet.has(booking.service_type) &&
       tierRank[cleaner.tier as keyof typeof tierRank] >=
-        tierRank[minimumTier[booking.service_type]] &&
+        tierRank[requiredTier] &&
       prefixes.some((prefix) => postcode.startsWith(prefix)) &&
       Boolean(slot) &&
       booking.scheduled_start_time >= slot.start_time &&

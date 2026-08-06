@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { formatMoney, formatServiceName, standardLabel } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
@@ -13,12 +13,14 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     { data: timeline },
     { data: messages },
     { data: cleaners },
+    { data: addOns },
   ] = await Promise.all([
     admin.from("bookings").select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone)").eq("id", params.id).single(),
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("booking_status_history").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("messages").select("*,sender:profiles!messages_sender_id_fkey(full_name)").eq("booking_id", params.id).order("created_at"),
     admin.from("profiles").select("id,full_name,cleaner_profiles!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
+    admin.from("booking_add_ons").select("*").eq("booking_id", params.id).order("created_at"),
   ]);
   if (!booking) notFound();
   let payment: { id: string; status: string; amount: number; amount_capturable: number } | null = null;
@@ -35,10 +37,17 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <p><b>Customer:</b> {booking.customer?.full_name}</p>
             <p><b>Cleaner:</b> {booking.cleaner?.full_name ?? "Unassigned"}</p>
+            <p><b>Category:</b> {booking.service_category?.replaceAll("_", " ") ?? "—"}</p>
+            <p><b>Standard:</b> {standardLabel(booking.cleaning_standard ?? "enhanced")}</p>
             <p><b>Schedule:</b> {booking.scheduled_date} {booking.scheduled_start_time}</p>
             <p><b>Status:</b> {booking.status}</p>
             <p><b>Address:</b> {booking.address?.address_line_1}, {booking.address?.city}</p>
             <p><b>Amount:</b> {formatMoney(booking.amount_total)}</p>
+            <p><b>Property condition:</b> {booking.property_condition?.replaceAll("_", " ") ?? "—"}</p>
+            <p><b>Recently moved:</b> {booking.recently_moved == null ? "—" : booking.recently_moved ? "Yes" : "No"}</p>
+            <p className="sm:col-span-2"><b>Special attention:</b> {(booking.special_attention_areas ?? []).join(", ") || "None"}</p>
+            <p className="sm:col-span-2"><b>Add-ons:</b> {(addOns ?? []).map((addOn) => addOn.label).join(", ") || "None"}</p>
+            <p className="sm:col-span-2"><b>Recommendation:</b> {booking.recommendation_outcome?.replaceAll("_", " ") ?? "not shown"}{booking.recommended_service_type ? ` → ${formatServiceName(booking.recommended_service_type)}` : ""}</p>
           </div>
         </section>
         <BookingActions bookingId={params.id} cleaners={(cleaners ?? []).map((cleaner) => ({ id: cleaner.id, full_name: cleaner.full_name }))} currentStatus={booking.status} />

@@ -19,6 +19,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
@@ -86,12 +87,23 @@ const steps = [
   "Service",
   "Standard",
   "Questions",
+  "Recommendation",
   "Add-ons",
   "Address",
   "Schedule",
   "Review",
   "Payment",
 ];
+
+function initialWizardStep(draft?: Partial<BookingDraft>) {
+  if (draft?.serviceType) return 3;
+  if (draft?.serviceCategory) return 2;
+  return 1;
+}
+
+const BOOKING_DRAFT_KEY = "cleanscape-booking-draft";
+const BOOKING_STEP_KEY = "cleanscape-booking-step";
+const authReturnPath = "/booking/new";
 
 export function BookingWizard({
   initialAddresses,
@@ -100,17 +112,20 @@ export function BookingWizard({
 }: {
   initialAddresses: Address[];
   initialDraft?: Partial<BookingDraft>;
-  userId: string;
+  userId: string | null;
 }) {
   const [addresses, setAddresses] = useState(initialAddresses);
   const [draft, setDraft] = useState<BookingDraft>({
     ...blankDraft,
     ...initialDraft,
   });
-  const [step, setStep] = useState(1);
-  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [step, setStep] = useState(() => initialWizardStep(initialDraft));
+  const [showAddressForm, setShowAddressForm] = useState(
+    () => initialAddresses.length === 0 && Boolean(userId),
+  );
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
+  const needsAuth = !userId;
   const selectedAddress = addresses.find(
     (address) => address.id === draft.addressId,
   );
@@ -134,22 +149,30 @@ export function BookingWizard({
   });
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("cleanscape-booking-draft");
+    const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
     if (stored && !initialDraft) {
       try {
         setDraft({ ...blankDraft, ...(JSON.parse(stored) as BookingDraft) });
+        const storedStep = Number(
+          window.localStorage.getItem(BOOKING_STEP_KEY) ?? "",
+        );
+        if (Number.isFinite(storedStep) && storedStep >= 1 && storedStep <= 10) {
+          setStep(storedStep);
+        }
       } catch {
-        window.localStorage.removeItem("cleanscape-booking-draft");
+        window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+        window.localStorage.removeItem(BOOKING_STEP_KEY);
       }
     }
   }, [initialDraft]);
 
   useEffect(() => {
-    window.localStorage.setItem(
-      "cleanscape-booking-draft",
-      JSON.stringify(draft),
-    );
+    window.localStorage.setItem(BOOKING_DRAFT_KEY, JSON.stringify(draft));
   }, [draft]);
+
+  useEffect(() => {
+    window.localStorage.setItem(BOOKING_STEP_KEY, String(step));
+  }, [step]);
 
   function update<K extends keyof BookingDraft>(
     key: K,
@@ -162,19 +185,26 @@ export function BookingWizard({
     }
   }
 
+  useEffect(() => {
+    if (step !== 5 || !recommendation?.autoApplied) return;
+    if (draft.recommendationOutcome !== "not_shown") return;
+    applyRecommendation();
+  }, [step, recommendation?.autoApplied, recommendation?.recommendedStandard, recommendation?.recommendedServiceType]);
+
   function canContinue() {
     if (step === 1) return Boolean(draft.serviceCategory);
     if (step === 2) return Boolean(draft.serviceType);
     if (step === 3) return Boolean(draft.cleaningStandard);
     if (step === 4) {
       return Boolean(
-        draft.propertyCondition &&
-          draft.recentlyMoved !== null &&
-          draft.specialAttentionAreas.length,
+        draft.propertyCondition && draft.recentlyMoved !== null,
       );
     }
-    if (step === 6) return Boolean(draft.addressId);
     if (step === 7) {
+      if (needsAuth) return false;
+      return Boolean(draft.addressId);
+    }
+    if (step === 8) {
       return Boolean(
         draft.scheduledDate &&
           draft.scheduledTime &&
@@ -231,14 +261,31 @@ export function BookingWizard({
     }));
   }
 
-  function continueWithSelection() {
-    setDraft((current) => ({
-      ...current,
-      recommendationOutcome: recommendation?.shouldShow ? "overridden" : "not_shown",
-      recommendedCleaningStandard: recommendation?.recommendedStandard ?? null,
-      recommendedServiceType: recommendation?.recommendedServiceType ?? null,
-    }));
-    setStep((current) => current + 1);
+  function continueFromRecommendation() {
+    if (recommendation?.autoApplied) {
+      applyRecommendation();
+    } else if (recommendation?.shouldShow) {
+      setDraft((current) => ({
+        ...current,
+        recommendationOutcome:
+          current.recommendationOutcome === "not_shown"
+            ? "overridden"
+            : current.recommendationOutcome,
+        recommendedCleaningStandard:
+          current.recommendedCleaningStandard ??
+          recommendation.recommendedStandard,
+        recommendedServiceType:
+          current.recommendedServiceType ?? recommendation.recommendedServiceType,
+      }));
+    } else {
+      setDraft((current) => ({
+        ...current,
+        recommendationOutcome: "not_shown",
+        recommendedCleaningStandard: null,
+        recommendedServiceType: null,
+      }));
+    }
+    setStep(6);
   }
 
   async function validatePromo() {
@@ -271,7 +318,7 @@ export function BookingWizard({
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">
           Book your cleaner
         </h1>
-        <div className="mt-6 grid grid-cols-9 gap-2">
+        <div className="mt-6 grid grid-cols-5 gap-2 sm:grid-cols-10">
           {steps.map((label, index) => (
             <div key={label}>
               <div
@@ -313,7 +360,7 @@ export function BookingWizard({
           <QuestionsStep draft={draft} update={update} />
         ) : null}
         {step === 5 ? (
-          <RecommendationAndAddOnsStep
+          <RecommendationStep
             applyRecommendation={applyRecommendation}
             draft={draft}
             recommendation={recommendation}
@@ -321,24 +368,31 @@ export function BookingWizard({
           />
         ) : null}
         {step === 6 ? (
-          <AddressStep
-            addresses={addresses}
-            selectedId={draft.addressId}
-            select={(id) => update("addressId", id)}
-            setShowForm={setShowAddressForm}
-            showForm={showAddressForm}
-            userId={userId}
-            onSaved={(address) => {
-              setAddresses((current) => [address, ...current]);
-              update("addressId", address.id);
-              setShowAddressForm(false);
-            }}
-          />
+          <AddOnsStep draft={draft} update={update} />
         ) : null}
         {step === 7 ? (
+          needsAuth || !userId ? (
+            <GuestAuthGate />
+          ) : (
+            <AddressStep
+              addresses={addresses}
+              selectedId={draft.addressId}
+              select={(id) => update("addressId", id)}
+              setShowForm={setShowAddressForm}
+              showForm={showAddressForm}
+              userId={userId}
+              onSaved={(address) => {
+                setAddresses((current) => [address, ...current]);
+                update("addressId", address.id);
+                setShowAddressForm(false);
+              }}
+            />
+          )
+        ) : null}
+        {step === 8 ? (
           <ScheduleStep draft={draft} update={update} />
         ) : null}
-        {step === 8 && draft.serviceType && selectedAddress && selectedStandard ? (
+        {step === 9 && draft.serviceType && selectedAddress && selectedStandard ? (
           <ReviewStep
             address={selectedAddress}
             amount={promoAmount ?? estimatedAmount}
@@ -352,7 +406,7 @@ export function BookingWizard({
             validatePromo={() => void validatePromo()}
           />
         ) : null}
-        {step === 9 && draft.serviceType && selectedAddress && selectedStandard ? (
+        {step === 10 && draft.serviceType && selectedAddress && selectedStandard ? (
           stripePromise ? (
             <Elements stripe={stripePromise}>
               <PaymentStep
@@ -372,7 +426,7 @@ export function BookingWizard({
           )
         ) : null}
 
-        {step < 9 ? (
+        {step < 10 ? (
           <div className="mt-8 flex justify-between border-t pt-5">
             <Button
               disabled={step === 1}
@@ -382,20 +436,49 @@ export function BookingWizard({
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <Button
-              disabled={!canContinue()}
-              onClick={() =>
-                step === 5
-                  ? continueWithSelection()
-                  : setStep((current) => current + 1)
-              }
-            >
-              {step === 8 ? "Continue to payment" : "Continue"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            {needsAuth && step === 7 ? null : (
+              <Button
+                disabled={!canContinue()}
+                onClick={() =>
+                  step === 5
+                    ? continueFromRecommendation()
+                    : setStep((current) => current + 1)
+                }
+              >
+                {step === 9 ? "Continue to payment" : "Continue"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
           </div>
         ) : null}
       </section>
+    </div>
+  );
+}
+
+function GuestAuthGate() {
+  const loginHref = `/login?redirectTo=${encodeURIComponent(authReturnPath)}`;
+  const signupHref = `/signup?redirectTo=${encodeURIComponent(authReturnPath)}`;
+
+  return (
+    <div className="mx-auto max-w-lg text-center">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <ShieldCheck className="h-7 w-7" />
+      </div>
+      <h2 className="mt-5 text-xl font-semibold">Save your progress with an account</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Your service choices are saved on this device. Log in or create a free
+        account to add your address and finish booking — you only pay after the
+        clean is done.
+      </p>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <Button asChild>
+          <Link href={signupHref}>Create account</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href={loginHref}>Log in</Link>
+        </Button>
+      </div>
     </div>
   );
 }
@@ -673,7 +756,7 @@ function QuestionsStep({
   );
 }
 
-function RecommendationAndAddOnsStep({
+function RecommendationStep({
   applyRecommendation,
   draft,
   recommendation,
@@ -682,6 +765,72 @@ function RecommendationAndAddOnsStep({
   applyRecommendation: () => void;
   draft: BookingDraft;
   recommendation: ReturnType<typeof getSmartRecommendation>;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
+}) {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold">CleanScape recommendation</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Based on your service, standard and property answers.
+      </p>
+
+      {recommendation?.shouldShow ? (
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+          <p className="text-sm font-semibold">Our recommendation</p>
+          <p className="mt-2 text-sm leading-6">{recommendation.message}</p>
+          {recommendation.autoApplied ? (
+            <p className="mt-4 rounded-lg bg-white/70 p-3 text-sm font-semibold">
+              The cleaning standard has automatically been updated for this
+              service.
+            </p>
+          ) : (
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Button onClick={applyRecommendation} type="button">
+                Switch to{" "}
+                {formatServiceName(recommendation.recommendedServiceType)}
+              </Button>
+              <Button
+                onClick={() => {
+                  update("recommendationOutcome", "overridden");
+                  update(
+                    "recommendedServiceType",
+                    recommendation.recommendedServiceType,
+                  );
+                  update(
+                    "recommendedCleaningStandard",
+                    recommendation.recommendedStandard,
+                  );
+                }}
+                type="button"
+                variant="outline"
+              >
+                Continue with{" "}
+                {formatServiceName(draft.serviceType ?? "regular")}
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mt-5 rounded-2xl border bg-emerald-50 p-5 text-emerald-950">
+          <p className="text-sm font-semibold">Your selection looks suitable</p>
+          <p className="mt-2 text-sm leading-6">
+            Based on your answers, this service and standard look appropriate.
+            Continue to optional add-ons.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddOnsStep({
+  draft,
+  update,
+}: {
+  draft: BookingDraft;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -698,56 +847,23 @@ function RecommendationAndAddOnsStep({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">Smart recommendation and add-ons</h2>
+      <h2 className="text-xl font-semibold">Optional add-ons</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Extras for your booking. You can skip this step.
+      </p>
 
-      {recommendation?.shouldShow ? (
-        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
-          <p className="text-sm font-semibold">CleanScape recommendation</p>
-          <p className="mt-2 text-sm leading-6">{recommendation.message}</p>
-          {recommendation.autoApplied ? (
-            <p className="mt-4 rounded-lg bg-white/70 p-3 text-sm font-semibold">
-              We’ve automatically updated the standard for this service.
-            </p>
-          ) : (
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <Button onClick={applyRecommendation} type="button">
-                Switch to recommendation
-              </Button>
-              <Button
-                onClick={() => {
-                  update("recommendationOutcome", "overridden");
-                  update("recommendedServiceType", recommendation.recommendedServiceType);
-                  update("recommendedCleaningStandard", recommendation.recommendedStandard);
-                }}
-                type="button"
-                variant="outline"
-              >
-                Continue with my choice
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="mt-5 rounded-2xl border bg-emerald-50 p-5 text-emerald-950">
-          <p className="text-sm font-semibold">Your selection looks suitable</p>
-          <p className="mt-2 text-sm leading-6">
-            Based on your answers, this service and standard look appropriate.
-          </p>
-        </div>
-      )}
+      <div className="mt-6 flex items-end justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          {addOns.length
+            ? "Select any extras you would like included."
+            : "No add-ons are available for this service."}
+        </p>
+        <p className="text-sm font-semibold">
+          {formatMoney(selectedAddOnTotal(draft.selectedAddOns))}
+        </p>
+      </div>
 
-      <div className="mt-7">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h3 className="font-semibold">Add-ons</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Optional extras. You can skip these.
-            </p>
-          </div>
-          <p className="text-sm font-semibold">
-            {formatMoney(selectedAddOnTotal(draft.selectedAddOns))}
-          </p>
-        </div>
+      {addOns.length ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {addOns.map((addOn) => {
             const selected = draft.selectedAddOns.includes(addOn.id);
@@ -775,7 +891,7 @@ function RecommendationAndAddOnsStep({
             );
           })}
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -1102,7 +1218,8 @@ function PaymentStep({
         throw new Error(booking.error ?? "Unable to create booking.");
       }
 
-      window.localStorage.removeItem("cleanscape-booking-draft");
+      window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+      window.localStorage.removeItem(BOOKING_STEP_KEY);
       router.replace(`/booking/${booking.bookingId}`);
       router.refresh();
     } catch (paymentError) {

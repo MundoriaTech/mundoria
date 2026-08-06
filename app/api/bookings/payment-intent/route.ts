@@ -3,16 +3,11 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
+import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { estimatePrice } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import type { Address } from "@/types/customer";
-
-interface PromoRecord {
-  discount_type: "fixed" | "percentage";
-  discount_value: number;
-  id: string;
-}
 
 export async function POST(request: Request) {
   const parsed = bookingDraftSchema.safeParse(await request.json());
@@ -55,32 +50,36 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient();
-  let promo: PromoRecord | null = null;
+  let promo: {
+    discount_type: "fixed" | "percentage";
+    discount_value: number;
+    id: string;
+  } | null = null;
 
   if (parsed.data.promoCode) {
-    const now = new Date().toISOString();
-    const { data } = await admin
-      .from("promo_codes")
-      .select("id, discount_type, discount_value, max_uses, uses_count")
-      .eq("code", parsed.data.promoCode.toUpperCase())
-      .eq("is_active", true)
-      .or(`valid_from.is.null,valid_from.lte.${now}`)
-      .or(`valid_until.is.null,valid_until.gte.${now}`)
-      .maybeSingle();
-
-    if (!data || (data.max_uses !== null && data.uses_count >= data.max_uses)) {
+    try {
+      promo = await resolvePromoForCheckout({
+        code: parsed.data.promoCode,
+        customerId: user.id,
+      });
+    } catch (error) {
       return NextResponse.json(
-        { error: "That promo code is invalid or has expired." },
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : "That promo code is invalid or has expired.",
+        },
         { status: 400 },
       );
     }
-
-    promo = data as PromoRecord;
   }
 
   const baseAmount = estimatePrice(
     parsed.data.serviceType,
     address as Address,
+    parsed.data.cleaningStandard,
+    parsed.data.selectedAddOns,
   );
   const discount = promo
     ? promo.discount_type === "percentage"
@@ -112,7 +111,9 @@ export async function POST(request: Request) {
     customer: stripeCustomerId,
     metadata: {
       address_id: parsed.data.addressId,
+      cleaning_standard: parsed.data.cleaningStandard,
       promo_code_id: promo?.id ?? "",
+      selected_add_ons: parsed.data.selectedAddOns.join(","),
       service_type: parsed.data.serviceType,
       supabase_user_id: user.id,
     },

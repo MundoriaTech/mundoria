@@ -16,6 +16,10 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
+  const signupHref = searchParams.redirectTo
+    ? `/signup?redirectTo=${encodeURIComponent(searchParams.redirectTo)}`
+    : "/signup";
+
   return (
     <AuthShell
       description="Welcome back. Your next booking or job is waiting."
@@ -24,7 +28,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
           New to CleanScape?{" "}
           <Link
             className="font-medium text-primary hover:underline"
-            href="/signup"
+            href={signupHref}
           >
             Create an account
           </Link>

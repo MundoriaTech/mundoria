@@ -59,7 +59,7 @@ export function AuthShell({
             className="mb-10 inline-flex items-center gap-3 text-xl font-semibold text-[#221f50] lg:hidden"
             href="/"
           >
-            <BrandMark className="h-10 w-10" />
+            <BrandMark className="h-10 w-7" />
             cleanscape
           </Link>
           <div className="rounded-[2rem] border border-[#dedbfd] bg-white p-6 shadow-2xl shadow-[#5a51aa]/10 sm:p-8">

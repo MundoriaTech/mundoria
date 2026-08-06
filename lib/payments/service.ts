@@ -1,5 +1,6 @@
 import { addDays, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from "date-fns";
 
+import { maybeRewardReferrer } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
@@ -120,6 +121,11 @@ export async function captureBookingPayment(bookingId: string) {
     .update({ payment_status: "released" })
     .eq("id", bookingId);
   const payoutId = await scheduleCleanerPayout(bookingId);
+  try {
+    await maybeRewardReferrer(bookingId);
+  } catch {
+    // Referral rewards should not block payment capture.
+  }
   return { intentId: intent.id, payoutId };
 }
 

@@ -2,67 +2,67 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { BrandMark } from "@/components/shared/brand-mark";
+import { BrandLogo, BrandMark } from "@/components/shared/brand-mark";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { Button } from "@/components/ui/button";
+import {
+  SERVICE_CATEGORIES,
+  SERVICES,
+} from "@/lib/customer/services";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
   description:
-    "Book certified UK cleaning professionals, manage every visit, and keep your home beautifully under control with CleanScape.",
-  title: "CleanScape UK | Trusted home cleaning, beautifully managed",
+    "Book certified UK cleaning professionals for homes, workplaces, short-term rentals, exterior cleaning and recovery support with CleanScape.",
+  title: "CleanScape UK | Trusted cleaning, beautifully managed",
 };
 
-const serviceTiles = [
-  {
-    description: "Weekly or fortnightly upkeep for everyday living.",
-    href: "/booking/new",
-    image:
-      "https://images.pexels.com/photos/8055207/pexels-photo-8055207.jpeg?auto=compress&cs=tinysrgb&w=900",
-    name: "Regular cleaning",
-    note: "Most booked",
-  },
-  {
-    description: "A detailed reset for bathrooms, kitchens, build-up and corners.",
-    href: "/booking/new",
-    image:
-      "https://images.pexels.com/photos/36730122/pexels-photo-36730122.jpeg?auto=compress&cs=tinysrgb&w=900",
-    name: "Deep clean",
-    note: "Most detailed",
-  },
-  {
-    description: "Guest-ready resets with checklist confirmation and quick turnaround.",
-    href: "/booking/new",
-    image:
-      "https://images.pexels.com/photos/15146054/pexels-photo-15146054.jpeg?auto=compress&cs=tinysrgb&w=900",
-    name: "Airbnb turnover",
-    note: "For hosts",
-  },
-  {
-    description: "Move-out and move-in cleaning for deposits, agents and handovers.",
-    href: "/booking/new",
-    image:
-      "https://images.pexels.com/photos/7641003/pexels-photo-7641003.jpeg?auto=compress&cs=tinysrgb&w=900",
-    name: "End of tenancy",
-    note: "Move day",
-  },
-  {
-    description: "A flexible refresh before guests, parties, inspections or a busy week.",
-    href: "/booking/new",
-    image:
-      "https://images.pexels.com/photos/27176673/pexels-photo-27176673.jpeg?auto=compress&cs=tinysrgb&w=900",
-    name: "One-off clean",
-    note: "Flexible",
-  },
-  {
-    description: "Dust, debris and finishing touches after building or renovation work.",
-    href: "/booking/new",
-    image:
-      "https://images.pexels.com/photos/10558186/pexels-photo-10558186.jpeg?auto=compress&cs=tinysrgb&w=900",
-    name: "Post-build cleaning",
-    note: "Heavy duty",
-  },
-];
+const categoryImages: Record<string, string> = {
+  commercial:
+    "https://images.pexels.com/photos/380769/pexels-photo-380769.jpeg?auto=compress&cs=tinysrgb&w=900",
+  exterior:
+    "https://images.pexels.com/photos/48889/pexels-photo-48889.jpeg?auto=compress&cs=tinysrgb&w=900",
+  recovery:
+    "https://images.pexels.com/photos/4107284/pexels-photo-4107284.jpeg?auto=compress&cs=tinysrgb&w=900",
+  residential:
+    "https://images.pexels.com/photos/8055207/pexels-photo-8055207.jpeg?auto=compress&cs=tinysrgb&w=900",
+  short_term_rental:
+    "https://images.pexels.com/photos/15146054/pexels-photo-15146054.jpeg?auto=compress&cs=tinysrgb&w=900",
+};
+
+const categoryNotes: Record<string, string> = {
+  commercial: "Workplaces",
+  exterior: "Specialist",
+  recovery: "Support",
+  residential: "Most booked",
+  short_term_rental: "For hosts",
+};
+
+const serviceTiles = SERVICE_CATEGORIES.map((category) => ({
+  description: category.description,
+  href: `/booking/new?category=${category.value}`,
+  image: categoryImages[category.value],
+  name: category.label,
+  note: categoryNotes[category.value] ?? "Explore",
+}));
+
+const featuredServices = [
+  "regular",
+  "deep_clean",
+  "end_of_tenancy",
+  "airbnb_turnover",
+  "office",
+  "bereavement_support",
+] as const;
+
+const featuredServiceTiles = featuredServices.map((serviceType) => {
+  const service = SERVICES.find((item) => item.value === serviceType)!;
+  return {
+    description: service.description,
+    href: `/booking/new?service=${service.value}`,
+    name: service.label,
+  };
+});
 
 const testimonials = [
   {
@@ -100,20 +100,16 @@ const cities = [
   "Chelmsford",
 ];
 
-const cityServiceColumns = [
-  "Cleaning",
-  "Regular cleaning",
-  "Deep cleaning",
-  "Airbnb turnover",
-  "End of tenancy",
-].map((service) => ({
-  links: cities.slice(0, 8).map((city) => `${service} in ${city}`),
-  service,
+const cityServiceColumns = SERVICE_CATEGORIES.map((category) => ({
+  href: `/booking/new?category=${category.value}`,
+  links: cities.slice(0, 8).map((city) => `${category.label} in ${city}`),
+  service: category.label.replace(" Cleaning", ""),
 }));
 
 export default function HomePage() {
   const configured = hasSupabasePublicConfig();
-  const customerHref = configured ? "/signup" : "/setup";
+  const bookingHref = configured ? "/booking/new" : "/setup";
+  const customerHref = bookingHref;
   const cleanerHref = configured ? "/signup" : "/setup";
 
   return (
@@ -132,15 +128,15 @@ export default function HomePage() {
               Book Trusted Home Cleaning in Minutes
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm font-medium leading-6 text-[#252236] min-[380px]:text-base sm:mt-4 sm:text-lg sm:leading-7">
-              From regular home cleaning to deep cleans, tenancy handovers and
-              Airbnb turnovers, book certified professionals, track every
-              booking in real time, and pay only after the job is complete.
+              From residential and commercial cleaning to short-term rentals,
+              exterior work and recovery support — book certified professionals,
+              track every visit, and pay only after the job is complete.
             </p>
             <Button
               asChild
               className="mt-4 rounded-full bg-black px-6 py-4 text-sm font-bold text-white shadow-xl shadow-black/20 hover:bg-[#221f50] sm:mt-5 sm:px-7 sm:py-5"
             >
-              <Link href={customerHref}>Book a Service</Link>
+              <Link href={bookingHref}>Book a Service</Link>
             </Button>
           </div>
 
@@ -167,8 +163,8 @@ export default function HomePage() {
 
           <div className="relative z-20 mx-auto -mt-20 max-w-5xl rounded-[1.5rem] bg-black px-5 py-5 text-white shadow-2xl shadow-black/25 min-[380px]:-mt-24 sm:-mt-36 sm:rounded-full sm:px-10 sm:py-7 lg:-mt-44">
             <div className="grid gap-4 text-center min-[380px]:grid-cols-3 min-[380px]:text-left">
-              <Metric label="service types" value="6" />
-              <Metric label="protected payments" value="Pay later" />
+              <Metric label="service categories" value="5" />
+              <Metric label="services available" value={`${SERVICES.length}+`} />
               <Metric label="status visibility" value="Live" />
             </div>
           </div>
@@ -184,15 +180,15 @@ export default function HomePage() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[#5a51aa]">
-                Popular at-home services
+                Smart Service categories
               </p>
               <h2 className="mt-4 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-6xl">
-                Home cleaning, neatly organised.
+                Every cleaning need, clearly organised.
               </h2>
             </div>
             <p className="max-w-lg text-base font-medium leading-7 text-[#69657a]">
-              Pick the service you need, choose a time, and let CleanScape
-              handle the cleaner match, booking updates and completion flow.
+              Choose a category to start — CleanScape guides you to the right
+              service, cleaning standard and optional add-ons.
             </p>
           </div>
 
@@ -232,6 +228,26 @@ export default function HomePage() {
               </ScrollReveal>
             ))}
           </div>
+
+          <div className="mt-14">
+            <h3 className="text-2xl font-black tracking-[-0.04em] text-[#2d2b35]">
+              Popular services
+            </h3>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredServiceTiles.map((tile) => (
+                <Link
+                  className="rounded-2xl border border-[#ededf4] bg-[#fbfaf7] p-5 transition hover:border-[#5a51aa]/40 hover:bg-white"
+                  href={configured ? tile.href : "/setup"}
+                  key={tile.name}
+                >
+                  <p className="font-black text-[#2d2b35]">{tile.name}</p>
+                  <p className="mt-2 text-sm font-medium leading-6 text-[#6f6a80]">
+                    {tile.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </ScrollReveal>
 
@@ -258,8 +274,8 @@ export default function HomePage() {
             <div className="grid gap-px overflow-hidden rounded-[1.35rem] bg-[#e8e5ee] ring-1 ring-[#e8e5ee] md:grid-cols-3">
               {[
                 [
-                  "Book",
-                  "Choose a service, saved address and slot without a long back-and-forth.",
+                  "Choose",
+                  "Pick a category, service and standard — we advise if something fits better.",
                 ],
                 [
                   "Track",
@@ -410,7 +426,7 @@ export default function HomePage() {
                     <li key={link}>
                       <Link
                         className="text-sm font-semibold text-[#6f6990] transition hover:text-[#5a51aa]"
-                        href={configured ? "/booking/new" : "/setup"}
+                        href={configured ? column.href : "/setup"}
                       >
                         {link}
                       </Link>
@@ -429,7 +445,7 @@ export default function HomePage() {
       >
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.75fr] lg:items-center">
           <div>
-            <BrandMark className="h-16 w-16" />
+            <BrandMark className="h-16 w-11" />
             <h2 className="mt-8 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] sm:text-6xl">
               Welcome home.
             </h2>
@@ -507,20 +523,11 @@ function LandingNavbar({
   return (
     <header className="sticky top-0 z-50 border-b border-[#ebe8f3] bg-white">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <Link
-          aria-label="CleanScape home"
-          className="flex items-center rounded-full py-2 pr-3 transition hover:opacity-80"
-          href="/"
-        >
-          <Image
-            alt="CleanScape"
-            className="h-auto w-36 sm:w-44"
-            height={46}
-            priority
-            src="/images/brand/cleanscape-logo.png"
-            width={203}
-          />
-        </Link>
+        <BrandLogo
+          className="rounded-full py-2 pr-3 transition hover:opacity-80"
+          markClassName="h-11 w-8 sm:h-12 sm:w-9"
+          wordmarkClassName="text-lg sm:text-xl"
+        />
 
         <nav
           aria-label="Primary navigation"
@@ -607,7 +614,7 @@ function LandingFooter({
   const footerSections = [
     {
       links: [
-        ["Book a cleaner", customerHref],
+        ["Book a cleaner", bookingHref],
         ["Customer login", loginHref],
         ["My bookings", configured ? "/bookings" : "/setup"],
         ["Saved addresses", configured ? "/addresses" : "/setup"],
@@ -645,19 +652,7 @@ function LandingFooter({
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-10 border-b border-[#ebe8f3] pb-12 sm:grid-cols-2 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link
-              aria-label="CleanScape home"
-              className="inline-flex"
-              href="/"
-            >
-              <Image
-                alt="CleanScape"
-                className="h-auto w-44"
-                height={46}
-                src="/images/brand/cleanscape-logo.png"
-                width={203}
-              />
-            </Link>
+            <BrandLogo markClassName="h-12 w-9" wordmarkClassName="text-2xl" />
             <p className="mt-6 max-w-xl text-base font-medium leading-7 text-[#69657a]">
               CleanScape connects UK customers with independent cleaning
               professionals for regular cleaning, deep cleans, Airbnb turnovers

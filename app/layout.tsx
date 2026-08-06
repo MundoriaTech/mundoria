@@ -10,8 +10,12 @@ export const metadata: Metadata = {
   },
   description: "Book trusted local cleaning professionals.",
   icons: {
-    apple: "/images/brand/cleanscape-mark.png",
-    icon: "/images/brand/cleanscape-mark.png",
+    apple: "/apple-touch-icon.png",
+    icon: [
+      { type: "image/x-icon", url: "/favicon.ico" },
+      { type: "image/png", url: "/images/brand/favicon-32.png" },
+      { type: "image/png", url: "/images/brand/cleanscape-mark.png" },
+    ],
   },
 };
 

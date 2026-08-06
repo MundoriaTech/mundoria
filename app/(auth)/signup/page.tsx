@@ -7,21 +7,31 @@ export const metadata = {
   title: "Create account",
 };
 
-export default function SignupPage() {
+interface SignupPageProps {
+  searchParams: {
+    redirectTo?: string;
+  };
+}
+
+export default function SignupPage({ searchParams }: SignupPageProps) {
+  const loginHref = searchParams.redirectTo
+    ? `/login?redirectTo=${encodeURIComponent(searchParams.redirectTo)}`
+    : "/login";
+
   return (
     <AuthShell
       description="Join as a customer or independent cleaning professional."
       footer={
         <>
           Already have an account?{" "}
-          <Link className="font-medium text-primary hover:underline" href="/login">
+          <Link className="font-medium text-primary hover:underline" href={loginHref}>
             Sign in
           </Link>
         </>
       }
       title="Create your account"
     >
-      <SignupForm />
+      <SignupForm redirectTo={searchParams.redirectTo} />
     </AuthShell>
   );
 }

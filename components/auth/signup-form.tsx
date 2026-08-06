@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { FormField } from "@/components/auth/form-field";
@@ -20,14 +20,19 @@ import type { UserRole } from "@/types/auth";
 interface SignupResponse {
   error?: string;
   hasSession?: boolean;
+  referralPromoCode?: string | null;
   requiresEmailConfirmation?: boolean;
   role?: UserRole;
 }
 
-export function SignupForm() {
+export function SignupForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const nextPath =
+    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+      ? redirectTo
+      : null;
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
@@ -41,10 +46,22 @@ export function SignupForm() {
       email: "",
       password: "",
       phone: "",
+      referral_code: "",
       role: "customer",
     },
   });
   const selectedRole = watch("role");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      setValue("referral_code", ref.toUpperCase(), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [setValue]);
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
@@ -64,13 +81,25 @@ export function SignupForm() {
 
       if (result.requiresEmailConfirmation) {
         setSuccess(
-          "Account created. Check your inbox to confirm your email, then sign in.",
+          result.referralPromoCode
+            ? `Account created. Check your inbox to confirm your email. Your welcome code is ${result.referralPromoCode}.`
+            : "Account created. Check your inbox to confirm your email, then sign in.",
         );
         return;
       }
 
       const role = result.role ?? values.role;
-      router.replace(dashboardForRole(role));
+      if (result.referralPromoCode) {
+        window.sessionStorage.setItem(
+          "cleanscape-welcome-promo",
+          result.referralPromoCode,
+        );
+      }
+      const destination =
+        role === "customer" && nextPath
+          ? nextPath
+          : dashboardForRole(role);
+      router.replace(destination);
       router.refresh();
     } catch (error) {
       setFormError(
@@ -90,7 +119,11 @@ export function SignupForm() {
             ? "Continue with Google as a cleaner"
             : "Continue with Google as a customer"
         }
-        next={dashboardForRole(selectedRole)}
+        next={
+          selectedRole === "customer" && nextPath
+            ? nextPath
+            : dashboardForRole(selectedRole)
+        }
         role={selectedRole}
       />
       <Divider />
@@ -178,6 +211,21 @@ export function SignupForm() {
             </p>
           ) : null}
         </fieldset>
+
+        {selectedRole === "customer" ? (
+          <FormField
+            error={errors.referral_code}
+            htmlFor="referral_code"
+            label="Referral code (optional)"
+          >
+            <Input
+              autoComplete="off"
+              id="referral_code"
+              placeholder="Friend’s code"
+              {...register("referral_code")}
+            />
+          </FormField>
+        ) : null}
 
         <Button className="w-full" disabled={isSubmitting} type="submit">
           {isSubmitting ? "Creating account…" : "Create account"}

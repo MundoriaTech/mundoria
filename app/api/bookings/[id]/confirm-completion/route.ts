@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { maybeRewardReferrer } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const uncheckedItemSchema = z.object({
@@ -79,6 +80,12 @@ export async function POST(
       status: "completed",
     })
     .eq("id", params.id);
+
+  try {
+    await maybeRewardReferrer(params.id);
+  } catch {
+    // Non-blocking.
+  }
 
   return NextResponse.json({ success: true });
 }

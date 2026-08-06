@@ -1,6 +1,6 @@
 import { LockKeyhole, ShieldCheck } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+
+import { BrandLogo } from "@/components/shared/brand-mark";
 
 interface AdminAuthShellProps {
   children: React.ReactNode;
@@ -21,16 +21,11 @@ export function AdminAuthShell({
         <div className="absolute -right-28 top-10 h-80 w-80 rounded-full bg-[#5a51aa]/35 blur-3xl" />
         <div className="absolute -bottom-28 left-10 h-80 w-80 rounded-full bg-[#ffc79f]/15 blur-3xl" />
 
-        <Link className="relative inline-flex w-fit" href="/">
-          <Image
-            alt="CleanScape"
-            className="h-auto w-44 brightness-0 invert"
-            height={46}
-            priority
-            src="/images/brand/cleanscape-logo.png"
-            width={203}
-          />
-        </Link>
+        <BrandLogo
+          className="relative"
+          markClassName="h-12 w-9"
+          wordmarkClassName="text-white"
+        />
 
         <div className="relative max-w-xl">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/75">
@@ -53,16 +48,7 @@ export function AdminAuthShell({
 
       <section className="flex items-center justify-center bg-[#f7f5ff] px-5 py-10 text-[#221f50] sm:px-8 lg:rounded-l-[2.5rem]">
         <div className="w-full max-w-md">
-          <Link className="mb-10 inline-flex lg:hidden" href="/">
-            <Image
-              alt="CleanScape"
-              className="h-auto w-40"
-              height={46}
-              priority
-              src="/images/brand/cleanscape-logo.png"
-              width={203}
-            />
-          </Link>
+          <BrandLogo className="mb-10 lg:hidden" markClassName="h-11 w-8" />
 
           <div className="rounded-[2rem] border border-[#dedbfd] bg-white p-6 shadow-2xl shadow-[#221f50]/10 sm:p-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#221f50] text-white">

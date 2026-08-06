@@ -553,7 +553,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
                 <table role="presentation" cellspacing="0" cellpadding="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <img src="${escapeAttribute(brandMarkUrl)}" width="50" height="46" alt="CleanScape" style="display:block;width:50px;height:46px;border:0;outline:none;text-decoration:none;">
+                      <img src="${escapeAttribute(brandMarkUrl)}" width="36" height="50" alt="CleanScape" style="display:block;width:36px;height:50px;border:0;outline:none;text-decoration:none;">
                     </td>
                     <td style="vertical-align:middle;padding-left:12px;">
                       <div style="font-size:25px;font-weight:900;letter-spacing:-0.06em;text-transform:lowercase;">cleanscape</div>

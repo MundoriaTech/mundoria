@@ -1,23 +1,5 @@
 -- CleanScape Smart Service recommendation engine support.
-
-begin;
-
--- Expanded service taxonomy from the Smart Service specification.
-alter type public.service_type add value if not exists 'move_in';
-alter type public.service_type add value if not exists 'move_out';
-alter type public.service_type add value if not exists 'office';
-alter type public.service_type add value if not exists 'retail_hospitality';
-alter type public.service_type add value if not exists 'educational_facility';
-alter type public.service_type add value if not exists 'communal_area';
-alter type public.service_type add value if not exists 'holiday_let';
-alter type public.service_type add value if not exists 'serviced_accommodation';
-alter type public.service_type add value if not exists 'window_cleaning';
-alter type public.service_type add value if not exists 'pregnancy_support';
-alter type public.service_type add value if not exists 'postpartum';
-alter type public.service_type add value if not exists 'illness_recovery';
-alter type public.service_type add value if not exists 'post_injury';
-alter type public.service_type add value if not exists 'hospital_discharge';
-alter type public.service_type add value if not exists 'bereavement_support';
+-- Enum values are added in 20260805099500_smart_service_enum_values.sql.
 
 do $$
 begin
@@ -111,5 +93,3 @@ on conflict (id) do update set
   service_types = excluded.service_types,
   is_active = excluded.is_active,
   sort_order = excluded.sort_order;
-
-commit;

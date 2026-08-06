@@ -42,7 +42,7 @@ export function CustomerShell({
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div>
             <Link className="flex items-center gap-3" href="/dashboard">
-              <BrandMark className="h-10 w-10 rounded-[0.95rem]" />
+              <BrandMark className="h-10 w-7" />
               <span>
                 <span className="block text-lg font-bold tracking-tight text-[#221f50]">
                   cleanscape

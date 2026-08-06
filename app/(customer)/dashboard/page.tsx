@@ -112,8 +112,11 @@ export default async function CustomerDashboardPage() {
               <span className="font-bold text-[#5a51aa]">
                 {customer.referral_code}
               </span>{" "}
-              with a friend. You’ll both receive a voucher after their first
-              clean.
+              or invite link. Friends get £10 off their first clean; you get £10
+              after they complete it. Enter the code at signup or checkout.
+            </p>
+            <p className="mt-3 break-all rounded-lg bg-white/80 px-3 py-2 font-mono text-xs text-[#5a51aa]">
+              {`${process.env.NEXT_PUBLIC_APP_URL ?? "https://cleanscapeuk.com"}/signup?ref=${customer.referral_code}`}
             </p>
           </div>
         </div>

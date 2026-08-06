@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { safeRedirectPath } from "@/lib/auth/redirects";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/middleware";
 import { ROLE_DASHBOARDS, type UserRole } from "@/types/auth";
@@ -23,6 +24,11 @@ function pathMatches(pathname: string, prefixes: string[]) {
 }
 
 function requiredRole(pathname: string): UserRole | null {
+  // Guest booking flow (WeCasa-style): start without an account.
+  if (pathname === "/booking/new") {
+    return null;
+  }
+
   if (pathname === "/cleaner" || pathname.startsWith("/cleaner/")) {
     return "cleaner";
   }
@@ -75,15 +81,18 @@ export async function middleware(request: NextRequest) {
 
   if (protectedRole && !user) {
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirectTo", pathname);
+    const redirectTo = `${pathname}${request.nextUrl.search}`;
+    loginUrl.searchParams.set("redirectTo", redirectTo);
     return redirectWithSession(loginUrl, response);
   }
 
   if (user && AUTH_ROUTES.includes(pathname)) {
-    return redirectWithSession(
-      new URL(role ? ROLE_DASHBOARDS[role] : "/", request.url),
-      response,
+    const redirectTo = request.nextUrl.searchParams.get("redirectTo");
+    const destination = safeRedirectPath(
+      redirectTo,
+      role ? ROLE_DASHBOARDS[role] : "/",
     );
+    return redirectWithSession(new URL(destination, request.url), response);
   }
 
   if (

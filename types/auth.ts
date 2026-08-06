@@ -18,6 +18,7 @@ export interface Profile {
     sms: boolean;
   };
   referral_code: string;
+  referred_by: string | null;
   created_at: string;
   updated_at: string;
 }

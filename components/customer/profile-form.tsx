@@ -167,6 +167,22 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
               Copy
             </Button>
           </div>
+          <Button
+            className="mt-3 w-full"
+            onClick={() => {
+              const link = `${window.location.origin}/signup?ref=${profile.referral_code}`;
+              void navigator.clipboard.writeText(link);
+              setStatus("Invite link copied.");
+            }}
+            size="sm"
+            variant="outline"
+          >
+            Copy invite link
+          </Button>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">
+            Friends get £10 off first booking. You get a £10 voucher after their
+            first completed clean (up to 10 active referrals).
+          </p>
         </section>
 
         <section className="rounded-2xl border bg-background p-5 shadow-sm">
@@ -185,6 +201,12 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
             >
               <CreditCard className="mr-2 h-4 w-4" />
               Payment methods
+            </Button>
+            <Button asChild className="justify-start" variant="outline">
+              <Link href="/payments">
+                <CreditCard className="mr-2 h-4 w-4" />
+                Payments & receipts
+              </Link>
             </Button>
             <Button
               className="justify-start text-destructive"

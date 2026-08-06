@@ -17,7 +17,7 @@ export default async function CustomerBookingPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [{ data }, { data: rating }, { data: checklist }, { data: confirmation }] = await Promise.all([
+  const [{ data }, { data: rating }, { data: checklist }, { data: confirmation }, { data: addOns }] = await Promise.all([
     supabase
       .from("bookings")
       .select("*, address:addresses(*)")
@@ -39,10 +39,16 @@ export default async function CustomerBookingPage({
       .select("id")
       .eq("booking_id", params.id)
       .maybeSingle(),
+    supabase
+      .from("booking_add_ons")
+      .select("*")
+      .eq("booking_id", params.id)
+      .order("created_at"),
   ]);
 
   if (!data) notFound();
   const booking = data as Booking;
+  booking.add_ons = (addOns ?? []) as Booking["add_ons"];
 
   if (booking.cleaner_id) {
     const { data: cleaner } = await supabase

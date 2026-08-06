@@ -85,6 +85,15 @@ export interface CleanerPublicProfile {
   years_experience: number | null;
 }
 
+export interface BookingAddOn {
+  id: string;
+  booking_id: string;
+  add_on_id: string;
+  label: string;
+  amount: number;
+  created_at: string;
+}
+
 export interface Booking {
   id: string;
   customer_id: string;
@@ -124,6 +133,7 @@ export interface Booking {
   created_at: string;
   updated_at: string;
   address?: Address | null;
+  add_ons?: BookingAddOn[] | null;
   cleaner?: CleanerPublicProfile | null;
 }
 

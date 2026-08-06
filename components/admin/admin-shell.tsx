@@ -59,7 +59,7 @@ export function AdminShell({
         <div className="pointer-events-none absolute -bottom-16 left-8 h-44 w-44 rounded-full bg-[#7669d1]/30 blur-3xl" />
         <div className="relative flex h-20 items-center justify-between border-b border-white/10 px-5">
           <Link className="flex items-center gap-3 font-bold" href="/admin/dashboard">
-            <BrandMark className="h-11 w-11" />
+            <BrandMark className="h-11 w-8" />
             <span>
               <span className="block text-base tracking-[-0.04em]">cleanscape</span>
               <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-white/60">

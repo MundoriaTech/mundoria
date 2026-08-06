@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import {
   formatMoney,
   formatServiceName,
+  standardLabel,
 } from "@/lib/customer/services";
 import { cleanerTierLabel } from "@/lib/cleaner/tier";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -237,6 +238,11 @@ export function BookingDetail({
           <h2 className="text-lg font-semibold">Booking details</h2>
           <div className="mt-5 space-y-4 text-sm">
             <Detail
+              icon={ShieldCheck}
+              label="Cleaning standard"
+              value={standardLabel(booking.cleaning_standard ?? "enhanced")}
+            />
+            <Detail
               icon={CalendarDays}
               label="Date"
               value={new Date(
@@ -259,11 +265,38 @@ export function BookingDetail({
                   : "Unavailable"
               }
             />
+            {booking.special_attention_areas?.length ? (
+              <Detail
+                icon={Check}
+                label="Special attention"
+                value={booking.special_attention_areas.join(", ")}
+              />
+            ) : null}
+            {booking.add_ons?.length ? (
+              <Detail
+                icon={Check}
+                label="Add-ons"
+                value={booking.add_ons
+                  .map((addOn) => `${addOn.label} (${formatMoney(addOn.amount)})`)
+                  .join(", ")}
+              />
+            ) : null}
             <Detail
               icon={ShieldCheck}
               label="Payment authorization"
               value={formatMoney(booking.amount_total)}
             />
+            {["completed", "awaiting_customer_confirmation"].includes(
+              booking.status,
+            ) || booking.payment_status === "released" ? (
+              <div className="pt-1">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/booking/${booking.id}/receipt`}>
+                    View receipt / invoice
+                  </Link>
+                </Button>
+              </div>
+            ) : null}
           </div>
         </section>
 
