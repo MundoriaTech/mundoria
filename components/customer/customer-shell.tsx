@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 
 import { NotificationBell } from "@/components/customer/notification-bell";
 import { BrandMark } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
@@ -54,6 +55,7 @@ export function CustomerShell({
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link
               className="hidden items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/15 transition hover:bg-primary/90 sm:flex"
               href="/booking/new"

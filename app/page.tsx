@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { BrandLogo, BrandMark } from "@/components/shared/brand-mark";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   SERVICE_CATEGORIES,
@@ -543,6 +544,7 @@ function LandingNavbar({
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle />
           <Link
             className="rounded-full px-4 py-2 text-sm font-black text-muted-foreground transition hover:bg-primary/10 hover:text-foreground"
             href={loginHref}
@@ -557,42 +559,45 @@ function LandingNavbar({
           </Button>
         </div>
 
-        <details className="relative lg:hidden">
-          <summary className="flex cursor-pointer list-none items-center rounded-full border border-border px-4 py-2 text-sm font-black text-foreground [&::-webkit-details-marker]:hidden">
-            Menu
-          </summary>
-          <div className="absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] border border-border bg-card shadow-2xl shadow-[#221f50]/15">
-            <nav
-              aria-label="Mobile navigation"
-              className="grid divide-y divide-border"
-            >
-              {navLinks.map(([label, href]) => (
-                <Link
-                  className="px-5 py-4 text-sm font-bold text-muted-foreground hover:bg-muted"
-                  href={href}
-                  key={label}
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+          <details className="relative">
+            <summary className="flex cursor-pointer list-none items-center rounded-full border border-border px-4 py-2 text-sm font-black text-foreground [&::-webkit-details-marker]:hidden">
+              Menu
+            </summary>
+            <div className="absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] border border-border bg-card shadow-2xl shadow-[#221f50]/15">
+              <nav
+                aria-label="Mobile navigation"
+                className="grid divide-y divide-border"
+              >
+                {navLinks.map(([label, href]) => (
+                  <Link
+                    className="px-5 py-4 text-sm font-bold text-muted-foreground hover:bg-muted"
+                    href={href}
+                    key={label}
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="grid gap-2 bg-muted p-4">
+                <Button
+                  asChild
+                  className="h-11 rounded-full bg-foreground text-sm font-black text-background hover:bg-foreground/90"
                 >
-                  {label}
-                </Link>
-              ))}
-            </nav>
-            <div className="grid gap-2 bg-muted p-4">
-              <Button
-                asChild
-                className="h-11 rounded-full bg-foreground text-sm font-black text-background hover:bg-foreground/90"
-              >
-                <Link href={customerHref}>Book a clean</Link>
-              </Button>
-              <Button
-                asChild
-                className="h-11 rounded-full text-sm font-black"
-                variant="outline"
-              >
-                <Link href={loginHref}>Log in</Link>
-              </Button>
+                  <Link href={customerHref}>Book a clean</Link>
+                </Button>
+                <Button
+                  asChild
+                  className="h-11 rounded-full text-sm font-black"
+                  variant="outline"
+                >
+                  <Link href={loginHref}>Log in</Link>
+                </Button>
+              </div>
             </div>
-          </div>
-        </details>
+          </details>
+        </div>
       </div>
     </header>
   );

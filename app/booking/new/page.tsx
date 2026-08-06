@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { BookingWizard } from "@/components/customer/booking-wizard";
 import { BrandLogo } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import {
   normalizeStandard,
   recommendedStandardFor,
@@ -106,6 +107,7 @@ export default async function NewBookingPage({
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-2">
           <BrandLogo href="/" markClassName="h-9 w-6 sm:h-10 sm:w-7" />
           <div className="flex shrink-0 items-center gap-2 text-sm font-semibold sm:gap-3">
+            <ThemeToggle />
             {user ? (
               <Link className="text-primary hover:underline" href="/dashboard">
                 Dashboard

@@ -2,6 +2,7 @@ import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 import { BrandMark } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 interface AuthShellProps {
   children: React.ReactNode;
@@ -28,10 +29,6 @@ export function AuthShell({
           </span>
         </Link>
         <div className="relative max-w-lg">
-          {/* <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white/80 backdrop-blur">
-            <Sparkles className="h-4 w-4 text-[#ffc79f]" />
-            Cleaning, thoughtfully matched
-          </div> */}
           <h2 className="mt-6 text-5xl font-semibold leading-[1.02] tracking-[-0.06em]">
             A calmer way to book and manage cleaning.
           </h2>
@@ -53,19 +50,19 @@ export function AuthShell({
         </p>
       </section>
 
-      <section className="flex items-center justify-center bg-background px-5 py-10 sm:px-8 lg:rounded-l-[2.5rem]">
-        <div className="w-full max-w-md">
+      <section className="relative flex items-center justify-center bg-background px-5 py-10 sm:px-8 lg:rounded-l-[2.5rem]">
+        <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+          <ThemeToggle />
+        </div>
+        <div className="w-full max-w-md pt-8 lg:pt-0">
           <Link
-            className="mb-10 inline-flex items-center gap-3 text-xl font-semibold text-foreground lg:hidden"
+            className="mb-10 inline-flex items-center gap-3 pr-12 text-xl font-semibold text-foreground lg:hidden lg:pr-0"
             href="/"
           >
             <BrandMark className="h-10 w-7" />
             cleanscape
           </Link>
           <div className="rounded-[2rem] border border-border bg-card p-6 shadow-2xl shadow-[#5a51aa]/10 sm:p-8">
-            {/* <p className="text-sm font-bold uppercase tracking-[0.2em] text-primary">
-              CleanScape
-            </p> */}
             <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
               {title}
             </h1>

@@ -20,6 +20,7 @@ import { useState } from "react";
 
 import { AdminAlerts } from "@/components/admin/admin-alerts";
 import { BrandMark } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
@@ -115,6 +116,7 @@ export function AdminShell({
           Platform command centre
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <ThemeToggle />
           <span className="hidden text-sm text-muted-foreground sm:inline">
             Signed in as {admin.full_name}
           </span>

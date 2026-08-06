@@ -5,7 +5,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export const metadata: Metadata = {
   title: {
@@ -47,14 +46,7 @@ export default function RootLayout({
         }}
       />
       <body className="font-sans">
-        <ThemeProvider>
-          {children}
-          <div className="pointer-events-none fixed right-3 top-3 z-[60]">
-            <div className="pointer-events-auto">
-              <ThemeToggle />
-            </div>
-          </div>
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

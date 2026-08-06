@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
 import type { CleanerProfile } from "@/types/cleaner";
@@ -55,7 +56,10 @@ export function CleanerShell({
               </span>
             </Link>
           </div>
-          <TierBadge tier={cleaner.tier} />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <TierBadge tier={cleaner.tier} />
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">

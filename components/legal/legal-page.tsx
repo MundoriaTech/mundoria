@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { BrandLogo, BrandMark } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export interface LegalSection {
   body?: string;
@@ -26,12 +27,15 @@ export function LegalPage({
       <header className="border-b border-border bg-background/90 px-5 py-5 backdrop-blur sm:px-8">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <BrandLogo markClassName="h-11 w-8" />
-          <Link
-            className="rounded-full bg-[#221f50] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#37306c]"
-            href="/signup"
-          >
-            Book now
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              className="rounded-full bg-[#221f50] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#37306c]"
+              href="/signup"
+            >
+              Book now
+            </Link>
+          </div>
         </div>
       </header>
 

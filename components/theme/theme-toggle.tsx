@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme/theme-provider";
+import { cn } from "@/lib/utils";
 
 export function ThemeToggle({
   className,
@@ -15,10 +16,10 @@ export function ThemeToggle({
 
   return (
     <Button
-      className={
-        className ??
-        "border-border bg-card/90 text-foreground shadow-sm backdrop-blur hover:bg-muted"
-      }
+      className={cn(
+        "h-9 w-9 shrink-0 border-border bg-card/90 text-foreground shadow-none backdrop-blur hover:bg-muted",
+        className,
+      )}
       size="icon"
       variant="outline"
       type="button"
@@ -29,4 +30,3 @@ export function ThemeToggle({
     </Button>
   );
 }
-

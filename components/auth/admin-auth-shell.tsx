@@ -1,6 +1,7 @@
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 
 import { BrandLogo } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 interface AdminAuthShellProps {
   children: React.ReactNode;
@@ -46,9 +47,12 @@ export function AdminAuthShell({
         </p>
       </section>
 
-      <section className="flex items-center justify-center bg-background px-5 py-10 text-foreground sm:px-8 lg:rounded-l-[2.5rem]">
-        <div className="w-full max-w-md">
-          <BrandLogo className="mb-10 lg:hidden" markClassName="h-11 w-8" />
+      <section className="relative flex items-center justify-center bg-background px-5 py-10 text-foreground sm:px-8 lg:rounded-l-[2.5rem]">
+        <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+          <ThemeToggle />
+        </div>
+        <div className="w-full max-w-md pt-8 lg:pt-0">
+          <BrandLogo className="mb-10 pr-12 lg:hidden lg:pr-0" markClassName="h-11 w-8" />
 
           <div className="rounded-[2rem] border border-border bg-card p-6 shadow-2xl shadow-[#221f50]/10 sm:p-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#221f50] text-white">
