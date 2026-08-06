@@ -150,7 +150,11 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
           />
         </FormField>
 
-        <FormField error={errors.phone} htmlFor="phone" label="Phone">
+        <FormField
+          error={errors.phone}
+          htmlFor="phone"
+          label="Phone (optional)"
+        >
           <Input
             autoComplete="tel"
             id="phone"

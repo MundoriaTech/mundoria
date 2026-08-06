@@ -10,7 +10,7 @@ export default async function AdminCustomersPage() {
   const [{ data: profiles }, { data: bookings }] = await Promise.all([
     admin
       .from("profiles")
-      .select("id,full_name,email,phone,created_at,referral_code")
+      .select("id,full_name,email,phone,created_at,referral_code,avatar_url")
       .eq("role", "customer")
       .order("created_at", { ascending: false }),
     admin
@@ -40,14 +40,53 @@ export default async function AdminCustomersPage() {
   const customers = profiles ?? [];
 
   return (
-    <div>
-      <h1 className="text-3xl font-semibold">Customer management</h1>
-      <p className="mb-7 mt-2 text-muted-foreground">
-        Track customer accounts, booking activity, and spend. These are
-        customers only — cleaners are managed separately.
+    <div className="min-w-0">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Customers
+      </h1>
+      <p className="mb-6 mt-2 text-sm text-muted-foreground sm:mb-7 sm:text-base">
+        Customer accounts and spend. Cleaners are managed separately.
       </p>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[900px] text-sm">
+
+      <div className="space-y-3 md:hidden">
+        {customers.map((customer) => {
+          const summary = stats.get(customer.id) ?? {
+            bookings: 0,
+            completed: 0,
+            spent: 0,
+          };
+          return (
+            <Link
+              className="block rounded-xl border border-border bg-card p-4 transition active:bg-muted/40"
+              href={`/admin/customer/${customer.id}`}
+              key={customer.id}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{customer.full_name}</p>
+                  <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                    {customer.email}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {summary.bookings} bookings · {formatMoney(summary.spent)}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm font-medium text-primary">
+                  View
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+        {!customers.length ? (
+          <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+            No customer accounts yet.
+          </p>
+        ) : null}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-xl border bg-card md:block">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="p-3">Customer</th>

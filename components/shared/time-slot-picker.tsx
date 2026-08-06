@@ -16,12 +16,15 @@ export function TimeSlotPicker({
   availability,
   className,
   date,
+  formatSlotPrice,
   onChange,
   value,
 }: {
   availability?: TimeSlotAvailability;
   className?: string;
   date: Date | string;
+  /** Optional price label per slot (e.g. "£62"). */
+  formatSlotPrice?: (slot: string) => string | null;
   onChange: (slot: string) => void;
   value?: string;
 }) {
@@ -40,11 +43,12 @@ export function TimeSlotPicker({
       {defaultSlots.map((slot) => {
         const enabled = available.has(slot);
         const selected = value === slot;
+        const priceLabel = formatSlotPrice?.(slot) ?? null;
         return (
           <button
             aria-pressed={selected}
             className={cn(
-              "min-h-11 rounded-md border px-2 py-2.5 text-sm transition-colors touch-manipulation",
+              "flex min-h-11 flex-col items-center justify-center rounded-md border px-2 py-2 text-sm transition-colors touch-manipulation",
               selected && "border-primary bg-primary text-primary-foreground",
               !enabled && "cursor-not-allowed bg-muted text-muted-foreground opacity-50",
             )}
@@ -53,7 +57,17 @@ export function TimeSlotPicker({
             onClick={() => onChange(slot)}
             type="button"
           >
-            {slot}
+            <span className="font-medium">{slot}</span>
+            {priceLabel ? (
+              <span
+                className={cn(
+                  "mt-0.5 text-[11px] leading-none",
+                  selected ? "text-primary-foreground/80" : "text-muted-foreground",
+                )}
+              >
+                {priceLabel}
+              </span>
+            ) : null}
           </button>
         );
       })}

@@ -36,7 +36,27 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    const taken = /already|registered|exists/i.test(error.message);
+    return NextResponse.json(
+      {
+        code: taken ? "email_taken" : "signup_failed",
+        error: taken
+          ? "An account already exists for this email."
+          : error.message,
+      },
+      { status: 400 },
+    );
+  }
+
+  // Supabase may return a user with no identities when the email is already registered.
+  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+    return NextResponse.json(
+      {
+        code: "email_taken",
+        error: "An account already exists for this email.",
+      },
+      { status: 400 },
+    );
   }
 
   let welcomeEmailSent = false;

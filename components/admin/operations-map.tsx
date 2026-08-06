@@ -8,7 +8,7 @@ export function OperationsMap({ bookings }: { bookings: AdminBooking[] }) {
   return (
     <GeoapifyMapView
       center={LONDON_CENTER}
-      className="h-96"
+      className="h-64 sm:h-96"
       markers={bookings.flatMap((booking) => {
         const lat =
           booking.status === "cleaner_en_route"

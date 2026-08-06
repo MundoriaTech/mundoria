@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Slate avatar">
+  <!-- Pack: shared figure geometry. Prop: dustpan and brush. -->
+  <rect width="128" height="128" fill="#4A5568"/>
+  <ellipse cx="64" cy="112" rx="36" ry="28" fill="#E2E8F0"/>
+  <circle cx="64" cy="56" r="28" fill="#E2E8F0"/>
+  <circle cx="52" cy="54" r="4" fill="#2D3748"/>
+  <circle cx="76" cy="54" r="4" fill="#2D3748"/>
+  <path d="M54 66c4 5 16 5 20 0" fill="none" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
+  <!-- dustpan -->
+  <path d="M88 94h26l-4 14H92l-4-14z" fill="#221F50"/>
+  <rect x="96" y="78" width="6" height="18" rx="2" fill="#7669D1"/>
+  <!-- brush -->
+  <rect x="112" y="72" width="5" height="22" rx="2" fill="#8B6B4A"/>
+  <rect x="108" y="66" width="13" height="10" rx="2" fill="#FFC79F"/>
+  <path d="M110 66v-6M114 66v-7M118 66v-6" stroke="#E2E8F0" stroke-width="2" stroke-linecap="round"/>
+</svg>

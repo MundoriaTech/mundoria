@@ -17,7 +17,7 @@ export default async function AdminLayout({
   const {
     data: { user },
   } = await session.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/admin/login");
   const admin = createAdminClient();
   const [{ data: profile }, { data: notifications }] = await Promise.all([
     admin.from("profiles").select("*").eq("id", user.id).single(),

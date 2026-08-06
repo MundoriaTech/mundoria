@@ -1,7 +1,8 @@
-import { ArrowRight, CalendarCheck, Gift, Plus, Sparkles } from "lucide-react";
+import { ArrowRight, Gift } from "lucide-react";
 import Link from "next/link";
 
 import { BookingCard } from "@/components/customer/booking-card";
+import { DashboardGreeting } from "@/components/customer/dashboard-greeting";
 import { Button } from "@/components/ui/button";
 import { getCustomerBookings } from "@/lib/customer/server";
 import { createServerClient } from "@/lib/supabase/server";
@@ -34,52 +35,18 @@ export default async function CustomerDashboardPage() {
     .reverse()
     .slice(0, 3);
   const customer = profile as Profile;
+  const firstName = customer.full_name.trim().split(/\s+/)[0] || "there";
 
   return (
     <div className="space-y-8">
-      <section className="relative isolate overflow-hidden rounded-[2rem] bg-[#221f50] px-6 py-8 text-white shadow-2xl shadow-[#221f50]/15 sm:px-10 sm:py-10">
-        <div className="absolute -right-20 top-0 -z-10 h-56 w-56 rounded-full bg-[#7669d1]/45 blur-3xl" />
-        <div className="absolute -bottom-20 left-10 -z-10 h-44 w-44 rounded-full bg-[#ffc79f]/30 blur-3xl" />
-        <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white/80">
-          <Sparkles className="h-4 w-4 text-[#ffc79f]" />
-          Welcome home
-        </p>
-        <h1 className="mt-5 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
-          Hello, {customer.full_name.split(" ")[0]}.
-        </h1>
-        <p className="mt-3 max-w-xl leading-7 text-white/75">
-          A beautifully clean space is only a few taps away — with booking,
-          payment holds, messages, and checklists all in one calm place.
-        </p>
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-          <Button
-            asChild
-            className="bg-[#ffc79f] font-bold text-[#221f50] hover:bg-[#ffd4b8]"
-          >
-            <Link href="/booking/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Book a cleaner
-            </Link>
-          </Button>
-          <Button
-            asChild
-            className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-            variant="outline"
-          >
-            <Link href="/bookings">
-              <CalendarCheck className="mr-2 h-4 w-4" />
-              View bookings
-            </Link>
-          </Button>
-        </div>
-      </section>
+      <DashboardGreeting firstName={firstName} />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <Insight label="Upcoming" value={String(upcoming.length)} />
         <Insight label="Recent history" value={String(recent.length)} />
         <Insight
           label="Referral code"
-          value={customer.referral_code ?? "Ready"}
+          value={customer.referral_code ?? "—"}
         />
       </section>
 
@@ -98,29 +65,26 @@ export default async function CustomerDashboardPage() {
         />
       )}
 
-      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <span className="rounded-2xl bg-muted p-3 text-primary shadow-sm">
-            <Gift className="h-6 w-6" />
-          </span>
-          <div>
-            <h2 className="font-semibold text-foreground">
-              Give £10, get £10
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Share your referral code{" "}
-              <span className="font-bold text-primary">
-                {customer.referral_code}
-              </span>{" "}
-              or invite link. Friends get £10 off their first clean; you get £10
-              after they complete it. Enter the code at signup or checkout.
-            </p>
-            <p className="mt-3 break-all rounded-lg bg-muted px-3 py-2 font-mono text-xs text-primary">
-              {`${process.env.NEXT_PUBLIC_APP_URL ?? "https://cleanscapeuk.com"}/signup?ref=${customer.referral_code}`}
-            </p>
+      {customer.referral_code ? (
+        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <Gift className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <h2 className="font-semibold text-foreground">
+                Give £10, get £10
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Share your code{" "}
+                <span className="font-semibold text-foreground">
+                  {customer.referral_code}
+                </span>
+                . Friends get £10 off their first clean; you get £10 after they
+                complete it.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <SectionHeading href="/bookings?tab=past" title="Recent history" />
       {recent.length ? (
@@ -141,7 +105,7 @@ export default async function CustomerDashboardPage() {
 
 function Insight({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-2 truncate text-2xl font-bold tracking-tight text-foreground">
         {value}
@@ -152,7 +116,7 @@ function Insight({ label, value }: { label: string; value: string }) {
 
 function SectionHeading({ href, title }: { href: string; title: string }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-3">
       <h2 className="text-xl font-semibold tracking-tight text-foreground">
         {title}
       </h2>

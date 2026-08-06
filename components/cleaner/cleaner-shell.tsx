@@ -13,6 +13,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { BrandMark } from "@/components/shared/brand-mark";
+import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ export function CleanerShell({
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <SessionTimeoutGuard audience="cleaner" />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Linen avatar">
+  <!-- Pack: shared figure geometry. Prop: folded towel stack. -->
+  <rect width="128" height="128" fill="#EFE6D8"/>
+  <ellipse cx="64" cy="112" rx="36" ry="28" fill="#8B6B4A"/>
+  <circle cx="64" cy="56" r="28" fill="#8B6B4A"/>
+  <circle cx="52" cy="54" r="4" fill="#EFE6D8"/>
+  <circle cx="76" cy="54" r="4" fill="#EFE6D8"/>
+  <path d="M54 66c4 5 16 5 20 0" fill="none" stroke="#EFE6D8" stroke-width="3" stroke-linecap="round"/>
+  <!-- towels -->
+  <rect x="86" y="90" width="32" height="12" rx="3" fill="#221F50"/>
+  <rect x="88" y="80" width="32" height="12" rx="3" fill="#5A51AA"/>
+  <rect x="90" y="70" width="32" height="12" rx="3" fill="#FFC79F"/>
+  <path d="M94 76h18M92 86h18M90 96h18" stroke="#FFF" stroke-width="1.5" opacity=".35" stroke-linecap="round"/>
+</svg>

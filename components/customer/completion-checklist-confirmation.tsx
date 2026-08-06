@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import type { BookingChecklistItem } from "@/types/customer";
 
@@ -14,6 +15,7 @@ export function CompletionChecklistConfirmation({
   items: BookingChecklistItem[];
   onConfirmed: () => void;
 }) {
+  const { success } = useFeedback();
   const [checked, setChecked] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(items.map((item) => [item.item_key, true])),
   );
@@ -57,6 +59,11 @@ export function CompletionChecklistConfirmation({
       return;
     }
 
+    success({
+      kind: "done",
+      title: "Clean confirmed",
+      note: "Thanks — payment can finish settling from here.",
+    });
     onConfirmed();
   }
 

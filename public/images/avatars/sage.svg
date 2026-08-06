@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Sage avatar">
+  <!-- Pack: shared figure geometry. Prop: potted plant. -->
+  <rect width="128" height="128" fill="#C8D5C3"/>
+  <ellipse cx="64" cy="112" rx="36" ry="28" fill="#F7F3EA"/>
+  <circle cx="64" cy="56" r="28" fill="#F7F3EA"/>
+  <circle cx="52" cy="54" r="4" fill="#3D5A45"/>
+  <circle cx="76" cy="54" r="4" fill="#3D5A45"/>
+  <path d="M54 66c4 5 16 5 20 0" fill="none" stroke="#3D5A45" stroke-width="3" stroke-linecap="round"/>
+  <!-- pot + leaves -->
+  <path d="M92 96h24l-3 16H95l-3-16z" fill="#8B6B4A"/>
+  <rect x="94" y="90" width="20" height="8" rx="2" fill="#6E5338"/>
+  <ellipse cx="104" cy="78" rx="10" ry="14" fill="#5A8F6B"/>
+  <ellipse cx="96" cy="82" rx="7" ry="11" fill="#4F7F5E"/>
+  <ellipse cx="112" cy="82" rx="7" ry="11" fill="#6AA07A"/>
+  <path d="M104 88v10" stroke="#3D5A45" stroke-width="2" stroke-linecap="round"/>
+</svg>

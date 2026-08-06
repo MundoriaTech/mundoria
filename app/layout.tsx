@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
+import { FeedbackProvider } from "@/components/shared/feedback-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
 
@@ -38,8 +39,10 @@ export default function RootLayout({
       </head>
       <body className="font-sans">
         <ThemeProvider>
-          <AuthHashHandler />
-          {children}
+          <FeedbackProvider>
+            <AuthHashHandler />
+            {children}
+          </FeedbackProvider>
         </ThemeProvider>
       </body>
     </html>

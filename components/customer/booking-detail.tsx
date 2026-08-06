@@ -17,6 +17,7 @@ import { CleanerMap } from "@/components/customer/cleaner-map";
 import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
 import { RatingForm } from "@/components/customer/rating-form";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,16 @@ const progress = [
   "completed",
 ] as const;
 
+const progressLabel: Record<(typeof progress)[number], string> = {
+  pending_match: "Finding cleaner",
+  matched: "Matched",
+  confirmed: "Confirmed",
+  cleaner_en_route: "En route",
+  in_progress: "In progress",
+  awaiting_customer_confirmation: "Confirm clean",
+  completed: "Completed",
+};
+
 export function BookingDetail({
   checklistItems,
   customerId,
@@ -53,6 +64,7 @@ export function BookingDetail({
   initialBooking: Booking;
 }) {
   const router = useRouter();
+  const { success } = useFeedback();
   const [booking, setBooking] = useState(initialBooking);
   const [showCancel, setShowCancel] = useState(false);
   const [showDispute, setShowDispute] = useState(false);
@@ -135,6 +147,11 @@ export function BookingDetail({
 
     setBooking((current) => ({ ...current, status: "cancelled" }));
     setShowCancel(false);
+    success({
+      kind: "done",
+      title: "Booking cancelled",
+      note: "Your payment hold will be released shortly.",
+    });
     router.refresh();
   }
 
@@ -153,21 +170,27 @@ export function BookingDetail({
       : null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+    <div className="min-w-0 space-y-5 sm:space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <p className="text-sm font-medium text-primary">Booking</p>
-          <h1 className="mt-1 text-3xl font-semibold">
+          <h1 className="mt-1 break-words text-2xl font-semibold tracking-tight sm:text-3xl">
             {formatServiceName(booking.service_type)}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">#{booking.id.slice(0, 8)}</p>
+          <p className="mt-2 font-mono text-xs text-muted-foreground sm:text-sm">
+            #{booking.id.slice(0, 8)}
+          </p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowDispute(true)} variant="outline">
+        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+          <Button
+            className="min-h-11 w-full sm:w-auto"
+            onClick={() => setShowDispute(true)}
+            variant="outline"
+          >
             Report issue
           </Button>
           {booking.cleaner_id ? (
-            <Button asChild variant="outline">
+            <Button asChild className="min-h-11 w-full sm:w-auto" variant="outline">
               <Link href={`/messages/${booking.id}`}>
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Message
@@ -175,7 +198,11 @@ export function BookingDetail({
             </Button>
           ) : null}
           {canCancel ? (
-            <Button onClick={() => setShowCancel(true)} variant="destructive">
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => setShowCancel(true)}
+              variant="destructive"
+            >
               Cancel booking
             </Button>
           ) : null}
@@ -183,37 +210,7 @@ export function BookingDetail({
       </div>
 
       {booking.status !== "cancelled" ? (
-        <section className="overflow-x-auto rounded-xl border bg-background p-5">
-          <div className="flex min-w-[640px] items-start">
-            {progress.map((status, index) => (
-              <div className="flex flex-1 items-start" key={status}>
-                <div className="flex flex-col items-center text-center">
-                  <span
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold",
-                      index <= activeIndex
-                        ? "border-primary bg-primary text-white"
-                        : "border-border bg-card text-muted-foreground",
-                    )}
-                  >
-                    {index < activeIndex ? <Check className="h-4 w-4" /> : index + 1}
-                  </span>
-                  <span className="mt-2 text-xs capitalize">
-                    {status.replaceAll("_", " ")}
-                  </span>
-                </div>
-                {index < progress.length - 1 ? (
-                  <span
-                    className={cn(
-                      "mt-4 h-0.5 flex-1",
-                      index < activeIndex ? "bg-primary" : "bg-muted",
-                    )}
-                  />
-                ) : null}
-              </div>
-            ))}
-          </div>
-        </section>
+        <BookingProgress activeIndex={activeIndex} />
       ) : (
         <div className="rounded-xl bg-muted p-4 text-sm text-foreground">
           This booking was cancelled. Its payment authorization was voided.
@@ -233,8 +230,8 @@ export function BookingDetail({
         />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-        <section className="rounded-xl border bg-background p-5">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+        <section className="rounded-xl border bg-background p-4 sm:p-5">
           <h2 className="text-lg font-semibold">Booking details</h2>
           <div className="mt-5 space-y-4 text-sm">
             <Detail
@@ -290,7 +287,7 @@ export function BookingDetail({
               booking.status,
             ) || booking.payment_status === "released" ? (
               <div className="pt-1">
-                <Button asChild size="sm" variant="outline">
+                <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
                   <Link href={`/booking/${booking.id}/receipt`}>
                     View receipt / invoice
                   </Link>
@@ -300,11 +297,11 @@ export function BookingDetail({
           </div>
         </section>
 
-        <section className="rounded-xl border bg-background p-5">
+        <section className="rounded-xl border bg-background p-4 sm:p-5">
           <h2 className="text-lg font-semibold">Your cleaner</h2>
           {booking.cleaner ? (
             <div className="mt-5 flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-lg font-bold text-primary">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-lg font-bold text-primary">
                 {booking.cleaner.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -316,9 +313,9 @@ export function BookingDetail({
                   booking.cleaner.full_name.charAt(0)
                 )}
               </div>
-              <div>
-                <p className="font-semibold">{booking.cleaner.full_name}</p>
-                <div className="mt-1 flex items-center gap-2 text-sm">
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{booking.cleaner.full_name}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold capitalize text-amber-800">
                     {cleanerTierLabel(booking.cleaner.tier)}
                   </span>
@@ -366,8 +363,8 @@ export function BookingDetail({
       ) : null}
 
       {booking.status === "completed" && booking.cleaner_id ? (
-        <section className="rounded-xl border bg-background p-5">
-          <div className="flex items-center justify-between">
+        <section className="rounded-xl border bg-background p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold">How was your clean?</h2>
               <p className="text-sm text-muted-foreground">
@@ -376,7 +373,12 @@ export function BookingDetail({
               </p>
             </div>
             {!hasRating ? (
-              <Button onClick={() => setShowRating(true)}>Leave a rating</Button>
+              <Button
+                className="min-h-11 w-full sm:w-auto"
+                onClick={() => setShowRating(true)}
+              >
+                Leave a rating
+              </Button>
             ) : (
               <span className="text-sm font-medium text-primary">Rated</span>
             )}
@@ -411,6 +413,11 @@ export function BookingDetail({
             customerId={customerId}
             onSubmitted={() => {
               setShowRating(false);
+              success({
+                kind: "sent",
+                title: "Thanks for the rating",
+                note: "Your cleaner will see the feedback.",
+              });
               router.refresh();
             }}
           />
@@ -423,12 +430,119 @@ export function BookingDetail({
             bookingId={booking.id}
             onSubmitted={() => {
               setShowDispute(false);
+              success({
+                kind: "sent",
+                title: "Issue reported",
+                note: "Our team will take a look and get back to you.",
+              });
               router.refresh();
             }}
           />
         </Modal>
       ) : null}
     </div>
+  );
+}
+
+function BookingProgress({ activeIndex }: { activeIndex: number }) {
+  const current =
+    activeIndex >= 0
+      ? progress[Math.min(activeIndex, progress.length - 1)]
+      : progress[0];
+
+  return (
+    <section className="rounded-xl border bg-background p-4 sm:p-5">
+      <div className="md:hidden">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Status
+        </p>
+        <p className="mt-1 text-base font-semibold text-foreground">
+          {progressLabel[current]}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Step {Math.max(activeIndex, 0) + 1} of {progress.length}
+        </p>
+        <ol className="mt-4 space-y-0">
+          {progress.map((status, index) => {
+            const done = index < activeIndex;
+            const currentStep = index === activeIndex;
+            return (
+              <li className="flex gap-3" key={status}>
+                <div className="flex flex-col items-center">
+                  <span
+                    className={cn(
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold",
+                      done || currentStep
+                        ? "border-primary bg-primary text-white"
+                        : "border-border bg-card text-muted-foreground",
+                    )}
+                  >
+                    {done ? <Check className="h-3.5 w-3.5" /> : index + 1}
+                  </span>
+                  {index < progress.length - 1 ? (
+                    <span
+                      className={cn(
+                        "my-1 w-0.5 flex-1 min-h-[1rem]",
+                        done ? "bg-primary" : "bg-muted",
+                      )}
+                    />
+                  ) : null}
+                </div>
+                <p
+                  className={cn(
+                    "pb-4 pt-1 text-sm",
+                    currentStep
+                      ? "font-semibold text-foreground"
+                      : done
+                        ? "text-foreground"
+                        : "text-muted-foreground",
+                    index === progress.length - 1 && "pb-0",
+                  )}
+                >
+                  {progressLabel[status]}
+                </p>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+
+      <div className="hidden md:block">
+        <div className="flex items-start">
+          {progress.map((status, index) => (
+            <div className="flex min-w-0 flex-1 items-start" key={status}>
+              <div className="flex w-full flex-col items-center text-center">
+                <span
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold",
+                    index <= activeIndex
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-card text-muted-foreground",
+                  )}
+                >
+                  {index < activeIndex ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+                <span className="mt-2 max-w-[6.5rem] text-xs leading-snug">
+                  {progressLabel[status]}
+                </span>
+              </div>
+              {index < progress.length - 1 ? (
+                <span
+                  className={cn(
+                    "mt-4 h-0.5 min-w-[0.75rem] flex-1",
+                    index < activeIndex ? "bg-primary" : "bg-muted",
+                  )}
+                />
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -462,10 +576,10 @@ function Modal({
   title: string;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-background p-6 shadow-xl">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">{title}</h2>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
+      <div className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-background p-5 shadow-xl sm:rounded-2xl sm:p-6">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold sm:text-xl">{title}</h2>
           <Button onClick={onClose} size="icon" variant="ghost">
             <X className="h-4 w-4" />
           </Button>

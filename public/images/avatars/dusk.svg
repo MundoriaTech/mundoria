@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Dusk avatar">
+  <!-- Pack: shared figure geometry. Prop: bedside lamp. -->
+  <rect width="128" height="128" fill="#221F50"/>
+  <ellipse cx="64" cy="112" rx="36" ry="28" fill="#FFC79F"/>
+  <circle cx="64" cy="56" r="28" fill="#FFC79F"/>
+  <circle cx="52" cy="54" r="4" fill="#221F50"/>
+  <circle cx="76" cy="54" r="4" fill="#221F50"/>
+  <path d="M54 66c4 5 16 5 20 0" fill="none" stroke="#221F50" stroke-width="3" stroke-linecap="round"/>
+  <!-- lamp -->
+  <rect x="94" y="78" width="6" height="22" rx="2" fill="#7669D1"/>
+  <path d="M86 78h22l-4-14H90l-4 14z" fill="#FFC79F"/>
+  <circle cx="97" cy="58" r="5" fill="#FFE2C4"/>
+  <path d="M97 48v6" stroke="#FFE2C4" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+</svg>

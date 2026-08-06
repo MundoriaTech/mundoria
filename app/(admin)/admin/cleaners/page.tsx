@@ -24,9 +24,9 @@ export default async function AdminCleanersPage() {
       : profile.cleaner_profiles,
   })) as AdminCleaner[];
   return (
-    <div>
-      <h1 className="text-3xl font-semibold">Cleaner management</h1>
-      <p className="mt-2 mb-7 text-muted-foreground">
+    <div className="min-w-0">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Cleaners</h1>
+      <p className="mb-5 mt-2 text-sm text-muted-foreground sm:mb-7 sm:text-base">
         Review applications and monitor cleaner quality.
       </p>
       <CleanersTable cleaners={cleaners} workingAreas={workingAreas} />

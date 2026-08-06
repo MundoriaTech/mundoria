@@ -1,12 +1,13 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-import { CreditCard, LogOut, Plus, Upload, X } from "lucide-react";
+import { CreditCard, LogOut, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { SERVICES } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/auth";
@@ -31,6 +32,7 @@ export function CleanerProfileForm({
   services: CleanerService[];
 }) {
   const router = useRouter();
+  const { error: showError, success } = useFeedback();
   const [profile, setProfile] = useState(initialProfile);
   const [cleaner, setCleaner] = useState(initialCleaner);
   const [services, setServices] = useState(
@@ -103,22 +105,13 @@ export function CleanerProfileForm({
       ),
     ]);
 
-    setStatus("Profile saved.");
+    setStatus(null);
+    success({
+      kind: "saved",
+      title: "Profile saved",
+      note: "Your availability and services are up to date.",
+    });
     router.refresh();
-  }
-
-  async function avatar(file: File) {
-    const supabase = createBrowserClient();
-    const path = `${profile.id}/cleaner-${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file);
-
-    if (error) {
-      setStatus(error.message);
-      return;
-    }
-
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    setProfile((current) => ({ ...current, avatar_url: data.publicUrl }));
   }
 
   async function connectStripe() {
@@ -141,9 +134,20 @@ export function CleanerProfileForm({
         return;
       }
 
-      setStatus(result.error ?? "Unable to open Stripe.");
+      const errorMessage = result.error ?? "Unable to open Stripe.";
+      setStatus(errorMessage);
+      showError({
+        description: errorMessage,
+        title: "Stripe didn’t open",
+      });
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Unable to open Stripe.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unable to open Stripe.";
+      setStatus(errorMessage);
+      showError({
+        description: errorMessage,
+        title: "Stripe didn’t open",
+      });
     }
   }
 
@@ -155,32 +159,18 @@ export function CleanerProfileForm({
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_.8fr]">
       <section className="rounded-xl border bg-background p-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-emerald-100">
-            {profile.avatar_url ? (
-              <img alt="" className="h-full w-full object-cover" src={profile.avatar_url} />
-            ) : (
-              profile.full_name[0]
-            )}
-          </div>
-          <label>
-            <Button asChild size="sm" variant="outline">
-              <span>
-                <Upload className="mr-2 h-4 w-4" />
-                Avatar
-              </span>
-            </Button>
-            <input
-              accept="image/*"
-              className="hidden"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void avatar(file);
-              }}
-              type="file"
-            />
-          </label>
-        </div>
+        <AvatarUpload
+          currentUrl={profile.avatar_url}
+          onUpload={(url) => {
+            setProfile((current) => ({ ...current, avatar_url: url }));
+            success({
+              kind: "updated",
+              title: "Look updated",
+              note: "Your new avatar is live.",
+            });
+          }}
+          userId={profile.id}
+        />
 
         <div className="mt-5 space-y-4">
           <Field label="Full name">

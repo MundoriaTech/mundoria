@@ -8,9 +8,11 @@ export default async function AdminBookingsPage() {
     .select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name),cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)")
     .order("created_at", { ascending: false });
   return (
-    <div>
-      <h1 className="text-3xl font-semibold">Booking management</h1>
-      <p className="mt-2 mb-7 text-muted-foreground">Search, inspect, and resolve booking edge cases.</p>
+    <div className="min-w-0">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Bookings</h1>
+      <p className="mb-5 mt-2 text-sm text-muted-foreground sm:mb-7 sm:text-base">
+        Search, inspect, and resolve booking edge cases.
+      </p>
       <BookingsTable bookings={(data ?? []) as AdminBooking[]} />
     </div>
   );

@@ -40,19 +40,23 @@ export default async function AdminCustomerPage({
     .reduce((sum, booking) => sum + (booking.amount_total ?? 0), 0);
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-5 sm:space-y-6">
       <div>
         <Link className="text-sm text-primary hover:underline" href="/admin/customers">
           ← Customers
         </Link>
-        <h1 className="mt-3 text-3xl font-semibold">{profile.full_name}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="mt-3 break-words text-2xl font-semibold tracking-tight sm:text-3xl">
+          {profile.full_name}
+        </h1>
+        <p className="break-all text-sm text-muted-foreground sm:text-base">
           {profile.email}
-          {profile.phone ? ` · ${profile.phone}` : ""}
         </p>
+        {profile.phone ? (
+          <p className="text-sm text-muted-foreground">{profile.phone}</p>
+        ) : null}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
         <Metric label="Bookings" value={String(jobs.length)} />
         <Metric
           label="Completed"
@@ -61,7 +65,7 @@ export default async function AdminCustomerPage({
         <Metric label="Lifetime spend" value={formatMoney(spent)} />
       </div>
 
-      <section className="rounded-xl border bg-card p-5">
+      <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Account</h2>
         <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
           <p>
@@ -71,13 +75,13 @@ export default async function AdminCustomerPage({
           <p>
             <b>Referral code:</b> {profile.referral_code || "—"}
           </p>
-          <p>
+          <p className="break-all sm:col-span-2">
             <b>Stripe customer:</b> {profile.stripe_customer_id || "—"}
           </p>
         </div>
       </section>
 
-      <section className="rounded-xl border bg-card p-5">
+      <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Saved addresses</h2>
         <div className="mt-4 space-y-3">
           {(addresses ?? []).map((address) => (
@@ -99,10 +103,33 @@ export default async function AdminCustomerPage({
         </div>
       </section>
 
-      <section className="rounded-xl border bg-card p-5">
+      <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Bookings</h2>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[700px] text-sm">
+        <div className="mt-4 space-y-3 md:hidden">
+          {jobs.map((booking) => (
+            <Link
+              className="block rounded-lg border p-3 transition active:bg-muted/40"
+              href={`/admin/booking/${booking.id}`}
+              key={booking.id}
+            >
+              <p className="font-medium">
+                {formatServiceName(booking.service_type)}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {booking.scheduled_date} ·{" "}
+                {booking.status.replaceAll("_", " ")}
+              </p>
+              <p className="mt-1 text-sm font-semibold">
+                {formatMoney(booking.amount_total)}
+              </p>
+            </Link>
+          ))}
+          {!jobs.length ? (
+            <p className="text-sm text-muted-foreground">No bookings yet.</p>
+          ) : null}
+        </div>
+        <div className="mt-4 hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-muted/50 text-left">
               <tr>
                 <th className="p-3">Service</th>
@@ -160,9 +187,9 @@ export default async function AdminCustomerPage({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border bg-card p-5">
+    <div className="rounded-xl border bg-card p-4 sm:p-5">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
+      <p className="mt-1 text-xl font-bold sm:text-2xl">{value}</p>
     </div>
   );
 }

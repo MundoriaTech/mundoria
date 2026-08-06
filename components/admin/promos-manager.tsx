@@ -109,7 +109,7 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
           />
         </div>
         <Button
-          className="mt-4"
+          className="mt-4 w-full sm:w-auto"
           disabled={!form.code || !form.discount_value}
           onClick={() =>
             void save({
@@ -124,8 +124,45 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
           Create promo
         </Button>
       </section>
-      <div className="mt-6 overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[800px] text-sm">
+
+      <div className="mt-6 space-y-3 md:hidden">
+        {promos.map((promo) => (
+          <div
+            className="rounded-xl border border-border bg-card p-4"
+            key={promo.id}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <p className="font-mono font-bold">{promo.code}</p>
+              <Button
+                onClick={() =>
+                  void save({
+                    action: "toggle",
+                    id: promo.id,
+                    is_active: !promo.is_active,
+                  })
+                }
+                size="sm"
+                variant={promo.is_active ? "default" : "outline"}
+              >
+                {promo.is_active ? "Active" : "Inactive"}
+              </Button>
+            </div>
+            <p className="mt-2 text-sm">
+              {promo.discount_type === "percentage"
+                ? `${promo.discount_value}%`
+                : formatMoney(promo.discount_value)}{" "}
+              · {promo.uses_count}/{promo.max_uses ?? "∞"} uses
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {promo.valid_from?.slice(0, 10) ?? "Now"} –{" "}
+              {promo.valid_until?.slice(0, 10) ?? "No expiry"}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 hidden overflow-x-auto rounded-xl border bg-card md:block">
+        <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="bg-muted/50 text-left">
               <th className="p-3">Code</th>

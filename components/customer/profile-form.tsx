@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AvatarUpload } from "@/components/shared/avatar-upload";
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -19,6 +20,7 @@ import type { Profile } from "@/types/auth";
 
 export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
   const router = useRouter();
+  const { success } = useFeedback();
   const [profile, setProfile] = useState(initialProfile);
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -36,8 +38,16 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
       })
       .eq("id", profile.id);
     setSaving(false);
-    setStatus(error ? error.message : "Profile saved.");
-    if (!error) router.refresh();
+    if (error) {
+      setStatus(error.message);
+      return;
+    }
+    success({
+      kind: "saved",
+      title: "Profile saved",
+      note: "Your details are up to date.",
+    });
+    router.refresh();
   }
 
   async function openPortal() {
@@ -69,7 +79,11 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
           currentUrl={profile.avatar_url}
           onUpload={(url) => {
             setProfile((current) => ({ ...current, avatar_url: url }));
-            setStatus("Avatar updated.");
+            success({
+              kind: "updated",
+              title: "Photo updated",
+              note: "Looking sharp.",
+            });
           }}
           userId={profile.id}
         />
@@ -151,14 +165,18 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
           <p className="mt-1 text-sm text-muted-foreground">
             Share it with friends so you can both earn vouchers.
           </p>
-          <div className="mt-4 flex items-center justify-between rounded-lg bg-amber-50 px-4 py-3">
-            <span className="font-mono text-lg font-bold tracking-wider">
+          <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
+            <span className="font-mono text-lg font-bold tracking-wider text-foreground">
               {profile.referral_code}
             </span>
             <Button
               onClick={() => {
                 void navigator.clipboard.writeText(profile.referral_code);
-                setStatus("Referral code copied.");
+                success({
+                  kind: "done",
+                  title: "Code copied",
+                  note: "Share it with a friend and you both win.",
+                });
               }}
               size="sm"
               variant="ghost"
@@ -172,7 +190,11 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
             onClick={() => {
               const link = `${window.location.origin}/signup?ref=${profile.referral_code}`;
               void navigator.clipboard.writeText(link);
-              setStatus("Invite link copied.");
+              success({
+                kind: "done",
+                title: "Invite link copied",
+                note: "Send it along — they’ll thank you later.",
+              });
             }}
             size="sm"
             variant="outline"

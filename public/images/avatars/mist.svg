@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Mist avatar">
+  <!-- Pack: shared figure geometry. Prop: sparkling window pane. -->
+  <rect width="128" height="128" fill="#B9D0E8"/>
+  <ellipse cx="64" cy="112" rx="36" ry="28" fill="#FFFFFF"/>
+  <circle cx="64" cy="56" r="28" fill="#FFFFFF"/>
+  <circle cx="52" cy="54" r="4" fill="#3A5F7A"/>
+  <circle cx="76" cy="54" r="4" fill="#3A5F7A"/>
+  <path d="M54 66c4 5 16 5 20 0" fill="none" stroke="#3A5F7A" stroke-width="3" stroke-linecap="round"/>
+  <!-- window -->
+  <rect x="88" y="70" width="28" height="34" rx="3" fill="#E8F1F8" stroke="#3A5F7A" stroke-width="3"/>
+  <path d="M102 70v34M88 87h28" stroke="#3A5F7A" stroke-width="2.5"/>
+  <path d="M94 78l4-4M116 92l-5 5" stroke="#3A5F7A" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+  <circle cx="112" cy="78" r="2" fill="#3A5F7A" opacity=".35"/>
+</svg>

@@ -3,6 +3,7 @@
 import { Check, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
 import { cloneElement, useEffect, useRef, useState } from "react";
 
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -50,11 +51,13 @@ export function AddressManager({
   initialAddresses: Address[];
   userId: string;
 }) {
+  const { confirm, error: showError, success } = useFeedback();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [editing, setEditing] = useState<Address | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   function handleSaved(address: Address) {
+    const wasEdit = Boolean(editing);
     setAddresses((current) => {
       const next = address.is_default
         ? current.map((item) => ({ ...item, is_default: false }))
@@ -66,21 +69,46 @@ export function AddressManager({
     });
     setEditing(null);
     setShowForm(false);
+    success({
+      kind: wasEdit ? "updated" : "saved",
+      title: wasEdit ? "Address updated" : "Address saved",
+      note: wasEdit
+        ? "Your booking details will use the latest version."
+        : "Ready whenever you book your next clean.",
+    });
   }
 
   async function removeAddress(address: Address) {
-    if (!window.confirm(`Delete ${address.label ?? "this address"}?`)) return;
+    const label = address.label ?? "this address";
+    const ok = await confirm({
+      action: "Delete address",
+      description: `Remove ${label} from your saved places? You can always add it again later.`,
+      title: "Delete this address?",
+      variant: "destructive",
+    });
+    if (!ok) return;
 
     const { error } = await createBrowserClient()
       .from("addresses")
       .delete()
       .eq("id", address.id);
 
-    if (!error) {
-      setAddresses((current) =>
-        current.filter((item) => item.id !== address.id),
-      );
+    if (error) {
+      showError({
+        description: error.message,
+        title: "Couldn’t delete address",
+      });
+      return;
     }
+
+    setAddresses((current) =>
+      current.filter((item) => item.id !== address.id),
+    );
+    success({
+      kind: "deleted",
+      title: "Address removed",
+      note: "One less place on the list.",
+    });
   }
 
   return (

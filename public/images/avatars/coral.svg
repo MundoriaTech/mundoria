@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Coral avatar">
+  <!-- Pack: shared figure geometry. Prop: kitchen sponge. -->
+  <rect width="128" height="128" fill="#F0B7A0"/>
+  <ellipse cx="64" cy="112" rx="36" ry="28" fill="#FFF6F1"/>
+  <circle cx="64" cy="56" r="28" fill="#FFF6F1"/>
+  <circle cx="52" cy="54" r="4" fill="#9A4E3A"/>
+  <circle cx="76" cy="54" r="4" fill="#9A4E3A"/>
+  <path d="M54 66c4 5 16 5 20 0" fill="none" stroke="#9A4E3A" stroke-width="3" stroke-linecap="round"/>
+  <!-- sponge -->
+  <rect x="88" y="82" width="30" height="20" rx="5" fill="#F4E3A8"/>
+  <rect x="88" y="82" width="30" height="8" rx="4" fill="#E8B84A"/>
+  <circle cx="96" cy="96" r="1.6" fill="#C9A227" opacity=".7"/>
+  <circle cx="104" cy="94" r="1.6" fill="#C9A227" opacity=".7"/>
+  <circle cx="112" cy="97" r="1.6" fill="#C9A227" opacity=".7"/>
+  <circle cx="100" cy="99" r="1.4" fill="#C9A227" opacity=".55"/>
+</svg>

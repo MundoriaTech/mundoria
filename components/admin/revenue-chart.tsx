@@ -23,27 +23,27 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
   const hasRevenue = data.some((point) => point.revenue > 0);
 
   return (
-    <section className="rounded-xl border bg-card p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <section className="min-w-0 overflow-hidden rounded-xl border bg-card p-4 sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
           <h2 className="font-semibold">Revenue</h2>
           <p className="text-sm text-muted-foreground">Captured platform revenue</p>
         </div>
-        <div className="flex rounded-lg bg-muted p-1">
+        <div className="flex w-full rounded-lg bg-muted p-1 sm:w-auto">
           {(["daily", "weekly", "monthly"] as const).map((value) => (
             <Button
               key={value}
               onClick={() => setPeriod(value)}
               size="sm"
               variant={period === value ? "default" : "ghost"}
-              className="capitalize"
+              className="flex-1 capitalize sm:flex-none"
             >
               {value}
             </Button>
           ))}
         </div>
       </div>
-      <div className="mt-5 h-72">
+      <div className="mt-5 h-56 min-w-0 sm:h-72">
         {hasRevenue ? (
           <ResponsiveContainer height="100%" width="100%">
             {period === "daily" ? (

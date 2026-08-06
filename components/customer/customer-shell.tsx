@@ -4,14 +4,15 @@ import {
   CalendarDays,
   Home,
   MessageCircle,
-  Plus,
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { NotificationBell } from "@/components/customer/notification-bell";
+import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { BrandMark } from "@/components/shared/brand-mark";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
@@ -39,34 +40,35 @@ export function CustomerShell({
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <SessionTimeoutGuard audience="customer" />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div>
             <Link className="flex items-center gap-3" href="/dashboard">
               <BrandMark className="h-10 w-7" />
-              <span>
-                <span className="block text-lg font-bold tracking-tight text-foreground">
-                  cleanscape
-                </span>
-                <span className="block text-xs text-muted-foreground">
-                  Hi, {profile.full_name.split(" ")[0]}
-                </span>
+              <span className="text-lg font-bold tracking-tight text-foreground">
+                cleanscape
               </span>
             </Link>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Link
-              className="hidden items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/15 transition hover:bg-primary/90 sm:flex"
-              href="/booking/new"
-            >
-              <Plus className="h-4 w-4" />
-              Book a cleaner
-            </Link>
             <NotificationBell
               initialNotifications={initialNotifications}
               userId={profile.id}
             />
+            <Link
+              aria-label="Open profile"
+              className="rounded-full ring-offset-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              href="/profile"
+            >
+              <UserAvatar
+                name={profile.full_name}
+                seed={profile.id}
+                size="sm"
+                url={profile.avatar_url}
+              />
+            </Link>
           </div>
         </div>
       </header>

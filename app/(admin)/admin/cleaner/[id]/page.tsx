@@ -1,9 +1,21 @@
 import { notFound } from "next/navigation";
 
-import { CleanerActions } from "@/components/admin/cleaner-actions";
+import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
+import { DocumentViewerButton } from "@/components/admin/document-viewer";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { CleanerTier } from "@/types/cleaner";
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Needs review",
+  in_training: "On hold",
+  certified: "Approved",
+  active: "Approved",
+  suspended: "Suspended",
+  removed: "Banned",
+};
 
 export default async function AdminCleanerPage({ params }: { params: { id: string } }) {
   const admin = createAdminClient();
@@ -24,60 +36,73 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
   ]);
   if (!profile || !cleaner) notFound();
   const signed = await Promise.all(
-    [
-      ["DBS certificate", cleaner.dbs_document_url],
-      ["Government ID", cleaner.id_document_url],
-    ].map(async ([label, path]) => {
-      if (!path) return { label, url: null };
+    (
+      [
+        ["DBS certificate", cleaner.dbs_document_url],
+        ["Government ID", cleaner.id_document_url],
+      ] as const
+    ).map(async ([label, path]) => {
+      if (!path) return { label, path: null as string | null, url: null as string | null };
       const { data } = await admin.storage
         .from("cleaner-documents")
         .createSignedUrl(path, 60 * 30);
-      return { label, url: data?.signedUrl ?? null };
+      return { label, path, url: data?.signedUrl ?? null };
     }),
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold">{profile.full_name}</h1>
-        <p className="text-muted-foreground">{profile.email} · {profile.phone}</p>
-      </div>
-      <div className="grid gap-5 lg:grid-cols-[1fr_.65fr]">
-        <section className="rounded-xl border bg-card p-5">
-          <div className="flex justify-between">
-            <div>
-              <p>{cleaner.bio}</p>
-              <p className="mt-3 text-sm text-muted-foreground">{cleaner.years_experience ?? 0} years experience</p>
-            </div>
-            <TierBadge tier={cleaner.tier} />
-          </div>
-          <div className="mt-5 grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
-            <Metric label="Performance score" value={cleaner.medallion_score ?? 0} />
-            <Metric label="Jobs completed" value={cleaner.total_jobs} />
-            <Metric
-              label="Status"
-              value={String(cleaner.status).replaceAll("_", " ")}
-            />
-          </div>
-        </section>
-        <CleanerActions
-          cleanerId={params.id}
-          currentStatus={cleaner.status}
-          currentTier={cleaner.tier}
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex items-start gap-3 sm:gap-4">
+        <UserAvatar
+          name={profile.full_name}
+          seed={profile.id}
+          size="lg"
+          url={profile.avatar_url}
         />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
+              {profile.full_name}
+            </h1>
+            <TierBadge size="sm" tier={cleaner.tier as CleanerTier} />
+          </div>
+          <p className="mt-1 break-all text-sm text-muted-foreground sm:text-base">
+            {profile.email}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {profile.phone ?? "No phone"}
+          </p>
+          <p className="mt-2 text-sm font-medium text-foreground">
+            {STATUS_LABEL[cleaner.status] ?? cleaner.status.replaceAll("_", " ")}
+          </p>
+        </div>
       </div>
-      <section className="rounded-xl border bg-card p-5">
+
+      <CleanerReviewPanel
+        bio={cleaner.bio}
+        cleanerId={params.id}
+        currentStatus={cleaner.status}
+        currentTier={cleaner.tier as CleanerTier}
+        medallionScore={cleaner.medallion_score ?? 0}
+        totalJobs={cleaner.total_jobs}
+        yearsExperience={cleaner.years_experience ?? 0}
+      />
+
+      <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Documents</h2>
-        <div className="mt-4 flex gap-3">
-          {signed.map((document) =>
-            document.url ? (
-              <a className="rounded-md border px-4 py-2 text-sm text-primary" href={document.url} key={document.label} target="_blank">
-                View {document.label}
-              </a>
-            ) : (
-              <span className="text-sm text-muted-foreground" key={document.label}>{document.label}: missing</span>
-            ),
-          )}
+        <p className="mt-1 text-sm text-muted-foreground">
+          Open DBS and ID here without leaving the admin portal.
+        </p>
+        <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap">
+          {signed.map((document) => (
+            <DocumentViewerButton
+              className="w-full justify-center sm:w-auto"
+              key={document.label}
+              label={document.label}
+              path={document.path}
+              url={document.url}
+            />
+          ))}
         </div>
       </section>
       <DataTable
@@ -126,18 +151,48 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
   );
 }
 
-function Metric({ label, value }: { label: string; value: string | number }) {
-  return <div className="rounded-lg bg-muted p-3"><b>{value}</b><small className="block text-muted-foreground">{label}</small></div>;
-}
-
-function DataTable({ headers, rows, title }: { headers: string[]; rows: (string | number | null)[][]; title: string }) {
+function DataTable({
+  headers,
+  rows,
+  title,
+}: {
+  headers: string[];
+  rows: (string | number | null)[][];
+  title: string;
+}) {
   return (
-    <section className="overflow-x-auto rounded-xl border bg-card p-5">
+    <section className="overflow-hidden rounded-xl border bg-card p-4 sm:p-5">
       <h2 className="mb-4 font-semibold">{title}</h2>
-      <table className="w-full min-w-[600px] text-sm">
-        <thead><tr>{headers.map((header) => <th className="border-b p-2 text-left" key={header}>{header}</th>)}</tr></thead>
-        <tbody>{rows.map((row, index) => <tr key={index}>{row.map((cell, cellIndex) => <td className="border-b p-2" key={cellIndex}>{cell}</td>)}</tr>)}</tbody>
-      </table>
+      <div className="-mx-4 overflow-x-auto sm:mx-0">
+        <table className="w-full min-w-[520px] text-sm">
+          <thead>
+            <tr>
+              {headers.map((header) => (
+                <th className="border-b p-2 text-left first:pl-4 sm:first:pl-2" key={header}>
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, index) => (
+              <tr key={index}>
+                {row.map((cell, cellIndex) => (
+                  <td
+                    className="border-b p-2 first:pl-4 sm:first:pl-2"
+                    key={cellIndex}
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!rows.length ? (
+        <p className="py-4 text-sm text-muted-foreground">Nothing here yet.</p>
+      ) : null}
     </section>
   );
 }

@@ -80,6 +80,10 @@ export async function POST(request: Request) {
     address as Address,
     parsed.data.cleaningStandard,
     parsed.data.selectedAddOns,
+    {
+      date: parsed.data.scheduledDate,
+      time: parsed.data.scheduledTime,
+    },
   );
   const discount = promo
     ? promo.discount_type === "percentage"

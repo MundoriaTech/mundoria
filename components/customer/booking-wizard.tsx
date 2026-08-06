@@ -19,9 +19,9 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
 import {
   AddressForm,
 } from "@/components/customer/address-manager";
@@ -40,6 +40,7 @@ import {
   getSmartRecommendation,
   normalizeStandard,
   recommendedStandardFor,
+  schedulePriceLabel,
   selectedAddOnTotal,
   SERVICES,
   SERVICE_ADD_ONS,
@@ -103,7 +104,6 @@ function initialWizardStep(draft?: Partial<BookingDraft>) {
 
 const BOOKING_DRAFT_KEY = "cleanscape-booking-draft";
 const BOOKING_STEP_KEY = "cleanscape-booking-step";
-const authReturnPath = "/booking/new";
 
 export function BookingWizard({
   initialAddresses,
@@ -120,9 +120,11 @@ export function BookingWizard({
     ...initialDraft,
   });
   const [step, setStep] = useState(() => initialWizardStep(initialDraft));
+  const [hydrated, setHydrated] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(
     () => initialAddresses.length === 0 && Boolean(userId),
   );
+  const [authMode, setAuthMode] = useState<BookingAuthMode>("ask");
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
   const needsAuth = !userId;
@@ -139,6 +141,10 @@ export function BookingWizard({
           selectedAddress,
           selectedStandard,
           draft.selectedAddOns,
+          {
+            date: draft.scheduledDate,
+            time: draft.scheduledTime,
+          },
         )
       : 0;
   const recommendation = getSmartRecommendation({
@@ -149,39 +155,83 @@ export function BookingWizard({
   });
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
-    if (stored && !initialDraft) {
-      try {
-        setDraft({ ...blankDraft, ...(JSON.parse(stored) as BookingDraft) });
-        const storedStep = Number(
-          window.localStorage.getItem(BOOKING_STEP_KEY) ?? "",
-        );
-        if (Number.isFinite(storedStep) && storedStep >= 1 && storedStep <= 10) {
-          setStep(storedStep);
-        }
-      } catch {
-        window.localStorage.removeItem(BOOKING_DRAFT_KEY);
-        window.localStorage.removeItem(BOOKING_STEP_KEY);
+    try {
+      const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
+      const storedStep = Number(
+        window.localStorage.getItem(BOOKING_STEP_KEY) ?? "",
+      );
+      if (stored) {
+        const parsed = JSON.parse(stored) as BookingDraft;
+        // Prefer the in-progress draft so login/signup can resume selections.
+        // URL/rebook seeds only fill gaps when storage is empty of a service.
+        setDraft({
+          ...blankDraft,
+          ...parsed,
+          ...(initialDraft && !parsed.serviceType ? initialDraft : {}),
+        });
       }
+      if (Number.isFinite(storedStep) && storedStep >= 1 && storedStep <= 10) {
+        setStep(storedStep);
+      }
+    } catch {
+      window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+      window.localStorage.removeItem(BOOKING_STEP_KEY);
     }
-  }, [initialDraft]);
+    setHydrated(true);
+    // Hydrate once on mount so auth refresh keeps the same draft.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     window.localStorage.setItem(BOOKING_DRAFT_KEY, JSON.stringify(draft));
-  }, [draft]);
+  }, [draft, hydrated]);
 
   useEffect(() => {
+    if (!hydrated) return;
     window.localStorage.setItem(BOOKING_STEP_KEY, String(step));
+  }, [hydrated, step]);
+
+  useEffect(() => {
+    setAddresses(initialAddresses);
+    if (userId && initialAddresses.length === 0) {
+      setShowAddressForm(true);
+    }
+  }, [initialAddresses, userId]);
+
+  useEffect(() => {
+    if (step !== 7) {
+      setAuthMode("ask");
+    }
   }, [step]);
+
+  function goBack() {
+    if (step === 7 && showAddressForm && addresses.length > 0) {
+      setShowAddressForm(false);
+      return;
+    }
+    if (step === 7 && needsAuth && authMode !== "ask") {
+      setAuthMode("ask");
+      return;
+    }
+    setStep((current) => Math.max(1, current - 1));
+  }
 
   function update<K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
   ) {
     setDraft((current) => ({ ...current, [key]: value }));
-    if (key === "promoCode") {
+    if (
+      key === "promoCode" ||
+      key === "scheduledDate" ||
+      key === "scheduledTime" ||
+      key === "selectedAddOns" ||
+      key === "cleaningStandard" ||
+      key === "serviceType"
+    ) {
       setPromoAmount(null);
-      setPromoFeedback(null);
+      if (key === "promoCode") setPromoFeedback(null);
     }
   }
 
@@ -317,6 +367,8 @@ export function BookingWizard({
         addressId: draft.addressId,
         cleaningStandard: selectedStandard,
         code: draft.promoCode,
+        scheduledDate: draft.scheduledDate,
+        scheduledTime: draft.scheduledTime,
         selectedAddOns: draft.selectedAddOns,
         serviceType: draft.serviceType,
       }),
@@ -394,7 +446,7 @@ export function BookingWizard({
         ) : null}
         {step === 7 ? (
           needsAuth || !userId ? (
-            <GuestAuthGate />
+            <BookingAuthPrompt mode={authMode} onModeChange={setAuthMode} />
           ) : (
             <AddressStep
               addresses={addresses}
@@ -412,7 +464,12 @@ export function BookingWizard({
           )
         ) : null}
         {step === 8 ? (
-          <ScheduleStep draft={draft} update={update} />
+          <ScheduleStep
+            address={selectedAddress}
+            draft={draft}
+            standard={selectedStandard}
+            update={update}
+          />
         ) : null}
         {step === 9 && draft.serviceType && selectedAddress && selectedStandard ? (
           <ReviewStep
@@ -449,66 +506,39 @@ export function BookingWizard({
         ) : null}
       </section>
 
-      {step < 10 ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur supports-[backdrop-filter]:bg-background/90 sm:static sm:mt-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-0 sm:backdrop-blur-none">
-          <div className="mx-auto flex max-w-4xl gap-2 sm:mt-6 sm:justify-between sm:gap-3 sm:border-t sm:pt-5">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur supports-[backdrop-filter]:bg-background/90 sm:static sm:mt-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-0 sm:backdrop-blur-none">
+        <div className="mx-auto flex max-w-4xl gap-2 sm:mt-6 sm:justify-between sm:gap-3 sm:border-t sm:pt-5">
+          <Button
+            className="min-h-11 flex-1 touch-manipulation sm:flex-none"
+            disabled={step === 1}
+            onClick={goBack}
+            type="button"
+            variant="ghost"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          {step < 10 && !(needsAuth && step === 7) ? (
             <Button
-              className="min-h-11 flex-1 touch-manipulation sm:flex-none"
-              disabled={step === 1}
-              onClick={() => setStep((current) => current - 1)}
-              variant="ghost"
+              className="min-h-11 flex-[1.6] touch-manipulation sm:flex-none"
+              disabled={!canContinue()}
+              onClick={() =>
+                step === 5
+                  ? continueFromRecommendation()
+                  : setStep((current) => current + 1)
+              }
+              type="button"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              <span className="sm:hidden">
+                {step === 9 ? "Payment" : "Continue"}
+              </span>
+              <span className="hidden sm:inline">
+                {step === 9 ? "Continue to payment" : "Continue"}
+              </span>
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            {needsAuth && step === 7 ? null : (
-              <Button
-                className="min-h-11 flex-[1.6] touch-manipulation sm:flex-none"
-                disabled={!canContinue()}
-                onClick={() =>
-                  step === 5
-                    ? continueFromRecommendation()
-                    : setStep((current) => current + 1)
-                }
-              >
-                <span className="sm:hidden">
-                  {step === 9 ? "Payment" : "Continue"}
-                </span>
-                <span className="hidden sm:inline">
-                  {step === 9 ? "Continue to payment" : "Continue"}
-                </span>
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          ) : null}
         </div>
-      ) : null}
-    </div>
-  );
-}
-
-function GuestAuthGate() {
-  const loginHref = `/login?redirectTo=${encodeURIComponent(authReturnPath)}`;
-  const signupHref = `/signup?redirectTo=${encodeURIComponent(authReturnPath)}`;
-
-  return (
-    <div className="mx-auto max-w-lg text-center">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <ShieldCheck className="h-7 w-7" />
-      </div>
-      <h2 className="mt-5 text-xl font-semibold">Save your progress with an account</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Your service choices are saved on this device. Log in or create a free
-        account to add your address and finish booking — you only pay after the
-        clean is done.
-      </p>
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Button asChild className="min-h-11 w-full touch-manipulation sm:w-auto">
-          <Link href={signupHref}>Create account</Link>
-        </Button>
-        <Button asChild className="min-h-11 w-full touch-manipulation sm:w-auto" variant="outline">
-          <Link href={loginHref}>Log in</Link>
-        </Button>
       </div>
     </div>
   );
@@ -580,7 +610,7 @@ function ServiceStep({
         Choose your {category ? categoryDefinition(category).label.toLowerCase() : "cleaning"} service
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Each service includes a recommended standard based on CleanScape guidance.
+        Pick the service that best matches what you need.
       </p>
       <div className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2">
         {services.map((service) => {
@@ -604,9 +634,6 @@ function ServiceStep({
                   <p className="font-semibold">{service.label}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {service.description}
-                  </p>
-                  <p className="mt-2 text-xs font-semibold text-primary">
-                    Recommended: {standardLabel(service.recommendedStandard)}
                   </p>
                 </div>
                 {active ? (
@@ -993,8 +1020,14 @@ function AddressStep({
         type="button"
         variant="outline"
       >
-        <Plus className="mr-2 h-4 w-4" />
-        Add another address
+        {showForm ? (
+          "Cancel new address"
+        ) : (
+          <>
+            <Plus className="mr-2 h-4 w-4" />
+            Add another address
+          </>
+        )}
       </Button>
       {showForm ? (
         <div className="mt-5 overflow-x-auto rounded-xl bg-muted/40 p-3 sm:p-4">
@@ -1006,20 +1039,32 @@ function AddressStep({
 }
 
 function ScheduleStep({
+  address,
   draft,
+  standard,
   update,
 }: {
+  address?: Address;
   draft: BookingDraft;
+  standard: CleaningStandard | null;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
   ) => void;
 }) {
   const minDate = new Date().toISOString().slice(0, 10);
+  const arrivalNote = schedulePriceLabel(
+    draft.scheduledDate,
+    draft.scheduledTime,
+  );
 
   return (
     <div>
       <h2 className="text-lg font-semibold sm:text-xl">Pick a date and time</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Price depends on when the cleaner arrives — evenings and weekends are a
+        little higher than weekday daytime.
+      </p>
       <div className="mt-5 grid gap-6 sm:mt-6 md:grid-cols-2">
         <label className="space-y-2 text-sm font-medium">
           <span className="flex items-center gap-2">
@@ -1042,11 +1087,31 @@ function ScheduleStep({
           <TimeSlotPicker
             className="mt-2 max-h-56 overflow-y-auto overscroll-contain pr-1"
             date={draft.scheduledDate}
+            formatSlotPrice={
+              draft.serviceType && address && standard
+                ? (slot) =>
+                    formatMoney(
+                      estimatePrice(
+                        draft.serviceType!,
+                        address,
+                        standard,
+                        draft.selectedAddOns,
+                        { date: draft.scheduledDate, time: slot },
+                      ),
+                    )
+                : undefined
+            }
             onChange={(slot) => update("scheduledTime", slot)}
             value={draft.scheduledTime}
           />
         </div>
       </div>
+
+      {arrivalNote && draft.scheduledTime ? (
+        <p className="mt-4 rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
+          {arrivalNote} rate applied for {draft.scheduledTime}.
+        </p>
+      ) : null}
 
       <div className="mt-6">
         <RecurringToggle
@@ -1127,6 +1192,12 @@ function ReviewStep({
           label="When"
           value={`${draft.scheduledDate} at ${draft.scheduledTime}`}
         />
+        {schedulePriceLabel(draft.scheduledDate, draft.scheduledTime) ? (
+          <SummaryRow
+            label="Arrival rate"
+            value={schedulePriceLabel(draft.scheduledDate, draft.scheduledTime)!}
+          />
+        ) : null}
         <SummaryRow
           label="Recurring"
           value={

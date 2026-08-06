@@ -9,6 +9,7 @@ export const metadata = {
 
 interface LoginPageProps {
   searchParams: {
+    email?: string;
     error?: string;
     message?: string;
     redirectTo?: string;
@@ -19,10 +20,17 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
   const signupHref = searchParams.redirectTo
     ? `/signup?redirectTo=${encodeURIComponent(searchParams.redirectTo)}`
     : "/signup";
+  const returningFromBooking =
+    searchParams.redirectTo?.startsWith("/booking") &&
+    Boolean(searchParams.email);
 
   return (
     <AuthShell
-      description="Welcome back. Your next booking or job is waiting."
+      description={
+        returningFromBooking
+          ? "Looks like you already have a CleanScape account. Sign in to finish your booking."
+          : "Welcome back. Your next booking or job is waiting."
+      }
       footer={
         <>
           New to CleanScape?{" "}
@@ -37,6 +45,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
       title="Sign in"
     >
       <LoginForm
+        initialEmail={searchParams.email}
         initialError={searchParams.error}
         initialMessage={searchParams.message}
         redirectTo={searchParams.redirectTo}

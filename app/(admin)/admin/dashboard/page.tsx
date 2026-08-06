@@ -3,11 +3,10 @@ import {
   AlertTriangle,
   Banknote,
   CalendarCheck,
-  ShieldCheck,
-  Sparkles,
   Star,
   UserRoundCheck,
 } from "lucide-react";
+import Link from "next/link";
 
 import { OperationsMap } from "@/components/admin/operations-map";
 import { RematchButton } from "@/components/admin/rematch-button";
@@ -74,59 +73,67 @@ export default async function AdminDashboardPage() {
       new Date(booking.updated_at ?? booking.created_at).getTime() >
         Date.now() - 24 * 60 * 60 * 1000,
   );
+  const weekday = new Date().toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <div className="space-y-7">
-      <div className="relative overflow-hidden rounded-[2rem] bg-[#221f50] p-6 text-white shadow-2xl shadow-[#221f50]/15 sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#ffc79f]/25 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-[#7669d1]/35 blur-3xl" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-[#ffc79f]">
-              <Sparkles className="h-4 w-4" />
-              Platform overview
-            </p>
-            <h1 className="mt-5 max-w-2xl text-3xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              Admin dashboard
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-white/75 sm:text-base">
-              Track live jobs, cleaner certification, payments, service quality,
-              and operational alerts from one CleanScape command centre.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-            <p className="flex items-center gap-2 text-sm font-semibold text-white">
-              <ShieldCheck className="h-4 w-4 text-[#ffc79f]" />
-              Today’s operational snapshot
-            </p>
-            <p className="mt-2 text-xs leading-5 text-white/60">
-              {active.length} active job{active.length === 1 ? "" : "s"} ·{" "}
-              {pending} cleaner application{pending === 1 ? "" : "s"} pending
-            </p>
-          </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">{weekday}</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-4xl">
+            Dashboard
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Jobs running today, cleaners waiting for review, and money in.
+          </p>
         </div>
+        {pending > 0 ? (
+          <Link
+            className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground sm:w-auto"
+            href="/admin/cleaners"
+          >
+            Review {pending} cleaner{pending === 1 ? "" : "s"}
+          </Link>
+        ) : null}
       </div>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi icon={CalendarCheck} label="Bookings today" value={String(todayBookings.length)} />
-        <Kpi icon={Activity} label="Active jobs" value={String(active.length)} />
+        <Kpi icon={Activity} label="Jobs in progress" value={String(active.length)} />
         <Kpi icon={Banknote} label="Revenue today" value={formatMoney(revenueToday)} />
-        <Kpi icon={UserRoundCheck} label="Pending cleaners" value={String(pending)} />
+        <Kpi icon={UserRoundCheck} label="Cleaners to review" value={String(pending)} />
       </div>
+
       {alerts.length ? (
-        <div className="space-y-2 rounded-[1.5rem] border border-border bg-muted p-4 text-sm text-foreground shadow-lg">
-          <p className="font-semibold"><AlertTriangle className="mr-2 inline h-5 w-5" />{alerts.length} rematchable cancellation{alerts.length > 1 ? "s" : ""} in the last 24 hours (payment still held).</p>
+        <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground">
+          <p className="font-semibold">
+            <AlertTriangle className="mr-2 inline h-5 w-5 text-amber-600" />
+            {alerts.length} cancelled booking{alerts.length > 1 ? "s" : ""} still
+            need a new cleaner (payment held).
+          </p>
           {alerts.slice(0, 3).map((booking) => (
-            <div className="flex items-center justify-between rounded-2xl bg-card p-3" key={booking.id}>
-              <span>Booking {booking.id.slice(0, 8)} · {booking.scheduled_start_time.slice(0, 5)}</span>
+            <div
+              className="flex flex-col gap-3 rounded-xl bg-card p-3 sm:flex-row sm:items-center sm:justify-between"
+              key={booking.id}
+            >
+              <span className="text-sm">
+                Booking {booking.id.slice(0, 8)} ·{" "}
+                {booking.scheduled_start_time.slice(0, 5)}
+              </span>
               <RematchButton bookingId={booking.id} />
             </div>
           ))}
         </div>
       ) : null}
+
       <div className="grid gap-5 xl:grid-cols-[1.4fr_.6fr]">
         <RevenueChart points={revenuePoints} />
-        <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-lg shadow-[#5a51aa]/5">
-          <h2 className="text-lg font-semibold tracking-[-0.03em] text-foreground">Platform health</h2>
+        <section className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold tracking-tight">Quality</h2>
           <Health label="Average rating" value={`${avgRating.toFixed(2)}/5`} icon={Star} />
           <Health
             label="No-show rate"
@@ -138,36 +145,51 @@ export default async function AdminDashboardPage() {
           />
         </section>
       </div>
-      <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-lg shadow-[#5a51aa]/5">
+
+      <section className="rounded-xl border border-border bg-card p-5">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-primary">Real-time operations monitor</p>
-            <h2 className="text-lg font-semibold tracking-[-0.03em] text-foreground">Live operations</h2>
+            <h2 className="text-lg font-semibold tracking-tight">Live map</h2>
+            <p className="text-sm text-muted-foreground">
+              Pending, en route, and in-progress jobs
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Pending, en-route, and in-progress jobs
-          </p>
         </div>
         <div className="mt-4">
-          <OperationsMap bookings={all.filter((booking) => ["pending_match", "cleaner_en_route", "in_progress"].includes(booking.status))} />
+          <OperationsMap
+            bookings={all.filter((booking) =>
+              ["pending_match", "cleaner_en_route", "in_progress"].includes(
+                booking.status,
+              ),
+            )}
+          />
         </div>
       </section>
-      <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-lg shadow-[#5a51aa]/5">
-        <h2 className="text-lg font-semibold tracking-[-0.03em] text-foreground">Recent activity</h2>
+
+      <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
+        <h2 className="text-lg font-semibold tracking-tight">Recent activity</h2>
         <div className="mt-4 divide-y divide-border">
-          {[...all.slice(0, 7).map((booking) => ({
-            date: booking.created_at,
-            text: `Booking ${booking.id.slice(0, 8)} · ${booking.status.replaceAll("_", " ")}`,
-          })), ...(disputes ?? []).slice(0, 3).map((dispute) => ({
-            date: dispute.created_at,
-            text: `Dispute opened · ${dispute.type}`,
-          }))]
+          {[
+            ...all.slice(0, 7).map((booking) => ({
+              date: booking.created_at,
+              text: `Booking ${booking.id.slice(0, 8)} · ${booking.status.replaceAll("_", " ")}`,
+            })),
+            ...(disputes ?? []).slice(0, 3).map((dispute) => ({
+              date: dispute.created_at,
+              text: `Dispute opened · ${dispute.type}`,
+            })),
+          ]
             .sort((a, b) => b.date.localeCompare(a.date))
             .slice(0, 10)
             .map((item, index) => (
-              <div className="flex justify-between gap-4 py-3 text-sm" key={`${item.date}-${index}`}>
-                <span className="font-medium text-foreground">{item.text}</span>
-                <span className="text-muted-foreground">
+              <div
+                className="flex flex-col gap-1 border-b border-border py-3 text-sm last:border-0 sm:flex-row sm:justify-between sm:gap-4"
+                key={`${item.date}-${index}`}
+              >
+                <span className="min-w-0 font-medium text-foreground">
+                  {item.text}
+                </span>
+                <span className="shrink-0 text-muted-foreground">
                   {new Date(item.date).toLocaleString("en-GB")}
                 </span>
               </div>
@@ -188,12 +210,14 @@ function Kpi({
   value: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-border bg-card p-5 shadow-lg shadow-[#5a51aa]/5 transition hover:-translate-y-0.5 hover:shadow-xl">
-      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted text-primary">
+    <div className="rounded-xl border border-border bg-card p-5 transition hover:border-primary/30">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-primary">
         <Icon className="h-5 w-5" />
       </span>
       <p className="mt-4 text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold tracking-[-0.04em] text-foreground">{value}</p>
+      <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+        {value}
+      </p>
     </div>
   );
 }

@@ -12,6 +12,8 @@ const schema = bookingDraftSchema
   .pick({
     addressId: true,
     cleaningStandard: true,
+    scheduledDate: true,
+    scheduledTime: true,
     selectedAddOns: true,
     serviceType: true,
   })
@@ -77,6 +79,10 @@ export async function POST(request: Request) {
     address as Address,
     parsed.data.cleaningStandard,
     parsed.data.selectedAddOns,
+    {
+      date: parsed.data.scheduledDate,
+      time: parsed.data.scheduledTime,
+    },
   );
   const discount =
     promo.discount_type === "percentage"

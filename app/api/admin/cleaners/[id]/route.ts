@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -106,7 +107,7 @@ export async function POST(
   });
   await auth.admin.from("notifications").insert({
     body:
-        action === "approve"
+      action === "approve"
         ? "You are approved and can now receive cleaning jobs."
         : action === "reject"
           ? "Your application is on hold. CleanScape will follow up if more is needed."
@@ -125,5 +126,10 @@ export async function POST(
     type: `cleaner_${action}`,
     user_id: params.id,
   });
+
+  revalidatePath(`/admin/cleaner/${params.id}`);
+  revalidatePath("/admin/cleaners");
+  revalidatePath("/admin/dashboard");
+
   return NextResponse.json({ success: true });
 }

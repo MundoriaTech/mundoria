@@ -132,7 +132,7 @@ function ZoneMap({ zones }: { zones: Zone[] }) {
           id: zone.id,
           radiusMeters: 5000 + zone.postcode_prefixes.length * 1000,
         }))}
-        className="h-[32rem]"
+        className="h-64 sm:h-[32rem]"
         markers={[]}
         zoom={10}
       />

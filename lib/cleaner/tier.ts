@@ -24,6 +24,7 @@ export function nextTier(tier: CleanerTier) {
 }
 
 export function cleanerTierLabel(tier: CleanerTier) {
-  if (tier === "rose_gold" || tier === "elite") return "Rose Gold";
+  if (tier === "rose_gold") return "Rose Gold";
+  if (tier === "elite") return "Elite";
   return tier.charAt(0).toUpperCase() + tier.slice(1);
 }

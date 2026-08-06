@@ -14,8 +14,12 @@ export const signupSchema = z.object({
   phone: z
     .string()
     .trim()
-    .min(7, "Enter a valid phone number")
-    .max(30, "Phone number is too long"),
+    .max(30, "Phone number is too long")
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || value.length >= 7, {
+      message: "Enter a valid phone number",
+    }),
   role: z.enum(["customer", "cleaner"]),
   referral_code: z.string().trim().max(40).optional().or(z.literal("")),
 });

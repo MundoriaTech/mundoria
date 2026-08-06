@@ -69,7 +69,7 @@ export const CLEANING_STANDARDS: Array<{
 }> = [
   {
     description: "Routine cleaning for properties that are already well maintained.",
-    label: "Essential",
+    label: "Standard",
     value: "essential",
   },
   {
@@ -486,11 +486,58 @@ export function selectedAddOnTotal(selectedAddOns: string[]) {
   );
 }
 
+/** Arrival-time pricing — evenings and weekends cost more than weekday daytime. */
+export function schedulePriceMultiplier(
+  scheduledDate?: string | null,
+  scheduledTime?: string | null,
+) {
+  if (!scheduledDate || !scheduledTime) return 1;
+
+  const day = new Date(`${scheduledDate}T12:00:00`).getDay();
+  const weekend = day === 0 || day === 6;
+  const hour = Number(scheduledTime.slice(0, 2));
+  if (!Number.isFinite(hour)) return weekend ? 1.18 : 1;
+
+  const early = hour < 9;
+  const evening = hour >= 17;
+
+  if (weekend && (early || evening)) return 1.28;
+  if (weekend) return 1.18;
+  if (evening) return 1.15;
+  if (early) return 1.1;
+  return 1;
+}
+
+export function schedulePriceLabel(
+  scheduledDate?: string | null,
+  scheduledTime?: string | null,
+) {
+  const multiplier = schedulePriceMultiplier(scheduledDate, scheduledTime);
+  if (multiplier === 1) return null;
+  if (!scheduledDate || !scheduledTime) return null;
+
+  const day = new Date(`${scheduledDate}T12:00:00`).getDay();
+  const weekend = day === 0 || day === 6;
+  const hour = Number(scheduledTime.slice(0, 2));
+  const early = Number.isFinite(hour) && hour < 9;
+  const evening = Number.isFinite(hour) && hour >= 17;
+
+  if (weekend && (early || evening)) return "Weekend peak arrival";
+  if (weekend) return "Weekend arrival";
+  if (evening) return "Evening arrival";
+  if (early) return "Early arrival";
+  return "Timed arrival";
+}
+
 export function estimatePrice(
   serviceType: ServiceType,
   address: Address,
   standard: CleaningStandard = recommendedStandardFor(serviceType),
   selectedAddOns: string[] = [],
+  schedule?: {
+    date?: string | null;
+    time?: string | null;
+  },
 ) {
   const service = serviceDefinition(serviceType);
   const bedrooms = address.num_bedrooms ?? 1;
@@ -505,7 +552,8 @@ export function estimatePrice(
   const base = Math.round(
     (service.basePrice + Math.max(0, bedrooms - 1) * 1200 + bathrooms * 800) *
       propertyMultiplier *
-      standardMultipliers[standard],
+      standardMultipliers[standard] *
+      schedulePriceMultiplier(schedule?.date, schedule?.time),
   );
 
   return base + selectedAddOnTotal(selectedAddOns);

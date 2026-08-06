@@ -29,10 +29,17 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     payment = { id: intent.id, status: intent.status, amount: intent.amount, amount_capturable: intent.amount_capturable };
   }
   return (
-    <div className="space-y-6">
-      <div><p className="font-mono text-sm text-primary">{booking.id}</p><h1 className="text-3xl font-semibold">{formatServiceName(booking.service_type)}</h1></div>
-      <div className="grid gap-5 lg:grid-cols-[1fr_.6fr]">
-        <section className="rounded-xl border bg-card p-5">
+    <div className="min-w-0 space-y-5 sm:space-y-6">
+      <div>
+        <p className="break-all font-mono text-xs text-primary sm:text-sm">
+          {booking.id}
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+          {formatServiceName(booking.service_type)}
+        </h1>
+      </div>
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1fr_.6fr]">
+        <section className="rounded-xl border bg-card p-4 sm:p-5">
           <h2 className="font-semibold">Booking information</h2>
           <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <p><b>Customer:</b> {booking.customer?.full_name}</p>
@@ -41,7 +48,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             <p><b>Standard:</b> {standardLabel(booking.cleaning_standard ?? "enhanced")}</p>
             <p><b>Schedule:</b> {booking.scheduled_date} {booking.scheduled_start_time}</p>
             <p><b>Status:</b> {booking.status}</p>
-            <p><b>Address:</b> {booking.address?.address_line_1}, {booking.address?.city}</p>
+            <p className="sm:col-span-2"><b>Address:</b> {booking.address?.address_line_1}, {booking.address?.city}</p>
             <p><b>Amount:</b> {formatMoney(booking.amount_total)}</p>
             <p><b>Property condition:</b> {booking.property_condition?.replaceAll("_", " ") ?? "—"}</p>
             <p><b>Recently moved:</b> {booking.recently_moved == null ? "—" : booking.recently_moved ? "Yes" : "No"}</p>
@@ -52,9 +59,17 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         </section>
         <BookingActions bookingId={params.id} cleaners={(cleaners ?? []).map((cleaner) => ({ id: cleaner.id, full_name: cleaner.full_name }))} currentStatus={booking.status} />
       </div>
-      <section className="rounded-xl border bg-card p-5">
+      <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Stripe payment</h2>
-        {payment ? <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3"><p>ID: {payment.id}</p><p>Status: {payment.status}</p><p>Capturable: {formatMoney(payment.amount_capturable)}</p></div> : <p className="mt-3 text-sm text-muted-foreground">No payment intent.</p>}
+        {payment ? (
+          <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+            <p className="break-all">ID: {payment.id}</p>
+            <p>Status: {payment.status}</p>
+            <p>Capturable: {formatMoney(payment.amount_capturable)}</p>
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground">No payment intent.</p>
+        )}
       </section>
       <SimpleTable title="Matching decision log" rows={(matching ?? []).map((item) => [item.created_at, item.decision, JSON.stringify(item.reasons)])} />
       <SimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "—"])} />
@@ -64,5 +79,27 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
 }
 
 function SimpleTable({ rows, title }: { rows: string[][]; title: string }) {
-  return <section className="overflow-x-auto rounded-xl border bg-card p-5"><h2 className="mb-3 font-semibold">{title}</h2><table className="w-full min-w-[600px] text-sm"><tbody>{rows.map((row, i) => <tr className="border-b" key={i}>{row.map((cell, j) => <td className="p-2" key={j}>{cell}</td>)}</tr>)}</tbody></table>{!rows.length ? <p className="text-sm text-muted-foreground">No records.</p> : null}</section>;
+  return (
+    <section className="overflow-hidden rounded-xl border bg-card p-4 sm:p-5">
+      <h2 className="mb-3 font-semibold">{title}</h2>
+      <div className="-mx-4 overflow-x-auto sm:mx-0">
+        <table className="w-full min-w-[480px] text-sm">
+          <tbody>
+            {rows.map((row, i) => (
+              <tr className="border-b" key={i}>
+                {row.map((cell, j) => (
+                  <td className="break-words p-2 first:pl-4 sm:first:pl-2" key={j}>
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!rows.length ? (
+        <p className="text-sm text-muted-foreground">No records.</p>
+      ) : null}
+    </section>
+  );
 }

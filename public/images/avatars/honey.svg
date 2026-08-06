@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Honey avatar">
+  <!-- Pack: shared figure geometry. Prop: rubber gloves. -->
+  <rect width="128" height="128" fill="#F4E3A8"/>
+  <ellipse cx="64" cy="112" rx="36" ry="28" fill="#5C4A1F"/>
+  <circle cx="64" cy="56" r="28" fill="#5C4A1F"/>
+  <circle cx="52" cy="54" r="4" fill="#F4E3A8"/>
+  <circle cx="76" cy="54" r="4" fill="#F4E3A8"/>
+  <path d="M54 66c4 5 16 5 20 0" fill="none" stroke="#F4E3A8" stroke-width="3" stroke-linecap="round"/>
+  <!-- gloves pair -->
+  <path d="M90 78c0-8 6-12 12-10 2 0 4 2 4 6v28c0 3-2 5-5 5h-6c-3 0-5-2-5-5V78z" fill="#E8B84A"/>
+  <path d="M100 74c2-6 8-8 12-4 1 4-1 8-4 9" fill="#F7C948"/>
+  <path d="M104 78c0-8 6-12 12-10 2 0 4 2 4 6v28c0 3-2 5-5 5h-6c-3 0-5-2-5-5V78z" fill="#F7C948"/>
+  <path d="M114 74c2-6 8-8 12-4 1 4-1 8-4 9" fill="#FFE08A"/>
+</svg>

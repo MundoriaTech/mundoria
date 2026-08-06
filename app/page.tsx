@@ -4,19 +4,25 @@ import Link from "next/link";
 
 import { BrandLogo, BrandMark } from "@/components/shared/brand-mark";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { dashboardForRole } from "@/lib/auth/redirects";
 import {
   SERVICE_CATEGORIES,
   SERVICES,
 } from "@/lib/customer/services";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+import { createServerClient } from "@/lib/supabase/server";
+import { isUserRole, type Profile } from "@/types/auth";
 
 export const metadata: Metadata = {
   description:
     "Book certified UK cleaning professionals for homes, workplaces, short-term rentals, exterior cleaning and recovery support with CleanScape.",
   title: "CleanScape UK | Trusted cleaning, beautifully managed",
 };
+
+export const dynamic = "force-dynamic";
 
 const categoryImages: Record<string, string> = {
   commercial:
@@ -107,11 +113,34 @@ const cityServiceColumns = SERVICE_CATEGORIES.map((category) => ({
   service: category.label.replace(" Cleaning", ""),
 }));
 
-export default function HomePage() {
+export default async function HomePage() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
   const customerHref = bookingHref;
   const cleanerHref = configured ? "/signup" : "/setup";
+
+  let viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null =
+    null;
+  if (configured) {
+    try {
+      const supabase = createServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id,full_name,avatar_url,role")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (profile && isUserRole(profile.role)) {
+          viewer = profile;
+        }
+      }
+    } catch {
+      viewer = null;
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -119,6 +148,7 @@ export default function HomePage() {
         cleanerHref={cleanerHref}
         configured={configured}
         customerHref={customerHref}
+        viewer={viewer}
       />
 
       <section className="relative isolate bg-background px-3 pb-16 pt-3 min-[380px]:px-4 sm:px-8 sm:pb-24 sm:pt-5 lg:pb-32">
@@ -504,12 +534,16 @@ function LandingNavbar({
   cleanerHref,
   configured,
   customerHref,
+  viewer,
 }: {
   cleanerHref: string;
   configured: boolean;
   customerHref: string;
+  viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
 }) {
   const loginHref = configured ? "/login" : "/setup";
+  const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
+  const firstName = viewer?.full_name.trim().split(/\s+/)[0] ?? "";
   const navLinks = [
     ["Services", "#services"],
     ["How it works", "#how-it-works"],
@@ -545,12 +579,29 @@ function LandingNavbar({
 
         <div className="hidden items-center gap-3 lg:flex">
           <ThemeToggle />
-          <Link
-            className="rounded-full px-4 py-2 text-sm font-black text-muted-foreground transition hover:bg-primary/10 hover:text-foreground"
-            href={loginHref}
-          >
-            Log in
-          </Link>
+          {viewer ? (
+            <Link
+              className="flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3 transition hover:bg-muted"
+              href={accountHref}
+            >
+              <UserAvatar
+                name={viewer.full_name}
+                seed={viewer.id}
+                size="sm"
+                url={viewer.avatar_url}
+              />
+              <span className="max-w-[9rem] truncate text-sm font-bold text-foreground">
+                {firstName}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              className="rounded-full px-4 py-2 text-sm font-black text-muted-foreground transition hover:bg-primary/10 hover:text-foreground"
+              href={loginHref}
+            >
+              Log in
+            </Link>
+          )}
           <Button
             asChild
             className="h-11 rounded-full bg-foreground px-6 text-sm font-black text-background hover:bg-foreground/90"
@@ -561,11 +612,46 @@ function LandingNavbar({
 
         <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
+          {viewer ? (
+            <Link
+              aria-label={`Open account for ${viewer.full_name}`}
+              className="shrink-0"
+              href={accountHref}
+            >
+              <UserAvatar
+                name={viewer.full_name}
+                seed={viewer.id}
+                size="sm"
+                url={viewer.avatar_url}
+              />
+            </Link>
+          ) : null}
           <details className="relative">
             <summary className="flex cursor-pointer list-none items-center rounded-full border border-border px-4 py-2 text-sm font-black text-foreground [&::-webkit-details-marker]:hidden">
               Menu
             </summary>
             <div className="absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] border border-border bg-card shadow-2xl shadow-[#221f50]/15">
+              {viewer ? (
+                <Link
+                  className="flex items-center gap-3 border-b border-border px-5 py-4 hover:bg-muted"
+                  href={accountHref}
+                >
+                  <UserAvatar
+                    name={viewer.full_name}
+                    seed={viewer.id}
+                    size="sm"
+                    url={viewer.avatar_url}
+                  />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-bold text-foreground">
+                      {viewer.full_name}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Go to dashboard
+                    </span>
+                  </span>
+                </Link>
+              ) : null}
               <nav
                 aria-label="Mobile navigation"
                 className="grid divide-y divide-border"
@@ -587,13 +673,23 @@ function LandingNavbar({
                 >
                   <Link href={customerHref}>Book a clean</Link>
                 </Button>
-                <Button
-                  asChild
-                  className="h-11 rounded-full text-sm font-black"
-                  variant="outline"
-                >
-                  <Link href={loginHref}>Log in</Link>
-                </Button>
+                {viewer ? (
+                  <Button
+                    asChild
+                    className="h-11 rounded-full text-sm font-black"
+                    variant="outline"
+                  >
+                    <Link href={accountHref}>Dashboard</Link>
+                  </Button>
+                ) : (
+                  <Button
+                    asChild
+                    className="h-11 rounded-full text-sm font-black"
+                    variant="outline"
+                  >
+                    <Link href={loginHref}>Log in</Link>
+                  </Button>
+                )}
               </div>
             </div>
           </details>

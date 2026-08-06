@@ -17,6 +17,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { isUserRole } from "@/types/auth";
 
 interface LoginFormProps {
+  initialEmail?: string;
   initialError?: string;
   initialMessage?: string;
   requiredRole?: "admin";
@@ -25,6 +26,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({
+  initialEmail,
   initialError,
   initialMessage,
   requiredRole,
@@ -41,7 +43,7 @@ export function LoginForm({
     register,
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: initialEmail ?? "", password: "" },
   });
 
   const onSubmit = handleSubmit(async ({ email, password }) => {
