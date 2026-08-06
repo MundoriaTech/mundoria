@@ -46,7 +46,7 @@ export function CleanersTable({
       <div className="flex flex-wrap gap-2">
         {["all", "pending", "in_training", "certified", "active", "suspended", "removed"].map((value) => (
           <button
-            className={`rounded-lg px-3 py-2 text-sm capitalize ${tab === value ? "bg-primary text-white" : "bg-white"}`}
+            className={`rounded-lg px-3 py-2 text-sm capitalize ${tab === value ? "bg-primary text-white" : "bg-muted"}`}
             key={value}
             onClick={() => setTab(value)}
           >
@@ -73,7 +73,7 @@ export function CleanersTable({
         </select>
         <Input onChange={(event) => setArea(event.target.value)} placeholder="Working area" />
       </div>
-      <div className="mt-5 overflow-x-auto rounded-xl border bg-white">
+      <div className="mt-5 overflow-x-auto rounded-xl border bg-card">
         <table className="w-full min-w-[800px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>

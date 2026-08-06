@@ -446,7 +446,7 @@ export function BookingWizard({
               />
             </Elements>
           ) : (
-            <p className="rounded-md bg-amber-50 p-4 text-sm text-amber-900">
+            <p className="rounded-md border border-border bg-muted p-4 text-sm text-foreground">
               Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure payment.
             </p>
           )
@@ -818,11 +818,11 @@ function RecommendationStep({
       </p>
 
       {recommendation?.shouldShow ? (
-        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-950 sm:p-5">
+        <div className="mt-5 rounded-2xl border border-border bg-muted p-4 text-foreground sm:p-5">
           <p className="text-sm font-semibold">Our recommendation</p>
           <p className="mt-2 text-sm leading-6">{recommendation.message}</p>
           {recommendation.autoApplied ? (
-            <p className="mt-4 rounded-lg bg-white/70 p-3 text-sm font-semibold">
+            <p className="mt-4 rounded-lg bg-card p-3 text-sm font-semibold">
               The cleaning standard has automatically been updated for this
               service.
             </p>

@@ -108,7 +108,7 @@ export function AdminInvitationsManager({
   }
 
   return (
-    <section className="rounded-xl border bg-white p-6">
+    <section className="rounded-xl border bg-card p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold tracking-[-0.03em]">

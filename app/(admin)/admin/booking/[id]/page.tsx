@@ -32,7 +32,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     <div className="space-y-6">
       <div><p className="font-mono text-sm text-primary">{booking.id}</p><h1 className="text-3xl font-semibold">{formatServiceName(booking.service_type)}</h1></div>
       <div className="grid gap-5 lg:grid-cols-[1fr_.6fr]">
-        <section className="rounded-xl border bg-white p-5">
+        <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Booking information</h2>
           <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <p><b>Customer:</b> {booking.customer?.full_name}</p>
@@ -52,7 +52,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         </section>
         <BookingActions bookingId={params.id} cleaners={(cleaners ?? []).map((cleaner) => ({ id: cleaner.id, full_name: cleaner.full_name }))} currentStatus={booking.status} />
       </div>
-      <section className="rounded-xl border bg-white p-5">
+      <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Stripe payment</h2>
         {payment ? <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3"><p>ID: {payment.id}</p><p>Status: {payment.status}</p><p>Capturable: {formatMoney(payment.amount_capturable)}</p></div> : <p className="mt-3 text-sm text-muted-foreground">No payment intent.</p>}
       </section>
@@ -64,5 +64,5 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
 }
 
 function SimpleTable({ rows, title }: { rows: string[][]; title: string }) {
-  return <section className="overflow-x-auto rounded-xl border bg-white p-5"><h2 className="mb-3 font-semibold">{title}</h2><table className="w-full min-w-[600px] text-sm"><tbody>{rows.map((row, i) => <tr className="border-b" key={i}>{row.map((cell, j) => <td className="p-2" key={j}>{cell}</td>)}</tr>)}</tbody></table>{!rows.length ? <p className="text-sm text-muted-foreground">No records.</p> : null}</section>;
+  return <section className="overflow-x-auto rounded-xl border bg-card p-5"><h2 className="mb-3 font-semibold">{title}</h2><table className="w-full min-w-[600px] text-sm"><tbody>{rows.map((row, i) => <tr className="border-b" key={i}>{row.map((cell, j) => <td className="p-2" key={j}>{cell}</td>)}</tr>)}</tbody></table>{!rows.length ? <p className="text-sm text-muted-foreground">No records.</p> : null}</section>;
 }

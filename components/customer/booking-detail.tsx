@@ -193,7 +193,7 @@ export function BookingDetail({
                       "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold",
                       index <= activeIndex
                         ? "border-primary bg-primary text-white"
-                        : "border-slate-200 bg-white text-slate-400",
+                        : "border-border bg-card text-muted-foreground",
                     )}
                   >
                     {index < activeIndex ? <Check className="h-4 w-4" /> : index + 1}
@@ -206,7 +206,7 @@ export function BookingDetail({
                   <span
                     className={cn(
                       "mt-4 h-0.5 flex-1",
-                      index < activeIndex ? "bg-primary" : "bg-slate-200",
+                      index < activeIndex ? "bg-primary" : "bg-muted",
                     )}
                   />
                 ) : null}
@@ -215,7 +215,7 @@ export function BookingDetail({
           </div>
         </section>
       ) : (
-        <div className="rounded-xl bg-slate-100 p-4 text-sm text-slate-800">
+        <div className="rounded-xl bg-muted p-4 text-sm text-foreground">
           This booking was cancelled. Its payment authorization was voided.
         </div>
       )}

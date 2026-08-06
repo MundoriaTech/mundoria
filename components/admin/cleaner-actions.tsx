@@ -43,7 +43,7 @@ export function CleanerActions({
   }
 
   return (
-    <section className="rounded-xl border bg-white p-5">
+    <section className="rounded-xl border bg-card p-5">
       <h2 className="font-semibold">Admin actions</h2>
       <Input
         className="mt-4"

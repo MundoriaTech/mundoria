@@ -21,7 +21,7 @@ const categoryImages: Record<string, string> = {
   commercial:
     "https://images.pexels.com/photos/380769/pexels-photo-380769.jpeg?auto=compress&cs=tinysrgb&w=900",
   exterior:
-    "https://images.pexels.com/photos/48889/pexels-photo-48889.jpeg?auto=compress&cs=tinysrgb&w=900",
+    "https://images.pexels.com/photos/37440103/pexels-photo-37440103.jpeg?auto=compress&cs=tinysrgb&w=900",
   recovery:
     "https://images.pexels.com/photos/4107284/pexels-photo-4107284.jpeg?auto=compress&cs=tinysrgb&w=900",
   residential:
@@ -113,34 +113,34 @@ export default function HomePage() {
   const cleanerHref = configured ? "/signup" : "/setup";
 
   return (
-    <main className="min-h-screen bg-[#f7f5ff] text-[#221f50]">
+    <main className="min-h-screen bg-background text-foreground">
       <LandingNavbar
         cleanerHref={cleanerHref}
         configured={configured}
         customerHref={customerHref}
       />
 
-      <section className="relative isolate bg-[#e9e8f7] px-3 pb-16 pt-3 min-[380px]:px-4 sm:px-8 sm:pb-24 sm:pt-5 lg:pb-32">
-        <div className="relative mx-auto mt-3 max-w-7xl overflow-hidden rounded-[1.5rem] bg-[#dcd9ee] px-4 pt-7 shadow-2xl shadow-[#5a51aa]/10 min-[380px]:px-5 sm:mt-5 sm:rounded-[2rem] sm:px-10 sm:pt-10 lg:min-h-[820px] lg:pt-12">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_70%,#eefaf0_0,transparent_30%),radial-gradient(circle_at_85%_28%,#eeeaff_0,transparent_42%)]" />
-          <div className="relative z-10 mx-auto max-w-4xl text-center">
-            <h1 className="text-[2.45rem] font-semibold leading-[0.98] tracking-[-0.06em] text-black min-[380px]:text-5xl sm:text-6xl sm:leading-[1.05] sm:tracking-[-0.055em] lg:text-7xl">
+      <section className="relative isolate bg-background px-3 pb-16 pt-3 min-[380px]:px-4 sm:px-8 sm:pb-24 sm:pt-5 lg:pb-32">
+        <div className="relative mx-auto mt-3 max-w-7xl overflow-hidden rounded-[1.5rem] bg-card px-4 pt-7 shadow-2xl shadow-[#5a51aa]/10 min-[380px]:px-5 sm:mt-5 sm:rounded-[2rem] sm:px-10 sm:pt-10 lg:min-h-[820px] lg:pt-12">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-muted/80 to-transparent" />
+          <div className="relative z-30 mx-auto max-w-4xl text-center">
+            <h1 className="text-[2.45rem] font-semibold leading-[0.98] tracking-[-0.06em] text-foreground min-[380px]:text-5xl sm:text-6xl sm:leading-[1.05] sm:tracking-[-0.055em] lg:text-7xl">
               Book Trusted Home Cleaning in Minutes
             </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm font-medium leading-6 text-[#252236] min-[380px]:text-base sm:mt-4 sm:text-lg sm:leading-7">
+            <p className="mx-auto mt-3 max-w-2xl text-sm font-medium leading-6 text-foreground min-[380px]:text-base sm:mt-4 sm:text-lg sm:leading-7">
               From residential and commercial cleaning to short-term rentals,
               exterior work and recovery support — book certified professionals,
               track every visit, and pay only after the job is complete.
             </p>
             <Button
               asChild
-              className="mt-4 rounded-full bg-black px-6 py-4 text-sm font-bold text-white shadow-xl shadow-black/20 hover:bg-[#221f50] sm:mt-5 sm:px-7 sm:py-5"
+              className="relative z-30 mt-4 rounded-full bg-foreground px-6 py-4 text-sm font-bold text-background shadow-xl shadow-foreground/20 hover:bg-foreground/90 sm:mt-5 sm:px-7 sm:py-5"
             >
               <Link href={bookingHref}>Book a Service</Link>
             </Button>
           </div>
 
-          <div className="relative z-10 mx-auto mt-0 h-[320px] max-w-7xl min-[380px]:h-[360px] sm:-mt-10 sm:h-[540px] lg:-mt-20 lg:h-[610px]">
+          <div className="pointer-events-none relative z-10 mx-auto mt-0 h-[320px] max-w-7xl min-[380px]:h-[360px] sm:-mt-10 sm:h-[540px] lg:-mt-20 lg:h-[610px]">
             <Image
               alt="CleanScape home cleaning professionals"
               className="absolute left-1/2 top-[-190px] h-auto w-[650px] max-w-none -translate-x-1/2 min-[380px]:top-[-220px] min-[380px]:w-[760px] sm:hidden"
@@ -161,7 +161,7 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="relative z-20 mx-auto -mt-20 max-w-5xl rounded-[1.5rem] bg-black px-5 py-5 text-white shadow-2xl shadow-black/25 min-[380px]:-mt-24 sm:-mt-36 sm:rounded-full sm:px-10 sm:py-7 lg:-mt-44">
+          <div className="relative z-20 mx-auto -mt-20 max-w-5xl rounded-[1.5rem] bg-foreground px-5 py-5 text-background shadow-2xl shadow-foreground/25 min-[380px]:-mt-24 sm:-mt-36 sm:rounded-full sm:px-10 sm:py-7 lg:-mt-44">
             <div className="grid gap-4 text-center min-[380px]:grid-cols-3 min-[380px]:text-left">
               <Metric label="service categories" value="5" />
               <Metric label="services available" value={`${SERVICES.length}+`} />
@@ -173,20 +173,20 @@ export default function HomePage() {
 
       <ScrollReveal
         as="section"
-        className="bg-white px-5 py-24 sm:px-8"
+        className="bg-card px-5 py-24 sm:px-8"
         id="services"
       >
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[#5a51aa]">
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-primary">
                 Smart Service categories
               </p>
-              <h2 className="mt-4 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-6xl">
+              <h2 className="mt-4 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] text-foreground sm:text-6xl">
                 Every cleaning need, clearly organised.
               </h2>
             </div>
-            <p className="max-w-lg text-base font-medium leading-7 text-[#69657a]">
+            <p className="max-w-lg text-base font-medium leading-7 text-muted-foreground">
               Choose a category to start — CleanScape guides you to the right
               service, cleaning standard and optional add-ons.
             </p>
@@ -196,10 +196,10 @@ export default function HomePage() {
             {serviceTiles.map((tile, index) => (
               <ScrollReveal delay={index * 70} key={tile.name}>
                 <Link
-                  className="group block overflow-hidden rounded-[1.35rem] bg-white shadow-[0_14px_38px_rgba(18,16,40,0.08)] ring-1 ring-[#ededf4] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_rgba(18,16,40,0.12)]"
+                  className="group block overflow-hidden rounded-[1.35rem] bg-card shadow-[0_14px_38px_rgba(18,16,40,0.08)] ring-1 ring-border transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_rgba(18,16,40,0.12)]"
                   href={configured ? tile.href : "/setup"}
                 >
-                  <div className="relative h-56 overflow-hidden bg-[#f0eff5]">
+                  <div className="relative h-56 overflow-hidden bg-muted">
                     <Image
                       alt={tile.name}
                       className="image-ease object-cover group-hover:scale-[1.03]"
@@ -210,17 +210,17 @@ export default function HomePage() {
                   </div>
                   <div className="min-h-[178px] p-6">
                     <div className="flex items-start justify-between gap-4">
-                      <h3 className="text-xl font-black tracking-[-0.03em] text-[#2d2b35]">
+                      <h3 className="text-xl font-black tracking-[-0.03em] text-foreground">
                         {tile.name}
                       </h3>
-                      <span className="rounded-full bg-[#f6f4ff] px-3 py-1 text-xs font-bold text-[#5a51aa]">
+                      <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
                         {tile.note}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm font-medium leading-6 text-[#6f6a80]">
+                    <p className="mt-3 text-sm font-medium leading-6 text-muted-foreground">
                       {tile.description}
                     </p>
-                    <span className="mt-6 inline-flex text-sm font-black text-[#2d2b35]">
+                    <span className="mt-6 inline-flex text-sm font-black text-foreground">
                       Start booking →
                     </span>
                   </div>
@@ -230,18 +230,18 @@ export default function HomePage() {
           </div>
 
           <div className="mt-14">
-            <h3 className="text-2xl font-black tracking-[-0.04em] text-[#2d2b35]">
+            <h3 className="text-2xl font-black tracking-[-0.04em] text-foreground">
               Popular services
             </h3>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {featuredServiceTiles.map((tile) => (
                 <Link
-                  className="rounded-2xl border border-[#ededf4] bg-[#fbfaf7] p-5 transition hover:border-[#5a51aa]/40 hover:bg-white"
+                  className="rounded-2xl border border-border bg-muted p-5 transition hover:border-primary/40 hover:bg-card"
                   href={configured ? tile.href : "/setup"}
                   key={tile.name}
                 >
-                  <p className="font-black text-[#2d2b35]">{tile.name}</p>
-                  <p className="mt-2 text-sm font-medium leading-6 text-[#6f6a80]">
+                  <p className="font-black text-foreground">{tile.name}</p>
+                  <p className="mt-2 text-sm font-medium leading-6 text-muted-foreground">
                     {tile.description}
                   </p>
                 </Link>
@@ -253,25 +253,25 @@ export default function HomePage() {
 
       <ScrollReveal
         as="section"
-        className="bg-[#fbfaf7] px-5 py-24 sm:px-8"
+        className="bg-muted px-5 py-24 sm:px-8"
         id="how-it-works"
       >
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[#5a51aa]">
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-primary">
                 Why it works
               </p>
-              <h2 className="mt-4 text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-5xl">
+              <h2 className="mt-4 text-4xl font-black leading-[1] tracking-[-0.05em] text-foreground sm:text-5xl">
                 Simple on the surface. Serious underneath.
               </h2>
-              <p className="mt-5 text-base font-medium leading-7 text-[#69657a]">
+              <p className="mt-5 text-base font-medium leading-7 text-muted-foreground">
                 Customers should not need to understand marketplace mechanics.
                 CleanScape keeps those details tidy in the background.
               </p>
             </div>
 
-            <div className="grid gap-px overflow-hidden rounded-[1.35rem] bg-[#e8e5ee] ring-1 ring-[#e8e5ee] md:grid-cols-3">
+            <div className="grid gap-px overflow-hidden rounded-[1.35rem] bg-muted ring-1 ring-border md:grid-cols-3">
               {[
                 [
                   "Choose",
@@ -287,14 +287,14 @@ export default function HomePage() {
                 ],
               ].map(([title, text], index) => (
                 <ScrollReveal
-                  className="bg-white p-7"
+                  className="bg-card p-7"
                   delay={index * 90}
                   key={title}
                 >
-                  <p className="text-2xl font-black tracking-[-0.035em] text-[#2d2b35]">
+                  <p className="text-2xl font-black tracking-[-0.035em] text-foreground">
                     {title}
                   </p>
-                  <p className="mt-4 text-sm font-medium leading-7 text-[#69657a]">
+                  <p className="mt-4 text-sm font-medium leading-7 text-muted-foreground">
                     {text}
                   </p>
                 </ScrollReveal>
@@ -306,22 +306,22 @@ export default function HomePage() {
 
       <ScrollReveal
         as="section"
-        className="bg-white px-5 py-24 sm:px-8"
+        className="bg-card px-5 py-24 sm:px-8"
         id="reviews"
       >
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-[0.76fr_1.24fr] lg:items-end">
             <div>
-              <h2 className="max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-6xl">
+              <h2 className="max-w-3xl text-4xl font-black leading-[1] tracking-[-0.05em] text-foreground sm:text-6xl">
                 Over 10,000 happy cleans
               </h2>
-              <p className="mt-6 text-lg font-bold text-[#2d2b35]">
+              <p className="mt-6 text-lg font-bold text-foreground">
                 Our average rating is{" "}
                 <span className="text-5xl font-black tracking-[-0.05em]">
                   4.9/5
                 </span>
               </p>
-              <p className="mt-2 text-lg font-semibold text-[#69657a]">
+              <p className="mt-2 text-lg font-semibold text-muted-foreground">
                 What about your home?
               </p>
             </div>
@@ -329,20 +329,20 @@ export default function HomePage() {
             <div className="grid gap-5 md:grid-cols-3">
               {testimonials.map((review, index) => (
                 <ScrollReveal
-                  className="rounded-[1.25rem] border border-[#ededf4] bg-white p-6 shadow-[0_12px_34px_rgba(18,16,40,0.06)]"
+                  className="rounded-[1.25rem] border border-border bg-card p-6 shadow-[0_12px_34px_rgba(18,16,40,0.06)]"
                   delay={index * 90}
                   key={review.name}
                 >
                   <p className="text-sm font-black tracking-[0.12em] text-[#f2bd3d]">
                     ★★★★★
                   </p>
-                  <p className="mt-5 text-sm font-medium leading-7 text-[#4c485b]">
+                  <p className="mt-5 text-sm font-medium leading-7 text-muted-foreground">
                     “{review.quote}”
                   </p>
-                  <p className="mt-6 text-sm font-black text-[#2d2b35]">
+                  <p className="mt-6 text-sm font-black text-foreground">
                     {review.name}
                   </p>
-                  <p className="text-xs font-semibold text-[#817c90]">
+                  <p className="text-xs font-semibold text-muted-foreground">
                     {review.detail}
                   </p>
                 </ScrollReveal>
@@ -354,11 +354,11 @@ export default function HomePage() {
 
       <ScrollReveal
         as="section"
-        className="bg-[#fbfaf7] px-5 py-24 sm:px-8"
+        className="bg-muted px-5 py-24 sm:px-8"
         id="about"
       >
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
-          <div className="relative min-h-[460px] overflow-hidden rounded-[1.5rem] bg-[#e9e6dd]">
+          <div className="relative min-h-[460px] overflow-hidden rounded-[1.5rem] bg-muted">
             <Image
               alt="A professional cleaner preparing a home"
               className="image-ease object-cover"
@@ -369,19 +369,19 @@ export default function HomePage() {
           </div>
 
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.22em] text-[#5a51aa]">
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-primary">
               We are CleanScape
             </p>
-            <h2 className="mt-4 text-4xl font-black leading-[1] tracking-[-0.05em] text-[#2d2b35] sm:text-6xl">
+            <h2 className="mt-4 text-4xl font-black leading-[1] tracking-[-0.05em] text-foreground sm:text-6xl">
               Home services with a visible standard.
             </h2>
-            <div className="mt-8 divide-y divide-[#e1dde9] border-y border-[#e1dde9]">
+            <div className="mt-8 divide-y divide-border border-y border-border">
               {[
                 "Helping customers reclaim time without losing control of the job.",
                 "Giving independent cleaners clearer work, fairer reviews and payout visibility.",
                 "Building a cleaning platform where every booking has status, evidence and accountability.",
               ].map((item) => (
-                <p className="py-5 font-medium leading-7 text-[#69657a]" key={item}>
+                <p className="py-5 font-medium leading-7 text-muted-foreground" key={item}>
                   {item}
                 </p>
               ))}
@@ -389,7 +389,7 @@ export default function HomePage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Button
                 asChild
-                className="h-12 rounded-full bg-black px-6 font-black text-white hover:bg-[#221f50]"
+                className="h-12 rounded-full bg-foreground px-6 font-black text-background hover:bg-foreground/90"
               >
                 <Link href={customerHref}>Book a clean</Link>
               </Button>
@@ -407,25 +407,25 @@ export default function HomePage() {
 
       <ScrollReveal
         as="section"
-        className="bg-white px-5 py-24 sm:px-8"
+        className="bg-card px-5 py-24 sm:px-8"
         id="coverage"
       >
         <div className="mx-auto max-w-7xl">
-          <h2 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-[-0.06em] text-[#2b2933] sm:text-6xl">
+          <h2 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-[-0.06em] text-foreground sm:text-6xl">
             CleanScape services in our top cities
           </h2>
 
           <div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
             {cityServiceColumns.map((column, index) => (
               <ScrollReveal delay={index * 70} key={column.service}>
-                <h3 className="text-lg font-black tracking-[-0.03em] text-[#221f50]">
+                <h3 className="text-lg font-black tracking-[-0.03em] text-foreground">
                   {column.service}
                 </h3>
                 <ul className="mt-5 space-y-3">
                   {column.links.map((link) => (
                     <li key={link}>
                       <Link
-                        className="text-sm font-semibold text-[#6f6990] transition hover:text-[#5a51aa]"
+                        className="text-sm font-semibold text-muted-foreground transition hover:text-primary"
                         href={configured ? column.href : "/setup"}
                       >
                         {link}
@@ -455,8 +455,8 @@ export default function HomePage() {
               underneath.
             </p>
           </div>
-          <div className="rounded-[1.5rem] bg-white p-6 text-[#221f50] sm:p-8">
-            <div className="divide-y divide-[#ece9f2] text-sm font-bold">
+          <div className="rounded-[1.5rem] bg-card p-6 text-foreground sm:p-8">
+            <div className="divide-y divide-border text-sm font-bold">
               {[
                 "Live booking status",
                 "In-app cleaner messaging",
@@ -473,7 +473,7 @@ export default function HomePage() {
             </div>
             <Button
               asChild
-              className="mt-6 h-14 w-full rounded-full bg-black text-base font-black text-white hover:bg-[#221f50]"
+              className="mt-6 h-14 w-full rounded-full bg-foreground text-base font-black text-background hover:bg-foreground/90"
             >
               <Link href={customerHref}>Book my cleaning</Link>
             </Button>
@@ -489,8 +489,10 @@ export default function HomePage() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-2xl font-semibold tracking-tight">{value}</p>
-      <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-white/60">
+      <p className="text-2xl font-semibold tracking-tight text-background">
+        {value}
+      </p>
+      <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-background/60">
         {label}
       </p>
     </div>
@@ -517,7 +519,7 @@ function LandingNavbar({
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#ebe8f3] bg-white">
+    <header className="sticky top-0 z-50 border-b border-border bg-card">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
         <BrandLogo
           className="rounded-full py-2 pr-3 transition hover:opacity-80"
@@ -531,7 +533,7 @@ function LandingNavbar({
         >
           {navLinks.map(([label, href]) => (
             <Link
-              className="text-sm font-bold text-[#4f4a63] transition hover:text-[#5a51aa]"
+              className="text-sm font-bold text-muted-foreground transition hover:text-primary"
               href={href}
               key={label}
             >
@@ -542,31 +544,31 @@ function LandingNavbar({
 
         <div className="hidden items-center gap-3 lg:flex">
           <Link
-            className="rounded-full px-4 py-2 text-sm font-black text-[#4f4a63] transition hover:bg-[#f6f4ff] hover:text-[#221f50]"
+            className="rounded-full px-4 py-2 text-sm font-black text-muted-foreground transition hover:bg-primary/10 hover:text-foreground"
             href={loginHref}
           >
             Log in
           </Link>
           <Button
             asChild
-            className="h-11 rounded-full bg-black px-6 text-sm font-black text-white hover:bg-[#221f50]"
+            className="h-11 rounded-full bg-foreground px-6 text-sm font-black text-background hover:bg-foreground/90"
           >
             <Link href={customerHref}>Book a clean</Link>
           </Button>
         </div>
 
         <details className="relative lg:hidden">
-          <summary className="flex cursor-pointer list-none items-center rounded-full border border-[#dedbfd] px-4 py-2 text-sm font-black text-[#221f50] [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center rounded-full border border-border px-4 py-2 text-sm font-black text-foreground [&::-webkit-details-marker]:hidden">
             Menu
           </summary>
-          <div className="absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] border border-[#ebe8f3] bg-white shadow-2xl shadow-[#221f50]/15">
+          <div className="absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] border border-border bg-card shadow-2xl shadow-[#221f50]/15">
             <nav
               aria-label="Mobile navigation"
-              className="grid divide-y divide-[#f0edf7]"
+              className="grid divide-y divide-border"
             >
               {navLinks.map(([label, href]) => (
                 <Link
-                  className="px-5 py-4 text-sm font-bold text-[#4f4a63] hover:bg-[#fbfaf7]"
+                  className="px-5 py-4 text-sm font-bold text-muted-foreground hover:bg-muted"
                   href={href}
                   key={label}
                 >
@@ -574,10 +576,10 @@ function LandingNavbar({
                 </Link>
               ))}
             </nav>
-            <div className="grid gap-2 bg-[#fbfaf7] p-4">
+            <div className="grid gap-2 bg-muted p-4">
               <Button
                 asChild
-                className="h-11 rounded-full bg-black text-sm font-black text-white hover:bg-[#221f50]"
+                className="h-11 rounded-full bg-foreground text-sm font-black text-background hover:bg-foreground/90"
               >
                 <Link href={customerHref}>Book a clean</Link>
               </Button>
@@ -642,25 +644,25 @@ function LandingFooter({
   ];
 
   return (
-    <footer className="reveal-on-scroll-soft bg-white px-5 py-16 sm:px-8">
+    <footer className="reveal-on-scroll-soft bg-card px-5 py-16 sm:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-10 border-b border-[#ebe8f3] pb-12 sm:grid-cols-2 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
+        <div className="grid gap-10 border-b border-border pb-12 sm:grid-cols-2 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
           <div className="sm:col-span-2 lg:col-span-1">
             <BrandLogo markClassName="h-12 w-9" wordmarkClassName="text-2xl" />
-            <p className="mt-6 max-w-xl text-base font-medium leading-7 text-[#69657a]">
+            <p className="mt-6 max-w-xl text-base font-medium leading-7 text-muted-foreground">
               CleanScape connects UK customers with independent cleaning
               professionals for regular cleaning, deep cleans, Airbnb turnovers
               and tenancy handovers.
             </p>
-            <div className="mt-6 grid gap-2 text-sm font-semibold text-[#4f4a63]">
+            <div className="mt-6 grid gap-2 text-sm font-semibold text-muted-foreground">
               <a
-                className="w-fit transition hover:text-[#5a51aa]"
+                className="w-fit transition hover:text-primary"
                 href="mailto:support@cleanscapeuk.com"
               >
                 support@cleanscapeuk.com
               </a>
               <a
-                className="w-fit transition hover:text-[#5a51aa]"
+                className="w-fit transition hover:text-primary"
                 href="mailto:hello@cleanscapeuk.com"
               >
                 hello@cleanscapeuk.com
@@ -671,14 +673,14 @@ function LandingFooter({
 
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-sm font-black uppercase tracking-[0.16em] text-[#2d2b35]">
+              <h3 className="text-sm font-black uppercase tracking-[0.16em] text-foreground">
                 {section.title}
               </h3>
               <ul className="mt-5 space-y-3">
                 {section.links.map(([label, href]) => (
                   <li key={`${section.title}-${label}`}>
                     <Link
-                      className="text-sm font-semibold text-[#69657a] transition hover:text-[#5a51aa]"
+                      className="text-sm font-semibold text-muted-foreground transition hover:text-primary"
                       href={href}
                     >
                       {label}
@@ -690,29 +692,29 @@ function LandingFooter({
           ))}
         </div>
 
-        <div className="flex flex-col gap-6 pt-8 text-sm font-semibold text-[#817c90] lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-6 pt-8 text-sm font-semibold text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p>© 2026 CleanScape UK. All rights reserved.</p>
-            <p className="mt-2 max-w-2xl text-xs leading-6 text-[#9a95a8]">
+            <p className="mt-2 max-w-2xl text-xs leading-6 text-muted-foreground">
               Cleaners on CleanScape are independent contractors. Availability,
               pricing and coverage may vary by location and service type.
             </p>
           </div>
           <div className="flex flex-wrap gap-5">
-            <Link className="transition hover:text-[#5a51aa]" href="/privacy">
+            <Link className="transition hover:text-primary" href="/privacy">
               Privacy
             </Link>
-            <Link className="transition hover:text-[#5a51aa]" href="/terms">
+            <Link className="transition hover:text-primary" href="/terms">
               Terms
             </Link>
             <Link
-              className="transition hover:text-[#5a51aa]"
+              className="transition hover:text-primary"
               href={configured ? "/login" : "/setup"}
             >
               Login
             </Link>
             <a
-              className="transition hover:text-[#5a51aa]"
+              className="transition hover:text-primary"
               href="mailto:support@cleanscapeuk.com"
             >
               Support

@@ -48,7 +48,7 @@ export function AdminShell({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f7f5ff] lg:pl-64">
+    <div className="min-h-screen bg-background lg:pl-64">
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 overflow-hidden border-r border-white/10 bg-[#221f50] text-white transition-transform lg:translate-x-0",
@@ -80,7 +80,7 @@ export function AdminShell({
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition",
                   active
-                    ? "bg-white text-[#221f50] shadow-lg shadow-black/10"
+                    ? "bg-card text-foreground shadow-lg shadow-black/10"
                     : "text-white/70 hover:bg-white/10 hover:text-white",
                 )}
                 href={item.href}
@@ -106,12 +106,12 @@ export function AdminShell({
         </div>
       </aside>
 
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#dedbfd] bg-white/90 px-4 backdrop-blur sm:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur sm:px-6">
         <button className="lg:hidden" onClick={() => setOpen(true)} type="button">
           <Menu className="h-5 w-5" />
         </button>
-        <div className="hidden items-center gap-2 text-sm font-semibold text-[#221f50] lg:flex">
-          <Sparkles className="h-4 w-4 text-[#5a51aa]" />
+        <div className="hidden items-center gap-2 text-sm font-semibold text-foreground lg:flex">
+          <Sparkles className="h-4 w-4 text-primary" />
           Platform command centre
         </div>
         <div className="ml-auto flex items-center gap-3">

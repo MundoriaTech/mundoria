@@ -82,7 +82,7 @@ export default async function CleanerDashboardPage() {
         <Stat label="This month" value={formatMoney(month)} />
       </div>
 
-      <section className="rounded-[1.75rem] border border-[#dedbfd] bg-white p-6 shadow-sm">
+      <section className="rounded-[1.75rem] border border-border bg-card p-6 shadow-sm">
         <div className="flex justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Current tier</p>
@@ -90,7 +90,7 @@ export default async function CleanerDashboardPage() {
           </div>
           <Trophy className="h-8 w-8 text-[#ffc06f]" />
         </div>
-        <div className="mt-4 h-2 rounded-full bg-[#e7e4ff]">
+        <div className="mt-4 h-2 rounded-full bg-muted">
           <div
             className="h-2 rounded-full bg-gradient-to-r from-[#5a51aa] to-[#ffc79f]"
             style={{ width: `${tierProgress}%` }}
@@ -128,13 +128,13 @@ export default async function CleanerDashboardPage() {
       </div>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold tracking-tight text-[#221f50]">
+        <h2 className="mb-4 text-xl font-semibold tracking-tight text-foreground">
           Today&apos;s jobs
         </h2>
         <div className="space-y-3">
           {todayJobs.map((job) => (
             <a
-              className="flex justify-between rounded-2xl border border-[#dedbfd] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#5a51aa]/10"
+              className="flex justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#5a51aa]/10"
               href={`/cleaner/job/${job.id}`}
               key={job.id}
             >
@@ -144,12 +144,12 @@ export default async function CleanerDashboardPage() {
                   {job.scheduled_start_time.slice(0, 5)} · {job.address?.city}
                 </small>
               </span>
-              <CalendarCheck className="text-[#5a51aa]" />
+              <CalendarCheck className="text-primary" />
             </a>
           ))}
           {!todayJobs.length ? (
-            <div className="rounded-2xl border border-dashed border-[#c9c4f2] bg-white p-8 text-center text-sm text-muted-foreground">
-              <Clock3 className="mx-auto mb-3 h-6 w-6 text-[#5a51aa]" />
+            <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+              <Clock3 className="mx-auto mb-3 h-6 w-6 text-primary" />
               No jobs today.
             </div>
           ) : null}
@@ -169,10 +169,10 @@ function Stat({
   value: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-[#dedbfd] bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm">
       {Icon ? <Icon className="mb-3 h-5 w-5 text-primary" /> : null}
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold tracking-tight text-[#221f50]">
+      <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
         {value}
       </p>
     </div>

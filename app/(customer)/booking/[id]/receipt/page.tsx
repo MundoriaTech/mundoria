@@ -103,7 +103,7 @@ function ReceiptDocument({
   lines: ReturnType<typeof buildReceiptLines>;
 }) {
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border bg-white shadow-sm">
+    <article className="overflow-hidden rounded-[1.75rem] border border-border bg-card shadow-sm">
       <header className="flex items-start justify-between gap-4 border-b bg-[#221f50] px-6 py-6 text-white sm:px-8">
         <div className="flex items-center gap-3">
           <BrandMark className="h-12 w-9" />
@@ -181,8 +181,8 @@ function ReceiptDocument({
         </table>
       </div>
 
-      <div className="grid gap-3 border-t bg-[#f7f5ff] px-6 py-5 text-sm sm:grid-cols-2 sm:px-8">
-        <div className="rounded-xl border bg-white p-4">
+      <div className="grid gap-3 border-t bg-background px-6 py-5 text-sm sm:grid-cols-2 sm:px-8">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             To your cleaner
           </p>
@@ -190,7 +190,7 @@ function ReceiptDocument({
             {formatMoney(booking.amount_cleaner)}
           </p>
         </div>
-        <div className="rounded-xl border bg-white p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             CleanScape service fee
           </p>

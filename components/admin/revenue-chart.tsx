@@ -23,7 +23,7 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
   const hasRevenue = data.some((point) => point.revenue > 0);
 
   return (
-    <section className="rounded-xl border bg-white p-5">
+    <section className="rounded-xl border bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-semibold">Revenue</h2>
@@ -86,7 +86,7 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 text-center">
-            <p className="font-semibold text-[#221f50]">No captured revenue yet</p>
+            <p className="font-semibold text-foreground">No captured revenue yet</p>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
               This chart starts filling after jobs are completed and their held
               Stripe payments are captured.

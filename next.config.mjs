@@ -14,6 +14,13 @@ const nextConfig = {
   experimental: {
     instrumentationHook: true,
   },
+  // Avoid corrupted PackFileCacheStrategy ("invalid block type") on this machine.
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = false;
+    }
+    return config;
+  },
 };
 
 export default withSentryConfig(nextConfig, {

@@ -22,8 +22,8 @@ export function LegalPage({
   title: string;
 }) {
   return (
-    <main className="min-h-screen bg-[#f7f5ff] text-[#221f50]">
-      <header className="border-b border-[#dedbfd] bg-white/90 px-5 py-5 backdrop-blur sm:px-8">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-background/90 px-5 py-5 backdrop-blur sm:px-8">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <BrandLogo markClassName="h-11 w-8" />
           <Link
@@ -52,17 +52,19 @@ export function LegalPage({
         <div className="mt-10 space-y-5">
           {sections.map((section) => (
             <section
-              className="rounded-[1.5rem] border border-[#dedbfd] bg-white p-6 shadow-sm sm:p-8"
+              className="rounded-[1.5rem] border border-border bg-card p-6 shadow-sm sm:p-8"
               key={section.title}
             >
               <h2 className="text-2xl font-semibold tracking-[-0.04em]">
                 {section.title}
               </h2>
               {section.body ? (
-                <p className="mt-4 leading-8 text-[#4e486e]">{section.body}</p>
+                <p className="mt-4 leading-8 text-muted-foreground">
+                  {section.body}
+                </p>
               ) : null}
               {section.bullets?.length ? (
-                <ul className="mt-4 list-disc space-y-2 pl-5 leading-7 text-[#4e486e]">
+                <ul className="mt-4 list-disc space-y-2 pl-5 leading-7 text-muted-foreground">
                   {section.bullets.map((item) => (
                     <li key={item}>{item}</li>
                   ))}

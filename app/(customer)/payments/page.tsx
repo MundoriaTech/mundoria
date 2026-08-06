@@ -45,7 +45,7 @@ export default async function CustomerPaymentsPage() {
         </p>
       </div>
 
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
         <h2 className="font-semibold">Your vouchers</h2>
         {usableVouchers.length ? (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -54,7 +54,7 @@ export default async function CustomerPaymentsPage() {
                 className="rounded-xl border border-amber-200 bg-amber-50 p-4"
                 key={voucher.code}
               >
-                <p className="font-mono text-lg font-bold tracking-wider text-[#221f50]">
+                <p className="font-mono text-lg font-bold tracking-wider text-foreground">
                   {voucher.code}
                 </p>
                 <p className="mt-1 text-sm text-amber-900">
@@ -85,7 +85,7 @@ export default async function CustomerPaymentsPage() {
       <section>
         <h2 className="font-semibold">Past receipts</h2>
         {receipts.length ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border bg-white">
+          <div className="mt-4 overflow-x-auto rounded-2xl border bg-card">
             <table className="w-full min-w-[640px] text-sm">
               <thead className="bg-muted/40 text-left">
                 <tr>
@@ -123,7 +123,7 @@ export default async function CustomerPaymentsPage() {
             </table>
           </div>
         ) : (
-          <p className="mt-3 rounded-2xl border bg-white p-5 text-sm text-muted-foreground">
+          <p className="mt-3 rounded-2xl border bg-card p-5 text-sm text-muted-foreground">
             Receipts appear here after a cleaning is completed and payment is
             captured.
           </p>

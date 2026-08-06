@@ -50,7 +50,7 @@ export function BrandLogo({
       {showWordmark ? (
         <span
           className={cn(
-            "text-xl font-black lowercase tracking-[-0.06em] text-[#221f50]",
+            "text-xl font-black lowercase tracking-[-0.06em] text-foreground",
             wordmarkClassName,
           )}
         >

@@ -53,16 +53,16 @@ export function AuthShell({
         </p>
       </section>
 
-      <section className="flex items-center justify-center bg-[#f7f5ff] px-5 py-10 sm:px-8 lg:rounded-l-[2.5rem]">
+      <section className="flex items-center justify-center bg-background px-5 py-10 sm:px-8 lg:rounded-l-[2.5rem]">
         <div className="w-full max-w-md">
           <Link
-            className="mb-10 inline-flex items-center gap-3 text-xl font-semibold text-[#221f50] lg:hidden"
+            className="mb-10 inline-flex items-center gap-3 text-xl font-semibold text-foreground lg:hidden"
             href="/"
           >
             <BrandMark className="h-10 w-7" />
             cleanscape
           </Link>
-          <div className="rounded-[2rem] border border-[#dedbfd] bg-white p-6 shadow-2xl shadow-[#5a51aa]/10 sm:p-8">
+          <div className="rounded-[2rem] border border-border bg-card p-6 shadow-2xl shadow-[#5a51aa]/10 sm:p-8">
             {/* <p className="text-sm font-bold uppercase tracking-[0.2em] text-primary">
               CleanScape
             </p> */}

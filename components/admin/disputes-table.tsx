@@ -33,7 +33,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
         </select>
         <Input onChange={(event) => setDate(event.target.value)} type="date" />
       </div>
-      <div className="mt-5 overflow-x-auto rounded-xl border bg-white">
+      <div className="mt-5 overflow-x-auto rounded-xl border bg-card">
         <table className="w-full min-w-[700px] text-sm">
           <thead><tr className="bg-muted/50 text-left"><th className="p-3">Created</th><th>Type</th><th>Booking</th><th>Raised by</th><th>Status</th><th></th></tr></thead>
           <tbody>{rows.map((item) => <tr className="border-t" key={item.id}><td className="p-3">{new Date(item.created_at).toLocaleDateString("en-GB")}</td><td className="capitalize">{item.type.replaceAll("_"," ")}</td><td>{item.booking_id.slice(0,8)}</td><td>{item.raised_by_profile?.full_name ?? "Unknown"}</td><td className="capitalize">{item.status.replaceAll("_"," ")}</td><td><Link className="text-primary" href={`/admin/disputes/${item.id}`}>Review</Link></td></tr>)}</tbody>

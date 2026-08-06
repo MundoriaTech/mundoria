@@ -98,24 +98,24 @@ export default async function CustomerDashboardPage() {
         />
       )}
 
-      <section className="rounded-[2rem] border border-[#ffe0c7] bg-gradient-to-br from-[#fff4ec] to-[#eeeaff] p-6 shadow-sm">
+      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
         <div className="flex items-start gap-4">
-          <span className="rounded-2xl bg-white p-3 text-[#5a51aa] shadow-sm">
+          <span className="rounded-2xl bg-muted p-3 text-primary shadow-sm">
             <Gift className="h-6 w-6" />
           </span>
           <div>
-            <h2 className="font-semibold text-[#221f50]">
+            <h2 className="font-semibold text-foreground">
               Give £10, get £10
             </h2>
-            <p className="mt-1 text-sm leading-6 text-[#6c668d]">
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
               Share your referral code{" "}
-              <span className="font-bold text-[#5a51aa]">
+              <span className="font-bold text-primary">
                 {customer.referral_code}
               </span>{" "}
               or invite link. Friends get £10 off their first clean; you get £10
               after they complete it. Enter the code at signup or checkout.
             </p>
-            <p className="mt-3 break-all rounded-lg bg-white/80 px-3 py-2 font-mono text-xs text-[#5a51aa]">
+            <p className="mt-3 break-all rounded-lg bg-muted px-3 py-2 font-mono text-xs text-primary">
               {`${process.env.NEXT_PUBLIC_APP_URL ?? "https://cleanscapeuk.com"}/signup?ref=${customer.referral_code}`}
             </p>
           </div>
@@ -141,9 +141,9 @@ export default async function CustomerDashboardPage() {
 
 function Insight({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#dedbfd] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-2 truncate text-2xl font-bold tracking-tight text-[#221f50]">
+      <p className="mt-2 truncate text-2xl font-bold tracking-tight text-foreground">
         {value}
       </p>
     </div>
@@ -153,7 +153,7 @@ function Insight({ label, value }: { label: string; value: string }) {
 function SectionHeading({ href, title }: { href: string; title: string }) {
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-xl font-semibold tracking-tight text-[#221f50]">
+      <h2 className="text-xl font-semibold tracking-tight text-foreground">
         {title}
       </h2>
       <Link
@@ -176,7 +176,7 @@ function EmptyState({
   title: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[#c9c4f2] bg-white p-8 text-center">
+    <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
       <h3 className="font-semibold">{title}</h3>
       <p className="mt-2 text-sm text-muted-foreground">{body}</p>
       {action ? (

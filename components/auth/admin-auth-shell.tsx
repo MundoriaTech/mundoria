@@ -46,11 +46,11 @@ export function AdminAuthShell({
         </p>
       </section>
 
-      <section className="flex items-center justify-center bg-[#f7f5ff] px-5 py-10 text-[#221f50] sm:px-8 lg:rounded-l-[2.5rem]">
+      <section className="flex items-center justify-center bg-background px-5 py-10 text-foreground sm:px-8 lg:rounded-l-[2.5rem]">
         <div className="w-full max-w-md">
           <BrandLogo className="mb-10 lg:hidden" markClassName="h-11 w-8" />
 
-          <div className="rounded-[2rem] border border-[#dedbfd] bg-white p-6 shadow-2xl shadow-[#221f50]/10 sm:p-8">
+          <div className="rounded-[2rem] border border-border bg-card p-6 shadow-2xl shadow-[#221f50]/10 sm:p-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#221f50] text-white">
               <LockKeyhole className="h-5 w-5" />
             </div>

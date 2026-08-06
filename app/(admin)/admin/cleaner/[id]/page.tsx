@@ -43,7 +43,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         <p className="text-muted-foreground">{profile.email} · {profile.phone}</p>
       </div>
       <div className="grid gap-5 lg:grid-cols-[1fr_.65fr]">
-        <section className="rounded-xl border bg-white p-5">
+        <section className="rounded-xl border bg-card p-5">
           <div className="flex justify-between">
             <div>
               <p>{cleaner.bio}</p>
@@ -59,7 +59,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         </section>
         <CleanerActions cleanerId={params.id} currentTier={cleaner.tier} />
       </div>
-      <section className="rounded-xl border bg-white p-5">
+      <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Documents</h2>
         <div className="mt-4 flex gap-3">
           {signed.map((document) =>
@@ -125,7 +125,7 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 
 function DataTable({ headers, rows, title }: { headers: string[]; rows: (string | number | null)[][]; title: string }) {
   return (
-    <section className="overflow-x-auto rounded-xl border bg-white p-5">
+    <section className="overflow-x-auto rounded-xl border bg-card p-5">
       <h2 className="mb-4 font-semibold">{title}</h2>
       <table className="w-full min-w-[600px] text-sm">
         <thead><tr>{headers.map((header) => <th className="border-b p-2 text-left" key={header}>{header}</th>)}</tr></thead>

@@ -51,7 +51,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
         <Input onChange={(event) => setTo(event.target.value)} type="date" />
         <Input onChange={(event) => setZone(event.target.value)} placeholder="Zone prefix" />
       </div>
-      <div className="mt-5 overflow-x-auto rounded-xl border bg-white">
+      <div className="mt-5 overflow-x-auto rounded-xl border bg-card">
         <table className="w-full min-w-[1000px] text-sm">
           <thead className="bg-muted/50 text-left"><tr><th className="p-3">ID</th><th>Customer</th><th>Cleaner</th><th>Service</th><th>Date</th><th>Status</th><th>Amount</th><th>Payment</th></tr></thead>
           <tbody>

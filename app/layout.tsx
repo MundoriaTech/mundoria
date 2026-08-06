@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
+
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export const metadata: Metadata = {
   title: {
@@ -25,8 +29,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans">{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <Script
+        id="theme-init"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function () {
+              try {
+                var saved = localStorage.getItem('cleanscape-theme');
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var shouldDark = saved === 'dark' || ((saved === 'system' || !saved) && prefersDark);
+                document.documentElement.classList.toggle('dark', !!shouldDark);
+              } catch (e) {}
+            })();
+          `,
+        }}
+      />
+      <body className="font-sans">
+        <ThemeProvider>
+          {children}
+          <div className="pointer-events-none fixed right-3 top-3 z-[60]">
+            <div className="pointer-events-auto">
+              <ThemeToggle />
+            </div>
+          </div>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

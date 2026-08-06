@@ -68,7 +68,7 @@ export function AdminAlerts({
         ) : null}
       </Button>
       {open ? (
-        <div className="absolute right-0 top-12 w-[min(24rem,calc(100vw-2rem))] rounded-xl border bg-white shadow-xl">
+        <div className="absolute right-0 top-12 w-[min(24rem,calc(100vw-2rem))] rounded-xl border bg-card shadow-xl">
           <div className="flex justify-between border-b p-4">
             <b>Admin alerts</b>
             <button className="text-xs text-primary" onClick={() => void markAll()}>

@@ -38,14 +38,14 @@ export function CleanerShell({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-[#f7f5ff] pb-24">
-      <header className="sticky top-0 z-30 border-b border-[#dedbfd] bg-white/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-background pb-24">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div>
             <Link className="flex items-center gap-3" href="/cleaner/dashboard">
               <BrandMark className="h-10 w-7" />
               <span>
-                <span className="block font-bold tracking-tight text-[#221f50]">
+                <span className="block font-bold tracking-tight text-foreground">
                   CleanScape Pro
                 </span>
                 <span className="block text-xs text-muted-foreground">
@@ -64,7 +64,7 @@ export function CleanerShell({
         ) : null}
         {children}
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#dedbfd] bg-white/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
         <div className="mx-auto grid h-16 max-w-xl grid-cols-5">
           {nav.map((item) => {
             const active =
@@ -73,7 +73,7 @@ export function CleanerShell({
               <Link
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 text-[11px] font-medium",
-                  active ? "text-[#5a51aa]" : "text-muted-foreground",
+                  active ? "text-primary" : "text-muted-foreground",
                 )}
                 href={item.href}
                 key={item.href}
@@ -92,22 +92,22 @@ export function CleanerShell({
 function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
   if (cleaner.status === "pending" || cleaner.status === "in_training") {
     return (
-      <div className="mb-6 rounded-[1.5rem] border border-[#ffe0c7] bg-gradient-to-br from-[#fff4ec] to-white p-5 text-[#4e3766] shadow-sm">
+      <div className="mb-6 rounded-[1.5rem] border border-border bg-card p-5 text-foreground shadow-sm">
         <div className="flex gap-3">
-          <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#5a51aa]" />
+          <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <div>
             <p className="font-semibold">
               {cleaner.status === "in_training"
                 ? "Certification in progress"
                 : "Application under review"}
             </p>
-            <p className="mt-1 text-sm leading-6 text-[#6c668d]">
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
               You can explore your dashboard, update your profile, and connect
               Stripe now. New job offers will appear after your CleanScape
               certification is complete.
             </p>
             {!cleaner.stripe_onboarding_complete ? (
-              <p className="mt-2 text-xs text-[#6c668d]">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Payout setup is incomplete. You can finish it later from Profile.
               </p>
             ) : null}

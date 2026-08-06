@@ -33,7 +33,7 @@ export function BookingActions({
   }
 
   return (
-    <section className="rounded-xl border bg-white p-5">
+    <section className="rounded-xl border bg-card p-5">
       <h2 className="font-semibold">Operations controls</h2>
       <Input className="mt-4" onChange={(event) => setNote(event.target.value)} placeholder="Required audit note" />
       <div className="mt-3 flex gap-2">
