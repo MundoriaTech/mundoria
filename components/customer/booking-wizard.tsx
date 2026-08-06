@@ -114,6 +114,7 @@ export function BookingWizard({
   initialDraft?: Partial<BookingDraft>;
   userId: string | null;
 }) {
+  const router = useRouter();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [draft, setDraft] = useState<BookingDraft>({
     ...blankDraft,
@@ -206,6 +207,19 @@ export function BookingWizard({
   }, [step]);
 
   function goBack() {
+    if (step === 1) {
+      const fallback = userId ? "/dashboard" : "/";
+      const sameOriginReferrer =
+        typeof document !== "undefined" &&
+        Boolean(document.referrer) &&
+        document.referrer.startsWith(window.location.origin);
+      if (sameOriginReferrer) {
+        router.back();
+      } else {
+        router.push(fallback);
+      }
+      return;
+    }
     if (step === 7 && showAddressForm && addresses.length > 0) {
       setShowAddressForm(false);
       return;
@@ -510,7 +524,6 @@ export function BookingWizard({
         <div className="mx-auto flex max-w-4xl gap-2 sm:mt-6 sm:justify-between sm:gap-3 sm:border-t sm:pt-5">
           <Button
             className="min-h-11 flex-1 touch-manipulation sm:flex-none"
-            disabled={step === 1}
             onClick={goBack}
             type="button"
             variant="ghost"
