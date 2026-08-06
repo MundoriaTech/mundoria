@@ -51,13 +51,20 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
             </div>
             <TierBadge tier={cleaner.tier} />
           </div>
-          <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-            <Metric label="Medallion score" value={cleaner.medallion_score ?? 0} />
-            <Metric label="Jobs" value={cleaner.total_jobs} />
-            <Metric label="Certification" value={cleaner.certification_score ?? "—"} />
+          <div className="mt-5 grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
+            <Metric label="Performance score" value={cleaner.medallion_score ?? 0} />
+            <Metric label="Jobs completed" value={cleaner.total_jobs} />
+            <Metric
+              label="Status"
+              value={String(cleaner.status).replaceAll("_", " ")}
+            />
           </div>
         </section>
-        <CleanerActions cleanerId={params.id} currentTier={cleaner.tier} />
+        <CleanerActions
+          cleanerId={params.id}
+          currentStatus={cleaner.status}
+          currentTier={cleaner.tier}
+        />
       </div>
       <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Documents</h2>
@@ -82,7 +89,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
           `${item.tier_before ?? "—"} → ${item.tier_after ?? "—"}`,
           item.notes ?? "—",
         ])}
-        title="Medallion and certification history"
+        title="Account history"
       />
       <DataTable
         headers={["Month", "Score", "Tier change", "Jobs"]}

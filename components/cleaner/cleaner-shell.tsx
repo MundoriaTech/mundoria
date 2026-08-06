@@ -102,13 +102,13 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
           <div>
             <p className="font-semibold">
               {cleaner.status === "in_training"
-                ? "Certification in progress"
+                ? "Application on hold"
                 : "Application under review"}
             </p>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              You can explore your dashboard, update your profile, and connect
-              Stripe now. New job offers will appear after your CleanScape
-              certification is complete.
+              {cleaner.status === "in_training"
+                ? "CleanScape has put your application on hold. You can still update your profile and finish Stripe setup. Job offers appear after you’re approved."
+                : "You can explore your dashboard, update your profile, and connect Stripe now. New job offers will appear after CleanScape approves your application."}
             </p>
             {!cleaner.stripe_onboarding_complete ? (
               <p className="mt-2 text-xs text-muted-foreground">

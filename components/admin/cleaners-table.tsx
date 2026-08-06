@@ -50,7 +50,17 @@ export function CleanersTable({
             key={value}
             onClick={() => setTab(value)}
           >
-            {value === "pending" ? "Pending Review" : value.replace("_", " ")}
+            {value === "pending"
+              ? "Needs review"
+              : value === "in_training"
+                ? "On hold"
+                : value === "certified"
+                  ? "Approved"
+                  : value === "active"
+                    ? "Legacy active"
+                    : value === "removed"
+                      ? "Banned"
+                      : value.replace("_", " ")}
           </button>
         ))}
       </div>

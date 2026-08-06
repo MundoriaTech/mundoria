@@ -4,8 +4,7 @@ import { z } from "zod";
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 
 const schema = z.object({
-  action: z.enum(["approve", "reject", "suspend", "remove", "set_tier", "start_training"]),
-  certificationScore: z.number().int().min(0).max(100).optional(),
+  action: z.enum(["approve", "reject", "suspend", "remove", "set_tier"]),
   reason: z.string().trim().min(3),
   tier: z.enum(["bronze", "silver", "gold", "rose_gold", "elite"]).optional(),
 });
@@ -27,7 +26,7 @@ export async function POST(
       { status: 400 },
     );
   }
-  const { action, certificationScore, reason, tier } = parsed.data;
+  const { action, reason, tier } = parsed.data;
   const status =
     action === "approve"
       ? "certified"
@@ -35,10 +34,8 @@ export async function POST(
         ? "in_training"
         : action === "suspend"
           ? "suspended"
-        : action === "remove"
+          : action === "remove"
             ? "removed"
-            : action === "start_training"
-              ? "in_training"
             : undefined;
   const updates: Record<string, unknown> = {};
   if (status) updates.status = status;
@@ -48,7 +45,6 @@ export async function POST(
     updates.dbs_document_status = "verified";
     updates.id_document_status = "verified";
     updates.certification_passed = true;
-    updates.certification_score = certificationScore ?? null;
     updates.certification_notes = reason;
     updates.certification_assessed_by = auth.user.id;
     updates.certification_assessed_at = new Date().toISOString();
@@ -56,7 +52,6 @@ export async function POST(
   }
   if (action === "reject") {
     updates.certification_passed = false;
-    updates.certification_score = certificationScore ?? null;
     updates.certification_notes = reason;
     updates.certification_assessed_by = auth.user.id;
     updates.certification_assessed_at = new Date().toISOString();
@@ -94,7 +89,7 @@ export async function POST(
       cleaner_id: params.id,
       event_type:
         action === "approve" ? "certification_passed" : "certification_failed",
-      metadata: { certificationScore: certificationScore ?? null },
+      metadata: {},
       notes: reason,
       score_delta: 0,
       tier_after: action === "approve" ? "silver" : null,
@@ -111,11 +106,22 @@ export async function POST(
   });
   await auth.admin.from("notifications").insert({
     body:
-      action === "approve"
-        ? "You passed CleanScape certification and can now receive jobs."
-        : `Your cleaner account was updated: ${action}.`,
+        action === "approve"
+        ? "You are approved and can now receive cleaning jobs."
+        : action === "reject"
+          ? "Your application is on hold. CleanScape will follow up if more is needed."
+          : action === "suspend"
+            ? "Your cleaner account has been temporarily suspended."
+            : action === "remove"
+              ? "Your cleaner account has been removed from CleanScape."
+              : `Your cleaner account was updated: ${action}.`,
     data: {},
-    title: action === "approve" ? "Certification complete" : "Account update",
+    title:
+      action === "approve"
+        ? "You're approved"
+        : action === "reject"
+          ? "Application on hold"
+          : "Account update",
     type: `cleaner_${action}`,
     user_id: params.id,
   });
