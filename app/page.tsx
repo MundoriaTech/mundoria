@@ -481,11 +481,7 @@ export default function HomePage() {
         </div>
       </ScrollReveal>
 
-      <LandingFooter
-        cleanerHref={cleanerHref}
-        configured={configured}
-        customerHref={customerHref}
-      />
+      <LandingFooter cleanerHref={cleanerHref} configured={configured} />
     </main>
   );
 }
@@ -603,11 +599,9 @@ function LandingNavbar({
 function LandingFooter({
   cleanerHref,
   configured,
-  customerHref,
 }: {
   cleanerHref: string;
   configured: boolean;
-  customerHref: string;
 }) {
   const bookingHref = configured ? "/booking/new" : "/setup";
   const loginHref = configured ? "/login" : "/setup";

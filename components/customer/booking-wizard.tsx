@@ -188,8 +188,29 @@ export function BookingWizard({
   useEffect(() => {
     if (step !== 5 || !recommendation?.autoApplied) return;
     if (draft.recommendationOutcome !== "not_shown") return;
-    applyRecommendation();
-  }, [step, recommendation?.autoApplied, recommendation?.recommendedStandard, recommendation?.recommendedServiceType]);
+    const service = SERVICES.find(
+      (item) => item.value === recommendation.recommendedServiceType,
+    );
+    setDraft((current) => ({
+      ...current,
+      cleaningStandard: recommendation.recommendedStandard,
+      recommendationOutcome: "auto_applied",
+      recommendedCleaningStandard: recommendation.recommendedStandard,
+      recommendedServiceType: recommendation.recommendedServiceType,
+      selectedAddOns:
+        current.serviceType === recommendation.recommendedServiceType
+          ? current.selectedAddOns
+          : [],
+      serviceCategory: service?.category ?? current.serviceCategory,
+      serviceType: recommendation.recommendedServiceType,
+    }));
+  }, [
+    draft.recommendationOutcome,
+    recommendation?.autoApplied,
+    recommendation?.recommendedServiceType,
+    recommendation?.recommendedStandard,
+    step,
+  ]);
 
   function canContinue() {
     if (step === 1) return Boolean(draft.serviceCategory);
@@ -312,13 +333,18 @@ export function BookingWizard({
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="mb-8">
+    <div className="mx-auto max-w-4xl pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-0">
+      <div className="mb-5 sm:mb-8">
         <p className="text-sm font-medium text-primary">New booking</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
           Book your cleaner
         </h1>
-        <div className="mt-6 grid grid-cols-5 gap-2 sm:grid-cols-10">
+        <p className="mt-3 text-sm text-muted-foreground sm:hidden">
+          Step {step} of {steps.length}
+          <span className="mx-1.5 text-muted-foreground/50">·</span>
+          {steps[step - 1]}
+        </p>
+        <div className="mt-3 grid grid-cols-10 gap-1 sm:mt-6 sm:gap-2">
           {steps.map((label, index) => (
             <div key={label}>
               <div
@@ -335,7 +361,7 @@ export function BookingWizard({
         </div>
       </div>
 
-      <section className="rounded-2xl border bg-background p-5 shadow-sm sm:p-8">
+      <section className="rounded-2xl border bg-background p-4 shadow-sm sm:p-8">
         {step === 1 ? (
           <CategoryStep
             selected={draft.serviceCategory}
@@ -425,10 +451,13 @@ export function BookingWizard({
             </p>
           )
         ) : null}
+      </section>
 
-        {step < 10 ? (
-          <div className="mt-8 flex justify-between border-t pt-5">
+      {step < 10 ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur supports-[backdrop-filter]:bg-background/90 sm:static sm:mt-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-0 sm:backdrop-blur-none">
+          <div className="mx-auto flex max-w-4xl gap-2 sm:mt-6 sm:justify-between sm:gap-3 sm:border-t sm:pt-5">
             <Button
+              className="min-h-11 flex-1 touch-manipulation sm:flex-none"
               disabled={step === 1}
               onClick={() => setStep((current) => current - 1)}
               variant="ghost"
@@ -438,6 +467,7 @@ export function BookingWizard({
             </Button>
             {needsAuth && step === 7 ? null : (
               <Button
+                className="min-h-11 flex-[1.6] touch-manipulation sm:flex-none"
                 disabled={!canContinue()}
                 onClick={() =>
                   step === 5
@@ -445,13 +475,18 @@ export function BookingWizard({
                     : setStep((current) => current + 1)
                 }
               >
-                {step === 9 ? "Continue to payment" : "Continue"}
+                <span className="sm:hidden">
+                  {step === 9 ? "Payment" : "Continue"}
+                </span>
+                <span className="hidden sm:inline">
+                  {step === 9 ? "Continue to payment" : "Continue"}
+                </span>
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}
           </div>
-        ) : null}
-      </section>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -472,10 +507,10 @@ function GuestAuthGate() {
         clean is done.
       </p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Button asChild>
+        <Button asChild className="min-h-11 w-full touch-manipulation sm:w-auto">
           <Link href={signupHref}>Create account</Link>
         </Button>
-        <Button asChild variant="outline">
+        <Button asChild className="min-h-11 w-full touch-manipulation sm:w-auto" variant="outline">
           <Link href={loginHref}>Log in</Link>
         </Button>
       </div>
@@ -492,18 +527,18 @@ function CategoryStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold">What type of cleaning do you need?</h2>
+      <h2 className="text-lg font-semibold sm:text-xl">What type of cleaning do you need?</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Start broad — CleanScape will guide you to the right service and standard.
       </p>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2">
         {SERVICE_CATEGORIES.map((category) => {
           const Icon = category.icon;
           const active = selected === category.value;
           return (
             <button
               className={cn(
-                "rounded-xl border p-4 text-left transition hover:border-primary",
+                "rounded-xl border p-3.5 text-left transition hover:border-primary touch-manipulation sm:p-4",
                 active && "border-primary bg-primary/5 ring-1 ring-primary",
               )}
               key={category.value}
@@ -511,16 +546,18 @@ function CategoryStep({
               type="button"
             >
               <div className="flex items-start gap-3">
-                <span className="rounded-lg bg-emerald-100 p-2 text-primary">
+                <span className="shrink-0 rounded-lg bg-emerald-100 p-2 text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="font-semibold">{category.label}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {category.description}
                   </p>
                 </div>
-                {active ? <Check className="ml-auto h-5 w-5 text-primary" /> : null}
+                {active ? (
+                  <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                ) : null}
               </div>
             </button>
           );
@@ -543,20 +580,20 @@ function ServiceStep({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">
+      <h2 className="text-lg font-semibold sm:text-xl">
         Choose your {category ? categoryDefinition(category).label.toLowerCase() : "cleaning"} service
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Each service includes a recommended standard based on CleanScape guidance.
       </p>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2">
         {services.map((service) => {
           const Icon = service.icon;
           const active = selected === service.value;
           return (
             <button
               className={cn(
-                "rounded-xl border p-4 text-left transition hover:border-primary",
+                "rounded-xl border p-3.5 text-left transition hover:border-primary touch-manipulation sm:p-4",
                 active && "border-primary bg-primary/5 ring-1 ring-primary",
               )}
               key={service.value}
@@ -564,10 +601,10 @@ function ServiceStep({
               type="button"
             >
               <div className="flex items-start gap-3">
-                <span className="rounded-lg bg-emerald-100 p-2 text-primary">
+                <span className="shrink-0 rounded-lg bg-emerald-100 p-2 text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="font-semibold">{service.label}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {service.description}
@@ -576,7 +613,9 @@ function ServiceStep({
                     Recommended: {standardLabel(service.recommendedStandard)}
                   </p>
                 </div>
-                {active ? <Check className="ml-auto h-5 w-5 text-primary" /> : null}
+                {active ? (
+                  <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                ) : null}
               </div>
             </button>
           );
@@ -600,13 +639,13 @@ function StandardStep({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">Choose your cleaning standard</h2>
+      <h2 className="text-lg font-semibold sm:text-xl">Choose your cleaning standard</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         {service.fixedStandard
           ? `${service.label} uses a fixed ${standardLabel(service.fixedStandard)} Standard.`
           : "Pick the level of detail you want. We’ll advise you if a different standard seems better."}
       </p>
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      <div className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-3">
         {CLEANING_STANDARDS.map((standard) => {
           const disabled = !standards.some((item) => item.value === standard.value);
           const active = selected === standard.value;
@@ -614,7 +653,7 @@ function StandardStep({
           return (
             <button
               className={cn(
-                "rounded-xl border p-4 text-left transition",
+                "rounded-xl border p-3.5 text-left transition touch-manipulation sm:p-4",
                 active && "border-primary bg-primary/5 ring-1 ring-primary",
                 disabled
                   ? "cursor-not-allowed opacity-40"
@@ -626,7 +665,7 @@ function StandardStep({
               type="button"
             >
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                   <p className="font-semibold">{standard.label}</p>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {standard.description}
@@ -637,7 +676,7 @@ function StandardStep({
                     </p>
                   ) : null}
                 </div>
-                {active ? <Check className="h-5 w-5 text-primary" /> : null}
+                {active ? <Check className="h-5 w-5 shrink-0 text-primary" /> : null}
               </div>
             </button>
           );
@@ -687,19 +726,19 @@ function QuestionsStep({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">A few quick property questions</h2>
+      <h2 className="text-lg font-semibold sm:text-xl">A few quick property questions</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         These help us give professional guidance before you confirm.
       </p>
 
-      <div className="mt-6 space-y-6">
+      <div className="mt-5 space-y-6 sm:mt-6">
         <div>
           <p className="font-medium">How would you describe the current condition?</p>
           <div className="mt-3 grid gap-3">
             {propertyConditionOptions.map((option) => (
               <button
                 className={cn(
-                  "rounded-xl border p-4 text-left text-sm transition hover:border-primary",
+                  "min-h-11 rounded-xl border p-3.5 text-left text-sm transition hover:border-primary touch-manipulation sm:p-4",
                   draft.propertyCondition === option.value &&
                     "border-primary bg-primary/5 ring-1 ring-primary",
                 )}
@@ -715,9 +754,10 @@ function QuestionsStep({
 
         <div>
           <p className="font-medium">Have you recently moved into or out of the property?</p>
-          <div className="mt-3 flex gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-3">
             {[true, false].map((value) => (
               <Button
+                className="min-h-11 touch-manipulation"
                 key={String(value)}
                 onClick={() => update("recentlyMoved", value)}
                 type="button"
@@ -731,13 +771,13 @@ function QuestionsStep({
 
         <div>
           <p className="font-medium">Any areas requiring special attention?</p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-2 gap-2">
             {attentionAreas.map((area) => {
               const selected = draft.specialAttentionAreas.includes(area);
               return (
                 <button
                   className={cn(
-                    "rounded-xl border p-3 text-left text-sm transition hover:border-primary",
+                    "min-h-11 rounded-xl border p-3 text-left text-sm transition hover:border-primary touch-manipulation",
                     selected && "border-primary bg-primary/5 ring-1 ring-primary",
                   )}
                   key={area}
@@ -772,13 +812,13 @@ function RecommendationStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold">CleanScape recommendation</h2>
+      <h2 className="text-lg font-semibold sm:text-xl">CleanScape recommendation</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Based on your service, standard and property answers.
       </p>
 
       {recommendation?.shouldShow ? (
-        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-950 sm:p-5">
           <p className="text-sm font-semibold">Our recommendation</p>
           <p className="mt-2 text-sm leading-6">{recommendation.message}</p>
           {recommendation.autoApplied ? (
@@ -787,12 +827,17 @@ function RecommendationStep({
               service.
             </p>
           ) : (
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <Button onClick={applyRecommendation} type="button">
+            <div className="mt-4 flex flex-col gap-2">
+              <Button
+                className="min-h-11 w-full touch-manipulation whitespace-normal"
+                onClick={applyRecommendation}
+                type="button"
+              >
                 Switch to{" "}
                 {formatServiceName(recommendation.recommendedServiceType)}
               </Button>
               <Button
+                className="min-h-11 w-full touch-manipulation whitespace-normal"
                 onClick={() => {
                   update("recommendationOutcome", "overridden");
                   update(
@@ -814,7 +859,7 @@ function RecommendationStep({
           )}
         </div>
       ) : (
-        <div className="mt-5 rounded-2xl border bg-emerald-50 p-5 text-emerald-950">
+        <div className="mt-5 rounded-2xl border bg-emerald-50 p-4 text-emerald-950 sm:p-5">
           <p className="text-sm font-semibold">Your selection looks suitable</p>
           <p className="mt-2 text-sm leading-6">
             Based on your answers, this service and standard look appropriate.
@@ -847,18 +892,18 @@ function AddOnsStep({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">Optional add-ons</h2>
+      <h2 className="text-lg font-semibold sm:text-xl">Optional add-ons</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Extras for your booking. You can skip this step.
       </p>
 
-      <div className="mt-6 flex items-end justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
+      <div className="mt-5 flex items-end justify-between gap-3 sm:mt-6 sm:gap-4">
+        <p className="min-w-0 text-sm text-muted-foreground">
           {addOns.length
             ? "Select any extras you would like included."
             : "No add-ons are available for this service."}
         </p>
-        <p className="text-sm font-semibold">
+        <p className="shrink-0 text-sm font-semibold">
           {formatMoney(selectedAddOnTotal(draft.selectedAddOns))}
         </p>
       </div>
@@ -871,7 +916,7 @@ function AddOnsStep({
             return (
               <button
                 className={cn(
-                  "rounded-xl border p-4 text-left transition hover:border-primary",
+                  "rounded-xl border p-3.5 text-left transition hover:border-primary touch-manipulation sm:p-4",
                   selected && "border-primary bg-primary/5 ring-1 ring-primary",
                 )}
                 key={addOn.id}
@@ -879,13 +924,15 @@ function AddOnsStep({
                 type="button"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-semibold">{addOn.label}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {addOn.description}
                     </p>
                   </div>
-                  <p className="text-sm font-bold">{formatMoney(addOn.amount)}</p>
+                  <p className="shrink-0 text-sm font-bold">
+                    {formatMoney(addOn.amount)}
+                  </p>
                 </div>
               </button>
             );
@@ -915,12 +962,12 @@ function AddressStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold">Where should we clean?</h2>
+      <h2 className="text-lg font-semibold sm:text-xl">Where should we clean?</h2>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {addresses.map((address) => (
           <button
             className={cn(
-              "rounded-xl border p-4 text-left",
+              "rounded-xl border p-3.5 text-left touch-manipulation sm:p-4",
               selectedId === address.id &&
                 "border-primary bg-primary/5 ring-1 ring-primary",
             )}
@@ -929,10 +976,10 @@ function AddressStep({
             type="button"
           >
             <div className="flex gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 text-primary" />
-              <div>
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0">
                 <p className="font-semibold">{address.label ?? "Address"}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 break-words text-sm text-muted-foreground">
                   {address.address_line_1}, {address.city}, {address.postcode}
                 </p>
                 <p className="mt-2 text-xs capitalize text-muted-foreground">
@@ -945,7 +992,7 @@ function AddressStep({
         ))}
       </div>
       <Button
-        className="mt-4"
+        className="mt-4 min-h-11 w-full touch-manipulation sm:w-auto"
         onClick={() => setShowForm(!showForm)}
         type="button"
         variant="outline"
@@ -954,7 +1001,7 @@ function AddressStep({
         Add another address
       </Button>
       {showForm ? (
-        <div className="mt-5 rounded-xl bg-muted/40 p-4">
+        <div className="mt-5 overflow-x-auto rounded-xl bg-muted/40 p-3 sm:p-4">
           <AddressForm compact onSaved={onSaved} userId={userId} />
         </div>
       ) : null}
@@ -976,14 +1023,15 @@ function ScheduleStep({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">Pick a date and time</h2>
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
+      <h2 className="text-lg font-semibold sm:text-xl">Pick a date and time</h2>
+      <div className="mt-5 grid gap-6 sm:mt-6 md:grid-cols-2">
         <label className="space-y-2 text-sm font-medium">
           <span className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4" />
             Date
           </span>
           <Input
+            className="min-h-11"
             min={minDate}
             onChange={(event) => update("scheduledDate", event.target.value)}
             type="date"
@@ -996,7 +1044,7 @@ function ScheduleStep({
             Start time
           </p>
           <TimeSlotPicker
-            className="mt-2 max-h-52 overflow-y-auto pr-1"
+            className="mt-2 max-h-56 overflow-y-auto overscroll-contain pr-1"
             date={draft.scheduledDate}
             onChange={(slot) => update("scheduledTime", slot)}
             value={draft.scheduledTime}
@@ -1045,8 +1093,8 @@ function ReviewStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold">Review your booking</h2>
-      <div className="mt-6 divide-y rounded-xl border">
+      <h2 className="text-lg font-semibold sm:text-xl">Review your booking</h2>
+      <div className="mt-5 divide-y overflow-hidden rounded-xl border sm:mt-6">
         <SummaryRow label="Service" value={formatServiceName(draft.serviceType)} />
         <SummaryRow
           label="Standard"
@@ -1105,13 +1153,15 @@ function ReviewStep({
 
       <div className="mt-5">
         <p className="text-sm font-medium">Promo code</p>
-        <div className="mt-2 flex gap-2">
+        <div className="mt-2 flex flex-col gap-2 min-[400px]:flex-row">
           <Input
+            className="min-h-11"
             onChange={(event) => update("promoCode", event.target.value)}
             placeholder="CLEAN10"
             value={draft.promoCode}
           />
           <Button
+            className="min-h-11 shrink-0 touch-manipulation"
             disabled={!draft.promoCode}
             onClick={validatePromo}
             type="button"
@@ -1125,8 +1175,8 @@ function ReviewStep({
         ) : null}
       </div>
 
-      <div className="mt-6 flex items-end justify-between rounded-xl bg-emerald-50 p-5">
-        <div>
+      <div className="mt-6 flex flex-col gap-2 rounded-xl bg-emerald-50 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
+        <div className="min-w-0">
           <p className="text-sm text-emerald-800">Estimated total</p>
           <p className="mt-1 text-xs text-emerald-700">
             Final adjustments require your approval.
@@ -1234,19 +1284,19 @@ function PaymentStep({
 
   return (
     <form onSubmit={pay}>
-      <div className="flex items-center gap-3">
-        <span className="rounded-full bg-emerald-100 p-3 text-primary">
+      <div className="flex items-start gap-3">
+        <span className="shrink-0 rounded-full bg-emerald-100 p-3 text-primary">
           <CreditCard className="h-5 w-5" />
         </span>
-        <div>
-          <h2 className="text-xl font-semibold">Secure your booking</h2>
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold sm:text-xl">Secure your booking</h2>
           <p className="text-sm text-muted-foreground">
             Authorization amount: {formatMoney(amount)}
           </p>
         </div>
       </div>
 
-      <div className="mt-6 rounded-lg border p-4">
+      <div className="mt-5 rounded-lg border p-3 sm:mt-6 sm:p-4">
         <CardElement
           options={{
             hidePostalCode: true,
@@ -1262,7 +1312,7 @@ function PaymentStep({
       </div>
 
       <div className="mt-5 flex gap-3 rounded-xl bg-blue-50 p-4 text-sm text-blue-900">
-        <ShieldCheck className="h-5 w-5 shrink-0" />
+        <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
         <p>
           Your card will only be charged after the job is completed. Today we
           place a secure authorization hold.
@@ -1276,7 +1326,7 @@ function PaymentStep({
       ) : null}
 
       <Button
-        className="mt-6 w-full"
+        className="mt-6 min-h-11 w-full touch-manipulation"
         disabled={!stripe || processing}
         size="lg"
         type="submit"
@@ -1289,9 +1339,13 @@ function PaymentStep({
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 px-4 py-3 sm:grid-cols-[8rem_1fr]">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium sm:text-right">{value}</span>
+    <div className="grid gap-1 px-3 py-3 sm:grid-cols-[8rem_1fr] sm:px-4">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-sm sm:normal-case sm:tracking-normal">
+        {label}
+      </span>
+      <span className="break-words text-sm font-medium sm:text-right">
+        {value}
+      </span>
     </div>
   );
 }

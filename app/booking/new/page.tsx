@@ -101,11 +101,11 @@ export default async function NewBookingPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f5ff] text-[#221f50]">
-      <header className="border-b border-[#dedbfd] bg-white/90 px-4 py-4 backdrop-blur sm:px-6">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
-          <BrandLogo href="/" markClassName="h-10 w-7" />
-          <div className="flex items-center gap-3 text-sm font-semibold">
+    <main className="min-h-screen overflow-x-hidden bg-[#f7f5ff] text-[#221f50]">
+      <header className="sticky top-0 z-50 border-b border-[#dedbfd] bg-white/95 px-3 py-3 backdrop-blur sm:px-6 sm:py-4">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-2">
+          <BrandLogo href="/" markClassName="h-9 w-6 sm:h-10 sm:w-7" />
+          <div className="flex shrink-0 items-center gap-2 text-sm font-semibold sm:gap-3">
             {user ? (
               <Link className="text-[#5a51aa] hover:underline" href="/dashboard">
                 Dashboard
@@ -113,13 +113,13 @@ export default async function NewBookingPage({
             ) : (
               <>
                 <Link
-                  className="text-[#5a51aa] hover:underline"
+                  className="px-1 text-[#5a51aa] hover:underline"
                   href="/login?redirectTo=%2Fbooking%2Fnew"
                 >
                   Log in
                 </Link>
                 <Link
-                  className="rounded-full bg-[#221f50] px-4 py-2 text-white hover:bg-[#37306c]"
+                  className="rounded-full bg-[#221f50] px-3 py-1.5 text-white hover:bg-[#37306c] sm:px-4 sm:py-2"
                   href="/signup?redirectTo=%2Fbooking%2Fnew"
                 >
                   Sign up
@@ -129,7 +129,7 @@ export default async function NewBookingPage({
           </div>
         </div>
       </header>
-      <div className="px-4 py-8 sm:px-6">
+      <div className="px-3 py-5 sm:px-6 sm:py-8">
         <BookingWizard
           initialAddresses={addresses}
           initialDraft={initialDraft}
