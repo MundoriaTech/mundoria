@@ -3,7 +3,15 @@
 import { Bell, CheckCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
@@ -25,11 +33,19 @@ export function NotificationBell({
   const pathname = usePathname();
   const [loading, setLoading] = useState(!initialNotifications);
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
+  const [isDesktop, setIsDesktop] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.is_read).length,
     [notifications],
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (initialNotifications) return;
@@ -73,7 +89,9 @@ export function NotificationBell({
             );
           } else if (payload.eventType === "DELETE") {
             setNotifications((current) =>
-              current.filter((notification) => notification.id !== payload.old.id),
+              current.filter(
+                (notification) => notification.id !== payload.old.id,
+              ),
             );
           }
         },
@@ -87,24 +105,61 @@ export function NotificationBell({
   useEffect(() => {
     if (!open) return;
 
-    function close(event: MouseEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+    function layoutPanel() {
+      const desktop = window.matchMedia("(min-width: 640px)").matches;
+      setIsDesktop(desktop);
+      const rect = triggerRef.current?.getBoundingClientRect();
+
+      if (desktop && rect) {
+        setPanelStyle({
+          top: rect.bottom + 8,
+          right: Math.max(8, window.innerWidth - rect.right),
+          left: "auto",
+          bottom: "auto",
+          width: "min(22rem, calc(100vw - 1rem))",
+          maxHeight: "min(24rem, 70vh)",
+        });
+        return;
+      }
+
+      setPanelStyle({
+        top: "auto",
+        right: 0,
+        left: 0,
+        bottom: 0,
+        width: "100%",
+        maxHeight: "min(88dvh, 40rem)",
+      });
     }
-    function escape(event: KeyboardEvent) {
+
+    function onPointerDown(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node;
+      if (triggerRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setOpen(false);
+    }
+
+    function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
     }
 
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", escape);
+    layoutPanel();
+    window.addEventListener("resize", layoutPanel);
+    window.addEventListener("scroll", layoutPanel, true);
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKey);
 
-    const mobile = window.matchMedia("(max-width: 639px)").matches;
     const previousOverflow = document.body.style.overflow;
-    if (mobile) document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("keydown", escape);
-      if (mobile) document.body.style.overflow = previousOverflow;
+      window.removeEventListener("resize", layoutPanel);
+      window.removeEventListener("scroll", layoutPanel, true);
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
     };
   }, [open]);
 
@@ -145,14 +200,140 @@ export function NotificationBell({
     return `/booking/${bookingId}`;
   }
 
+  let list: ReactNode;
+  if (loading) {
+    list = (
+      <div className="flex justify-center p-8">
+        <LoadingSpinner label="Loading notifications" />
+      </div>
+    );
+  } else if (notifications.length) {
+    list = notifications.map((notification) => {
+      const href = notificationHref(notification);
+      const content = (
+        <div
+          className={cn(
+            "border-b border-border px-4 py-3.5 last:border-0",
+            !notification.is_read && "bg-primary/10",
+          )}
+        >
+          <p className="text-sm font-medium text-foreground">
+            {notification.title}
+          </p>
+          <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">
+            {notification.body}
+          </p>
+          <time className="mt-2 block text-[10px] text-muted-foreground">
+            {new Date(notification.created_at).toLocaleString("en-GB", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </time>
+        </div>
+      );
+      return href ? (
+        <Link
+          className="block min-h-11"
+          href={href}
+          key={notification.id}
+          onClick={() => {
+            void markRead(notification);
+            setOpen(false);
+          }}
+        >
+          {content}
+        </Link>
+      ) : (
+        <button
+          className="block min-h-11 w-full text-left"
+          key={notification.id}
+          onClick={() => void markRead(notification)}
+          type="button"
+        >
+          {content}
+        </button>
+      );
+    });
+  } else {
+    list = (
+      <EmptyState
+        className="m-4 border-0 p-5"
+        message="You’re all caught up."
+        title="No notifications"
+      />
+    );
+  }
+
+  const panel =
+    open && mounted
+      ? createPortal(
+          <>
+            <button
+              aria-label="Close notifications"
+              className="fixed inset-0 z-[110] bg-slate-950/45"
+              onClick={() => setOpen(false)}
+              type="button"
+            />
+            <div
+              aria-label="Notifications"
+              className={cn(
+                "fixed z-[120] flex flex-col overflow-hidden border border-border bg-background shadow-2xl",
+                isDesktop
+                  ? "rounded-xl"
+                  : "rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
+              )}
+              ref={panelRef}
+              role="dialog"
+              style={panelStyle}
+            >
+              {!isDesktop ? (
+                <div className="flex shrink-0 items-center justify-center py-2">
+                  <span className="h-1 w-10 rounded-full bg-muted-foreground/30" />
+                </div>
+              ) : null}
+              <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-3">
+                <p className="font-semibold text-foreground">Notifications</p>
+                <div className="flex items-center gap-1">
+                  {unreadCount ? (
+                    <button
+                      className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-xs font-medium text-primary"
+                      onClick={() => void markAllRead()}
+                      type="button"
+                    >
+                      <CheckCheck className="h-3.5 w-3.5" />
+                      Mark all read
+                    </button>
+                  ) : null}
+                  {!isDesktop ? (
+                    <button
+                      aria-label="Close"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                      type="button"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                {list}
+              </div>
+            </div>
+          </>,
+          document.body,
+        )
+      : null;
+
   return (
-    <div className="relative" ref={containerRef}>
+    <>
       <Button
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label="Notifications"
-        className="h-11 w-11"
+        className="relative h-11 w-11"
         onClick={() => setOpen((value) => !value)}
+        ref={triggerRef}
         size="icon"
         type="button"
         variant="ghost"
@@ -164,118 +345,7 @@ export function NotificationBell({
           </span>
         ) : null}
       </Button>
-
-      {open ? (
-        <>
-          <button
-            aria-label="Close notifications"
-            className="fixed inset-0 z-40 bg-slate-950/40 sm:hidden"
-            onClick={() => setOpen(false)}
-            type="button"
-          />
-          <div
-            aria-label="Notifications"
-            className={cn(
-              "z-50 flex flex-col overflow-hidden border border-border bg-background shadow-xl",
-              // Mobile: full-width bottom sheet
-              "fixed inset-x-0 bottom-0 max-h-[min(85dvh,36rem)] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
-              // Desktop: anchored dropdown
-              "sm:absolute sm:inset-auto sm:right-0 sm:top-12 sm:max-h-96 sm:w-[min(22rem,calc(100vw-2rem))] sm:rounded-xl sm:pb-0",
-            )}
-            role="dialog"
-          >
-            <div className="flex shrink-0 items-center justify-center py-2 sm:hidden">
-              <span className="h-1 w-10 rounded-full bg-muted-foreground/30" />
-            </div>
-            <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-              <p className="font-semibold text-foreground">Notifications</p>
-              <div className="flex items-center gap-1">
-                {unreadCount ? (
-                  <button
-                    className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-xs font-medium text-primary"
-                    onClick={() => void markAllRead()}
-                    type="button"
-                  >
-                    <CheckCheck className="h-3.5 w-3.5" />
-                    Mark all read
-                  </button>
-                ) : null}
-                <button
-                  aria-label="Close"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted sm:hidden"
-                  onClick={() => setOpen(false)}
-                  type="button"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-              {loading ? (
-                <div className="flex justify-center p-8">
-                  <LoadingSpinner label="Loading notifications" />
-                </div>
-              ) : notifications.length ? (
-                notifications.map((notification) => {
-                  const href = notificationHref(notification);
-                  const content = (
-                    <div
-                      className={cn(
-                        "border-b border-border px-4 py-3.5 last:border-0",
-                        !notification.is_read && "bg-primary/10",
-                      )}
-                    >
-                      <p className="text-sm font-medium text-foreground">
-                        {notification.title}
-                      </p>
-                      <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">
-                        {notification.body}
-                      </p>
-                      <time className="mt-2 block text-[10px] text-muted-foreground">
-                        {new Date(notification.created_at).toLocaleString(
-                          "en-GB",
-                          {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          },
-                        )}
-                      </time>
-                    </div>
-                  );
-                  return href ? (
-                    <Link
-                      className="block min-h-11"
-                      href={href}
-                      key={notification.id}
-                      onClick={() => {
-                        void markRead(notification);
-                        setOpen(false);
-                      }}
-                    >
-                      {content}
-                    </Link>
-                  ) : (
-                    <button
-                      className="block w-full min-h-11 text-left"
-                      key={notification.id}
-                      onClick={() => void markRead(notification)}
-                      type="button"
-                    >
-                      {content}
-                    </button>
-                  );
-                })
-              ) : (
-                <EmptyState
-                  className="m-4 border-0 p-5"
-                  message="You’re all caught up."
-                  title="No notifications"
-                />
-              )}
-            </div>
-          </div>
-        </>
-      ) : null}
-    </div>
+      {panel}
+    </>
   );
 }
