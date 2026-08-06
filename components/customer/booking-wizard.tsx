@@ -339,24 +339,20 @@ export function BookingWizard({
         <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
           Book your cleaner
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground sm:hidden">
+        <p className="mt-3 text-sm text-muted-foreground">
           Step {step} of {steps.length}
           <span className="mx-1.5 text-muted-foreground/50">·</span>
           {steps[step - 1]}
         </p>
-        <div className="mt-3 grid grid-cols-10 gap-1 sm:mt-6 sm:gap-2">
+        <div className="mt-3 grid grid-cols-10 gap-1 sm:mt-4 sm:gap-1.5" aria-hidden="true">
           {steps.map((label, index) => (
-            <div key={label}>
-              <div
-                className={cn(
-                  "h-1.5 rounded-full",
-                  index + 1 <= step ? "bg-primary" : "bg-muted",
-                )}
-              />
-              <p className="mt-2 hidden text-xs text-muted-foreground sm:block">
-                {label}
-              </p>
-            </div>
+            <div
+              className={cn(
+                "h-1.5 rounded-full",
+                index + 1 <= step ? "bg-primary" : "bg-muted",
+              )}
+              key={label}
+            />
           ))}
         </div>
       </div>

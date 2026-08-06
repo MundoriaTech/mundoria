@@ -210,12 +210,12 @@ export function AddressForm({
   address,
   compact = false,
   onSaved,
-  userId,
 }: {
   address?: Address | null;
   compact?: boolean;
   onSaved: (address: Address) => void;
-  userId: string;
+  /** @deprecated Ownership comes from the authenticated session via /api/addresses */
+  userId?: string;
 }) {
   const [values, setValues] = useState<AddressFormValues>(() =>
     address
@@ -280,43 +280,46 @@ export function AddressForm({
     }
 
     setSaving(true);
-    const supabase = createBrowserClient();
-
-    if (values.is_default) {
-      await supabase
-        .from("addresses")
-        .update({ is_default: false })
-        .eq("customer_id", userId)
-        .neq("id", address?.id ?? "00000000-0000-0000-0000-000000000000");
-    }
 
     const payload = {
-      ...values,
       address_line_1: values.address_line_1.trim(),
       address_line_2: values.address_line_2.trim() || null,
       city: values.city.trim(),
-      customer_id: userId,
+      id: address?.id,
+      is_default: values.is_default,
       label: values.label.trim() || null,
+      latitude: values.latitude,
+      longitude: values.longitude,
+      num_bathrooms: values.num_bathrooms,
+      num_bedrooms: values.num_bedrooms,
       postcode: values.postcode.trim().toUpperCase(),
+      property_type: values.property_type,
       special_requirements: values.special_requirements.trim() || null,
     };
-    const query = address
-      ? supabase
-          .from("addresses")
-          .update(payload)
-          .eq("id", address.id)
-          .select()
-          .single()
-      : supabase.from("addresses").insert(payload).select().single();
-    const { data, error: saveError } = await query;
 
-    setSaving(false);
-    if (saveError) {
-      setError(saveError.message);
-      return;
+    try {
+      const response = await fetch("/api/addresses", {
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        method: address ? "PATCH" : "POST",
+      });
+      const result = (await response.json()) as {
+        address?: Address;
+        error?: string;
+      };
+
+      setSaving(false);
+
+      if (!response.ok || !result.address) {
+        setError(result.error ?? "Could not save address.");
+        return;
+      }
+
+      onSaved(result.address);
+    } catch {
+      setSaving(false);
+      setError("Could not save address. Check your connection and try again.");
     }
-
-    onSaved(data as Address);
   }
 
   const addressInput = (
