@@ -23,11 +23,11 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
   return (
     <div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <select className="h-11 rounded-md border px-3" onChange={(event) => setType(event.target.value)}>
+        <select className="h-11 rounded-md border border-input bg-background px-3 text-foreground" onChange={(event) => setType(event.target.value)}>
           <option value="">All types</option>
           {["damage", "no_show", "quality", "payment", "other"].map((value) => <option key={value}>{value}</option>)}
         </select>
-        <select className="h-11 rounded-md border px-3" onChange={(event) => setStatus(event.target.value)}>
+        <select className="h-11 rounded-md border border-input bg-background px-3 text-foreground" onChange={(event) => setStatus(event.target.value)}>
           <option value="">All statuses</option>
           {["open", "under_review", "resolved", "closed"].map((value) => <option key={value}>{value}</option>)}
         </select>

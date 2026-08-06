@@ -33,7 +33,10 @@ export default async function AdminDashboardPage() {
     admin
       .from("cleaner_profiles")
       .select("status,no_show_count,cancellation_count,onboarding_complete"),
-    admin.from("ratings").select("overall_score"),
+    admin
+      .from("ratings")
+      .select("overall_score,application_status")
+      .eq("application_status", "applied"),
   ]);
   const all = (bookings ?? []) as AdminBooking[];
   const todayBookings = all.filter((booking) => booking.scheduled_date === today);
@@ -44,21 +47,20 @@ export default async function AdminDashboardPage() {
     .filter((booking) => booking.payment_status === "released")
     .reduce((sum, booking) => sum + (booking.amount_platform ?? 0), 0);
   const pending = (cleaners ?? []).filter(
-    (cleaner) => cleaner.status === "pending" && cleaner.onboarding_complete,
+    (cleaner) =>
+      (cleaner.status === "pending" || cleaner.status === "in_training") &&
+      cleaner.onboarding_complete,
   ).length;
   const avgRating = ratings?.length
     ? ratings.reduce((sum, rating) => sum + Number(rating.overall_score), 0) /
       ratings.length
     : 0;
-  const noShows = (cleaners ?? []).reduce(
-    (sum, cleaner) => sum + cleaner.no_show_count,
-    0,
-  );
-  const cancellations = (cleaners ?? []).reduce(
-    (sum, cleaner) => sum + cleaner.cancellation_count,
-    0,
-  );
   const completed = all.filter((booking) => booking.status === "completed").length;
+  const noShowBookings = all.filter((booking) => booking.status === "no_show").length;
+  const cancelledBookings = all.filter(
+    (booking) => booking.status === "cancelled",
+  ).length;
+  const finishedLike = completed + noShowBookings + cancelledBookings;
   const revenuePoints: RevenuePoint[] = all
     .filter((booking) => booking.payment_status === "released")
     .map((booking) => ({
@@ -68,6 +70,7 @@ export default async function AdminDashboardPage() {
   const alerts = all.filter(
     (booking) =>
       booking.status === "cancelled" &&
+      booking.payment_status === "held" &&
       new Date(booking.updated_at ?? booking.created_at).getTime() >
         Date.now() - 24 * 60 * 60 * 1000,
   );
@@ -111,7 +114,7 @@ export default async function AdminDashboardPage() {
       </div>
       {alerts.length ? (
         <div className="space-y-2 rounded-[1.5rem] border border-border bg-muted p-4 text-sm text-foreground shadow-lg">
-          <p className="font-semibold"><AlertTriangle className="mr-2 inline h-5 w-5" />{alerts.length} late cancellation alert{alerts.length > 1 ? "s" : ""} require attention.</p>
+          <p className="font-semibold"><AlertTriangle className="mr-2 inline h-5 w-5" />{alerts.length} rematchable cancellation{alerts.length > 1 ? "s" : ""} in the last 24 hours (payment still held).</p>
           {alerts.slice(0, 3).map((booking) => (
             <div className="flex items-center justify-between rounded-2xl bg-card p-3" key={booking.id}>
               <span>Booking {booking.id.slice(0, 8)} · {booking.scheduled_start_time.slice(0, 5)}</span>
@@ -125,8 +128,14 @@ export default async function AdminDashboardPage() {
         <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-lg shadow-[#5a51aa]/5">
           <h2 className="text-lg font-semibold tracking-[-0.03em] text-foreground">Platform health</h2>
           <Health label="Average rating" value={`${avgRating.toFixed(2)}/5`} icon={Star} />
-          <Health label="No-show rate" value={`${completed ? ((noShows / completed) * 100).toFixed(1) : 0}%`} />
-          <Health label="Cancellation rate" value={`${all.length ? ((cancellations / all.length) * 100).toFixed(1) : 0}%`} />
+          <Health
+            label="No-show rate"
+            value={`${finishedLike ? ((noShowBookings / finishedLike) * 100).toFixed(1) : 0}%`}
+          />
+          <Health
+            label="Cancellation rate"
+            value={`${all.length ? ((cancelledBookings / all.length) * 100).toFixed(1) : 0}%`}
+          />
         </section>
       </div>
       <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-lg shadow-[#5a51aa]/5">

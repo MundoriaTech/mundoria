@@ -80,7 +80,8 @@ export async function middleware(request: NextRequest) {
   const protectedRole = requiredRole(pathname);
 
   if (protectedRole && !user) {
-    const loginUrl = new URL("/login", request.url);
+    const loginPath = protectedRole === "admin" ? "/admin/login" : "/login";
+    const loginUrl = new URL(loginPath, request.url);
     const redirectTo = `${pathname}${request.nextUrl.search}`;
     loginUrl.searchParams.set("redirectTo", redirectTo);
     return redirectWithSession(loginUrl, response);

@@ -119,7 +119,11 @@ export function LoginForm({
         <div className="text-right">
           <Link
             className="text-sm font-medium text-primary hover:underline"
-            href="/forgot-password"
+            href={
+              requiredRole === "admin"
+                ? "/forgot-password?from=admin"
+                : "/forgot-password"
+            }
           >
             Forgot password?
           </Link>

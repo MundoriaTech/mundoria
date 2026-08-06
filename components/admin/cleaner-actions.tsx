@@ -65,7 +65,7 @@ export function CleanerActions({
       />
       <div className="mt-3 flex gap-2">
         <select
-          className="h-10 rounded-md border px-3 text-sm"
+          className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
           onChange={(event) => setTier(event.target.value)}
           value={tier}
         >
@@ -81,7 +81,7 @@ export function CleanerActions({
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Button disabled={!reasonIsValid} onClick={() => void act("approve")}>
-          Approve & activate
+          Approve & certify
         </Button>
         <Button disabled={!reasonIsValid} onClick={() => void act("reject")} variant="outline">
           Needs training

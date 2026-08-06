@@ -63,7 +63,7 @@ export function CleanersTable({
             placeholder="Search cleaners"
           />
         </label>
-        <select className="rounded-md border px-3 text-sm" onChange={(event) => setTier(event.target.value)}>
+        <select className="rounded-md border border-input bg-background px-3 text-sm text-foreground" onChange={(event) => setTier(event.target.value)}>
           <option value="">All tiers</option>
           {["bronze", "silver", "gold", "rose_gold"].map((value) => (
             <option key={value} value={value}>
@@ -96,19 +96,37 @@ export function CleanersTable({
                 <td>
                   {cleaner.cleaner_profiles ? (
                     <TierBadge tier={cleaner.cleaner_profiles.tier} />
-                  ) : null}
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td>{cleaner.cleaner_profiles?.medallion_score ?? 0}</td>
                 <td>{cleaner.cleaner_profiles?.total_jobs ?? 0}</td>
-                <td className="capitalize">{cleaner.cleaner_profiles?.status}</td>
+                <td className="capitalize">
+                  {cleaner.cleaner_profiles?.status?.replaceAll("_", " ") ?? "—"}
+                  {cleaner.cleaner_profiles?.onboarding_complete === false ? (
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      Onboarding incomplete
+                    </span>
+                  ) : null}
+                </td>
                 <td>{new Date(cleaner.created_at).toLocaleDateString("en-GB")}</td>
                 <td>
                   <Link className="font-medium text-primary" href={`/admin/cleaner/${cleaner.id}`}>
-                    View
+                    Review
                   </Link>
                 </td>
               </tr>
             ))}
+            {!filtered.length ? (
+              <tr>
+                <td className="p-8 text-center text-muted-foreground" colSpan={7}>
+                  {cleaners.length
+                    ? "No cleaners match these filters."
+                    : "No cleaner accounts yet."}
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>

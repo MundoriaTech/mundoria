@@ -30,7 +30,7 @@ export async function POST(
   const { action, certificationScore, reason, tier } = parsed.data;
   const status =
     action === "approve"
-      ? "active"
+      ? "certified"
       : action === "reject"
         ? "in_training"
         : action === "suspend"

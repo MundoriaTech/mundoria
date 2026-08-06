@@ -78,7 +78,7 @@ export function AdminAlerts({
           <div className="max-h-96 overflow-auto">
             {items.map((item) => (
               <div
-                className={`border-b p-4 text-sm ${item.is_read ? "" : "bg-amber-50"}`}
+                className={`border-b p-4 text-sm ${item.is_read ? "" : "bg-primary/10"}`}
                 key={item.id}
               >
                 <b>{item.title}</b>

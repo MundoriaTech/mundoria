@@ -31,7 +31,7 @@ export async function runMatchingEngine(
     admin
       .from("profiles")
       .select(
-        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!inner(tier,status,dbs_verified,working_radius_km),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
+        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!cleaner_profiles_id_fkey!inner(tier,status,dbs_verified,working_radius_km),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
       )
       .eq("role", "cleaner")
       .in("cleaner_profiles.status", ["certified", "active"])

@@ -29,16 +29,33 @@ export function UpdatePasswordForm() {
 
   const onSubmit = handleSubmit(async ({ password }) => {
     setFormError(null);
-    const { error } = await createBrowserClient().auth.updateUser({ password });
+    const supabase = createBrowserClient();
+    const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
       setFormError(error.message);
       return;
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data: profile } = user
+      ? await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle()
+      : { data: null };
+
     await fetch("/api/auth/password-updated", { method: "POST" });
-    await createBrowserClient().auth.signOut();
-    router.replace("/login?message=Password%20updated.%20You%20can%20sign%20in.");
+    await supabase.auth.signOut();
+
+    const loginPath =
+      profile?.role === "admin" ? "/admin/login" : "/login";
+    router.replace(
+      `${loginPath}?message=${encodeURIComponent("Password updated. You can sign in.")}`,
+    );
     router.refresh();
   });
 

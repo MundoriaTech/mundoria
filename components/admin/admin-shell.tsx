@@ -11,6 +11,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  UserRound,
   UsersRound,
   X,
 } from "lucide-react";
@@ -28,6 +29,7 @@ import type { Notification } from "@/types/customer";
 const items = [
   { href: "/admin/dashboard", icon: Gauge, label: "Dashboard" },
   { href: "/admin/cleaners", icon: UsersRound, label: "Cleaners" },
+  { href: "/admin/customers", icon: UserRound, label: "Customers" },
   { href: "/admin/bookings", icon: BookOpenCheck, label: "Bookings" },
   { href: "/admin/disputes", icon: AlertTriangle, label: "Disputes" },
   { href: "/admin/payouts", icon: Banknote, label: "Payouts" },

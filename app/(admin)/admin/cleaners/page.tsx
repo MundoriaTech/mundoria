@@ -7,7 +7,7 @@ export default async function AdminCleanersPage() {
   const [{ data: profiles }, { data: areas }] = await Promise.all([
     admin
       .from("profiles")
-      .select("id,full_name,email,phone,avatar_url,created_at,cleaner_profiles(*)")
+      .select("id,full_name,email,phone,avatar_url,created_at,cleaner_profiles!cleaner_profiles_id_fkey(*)")
       .eq("role", "cleaner")
       .order("created_at", { ascending: false }),
     admin.from("cleaner_working_areas").select("cleaner_id,postcode_prefix"),

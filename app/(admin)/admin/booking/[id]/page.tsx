@@ -19,7 +19,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("booking_status_history").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("messages").select("*,sender:profiles!messages_sender_id_fkey(full_name)").eq("booking_id", params.id).order("created_at"),
-    admin.from("profiles").select("id,full_name,cleaner_profiles!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
+    admin.from("profiles").select("id,full_name,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
     admin.from("booking_add_ons").select("*").eq("booking_id", params.id).order("created_at"),
   ]);
   if (!booking) notFound();

@@ -39,11 +39,11 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
           <Input className="pl-9" onChange={(event) => setSearch(event.target.value)} placeholder="Customer or booking ID" />
         </label>
-        <select className="rounded-md border px-3 text-sm" onChange={(event) => setStatus(event.target.value)}>
+        <select className="rounded-md border border-input bg-background px-3 text-sm text-foreground" onChange={(event) => setStatus(event.target.value)}>
           <option value="">All statuses</option>
           {["pending_match","matched","confirmed","cleaner_en_route","in_progress","awaiting_customer_confirmation","completed","cancelled","no_show","disputed"].map((value) => <option key={value}>{value}</option>)}
         </select>
-        <select className="rounded-md border px-3 text-sm" onChange={(event) => setService(event.target.value)}>
+        <select className="rounded-md border border-input bg-background px-3 text-sm text-foreground" onChange={(event) => setService(event.target.value)}>
           <option value="">All services</option>
           {SERVICES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>
