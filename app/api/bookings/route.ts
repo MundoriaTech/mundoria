@@ -56,10 +56,10 @@ export async function POST(request: Request) {
       paymentIntent.metadata.cleaning_standard !== parsed.data.cleaningStandard) ||
     (paymentIntent.metadata.selected_add_ons !== undefined &&
       metadataAddOns !== requestAddOns) ||
-    !["requires_capture", "requires_confirmation"].includes(paymentIntent.status)
+    paymentIntent.status !== "succeeded"
   ) {
     return NextResponse.json(
-      { error: "Payment authorization could not be verified." },
+      { error: "Payment could not be verified." },
       { status: 400 },
     );
   }
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         parsed.data.selectedAddOns,
       ),
       is_recurring: parsed.data.isRecurring,
-      payment_status: "held",
+      payment_status: "released",
       promo_code_id: paymentIntent.metadata.promo_code_id || null,
       prefer_same_cleaner:
         parsed.data.isRecurring && parsed.data.preferSameCleaner,
@@ -127,7 +127,12 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    if (!["canceled", "succeeded"].includes(paymentIntent.status)) {
+    if (paymentIntent.status === "succeeded") {
+      await stripe.refunds.create({
+        payment_intent: paymentIntent.id,
+        reason: "requested_by_customer",
+      });
+    } else if (!["canceled", "succeeded"].includes(paymentIntent.status)) {
       await stripe.paymentIntents.cancel(paymentIntent.id);
     }
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -146,7 +151,12 @@ export async function POST(request: Request) {
     if (addOnError) {
       Sentry.captureException(addOnError);
       await admin.from("bookings").delete().eq("id", booking.id);
-      if (!["canceled", "succeeded"].includes(paymentIntent.status)) {
+      if (paymentIntent.status === "succeeded") {
+        await stripe.refunds.create({
+          payment_intent: paymentIntent.id,
+          reason: "requested_by_customer",
+        });
+      } else if (!["canceled", "succeeded"].includes(paymentIntent.status)) {
         await stripe.paymentIntents.cancel(paymentIntent.id);
       }
       return NextResponse.json(
@@ -179,7 +189,7 @@ export async function POST(request: Request) {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const message = `Your CleanScape booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Your card is authorized for ${formatMoney(paymentIntent.amount)} and will only be captured after completion.`;
+  const message = `Your CleanScape booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Your card has been charged ${formatMoney(paymentIntent.amount)}.`;
   const preferences = profile.notification_preferences as {
     email?: boolean;
     sms?: boolean;

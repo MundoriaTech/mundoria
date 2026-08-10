@@ -86,7 +86,7 @@ export async function cancelExpiredReplacement(bookingId: string) {
   await sendPushNotification(
     booking.customer_id,
     "Booking cancelled",
-    "We could not find a replacement within one hour. Your payment authorization has been voided.",
+    "We could not find a replacement within one hour. Your payment has been refunded.",
     { booking_id: bookingId },
   );
   if (customer?.email) {
@@ -97,7 +97,7 @@ export async function cancelExpiredReplacement(bookingId: string) {
         bookingId,
         bookingUrl: `${appUrl}/booking/${bookingId}`,
         reason:
-          "We could not find a replacement within one hour. Your payment authorization has been voided.",
+          "We could not find a replacement within one hour. Your payment has been refunded.",
       },
       template: "customer.booking_cancelled",
       to: customer.email,

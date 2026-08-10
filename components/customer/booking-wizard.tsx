@@ -40,7 +40,6 @@ import {
   getSmartRecommendation,
   normalizeStandard,
   recommendedStandardFor,
-  schedulePriceLabel,
   selectedAddOnTotal,
   SERVICES,
   SERVICE_ADD_ONS,
@@ -1066,18 +1065,10 @@ function ScheduleStep({
   ) => void;
 }) {
   const minDate = new Date().toISOString().slice(0, 10);
-  const arrivalNote = schedulePriceLabel(
-    draft.scheduledDate,
-    draft.scheduledTime,
-  );
 
   return (
     <div>
       <h2 className="text-lg font-semibold sm:text-xl">Pick a date and time</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Price depends on when the cleaner arrives — evenings and weekends are a
-        little higher than weekday daytime.
-      </p>
       <div className="mt-5 grid gap-6 sm:mt-6 md:grid-cols-2">
         <label className="space-y-2 text-sm font-medium">
           <span className="flex items-center gap-2">
@@ -1100,31 +1091,11 @@ function ScheduleStep({
           <TimeSlotPicker
             className="mt-2 max-h-56 overflow-y-auto overscroll-contain pr-1"
             date={draft.scheduledDate}
-            formatSlotPrice={
-              draft.serviceType && address && standard
-                ? (slot) =>
-                    formatMoney(
-                      estimatePrice(
-                        draft.serviceType!,
-                        address,
-                        standard,
-                        draft.selectedAddOns,
-                        { date: draft.scheduledDate, time: slot },
-                      ),
-                    )
-                : undefined
-            }
             onChange={(slot) => update("scheduledTime", slot)}
             value={draft.scheduledTime}
           />
         </div>
       </div>
-
-      {arrivalNote && draft.scheduledTime ? (
-        <p className="mt-4 rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
-          {arrivalNote} rate applied for {draft.scheduledTime}.
-        </p>
-      ) : null}
 
       <div className="mt-6">
         <RecurringToggle
@@ -1205,12 +1176,6 @@ function ReviewStep({
           label="When"
           value={`${draft.scheduledDate} at ${draft.scheduledTime}`}
         />
-        {schedulePriceLabel(draft.scheduledDate, draft.scheduledTime) ? (
-          <SummaryRow
-            label="Arrival rate"
-            value={schedulePriceLabel(draft.scheduledDate, draft.scheduledTime)!}
-          />
-        ) : null}
         <SummaryRow
           label="Recurring"
           value={
@@ -1311,7 +1276,7 @@ function PaymentStep({
         paymentIntentId?: string;
       };
       if (!authorizationResponse.ok || !authorization.clientSecret) {
-        throw new Error(authorization.error ?? "Unable to authorize payment.");
+        throw new Error(authorization.error ?? "Unable to charge payment.");
       }
 
       const { error: stripeError, paymentIntent } =
@@ -1329,7 +1294,10 @@ function PaymentStep({
           },
         });
       if (stripeError || !paymentIntent) {
-        throw new Error(stripeError?.message ?? "Card authorization failed.");
+        throw new Error(stripeError?.message ?? "Card payment failed.");
+      }
+      if (paymentIntent.status !== "succeeded") {
+        throw new Error("Payment was not completed. Please try again.");
       }
 
       const bookingResponse = await fetch("/api/bookings", {
@@ -1369,9 +1337,9 @@ function PaymentStep({
           <CreditCard className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold sm:text-xl">Secure your booking</h2>
+          <h2 className="text-lg font-semibold sm:text-xl">Pay to confirm</h2>
           <p className="text-sm text-muted-foreground">
-            Authorization amount: {formatMoney(amount)}
+            Total due now: {formatMoney(amount)}
           </p>
         </div>
       </div>
@@ -1394,8 +1362,8 @@ function PaymentStep({
       <div className="mt-5 flex gap-3 rounded-xl bg-blue-50 p-4 text-sm text-blue-900">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
         <p>
-          Your card will only be charged after the job is completed. Today we
-          place a secure authorization hold.
+          Your card is charged when you confirm. Cancellations that qualify are
+          refunded to the original payment method.
         </p>
       </div>
 
@@ -1411,7 +1379,7 @@ function PaymentStep({
         size="lg"
         type="submit"
       >
-        {processing ? "Securing your booking…" : "Confirm Booking"}
+        {processing ? "Charging your card…" : "Pay & confirm booking"}
       </Button>
     </form>
   );

@@ -186,7 +186,7 @@ function resolveTemplate(
     case "customer.booking_confirmed":
       return {
         body:
-          "Your booking is confirmed and your card has only been authorized. It will be charged after the job is completed.",
+          "Your booking is confirmed and your card has been charged. You can view the receipt anytime from your booking.",
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View booking",
         cards: bookingCards(data),
@@ -267,7 +267,7 @@ function resolveTemplate(
       };
     case "customer.booking_cancelled":
       return {
-        body: string(data.reason) || "Your booking has been cancelled. Any uncaptured card authorization will be voided where applicable.",
+        body: string(data.reason) || "Your booking has been cancelled. Any payment taken for this booking will be refunded where applicable.",
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View booking",
         cards: bookingCards(data),

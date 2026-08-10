@@ -202,7 +202,7 @@ function ReceiptDocument({
 
       <footer className="flex items-center justify-between border-t px-6 py-5 sm:px-8">
         <p className="text-sm text-muted-foreground">
-          Total charged after completion
+          Total charged
         </p>
         <p className="text-2xl font-bold tracking-tight">
           {formatMoney(lines.total)}

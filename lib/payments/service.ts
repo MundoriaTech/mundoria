@@ -17,7 +17,6 @@ export async function createManualPaymentIntent({
 }) {
   const intent = await getStripe().paymentIntents.create({
     amount,
-    capture_method: "manual",
     currency: "gbp",
     customer: stripeCustomerId ?? undefined,
     metadata: {
@@ -31,7 +30,7 @@ export async function createManualPaymentIntent({
       .from("bookings")
       .update({
         amount_total: amount,
-        payment_status: "held",
+        payment_status: "unpaid",
         stripe_payment_intent_id: intent.id,
       })
       .eq("id", bookingId)

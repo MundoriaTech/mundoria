@@ -23,7 +23,7 @@ const schema = z.object({
     .optional(),
 });
 
-const REMATCHABLE_PAYMENTS = new Set(["held"]);
+const REMATCHABLE_PAYMENTS = new Set(["held", "released"]);
 
 export async function POST(
   request: Request,
@@ -66,7 +66,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "Only bookings with an active payment hold can be rematched. Refunded or unpaid bookings cannot re-enter matching.",
+            "Only paid bookings can be rematched. Refunded or unpaid bookings cannot re-enter matching.",
         },
         { status: 400 },
       );

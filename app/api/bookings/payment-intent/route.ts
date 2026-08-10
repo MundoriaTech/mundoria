@@ -110,7 +110,6 @@ export async function POST(request: Request) {
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
-    capture_method: "manual",
     currency: "gbp",
     customer: stripeCustomerId,
     metadata: {

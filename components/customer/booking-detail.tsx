@@ -150,7 +150,7 @@ export function BookingDetail({
     success({
       kind: "done",
       title: "Booking cancelled",
-      note: "Your payment hold will be released shortly.",
+      note: "Any eligible refund will be returned to your original payment method.",
     });
     router.refresh();
   }
@@ -213,7 +213,7 @@ export function BookingDetail({
         <BookingProgress activeIndex={activeIndex} />
       ) : (
         <div className="rounded-xl bg-muted p-4 text-sm text-foreground">
-          This booking was cancelled. Its payment authorization was voided.
+          This booking was cancelled. Any payment taken has been refunded.
         </div>
       )}
 
@@ -280,7 +280,7 @@ export function BookingDetail({
             ) : null}
             <Detail
               icon={ShieldCheck}
-              label="Payment authorization"
+              label="Amount paid"
               value={formatMoney(booking.amount_total)}
             />
             {["completed", "awaiting_customer_confirmation"].includes(
@@ -390,7 +390,7 @@ export function BookingDetail({
         <ConfirmModal
           action="Confirm cancellation"
           confirmDisabled={reason.trim().length < 3}
-          description="Your payment authorization will be voided. Tell us why you’re cancelling."
+          description="Eligible cancellations are refunded to your original payment method. Tell us why you’re cancelling."
           onCancel={() => setShowCancel(false)}
           onConfirm={cancelBooking}
           title="Cancel this booking?"

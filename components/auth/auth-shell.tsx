@@ -35,7 +35,7 @@ export function AuthShell({
           <div className="mt-8 space-y-4 text-sm text-white/75">
             {[
               "Certified independent cleaners",
-              "Protected card authorization",
+              "Secure card payment",
               "Live booking status, messages, and checklists",
             ].map((item) => (
               <p className="flex items-center gap-3" key={item}>

@@ -492,7 +492,7 @@ export default async function HomePage() {
                 "Live booking status",
                 "In-app cleaner messaging",
                 "Checklist-led completion",
-                "Protected card authorization",
+                "Secure card payment",
               ].map((item) => (
                 <div
                   className="py-4 first:pt-0 last:pb-0"

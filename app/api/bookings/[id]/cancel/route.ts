@@ -4,8 +4,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getStripe } from "@/lib/stripe/server";
 
 const schema = z.object({
   reason: z.string().trim().min(3).max(500),
@@ -55,12 +55,13 @@ export async function POST(
   }
 
   if (booking.stripe_payment_intent_id) {
-    const stripe = getStripe();
-    const intent = await stripe.paymentIntents.retrieve(
-      booking.stripe_payment_intent_id,
-    );
-    if (!["canceled", "succeeded"].includes(intent.status)) {
-      await stripe.paymentIntents.cancel(intent.id);
+    try {
+      await refundBookingPayment(params.id);
+    } catch {
+      return NextResponse.json(
+        { error: "Unable to refund this booking payment." },
+        { status: 400 },
+      );
     }
   }
 
@@ -80,7 +81,7 @@ export async function POST(
   }
 
   await admin.from("notifications").insert({
-    body: "Your payment authorization has been voided.",
+    body: "Your payment has been refunded.",
     data: { booking_id: params.id },
     title: "Booking cancelled",
     type: "booking_cancelled",
