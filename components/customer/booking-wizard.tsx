@@ -478,9 +478,7 @@ export function BookingWizard({
         ) : null}
         {step === 8 ? (
           <ScheduleStep
-            address={selectedAddress}
             draft={draft}
-            standard={selectedStandard}
             update={update}
           />
         ) : null}
@@ -1051,14 +1049,10 @@ function AddressStep({
 }
 
 function ScheduleStep({
-  address,
   draft,
-  standard,
   update,
 }: {
-  address?: Address;
   draft: BookingDraft;
-  standard: CleaningStandard | null;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
