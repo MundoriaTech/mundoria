@@ -6,13 +6,22 @@ import "./globals.css";
 import { FeedbackProvider } from "@/components/shared/feedback-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_NAME,
+  SITE_TAGLINE,
+  absoluteUrl,
+  getSiteUrl,
+} from "@/lib/seo/site";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "CleanScape",
-    template: "%s | CleanScape",
+    default: `${SITE_NAME} UK | Trusted cleaning, beautifully managed`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: "Book trusted local cleaning professionals.",
+  description: SITE_TAGLINE,
+  applicationName: SITE_NAME,
   icons: {
     apple: "/apple-touch-icon.png",
     icon: [
@@ -20,6 +29,20 @@ export const metadata: Metadata = {
       { type: "image/png", url: "/images/brand/favicon-32.png" },
       { type: "image/png", url: "/images/brand/cleanscape-mark.png" },
     ],
+  },
+  openGraph: {
+    description: SITE_TAGLINE,
+    images: [{ alt: SITE_NAME, url: absoluteUrl(DEFAULT_OG_IMAGE) }],
+    locale: "en_GB",
+    siteName: SITE_NAME,
+    type: "website",
+    url: absoluteUrl("/"),
+  },
+  twitter: {
+    card: "summary_large_image",
+    description: SITE_TAGLINE,
+    images: [absoluteUrl(DEFAULT_OG_IMAGE)],
+    title: SITE_NAME,
   },
 };
 

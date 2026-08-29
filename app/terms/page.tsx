@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
+import { buildPageMetadata } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   description:
     "CleanScape terms for customers, independent cleaners, bookings, payments, cancellations, disputes and platform use.",
-  title: "Terms of Service | CleanScape",
-};
+  path: "/terms",
+  title: "Terms of Service",
+});
 
 const sections: LegalSection[] = [
   {

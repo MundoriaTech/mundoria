@@ -17,9 +17,35 @@ const CUSTOMER_PREFIXES = [
   "/messages",
 ];
 
+/** Public marketing + legal routes that must work even before Supabase is configured. */
+const PUBLIC_MARKETING_PREFIXES = [
+  "/cleaning",
+  "/cleaners",
+  "/faq",
+  "/how-it-works",
+  "/pricing",
+  "/for-cleaners",
+  "/privacy",
+  "/terms",
+];
+
+const PUBLIC_EXACT_PATHS = new Set([
+  "/",
+  "/setup",
+  "/robots.txt",
+  "/sitemap.xml",
+]);
+
 function pathMatches(pathname: string, prefixes: string[]) {
   return prefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+function isPublicMarketingPath(pathname: string) {
+  return (
+    PUBLIC_EXACT_PATHS.has(pathname) ||
+    pathMatches(pathname, PUBLIC_MARKETING_PREFIXES)
   );
 }
 
@@ -70,7 +96,7 @@ export async function middleware(request: NextRequest) {
         { status: 503 },
       );
     }
-    if (pathname !== "/" && pathname !== "/setup") {
+    if (!isPublicMarketingPath(pathname)) {
       return NextResponse.redirect(new URL("/setup", request.url));
     }
     return NextResponse.next();

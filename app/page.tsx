@@ -12,15 +12,22 @@ import {
   SERVICE_CATEGORIES,
   SERVICES,
 } from "@/lib/customer/services";
+import {
+  BIRMINGHAM_AREAS,
+  LAUNCH_CITY,
+  popularMarketingServices,
+} from "@/lib/seo/marketing";
+import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
 import { isUserRole, type Profile } from "@/types/auth";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   description:
     "Book certified UK cleaning professionals for homes, workplaces, short-term rentals, exterior cleaning and recovery support with CleanScape.",
+  path: "/",
   title: "CleanScape UK | Trusted cleaning, beautifully managed",
-};
+});
 
 export const dynamic = "force-dynamic";
 
@@ -92,26 +99,7 @@ const testimonials = [
   },
 ];
 
-const cities = [
-  "London",
-  "Birmingham",
-  "Manchester",
-  "Leeds",
-  "Bristol",
-  "Croydon",
-  "Luton",
-  "Slough",
-  "Milton Keynes",
-  "Coventry",
-  "Liverpool",
-  "Chelmsford",
-];
-
-const cityServiceColumns = SERVICE_CATEGORIES.map((category) => ({
-  href: `/booking/new?category=${category.value}`,
-  links: cities.slice(0, 8).map((city) => `${category.label} in ${city}`),
-  service: category.label.replace(" Cleaning", ""),
-}));
+const popularSeoServices = popularMarketingServices(6);
 
 export default async function HomePage() {
   const configured = hasSupabasePublicConfig();
@@ -145,7 +133,6 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <LandingNavbar
-        cleanerHref={cleanerHref}
         configured={configured}
         customerHref={customerHref}
         viewer={viewer}
@@ -443,29 +430,61 @@ export default async function HomePage() {
       >
         <div className="mx-auto max-w-7xl">
           <h2 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-[-0.06em] text-foreground sm:text-6xl">
-            CleanScape services in our top cities
+            Launching in Birmingham — then expanding with real coverage
           </h2>
+          <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-muted-foreground">
+            {LAUNCH_CITY.summary}
+          </p>
 
-          <div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
-            {cityServiceColumns.map((column, index) => (
-              <ScrollReveal delay={index * 70} key={column.service}>
-                <h3 className="text-lg font-black tracking-[-0.03em] text-foreground">
-                  {column.service}
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Link
+              className="rounded-2xl border border-border bg-muted p-6 transition hover:border-primary/40 hover:bg-card sm:col-span-2 lg:col-span-1"
+              href={`/cleaners/${LAUNCH_CITY.slug}`}
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                City
+              </p>
+              <h3 className="mt-3 text-2xl font-black text-foreground">
+                Cleaners in Birmingham
+              </h3>
+              <p className="mt-2 text-sm font-medium text-muted-foreground">
+                Browse neighbourhood pages and popular services.
+              </p>
+            </Link>
+            {BIRMINGHAM_AREAS.slice(0, 5).map((area) => (
+              <Link
+                className="rounded-2xl border border-border bg-muted p-6 transition hover:border-primary/40 hover:bg-card"
+                href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
+                key={area.slug}
+              >
+                <h3 className="text-lg font-black text-foreground">
+                  {area.name}
                 </h3>
-                <ul className="mt-5 space-y-3">
-                  {column.links.map((link) => (
-                    <li key={link}>
-                      <Link
-                        className="text-sm font-semibold text-muted-foreground transition hover:text-primary"
-                        href={configured ? column.href : "/setup"}
-                      >
-                        {link}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </ScrollReveal>
+                <p className="mt-2 text-sm font-medium text-muted-foreground">
+                  {area.description}
+                </p>
+              </Link>
             ))}
+          </div>
+
+          <div className="mt-14">
+            <h3 className="text-2xl font-black tracking-[-0.04em] text-foreground">
+              Popular services
+            </h3>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {popularSeoServices.map((service) => (
+                <Link
+                  className="rounded-2xl border border-border bg-muted p-5 transition hover:border-primary/40 hover:bg-card"
+                  href={`/cleaning/${service.slug}`}
+                  key={service.slug}
+                >
+                  <p className="font-black text-foreground">{service.label}</p>
+                  <p className="mt-2 text-sm font-medium leading-6 text-muted-foreground">
+                    From {service.fromPrice} · {service.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </ScrollReveal>
@@ -531,12 +550,10 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 function LandingNavbar({
-  cleanerHref,
   configured,
   customerHref,
   viewer,
 }: {
-  cleanerHref: string;
   configured: boolean;
   customerHref: string;
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
@@ -545,12 +562,12 @@ function LandingNavbar({
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
   const firstName = viewer?.full_name.trim().split(/\s+/)[0] ?? "";
   const navLinks = [
-    ["Services", "#services"],
-    ["How it works", "#how-it-works"],
-    ["Reviews", "#reviews"],
-    ["Coverage", "#coverage"],
-    ["For cleaners", cleanerHref],
-    ["Support", "mailto:support@cleanscapeuk.com"],
+    ["Services", "/cleaning"],
+    ["How it works", "/how-it-works"],
+    ["Pricing", "/pricing"],
+    ["Birmingham", `/cleaners/${LAUNCH_CITY.slug}`],
+    ["For cleaners", "/for-cleaners"],
+    ["FAQ", "/faq"],
   ];
 
   return (
@@ -713,28 +730,32 @@ function LandingFooter({
       links: [
         ["Book a cleaner", bookingHref],
         ["Customer login", loginHref],
-        ["My bookings", configured ? "/bookings" : "/setup"],
-        ["Saved addresses", configured ? "/addresses" : "/setup"],
+        ["Pricing", "/pricing"],
+        ["FAQ", "/faq"],
       ],
       title: "Customers",
     },
     {
-      links: serviceTiles.map((service) => [service.name, bookingHref]),
+      links: [
+        ["All services", "/cleaning"],
+        ...popularSeoServices
+          .slice(0, 4)
+          .map((service) => [service.label, `/cleaning/${service.slug}`] as [string, string]),
+      ],
       title: "Services",
     },
     {
       links: [
+        ["For cleaners", "/for-cleaners"],
         ["Become a cleaner", cleanerHref],
         ["Cleaner login", loginHref],
-        ["Cleaner dashboard", configured ? "/cleaner/dashboard" : "/setup"],
-        ["Earnings", configured ? "/cleaner/earnings" : "/setup"],
+        ["Birmingham coverage", `/cleaners/${LAUNCH_CITY.slug}`],
       ],
       title: "Cleaners",
     },
     {
       links: [
-        ["How it works", "#how-it-works"],
-        ["Reviews", "#reviews"],
+        ["How it works", "/how-it-works"],
         ["Coverage", "#coverage"],
         ["About CleanScape", "#about"],
         ["Privacy", "/privacy"],
