@@ -22,7 +22,7 @@ export function analyticsConfigured() {
 function ensureDataLayer() {
   window.dataLayer = window.dataLayer || [];
   if (!window.gtag) {
-    window.gtag = function gtag(..._args: unknown[]) {
+    window.gtag = function gtag() {
       // Google expects the Arguments object, not a rest array.
       // eslint-disable-next-line prefer-rest-params
       window.dataLayer?.push(arguments);
