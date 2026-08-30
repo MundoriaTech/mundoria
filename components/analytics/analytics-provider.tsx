@@ -134,7 +134,7 @@ function CookieConsentBanner({
           id="cleanscape-cookie-copy"
         >
           We use essential cookies to run the site. With your permission we also
-          use analytics cookies (via Google Tag Manager / Analytics) to
+          use analytics cookies (via Google Tag Manager/Analytics) to
           understand how CleanScape is used. You can change this anytime. See
           our{" "}
           <Link className="font-bold text-primary underline-offset-2 hover:underline" href="/privacy">
