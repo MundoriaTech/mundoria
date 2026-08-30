@@ -75,6 +75,11 @@ const sections: LegalSection[] = [
     title: "Retention",
   },
   {
+    body:
+      "Essential cookies and similar technologies are required for authentication, security and core booking features. Analytics cookies (for example via Google Tag Manager or Google Analytics) are used only if you consent through our cookie banner. Marketing cookies for advertising pixels are off until you enable them. You can change your choice anytime using Cookie settings on the site.",
+    title: "Cookies",
+  },
+  {
     bullets: [
       "Request access to your personal data.",
       "Ask us to correct inaccurate information.",

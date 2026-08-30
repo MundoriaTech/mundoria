@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CookieSettingsButton } from "@/components/analytics/cookie-settings-button";
 import { BrandLogo, BrandMark } from "@/components/shared/brand-mark";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -146,6 +147,9 @@ export function MarketingShell({
               title="Company"
             />
           </div>
+        </div>
+        <div className="mx-auto mt-10 max-w-7xl border-t border-border pt-6">
+          <CookieSettingsButton />
         </div>
       </footer>
     </main>
