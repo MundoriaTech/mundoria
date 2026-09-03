@@ -67,10 +67,7 @@
   }
 
   body {
-    font-family:
-      Poppins, Inter, ui-sans-serif, system-ui, -apple-system,
-      BlinkMacSystemFont, "Segoe UI", sans-serif;
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
   }
 }
 
@@ -146,6 +143,49 @@
     to {
       opacity: 1;
       transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes reviews-carousel-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 14px, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes reviews-carousel-exit {
+    from {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translate3d(0, -14px, 0);
+    }
+  }
+
+  .reviews-carousel-enter {
+    animation: reviews-carousel-enter 2s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .reviews-carousel-exit {
+    animation: reviews-carousel-exit 2s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  @keyframes cookie-bob {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-2deg);
+    }
+
+    50% {
+      transform: translateY(-4px) rotate(2deg);
     }
   }
 }

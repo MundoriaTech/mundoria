@@ -11,6 +11,7 @@ import {
 import { FeedbackProvider } from "@/components/shared/feedback-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
+import { poppins } from "@/lib/fonts";
 import {
   DEFAULT_OG_IMAGE,
   SITE_NAME,
@@ -57,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html className={poppins.variable} lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -70,7 +71,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans">
+      <body className="font-sans antialiased">
         <GoogleTagManagerNoscript />
         <GoogleTagManagerHead />
         <ThemeProvider>

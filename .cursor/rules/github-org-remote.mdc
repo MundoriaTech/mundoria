@@ -1,0 +1,25 @@
+---
+description: GitHub remote and collaborator policy for CleanScape org repo
+alwaysApply: true
+---
+
+# GitHub — CleanScape organization only
+
+## Remote
+
+- **Always push to the organization repo:** `git@github.com:CleanScape/cleanscape.git` (`origin`).
+- Do **not** push to `personal` (`MarithaMiracle/cleanscape`) unless the user explicitly asks.
+- Before pushing, confirm `origin` points to `CleanScape/cleanscape`.
+
+## Collaborators & commit identity
+
+- **Never** add Cursor, Cursor Agent, `cursoragent`, cursor bots, or any AI/automation account as a repository collaborator.
+- **Never** push commits authored by Cursor Cloud/Background Agent — those appear as `cursoragent` (or similar) on GitHub's contributor graph and cannot be "uninvited"; they come from commit authorship.
+- **Always commit and push with your identity:** `Maritha Miracle <marithamiracle@gmail.com>`.
+- Use local git commits only; do not use Cursor's "push to GitHub" / cloud agent publish if it uses a bot account.
+- If a Cursor-related account appears on the repo, remove it from **Settings → Collaborators** and uninstall the **Cursor GitHub App** under **Settings → Integrations → Applications** (org owner may be required).
+- Do not invite GitHub Apps or bots to the repo unless the user explicitly requests it.
+
+## Pull requests
+
+- Create PRs against `CleanScape/cleanscape`, not the personal fork.

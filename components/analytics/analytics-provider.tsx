@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { CookieSettingsWidget } from "@/components/analytics/cookie-settings-button";
 import {
   createConsentPreferences,
   readConsent,
@@ -88,13 +89,10 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         />
       ) : null}
       {ready && preferences && !bannerOpen && analyticsConfigured() ? (
-        <button
-          className="fixed bottom-4 left-4 z-[60] rounded-full border border-border bg-card px-3 py-2 text-xs font-bold text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-foreground"
+        <CookieSettingsWidget
           onClick={() => setBannerOpen(true)}
-          type="button"
-        >
-          Cookie settings
-        </button>
+          variant="floating"
+        />
       ) : null}
     </>
   );

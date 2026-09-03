@@ -1,12 +1,16 @@
 "use client";
 
 import type { ComponentPropsWithoutRef, ElementType } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 type ScrollRevealProps = ComponentPropsWithoutRef<"div"> & {
   as?: ElementType;
   delay?: number;
 };
+
+function emptySubscribe() {
+  return () => {};
+}
 
 export function ScrollReveal({
   as: Component = "div",
@@ -17,7 +21,15 @@ export function ScrollReveal({
   ...props
 }: ScrollRevealProps) {
   const ref = useRef<HTMLElement | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [motionEnabled, setMotionEnabled] = useState(false);
+
+  // Server HTML and pre-hydration paint stay visible for SEO and AI crawlers.
+  const isVisible = useSyncExternalStore(
+    emptySubscribe,
+    () => revealed || !motionEnabled,
+    () => true,
+  );
 
   useEffect(() => {
     const element = ref.current;
@@ -29,14 +41,16 @@ export function ScrollReveal({
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     if (mediaQuery.matches) {
-      setIsVisible(true);
+      setRevealed(true);
       return;
     }
+
+    setMotionEnabled(true);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
-          setIsVisible(true);
+          setRevealed(true);
           observer.unobserve(element);
         }
       },
