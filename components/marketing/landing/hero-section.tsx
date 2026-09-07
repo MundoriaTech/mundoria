@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,93 +16,50 @@ const HERO_ALT_WAVES = "/images/marketing/landing/hero-alt-waves.png";
 const ALT_PURPLE = "#291845";
 const ALT_GOLD = "#c79c66";
 
+/** Frame 29 canvas (1552×953). */
+const HERO_ASPECT = "1552 / 953";
+
 export function HeroSection({ bookingHref }: { bookingHref: string }) {
   const [variant, setVariant] = useState<"default" | "alt">("default");
   const [hovered, setHovered] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const canHover = window.matchMedia("(hover: hover)").matches;
-
-    // Desktop: hover engages the swap (same as before).
-    if (canHover) {
-      if (!hovered) {
-        setVariant("default");
-        return;
-      }
-
-      if (reduceMotion) {
-        setVariant("alt");
-        return;
-      }
-
-      setVariant("alt");
-      const id = window.setInterval(() => {
-        setVariant((current) => (current === "default" ? "alt" : "default"));
-      }, HERO_SWAP_MS);
-
-      return () => window.clearInterval(id);
+    if (!hovered) {
+      setVariant("default");
+      return;
     }
 
-    // Mobile / touch: same swap while the section is on screen (size-adjusted frame).
-    const node = sectionRef.current;
-    if (!node || reduceMotion) return;
-
-    let intervalId: number | undefined;
-
-    const startSwap = () => {
-      if (intervalId != null) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setVariant("alt");
-      intervalId = window.setInterval(() => {
-        setVariant((current) => (current === "default" ? "alt" : "default"));
-      }, HERO_SWAP_MS);
-    };
+      return;
+    }
 
-    const stopSwap = () => {
-      if (intervalId != null) {
-        window.clearInterval(intervalId);
-        intervalId = undefined;
-      }
-      setVariant("default");
-    };
+    if (!window.matchMedia("(hover: hover)").matches) {
+      return;
+    }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) startSwap();
-        else stopSwap();
-      },
-      { threshold: 0.35 },
-    );
+    setVariant("alt");
+    const id = window.setInterval(() => {
+      setVariant((current) => (current === "default" ? "alt" : "default"));
+    }, HERO_SWAP_MS);
 
-    observer.observe(node);
-
-    return () => {
-      stopSwap();
-      observer.disconnect();
-    };
+    return () => window.clearInterval(id);
   }, [hovered]);
 
   return (
     <section
-      ref={sectionRef}
       className="overflow-x-clip px-3 pb-14 pt-2 min-[380px]:px-4 sm:px-8 sm:pb-20"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/*
-        Same dual-hero composition on all breakpoints.
-        Aspect is taller on phones so the Frame 29 layout can scale instead of crush.
+        Shared Frame 29 box for a seamless default ↔ alt swap.
+        min-height on small screens stops the landscape ratio from crushing the layout.
       */}
       <div className="relative mx-auto w-full max-w-[1551px] pb-9 sm:pb-11">
         <div
-          className={cn(
-            "relative w-full",
-            // Mobile → tablet: taller frame. Desktop: Frame 29 landscape.
-            "aspect-[4/5] min-[400px]:aspect-[3/4] sm:aspect-[6/5] md:aspect-[1552/953]",
-          )}
+          className="relative w-full min-h-[26.5rem] min-[400px]:min-h-[28rem] sm:min-h-[30rem] md:min-h-0"
+          style={{ aspectRatio: HERO_ASPECT }}
         >
           <div
             aria-hidden={variant !== "default"}
@@ -135,7 +92,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
 
 function DefaultHero({ bookingHref }: { bookingHref: string }) {
   return (
-    <div className="relative isolate flex h-full flex-col rounded-[20px] bg-white px-3 min-[380px]:px-5 sm:rounded-[38px] sm:px-8 sm:pt-1 md:px-10 lg:px-12">
+    <div className="relative isolate flex h-full flex-col rounded-[20px] bg-white px-3 min-[380px]:px-5 sm:rounded-[38px] sm:px-10 sm:pt-1 lg:px-12">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 overflow-hidden rounded-[20px] sm:rounded-[38px]"
@@ -158,18 +115,19 @@ function DefaultHero({ bookingHref }: { bookingHref: string }) {
         />
       </div>
 
+      {/* Clip media/copy to the rounded frame; metrics sit outside this layer so they aren’t cut off. */}
       <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] sm:rounded-[38px]">
-        <div className="mx-auto flex w-full max-w-[767px] shrink-0 flex-col items-center pt-4 text-center sm:pt-5 md:pt-6 lg:pt-7">
-          <h1 className="text-balance text-[clamp(1.35rem,5.2vw,2.75rem)] font-medium leading-[1.08] tracking-[-0.04em] text-[#1c133b]">
+        <div className="mx-auto flex w-full max-w-[767px] shrink-0 flex-col items-center pt-4 text-center sm:pt-6 lg:pt-7">
+          <h1 className="text-balance text-[clamp(1.35rem,4.5vw,2.75rem)] font-medium leading-[1.08] tracking-[-0.04em] text-[#1c133b]">
             Book Trusted Home Cleaning service in Minutes
           </h1>
-          <p className="mx-auto mt-1.5 max-w-[550px] text-pretty text-[clamp(0.75rem,2.1vw,0.875rem)] font-normal leading-[1.45] text-[#1c133b] sm:mt-2">
+          <p className="mx-auto mt-1.5 max-w-[550px] text-pretty text-[clamp(0.75rem,2vw,0.875rem)] font-normal leading-[1.45] text-[#1c133b] sm:mt-2">
             From residential and commercial cleaning to short-term rentals,
             exterior work and recovery support, book certified professionals,
             track every visit, and pay only after the job is complete.
           </p>
           <Link
-            className="mt-2.5 inline-flex min-h-10 items-center justify-center rounded-2xl bg-[#1c133b] px-5 py-2 text-[clamp(0.75rem,2vw,0.8125rem)] font-medium text-[#e6e5f3] transition hover:bg-[#1c133b]/90 sm:mt-3 sm:min-h-0 sm:h-[29px] sm:px-5 sm:py-0"
+            className="mt-2.5 inline-flex min-h-10 items-center justify-center rounded-2xl bg-[#1c133b] px-5 py-2 text-[12px] font-medium text-[#e6e5f3] transition hover:bg-[#1c133b]/90 sm:mt-3 sm:min-h-0 sm:h-[29px] sm:px-5 sm:py-0"
             href={bookingHref}
           >
             Book a Service
@@ -194,7 +152,7 @@ function DefaultHero({ bookingHref }: { bookingHref: string }) {
 }
 
 /**
- * Frame 29 composition — same layout on all sizes; copy scales with the frame.
+ * Frame 29 composition: purple field, waves, cleaner, split copy, metrics on the bottom edge.
  */
 function AlternateHero({ bookingHref }: { bookingHref: string }) {
   return (
@@ -215,7 +173,7 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
 
         <Image
           alt="CleanScape cleaner giving a thumbs up"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[center_65%] sm:object-[center_72%]"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[center_72%]"
           fill
           priority
           sizes="(min-width: 1551px) 1551px, 100vw"
@@ -223,19 +181,19 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
         />
 
         <div className="absolute inset-0 z-10">
-          <h2 className="absolute left-[5%] top-[10%] max-w-[42%] text-left text-[clamp(1rem,4.6vw,3.25rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:top-[12%] sm:left-[7.5%] sm:top-[17%] sm:max-w-[34%]">
+          <h2 className="absolute left-[5.5%] top-[14%] max-w-[44%] text-left text-[clamp(1.1rem,4.2vw,3.25rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-white sm:left-[7.5%] sm:top-[17%] sm:max-w-[34%]">
             Book Trusted Home{" "}
             <span style={{ color: ALT_GOLD }}>Cleaning</span> service in Minutes
           </h2>
 
-          <div className="absolute bottom-[18%] right-[5%] flex max-w-[42%] flex-col items-end text-right min-[400px]:bottom-[16%] sm:bottom-auto sm:right-[7%] sm:top-[30%] sm:max-w-[23%]">
-            <p className="text-pretty text-[clamp(0.625rem,2vw,0.875rem)] font-normal leading-[1.4] text-white">
+          <div className="absolute right-[5.5%] top-[26%] flex max-w-[40%] flex-col items-end text-right sm:right-[7%] sm:top-[30%] sm:max-w-[23%]">
+            <p className="text-pretty text-[clamp(0.68rem,1.8vw,0.875rem)] font-normal leading-[1.45] text-white">
               From residential and commercial cleaning to short-term rentals,
               exterior work and recovery support, book certified professionals,
               track every visit, and pay only after the job is complete.
             </p>
             <Link
-              className="mt-2 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full px-[0.9em] py-[0.55em] text-[clamp(0.6rem,1.8vw,0.72rem)] font-medium tracking-[-0.01em] text-[#1c133b] transition hover:brightness-110 sm:mt-3.5"
+              className="mt-3 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full px-[0.9em] py-[0.55em] text-[clamp(0.625rem,0.85vw,0.72rem)] font-medium tracking-[-0.01em] text-[#1c133b] transition hover:brightness-110 sm:mt-3.5"
               href={bookingHref}
               style={{ backgroundColor: ALT_GOLD }}
             >
