@@ -1,9 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { CookieSettingsButton } from "@/components/analytics/cookie-settings-button";
+import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
 import { BrandLogo, BrandMark } from "@/components/shared/brand-mark";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { SUPPORT_EMAIL } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
@@ -53,7 +52,6 @@ export function MarketingShell({
             ))}
           </nav>
           <div className="hidden items-center gap-3 lg:flex">
-            <ThemeToggle />
             <Link
               className="rounded-full px-4 py-2 text-sm font-black text-muted-foreground transition hover:bg-primary/10 hover:text-foreground"
               href={loginHref}
@@ -68,7 +66,6 @@ export function MarketingShell({
             </Button>
           </div>
           <div className="flex items-center gap-2 lg:hidden">
-            <ThemeToggle />
             <details className="relative">
               <summary className="flex cursor-pointer list-none items-center rounded-full border border-border px-4 py-2 text-sm font-black text-foreground [&::-webkit-details-marker]:hidden">
                 Menu
@@ -142,14 +139,24 @@ export function MarketingShell({
                 ["Book a clean", bookingHref],
                 ["Become a cleaner", cleanerHref],
                 ["Privacy", "/privacy"],
+                ["Cookie policy", "/cookies"],
                 ["Terms", "/terms"],
               ]}
               title="Company"
             />
           </div>
         </div>
-        <div className="mx-auto mt-10 max-w-7xl border-t border-border pt-6">
-          <CookieSettingsButton />
+        <div className="mx-auto mt-10 flex max-w-7xl flex-wrap items-center gap-5 border-t border-border pt-6 text-sm font-medium text-muted-foreground">
+          <Link className="transition hover:text-primary" href="/privacy">
+            Privacy
+          </Link>
+          <Link className="transition hover:text-primary" href="/cookies">
+            Cookie policy
+          </Link>
+          <CookieSettingsLink className="font-semibold hover:text-primary" />
+          <Link className="transition hover:text-primary" href="/terms">
+            Terms
+          </Link>
         </div>
       </footer>
     </main>

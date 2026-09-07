@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { landingNavLinks } from "@/components/marketing/landing/constants";
 import { dashboardForRole } from "@/lib/auth/redirects";
@@ -22,8 +21,8 @@ export function LandingNavbar({
   const firstName = viewer?.full_name.trim().split(/\s+/)[0] ?? "";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#ece3f9] bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-[72px] w-full max-w-[1400px] items-center justify-between gap-4 px-5 sm:h-20 sm:px-8 lg:px-12">
+    <header className="sticky top-0 z-50 border-b border-[#ece3f9] bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+      <div className="mx-auto flex h-[64px] w-full max-w-[1400px] items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-8 lg:px-12">
         <LandingLogo href="/" priority />
 
         <nav
@@ -52,7 +51,6 @@ export function LandingNavbar({
         </nav>
 
         <div className="hidden items-center gap-2.5 lg:flex">
-          <ThemeToggle />
           {viewer ? (
             <Link
               className="flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3 transition hover:bg-[#f6f0ff]"
@@ -108,7 +106,6 @@ function MobileNav({
 }) {
   return (
     <div className="flex items-center gap-2 lg:hidden">
-      <ThemeToggle />
       {viewer ? (
         <Link
           aria-label={`Open account for ${viewer.full_name}`}
@@ -124,10 +121,10 @@ function MobileNav({
         </Link>
       ) : null}
       <details className="relative">
-        <summary className="flex cursor-pointer list-none items-center rounded-full border border-border px-4 py-2 text-sm font-semibold text-[#1c133b] [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-full border border-border px-3.5 py-2 text-sm font-semibold text-[#1c133b] sm:px-4 [&::-webkit-details-marker]:hidden">
           Menu
         </summary>
-        <div className="absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] border border-border bg-white shadow-2xl">
+        <div className="absolute right-0 top-12 z-50 w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.25rem] border border-border bg-white shadow-2xl">
           <nav
             aria-label="Mobile navigation"
             className="grid divide-y divide-border"
@@ -135,7 +132,7 @@ function MobileNav({
             {landingNavLinks.map(([label, href]) =>
               href.startsWith("mailto:") ? (
                 <a
-                  className="px-5 py-4 text-sm font-medium text-muted-foreground hover:bg-muted"
+                  className="px-5 py-3.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                   href={href}
                   key={label}
                 >
@@ -143,7 +140,7 @@ function MobileNav({
                 </a>
               ) : (
                 <Link
-                  className="px-5 py-4 text-sm font-medium text-muted-foreground hover:bg-muted"
+                  className="px-5 py-3.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                   href={href}
                   key={label}
                 >
@@ -152,7 +149,7 @@ function MobileNav({
               ),
             )}
           </nav>
-          <div className="grid gap-2 bg-[#f6f0ff] p-4">
+          <div className="grid gap-2 bg-[#f6f0ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <Button
               asChild
               className="h-11 rounded-full bg-[#312c79] text-sm font-semibold text-[#e6e5f3] hover:bg-[#312c79]/90"

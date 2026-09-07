@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
 import { buildPageMetadata } from "@/lib/seo/site";
@@ -76,7 +77,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Essential cookies and similar technologies are required for authentication, security and core booking features. Analytics cookies (for example via Google Tag Manager or Google Analytics) are used only if you consent through our cookie banner. Marketing cookies for advertising pixels are off until you enable them. You can change your choice anytime using Cookie settings on the site.",
+      "Essential cookies and similar technologies are required for authentication, security and core booking features. Analytics cookies (for example via Google Tag Manager or Google Analytics) are used only if you consent through our cookie banner. Marketing cookies for advertising pixels are off until you enable them. You can change your choice anytime using Cookies in the footer. Full category details are in our cookie policy.",
     title: "Cookies",
   },
   {
@@ -119,6 +120,19 @@ export default function PrivacyPage() {
       lastUpdated="27 July 2026"
       sections={sections}
       title="Privacy Policy"
-    />
+    >
+      <section className="rounded-[1.5rem] border border-border bg-card p-6 shadow-sm sm:p-8">
+        <p className="leading-8 text-muted-foreground">
+          See the{" "}
+          <Link
+            className="font-bold text-primary underline-offset-2 hover:underline"
+            href="/cookies"
+          >
+            cookie policy
+          </Link>{" "}
+          for categories, durations and preference controls.
+        </p>
+      </section>
+    </LegalPage>
   );
 }

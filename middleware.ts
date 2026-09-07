@@ -26,6 +26,7 @@ const PUBLIC_MARKETING_PREFIXES = [
   "/pricing",
   "/for-cleaners",
   "/privacy",
+  "/cookies",
   "/terms",
 ];
 

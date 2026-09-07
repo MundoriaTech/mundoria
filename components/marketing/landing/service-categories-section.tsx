@@ -1,13 +1,21 @@
 import Link from "next/link";
 
-import { landingCategoryBadges, landingCategoryImages } from "@/components/marketing/landing/constants";
+import {
+  landingCategoryBadges,
+  landingCategoryImages,
+} from "@/components/marketing/landing/constants";
 import { LazyImage } from "@/components/shared/lazy-image";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SERVICE_CATEGORIES } from "@/lib/customer/services";
 import type { ServiceCategoryDefinition } from "@/lib/customer/services";
 
-const topRowCategories = ["residential", "commercial", "short_term_rental"] as const;
+const topRowCategories = [
+  "residential",
+  "commercial",
+  "short_term_rental",
+] as const;
 const bottomRowCategories = ["exterior", "recovery"] as const;
+const allCategories = [...topRowCategories, ...bottomRowCategories] as const;
 
 function getCategory(value: string) {
   return SERVICE_CATEGORIES.find((category) => category.value === value)!;
@@ -21,38 +29,45 @@ export function ServiceCategoriesSection({
   return (
     <ScrollReveal
       as="section"
-      className="bg-[#f4ebfe] px-5 py-20 sm:px-8 sm:py-24"
+      className="overflow-x-clip bg-[#f4ebfe] px-4 py-14 min-[400px]:px-5 sm:px-8 sm:py-24"
       id="services"
     >
       <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-4 lg:gap-5">
-          <div className="max-w-[516px] shrink-0">
-            <p className="text-[12px] font-normal uppercase tracking-[0.43em] text-black">
-              Smart Service categories
-            </p>
-            <h2 className="mt-3 text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-[#1c133b] sm:text-[2.5rem] lg:text-[40px] lg:leading-[41px]">
-              Every cleaning need, clearly organised.
-            </h2>
-            <p className="mt-4 max-w-[376px] text-[13px] font-light leading-[17px] text-black">
+        <div className="relative flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6 lg:gap-8">
+          <div className="relative z-10 max-w-[516px] shrink-0">
+            {/* Reserve space for the corner accent on phones only */}
+            <div className="pr-[7.25rem] min-[400px]:pr-[8.5rem] sm:pr-0">
+              <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-black min-[400px]:text-[12px] sm:tracking-[0.43em]">
+                Smart Service categories
+              </p>
+              <h2 className="mt-3 text-balance text-[1.7rem] font-semibold leading-[1.08] tracking-[-0.03em] text-[#1c133b] min-[400px]:text-[1.85rem] sm:text-[2.5rem] lg:text-[40px] lg:leading-[41px]">
+                Every cleaning need, clearly organised.
+              </h2>
+            </div>
+            <p className="mt-3 max-w-[376px] text-pretty text-[13px] font-light leading-5 text-black sm:mt-4 sm:leading-[17px]">
               Choose a category to start. CleanScape guides you to the right
               service, cleaning standard and optional add-ons.
             </p>
           </div>
 
+          {/*
+            Phone: scaled corner accent (top-right of the title block).
+            sm+: inline decorative pair beside the copy.
+          */}
           <div
             aria-hidden
-            className="pointer-events-none -mt-4 flex shrink-0 items-center sm:-mt-8 lg:-mt-10"
+            className="pointer-events-none absolute -right-0.5 top-0 z-0 flex items-start sm:static sm:-mt-8 sm:shrink-0 sm:self-start sm:items-center lg:-mt-10"
           >
             <LazyImage
               alt=""
-              className="h-auto w-[130px] sm:w-[180px] lg:w-[214px]"
+              className="h-auto w-[88px] min-[400px]:w-[104px] sm:w-[180px] lg:w-[214px]"
               height={223}
               src="/images/marketing/landing/Brush.png"
               width={214}
             />
             <LazyImage
               alt=""
-              className="h-auto w-[97px] shrink-0 -ml-[53px] sm:w-[134px] sm:-ml-[73px] lg:w-[159px] lg:-ml-[88px]"
+              className="h-auto w-[64px] shrink-0 -ml-[34px] -mt-1 min-[400px]:w-[78px] min-[400px]:-ml-[42px] sm:mt-0 sm:w-[134px] sm:-ml-[73px] lg:w-[159px] lg:-ml-[88px]"
               height={156}
               src="/images/marketing/landing/Sparkles.png"
               width={159}
@@ -60,8 +75,21 @@ export function ServiceCategoriesSection({
           </div>
         </div>
 
-        <div className="mt-14 lg:mt-[72px]">
-          <div className="mx-auto grid max-w-[921px] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Phone + tablet: one even 1/2-col grid (avoids orphan third card) */}
+        <div className="mt-10 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[480px]:gap-5 sm:mt-12 sm:gap-6 lg:hidden">
+          {allCategories.map((value, index) => (
+            <ScrollReveal delay={index * 40} key={value}>
+              <CategoryCard
+                bookingHref={bookingHref}
+                category={getCategory(value)}
+              />
+            </ScrollReveal>
+          ))}
+        </div>
+
+        {/* Desktop: designed 3-up + centred 2-up */}
+        <div className="mt-[72px] hidden lg:block">
+          <div className="mx-auto grid max-w-[921px] grid-cols-3 gap-6">
             {topRowCategories.map((value, index) => (
               <ScrollReveal delay={index * 50} key={value}>
                 <CategoryCard
@@ -72,7 +100,7 @@ export function ServiceCategoriesSection({
             ))}
           </div>
 
-          <div className="mx-auto mt-6 grid max-w-[614px] grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-7">
+          <div className="mx-auto mt-7 grid max-w-[614px] grid-cols-2 gap-6">
             {bottomRowCategories.map((value, index) => (
               <ScrollReveal delay={(index + 3) * 50} key={value}>
                 <CategoryCard
@@ -100,19 +128,18 @@ function CategoryCard({
       ? "/setup"
       : `${bookingHref}?category=${category.value}`;
 
-  const badge =
-    landingCategoryBadges[category.value] ?? "Explore";
+  const badge = landingCategoryBadges[category.value] ?? "Explore";
 
   return (
     <Link
-      className="group relative mx-auto block aspect-[295/284] w-full overflow-hidden rounded-tl-[29px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)]"
+      className="group relative mx-auto block aspect-[295/284] w-full max-w-[22rem] overflow-hidden rounded-tl-[24px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)] min-[480px]:max-w-none sm:rounded-tl-[29px]"
       href={href}
     >
       <LazyImage
         alt={category.label}
         className="object-cover transition duration-500 group-hover:scale-[1.03]"
         fill
-        sizes="(min-width: 1024px) 295px, (min-width: 640px) 50vw, 100vw"
+        sizes="(min-width: 1024px) 295px, (min-width: 480px) 45vw, 92vw"
         src={
           landingCategoryImages[category.value] ??
           landingCategoryImages.residential
@@ -120,25 +147,27 @@ function CategoryCard({
       />
       <div className="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-[#1b1432]/70 to-transparent" />
 
-      <div className="absolute right-1 top-0 z-10 flex w-[58px] flex-col items-center">
+      <div className="absolute right-0.5 top-0 z-10 flex w-[48px] flex-col items-center min-[400px]:right-1 min-[400px]:w-[58px]">
         <LazyImage
           alt=""
           aria-hidden
-          className="h-[92px] w-[58px] object-contain"
+          className="h-[76px] w-[48px] object-contain min-[400px]:h-[92px] min-[400px]:w-[58px]"
           height={92}
           src="/images/marketing/landing/badge-ribbon.png"
           width={58}
         />
-        <div className="absolute inset-x-0 top-3 flex flex-col items-center px-1 text-center">
-          <span className="text-[11px] leading-none text-[#c79c66]">★</span>
-          <span className="mt-1 whitespace-pre-line text-[10px] font-semibold leading-[1.15] text-white">
+        <div className="absolute inset-x-0 top-2.5 flex flex-col items-center px-0.5 text-center min-[400px]:top-3 min-[400px]:px-1">
+          <span className="text-[10px] leading-none text-[#c79c66] min-[400px]:text-[11px]">
+            ★
+          </span>
+          <span className="mt-0.5 whitespace-pre-line text-[9px] font-semibold leading-[1.15] text-white min-[400px]:mt-1 min-[400px]:text-[10px]">
             {badge}
           </span>
         </div>
       </div>
 
-      <div className="absolute bottom-4 left-3 z-10 rounded-[7px] bg-white px-3 py-2">
-        <p className="text-[15px] font-bold leading-none text-[#7146ba]">
+      <div className="absolute bottom-3 left-2.5 z-10 max-w-[min(100%-1.25rem,14rem)] rounded-[7px] bg-white px-2.5 py-1.5 min-[400px]:bottom-4 min-[400px]:left-3 min-[400px]:max-w-[min(100%-1.5rem,16rem)] min-[400px]:px-3 min-[400px]:py-2">
+        <p className="text-[13px] font-bold leading-snug text-[#7146ba] min-[400px]:text-[15px] min-[400px]:leading-none">
           {category.label}
         </p>
       </div>

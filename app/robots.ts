@@ -36,6 +36,7 @@ const PUBLIC_MARKETING_ALLOW = [
   "/pricing",
   "/for-cleaners",
   "/privacy",
+  "/cookies",
   "/terms",
   "/llms.txt",
 ] as const;

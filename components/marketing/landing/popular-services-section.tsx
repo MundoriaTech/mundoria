@@ -73,9 +73,8 @@ const starMaskStyle = {
   maskPosition: "center top",
 } as const;
 
-const CARD_GAP = 26;
-const AUTO_SCROLL_SPEED = 0.6;
-const AUTO_SCROLL_INTERVAL_MS = 16;
+/** px/frame at ~60fps ≈ previous 0.6px / 16ms cadence */
+const AUTO_SCROLL_SPEED = 36;
 const MANUAL_PAUSE_MS = 5000;
 
 export function PopularServicesSection({
@@ -83,151 +82,284 @@ export function PopularServicesSection({
 }: {
   bookingBaseHref: string;
 }) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const loopWidthRef = useRef(0);
+  const pauseUntilRef = useRef(0);
+  const dragRef = useRef<{
+    active: boolean;
+    startX: number;
+    startY: number;
+    startOffset: number;
+    moved: boolean;
+    pointerId: number | null;
+  }>({
+    active: false,
+    startX: 0,
+    startY: 0,
+    startOffset: 0,
+    moved: false,
+    pointerId: null,
+  });
   const pauseAutoScrollRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    const node = scrollerRef.current;
-    if (!node) return;
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!viewport || !track) return;
 
-    let resumeTimeout: ReturnType<typeof setTimeout> | undefined;
+    let rafId = 0;
+    let lastTs = 0;
     let isVisible = false;
-    let paused = false;
+    let reduceMotion = false;
+
+    const measure = () => {
+      // First half of the duplicated track = one seamless loop
+      loopWidthRef.current = track.scrollWidth / 2;
+    };
+
+    const apply = () => {
+      const loop = loopWidthRef.current;
+      if (loop > 0) {
+        offsetRef.current = ((offsetRef.current % loop) + loop) % loop;
+      }
+      track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
+    };
 
     const pause = (duration = MANUAL_PAUSE_MS) => {
-      paused = true;
-      if (resumeTimeout) clearTimeout(resumeTimeout);
-      resumeTimeout = setTimeout(() => {
-        paused = false;
-      }, duration);
+      pauseUntilRef.current = performance.now() + duration;
     };
 
     pauseAutoScrollRef.current = () => pause();
 
-    const step = () => {
-      if (!isVisible || paused) return;
+    const tick = (ts: number) => {
+      rafId = requestAnimationFrame(tick);
+      if (!lastTs) lastTs = ts;
+      const dt = Math.min(64, ts - lastTs) / 1000;
+      lastTs = ts;
 
-      const loopWidth = node.scrollWidth / 2;
-      if (loopWidth <= 0 || node.scrollWidth <= node.clientWidth) return;
+      if (
+        !isVisible ||
+        reduceMotion ||
+        ts < pauseUntilRef.current ||
+        dragRef.current.active ||
+        loopWidthRef.current <= 0
+      ) {
+        return;
+      }
 
-      const next = node.scrollLeft + AUTO_SCROLL_SPEED;
-      node.scrollLeft = next >= loopWidth ? next - loopWidth : next;
+      offsetRef.current += AUTO_SCROLL_SPEED * dt;
+      apply();
     };
-
-    const onUserInteraction = () => pause();
 
     const onVisibilityChange = () => {
       if (document.hidden) {
-        paused = true;
-        if (resumeTimeout) clearTimeout(resumeTimeout);
+        pauseUntilRef.current = Number.POSITIVE_INFINITY;
       } else {
-        pause(1000);
+        pause(800);
+        lastTs = 0;
       }
     };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      dragRef.current = {
+        active: false,
+        startX: event.clientX,
+        startY: event.clientY,
+        startOffset: offsetRef.current,
+        moved: false,
+        pointerId: event.pointerId,
+      };
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      const drag = dragRef.current;
+      if (drag.pointerId !== event.pointerId) return;
+
+      const dx = event.clientX - drag.startX;
+      const dy = event.clientY - drag.startY;
+
+      if (!drag.active) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        // Vertical intent → let the page scroll
+        if (Math.abs(dy) > Math.abs(dx)) {
+          drag.pointerId = null;
+          return;
+        }
+        drag.active = true;
+        pause();
+        viewport.setPointerCapture(event.pointerId);
+      }
+
+      drag.moved = true;
+      offsetRef.current = drag.startOffset - dx;
+      apply();
+      event.preventDefault();
+    };
+
+    const onPointerUp = (event: PointerEvent) => {
+      const drag = dragRef.current;
+      if (drag.pointerId !== event.pointerId) return;
+      const wasDragging = drag.active;
+      drag.active = false;
+      drag.pointerId = null;
+      if (wasDragging) {
+        pause();
+        try {
+          viewport.releasePointerCapture(event.pointerId);
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotion = () => {
+      reduceMotion = mediaQuery.matches;
+    };
+    syncMotion();
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         isVisible = Boolean(entry?.isIntersecting);
+        if (isVisible) lastTs = 0;
       },
-      { threshold: 0.15 },
+      { threshold: 0.12 },
     );
 
-    observer.observe(node);
-    const intervalId = setInterval(step, AUTO_SCROLL_INTERVAL_MS);
+    const resizeObserver = new ResizeObserver(() => {
+      measure();
+      apply();
+    });
 
-    node.addEventListener("pointerdown", onUserInteraction);
-    node.addEventListener("touchstart", onUserInteraction, { passive: true });
-    node.addEventListener("wheel", onUserInteraction, { passive: true });
+    measure();
+    apply();
+    observer.observe(viewport);
+    resizeObserver.observe(track);
+    rafId = requestAnimationFrame(tick);
+
+    viewport.addEventListener("pointerdown", onPointerDown);
+    viewport.addEventListener("pointermove", onPointerMove);
+    viewport.addEventListener("pointerup", onPointerUp);
+    viewport.addEventListener("pointercancel", onPointerUp);
     document.addEventListener("visibilitychange", onVisibilityChange);
+    mediaQuery.addEventListener("change", syncMotion);
 
     return () => {
-      clearInterval(intervalId);
-      if (resumeTimeout) clearTimeout(resumeTimeout);
+      cancelAnimationFrame(rafId);
       pauseAutoScrollRef.current = null;
       observer.disconnect();
-      node.removeEventListener("pointerdown", onUserInteraction);
-      node.removeEventListener("touchstart", onUserInteraction);
-      node.removeEventListener("wheel", onUserInteraction);
+      resizeObserver.disconnect();
+      viewport.removeEventListener("pointerdown", onPointerDown);
+      viewport.removeEventListener("pointermove", onPointerMove);
+      viewport.removeEventListener("pointerup", onPointerUp);
+      viewport.removeEventListener("pointercancel", onPointerUp);
       document.removeEventListener("visibilitychange", onVisibilityChange);
+      mediaQuery.removeEventListener("change", syncMotion);
     };
   }, []);
 
   function scrollByCard(direction: "left" | "right") {
     pauseAutoScrollRef.current?.();
 
-    const node = scrollerRef.current;
-    if (!node) return;
-    const cardWidth = node.querySelector("article")?.clientWidth ?? 371;
-    node.scrollBy({
-      behavior: "smooth",
-      left: direction === "left" ? -(cardWidth + CARD_GAP) : cardWidth + CARD_GAP,
-    });
+    const track = trackRef.current;
+    if (!track) return;
+
+    const card = track.querySelector("article");
+    if (!card) return;
+
+    const styles = window.getComputedStyle(track);
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || "16") || 16;
+    const step = card.getBoundingClientRect().width + gap;
+    offsetRef.current += direction === "left" ? -step : step;
+
+    const loop = loopWidthRef.current || track.scrollWidth / 2;
+    if (loop > 0) {
+      offsetRef.current = ((offsetRef.current % loop) + loop) % loop;
+    }
+    track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
   }
 
   const carouselServices = [...popularServices, ...popularServices];
 
   return (
-    <ScrollReveal as="section" className="bg-[#f7f7f7] px-5 py-20 sm:px-8">
+    <ScrollReveal
+      as="section"
+      className="overflow-x-clip bg-[#f7f7f7] px-4 py-14 sm:px-8 sm:py-20"
+    >
       <div className="mx-auto max-w-6xl">
-        <h2 className="text-[2rem] font-bold tracking-[-0.03em] text-[#414141] sm:text-[36px]">
+        <h2 className="text-balance text-[1.75rem] font-bold tracking-[-0.03em] text-[#414141] sm:text-[36px]">
           Popular Cleaning Services
         </h2>
 
-        <div className="relative mt-10 min-w-0">
+        <div className="relative mt-8 min-w-0 sm:mt-10">
           <div
-            className="flex w-full min-w-0 touch-pan-x gap-[26px] overflow-x-auto scroll-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            ref={scrollerRef}
+            className="w-full min-w-0 cursor-grab overflow-hidden active:cursor-grabbing touch-pan-y"
+            ref={viewportRef}
+            style={{ touchAction: "pan-y" }}
           >
-            {carouselServices.map((service, index) => {
-              const href =
-                bookingBaseHref === "/setup"
-                  ? "/setup"
-                  : service.href.replace("/booking/new", bookingBaseHref);
+            <div
+              className="flex w-max gap-4 will-change-transform sm:gap-[26px]"
+              ref={trackRef}
+            >
+              {carouselServices.map((service, index) => {
+                const href =
+                  bookingBaseHref === "/setup"
+                    ? "/setup"
+                    : service.href.replace("/booking/new", bookingBaseHref);
 
-              return (
-                <article
-                  className="relative h-[372px] w-[min(86vw,340px)] shrink-0 overflow-hidden rounded-[21px] sm:w-[371px]"
-                  key={`${service.title}-${index}`}
-                  style={{ backgroundColor: service.color }}
-                >
-                  <div
-                    className="absolute inset-x-0 top-0 h-[255px]"
-                    style={starMaskStyle}
+                return (
+                  <article
+                    className="relative h-[340px] w-[min(82vw,300px)] shrink-0 overflow-hidden rounded-[21px] sm:h-[372px] sm:w-[371px]"
+                    key={`${service.title}-${index}`}
+                    style={{ backgroundColor: service.color }}
                   >
-                    <LazyImage
-                      alt=""
-                      className="object-cover object-[center_30%]"
-                      fill
-                      sizes="371px"
-                      src={service.image}
-                    />
-                  </div>
+                    <div
+                      className="absolute inset-x-0 top-0 h-[220px] sm:h-[255px]"
+                      style={starMaskStyle}
+                    >
+                      <LazyImage
+                        alt=""
+                        className="object-cover object-[center_30%]"
+                        fill
+                        sizes="(min-width: 640px) 371px, 82vw"
+                        src={service.image}
+                      />
+                    </div>
 
-                  <div className="absolute inset-x-0 bottom-0 px-8 pb-7 pt-4">
-                    <h3 className="max-w-[15.5rem] whitespace-pre-line text-[28px] font-medium leading-[1.05] text-[#e9e1fa] sm:text-[32px] sm:leading-[33px]">
-                      {service.title}
-                    </h3>
-                    <p className="mt-2 max-w-[15rem] text-[13px] font-light leading-[14px] text-white">
-                      {service.description}
-                    </p>
-                  </div>
+                    <div className="absolute inset-x-0 bottom-0 px-5 pb-6 pt-4 sm:px-8 sm:pb-7">
+                      <h3 className="max-w-[15.5rem] whitespace-pre-line text-[1.375rem] font-medium leading-[1.08] text-[#e9e1fa] sm:text-[32px] sm:leading-[33px]">
+                        {service.title}
+                      </h3>
+                      <p className="mt-2 max-w-[15rem] text-[12px] font-light leading-[1.25] text-white sm:text-[13px] sm:leading-[14px]">
+                        {service.description}
+                      </p>
+                    </div>
 
-                  <Link
-                    aria-label={`Book ${service.title.replace("\n", " ")}`}
-                    className="absolute bottom-8 right-6 transition hover:scale-105"
-                    href={href}
-                  >
-                    <LazyImage
-                      alt=""
-                      className="h-[25px] w-[31px]"
-                      height={25}
-                      src="/images/marketing/landing/Arrow.png"
-                      width={31}
-                    />
-                  </Link>
-                </article>
-              );
-            })}
+                    <Link
+                      aria-label={`Book ${service.title.replace("\n", " ")}`}
+                      className="absolute bottom-6 right-5 transition hover:scale-105 sm:bottom-8 sm:right-6"
+                      href={href}
+                      onClick={(event) => {
+                        if (dragRef.current.moved) {
+                          event.preventDefault();
+                        }
+                      }}
+                    >
+                      <LazyImage
+                        alt=""
+                        className="h-[25px] w-[31px]"
+                        height={25}
+                        src="/images/marketing/landing/Arrow.png"
+                        width={31}
+                      />
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
           </div>
 
           <div className="mt-5 flex justify-end gap-2">

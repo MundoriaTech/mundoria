@@ -1,7 +1,11 @@
 export const CONSENT_STORAGE_KEY = "cleanscape-cookie-consent-v1";
 
 export type ConsentPreferences = {
+  /** Preference cookies (theme / personalisation). */
+  preferences: boolean;
+  /** Statistics cookies (GTM / GA4). */
   analytics: boolean;
+  /** Marketing cookies (ads pixels). */
   marketing: boolean;
   /** ISO timestamp when the user last chose. */
   updatedAt: string;
@@ -11,9 +15,10 @@ export type ConsentPreferences = {
 export type ConsentDecision = ConsentPreferences | null;
 
 export function createConsentPreferences(
-  partial: Pick<ConsentPreferences, "analytics" | "marketing">,
+  partial: Pick<ConsentPreferences, "preferences" | "analytics" | "marketing">,
 ): ConsentPreferences {
   return {
+    preferences: partial.preferences,
     analytics: partial.analytics,
     marketing: partial.marketing,
     updatedAt: new Date().toISOString(),
@@ -29,6 +34,7 @@ export function readConsent(): ConsentDecision {
     const parsed = JSON.parse(raw) as Partial<ConsentPreferences>;
     if (parsed.version !== 1) return null;
     return {
+      preferences: Boolean(parsed.preferences),
       analytics: Boolean(parsed.analytics),
       marketing: Boolean(parsed.marketing),
       updatedAt:

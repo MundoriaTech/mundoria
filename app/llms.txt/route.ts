@@ -52,6 +52,7 @@ ${faqs}
 ## Contact
 - Customer support: ${SUPPORT_EMAIL}
 - Privacy: ${absoluteUrl("/privacy")}
+- Cookies: ${absoluteUrl("/cookies")}
 - Terms: ${absoluteUrl("/terms")}
 
 ## Preferred citation

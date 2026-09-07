@@ -19,6 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/pricing",
     "/for-cleaners",
     "/privacy",
+    "/cookies",
     "/terms",
   ].map((path) => ({
     changeFrequency: "weekly" as const,

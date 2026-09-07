@@ -9,12 +9,12 @@ const COOKIE = {
   center: "#f7e4a8",
   mid: "#f0cf7a",
   edge: "#d4a056",
-  crust: "#b8843f",
-  chip: "#6b3f1f",
-  chipMid: "#8b5a24",
+  crust: "#a66d28",
+  chip: "#4a2a12",
+  chipMid: "#7a4a1c",
   chipGloss: "#c4956a",
   crumb: "#e8bcac",
-  shadow: "#ac742f",
+  shadow: "#8a5a20",
 } as const;
 
 function Chip({
@@ -30,7 +30,14 @@ function Chip({
 }) {
   return (
     <g transform={`rotate(${rotate} ${cx} ${cy})`}>
-      <ellipse cx={cx} cy={cy + 0.4} fill="#000" opacity="0.12" rx={r + 0.3} ry={r * 0.55} />
+      <ellipse
+        cx={cx}
+        cy={cy + 0.55}
+        fill="#000"
+        opacity="0.2"
+        rx={r + 0.2}
+        ry={r * 0.5}
+      />
       <path
         d={`M${cx - r} ${cy + 0.5}
            C${cx - r * 0.55} ${cy - r * 1.05} ${cx + r * 0.45} ${cy - r * 1.1} ${cx + r} ${cy + 0.2}
@@ -49,7 +56,7 @@ function Chip({
         cx={cx - r * 0.25}
         cy={cy - r * 0.35}
         fill={COOKIE.chipGloss}
-        opacity="0.55"
+        opacity="0.7"
         rx={r * 0.28}
         ry={r * 0.16}
       />
@@ -66,6 +73,7 @@ export function CartoonCookieIcon({
 }) {
   const bodyGradientId = useId();
   const edgeGradientId = useId();
+  const clipId = `${bodyGradientId}-clip`;
 
   /** Slightly irregular baked disc — reads round at a glance, wobbly up close. */
   const cookieBody =
@@ -78,9 +86,10 @@ export function CartoonCookieIcon({
   return (
     <svg
       aria-hidden="true"
-      className={cn("shrink-0 drop-shadow-[0_3px_6px_rgba(172,116,47,0.35)]", className)}
+      className={cn("shrink-0", className)}
       fill="none"
       height={size}
+      shapeRendering="geometricPrecision"
       viewBox="0 0 64 64"
       width={size}
       xmlns="http://www.w3.org/2000/svg"
@@ -95,21 +104,28 @@ export function CartoonCookieIcon({
           r="1"
         >
           <stop stopColor={COOKIE.center} />
-          <stop offset="0.55" stopColor={COOKIE.mid} />
-          <stop offset="0.88" stopColor={COOKIE.edge} />
+          <stop offset="0.5" stopColor={COOKIE.mid} />
+          <stop offset="0.85" stopColor={COOKIE.edge} />
           <stop offset="1" stopColor={COOKIE.crust} />
         </radialGradient>
         <linearGradient id={edgeGradientId} x1="10" x2="54" y1="10" y2="54">
-          <stop stopColor="#fff" stopOpacity="0.35" />
+          <stop stopColor="#fff" stopOpacity="0.28" />
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </linearGradient>
-        <clipPath id={`${bodyGradientId}-clip`}>
+        <clipPath id={clipId}>
           <path d={cookieBody} />
         </clipPath>
       </defs>
 
-      {/* Soft base shadow */}
-      <ellipse cx="32" cy="54" fill={COOKIE.shadow} opacity="0.18" rx="22" ry="3.5" />
+      {/* Hard contact shadow — no CSS blur */}
+      <ellipse
+        cx="32"
+        cy="55.5"
+        fill={COOKIE.shadow}
+        opacity="0.35"
+        rx="19"
+        ry="2.8"
+      />
 
       {/* Main cookie disc */}
       <path
@@ -117,21 +133,22 @@ export function CartoonCookieIcon({
         fill={`url(#${bodyGradientId})`}
         stroke={COOKIE.crust}
         strokeLinejoin="round"
-        strokeWidth="1.8"
+        strokeWidth="2.2"
       />
 
-      {/* Baked surface sheen */}
-      <path
-        d={cookieBody}
-        fill={`url(#${edgeGradientId})`}
-        opacity="0.55"
-      />
+      {/* Baked surface sheen — kept light so it does not wash out */}
+      <path d={cookieBody} fill={`url(#${edgeGradientId})`} opacity="0.4" />
 
       {/* Subtle crack / bake lines */}
-      <g clipPath={`url(#${bodyGradientId}-clip`} opacity="0.35" stroke={COOKIE.crust} strokeLinecap="round">
-        <path d="M18 28 C21 30 23 34 20 38" strokeWidth="0.9" />
-        <path d="M36 42 C39 40 42 43 40 46" strokeWidth="0.8" />
-        <path d="M26 18 C28 20 27 23 25 24" strokeWidth="0.7" />
+      <g
+        clipPath={`url(#${clipId})`}
+        opacity="0.45"
+        stroke={COOKIE.crust}
+        strokeLinecap="round"
+      >
+        <path d="M18 28 C21 30 23 34 20 38" strokeWidth="1" />
+        <path d="M36 42 C39 40 42 43 40 46" strokeWidth="0.9" />
+        <path d="M26 18 C28 20 27 23 25 24" strokeWidth="0.8" />
       </g>
 
       {/* Chocolate chips — domed, embedded in the dough */}
@@ -143,23 +160,49 @@ export function CartoonCookieIcon({
       <Chip cx={45} cy={44} r={2.6} rotate={-8} />
 
       {/* Bite mark — exposes lighter inner crumb */}
-      <path d={biteCutout} fill={COOKIE.center} stroke={COOKIE.edge} strokeWidth="1.2" />
+      <path
+        d={biteCutout}
+        fill={COOKIE.center}
+        stroke={COOKIE.crust}
+        strokeWidth="1.5"
+      />
       <path
         d="M44.8 14.2 C47.6 13.6 50.2 15.4 51.2 18.1 C51.9 20.1 50.8 22 48.8 22.8"
-        opacity="0.45"
+        opacity="0.55"
         stroke={COOKIE.crust}
         strokeLinecap="round"
-        strokeWidth="1"
+        strokeWidth="1.1"
       />
 
       {/* Crumbs near the bite */}
-      <circle cx="52.5" cy="20.5" fill={COOKIE.mid} r="1.1" stroke={COOKIE.crust} strokeWidth="0.4" />
-      <circle cx="54.2" cy="24.2" fill={COOKIE.edge} r="0.85" />
-      <circle cx="50.8" cy="26.5" fill={COOKIE.crumb} r="0.75" />
+      <circle
+        cx="52.5"
+        cy="20.5"
+        fill={COOKIE.mid}
+        r="1.1"
+        stroke={COOKIE.crust}
+        strokeWidth="0.55"
+      />
+      <circle
+        cx="54.2"
+        cy="24.2"
+        fill={COOKIE.edge}
+        r="0.85"
+        stroke={COOKIE.crust}
+        strokeWidth="0.45"
+      />
+      <circle
+        cx="50.8"
+        cy="26.5"
+        fill={COOKIE.crumb}
+        r="0.75"
+        stroke={COOKIE.crust}
+        strokeWidth="0.4"
+      />
       <circle cx="53.4" cy="17.8" fill={COOKIE.mid} r="0.65" />
 
       {/* Crispy edge speckles */}
-      <g opacity="0.5">
+      <g opacity="0.65">
         <circle cx="13" cy="31" fill={COOKIE.crust} r="0.55" />
         <circle cx="48" cy="50" fill={COOKIE.crust} r="0.5" />
         <circle cx="52" cy="33" fill={COOKIE.crust} r="0.45" />
