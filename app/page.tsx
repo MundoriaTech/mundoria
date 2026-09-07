@@ -92,7 +92,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-clip bg-background text-foreground">
+    <main className="min-h-screen bg-background text-foreground">
       <JsonLd data={homePageStructuredData()} />
       <LandingNavbar customerHref={customerHref} viewer={viewer} />
       <HeroSection bookingHref={bookingHref} />
