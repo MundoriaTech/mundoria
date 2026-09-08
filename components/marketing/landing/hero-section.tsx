@@ -15,8 +15,8 @@ const ALT_PURPLE = "#291845";
 const ALT_GOLD = "#c79c66";
 
 /** Clears the top half of the metrics pill so images sit flush on it without being covered. */
-const METRICS_CLEARANCE = "pb-8 sm:pb-9 lg:pb-10";
-const METRICS_CLEARANCE_PX = 40; // keep in sync with bottom on desktop cleaner
+const METRICS_CLEARANCE = "pb-5 lg:pb-10";
+const METRICS_CLEARANCE_PX = 40; // desktop only — keep in sync with bottom on desktop cleaner
 
 export function HeroSection({ bookingHref }: { bookingHref: string }) {
   const [variant, setVariant] = useState<"default" | "alt">("default");
@@ -85,7 +85,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="relative mx-auto w-full max-w-[1551px] pb-10 sm:pb-12 lg:pb-11">
+      <div className="relative mx-auto w-full max-w-[1551px] pb-8 sm:pb-9 lg:pb-11">
         {/*
           Mobile: CSS grid stack — both heroes contribute height (no absolute clip).
           Desktop: shared aspect box with height cap.
@@ -93,7 +93,8 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
         <div
           className={cn(
             "relative w-full",
-            "max-lg:grid max-lg:[&>*]:col-start-1 max-lg:[&>*]:row-start-1",
+            // Same grid cell → row height = max(default, alt); both stretch to match.
+            "max-lg:grid max-lg:items-stretch max-lg:[&>*]:col-start-1 max-lg:[&>*]:row-start-1 max-lg:[&>*]:h-full",
             "lg:aspect-[1552/953] lg:max-h-[540px] xl:max-h-[580px]",
           )}
         >
@@ -101,7 +102,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             aria-hidden={variant !== "default"}
             className={cn(
               "transition-opacity duration-700 ease-in-out",
-              "max-lg:relative lg:absolute lg:inset-0",
+              "max-lg:relative max-lg:h-full lg:absolute lg:inset-0",
               variant === "default"
                 ? "z-10 opacity-100"
                 : "pointer-events-none z-0 opacity-0",
@@ -114,7 +115,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             aria-hidden={variant !== "alt"}
             className={cn(
               "transition-opacity duration-700 ease-in-out",
-              "max-lg:relative lg:absolute lg:inset-0",
+              "max-lg:relative max-lg:h-full lg:absolute lg:inset-0",
               variant === "alt"
                 ? "z-10 opacity-100"
                 : "pointer-events-none z-0 opacity-0",
@@ -130,7 +131,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
 
 function DefaultHero({ bookingHref }: { bookingHref: string }) {
   return (
-    <div className="relative isolate flex h-auto flex-col rounded-[20px] bg-white px-3 min-[380px]:px-5 sm:rounded-[38px] sm:px-10 sm:pt-2 lg:h-full lg:px-12 lg:pt-1">
+    <div className="relative isolate flex h-full min-h-full flex-col rounded-[20px] bg-white px-3 min-[380px]:px-5 sm:rounded-[38px] sm:px-10 sm:pt-2 lg:px-12 lg:pt-1">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 overflow-hidden rounded-[20px] sm:rounded-[38px]"
@@ -176,13 +177,13 @@ function DefaultHero({ bookingHref }: { bookingHref: string }) {
           </Link>
         </div>
 
-        <div className="relative mx-auto mt-4 w-full max-w-[980px] sm:mt-5 lg:mt-2 lg:min-h-0 lg:flex-1">
+        <div className="relative mx-auto mt-4 flex w-full max-w-[980px] flex-1 flex-col justify-end overflow-hidden sm:mt-5 lg:mt-2 lg:min-h-0 lg:overflow-visible">
           <Image
             alt="CleanScape cleaning professionals"
-            className="mx-auto h-auto w-full object-contain object-bottom lg:hidden"
+            className="mx-auto h-auto w-full origin-bottom scale-[1.24] object-contain object-bottom lg:hidden"
             height={503}
             priority
-            sizes="92vw"
+            sizes="100vw"
             src="/images/marketing/landing/hero-cleaners.png"
             width={1296}
           />
@@ -205,7 +206,7 @@ function DefaultHero({ bookingHref }: { bookingHref: string }) {
 function AlternateHero({ bookingHref }: { bookingHref: string }) {
   return (
     <div
-      className="relative isolate flex h-auto min-h-full flex-col rounded-[20px] sm:rounded-[38px] lg:h-full"
+      className="relative isolate flex h-full min-h-full flex-col rounded-[20px] sm:rounded-[38px]"
       style={{ backgroundColor: ALT_PURPLE }}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[20px] sm:rounded-[38px]">
@@ -223,34 +224,34 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
       {/* Mobile stacked — intrinsic image (never clipped by fill/scale hacks) */}
       <div
         className={cn(
-          "relative z-10 flex flex-col px-4 pt-5 min-[380px]:px-5 lg:hidden",
+          "relative z-10 flex min-h-0 flex-1 flex-col px-4 pt-5 min-[380px]:px-5 lg:hidden",
           METRICS_CLEARANCE,
         )}
       >
-        <h2 className="text-balance text-left text-[1.5rem] font-semibold leading-[1.08] tracking-[-0.04em] text-white min-[380px]:text-[1.65rem]">
+        <h2 className="shrink-0 text-balance text-left text-[1.5rem] font-semibold leading-[1.08] tracking-[-0.04em] text-white min-[380px]:text-[1.65rem]">
           Book Trusted Home{" "}
           <span style={{ color: ALT_GOLD }}>Cleaning</span> service in Minutes
         </h2>
-        <p className="mt-3 max-w-md text-pretty text-left text-[13px] font-normal leading-5 text-white/95">
+        <p className="mt-3 max-w-md shrink-0 text-pretty text-left text-[13px] font-normal leading-5 text-white/95">
           From residential and commercial cleaning to short-term rentals,
           exterior work and recovery support, book certified professionals,
           track every visit, and pay only after the job is complete.
         </p>
         <Link
-          className="mt-3 inline-flex w-fit items-center justify-center rounded-full px-4 py-2 text-[12px] font-medium text-[#1c133b] transition hover:brightness-110"
+          className="mt-3 inline-flex w-fit shrink-0 items-center justify-center rounded-full px-4 py-2 text-[12px] font-medium text-[#1c133b] transition hover:brightness-110"
           href={bookingHref}
           style={{ backgroundColor: ALT_GOLD }}
         >
           Book a Service
         </Link>
 
-        <div className="relative mt-4 w-full">
+        <div className="relative mt-4 w-full shrink-0">
           <Image
             alt="CleanScape cleaner giving a thumbs up"
-            className="mx-auto h-auto w-full object-contain object-bottom"
+            className="mx-auto h-auto w-full origin-bottom scale-[1.08] object-contain object-bottom"
             height={900}
             priority
-            sizes="92vw"
+            sizes="100vw"
             src={HERO_ALT_CLEANER}
             width={1200}
           />
@@ -260,7 +261,7 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
       {/* Desktop: Frame 29 — cleaner centered, full asset visible, sits on metrics */}
       <div className="absolute inset-0 z-10 hidden lg:block">
         <div
-          className="pointer-events-none absolute inset-x-[10%] top-0 lg:inset-x-[12%]"
+          className="pointer-events-none absolute inset-x-[8%] top-0 lg:inset-x-[10%]"
           style={{ bottom: METRICS_CLEARANCE_PX }}
         >
           <Image
@@ -302,7 +303,7 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
 /** Centered on the container’s bottom edge; half the pill hangs outside. */
 function HeroMetricsAnchor() {
   return (
-    <div className="pointer-events-none absolute bottom-0 left-1/2 z-20 w-[min(92%,640px)] -translate-x-1/2 translate-y-1/2 sm:w-[min(78%,780px)] lg:w-[min(72%,900px)]">
+    <div className="pointer-events-none absolute bottom-0 left-1/2 z-20 w-[min(78%,420px)] -translate-x-1/2 translate-y-1/2 sm:w-[min(48%,520px)] lg:w-[min(72%,900px)]">
       <div className="pointer-events-auto">
         <HeroMetrics />
       </div>
@@ -312,7 +313,7 @@ function HeroMetricsAnchor() {
 
 function HeroMetrics() {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-full border border-[#c79c66] bg-[#1c133b] px-4 py-2.5 text-white min-[400px]:gap-4 min-[400px]:px-5 sm:gap-6 sm:px-8 sm:py-4 lg:gap-8 lg:px-11 lg:py-5">
+    <div className="flex items-center justify-between gap-2 rounded-full border border-[#c79c66] bg-[#1c133b] px-3 py-1.5 text-white min-[400px]:gap-3 min-[400px]:px-3.5 sm:gap-4 sm:px-5 sm:py-2 lg:gap-8 lg:px-11 lg:py-5">
       <Metric label={"Service\ncategories"} value="5" />
       <Metric label={"Services\navailable"} value="20+" />
       <Metric label={"Status\nvisibility"} value="Live" />
@@ -322,11 +323,11 @@ function HeroMetrics() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex min-w-0 flex-col items-center gap-0.5 text-center sm:flex-row sm:items-center sm:gap-2 sm:text-left lg:gap-2.5">
-      <p className="text-xl font-normal leading-none tracking-tight text-[#c79c66] min-[400px]:text-2xl sm:text-3xl lg:text-4xl">
+    <div className="flex min-w-0 flex-col items-center gap-0 text-center sm:flex-row sm:items-center sm:gap-1 sm:text-left lg:gap-2.5">
+      <p className="text-[11px] font-normal leading-none tracking-tight text-[#c79c66] min-[400px]:text-xs sm:text-sm lg:text-4xl">
         {value}
       </p>
-      <p className="whitespace-pre-line text-[8px] font-normal leading-[1.15] text-white min-[400px]:text-[9px] sm:text-sm sm:leading-[15px] lg:text-base lg:leading-[17px]">
+      <p className="whitespace-pre-line text-[6px] font-normal leading-[1.1] text-white min-[400px]:text-[7px] sm:text-[9px] lg:text-base lg:leading-[17px]">
         {label}
       </p>
     </div>
