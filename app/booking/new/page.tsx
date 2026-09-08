@@ -6,6 +6,7 @@ import {
   SERVICES,
   SERVICE_CATEGORIES,
 } from "@/lib/customer/services";
+import { frequencyModeFor } from "@/lib/customer/booking-flow";
 import { createServerClient } from "@/lib/supabase/server";
 import { isUserRole, type Profile } from "@/types/auth";
 import type {
@@ -40,12 +41,18 @@ function draftFromSearchParams(searchParams: {
 
   if (!category && !service) return undefined;
 
+  const serviceTypeValue = service?.value ?? null;
+  const mode = frequencyModeFor(serviceTypeValue);
+
   return {
-    cleaningStandard: serviceType
-      ? normalizeStandard(serviceType, recommendedStandardFor(serviceType))
+    cleaningStandard: serviceTypeValue
+      ? normalizeStandard(serviceTypeValue, recommendedStandardFor(serviceTypeValue))
       : null,
+    isRecurring: mode === "required_recurring",
+    preferSameCleaner: mode === "required_recurring",
+    recurrencePattern: mode === "required_recurring" ? "weekly" : null,
     serviceCategory: service?.category ?? category,
-    serviceType,
+    serviceType: serviceTypeValue,
   } satisfies Partial<BookingDraft>;
 }
 

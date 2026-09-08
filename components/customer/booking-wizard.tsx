@@ -204,17 +204,50 @@ export function BookingWizard({
       const storedStep = Number(
         window.localStorage.getItem(BOOKING_STEP_KEY) ?? "",
       );
-      if (stored) {
-        const parsed = JSON.parse(stored) as BookingDraft;
+      const parsed = stored
+        ? (JSON.parse(stored) as BookingDraft)
+        : null;
+      const urlService = initialDraft?.serviceType ?? null;
+      const sameService =
+        Boolean(urlService) && parsed?.serviceType === urlService;
+
+      if (urlService || parsed) {
         setDraft({
           ...blankDraft,
-          ...parsed,
-          alternateTimes: parsed.alternateTimes ?? [],
-          guestAddress: parsed.guestAddress ?? null,
-          ...(initialDraft && !parsed.serviceType ? initialDraft : {}),
+          ...(parsed
+            ? {
+                ...parsed,
+                alternateTimes: parsed.alternateTimes ?? [],
+                guestAddress: parsed.guestAddress ?? null,
+              }
+            : {}),
+          // Deep-link / category seed always wins over a stale draft service.
+          ...(initialDraft ?? {}),
+          alternateTimes: sameService
+            ? (parsed?.alternateTimes ?? [])
+            : [],
+          selectedAddOns: sameService ? (parsed?.selectedAddOns ?? []) : [],
+          scheduledDate: sameService ? (parsed?.scheduledDate ?? "") : "",
+          scheduledTime: sameService ? (parsed?.scheduledTime ?? "") : "",
+          isRecurring: sameService
+            ? Boolean(parsed?.isRecurring)
+            : Boolean(initialDraft?.isRecurring),
+          recurrencePattern: sameService
+            ? (parsed?.recurrencePattern ?? null)
+            : (initialDraft?.recurrencePattern ?? null),
+          preferSameCleaner: sameService
+            ? Boolean(parsed?.preferSameCleaner)
+            : Boolean(initialDraft?.preferSameCleaner),
+          guestAddress: parsed?.guestAddress ?? null,
+          addressId: parsed?.addressId ?? null,
         });
       }
-      if (Number.isFinite(storedStep) && storedStep >= 0) {
+
+      if (sameService && Number.isFinite(storedStep) && storedStep >= 0) {
+        setStepIndex(storedStep);
+      } else if (urlService) {
+        setStepIndex(0);
+      } else if (Number.isFinite(storedStep) && storedStep >= 0) {
         setStepIndex(storedStep);
       }
     } catch {
