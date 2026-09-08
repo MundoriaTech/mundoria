@@ -255,7 +255,7 @@ function CategoryServicesSection({
   title,
 }: {
   bookingHref: string;
-  carouselRef: React.RefObject<HTMLDivElement | null>;
+  carouselRef: React.RefObject<HTMLDivElement>;
   gridClassName?: string;
   onScroll: (direction: 1 | -1) => void;
   services: CategoryServiceCard[];
