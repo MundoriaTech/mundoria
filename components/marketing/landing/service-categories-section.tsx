@@ -5,7 +5,6 @@ import {
   landingCategoryImages,
 } from "@/components/marketing/landing/constants";
 import { LazyImage } from "@/components/shared/lazy-image";
-import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SERVICE_CATEGORIES } from "@/lib/customer/services";
 import type { ServiceCategoryDefinition } from "@/lib/customer/services";
 
@@ -27,9 +26,8 @@ export function ServiceCategoriesSection({
   bookingHref: string;
 }) {
   return (
-    <ScrollReveal
-      as="section"
-      className="overflow-x-clip bg-[#f4ebfe] px-4 py-14 min-[400px]:px-5 sm:px-8 sm:py-24"
+    <section
+      className="overflow-x-clip bg-[#f4ebfe] px-4 pb-14 pt-6 min-[400px]:px-5 sm:px-8 sm:pb-24 sm:pt-8"
       id="services"
     >
       <div className="mx-auto max-w-6xl">
@@ -77,42 +75,39 @@ export function ServiceCategoriesSection({
 
         {/* Phone + tablet: one even 1/2-col grid (avoids orphan third card) */}
         <div className="mt-10 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[480px]:gap-5 sm:mt-12 sm:gap-6 lg:hidden">
-          {allCategories.map((value, index) => (
-            <ScrollReveal delay={index * 40} key={value}>
-              <CategoryCard
-                bookingHref={bookingHref}
-                category={getCategory(value)}
-              />
-            </ScrollReveal>
+          {allCategories.map((value) => (
+            <CategoryCard
+              bookingHref={bookingHref}
+              category={getCategory(value)}
+              key={value}
+            />
           ))}
         </div>
 
         {/* Desktop: designed 3-up + centred 2-up */}
         <div className="mt-[72px] hidden lg:block">
           <div className="mx-auto grid max-w-[921px] grid-cols-3 gap-6">
-            {topRowCategories.map((value, index) => (
-              <ScrollReveal delay={index * 50} key={value}>
-                <CategoryCard
-                  bookingHref={bookingHref}
-                  category={getCategory(value)}
-                />
-              </ScrollReveal>
+            {topRowCategories.map((value) => (
+              <CategoryCard
+                bookingHref={bookingHref}
+                category={getCategory(value)}
+                key={value}
+              />
             ))}
           </div>
 
           <div className="mx-auto mt-7 grid max-w-[614px] grid-cols-2 gap-6">
-            {bottomRowCategories.map((value, index) => (
-              <ScrollReveal delay={(index + 3) * 50} key={value}>
-                <CategoryCard
-                  bookingHref={bookingHref}
-                  category={getCategory(value)}
-                />
-              </ScrollReveal>
+            {bottomRowCategories.map((value) => (
+              <CategoryCard
+                bookingHref={bookingHref}
+                category={getCategory(value)}
+                key={value}
+              />
             ))}
           </div>
         </div>
       </div>
-    </ScrollReveal>
+    </section>
   );
 }
 
@@ -126,7 +121,9 @@ function CategoryCard({
   const href =
     bookingHref === "/setup"
       ? "/setup"
-      : `${bookingHref}?category=${category.value}`;
+      : category.value === "residential"
+        ? "/cleaning/residential"
+        : `${bookingHref}?category=${category.value}`;
 
   const badge = landingCategoryBadges[category.value] ?? "Explore";
 
@@ -145,7 +142,6 @@ function CategoryCard({
           landingCategoryImages.residential
         }
       />
-      <div className="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-[#1b1432]/70 to-transparent" />
 
       <div className="absolute right-0.5 top-0 z-10 flex w-[48px] flex-col items-center min-[400px]:right-1 min-[400px]:w-[58px]">
         <LazyImage
@@ -166,8 +162,14 @@ function CategoryCard({
         </div>
       </div>
 
-      <div className="absolute bottom-3 left-2.5 z-10 max-w-[min(100%-1.25rem,14rem)] rounded-[7px] bg-white px-2.5 py-1.5 min-[400px]:bottom-4 min-[400px]:left-3 min-[400px]:max-w-[min(100%-1.5rem,16rem)] min-[400px]:px-3 min-[400px]:py-2">
-        <p className="text-[13px] font-bold leading-snug text-[#7146ba] min-[400px]:text-[15px] min-[400px]:leading-none">
+      <div
+        className="absolute inset-x-0 bottom-0 z-10 flex min-h-0 items-center px-3 py-2 min-[400px]:px-3.5 min-[400px]:py-2.5"
+        style={{
+          backgroundImage:
+            "linear-gradient(118deg, #8b6ad4 0%, #6a45b8 42%, #3f2a7a 100%)",
+        }}
+      >
+        <p className="text-[13px] font-bold leading-snug text-white min-[400px]:text-[15px] min-[400px]:leading-tight">
           {category.label}
         </p>
       </div>

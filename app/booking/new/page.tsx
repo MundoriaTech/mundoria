@@ -1,8 +1,5 @@
-import Link from "next/link";
-
 import { BookingWizard } from "@/components/customer/booking-wizard";
-import { BrandLogo } from "@/components/shared/brand-mark";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import {
   normalizeStandard,
   recommendedStandardFor,
@@ -10,6 +7,7 @@ import {
   SERVICE_CATEGORIES,
 } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
+import { isUserRole, type Profile } from "@/types/auth";
 import type {
   Address,
   Booking,
@@ -65,14 +63,26 @@ export default async function NewBookingPage({
   let initialDraft: Partial<BookingDraft> | undefined = draftFromSearchParams(
     searchParams,
   );
+  let viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null =
+    null;
 
   if (user) {
-    const { data } = await supabase
-      .from("addresses")
-      .select("*")
-      .eq("customer_id", user.id)
-      .order("is_default", { ascending: false });
+    const [{ data }, { data: profile }] = await Promise.all([
+      supabase
+        .from("addresses")
+        .select("*")
+        .eq("customer_id", user.id)
+        .order("is_default", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("id,full_name,avatar_url,role")
+        .eq("id", user.id)
+        .maybeSingle(),
+    ]);
     addresses = (data ?? []) as Address[];
+    if (profile && isUserRole(profile.role)) {
+      viewer = profile;
+    }
 
     if (searchParams.rebook) {
       const { data: bookingData } = await supabase
@@ -103,34 +113,7 @@ export default async function NewBookingPage({
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 px-3 py-3 backdrop-blur sm:px-6 sm:py-4">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-2">
-          <BrandLogo href="/" markClassName="h-9 w-6 sm:h-10 sm:w-7" />
-          <div className="flex shrink-0 items-center gap-2 text-sm font-semibold sm:gap-3">
-            <ThemeToggle />
-            {user ? (
-              <Link className="text-primary hover:underline" href="/dashboard">
-                Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link
-                  className="px-1 text-primary hover:underline"
-                  href="/login?redirectTo=%2Fbooking%2Fnew"
-                >
-                  Log in
-                </Link>
-                <Link
-                  className="rounded-full bg-primary px-3 py-1.5 text-primary-foreground hover:bg-primary/90 sm:px-4 sm:py-2"
-                  href="/signup?redirectTo=%2Fbooking%2Fnew"
-                >
-                  Sign up
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <LandingNavbar customerHref="/booking/new" viewer={viewer} />
       <div className="px-3 py-5 sm:px-6 sm:py-8">
         <BookingWizard
           initialAddresses={addresses}

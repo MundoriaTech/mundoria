@@ -1,0 +1,12 @@
+---
+description: Use landing navbar and footer on all public marketing pages
+alwaysApply: true
+---
+
+# Landing chrome everywhere
+
+Always use `LandingNavbar` and `LandingFooter` (via `MarketingShell`) for public marketing, SEO, legal, and booking surfaces — not `BrandLogo` / the old marketing header/footer.
+
+- Prefer `MarketingShell` for shared public pages (home, pricing, cleaning, cleaners, FAQ, for-cleaners, how-it-works, privacy, cookies, terms).
+- Do not reintroduce a separate marketing nav/footer with different logo fonts or layout.
+- App shells (customer/cleaner/admin dashboards) keep their own chrome; public-facing pages use the landing chrome.

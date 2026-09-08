@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
-import { BrandLogo } from "@/components/shared/brand-mark";
+import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import {
   LAUNCH_CITY,
   popularMarketingServices,
@@ -65,7 +65,7 @@ export function LandingFooter({
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-8 border-b border-border pb-10 sm:grid-cols-2 sm:gap-10 sm:pb-12 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
           <div className="sm:col-span-2 lg:col-span-1">
-            <BrandLogo markClassName="h-12 w-9" wordmarkClassName="text-2xl" />
+            <LandingLogo href="/" />
             <p className="mt-5 max-w-xl text-pretty text-sm font-light leading-7 text-muted-foreground sm:mt-6">
               CleanScape connects UK customers with independent cleaning
               professionals for regular cleaning, deep cleans, Airbnb turnovers

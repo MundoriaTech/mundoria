@@ -369,7 +369,7 @@ export function ReviewsSection({
       style={{ backgroundColor: REVIEWS_SECTION_BG }}
     >
       <div className="mx-auto max-w-6xl">
-        <ScrollReveal className="relative mx-auto flex min-h-[120px] max-w-[720px] flex-col items-center justify-center px-2 text-center sm:min-h-[168px] sm:px-16">
+        <ScrollReveal className="relative mx-auto flex min-h-[72px] max-w-[720px] flex-col items-center justify-center px-2 text-center sm:min-h-[96px] sm:px-16">
           <LazyImage
             alt=""
             className="absolute right-0 top-0 hidden sm:block"
@@ -392,17 +392,9 @@ export function ReviewsSection({
             width={30}
           />
 
-          <h2 className="max-w-[18rem] text-balance text-[1.5rem] uppercase leading-[1.1] tracking-[-0.02em] text-[#1c133b] sm:max-w-none sm:text-[36px] sm:leading-[1.08]">
-            <span className="font-medium">Over </span>
-            <span className="font-extrabold">10,000</span>
-            <span className="font-medium"> happy cleans</span>
+          <h2 className="max-w-[20rem] text-balance text-[1.5rem] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-[36px] sm:leading-[1.08]">
+            What our customers say
           </h2>
-          <p className="mt-3 text-[18px] font-normal leading-snug text-[#414141] sm:mt-4 sm:text-[24px] sm:leading-[17px]">
-            Our average rating is 4.9/5
-          </p>
-          <p className="mt-2 text-[13px] font-light leading-5 tracking-[0.12em] text-[#414141] sm:mt-1 sm:text-[14px] sm:leading-[19px] sm:tracking-[3.64px]">
-            What about your home?
-          </p>
         </ScrollReveal>
 
         <div className="mt-8 md:mt-14">

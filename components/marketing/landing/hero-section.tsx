@@ -15,8 +15,8 @@ const ALT_PURPLE = "#291845";
 const ALT_GOLD = "#c79c66";
 
 /** Clears the top half of the metrics pill so images sit flush on it without being covered. */
-const METRICS_CLEARANCE = "pb-5 lg:pb-10";
-const METRICS_CLEARANCE_PX = 40; // desktop only — keep in sync with bottom on desktop cleaner
+const METRICS_CLEARANCE = "pb-5 lg:pb-11";
+const METRICS_CLEARANCE_PX = 44; // desktop only — keep in sync with bottom on desktop cleaner
 
 export function HeroSection({ bookingHref }: { bookingHref: string }) {
   const [variant, setVariant] = useState<"default" | "alt">("default");
@@ -81,7 +81,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
   return (
     <section
       ref={sectionRef}
-      className="px-3 pb-12 pt-2 min-[380px]:px-4 sm:px-8 sm:pb-16"
+      className="px-3 pb-6 pt-2 min-[380px]:px-4 sm:px-8 sm:pb-8 lg:pb-10"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -95,7 +95,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             "relative w-full",
             // Same grid cell → row height = max(default, alt); both stretch to match.
             "max-lg:grid max-lg:items-stretch max-lg:[&>*]:col-start-1 max-lg:[&>*]:row-start-1 max-lg:[&>*]:h-full",
-            "lg:aspect-[1552/953] lg:max-h-[540px] xl:max-h-[580px]",
+            "lg:aspect-[1552/953] lg:max-h-[580px] xl:max-h-[620px]",
           )}
         >
           <div
@@ -160,17 +160,19 @@ function DefaultHero({ bookingHref }: { bookingHref: string }) {
           METRICS_CLEARANCE,
         )}
       >
-        <div className="mx-auto flex w-full max-w-[767px] shrink-0 flex-col items-center pt-5 text-center sm:pt-6 lg:pt-7">
-          <h1 className="text-balance text-[1.625rem] font-medium leading-[1.08] tracking-[-0.04em] text-[#1c133b] min-[380px]:text-[2rem] sm:text-4xl lg:text-[clamp(1.75rem,2.4vw,2.75rem)]">
-            Book Trusted Home Cleaning service in Minutes
+        <div className="mx-auto flex w-full max-w-[767px] shrink-0 flex-col items-center pt-5 text-center sm:pt-6 lg:pt-8">
+          <h1 className="text-[1.625rem] font-medium leading-[1.08] tracking-[-0.04em] text-[#1c133b] min-[380px]:text-[2rem] sm:text-4xl lg:text-[clamp(1.9rem,2.6vw,3rem)]">
+            Book Trusted Home
+            <br />
+            Cleaning service in Minutes
           </h1>
-          <p className="mx-auto mt-2 max-w-[550px] text-pretty text-[13px] font-normal leading-5 text-[#1c133b] sm:mt-3 sm:text-[14px] sm:leading-[21px] lg:mt-2 lg:text-[clamp(0.8125rem,1.1vw,0.875rem)]">
+          <p className="mx-auto mt-2 max-w-[550px] text-pretty text-[13px] font-normal leading-5 text-[#1c133b] sm:mt-3 sm:text-[14px] sm:leading-[21px] lg:mt-3 lg:text-[clamp(0.875rem,1.15vw,0.9375rem)]">
             From residential and commercial cleaning to short-term rentals,
             exterior work and recovery support, book certified professionals,
             track every visit, and pay only after the job is complete.
           </p>
           <Link
-            className="mt-3 inline-flex h-[29px] items-center justify-center rounded-2xl bg-[#1c133b] px-5 text-[12px] font-medium text-[#e6e5f3] transition hover:bg-[#1c133b]/90 sm:mt-4 lg:mt-3"
+            className="mt-3 inline-flex h-[29px] items-center justify-center rounded-2xl bg-[#1c133b] px-5 text-[12px] font-medium text-[#e6e5f3] transition hover:bg-[#1c133b]/90 sm:mt-4 lg:mt-4 lg:h-8 lg:px-6 lg:text-[13px]"
             href={bookingHref}
           >
             Book a Service
@@ -274,19 +276,19 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
           />
         </div>
 
-        <h2 className="absolute left-[7.5%] top-[17%] max-w-[34%] text-left text-[clamp(1.75rem,3.2vw,3.15rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-white">
+        <h2 className="absolute left-[7%] top-[15%] max-w-[36%] text-left text-[clamp(1.9rem,3.4vw,3.35rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-white">
           Book Trusted Home{" "}
           <span style={{ color: ALT_GOLD }}>Cleaning</span> service in Minutes
         </h2>
 
-        <div className="absolute right-[7%] top-[30%] flex max-w-[23%] flex-col items-end text-right">
-          <p className="text-pretty text-[clamp(0.75rem,1.05vw,0.875rem)] font-normal leading-[1.45] text-white">
+        <div className="absolute right-[6.5%] top-[28%] flex max-w-[24%] flex-col items-end text-right">
+          <p className="text-pretty text-[clamp(0.8rem,1.1vw,0.9375rem)] font-normal leading-[1.45] text-white">
             From residential and commercial cleaning to short-term rentals,
             exterior work and recovery support, book certified professionals,
             track every visit, and pay only after the job is complete.
           </p>
           <Link
-            className="mt-4 inline-flex items-center justify-center whitespace-nowrap rounded-full px-5 py-2 text-[clamp(0.65rem,0.95vw,0.75rem)] font-medium text-[#1c133b] transition hover:brightness-110"
+            className="mt-4 inline-flex items-center justify-center whitespace-nowrap rounded-full px-5 py-2.5 text-[clamp(0.7rem,1vw,0.8125rem)] font-medium text-[#1c133b] transition hover:brightness-110"
             href={bookingHref}
             style={{ backgroundColor: ALT_GOLD }}
           >

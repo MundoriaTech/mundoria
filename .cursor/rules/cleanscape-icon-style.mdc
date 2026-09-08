@@ -1,0 +1,29 @@
+---
+description: CleanScape marketing icon style (Phosphor duotone + sticker edge)
+alwaysApply: true
+---
+
+# CleanScape icon style
+
+When adding or updating marketing/feature icons on public pages, use this established CleanScape style — do not invent new custom SVG sticker drawings or switch libraries without being asked.
+
+## Stack
+- Prefer **Phosphor Icons** (`@phosphor-icons/react`) with `weight="duotone"`.
+- Keep **lucide-react** for small UI chrome (nav chevrons, form controls, etc.), not for branded feature illustrations.
+
+## Colour mix (duotone layers)
+Colour the two SVG paths creatively with **purple, white, and orange** (CleanScape brand):
+- Soft fill = `path:first-child` at full opacity (`!opacity-100`) with peach/lavender/white fill
+- Linework = `path:last-child` with purple (`#312c79` / `#5b3d9e`) or orange (`#d4694a`)
+- Vary the mix per icon (e.g. orange fill + purple lines, or lavender fill + orange lines, or white fill + purple lines)
+
+Example classes:
+```
+[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]
+```
+
+## White sticker outline
+Apply a stylish white die-cut edge via stacked white `drop-shadow` filters, plus a soft brand shadow for lift. Reuse the same filter treatment used on the residential “Cleaning that works around you” icons — do not add gradient washes behind icons unless asked.
+
+## Layout reference
+Feature cards may place the icon bottom-right on a warm cream tile (see `components/marketing/residential/residential-cleaning-page.tsx` + `feature-icons.tsx`).

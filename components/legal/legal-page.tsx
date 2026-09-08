@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { BrandLogo, BrandMark } from "@/components/shared/brand-mark";
+import { LandingLogo } from "@/components/marketing/landing/landing-logo";
+import { MarketingShell } from "@/components/marketing/marketing-shell";
 
 export interface LegalSection {
   body?: string;
@@ -8,7 +9,7 @@ export interface LegalSection {
   title: string;
 }
 
-export function LegalPage({
+export async function LegalPage({
   children,
   intro,
   lastUpdated,
@@ -22,24 +23,10 @@ export function LegalPage({
   title: string;
 }) {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-background/90 px-5 py-5 backdrop-blur sm:px-8">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
-          <BrandLogo markClassName="h-11 w-8" />
-          <div className="flex items-center gap-2">
-            <Link
-              className="rounded-full bg-[#221f50] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#37306c]"
-              href="/signup"
-            >
-              Book now
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <MarketingShell>
       <section className="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
         <div className="rounded-[2.25rem] bg-[#221f50] p-7 text-white shadow-2xl shadow-[#221f50]/15 sm:p-10">
-          <BrandMark className="h-14 w-10" />
+          <LandingLogo variant="onDark" />
           <p className="mt-8 text-sm font-bold uppercase tracking-[0.24em] text-[#ffc79f]">
             Last updated {lastUpdated}
           </p>
@@ -77,7 +64,16 @@ export function LegalPage({
         </div>
 
         {children ? <div className="mt-5">{children}</div> : null}
+
+        <div className="mt-10 flex justify-center">
+          <Link
+            className="rounded-full bg-[#221f50] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#37306c]"
+            href="/"
+          >
+            Back to home
+          </Link>
+        </div>
       </section>
-    </main>
+    </MarketingShell>
   );
 }
