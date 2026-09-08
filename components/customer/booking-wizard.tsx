@@ -49,7 +49,6 @@ import {
   recommendedStandardFor,
   selectedAddOnTotal,
   SERVICES,
-  SERVICE_ADD_ONS,
   SERVICE_CATEGORIES,
   servicesForCategory,
   standardLabel,
