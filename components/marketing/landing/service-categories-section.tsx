@@ -10,10 +10,10 @@ import type { ServiceCategoryDefinition } from "@/lib/customer/services";
 
 const topRowCategories = [
   "residential",
-  "commercial",
+  "moving_home",
   "short_term_rental",
 ] as const;
-const bottomRowCategories = ["exterior", "recovery"] as const;
+const bottomRowCategories = ["commercial", "recovery"] as const;
 const allCategories = [...topRowCategories, ...bottomRowCategories] as const;
 
 function getCategory(value: string) {
@@ -123,7 +123,15 @@ function CategoryCard({
       ? "/setup"
       : category.value === "residential"
         ? "/cleaning/residential"
-        : `${bookingHref}?category=${category.value}`;
+        : category.value === "commercial"
+          ? "/cleaning/commercial"
+          : category.value === "moving_home"
+            ? "/cleaning/moving-home"
+            : category.value === "short_term_rental"
+              ? "/cleaning/short-lets"
+              : category.value === "recovery"
+                ? "/cleaning/recovery"
+                : `${bookingHref}?category=${category.value}`;
 
   const badge = landingCategoryBadges[category.value] ?? "Explore";
 

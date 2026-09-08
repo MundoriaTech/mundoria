@@ -25,10 +25,12 @@ export type ServiceType =
 
 export type ServiceCategory =
   | "residential"
+  | "moving_home"
   | "commercial"
   | "short_term_rental"
-  | "exterior"
-  | "recovery";
+  | "recovery"
+  /** @deprecated Removed from bookable catalogue; kept for legacy bookings. */
+  | "exterior";
 
 export type CleaningStandard = "essential" | "enhanced" | "comprehensive";
 
@@ -198,8 +200,24 @@ export interface BookingDraft {
   recommendedCleaningStandard: CleaningStandard | null;
   selectedAddOns: string[];
   addressId: string | null;
+  /** Collected before sign-in; persisted to /api/addresses at checkout. */
+  guestAddress: {
+    address_line_1: string;
+    address_line_2: string | null;
+    city: string;
+    label: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    num_bathrooms: number;
+    num_bedrooms: number;
+    postcode: string;
+    property_type: "house" | "flat" | "office" | "other";
+    special_requirements: string | null;
+  } | null;
   scheduledDate: string;
   scheduledTime: string;
+  /** Optional backup start times the customer can also do. */
+  alternateTimes: string[];
   isRecurring: boolean;
   recurrencePattern: "weekly" | "fortnightly" | "monthly" | null;
   preferSameCleaner: boolean;

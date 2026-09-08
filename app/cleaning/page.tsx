@@ -17,7 +17,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Browse CleanScape cleaning services — regular, deep, end-of-tenancy, Airbnb, office, windows and recovery support. Clear pricing and online booking.",
+    "Browse CleanScape cleaning services — residential, moving home, Airbnb & short lets, commercial and CleanScape Recovery. Clear pricing and online booking.",
   path: "/cleaning",
   title: "Cleaning Services | CleanScape",
 });

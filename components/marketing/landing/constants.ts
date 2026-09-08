@@ -25,7 +25,7 @@ export const landingNavLinks = [
 
 export const landingCategoryImages: Record<string, string> = {
   commercial: "/images/marketing/landing/category-commercial.png",
-  exterior: "/images/marketing/landing/category-exterior.png",
+  moving_home: "/images/marketing/landing/category-moving-home.png",
   recovery: "/images/marketing/landing/category-recovery.png",
   residential: "/images/marketing/landing/category-residential.png",
   short_term_rental: "/images/marketing/landing/category-str.png",
@@ -33,7 +33,7 @@ export const landingCategoryImages: Record<string, string> = {
 
 export const landingCategoryBadges: Record<string, string> = {
   commercial: "Work-\nplace",
-  exterior: "Specialist",
+  moving_home: "Moving",
   recovery: "Support",
   residential: "Most\npopular",
   short_term_rental: "For\nHost",
@@ -41,7 +41,7 @@ export const landingCategoryBadges: Record<string, string> = {
 
 export const landingCategoryColors: Record<string, string> = {
   commercial: "#7146ba",
-  exterior: "#823fb2",
+  moving_home: "#6a45b8",
   recovery: "#823fb2",
   residential: "#45347e",
   short_term_rental: "#823fb2",

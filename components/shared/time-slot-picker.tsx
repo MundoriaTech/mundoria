@@ -7,9 +7,12 @@ export type TimeSlotAvailability =
   | Record<string, string[]>
   | ((date: string) => string[]);
 
-const defaultSlots = Array.from({ length: 16 }, (_, index) => {
-  const hour = index + 7;
-  return `${String(hour).padStart(2, "0")}:00`;
+/** Half-hour slots from 07:00 through 21:30 (matches booking mock). */
+const defaultSlots = Array.from({ length: 30 }, (_, index) => {
+  const totalMinutes = 7 * 60 + index * 30;
+  const hour = Math.floor(totalMinutes / 60);
+  const minute = totalMinutes % 60;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 });
 
 export function TimeSlotPicker({

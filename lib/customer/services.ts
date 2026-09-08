@@ -8,11 +8,9 @@ import {
   Home,
   Hotel,
   Hospital,
-  Landmark,
   MoveRight,
   RefreshCw,
   Shirt,
-  ShoppingBag,
   Sparkles,
   Store,
   type LucideIcon,
@@ -68,8 +66,8 @@ export const CLEANING_STANDARDS: Array<{
   value: CleaningStandard;
 }> = [
   {
-    description: "Routine cleaning for properties that are already well maintained.",
-    label: "Standard",
+    description: "Routine for properties that are already well maintained.",
+    label: "Essential",
     value: "essential",
   },
   {
@@ -86,10 +84,22 @@ export const CLEANING_STANDARDS: Array<{
 
 export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
   {
-    description: "Everyday homes, deep resets, move-ins and tenancy handovers.",
+    description: "Everyday homes — regular upkeep, deep resets and one-off cleans.",
     icon: Home,
     label: "Residential Cleaning",
     value: "residential",
+  },
+  {
+    description: "End of tenancy, move-in and move-out cleans when you’re changing homes.",
+    icon: MoveRight,
+    label: "Moving Home",
+    value: "moving_home",
+  },
+  {
+    description: "Guest-ready turnovers for Airbnb, holiday lets and serviced stays.",
+    icon: Hotel,
+    label: "Airbnb & Short Lets",
+    value: "short_term_rental",
   },
   {
     description: "Workplaces, retail, hospitality, education and shared areas.",
@@ -98,19 +108,7 @@ export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
     value: "commercial",
   },
   {
-    description: "Fast, checklist-led cleans for stays, hosts and operators.",
-    icon: Hotel,
-    label: "Short-Term Rental Cleaning",
-    value: "short_term_rental",
-  },
-  {
-    description: "External specialist cleaning such as windows.",
-    icon: Landmark,
-    label: "Exterior Cleaning",
-    value: "exterior",
-  },
-  {
-    description: "Sensitive support cleans for recovery, family and life events.",
+    description: "Cleaning that adapts when life does — with more personal consideration.",
     icon: HeartHandshake,
     label: "CleanScape Recovery",
     value: "recovery",
@@ -121,7 +119,7 @@ export const SERVICES: ServiceDefinition[] = [
   {
     basePrice: 4500,
     category: "residential",
-    description: "Reliable upkeep for a consistently fresh home.",
+    description: "Keep your home clean and fresh with scheduled visits.",
     duration: 2,
     icon: RefreshCw,
     label: "Regular Cleaning",
@@ -129,19 +127,9 @@ export const SERVICES: ServiceDefinition[] = [
     value: "regular",
   },
   {
-    basePrice: 5500,
-    category: "residential",
-    description: "A flexible, thorough clean whenever you need it.",
-    duration: 2.5,
-    icon: Sparkles,
-    label: "One-Off Cleaning",
-    recommendedStandard: "enhanced",
-    value: "one_off",
-  },
-  {
     basePrice: 8500,
     category: "residential",
-    description: "Detailed attention for built-up dirt and overlooked areas.",
+    description: "A more thorough clean for areas that need extra attention.",
     duration: 4,
     icon: Home,
     label: "Deep Cleaning",
@@ -149,8 +137,18 @@ export const SERVICES: ServiceDefinition[] = [
     value: "deep_clean",
   },
   {
-    basePrice: 12500,
+    basePrice: 5500,
     category: "residential",
+    description: "Ideal when you need a clean for a specific occasion.",
+    duration: 2.5,
+    icon: Sparkles,
+    label: "One-Off Cleaning",
+    recommendedStandard: "enhanced",
+    value: "one_off",
+  },
+  {
+    basePrice: 12500,
+    category: "moving_home",
     description: "Move-out cleaning designed for landlord and agent standards.",
     duration: 6,
     fixedStandard: "comprehensive",
@@ -161,7 +159,7 @@ export const SERVICES: ServiceDefinition[] = [
   },
   {
     basePrice: 11500,
-    category: "residential",
+    category: "moving_home",
     description: "A full reset before settling into a new home.",
     duration: 5,
     fixedStandard: "comprehensive",
@@ -172,7 +170,7 @@ export const SERVICES: ServiceDefinition[] = [
   },
   {
     basePrice: 11500,
-    category: "residential",
+    category: "moving_home",
     description: "A move-out clean for handovers and deposit confidence.",
     duration: 5,
     fixedStandard: "comprehensive",
@@ -187,7 +185,7 @@ export const SERVICES: ServiceDefinition[] = [
     description: "Fast, guest-ready resets between stays.",
     duration: 3,
     icon: BriefcaseBusiness,
-    label: "Airbnb Turnover Cleaning",
+    label: "Airbnb Cleaning",
     recommendedStandard: "enhanced",
     value: "airbnb_turnover",
   },
@@ -252,16 +250,6 @@ export const SERVICES: ServiceDefinition[] = [
     value: "communal_area",
   },
   {
-    basePrice: 4200,
-    category: "exterior",
-    description: "Window glass cleaning for a clearer finish.",
-    duration: 2,
-    icon: ShoppingBag,
-    label: "Window Cleaning",
-    recommendedStandard: "essential",
-    value: "window_cleaning",
-  },
-  {
     basePrice: 7600,
     category: "recovery",
     description: "Supportive home cleaning during pregnancy.",
@@ -278,7 +266,7 @@ export const SERVICES: ServiceDefinition[] = [
     duration: 4.5,
     fixedStandard: "comprehensive",
     icon: Baby,
-    label: "Postpartum Home Cleaning",
+    label: "Postpartum Cleaning",
     recommendedStandard: "comprehensive",
     value: "postpartum",
   },
@@ -298,7 +286,7 @@ export const SERVICES: ServiceDefinition[] = [
     description: "Supportive cleaning after injury or limited mobility.",
     duration: 4.5,
     icon: Shirt,
-    label: "Post-Injury Home Cleaning",
+    label: "Injury Recovery Cleaning",
     recommendedStandard: "comprehensive",
     value: "post_injury",
   },
@@ -328,28 +316,28 @@ export const SERVICES: ServiceDefinition[] = [
 export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
   {
     amount: 1200,
-    categories: ["residential", "short_term_rental"],
+    categories: ["residential", "moving_home", "short_term_rental"],
     description: "Interior fridge clean and wipe-down.",
     id: "inside_fridge",
     label: "Inside fridge",
   },
   {
     amount: 1800,
-    categories: ["residential", "short_term_rental"],
+    categories: ["residential", "moving_home", "short_term_rental"],
     description: "Oven interior clean for grease and residue.",
     id: "inside_oven",
     label: "Inside oven",
   },
   {
     amount: 1500,
-    categories: ["residential", "short_term_rental"],
+    categories: ["residential", "moving_home", "short_term_rental"],
     description: "Interior cupboard/cabinet wipe-down.",
     id: "inside_cabinets",
     label: "Inside cabinets",
   },
   {
     amount: 1400,
-    categories: ["residential", "commercial", "short_term_rental"],
+    categories: ["residential", "moving_home", "commercial", "short_term_rental"],
     description: "Interior window glass and sill clean.",
     id: "interior_windows",
     label: "Interior windows",
@@ -418,7 +406,7 @@ export function serviceDefinition(serviceType: ServiceType) {
   const service = SERVICES.find((item) => item.value === serviceType);
   if (service) return service;
 
-  // Legacy DB values no longer offered in booking (not in Smart Service PDF).
+  // Legacy DB values no longer offered in booking.
   if (serviceType === "post_construction") {
     return {
       basePrice: 14500,
@@ -432,11 +420,36 @@ export function serviceDefinition(serviceType: ServiceType) {
     } satisfies ServiceDefinition;
   }
 
+  if (serviceType === "window_cleaning") {
+    return {
+      basePrice: 4200,
+      category: "residential" as const,
+      description: "Interior window cleaning (now offered as an add-on).",
+      duration: 2,
+      icon: Home,
+      label: "Window Cleaning",
+      recommendedStandard: "essential" as const,
+      value: "window_cleaning" as const,
+    } satisfies ServiceDefinition;
+  }
+
   throw new Error(`Unknown service type: ${serviceType}`);
 }
 
 export function categoryDefinition(category: ServiceCategory) {
-  return SERVICE_CATEGORIES.find((item) => item.value === category)!;
+  const found = SERVICE_CATEGORIES.find((item) => item.value === category);
+  if (found) return found;
+
+  if (category === "exterior") {
+    return {
+      description: "External specialist cleaning such as windows.",
+      icon: Home,
+      label: "Exterior Cleaning",
+      value: "exterior" as const,
+    } satisfies ServiceCategoryDefinition;
+  }
+
+  throw new Error(`Unknown service category: ${category}`);
 }
 
 export function servicesForCategory(category: ServiceCategory) {

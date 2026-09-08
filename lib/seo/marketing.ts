@@ -157,7 +157,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
 
 export const HOW_IT_WORKS_STEPS = [
   {
-    body: "Choose residential, commercial, short-let, windows or recovery support — then the specific service you need.",
+    body: "Choose residential, moving home, short-let, commercial or recovery support — then the specific service you need.",
     title: "Pick your service",
   },
   {
@@ -181,7 +181,7 @@ export function popularMarketingServices(limit = 6) {
     "end_of_tenancy",
     "airbnb_turnover",
     "office",
-    "window_cleaning",
+    "move_in",
   ];
   return preferred
     .map((value) => MARKETING_SERVICES.find((service) => service.value === value))

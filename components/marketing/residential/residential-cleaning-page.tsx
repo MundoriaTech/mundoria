@@ -51,15 +51,15 @@ const SERVICE_CARDS = [
     objectPosition: "object-center",
   },
   {
-    href: "/booking/new?service=move_in",
-    image: "/images/marketing/landing/residential-move-in.png",
-    label: "Move-In/out Cleaning",
-    objectPosition: "object-[center_20%]",
+    href: "/booking/new?service=deep_clean",
+    image: "/images/marketing/landing/residential-deep.png",
+    label: "Deep Cleaning",
+    objectPosition: "object-center",
   },
   {
     href: "/booking/new?service=one_off",
     image: "/images/marketing/landing/residential-one-off.png",
-    label: "One-off Cleaning",
+    label: "One-Off Cleaning",
     objectPosition: "object-center",
   },
 ] as const;
@@ -75,27 +75,15 @@ const FAQS = [
         name: "Regular cleaning",
       },
       {
-        description: "Ideal when you need a clean for a specific occasion.",
-        name: "One-off cleaning",
-      },
-      {
         description: "A more thorough clean for areas that need extra attention.",
         name: "Deep cleaning",
       },
       {
-        description: "Get your space ready for a new beginning.",
-        name: "Move-in / move-out cleaning",
-      },
-      {
-        description: "Find available cleaners when you need help quickly.",
-        name: "Same-day cleaning",
-      },
-      {
-        description: "Choose services based on the specific needs of your home.",
-        name: "Custom cleaning",
+        description: "Ideal when you need a clean for a specific occasion.",
+        name: "One-off cleaning",
       },
     ],
-    servicesHeading: "What cleaning services does CleanScape offer?",
+    servicesHeading: "What residential cleaning services does CleanScape offer?",
   },
   {
     answer:
@@ -168,7 +156,7 @@ export function ResidentialCleaningPage({
               Residential Cleaning
             </h1>
             <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
-              Everyday homes, deep resets, move-ins and tenancy handovers
+              Everyday homes, deep resets and flexible one-off cleans
             </p>
             <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">
               {[

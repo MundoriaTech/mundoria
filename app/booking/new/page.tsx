@@ -112,7 +112,7 @@ export default async function NewBookingPage({
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <main className="min-h-screen overflow-x-hidden bg-[#efe6ff] text-foreground">
       <LandingNavbar customerHref="/booking/new" viewer={viewer} />
       <div className="px-3 py-5 sm:px-6 sm:py-8">
         <BookingWizard

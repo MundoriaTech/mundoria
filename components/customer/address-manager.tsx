@@ -238,10 +238,13 @@ export function AddressManager({
 export function AddressForm({
   address,
   compact = false,
+  localOnly = false,
   onSaved,
 }: {
   address?: Address | null;
   compact?: boolean;
+  /** Collect address in-memory (no sign-in / API). Used in guest booking. */
+  localOnly?: boolean;
   onSaved: (address: Address) => void;
   /** @deprecated Ownership comes from the authenticated session via /api/addresses */
   userId?: string;
@@ -285,10 +288,7 @@ export function AddressForm({
         properties.street ||
         properties.formatted ||
         current.address_line_1,
-      city:
-        properties.city ||
-        properties.address_line2 ||
-        current.city,
+      city: properties.city || properties.address_line2 || current.city,
       latitude: properties.lat ?? null,
       longitude: properties.lon ?? null,
       postcode: properties.postcode ?? current.postcode,
@@ -305,6 +305,29 @@ export function AddressForm({
       !values.postcode.trim()
     ) {
       setError("Address line, city, and postcode are required.");
+      return;
+    }
+
+    if (localOnly) {
+      const now = new Date().toISOString();
+      onSaved({
+        address_line_1: values.address_line_1.trim(),
+        address_line_2: values.address_line_2.trim() || null,
+        city: values.city.trim(),
+        created_at: now,
+        customer_id: "",
+        id: `guest-${crypto.randomUUID()}`,
+        is_default: false,
+        label: values.label.trim() || null,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        num_bathrooms: values.num_bathrooms,
+        num_bedrooms: values.num_bedrooms,
+        postcode: values.postcode.trim().toUpperCase(),
+        property_type: values.property_type,
+        special_requirements: values.special_requirements.trim() || null,
+        updated_at: now,
+      });
       return;
     }
 
@@ -462,15 +485,17 @@ export function AddressForm({
         </Field>
       ) : null}
 
-      <label className="flex items-center gap-3 text-sm">
-        <input
-          checked={values.is_default}
-          className="h-4 w-4 accent-emerald-700"
-          onChange={(event) => update("is_default", event.target.checked)}
-          type="checkbox"
-        />
-        Make this my default address
-      </label>
+      {!localOnly ? (
+        <label className="flex items-center gap-3 text-sm">
+          <input
+            checked={values.is_default}
+            className="h-4 w-4 accent-emerald-700"
+            onChange={(event) => update("is_default", event.target.checked)}
+            type="checkbox"
+          />
+          Make this my default address
+        </label>
+      ) : null}
 
       <Button disabled={saving} type="submit">
         {saving ? (
@@ -478,7 +503,7 @@ export function AddressForm({
         ) : (
           <>
             <Check className="mr-2 h-4 w-4" />
-            Save address
+            {localOnly ? "Continue with this address" : "Save address"}
           </>
         )}
       </Button>

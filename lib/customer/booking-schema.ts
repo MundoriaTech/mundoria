@@ -25,16 +25,33 @@ const serviceType = z.enum([
 
 const serviceCategory = z.enum([
   "residential",
+  "moving_home",
   "commercial",
   "short_term_rental",
-  "exterior",
   "recovery",
+  "exterior",
 ]);
 
 const cleaningStandard = z.enum(["essential", "enhanced", "comprehensive"]);
 
 export const bookingDraftSchema = z.object({
   addressId: z.string().uuid(),
+  guestAddress: z
+    .object({
+      address_line_1: z.string().trim().min(1),
+      address_line_2: z.string().trim().nullable(),
+      city: z.string().trim().min(1),
+      label: z.string().trim().nullable(),
+      latitude: z.number().nullable(),
+      longitude: z.number().nullable(),
+      num_bathrooms: z.number().int().min(0),
+      num_bedrooms: z.number().int().min(0),
+      postcode: z.string().trim().min(1),
+      property_type: z.enum(["house", "flat", "office", "other"]),
+      special_requirements: z.string().trim().nullable(),
+    })
+    .nullable()
+    .optional(),
   cleaningStandard,
   isRecurring: z.boolean(),
   preferSameCleaner: z.boolean(),
@@ -54,6 +71,10 @@ export const bookingDraftSchema = z.object({
   recentlyMoved: z.boolean().nullable().default(null),
   scheduledDate: z.string().date(),
   scheduledTime: z.string().regex(/^\d{2}:\d{2}$/),
+  alternateTimes: z
+    .array(z.string().regex(/^\d{2}:\d{2}$/))
+    .max(6)
+    .default([]),
   selectedAddOns: z.array(z.string().trim().min(1)).default([]),
   serviceCategory,
   serviceType,

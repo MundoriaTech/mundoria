@@ -47,7 +47,7 @@ const WelcomeSection = nextDynamic(() =>
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Book certified UK cleaning professionals for homes, workplaces, short-term rentals, exterior cleaning and recovery support with CleanScape.",
+    "Book certified UK cleaning professionals for homes, workplaces, short lets, moving home and recovery support with CleanScape.",
   path: "/",
   title: "CleanScape UK | Trusted cleaning, beautifully managed",
 });

@@ -8,7 +8,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Residential cleaning with CleanScape — regular, one-off, deep, move-in/out and end-of-tenancy cleans with clear pricing and vetted cleaners.",
+    "Residential cleaning with CleanScape — regular, deep and one-off cleans with clear pricing and vetted cleaners in Birmingham.",
   path: "/cleaning/residential",
   title: "Residential Cleaning | CleanScape",
 });
@@ -30,7 +30,7 @@ export default function ResidentialCleaningRoute() {
             name: "Birmingham",
           },
           description:
-            "Residential cleaning for everyday homes, deep resets, move-ins and tenancy handovers.",
+            "Residential cleaning for everyday homes, deep resets and flexible one-off visits.",
           name: "Residential Cleaning",
           provider: {
             "@type": "Organization",

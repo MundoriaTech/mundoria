@@ -167,9 +167,9 @@ function DefaultHero({ bookingHref }: { bookingHref: string }) {
             Cleaning service in Minutes
           </h1>
           <p className="mx-auto mt-2 max-w-[550px] text-pretty text-[13px] font-normal leading-5 text-[#1c133b] sm:mt-3 sm:text-[14px] sm:leading-[21px] lg:mt-3 lg:text-[clamp(0.875rem,1.15vw,0.9375rem)]">
-            From residential and commercial cleaning to short-term rentals,
-            exterior work and recovery support, book certified professionals,
-            track every visit, and pay only after the job is complete.
+            From residential and commercial cleaning to short lets, moving home
+            and recovery support, book certified professionals, track every
+            visit, and pay only after the job is complete.
           </p>
           <Link
             className="mt-3 inline-flex h-[29px] items-center justify-center rounded-2xl bg-[#1c133b] px-5 text-[12px] font-medium text-[#e6e5f3] transition hover:bg-[#1c133b]/90 sm:mt-4 lg:mt-4 lg:h-8 lg:px-6 lg:text-[13px]"
@@ -235,9 +235,9 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
           <span style={{ color: ALT_GOLD }}>Cleaning</span> service in Minutes
         </h2>
         <p className="mt-3 max-w-md shrink-0 text-pretty text-left text-[13px] font-normal leading-5 text-white/95">
-          From residential and commercial cleaning to short-term rentals,
-          exterior work and recovery support, book certified professionals,
-          track every visit, and pay only after the job is complete.
+          From residential and commercial cleaning to short lets, moving home
+          and recovery support, book certified professionals, track every visit,
+          and pay only after the job is complete.
         </p>
         <Link
           className="mt-3 inline-flex w-fit shrink-0 items-center justify-center rounded-full px-4 py-2 text-[12px] font-medium text-[#1c133b] transition hover:brightness-110"
@@ -283,9 +283,9 @@ function AlternateHero({ bookingHref }: { bookingHref: string }) {
 
         <div className="absolute right-[6.5%] top-[28%] flex max-w-[24%] flex-col items-end text-right">
           <p className="text-pretty text-[clamp(0.8rem,1.1vw,0.9375rem)] font-normal leading-[1.45] text-white">
-            From residential and commercial cleaning to short-term rentals,
-            exterior work and recovery support, book certified professionals,
-            track every visit, and pay only after the job is complete.
+            From residential and commercial cleaning to short lets, moving home
+            and recovery support, book certified professionals, track every
+            visit, and pay only after the job is complete.
           </p>
           <Link
             className="mt-4 inline-flex items-center justify-center whitespace-nowrap rounded-full px-5 py-2.5 text-[clamp(0.7rem,1vw,0.8125rem)] font-medium text-[#1c133b] transition hover:brightness-110"
