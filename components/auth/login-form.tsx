@@ -14,7 +14,11 @@ import { Input } from "@/components/ui/input";
 import { dashboardForRole, safeRedirectPath } from "@/lib/auth/redirects";
 import { loginSchema, type LoginValues } from "@/lib/auth/schemas";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { isUserRole } from "@/types/auth";
+
+const fieldClassName =
+  "h-12 rounded-xl border-[#ddd6eb] bg-[#ece8f2] text-[#291845] placeholder:text-[#9a93ad] focus-visible:ring-[#291845]/30";
 
 interface LoginFormProps {
   initialEmail?: string;
@@ -86,11 +90,14 @@ export function LoginForm({
     <div className="space-y-6">
       {showOAuth ? (
         <>
-          <OAuthButton next={safeRedirectPath(redirectTo ?? null, "/dashboard")} />
-          <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
+          <OAuthButton
+            className="h-12 rounded-xl border-[#ddd6eb] bg-white text-[#414141] hover:bg-white/90"
+            next={safeRedirectPath(redirectTo ?? null, "/dashboard")}
+          />
+          <div className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#9a93ad]">
+            <span className="h-px flex-1 bg-[#ddd6eb]" />
             or use email
-            <span className="h-px flex-1 bg-border" />
+            <span className="h-px flex-1 bg-[#ddd6eb]" />
           </div>
         </>
       ) : null}
@@ -102,6 +109,7 @@ export function LoginForm({
         <FormField error={errors.email} htmlFor="email" label="Email">
           <Input
             autoComplete="email"
+            className={fieldClassName}
             id="email"
             placeholder="alex@example.com"
             type="email"
@@ -112,27 +120,34 @@ export function LoginForm({
         <FormField error={errors.password} htmlFor="password" label="Password">
           <Input
             autoComplete="current-password"
+            className={fieldClassName}
             id="password"
             type="password"
             {...register("password")}
           />
         </FormField>
 
-        <div className="text-right">
+        <div className="-mt-2 text-right">
           <Link
-            className="text-sm font-medium text-primary hover:underline"
+            className="text-sm font-medium text-[#291845] hover:underline"
             href={
               requiredRole === "admin"
                 ? "/forgot-password?from=admin"
                 : "/forgot-password"
             }
           >
-            Forgot password?
+            Forgot Password?
           </Link>
         </div>
 
-        <Button className="w-full" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Signing in…" : "Sign in"}
+        <Button
+          className={cn(
+            "h-12 w-full rounded-xl bg-[#291845] text-base font-semibold text-white hover:bg-[#291845]/90",
+          )}
+          disabled={isSubmitting}
+          type="submit"
+        >
+          {isSubmitting ? "Signing in…" : "Log in"}
         </Button>
       </form>
     </div>

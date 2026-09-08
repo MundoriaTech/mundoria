@@ -4,15 +4,18 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/auth";
 
 interface OAuthButtonProps {
+  className?: string;
   label?: string;
   next?: string;
   role?: Extract<UserRole, "customer" | "cleaner">;
 }
 
 export function OAuthButton({
+  className,
   label = "Continue with Google",
   next = "/dashboard",
   role,
@@ -47,7 +50,7 @@ export function OAuthButton({
   return (
     <div>
       <Button
-        className="w-full"
+        className={cn("w-full", className)}
         disabled={isLoading}
         onClick={signInWithGoogle}
         type="button"

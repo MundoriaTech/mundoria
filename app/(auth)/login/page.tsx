@@ -35,7 +35,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
         <>
           New to CleanScape?{" "}
           <Link
-            className="font-medium text-primary hover:underline"
+            className="font-semibold text-[#291845] hover:underline"
             href={signupHref}
           >
             Create an account

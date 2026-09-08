@@ -1,8 +1,15 @@
-import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import Image from "next/image";
 
-import { BrandMark } from "@/components/shared/brand-mark";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { LandingLogo } from "@/components/marketing/landing/landing-logo";
+
+const LOGIN_HERO = "/images/marketing/landing/login-hero.png";
+const LOGIN_MASCOT = "/images/marketing/landing/login-avatar.png";
+
+const HERO_POINTS = [
+  "Certified independent cleaners",
+  "Secure card payment",
+  "Live booking status, messages, and checklists",
+] as const;
 
 interface AuthShellProps {
   children: React.ReactNode;
@@ -18,60 +25,69 @@ export function AuthShell({
   title,
 }: AuthShellProps) {
   return (
-    <main className="grid min-h-screen bg-[#221f50] lg:grid-cols-[0.92fr_1.08fr]">
-      <section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="absolute -right-28 top-8 h-72 w-72 rounded-full bg-[#7669d1]/35 blur-3xl" />
-        <div className="absolute -left-20 bottom-20 h-56 w-56 rounded-full bg-[#ffc79f]/25 blur-3xl" />
-        <Link className="relative flex items-center gap-3" href="/">
-          <BrandMark />
-          <span className="text-xl font-semibold tracking-tight">
-            cleanscape
-          </span>
-        </Link>
-        <div className="relative max-w-lg">
-          <h2 className="mt-6 text-5xl font-semibold leading-[1.02] tracking-[-0.06em]">
-            A calmer way to book and manage cleaning.
-          </h2>
-          <div className="mt-8 space-y-4 text-sm text-white/75">
-            {[
-              "Certified independent cleaners",
-              "Secure card payment",
-              "Live booking status, messages, and checklists",
-            ].map((item) => (
-              <p className="flex items-center gap-3" key={item}>
-                <CheckCircle2 className="h-5 w-5 text-[#ffc79f]" />
-                {item}
-              </p>
-            ))}
+    <main className="relative min-h-screen bg-[#ebe4f8]">
+      <section className="relative isolate overflow-hidden bg-[#291845]">
+        <div className="absolute inset-0">
+          <Image
+            alt=""
+            aria-hidden
+            className="object-cover object-[70%_center] opacity-55 sm:object-[75%_center]"
+            fill
+            priority
+            sizes="100vw"
+            src={LOGIN_HERO}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-[#291845] via-[#291845]/88 to-[#291845]/45"
+          />
+        </div>
+
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 py-7 sm:gap-6 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
+          <LandingLogo className="h-8 sm:h-9" href="/" priority variant="onDark" />
+
+          <div className="max-w-xl pb-1 sm:pb-2">
+            <h2 className="text-balance text-[1.65rem] font-semibold leading-[1.12] tracking-[-0.03em] text-white sm:text-[2rem] lg:text-[2.15rem]">
+              A calmer way to book and manage{" "}
+              <span className="text-[#c79c66]">cleaning</span>
+            </h2>
+            <ul className="mt-4 space-y-1.5 text-[13px] font-normal leading-5 text-white/95 sm:mt-5 sm:text-sm sm:leading-6">
+              {HERO_POINTS.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </div>
         </div>
-        <p className="relative text-sm text-white/60">
-          Trusted local cleaning, managed in one clear place.
-        </p>
       </section>
 
-      <section className="relative flex items-center justify-center bg-background px-5 py-10 sm:px-8 lg:rounded-l-[2.5rem]">
-        <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
-          <ThemeToggle />
-        </div>
-        <div className="w-full max-w-md pt-8 lg:pt-0">
-          <Link
-            className="mb-10 inline-flex items-center gap-3 pr-12 text-xl font-semibold text-foreground lg:hidden lg:pr-0"
-            href="/"
-          >
-            <BrandMark className="h-10 w-7" />
-            cleanscape
-          </Link>
-          <div className="rounded-[2rem] border border-border bg-card p-6 shadow-2xl shadow-[#5a51aa]/10 sm:p-8">
-            <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
-              {title}
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              {description}
-            </p>
-            <div className="mt-8">{children}</div>
+      <section className="relative px-4 pb-8 pt-8 sm:px-8 sm:pt-10">
+        <div className="relative mx-auto w-full max-w-[31.25rem]">
+          {/*
+            Padding-bottom reserves space for the mascot so absolute positioning
+            cannot clip her feet at the viewport edge.
+          */}
+          <div className="relative pb-[8.75rem] sm:pb-[9.5rem]">
+            <div className="relative z-10 rounded-[1.75rem] border border-[#9a91b0] bg-[#f3eef9] px-6 pb-8 pt-7 sm:rounded-[2rem] sm:px-9 sm:pb-9 sm:pt-8">
+              <h1 className="text-[1.85rem] font-bold tracking-[-0.04em] text-[#291845] sm:text-[2.15rem]">
+                {title}
+              </h1>
+              <p className="mt-2 text-sm font-normal leading-6 text-[#6b6680]">
+                {description}
+              </p>
+              <div className="mt-7">{children}</div>
+            </div>
+
+            <Image
+              alt=""
+              aria-hidden
+              className="pointer-events-none absolute bottom-0 right-0 z-20 h-auto w-[10.5rem] translate-x-[40%] select-none sm:w-[13.5rem] sm:translate-x-[55%] md:w-[14.5rem] md:translate-x-[60%]"
+              height={519}
+              src={LOGIN_MASCOT}
+              width={455}
+            />
           </div>
-          <div className="mt-7 text-center text-sm text-muted-foreground">
+
+          <div className="relative z-10 mt-2 text-center text-sm text-[#6b6680] sm:mt-3">
             {footer}
           </div>
         </div>

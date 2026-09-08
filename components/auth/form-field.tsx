@@ -15,7 +15,10 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium" htmlFor={htmlFor}>
+      <label
+        className="text-sm font-semibold text-[#291845]"
+        htmlFor={htmlFor}
+      >
         {label}
       </label>
       {children}
