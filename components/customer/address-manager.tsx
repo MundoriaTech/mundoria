@@ -24,6 +24,7 @@ export interface AddressFormValues {
   longitude: number | null;
   num_bathrooms: number;
   num_bedrooms: number;
+  num_other_rooms: number;
   postcode: string;
   property_type: "house" | "flat" | "office" | "other";
   special_requirements: string;
@@ -39,6 +40,7 @@ const emptyAddress: AddressFormValues = {
   longitude: null,
   num_bathrooms: 1,
   num_bedrooms: 1,
+  num_other_rooms: 0,
   postcode: "",
   property_type: "flat",
   special_requirements: "",
@@ -194,6 +196,9 @@ export function AddressManager({
                       {address.property_type ?? "Property"} ·{" "}
                       {address.num_bedrooms ?? 0} bed ·{" "}
                       {address.num_bathrooms ?? 0} bath
+                      {(address.num_other_rooms ?? 0) > 0
+                        ? ` · ${address.num_other_rooms} other`
+                        : ""}
                     </p>
                   </div>
                 </div>
@@ -261,6 +266,7 @@ export function AddressForm({
           longitude: address.longitude,
           num_bathrooms: address.num_bathrooms ?? 1,
           num_bedrooms: address.num_bedrooms ?? 1,
+          num_other_rooms: address.num_other_rooms ?? 0,
           postcode: address.postcode,
           property_type: address.property_type ?? "flat",
           special_requirements: address.special_requirements ?? "",
@@ -284,10 +290,11 @@ export function AddressForm({
     setValues((current) => ({
       ...current,
       address_line_1:
+        properties.formatted ||
         properties.address_line1 ||
         properties.street ||
-        properties.formatted ||
         current.address_line_1,
+      address_line_2: properties.address_line2 || current.address_line_2,
       city: properties.city || properties.address_line2 || current.city,
       latitude: properties.lat ?? null,
       longitude: properties.lon ?? null,
@@ -299,12 +306,13 @@ export function AddressForm({
     event.preventDefault();
     setError(null);
 
-    if (
-      !values.address_line_1.trim() ||
-      !values.city.trim() ||
-      !values.postcode.trim()
-    ) {
-      setError("Address line, city, and postcode are required.");
+    if (!values.address_line_1.trim()) {
+      setError("Start typing and pick an address from the suggestions.");
+      return;
+    }
+
+    if (!values.city.trim() || !values.postcode.trim()) {
+      setError("Pick an address from the suggestions so we can fill city and postcode.");
       return;
     }
 
@@ -323,6 +331,7 @@ export function AddressForm({
         longitude: values.longitude,
         num_bathrooms: values.num_bathrooms,
         num_bedrooms: values.num_bedrooms,
+        num_other_rooms: values.num_other_rooms,
         postcode: values.postcode.trim().toUpperCase(),
         property_type: values.property_type,
         special_requirements: values.special_requirements.trim() || null,
@@ -344,6 +353,7 @@ export function AddressForm({
       longitude: values.longitude,
       num_bathrooms: values.num_bathrooms,
       num_bedrooms: values.num_bedrooms,
+      num_other_rooms: values.num_other_rooms,
       postcode: values.postcode.trim().toUpperCase(),
       property_type: values.property_type,
       special_requirements: values.special_requirements.trim() || null,
@@ -377,7 +387,7 @@ export function AddressForm({
   const addressInput = (
     <Input
       onChange={(event) => update("address_line_1", event.target.value)}
-      placeholder="Start typing your address"
+      placeholder="Enter your address here"
       required
       value={values.address_line_1}
     />
@@ -391,7 +401,7 @@ export function AddressForm({
         </p>
       ) : null}
 
-      <Field label="Find address">
+      <Field label="Where will your cleaning take place">
         {mapsKey ? (
           <AddressAutocompleteInput
             apiKey={mapsKey}
@@ -401,86 +411,57 @@ export function AddressForm({
         ) : (
           addressInput
         )}
+        {values.city && values.postcode ? (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {values.city} · {values.postcode.toUpperCase()}
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Choose a suggestion so city and postcode fill in automatically.
+          </p>
+        )}
       </Field>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-3 gap-3">
+        <Field label="Bedrooms">
+          <Input
+            min={0}
+            onChange={(event) =>
+              update("num_bedrooms", Number(event.target.value))
+            }
+            type="number"
+            value={values.num_bedrooms}
+          />
+        </Field>
+        <Field label="Bathrooms">
+          <Input
+            min={0}
+            onChange={(event) =>
+              update("num_bathrooms", Number(event.target.value))
+            }
+            type="number"
+            value={values.num_bathrooms}
+          />
+        </Field>
+        <Field label="Other rooms">
+          <Input
+            min={0}
+            onChange={(event) =>
+              update("num_other_rooms", Number(event.target.value))
+            }
+            placeholder="Lounge, office…"
+            type="number"
+            value={values.num_other_rooms}
+          />
+        </Field>
+      </div>
+
+      {!compact && !localOnly ? (
         <Field label="Label">
           <Input
             onChange={(event) => update("label", event.target.value)}
             placeholder="Home"
             value={values.label}
-          />
-        </Field>
-        <Field label="Flat, unit or building">
-          <Input
-            onChange={(event) => update("address_line_2", event.target.value)}
-            value={values.address_line_2}
-          />
-        </Field>
-        <Field label="City">
-          <Input
-            onChange={(event) => update("city", event.target.value)}
-            required
-            value={values.city}
-          />
-        </Field>
-        <Field label="Postcode">
-          <Input
-            onChange={(event) => update("postcode", event.target.value)}
-            required
-            value={values.postcode}
-          />
-        </Field>
-        <Field label="Property type">
-          <select
-            className="h-11 w-full rounded-md border bg-background px-3 text-sm"
-            onChange={(event) =>
-              update(
-                "property_type",
-                event.target.value as AddressFormValues["property_type"],
-              )
-            }
-            value={values.property_type}
-          >
-            <option value="house">House</option>
-            <option value="flat">Flat</option>
-            <option value="office">Office</option>
-            <option value="other">Other</option>
-          </select>
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Bedrooms">
-            <Input
-              min={0}
-              onChange={(event) =>
-                update("num_bedrooms", Number(event.target.value))
-              }
-              type="number"
-              value={values.num_bedrooms}
-            />
-          </Field>
-          <Field label="Bathrooms">
-            <Input
-              min={0}
-              onChange={(event) =>
-                update("num_bathrooms", Number(event.target.value))
-              }
-              type="number"
-              value={values.num_bathrooms}
-            />
-          </Field>
-        </div>
-      </div>
-
-      {!compact ? (
-        <Field label="Special requirements">
-          <textarea
-            className="min-h-24 w-full rounded-md border bg-background p-3 text-sm"
-            onChange={(event) =>
-              update("special_requirements", event.target.value)
-            }
-            placeholder="Pets, access notes, preferred products…"
-            value={values.special_requirements}
           />
         </Field>
       ) : null}

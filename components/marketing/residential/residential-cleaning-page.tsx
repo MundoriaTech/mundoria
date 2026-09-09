@@ -63,6 +63,12 @@ const SERVICE_CARDS = [
     objectPosition: "object-center",
   },
   {
+    href: "/booking/new?service=same_day",
+    image: "/images/marketing/landing/residential-deep.png",
+    label: "Same-Day Cleaning",
+    objectPosition: "object-center",
+  },
+  {
     href: "/booking/new?service=end_of_tenancy",
     image: "/images/marketing/landing/moving-end-of-tenancy.png",
     label: "End of Tenancy Cleaning",
@@ -73,7 +79,7 @@ const SERVICE_CARDS = [
 const FAQS = [
   {
     answer:
-      "CleanScape helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, a move-in or move-out clean, a one-off refresh or an end of tenancy clean, we make it easy to book trusted cleaners.",
+      "CleanScape helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, same-day help, a move-in or move-out clean, a one-off refresh or an end of tenancy clean, we make it easy to book trusted cleaners.",
     question: "What is CleanScape?",
     services: [
       {
@@ -87,6 +93,10 @@ const FAQS = [
       {
         description: "Ideal when you need a clean for a specific occasion.",
         name: "One-off cleaning",
+      },
+      {
+        description: "Book today when you need a cleaner as soon as possible.",
+        name: "Same-day cleaning",
       },
       {
         description: "Move-out cleaning designed for landlord and agent standards.",
@@ -251,7 +261,7 @@ export function ResidentialCleaningPage({
           </div>
 
           <div
-            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 xl:grid-cols-4 lg:overflow-visible lg:pb-0"
+            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:overflow-visible lg:pb-0"
             ref={carouselRef}
           >
             {SERVICE_CARDS.map((service) => (

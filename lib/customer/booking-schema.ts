@@ -3,6 +3,7 @@ import { z } from "zod";
 const serviceType = z.enum([
   "regular",
   "one_off",
+  "same_day",
   "deep_clean",
   "end_of_tenancy",
   "move_in",
@@ -46,6 +47,7 @@ export const bookingDraftSchema = z.object({
       longitude: z.number().nullable(),
       num_bathrooms: z.number().int().min(0),
       num_bedrooms: z.number().int().min(0),
+      num_other_rooms: z.number().int().min(0).default(0),
       postcode: z.string().trim().min(1),
       property_type: z.enum(["house", "flat", "office", "other"]),
       special_requirements: z.string().trim().nullable(),

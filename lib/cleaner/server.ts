@@ -77,6 +77,7 @@ export async function getAvailableJobs(cleanerId: string) {
   const minimumTier: Record<string, keyof typeof tierRank> = {
     regular: "bronze",
     one_off: "bronze",
+    same_day: "silver",
     deep_clean: "silver",
     end_of_tenancy: "gold",
     move_in: "gold",

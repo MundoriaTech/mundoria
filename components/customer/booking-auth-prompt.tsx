@@ -68,11 +68,9 @@ export function BookingAuthPrompt({
       };
 
       if (result.code === "email_taken") {
-        const params = new URLSearchParams({
-          email: email.trim(),
-          redirectTo: RETURN_PATH,
-        });
-        router.push(`/login?${params.toString()}`);
+        setMode("signin");
+        setMessage("That email already has an account — enter your password to continue.");
+        setBusy(false);
         return;
       }
 

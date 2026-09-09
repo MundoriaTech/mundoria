@@ -3,6 +3,7 @@ import type { UserRole } from "@/types/auth";
 export type ServiceType =
   | "regular"
   | "one_off"
+  | "same_day"
   | "deep_clean"
   | "end_of_tenancy"
   | "move_in"
@@ -71,6 +72,7 @@ export interface Address {
   property_type: "house" | "flat" | "office" | "other" | null;
   num_bedrooms: number | null;
   num_bathrooms: number | null;
+  num_other_rooms: number | null;
   special_requirements: string | null;
   created_at: string;
   updated_at: string;
@@ -210,6 +212,7 @@ export interface BookingDraft {
     longitude: number | null;
     num_bathrooms: number;
     num_bedrooms: number;
+    num_other_rooms: number;
     postcode: string;
     property_type: "house" | "flat" | "office" | "other";
     special_requirements: string | null;

@@ -13,6 +13,7 @@ import {
   Shirt,
   Sparkles,
   Store,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -85,7 +86,7 @@ export const CLEANING_STANDARDS: Array<{
 export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
   {
     description:
-      "Regular, one-off, move-in/out and end of tenancy cleans for the home.",
+      "Regular, same-day, one-off, move-in/out and end of tenancy cleans for the home.",
     icon: Home,
     label: "Residential Cleaning",
     value: "residential",
@@ -158,6 +159,16 @@ export const SERVICES: ServiceDefinition[] = [
     label: "One-Off Cleaning",
     recommendedStandard: "enhanced",
     value: "one_off",
+  },
+  {
+    basePrice: 7500,
+    category: "residential",
+    description: "Need it today? Book a cleaner for as soon as capacity allows.",
+    duration: 2.5,
+    icon: Zap,
+    label: "Same-Day Cleaning",
+    recommendedStandard: "enhanced",
+    value: "same_day",
   },
   {
     basePrice: 12500,
@@ -556,6 +567,7 @@ export function estimatePrice(
   const service = serviceDefinition(serviceType);
   const bedrooms = address.num_bedrooms ?? 1;
   const bathrooms = address.num_bathrooms ?? 1;
+  const otherRooms = address.num_other_rooms ?? 0;
   const propertyMultiplier =
     address.property_type === "office"
       ? 1.35
@@ -564,7 +576,10 @@ export function estimatePrice(
         : 1;
 
   const base = Math.round(
-    (service.basePrice + Math.max(0, bedrooms - 1) * 1200 + bathrooms * 800) *
+    (service.basePrice +
+      Math.max(0, bedrooms - 1) * 1200 +
+      bathrooms * 800 +
+      otherRooms * 600) *
       propertyMultiplier *
       standardMultipliers[standard] *
       schedulePriceMultiplier(schedule?.date, schedule?.time),
@@ -618,7 +633,10 @@ export function getSmartRecommendation({
   ) {
     return {
       autoApplied: false,
-      message: `Based on your selections, ${serviceDefinition("deep_clean").label} may be more suitable because your property ${conditionLabels[propertyCondition ?? "extra_attention"]}.`,
+      message:
+        propertyCondition === "neglected"
+          ? `Based on your selections, ${serviceDefinition("deep_clean").label} may be more suitable because your property ${conditionLabels.neglected}.`
+          : `Choosing Comprehensive on a Regular clean often points to ${serviceDefinition("deep_clean").label} — a fuller reset without stretching a routine visit.`,
       recommendedServiceType: "deep_clean",
       recommendedStandard: "enhanced",
       shouldShow: true,

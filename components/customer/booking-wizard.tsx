@@ -138,6 +138,7 @@ export function BookingWizard({
   const [authMode, setAuthMode] = useState<BookingAuthMode>("ask");
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
+  const lastRecommendedDurationRef = useRef<number | null>(null);
 
   const needsAuth = !userId;
   const flowSteps = useMemo(() => getFlowSteps(draft), [draft]);
@@ -162,6 +163,7 @@ export function BookingWizard({
           longitude: draft.guestAddress.longitude,
           num_bathrooms: draft.guestAddress.num_bathrooms,
           num_bedrooms: draft.guestAddress.num_bedrooms,
+          num_other_rooms: draft.guestAddress.num_other_rooms,
           postcode: draft.guestAddress.postcode,
           property_type: draft.guestAddress.property_type,
           special_requirements: draft.guestAddress.special_requirements,
@@ -196,6 +198,7 @@ export function BookingWizard({
   const duration = durationSummary({
     bathrooms: selectedAddress?.num_bathrooms,
     bedrooms: selectedAddress?.num_bedrooms,
+    otherRooms: selectedAddress?.num_other_rooms,
     cleaningStandard: selectedStandard,
     selectedAddOns: draft.selectedAddOns,
     serviceType: draft.serviceType,
@@ -232,6 +235,11 @@ export function BookingWizard({
           selectedAddOns: sameService ? (parsed?.selectedAddOns ?? []) : [],
           scheduledDate: sameService ? (parsed?.scheduledDate ?? "") : "",
           scheduledTime: sameService ? (parsed?.scheduledTime ?? "") : "",
+          estimatedDurationHours: sameService
+            ? (parsed?.estimatedDurationHours ??
+              initialDraft?.estimatedDurationHours ??
+              null)
+            : (initialDraft?.estimatedDurationHours ?? null),
           isRecurring: sameService
             ? Boolean(parsed?.isRecurring)
             : Boolean(initialDraft?.isRecurring),
@@ -307,40 +315,20 @@ export function BookingWizard({
   // Seed / refresh recommended duration when service inputs change.
   useEffect(() => {
     if (!duration) return;
+    const recommended = duration.hours;
+    if (lastRecommendedDurationRef.current === recommended) return;
+    const previousRecommended = lastRecommendedDurationRef.current;
+    lastRecommendedDurationRef.current = recommended;
     setDraft((current) => {
-      if (
-        current.estimatedDurationHours != null &&
-        Math.abs(current.estimatedDurationHours - duration.hours) < 0.001
-      ) {
-        return current;
+      if (current.estimatedDurationHours == null) {
+        return { ...current, estimatedDurationHours: recommended };
       }
-      // Keep a manual edit only until service/level/add-ons change the estimate.
-      const fingerprint = [
-        current.serviceType,
-        current.cleaningStandard,
-        [...current.selectedAddOns].sort().join(","),
-      ].join("|");
-      const previousFingerprint =
-        typeof window !== "undefined"
-          ? window.sessionStorage.getItem("cleanscape-duration-fp")
-          : null;
-      if (
-        previousFingerprint === fingerprint &&
-        current.estimatedDurationHours != null
-      ) {
-        return current;
+      if (previousRecommended != null && previousRecommended !== recommended) {
+        return { ...current, estimatedDurationHours: recommended };
       }
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem("cleanscape-duration-fp", fingerprint);
-      }
-      return { ...current, estimatedDurationHours: duration.hours };
+      return current;
     });
-  }, [
-    duration,
-    draft.serviceType,
-    draft.cleaningStandard,
-    draft.selectedAddOns,
-  ]);
+  }, [duration]);
 
   // Move / tenancy services default recentlyMoved for recommendation heuristics.
   useEffect(() => {
@@ -382,8 +370,8 @@ export function BookingWizard({
   }
 
   function goNext() {
-    if (stepId === "recommendation") {
-      continueFromRecommendation();
+    if (stepId === "standard") {
+      continueFromStandard();
       return;
     }
     setStepIndex((current) => Math.min(flowSteps.length - 1, current + 1));
@@ -423,6 +411,7 @@ export function BookingWizard({
   function selectService(serviceType: ServiceType) {
     const standard = recommendedStandardFor(serviceType);
     const mode = frequencyModeFor(serviceType);
+    const today = new Date().toISOString().slice(0, 10);
     setDraft((current) => ({
       ...current,
       cleaningStandard: normalizeStandard(serviceType, standard),
@@ -432,6 +421,8 @@ export function BookingWizard({
       recommendedCleaningStandard: null,
       recommendedServiceType: null,
       recurrencePattern: mode === "required_recurring" ? "weekly" : null,
+      scheduledDate:
+        serviceType === "same_day" ? today : current.scheduledDate,
       selectedAddOns: [],
       serviceCategory:
         SERVICES.find((item) => item.value === serviceType)?.category ??
@@ -462,7 +453,7 @@ export function BookingWizard({
     }));
   }
 
-  function continueFromRecommendation() {
+  function continueFromStandard() {
     if (recommendation?.autoApplied) {
       applyRecommendation();
     } else if (recommendation?.shouldShow) {
@@ -511,6 +502,11 @@ export function BookingWizard({
         }
         return true;
       }
+      case "duration":
+        return (
+          draft.estimatedDurationHours != null &&
+          draft.estimatedDurationHours >= 1
+        );
       case "date":
         return Boolean(draft.scheduledDate);
       case "time":
@@ -663,6 +659,7 @@ export function BookingWizard({
                     longitude: address.longitude,
                     num_bathrooms: address.num_bathrooms ?? 1,
                     num_bedrooms: address.num_bedrooms ?? 1,
+                    num_other_rooms: address.num_other_rooms ?? 0,
                     postcode: address.postcode,
                     property_type: address.property_type ?? "flat",
                     special_requirements: address.special_requirements,
@@ -680,16 +677,15 @@ export function BookingWizard({
           ) : null}
           {stepId === "standard" && draft.serviceType ? (
             <StandardStep
-              selected={selectedStandard}
-              select={(value) => update("cleaningStandard", value)}
-              serviceType={draft.serviceType}
-            />
-          ) : null}
-          {stepId === "recommendation" ? (
-            <RecommendationStep
               applyRecommendation={applyRecommendation}
               draft={draft}
               recommendation={recommendation}
+              selected={selectedStandard}
+              select={(value) => {
+                update("cleaningStandard", value);
+                update("recommendationOutcome", "not_shown");
+              }}
+              serviceType={draft.serviceType}
               update={update}
             />
           ) : null}
@@ -705,6 +701,8 @@ export function BookingWizard({
               hasWindowAddOn={draft.selectedAddOns.includes(
                 "interior_windows",
               )}
+              hours={draft.estimatedDurationHours ?? duration.hours}
+              onChange={(value) => update("estimatedDurationHours", value)}
             />
           ) : null}
           {stepId === "date" ? (
@@ -871,6 +869,7 @@ function ServiceStep({
     "move_in",
     "move_out",
     "one_off",
+    "same_day",
     "end_of_tenancy",
   ]);
   let services = category ? servicesForCategory(category) : SERVICES;
@@ -972,6 +971,7 @@ function AddressStep({
         longitude: guestAddress.longitude,
         num_bathrooms: guestAddress.num_bathrooms,
         num_bedrooms: guestAddress.num_bedrooms,
+        num_other_rooms: guestAddress.num_other_rooms,
         postcode: guestAddress.postcode,
         property_type: guestAddress.property_type,
         special_requirements: guestAddress.special_requirements,
@@ -1005,6 +1005,9 @@ function AddressStep({
                 {guestAsAddress.property_type} ·{" "}
                 {guestAsAddress.num_bedrooms ?? 0} bed ·{" "}
                 {guestAsAddress.num_bathrooms ?? 0} bath
+                {(guestAsAddress.num_other_rooms ?? 0) > 0
+                  ? ` · ${guestAsAddress.num_other_rooms} other`
+                  : ""}
               </p>
             </div>
           </div>
@@ -1036,6 +1039,9 @@ function AddressStep({
                   <p className="mt-2 text-xs capitalize text-[#7a7198]">
                     {address.property_type} · {address.num_bedrooms ?? 0} bed ·{" "}
                     {address.num_bathrooms ?? 0} bath
+                    {(address.num_other_rooms ?? 0) > 0
+                      ? ` · ${address.num_other_rooms} other`
+                      : ""}
                   </p>
                 </div>
               </div>
@@ -1085,16 +1091,38 @@ function AddressStep({
 }
 
 function StandardStep({
+  applyRecommendation,
+  draft,
+  recommendation,
   select,
   selected,
   serviceType,
+  update,
 }: {
+  applyRecommendation: () => void;
+  draft: BookingDraft;
+  recommendation: ReturnType<typeof getSmartRecommendation>;
   select: (standard: CleaningStandard) => void;
   selected: CleaningStandard | null;
   serviceType: ServiceType;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
 }) {
   const service = SERVICES.find((item) => item.value === serviceType)!;
   const standards = allowedStandards(serviceType);
+  const sameServiceSuggestion =
+    recommendation?.shouldShow &&
+    !recommendation.autoApplied &&
+    recommendation.recommendedServiceType === serviceType;
+  const differentServiceSuggestion =
+    recommendation?.shouldShow &&
+    !recommendation.autoApplied &&
+    recommendation.recommendedServiceType !== serviceType;
+  const acceptedDifferentService =
+    draft.recommendationOutcome === "accepted" &&
+    draft.serviceType === recommendation?.recommendedServiceType;
 
   return (
     <div>
@@ -1104,96 +1132,110 @@ function StandardStep({
       <p className="mt-2 text-sm text-[#5b5478]">
         {service.fixedStandard
           ? `${service.label} is delivered to the ${standardLabel(service.fixedStandard)} standard.`
-          : "Essential, Enhanced or Comprehensive — intensity shapes duration and price."}
+          : "Choose intensity — we’ll nudge you if a better CleanScape fit appears."}
       </p>
-      <div className="mt-5 grid gap-3">
-        {CLEANING_STANDARDS.map((standard) => {
-          const disabled = !standards.some(
-            (item) => item.value === standard.value,
-          );
-          const active = selected === standard.value;
-          const style = LEVEL_CARD_STYLES[standard.value];
 
-          return (
-            <button
-              className={cn(
-                "rounded-2xl border border-transparent p-4 text-left transition touch-manipulation",
-                style.bg,
-                active && "ring-2 ring-[#1c133b]",
-                disabled && "cursor-not-allowed opacity-40",
-              )}
-              disabled={disabled}
-              key={standard.value}
-              onClick={() => select(standard.value)}
-              type="button"
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-2xl" aria-hidden>
-                  {style.icon}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold text-[#1c133b]">{standard.label}</p>
-                  <p className="mt-1 text-sm text-[#4a4266]">
-                    {standard.description}
-                  </p>
-                  {service.recommendedStandard === standard.value ? (
-                    <p className="mt-2 text-xs font-semibold text-[#6a45b8]">
-                      Recommended
+      <div className="mt-5 overflow-hidden rounded-[1.35rem] border border-[#d9ccef]/80 bg-white/35">
+        <div className="grid gap-2.5 p-3 sm:p-4">
+          {CLEANING_STANDARDS.map((standard) => {
+            const disabled = !standards.some(
+              (item) => item.value === standard.value,
+            );
+            const active = selected === standard.value;
+            const style = LEVEL_CARD_STYLES[standard.value];
+            const isServiceRecommended =
+              service.recommendedStandard === standard.value;
+            const isSmartSuggested =
+              sameServiceSuggestion &&
+              recommendation.recommendedStandard === standard.value &&
+              selected !== standard.value;
+
+            return (
+              <button
+                className={cn(
+                  "relative rounded-2xl border border-transparent p-4 text-left transition touch-manipulation",
+                  style.bg,
+                  active && "ring-2 ring-[#1c133b]",
+                  isSmartSuggested && !active && "ring-2 ring-[#c79c66]/70",
+                  disabled && "cursor-not-allowed opacity-40",
+                )}
+                disabled={disabled}
+                key={standard.value}
+                onClick={() => select(standard.value)}
+                type="button"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl" aria-hidden>
+                    {style.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold text-[#1c133b]">
+                        {standard.label}
+                      </p>
+                      {isSmartSuggested ? (
+                        <span className="rounded-full bg-[#e8d2b8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6b4a28]">
+                          Better fit
+                        </span>
+                      ) : isServiceRecommended ? (
+                        <span className="rounded-full bg-[#efe6ff] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6a45b8]">
+                          Popular
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-sm text-[#4a4266]">
+                      {standard.description}
                     </p>
+                  </div>
+                  {active ? (
+                    <Check className="h-5 w-5 shrink-0 text-[#1c133b]" />
                   ) : null}
                 </div>
-                {active ? (
-                  <Check className="h-5 w-5 shrink-0 text-[#1c133b]" />
-                ) : null}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+              </button>
+            );
+          })}
+        </div>
 
-function RecommendationStep({
-  applyRecommendation,
-  draft,
-  recommendation,
-  update,
-}: {
-  applyRecommendation: () => void;
-  draft: BookingDraft;
-  recommendation: ReturnType<typeof getSmartRecommendation>;
-  update: <K extends keyof BookingDraft>(
-    key: K,
-    value: BookingDraft[K],
-  ) => void;
-}) {
-  return (
-    <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        CleanScape guidance
-      </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        Based on your property answers and cleaning level.
-      </p>
-
-      {recommendation?.shouldShow ? (
-        <div className="mt-5 rounded-2xl border border-[#d9ccef] bg-white/80 p-4 sm:p-5">
-          <p className="text-sm font-semibold text-[#1c133b]">
-            Our recommendation
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[#4a4266]">
-            {recommendation.message}
-          </p>
-          {recommendation.autoApplied ? (
-            <p className="mt-4 rounded-xl bg-[#efe6ff] p-3 text-sm font-semibold text-[#5b3d9e]">
-              The cleaning standard has been updated automatically for this
-              service.
+        {sameServiceSuggestion ? (
+          <div className="border-t border-[#e8d2b8]/80 bg-gradient-to-br from-[#f7ead8] to-[#f3ebff] px-4 py-4 sm:px-5">
+            <p className="text-sm font-semibold text-[#1c133b]">
+              CleanScape tip
             </p>
-          ) : (
-            <div className="mt-4 flex flex-col gap-2">
+            <p className="mt-1.5 text-sm leading-6 text-[#4a4266]">
+              {recommendation.message}
+            </p>
+            <button
+              className="mt-3 inline-flex min-h-10 items-center rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white transition hover:bg-[#312c79] touch-manipulation"
+              onClick={() => {
+                select(recommendation.recommendedStandard);
+                update("recommendationOutcome", "accepted");
+                update(
+                  "recommendedCleaningStandard",
+                  recommendation.recommendedStandard,
+                );
+                update(
+                  "recommendedServiceType",
+                  recommendation.recommendedServiceType,
+                );
+              }}
+              type="button"
+            >
+              Use {standardLabel(recommendation.recommendedStandard)}
+            </button>
+          </div>
+        ) : null}
+
+        {differentServiceSuggestion && !acceptedDifferentService ? (
+          <div className="border-t border-[#d9ccef] bg-gradient-to-br from-[#efe6ff] via-[#f3ebff] to-[#f7ead8] px-4 py-4 sm:px-5">
+            <p className="text-sm font-semibold text-[#1c133b]">
+              A closer CleanScape match
+            </p>
+            <p className="mt-1.5 text-sm leading-6 text-[#4a4266]">
+              {recommendation.message}
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <Button
-                className="min-h-11 w-full rounded-full bg-[#6a45b8] touch-manipulation hover:bg-[#5a38a3]"
+                className="min-h-11 flex-1 rounded-full bg-[#6a45b8] touch-manipulation hover:bg-[#5a38a3]"
                 onClick={applyRecommendation}
                 type="button"
               >
@@ -1201,7 +1243,7 @@ function RecommendationStep({
                 {formatServiceName(recommendation.recommendedServiceType)}
               </Button>
               <Button
-                className="min-h-11 w-full rounded-full touch-manipulation"
+                className="min-h-11 flex-1 rounded-full touch-manipulation"
                 onClick={() => {
                   update("recommendationOutcome", "overridden");
                   update(
@@ -1216,20 +1258,21 @@ function RecommendationStep({
                 type="button"
                 variant="outline"
               >
-                Continue with{" "}
-                {formatServiceName(draft.serviceType ?? "regular")}
+                Keep {formatServiceName(serviceType)}
               </Button>
             </div>
-          )}
-        </div>
-      ) : (
-        <div className="mt-5 rounded-2xl bg-[#efe6ff] p-4 text-[#3b3358] sm:p-5">
-          <p className="text-sm font-semibold">Your selection looks suitable</p>
-          <p className="mt-2 text-sm leading-6">
-            Continue to optional add-ons to personalise the clean.
-          </p>
-        </div>
-      )}
+          </div>
+        ) : null}
+
+        {!recommendation?.shouldShow && selected ? (
+          <div className="border-t border-[#d9ccef]/70 bg-[#efe6ff]/55 px-4 py-3 text-sm text-[#3b3358] sm:px-5">
+            <span className="font-semibold text-[#1c133b]">
+              {standardLabel(selected)}
+            </span>{" "}
+            looks right for this booking — next you can add optional extras.
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -1402,33 +1445,102 @@ function FrequencyStep({
 function DurationStep({
   duration,
   hasWindowAddOn,
+  hours,
+  onChange,
 }: {
   duration: NonNullable<ReturnType<typeof durationSummary>>;
   hasWindowAddOn: boolean;
+  hours: number;
+  onChange: (hours: number) => void;
 }) {
+  const MIN_HOURS = 1;
+  const MAX_HOURS = 12;
+  const STEP_MINUTES = 15;
+
+  const totalMinutes = Math.round(hours * 60);
+  const wholeHours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  function setTotalMinutes(next: number) {
+    const clamped = Math.min(
+      MAX_HOURS * 60,
+      Math.max(MIN_HOURS * 60, next),
+    );
+    onChange(Number((clamped / 60).toFixed(2)));
+  }
+
+  function nudgeHours(delta: number) {
+    setTotalMinutes(totalMinutes + delta * 60);
+  }
+
+  function nudgeMinutes(deltaSteps: number) {
+    setTotalMinutes(totalMinutes + deltaSteps * STEP_MINUTES);
+  }
+
   return (
     <div>
       <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">How long?</h2>
       <p className="mt-2 text-sm text-[#5b5478]">
-        Estimated from your service, cleaning level and add-ons.
+        Recommended from your service, cleaning level and add-ons — adjust if you
+        need more or less time.
       </p>
       <div className="mt-6 flex items-center justify-center gap-3">
-        <div className="flex h-24 w-28 flex-col items-center justify-center rounded-2xl bg-[#ebe3f8]">
-          <span className="text-4xl font-bold text-[#1c133b]">
-            {String(duration.wholeHours).padStart(2, "0")}
-          </span>
-          <span className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
-            Hours
-          </span>
+        <div className="flex flex-col items-center gap-1">
+          <button
+            aria-label="Increase hours"
+            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
+            disabled={totalMinutes >= MAX_HOURS * 60}
+            onClick={() => nudgeHours(1)}
+            type="button"
+          >
+            <ChevronUp className="h-5 w-5" />
+          </button>
+          <div className="flex h-24 w-28 flex-col items-center justify-center rounded-2xl bg-[#ebe3f8]">
+            <span className="text-4xl font-bold text-[#1c133b]">
+              {String(wholeHours).padStart(2, "0")}
+            </span>
+            <span className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
+              Hours
+            </span>
+          </div>
+          <button
+            aria-label="Decrease hours"
+            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
+            disabled={totalMinutes <= MIN_HOURS * 60}
+            onClick={() => nudgeHours(-1)}
+            type="button"
+          >
+            <ChevronDown className="h-5 w-5" />
+          </button>
         </div>
         <span className="text-3xl font-bold text-[#1c133b]">:</span>
-        <div className="flex h-24 w-28 flex-col items-center justify-center rounded-2xl bg-[#ebe3f8]">
-          <span className="text-4xl font-bold text-[#1c133b]">
-            {String(duration.minutes).padStart(2, "0")}
-          </span>
-          <span className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
-            Minutes
-          </span>
+        <div className="flex flex-col items-center gap-1">
+          <button
+            aria-label="Increase minutes"
+            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
+            disabled={totalMinutes >= MAX_HOURS * 60}
+            onClick={() => nudgeMinutes(1)}
+            type="button"
+          >
+            <ChevronUp className="h-5 w-5" />
+          </button>
+          <div className="flex h-24 w-28 flex-col items-center justify-center rounded-2xl bg-[#ebe3f8]">
+            <span className="text-4xl font-bold text-[#1c133b]">
+              {String(minutes).padStart(2, "0")}
+            </span>
+            <span className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
+              Minutes
+            </span>
+          </div>
+          <button
+            aria-label="Decrease minutes"
+            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
+            disabled={totalMinutes <= MIN_HOURS * 60}
+            onClick={() => nudgeMinutes(-1)}
+            type="button"
+          >
+            <ChevronDown className="h-5 w-5" />
+          </button>
         </div>
       </div>
       <div className="mt-5 rounded-full bg-[#e8d2b8] px-4 py-3 text-sm text-[#4a3a28]">
@@ -1692,6 +1804,7 @@ function CheckoutStep({
         longitude: draft.guestAddress.longitude,
         num_bathrooms: draft.guestAddress.num_bathrooms,
         num_bedrooms: draft.guestAddress.num_bedrooms,
+        num_other_rooms: draft.guestAddress.num_other_rooms,
         postcode: draft.guestAddress.postcode,
         property_type: draft.guestAddress.property_type,
         special_requirements: draft.guestAddress.special_requirements,

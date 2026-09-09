@@ -14,7 +14,6 @@ export type BookingFlowStepId =
   | "service"
   | "address"
   | "standard"
-  | "recommendation"
   | "addons"
   | "frequency"
   | "duration"
@@ -30,8 +29,7 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   category: "Category",
   service: "Service",
   address: "Address",
-  standard: "Level",
-  recommendation: "Guidance",
+  standard: "Session",
   addons: "Add-ons",
   frequency: "Frequency",
   duration: "Duration",
@@ -45,6 +43,7 @@ export const bookingServiceImages: Record<ServiceType, string> = {
   regular: "/images/marketing/landing/residential-regular.png",
   deep_clean: "/images/marketing/landing/residential-deep.png",
   one_off: "/images/marketing/landing/residential-one-off.png",
+  same_day: "/images/marketing/landing/residential-one-off.png",
   end_of_tenancy: "/images/marketing/landing/moving-end-of-tenancy.png",
   move_in: "/images/marketing/landing/moving-move-in.png",
   move_out: "/images/marketing/landing/moving-move-out.png",
@@ -158,7 +157,7 @@ export function getFlowSteps(
     steps.push("standard");
   }
 
-  steps.push("recommendation", "addons");
+  steps.push("addons");
 
   if (frequencyModeFor(draft.serviceType) !== "none") {
     steps.push("frequency");
@@ -175,6 +174,7 @@ export function stepLabel(stepId: BookingFlowStepId) {
 export function durationSummary(args: {
   bedrooms?: number | null;
   bathrooms?: number | null;
+  otherRooms?: number | null;
   cleaningStandard: CleaningStandard | null;
   selectedAddOns: string[];
   serviceType: ServiceType | null;
@@ -187,12 +187,17 @@ export function durationSummary(args: {
   );
   const beds = args.bedrooms ?? 1;
   const baths = args.bathrooms ?? 1;
+  const other = args.otherRooms ?? 0;
+  const otherBit =
+    other > 0
+      ? ` and ${other} other room${other === 1 ? "" : "s"}`
+      : "";
   const propertyHint =
-    beds <= 1 && baths <= 1
+    beds <= 1 && baths <= 1 && other === 0
       ? "Recommended for a studio or 1-bed with 1 bathroom"
       : beds <= 2
-        ? `Recommended for about ${beds} bedroom${beds === 1 ? "" : "s"} and ${baths} bathroom${baths === 1 ? "" : "s"}`
-        : `Based on ${beds} bedrooms and ${baths} bathrooms`;
+        ? `Recommended for about ${beds} bedroom${beds === 1 ? "" : "s"}, ${baths} bathroom${baths === 1 ? "" : "s"}${otherBit}`
+        : `Based on ${beds} bedrooms, ${baths} bathrooms${otherBit}`;
 
   return {
     hours,

@@ -51,6 +51,10 @@ function draftFromSearchParams(searchParams: {
     isRecurring: mode === "required_recurring",
     preferSameCleaner: mode === "required_recurring",
     recurrencePattern: mode === "required_recurring" ? "weekly" : null,
+    scheduledDate:
+      serviceTypeValue === "same_day"
+        ? new Date().toISOString().slice(0, 10)
+        : undefined,
     serviceCategory: service?.category ?? category,
     serviceType: serviceTypeValue,
   } satisfies Partial<BookingDraft>;
