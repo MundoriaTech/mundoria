@@ -20,8 +20,10 @@ export function CoverageSection() {
           UK cities coming soon.
         </p>
 
-        <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
-          {SERVICE_CATEGORIES.map((category) => (
+        <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          {SERVICE_CATEGORIES.filter((category) =>
+            ["residential", "commercial", "recovery"].includes(category.value),
+          ).map((category) => (
             <div className="min-w-0" key={category.value}>
               <h3 className="text-[15px] font-semibold leading-snug text-black">
                 {category.label.replace(" Cleaning", "")}

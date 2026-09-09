@@ -314,13 +314,17 @@ export function BookingWizard({
 
   function goBack() {
     if (stepIndex === 0) {
-      const fallback = userId ? "/dashboard" : "/";
-      const sameOriginReferrer =
-        typeof document !== "undefined" &&
-        Boolean(document.referrer) &&
-        document.referrer.startsWith(window.location.origin);
-      if (sameOriginReferrer) router.back();
-      else router.push(fallback);
+      const categoryExit: Partial<Record<string, string>> = {
+        residential: "/cleaning/residential",
+        moving_home: "/cleaning/moving-home",
+        short_term_rental: "/cleaning/short-lets",
+        commercial: "/cleaning/commercial",
+        recovery: "/cleaning/recovery",
+      };
+      const exitHref =
+        (draft.serviceCategory && categoryExit[draft.serviceCategory]) ||
+        "/cleaning";
+      router.push(exitHref);
       return;
     }
     if (stepId === "address" && showAddressForm && addresses.length > 0) {

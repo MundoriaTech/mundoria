@@ -8,13 +8,12 @@ import { LazyImage } from "@/components/shared/lazy-image";
 import { SERVICE_CATEGORIES } from "@/lib/customer/services";
 import type { ServiceCategoryDefinition } from "@/lib/customer/services";
 
-const topRowCategories = [
+/** Landing “Smart Service categories” — three primary entry points. */
+const smartMainCategories = [
   "residential",
-  "moving_home",
-  "short_term_rental",
+  "commercial",
+  "recovery",
 ] as const;
-const bottomRowCategories = ["commercial", "recovery"] as const;
-const allCategories = [...topRowCategories, ...bottomRowCategories] as const;
 
 function getCategory(value: string) {
   return SERVICE_CATEGORIES.find((category) => category.value === value)!;
@@ -33,7 +32,6 @@ export function ServiceCategoriesSection({
       <div className="mx-auto max-w-6xl">
         <div className="relative flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6 lg:gap-8">
           <div className="relative z-10 max-w-[516px] shrink-0">
-            {/* Reserve space for the corner accent on phones only */}
             <div className="pr-[7.25rem] min-[400px]:pr-[8.5rem] sm:pr-0">
               <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-black min-[400px]:text-[12px] sm:tracking-[0.43em]">
                 Smart Service categories
@@ -48,10 +46,6 @@ export function ServiceCategoriesSection({
             </p>
           </div>
 
-          {/*
-            Phone: scaled corner accent (top-right of the title block).
-            sm+: inline decorative pair beside the copy.
-          */}
           <div
             aria-hidden
             className="pointer-events-none absolute -right-0.5 top-0 z-0 flex items-start sm:static sm:-mt-8 sm:shrink-0 sm:self-start sm:items-center lg:-mt-10"
@@ -73,38 +67,14 @@ export function ServiceCategoriesSection({
           </div>
         </div>
 
-        {/* Phone + tablet: one even 1/2-col grid (avoids orphan third card) */}
-        <div className="mt-10 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[480px]:gap-5 sm:mt-12 sm:gap-6 lg:hidden">
-          {allCategories.map((value) => (
+        <div className="mt-10 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[480px]:gap-5 sm:mt-12 sm:gap-6 lg:mt-[72px] lg:mx-auto lg:max-w-[921px] lg:grid-cols-3 lg:gap-6">
+          {smartMainCategories.map((value) => (
             <CategoryCard
               bookingHref={bookingHref}
               category={getCategory(value)}
               key={value}
             />
           ))}
-        </div>
-
-        {/* Desktop: designed 3-up + centred 2-up */}
-        <div className="mt-[72px] hidden lg:block">
-          <div className="mx-auto grid max-w-[921px] grid-cols-3 gap-6">
-            {topRowCategories.map((value) => (
-              <CategoryCard
-                bookingHref={bookingHref}
-                category={getCategory(value)}
-                key={value}
-              />
-            ))}
-          </div>
-
-          <div className="mx-auto mt-7 grid max-w-[614px] grid-cols-2 gap-6">
-            {bottomRowCategories.map((value) => (
-              <CategoryCard
-                bookingHref={bookingHref}
-                category={getCategory(value)}
-                key={value}
-              />
-            ))}
-          </div>
         </div>
       </div>
     </section>
@@ -125,19 +95,15 @@ function CategoryCard({
         ? "/cleaning/residential"
         : category.value === "commercial"
           ? "/cleaning/commercial"
-          : category.value === "moving_home"
-            ? "/cleaning/moving-home"
-            : category.value === "short_term_rental"
-              ? "/cleaning/short-lets"
-              : category.value === "recovery"
-                ? "/cleaning/recovery"
-                : `${bookingHref}?category=${category.value}`;
+          : category.value === "recovery"
+            ? "/cleaning/recovery"
+            : `${bookingHref}?category=${category.value}`;
 
   const badge = landingCategoryBadges[category.value] ?? "Explore";
 
   return (
     <Link
-      className="group relative mx-auto block aspect-[295/284] w-full max-w-[22rem] overflow-hidden rounded-tl-[24px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)] min-[480px]:max-w-none sm:rounded-tl-[29px]"
+      className="group relative mx-auto block aspect-[295/284] w-full max-w-[22rem] overflow-hidden rounded-tl-[24px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)] min-[480px]:max-w-none sm:rounded-tl-[29px] min-[480px]:[&:last-child]:col-span-2 min-[480px]:[&:last-child]:mx-auto min-[480px]:[&:last-child]:max-w-[calc(50%-0.625rem)] lg:[&:last-child]:col-span-1 lg:[&:last-child]:max-w-none"
       href={href}
     >
       <LazyImage
