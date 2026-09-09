@@ -218,6 +218,8 @@ export interface BookingDraft {
   scheduledTime: string;
   /** Optional backup start times the customer can also do. */
   alternateTimes: string[];
+  /** Customer-editable session length in hours (seeded from estimate). */
+  estimatedDurationHours: number | null;
   isRecurring: boolean;
   recurrencePattern: "weekly" | "fortnightly" | "monthly" | null;
   preferSameCleaner: boolean;

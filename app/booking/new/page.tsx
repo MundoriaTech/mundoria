@@ -56,10 +56,20 @@ function draftFromSearchParams(searchParams: {
   } satisfies Partial<BookingDraft>;
 }
 
+function focusServicesFromSearchParams(focus?: string): ServiceType[] | undefined {
+  if (focus === "move") return ["move_in", "move_out"];
+  return undefined;
+}
+
 export default async function NewBookingPage({
   searchParams,
 }: {
-  searchParams: { category?: string; rebook?: string; service?: string };
+  searchParams: {
+    category?: string;
+    focus?: string;
+    rebook?: string;
+    service?: string;
+  };
 }) {
   const supabase = createServerClient();
   const {
@@ -70,6 +80,7 @@ export default async function NewBookingPage({
   let initialDraft: Partial<BookingDraft> | undefined = draftFromSearchParams(
     searchParams,
   );
+  const focusServices = focusServicesFromSearchParams(searchParams.focus);
   let viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null =
     null;
 
@@ -104,6 +115,7 @@ export default async function NewBookingPage({
         initialDraft = {
           addressId: booking.address_id,
           cleaningStandard: booking.cleaning_standard,
+          estimatedDurationHours: booking.estimated_duration_hours,
           isRecurring: booking.is_recurring,
           preferSameCleaner: booking.prefer_same_cleaner,
           propertyCondition: booking.property_condition,
@@ -123,6 +135,7 @@ export default async function NewBookingPage({
       <LandingNavbar customerHref="/booking/new" viewer={viewer} />
       <div className="px-3 py-5 sm:px-6 sm:py-8">
         <BookingWizard
+          focusServices={focusServices}
           initialAddresses={addresses}
           initialDraft={initialDraft}
           userId={user?.id ?? null}

@@ -13,7 +13,6 @@ export type BookingFlowStepId =
   | "category"
   | "service"
   | "address"
-  | "property"
   | "standard"
   | "recommendation"
   | "addons"
@@ -31,7 +30,6 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   category: "Category",
   service: "Service",
   address: "Address",
-  property: "Property",
   standard: "Level",
   recommendation: "Guidance",
   addons: "Add-ons",
@@ -151,7 +149,7 @@ export function getFlowSteps(
   if (!draft.serviceCategory) steps.push("category");
   if (!draft.serviceType) steps.push("service");
 
-  steps.push("address", "property");
+  steps.push("address");
 
   if (draft.serviceType) {
     const fixed = serviceDefinition(draft.serviceType).fixedStandard;

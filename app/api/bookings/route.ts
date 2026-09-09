@@ -6,7 +6,6 @@ import twilio from "twilio";
 
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import {
-  estimateDuration,
   formatMoney,
   formatServiceName,
   SERVICE_ADD_ONS,
@@ -96,11 +95,7 @@ export async function POST(request: Request) {
       amount_total: paymentIntent.amount,
       cleaning_standard: parsed.data.cleaningStandard,
       customer_id: user.id,
-      estimated_duration_hours: estimateDuration(
-        parsed.data.serviceType,
-        parsed.data.cleaningStandard,
-        parsed.data.selectedAddOns,
-      ),
+      estimated_duration_hours: parsed.data.estimatedDurationHours,
       is_recurring: parsed.data.isRecurring,
       payment_status: "released",
       promo_code_id: paymentIntent.metadata.promo_code_id || null,

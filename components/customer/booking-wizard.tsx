@@ -10,6 +10,8 @@ import { loadStripe } from "@stripe/stripe-js";
 import {
   ArrowLeft,
   Check,
+  ChevronDown,
+  ChevronUp,
   Clock3,
   CreditCard,
   MapPin,
@@ -18,7 +20,7 @@ import {
   Star,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
 import { AddressForm } from "@/components/customer/address-manager";
@@ -33,7 +35,6 @@ import {
   frequencyOptionsFor,
   getFlowSteps,
   guestAddressComplete,
-  propertyQuestionModeFor,
 } from "@/lib/customer/booking-flow";
 import { LazyImage } from "@/components/shared/lazy-image";
 import {
@@ -58,7 +59,6 @@ import type {
   Address,
   BookingDraft,
   CleaningStandard,
-  PropertyCondition,
   ServiceCategory,
   ServiceType,
 } from "@/types/customer";
@@ -71,6 +71,7 @@ const blankDraft: BookingDraft = {
   addressId: null,
   alternateTimes: [],
   cleaningStandard: null,
+  estimatedDurationHours: null,
   guestAddress: null,
   isRecurring: false,
   preferSameCleaner: false,
@@ -112,10 +113,12 @@ const LEVEL_CARD_STYLES: Record<
 };
 
 export function BookingWizard({
+  focusServices,
   initialAddresses,
   initialDraft,
   userId,
 }: {
+  focusServices?: ServiceType[];
   initialAddresses: Address[];
   initialDraft?: Partial<BookingDraft>;
   userId: string | null;
@@ -301,11 +304,51 @@ export function BookingWizard({
     }
   }, [draft.cleaningStandard, draft.serviceType]);
 
-  // Moving home defaults recentlyMoved.
+  // Seed / refresh recommended duration when service inputs change.
+  useEffect(() => {
+    if (!duration) return;
+    setDraft((current) => {
+      if (
+        current.estimatedDurationHours != null &&
+        Math.abs(current.estimatedDurationHours - duration.hours) < 0.001
+      ) {
+        return current;
+      }
+      // Keep a manual edit only until service/level/add-ons change the estimate.
+      const fingerprint = [
+        current.serviceType,
+        current.cleaningStandard,
+        [...current.selectedAddOns].sort().join(","),
+      ].join("|");
+      const previousFingerprint =
+        typeof window !== "undefined"
+          ? window.sessionStorage.getItem("cleanscape-duration-fp")
+          : null;
+      if (
+        previousFingerprint === fingerprint &&
+        current.estimatedDurationHours != null
+      ) {
+        return current;
+      }
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("cleanscape-duration-fp", fingerprint);
+      }
+      return { ...current, estimatedDurationHours: duration.hours };
+    });
+  }, [
+    duration,
+    draft.serviceType,
+    draft.cleaningStandard,
+    draft.selectedAddOns,
+  ]);
+
+  // Move / tenancy services default recentlyMoved for recommendation heuristics.
   useEffect(() => {
     if (
       draft.serviceType &&
-      propertyQuestionModeFor(draft.serviceType) === "moving" &&
+      (draft.serviceType === "move_in" ||
+        draft.serviceType === "move_out" ||
+        draft.serviceType === "end_of_tenancy") &&
       draft.recentlyMoved === null
     ) {
       setDraft((current) => ({ ...current, recentlyMoved: true }));
@@ -455,12 +498,6 @@ export function BookingWizard({
         return Boolean(draft.serviceType);
       case "address":
         return Boolean(draft.addressId || guestAddressComplete(draft.guestAddress));
-      case "property": {
-        const mode = propertyQuestionModeFor(draft.serviceType);
-        if (!draft.propertyCondition) return false;
-        if (mode === "commercial") return true;
-        return draft.recentlyMoved !== null;
-      }
       case "standard":
         return Boolean(draft.cleaningStandard);
       case "frequency": {
@@ -581,20 +618,6 @@ export function BookingWizard({
               <div className="absolute inset-0 bg-gradient-to-r from-[#f3ebff] via-[#f3ebff]/55 to-transparent" />
             </div>
           </div>
-          <div
-            aria-hidden
-            className="relative z-10 mt-5 grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-1"
-          >
-            {flowSteps.map((id, index) => (
-              <div
-                className={cn(
-                  "h-1 rounded-full",
-                  index <= stepIndex ? "bg-[#6a45b8]" : "bg-[#d9ccef]",
-                )}
-                key={id}
-              />
-            ))}
-          </div>
         </header>
 
         <div className="px-5 pb-6 sm:px-8 sm:pb-8">
@@ -607,6 +630,7 @@ export function BookingWizard({
           {stepId === "service" ? (
             <ServiceStep
               category={draft.serviceCategory}
+              focusServices={focusServices}
               selected={draft.serviceType}
               select={selectService}
             />
@@ -653,9 +677,6 @@ export function BookingWizard({
                 setShowAddressForm(false);
               }}
             />
-          ) : null}
-          {stepId === "property" ? (
-            <PropertyStep draft={draft} update={update} />
           ) : null}
           {stepId === "standard" && draft.serviceType ? (
             <StandardStep
@@ -836,24 +857,49 @@ function CategoryStep({
 
 function ServiceStep({
   category,
+  focusServices,
   select,
   selected,
 }: {
   category: ServiceCategory | null;
+  focusServices?: ServiceType[];
   select: (service: ServiceType) => void;
   selected: ServiceType | null;
 }) {
-  const services = category ? servicesForCategory(category) : SERVICES;
+  const primaryResidential = new Set<ServiceType>([
+    "regular",
+    "move_in",
+    "move_out",
+    "one_off",
+    "end_of_tenancy",
+  ]);
+  let services = category ? servicesForCategory(category) : SERVICES;
+  if (focusServices?.length) {
+    services = services.filter((item) => focusServices.includes(item.value));
+  } else if (category === "residential") {
+    services = services.filter(
+      (item) =>
+        primaryResidential.has(item.value) || item.value === selected,
+    );
+  }
 
   return (
     <div>
       <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        Select your service
+        {focusServices?.length === 2 &&
+        focusServices.includes("move_in") &&
+        focusServices.includes("move_out")
+          ? "Move-in or move-out?"
+          : `Select your service`}
       </h2>
       <p className="mt-2 text-sm text-[#5b5478]">
-        {category
-          ? `Choose within ${categoryDefinition(category).label}.`
-          : "Pick the sub-service that fits."}
+        {focusServices?.length === 2 &&
+        focusServices.includes("move_in") &&
+        focusServices.includes("move_out")
+          ? "Choose whether you need a move-in or move-out clean."
+          : category
+            ? `Choose within ${categoryDefinition(category).label}.`
+            : "Pick the sub-service that fits."}
       </p>
       <div className="mt-5 grid gap-3">
         {services.map((item) => {
@@ -1034,139 +1080,6 @@ function AddressStep({
           />
         </div>
       ) : null}
-    </div>
-  );
-}
-
-const propertyConditionOptions: Array<{
-  label: string;
-  value: PropertyCondition;
-}> = [
-  { label: "It is cleaned regularly.", value: "maintained" },
-  { label: "It needs a little extra attention.", value: "extra_attention" },
-  {
-    label: "It hasn't been cleaned for quite some time.",
-    value: "neglected",
-  },
-];
-
-const attentionAreas = [
-  "Kitchen",
-  "Bathroom",
-  "Windows",
-  "Bedrooms",
-  "Living Areas",
-  "Other",
-];
-
-function PropertyStep({
-  draft,
-  update,
-}: {
-  draft: BookingDraft;
-  update: <K extends keyof BookingDraft>(
-    key: K,
-    value: BookingDraft[K],
-  ) => void;
-}) {
-  const mode = propertyQuestionModeFor(draft.serviceType);
-
-  function toggleArea(area: string) {
-    const selected = new Set(draft.specialAttentionAreas);
-    if (selected.has(area)) selected.delete(area);
-    else selected.add(area);
-    update("specialAttentionAreas", Array.from(selected));
-  }
-
-  return (
-    <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        Tell us about the property
-      </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        {mode === "commercial"
-          ? "A few details help us size a workplace clean."
-          : mode === "recovery"
-            ? "We’ll use this to keep the clean considerate of your circumstances."
-            : mode === "moving"
-              ? "Moving cleans need a clear picture of the property condition."
-              : "These answers help us recommend the right cleaning level."}
-      </p>
-
-      <div className="mt-5 space-y-6">
-        <div>
-          <p className="font-semibold text-[#1c133b]">
-            How would you describe the current condition?
-          </p>
-          <div className="mt-3 grid gap-3">
-            {propertyConditionOptions.map((option) => (
-              <button
-                className={cn(
-                  "min-h-11 rounded-2xl border border-[#d9ccef] bg-white/70 p-4 text-left text-sm transition hover:border-[#6a45b8] touch-manipulation",
-                  draft.propertyCondition === option.value &&
-                    "border-[#6a45b8] ring-2 ring-[#6a45b8]/25",
-                )}
-                key={option.value}
-                onClick={() => update("propertyCondition", option.value)}
-                type="button"
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {mode !== "commercial" ? (
-          <div>
-            <p className="font-semibold text-[#1c133b]">
-              {mode === "moving"
-                ? "Is this linked to moving in or out?"
-                : "Have you recently moved into or out of the property?"}
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {[true, false].map((value) => (
-                <button
-                  className={cn(
-                    "min-h-11 rounded-full border border-[#d9ccef] bg-white/70 text-sm font-semibold touch-manipulation",
-                    draft.recentlyMoved === value &&
-                      "border-transparent bg-[#6a45b8] text-white",
-                  )}
-                  key={String(value)}
-                  onClick={() => update("recentlyMoved", value)}
-                  type="button"
-                >
-                  {value ? "Yes" : "No"}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div>
-          <p className="font-semibold text-[#1c133b]">
-            Any areas requiring special attention?
-          </p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {attentionAreas.map((area) => {
-              const selected = draft.specialAttentionAreas.includes(area);
-              return (
-                <button
-                  className={cn(
-                    "min-h-11 rounded-2xl border border-[#d9ccef] bg-white/70 p-3 text-left text-sm touch-manipulation",
-                    selected && "border-[#6a45b8] ring-2 ring-[#6a45b8]/25",
-                  )}
-                  key={area}
-                  onClick={() => toggleArea(area)}
-                  type="button"
-                >
-                  {selected ? "✓ " : ""}
-                  {area}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

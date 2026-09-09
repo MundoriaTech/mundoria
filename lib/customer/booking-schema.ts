@@ -75,6 +75,7 @@ export const bookingDraftSchema = z.object({
     .array(z.string().regex(/^\d{2}:\d{2}$/))
     .max(6)
     .default([]),
+  estimatedDurationHours: z.number().min(1).max(12),
   selectedAddOns: z.array(z.string().trim().min(1)).default([]),
   serviceCategory,
   serviceType,

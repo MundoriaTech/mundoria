@@ -51,9 +51,9 @@ const SERVICE_CARDS = [
     objectPosition: "object-center",
   },
   {
-    href: "/booking/new?service=deep_clean",
-    image: "/images/marketing/landing/residential-deep.png",
-    label: "Deep Cleaning",
+    href: "/booking/new?category=residential&focus=move",
+    image: "/images/marketing/landing/moving-move-in.png",
+    label: "Move-In / Move-Out Cleaning",
     objectPosition: "object-center",
   },
   {
@@ -62,12 +62,18 @@ const SERVICE_CARDS = [
     label: "One-Off Cleaning",
     objectPosition: "object-center",
   },
+  {
+    href: "/booking/new?service=end_of_tenancy",
+    image: "/images/marketing/landing/moving-end-of-tenancy.png",
+    label: "End of Tenancy Cleaning",
+    objectPosition: "object-center",
+  },
 ] as const;
 
 const FAQS = [
   {
     answer:
-      "CleanScape helps you find reliable cleaning professionals for your home. Whether you need a one-time clean or regular support, we make it easy to book trusted cleaners.",
+      "CleanScape helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, a move-in or move-out clean, a one-off refresh or an end of tenancy clean, we make it easy to book trusted cleaners.",
     question: "What is CleanScape?",
     services: [
       {
@@ -75,19 +81,23 @@ const FAQS = [
         name: "Regular cleaning",
       },
       {
-        description: "A more thorough clean for areas that need extra attention.",
-        name: "Deep cleaning",
+        description: "A full reset when moving into or out of a property.",
+        name: "Move-in / move-out cleaning",
       },
       {
         description: "Ideal when you need a clean for a specific occasion.",
         name: "One-off cleaning",
+      },
+      {
+        description: "Move-out cleaning designed for landlord and agent standards.",
+        name: "End of tenancy cleaning",
       },
     ],
     servicesHeading: "What residential cleaning services does CleanScape offer?",
   },
   {
     answer:
-      "Booking is simple. Choose the cleaning service you need, enter your location and preferred date, select an available cleaner, and complete your booking.",
+      "Booking is simple. Choose the cleaning service you need, enter your location and preferred date, and complete your booking with a clear estimate.",
     question: "How do I book a cleaner?",
   },
   {
@@ -241,7 +251,7 @@ export function ResidentialCleaningPage({
           </div>
 
           <div
-            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0"
+            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 xl:grid-cols-4 lg:overflow-visible lg:pb-0"
             ref={carouselRef}
           >
             {SERVICE_CARDS.map((service) => (
