@@ -1,9 +1,6 @@
 import Link from "next/link";
 
-import {
-  landingCategoryBadges,
-  landingCategoryImages,
-} from "@/components/marketing/landing/constants";
+import { landingCategoryImages } from "@/components/marketing/landing/constants";
 import { LazyImage } from "@/components/shared/lazy-image";
 import { SERVICE_CATEGORIES } from "@/lib/customer/services";
 import type { ServiceCategoryDefinition } from "@/lib/customer/services";
@@ -14,6 +11,22 @@ const smartMainCategories = [
   "commercial",
   "recovery",
 ] as const;
+
+/** Card title text as shown on the landing design. */
+const smartCategoryLabels: Record<(typeof smartMainCategories)[number], string> =
+  {
+    commercial: "Commercial Cleaning",
+    recovery: "Cleanscape recovery Cleaning",
+    residential: "Residential Cleaning",
+  };
+
+/** Bottom label bar colours from the landing design. */
+const smartCategoryBarColors: Record<(typeof smartMainCategories)[number], string> =
+  {
+    commercial: "#F5BB95",
+    recovery: "#8B40A7",
+    residential: "#CF4696",
+  };
 
 function getCategory(value: string) {
   return SERVICE_CATEGORIES.find((category) => category.value === value)!;
@@ -26,13 +39,13 @@ export function ServiceCategoriesSection({
 }) {
   return (
     <section
-      className="overflow-x-clip bg-[linear-gradient(180deg,#efebf9_0%,#decff0_100%)] px-4 pb-14 pt-2 min-[400px]:px-5 sm:px-8 sm:pb-24 sm:pt-4"
+      className="relative z-10 -mt-8 overflow-x-clip px-4 pb-8 pt-0 min-[400px]:px-5 sm:-mt-12 sm:px-8 sm:pb-12 lg:-mt-14"
       id="services"
     >
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-6xl rounded-[1.75rem] bg-[#F3E6D6] px-4 py-10 min-[400px]:px-5 sm:rounded-[2rem] sm:px-8 sm:py-14 lg:px-10 lg:py-16">
         <div className="relative flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6 lg:gap-8">
           <div className="relative z-10 max-w-[516px] shrink-0">
-            <div className="pr-[7.25rem] min-[400px]:pr-[8.5rem] sm:pr-0">
+            <div>
               <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-black min-[400px]:text-[12px] sm:tracking-[0.43em]">
                 Smart Service categories
               </p>
@@ -45,34 +58,16 @@ export function ServiceCategoriesSection({
               service, cleaning standard and optional add-ons.
             </p>
           </div>
-
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-0.5 top-0 z-0 flex items-start sm:static sm:-mt-8 sm:shrink-0 sm:self-start sm:items-center lg:-mt-10"
-          >
-            <LazyImage
-              alt=""
-              className="h-auto w-[88px] min-[400px]:w-[104px] sm:w-[180px] lg:w-[214px]"
-              height={223}
-              src="/images/marketing/landing/Brush.png"
-              width={214}
-            />
-            <LazyImage
-              alt=""
-              className="h-auto w-[64px] shrink-0 -ml-[34px] -mt-1 min-[400px]:w-[78px] min-[400px]:-ml-[42px] sm:mt-0 sm:w-[134px] sm:-ml-[73px] lg:w-[159px] lg:-ml-[88px]"
-              height={156}
-              src="/images/marketing/landing/Sparkles.png"
-              width={159}
-            />
-          </div>
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[480px]:gap-5 sm:mt-12 sm:gap-6 lg:mt-[72px] lg:mx-auto lg:max-w-[921px] lg:grid-cols-3 lg:gap-6">
           {smartMainCategories.map((value) => (
             <CategoryCard
+              barColor={smartCategoryBarColors[value]}
               bookingHref={bookingHref}
               category={getCategory(value)}
               key={value}
+              label={smartCategoryLabels[value]}
             />
           ))}
         </div>
@@ -82,11 +77,15 @@ export function ServiceCategoriesSection({
 }
 
 function CategoryCard({
+  barColor,
   bookingHref,
   category,
+  label,
 }: {
+  barColor: string;
   bookingHref: string;
   category: ServiceCategoryDefinition;
+  label: string;
 }) {
   const href =
     bookingHref === "/setup"
@@ -99,15 +98,13 @@ function CategoryCard({
             ? "/cleaning/recovery"
             : `${bookingHref}?category=${category.value}`;
 
-  const badge = landingCategoryBadges[category.value] ?? "Explore";
-
   return (
     <Link
       className="group relative mx-auto block aspect-[295/284] w-full max-w-[22rem] overflow-hidden rounded-tl-[24px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)] min-[480px]:max-w-none sm:rounded-tl-[29px] min-[480px]:[&:last-child]:col-span-2 min-[480px]:[&:last-child]:mx-auto min-[480px]:[&:last-child]:max-w-[calc(50%-0.625rem)] lg:[&:last-child]:col-span-1 lg:[&:last-child]:max-w-none"
       href={href}
     >
       <LazyImage
-        alt={category.label}
+        alt={label}
         className="object-cover transition duration-500 group-hover:scale-[1.03]"
         fill
         sizes="(min-width: 1024px) 295px, (min-width: 480px) 45vw, 92vw"
@@ -117,34 +114,12 @@ function CategoryCard({
         }
       />
 
-      <div className="absolute right-0.5 top-0 z-10 flex w-[48px] flex-col items-center min-[400px]:right-1 min-[400px]:w-[58px]">
-        <LazyImage
-          alt=""
-          aria-hidden
-          className="h-[76px] w-[48px] object-contain min-[400px]:h-[92px] min-[400px]:w-[58px]"
-          height={92}
-          src="/images/marketing/landing/badge-ribbon.png"
-          width={58}
-        />
-        <div className="absolute inset-x-0 top-2.5 flex flex-col items-center px-0.5 text-center min-[400px]:top-3 min-[400px]:px-1">
-          <span className="text-[10px] leading-none text-[#c79c66] min-[400px]:text-[11px]">
-            ★
-          </span>
-          <span className="mt-0.5 whitespace-pre-line text-[9px] font-semibold leading-[1.15] text-white min-[400px]:mt-1 min-[400px]:text-[10px]">
-            {badge}
-          </span>
-        </div>
-      </div>
-
       <div
         className="absolute inset-x-0 bottom-0 z-10 flex min-h-0 items-center px-3 py-2 min-[400px]:px-3.5 min-[400px]:py-2.5"
-        style={{
-          backgroundImage:
-            "linear-gradient(118deg, #8b6ad4 0%, #6a45b8 42%, #3f2a7a 100%)",
-        }}
+        style={{ backgroundColor: barColor }}
       >
         <p className="text-[13px] font-bold leading-snug text-white min-[400px]:text-[15px] min-[400px]:leading-tight">
-          {category.label}
+          {label}
         </p>
       </div>
     </Link>

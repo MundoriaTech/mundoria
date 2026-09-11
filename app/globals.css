@@ -188,4 +188,14 @@
       transform: translateY(-4px) rotate(2deg);
     }
   }
+
+  @keyframes category-loop-drift {
+    0% {
+      transform: scale(1.12) translate3d(-1.5%, -1%, 0);
+    }
+
+    100% {
+      transform: scale(1.2) translate3d(1.5%, 1.2%, 0);
+    }
+  }
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
 import {
   LANDING_NAV_PILL_H,
   LANDING_NAV_TOP,
@@ -29,36 +30,25 @@ const HERO_STACK = [
 ] as const;
 
 const CARD_SIZE = "w-[72%]";
-
-/** Frame 106 */
-const HERO_PURPLE = "#4a3578";
 const HERO_BELOW_NAV = "3.75rem";
 
 const CARD_HOLD_MS = 3200;
 const CARD_TRANSITION_MS = 750;
 
-/**
- * Frame 106 stack: front lower-left, middle up-right, back further right
- * and slightly lower than middle (not a straight rising diagonal).
- * Percentages are relative to the card’s own width via translate.
- */
 const CARD_DEPTH_STYLE = [
   {
-    // front — clear
     transform: "translate(0%, 18%)",
     zIndex: 3,
     filter: "blur(0px)",
     opacity: 1,
   },
   {
-    // middle — blurred, up and right
     transform: "translate(14%, 4%)",
     zIndex: 2,
     filter: "blur(8px)",
     opacity: 0.95,
   },
   {
-    // back — more blurred, further right, a touch lower than middle
     transform: "translate(28%, 10%)",
     zIndex: 1,
     filter: "blur(12px)",
@@ -66,6 +56,29 @@ const CARD_DEPTH_STYLE = [
   },
 ] as const;
 
+/** Mobile: whole 3-card cluster centered as one unit (desktop styles unchanged). */
+const CARD_DEPTH_STYLE_MOBILE = [
+  {
+    transform: "translate(-50%, 18%)",
+    zIndex: 3,
+    filter: "blur(0px)",
+    opacity: 1,
+  },
+  {
+    transform: "translate(calc(-50% + 12%), 4%)",
+    zIndex: 2,
+    filter: "blur(8px)",
+    opacity: 0.95,
+  },
+  {
+    transform: "translate(calc(-50% + 24%), 10%)",
+    zIndex: 1,
+    filter: "blur(12px)",
+    opacity: 0.9,
+  },
+] as const;
+
+/** Hero copy + cards; purple fill + texture that softens into the flat band below. */
 export function HeroSection({ bookingHref }: { bookingHref: string }) {
   const navBlock = `calc(${LANDING_NAV_TOP} + ${LANDING_NAV_PILL_H})`;
 
@@ -73,14 +86,15 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
     <section
       className="relative isolate overflow-x-clip"
       style={{
+        backgroundColor: LANDING_PURPLE,
         marginTop: `calc(-1 * ${navBlock})`,
         paddingTop: `calc(${navBlock} + ${HERO_BELOW_NAV})`,
-        backgroundImage: `linear-gradient(180deg, ${HERO_PURPLE} 0%, ${HERO_PURPLE} 86%, #efebf9 86%, #efebf9 100%)`,
       }}
     >
+      {/* Textured layer — full hero */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 bottom-[14%] overflow-hidden"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
       >
         <Image
           alt=""
@@ -91,9 +105,16 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
           src="/images/marketing/landing/hero-purple-texture.png"
         />
       </div>
-
-      <div className="relative mx-auto grid w-full max-w-[1320px] items-center gap-12 px-4 pb-28 sm:gap-14 sm:px-6 sm:pb-32 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-8 lg:px-8 lg:pb-40 lg:pt-2 xl:gap-6 xl:px-10 xl:pb-44">
-        <div className="relative z-10 max-w-xl text-left lg:max-w-[34rem] lg:justify-self-start lg:pb-8 lg:pl-0 xl:-ml-2">
+      {/* Solid purple wash so texture fades out at the bottom into the next section */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] z-[1]"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, transparent 0%, ${LANDING_PURPLE} 100%)`,
+        }}
+      />
+      <div className="relative z-10 mx-auto grid w-full max-w-[1320px] items-center gap-8 px-4 pb-16 sm:gap-10 sm:px-6 sm:pb-20 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-8 lg:px-8 lg:pb-40 lg:pt-2 xl:gap-6 xl:px-10 xl:pb-44">
+        <div className="relative z-10 mx-auto flex w-full max-w-xl flex-col items-center text-center lg:mx-0 lg:max-w-[34rem] lg:items-start lg:justify-self-start lg:pb-8 lg:pl-0 lg:text-left xl:-ml-2">
           <h1 className="text-balance text-[2.05rem] font-bold leading-[1.1] tracking-[-0.04em] text-white min-[400px]:text-[2.4rem] sm:text-[2.85rem] lg:text-[clamp(2.65rem,3.5vw,3.4rem)]">
             Book Trusted Home
             <br />
@@ -104,14 +125,14 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             the services you provide.
           </p>
           <Link
-            className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-[#ff5274] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#ff3d63] active:scale-[0.98] sm:mt-10 sm:min-h-[3.25rem] sm:px-9"
+            className="mt-8 inline-flex min-h-12 w-full max-w-[18.5rem] items-center justify-center rounded-full bg-[#ff5274] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#ff3d63] active:scale-[0.98] sm:mt-10 sm:min-h-[3.25rem] sm:w-auto sm:max-w-none sm:px-9"
             href={bookingHref}
           >
             Book a Service
           </Link>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[520px] lg:mx-0 lg:mb-2 lg:ml-auto lg:max-w-none lg:justify-self-end xl:max-w-[620px]">
+        <div className="relative mx-auto w-full max-w-[400px] lg:mx-0 lg:mb-2 lg:ml-auto lg:max-w-none lg:justify-self-end xl:max-w-[620px]">
           <HeroImageStack />
         </div>
       </div>
@@ -122,13 +143,23 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
 function HeroImageStack() {
   const [front, setFront] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduceMotion(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotion = () => setReduceMotion(motion.matches);
+    syncMotion();
+    motion.addEventListener("change", syncMotion);
+
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const syncViewport = () => setIsMobile(!desktop.matches);
+    syncViewport();
+    desktop.addEventListener("change", syncViewport);
+
+    return () => {
+      motion.removeEventListener("change", syncMotion);
+      desktop.removeEventListener("change", syncViewport);
+    };
   }, []);
 
   useEffect(() => {
@@ -139,19 +170,23 @@ function HeroImageStack() {
     return () => window.clearInterval(id);
   }, [reduceMotion]);
 
+  const depthStyles = isMobile ? CARD_DEPTH_STYLE_MOBILE : CARD_DEPTH_STYLE;
+
   return (
     <div
       aria-live="polite"
-      className="relative mx-auto aspect-[860/780] w-full max-w-[480px] translate-x-6 sm:max-w-[540px] sm:translate-x-10 lg:ml-auto lg:mr-0 lg:max-w-[580px] lg:translate-x-16 xl:translate-x-24"
+      className="relative mx-auto aspect-[860/780] w-full max-w-[320px] translate-x-0 min-[400px]:max-w-[360px] sm:max-w-[420px] lg:ml-auto lg:mr-0 lg:max-w-[580px] lg:translate-x-16 xl:translate-x-24"
     >
       {HERO_STACK.map((card, index) => {
         const depth = (index - front + HERO_STACK.length) % HERO_STACK.length;
-        const style = CARD_DEPTH_STYLE[depth];
+        const style = depthStyles[depth];
         const isFront = depth === 0;
 
         return (
           <div
-            className={`absolute left-0 top-0 aspect-square ${CARD_SIZE}`}
+            className={`absolute top-0 aspect-square ${CARD_SIZE} ${
+              isMobile ? "left-1/2" : "left-0"
+            }`}
             key={card.src}
             style={{
               transform: style.transform,

@@ -48,7 +48,7 @@ export function LandingNavbar({
       style={{ paddingTop: LANDING_NAV_TOP }}
     >
       <div
-        className="pointer-events-auto relative mx-auto flex w-full max-w-[1040px] items-center justify-between gap-5 sm:gap-6"
+        className="pointer-events-auto relative mx-auto flex w-full max-w-[1040px] items-center justify-between gap-5 shadow-[0_12px_40px_rgba(28,19,59,0.18)] sm:gap-6"
         style={{
           backgroundColor: "#e8e0f9",
           borderRadius: LANDING_NAV_PILL_RADIUS,

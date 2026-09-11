@@ -90,7 +90,7 @@ function ReviewCard({
 
   return (
     <article
-      className={`relative flex min-h-[248px] w-full flex-col overflow-hidden rounded-[8px] md:min-h-[262px] ${slot.offsetClass}`}
+      className={`relative flex min-h-[248px] w-full flex-col overflow-hidden rounded-[8px] shadow-[0_12px_32px_rgba(28,19,59,0.12)] md:min-h-[262px] md:shadow-[0_14px_36px_rgba(28,19,59,0.14)] ${slot.offsetClass}`}
       style={{ backgroundColor: REVIEW_CARD_BG }}
     >
       <div className="flex flex-1 flex-col px-6 pb-5 pt-7">

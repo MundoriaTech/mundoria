@@ -65,9 +65,29 @@ export const landingServicesMenu = {
 export const landingCategoryImages: Record<string, string> = {
   commercial: "/images/marketing/landing/category-commercial.png",
   moving_home: "/images/marketing/landing/category-moving-home.png",
-  recovery: "/images/marketing/landing/category-recovery.png",
+  recovery:
+    "/images/marketing/landing/young-woman-rubber-gloves-holding-cleaning-spray-rag-cleaning-table-looking-confident-light-living-room 1.png",
   residential: "/images/marketing/landing/category-residential.png",
   short_term_rental: "/images/marketing/landing/category-str.png",
+};
+
+/** Colour-coded cleaning scene loops for Smart Service cards. */
+export const landingCategoryLoops: Record<
+  string,
+  { poster: string; video?: string }
+> = {
+  commercial: {
+    poster: "/images/marketing/landing/category-loop-commercial-poster.jpg",
+    video: "/images/marketing/landing/category-loop-commercial.mp4",
+  },
+  recovery: {
+    poster: "/images/marketing/landing/category-loop-recovery-poster.jpg",
+    video: "/images/marketing/landing/category-loop-recovery.mp4",
+  },
+  residential: {
+    poster: "/images/marketing/landing/category-loop-residential-poster.jpg",
+    video: "/images/marketing/landing/category-loop-residential.mp4",
+  },
 };
 
 export const landingCategoryBadges: Record<string, string> = {

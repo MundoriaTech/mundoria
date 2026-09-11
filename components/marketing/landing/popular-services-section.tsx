@@ -287,10 +287,10 @@ export function PopularServicesSection({
   return (
     <ScrollReveal
       as="section"
-      className="overflow-x-clip bg-[#f7f7f7] px-4 py-14 sm:px-8 sm:py-20"
+      className="overflow-x-clip px-4 py-14 sm:px-8 sm:py-20"
     >
       <div className="mx-auto max-w-6xl">
-        <h2 className="text-balance text-[1.75rem] font-bold tracking-[-0.03em] text-[#414141] sm:text-[36px]">
+        <h2 className="text-balance text-[1.75rem] font-bold tracking-[-0.03em] text-white sm:text-[36px]">
           Popular Cleaning Services
         </h2>
 

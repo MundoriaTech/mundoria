@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import nextDynamic from "next/dynamic";
 
 import { HeroSection } from "@/components/marketing/landing/hero-section";
+import { LandingPurpleField } from "@/components/marketing/landing/landing-purple-field";
 import { ServiceCategoriesSection } from "@/components/marketing/landing/service-categories-section";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -63,9 +64,11 @@ export default async function HomePage() {
   return (
     <MarketingShell>
       <JsonLd data={homePageStructuredData()} />
-      <HeroSection bookingHref={bookingHref} />
-      <ServiceCategoriesSection bookingHref={bookingHref} />
-      <PopularServicesSection bookingBaseHref={bookingHref} />
+      <LandingPurpleField>
+        <HeroSection bookingHref={bookingHref} />
+        <ServiceCategoriesSection bookingHref={bookingHref} />
+        <PopularServicesSection bookingBaseHref={bookingHref} />
+      </LandingPurpleField>
       <HowItWorksSection />
       <ReviewsSection />
       <AboutSection cleanerHref={cleanerHref} customerHref={customerHref} />
