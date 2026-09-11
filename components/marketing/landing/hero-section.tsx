@@ -125,7 +125,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             the services you provide.
           </p>
           <Link
-            className="mt-8 inline-flex min-h-12 w-full max-w-[18.5rem] items-center justify-center rounded-full bg-[#ff5274] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#ff3d63] active:scale-[0.98] sm:mt-10 sm:min-h-[3.25rem] sm:w-auto sm:max-w-none sm:px-9"
+            className="mt-8 inline-flex min-h-12 w-auto items-center justify-center rounded-full bg-[#ff5274] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#ff3d63] active:scale-[0.98] sm:mt-10 sm:min-h-[3.25rem] sm:px-9"
             href={bookingHref}
           >
             Book a Service

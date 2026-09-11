@@ -365,7 +365,7 @@ export function PopularServicesSection({
           <div className="mt-5 flex justify-end gap-2">
             <button
               aria-label="Previous popular services"
-              className="flex size-[31px] items-center justify-center rounded-full bg-[#45347e] text-white transition hover:bg-[#312c79]"
+              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
               onClick={() => scrollByCard("left")}
               type="button"
             >
@@ -373,7 +373,7 @@ export function PopularServicesSection({
             </button>
             <button
               aria-label="Next popular services"
-              className="flex size-[31px] items-center justify-center rounded-full bg-[#45347e] text-white transition hover:bg-[#312c79]"
+              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
               onClick={() => scrollByCard("right")}
               type="button"
             >

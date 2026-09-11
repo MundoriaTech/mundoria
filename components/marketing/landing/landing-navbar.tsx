@@ -27,6 +27,9 @@ export const LANDING_NAV_TOP =
 export const LANDING_NAV_PILL_H = "4.75rem"; /* ~76px — room for inner pad + CTA pills */
 export const LANDING_NAV_PILL_RADIUS = "1.125rem"; /* 18px */
 
+const NAV_SCROLL_AT = 48;
+const NAV_DESKTOP_MQ = "(min-width: 1024px)";
+
 const NAV_LINK_CLASS =
   "whitespace-nowrap text-[12px] font-medium text-[#1c133b] transition hover:text-[#312c79] xl:text-[13px]";
 
@@ -41,14 +44,57 @@ export function LandingNavbar({
   const loginHref = configured ? "/login" : "/setup";
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
   const firstName = viewer?.full_name.trim().split(/\s+/)[0] ?? "";
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const desktopMq = window.matchMedia(NAV_DESKTOP_MQ);
+    lastScrollY.current = window.scrollY;
+
+    const update = () => {
+      const y = window.scrollY;
+      const isDesktop = desktopMq.matches;
+
+      if (!isDesktop) {
+        setHidden(false);
+        lastScrollY.current = y;
+        return;
+      }
+
+      const delta = y - lastScrollY.current;
+      if (y < NAV_SCROLL_AT) {
+        setHidden(false);
+      } else if (delta > 6) {
+        setHidden(true);
+      } else if (delta < -6) {
+        setHidden(false);
+      }
+      lastScrollY.current = y;
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    desktopMq.addEventListener("change", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      desktopMq.removeEventListener("change", update);
+    };
+  }, []);
 
   return (
     <header
-      className="pointer-events-none sticky top-0 z-50 bg-transparent px-5 sm:px-8 lg:px-14 xl:px-20"
+      className={cn(
+        "pointer-events-none sticky top-0 z-50 bg-transparent px-5 sm:px-8 lg:px-14 xl:px-20",
+        "transition-transform duration-300 ease-out motion-reduce:transition-none",
+        hidden && "-translate-y-[calc(100%+0.75rem)]",
+      )}
       style={{ paddingTop: LANDING_NAV_TOP }}
     >
       <div
-        className="pointer-events-auto relative mx-auto flex w-full max-w-[1040px] items-center justify-between gap-5 shadow-[0_12px_40px_rgba(28,19,59,0.18)] sm:gap-6"
+        className={cn(
+          "pointer-events-auto relative mx-auto flex w-full max-w-[1040px] -translate-y-0.5 items-center justify-between gap-5 shadow-[0_18px_48px_rgba(28,19,59,0.28)] sm:gap-6",
+          hidden && "pointer-events-none",
+        )}
         style={{
           backgroundColor: "#e8e0f9",
           borderRadius: LANDING_NAV_PILL_RADIUS,
