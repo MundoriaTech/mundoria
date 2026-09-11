@@ -63,8 +63,12 @@ export const bookingDraftSchema = z.object({
     .nullable()
     .default(null),
   recurrencePattern: z
-    .enum(["weekly", "fortnightly", "monthly"])
+    .enum(["weekly", "fortnightly", "monthly", "custom"])
     .nullable(),
+  customRecurrenceDates: z
+    .array(z.string().date())
+    .max(24)
+    .default([]),
   recommendationOutcome: z
     .enum(["not_shown", "accepted", "overridden", "auto_applied"])
     .default("not_shown"),

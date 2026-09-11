@@ -26,7 +26,7 @@ export function ServiceCategoriesSection({
 }) {
   return (
     <section
-      className="overflow-x-clip bg-[#f4ebfe] px-4 pb-14 pt-6 min-[400px]:px-5 sm:px-8 sm:pb-24 sm:pt-8"
+      className="overflow-x-clip bg-[linear-gradient(180deg,#efebf9_0%,#decff0_100%)] px-4 pb-14 pt-2 min-[400px]:px-5 sm:px-8 sm:pb-24 sm:pt-4"
       id="services"
     >
       <div className="mx-auto max-w-6xl">

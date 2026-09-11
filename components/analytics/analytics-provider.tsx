@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { CookieSettingsWidget } from "@/components/analytics/cookie-settings-button";
 import {
   createConsentPreferences,
   readConsent,
@@ -18,6 +17,12 @@ import {
   updateConsentMode,
 } from "@/lib/analytics/gtm";
 
+/**
+ * WeCasa-style consent:
+ * 1) Banner — Accept all / Reject optional / Cookie preferences
+ * 2) Preferences — Necessary (locked) + optional toggles
+ * Re-open via footer “Manage cookies” (no floating widget).
+ */
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [bannerOpen, setBannerOpen] = useState(false);
@@ -29,12 +34,14 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     applyDefaultConsent();
     const existing = readConsent();
     setPreferences(existing);
-    setBannerOpen(!existing && analyticsConfigured());
+    // First visit (or reopen from footer) — show even before tags are configured
+    // so consent UX matches WeCasa; tags only load when analytics is allowed.
+    setBannerOpen(!existing);
     setReady(true);
 
     if (existing) {
       updateConsentMode(existing);
-      if (existing.analytics) {
+      if (existing.analytics && analyticsConfigured()) {
         loadAnalyticsTags(existing);
       }
     }
@@ -65,7 +72,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     writeConsent(next);
     setPreferences(next);
     updateConsentMode(next);
-    if (next.analytics) {
+    if (next.analytics && analyticsConfigured()) {
       loadAnalyticsTags(next);
     }
     setBannerOpen(false);
@@ -77,7 +84,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       {ready && bannerOpen ? (
         <CookieConsentBanner
           current={preferences}
-          onAllowAll={() =>
+          onAcceptAll={() =>
             save(
               createConsentPreferences({
                 preferences: true,
@@ -86,7 +93,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
               }),
             )
           }
-          onDeny={() =>
+          onRejectOptional={() =>
             save(
               createConsentPreferences({
                 preferences: false,
@@ -95,13 +102,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
               }),
             )
           }
-          onAllowSelection={(prefs) => save(createConsentPreferences(prefs))}
-        />
-      ) : null}
-      {ready && !bannerOpen && analyticsConfigured() ? (
-        <CookieSettingsWidget
-          onClick={() => setBannerOpen(true)}
-          variant="floating"
+          onSaveSelection={(prefs) => save(createConsentPreferences(prefs))}
         />
       ) : null}
     </>
@@ -110,18 +111,21 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
 function CookieConsentBanner({
   current,
-  onAllowAll,
-  onDeny,
-  onAllowSelection,
+  onAcceptAll,
+  onRejectOptional,
+  onSaveSelection,
 }: {
   current: ConsentPreferences | null;
-  onAllowAll: () => void;
-  onDeny: () => void;
-  onAllowSelection: (
+  onAcceptAll: () => void;
+  onRejectOptional: () => void;
+  onSaveSelection: (
     prefs: Pick<ConsentPreferences, "preferences" | "analytics" | "marketing">,
   ) => void;
 }) {
-  const [showDetails, setShowDetails] = useState(Boolean(current));
+  // Returning visitors who open “Manage cookies” go straight to preferences.
+  const [layer, setLayer] = useState<"banner" | "preferences">(
+    current ? "preferences" : "banner",
+  );
   const [prefsEnabled, setPrefsEnabled] = useState(
     current?.preferences ?? false,
   );
@@ -146,177 +150,199 @@ function CookieConsentBanner({
     >
       <div className="flex max-h-[min(92dvh,40rem)] w-full max-w-3xl flex-col overflow-hidden rounded-t-[1.25rem] border border-border bg-card shadow-2xl shadow-foreground/10 sm:rounded-[1.25rem]">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-5 sm:px-6 sm:pt-6">
-          <h2
-            className="text-lg font-black tracking-[-0.03em] text-foreground"
-            id="cleanscape-cookie-title"
-          >
-            This website uses cookies
-          </h2>
-          <div
-            className="mt-2 space-y-3 text-sm font-medium leading-6 text-muted-foreground"
-            id="cleanscape-cookie-copy"
-          >
-            <p>
-              Of course, like you, we prefer real cookies. Those cookies allow
-              us to personalise content and to analyse our traffic. We also
-              share information about your use of our site with our partners
-              (social media, ad personalisation and analytics).{" "}
-              <Link
-                className="font-bold text-primary underline-offset-2 hover:underline"
-                href="/cookies"
+          {layer === "banner" ? (
+            <>
+              <h2
+                className="text-lg font-black tracking-[-0.03em] text-foreground"
+                id="cleanscape-cookie-title"
               >
-                Cookie management policy
-              </Link>
-              .
-            </p>
-            <p>
-              Cookies are small text files that can be used by websites to make
-              a user&apos;s experience more efficient. The law states that we
-              can store cookies on your device if they are strictly necessary
-              for the operation of this site. For all other types of cookies we
-              need your permission.
-            </p>
-            <p>
-              This site uses different types of cookies. Some cookies are placed
-              by third party services that appear on our pages. You can at any
-              time change or withdraw your consent from the{" "}
-              <Link
-                className="font-bold text-primary underline-offset-2 hover:underline"
-                href="/cookies"
+                This website uses cookies
+              </h2>
+              <div
+                className="mt-2 space-y-3 text-sm font-medium leading-6 text-muted-foreground"
+                id="cleanscape-cookie-copy"
               >
-                cookie policy
-              </Link>{" "}
-              on our website.
-            </p>
-            <p>
-              Learn more about who we are, how you can contact us and how we
-              process personal data in our{" "}
-              <Link
-                className="font-bold text-primary underline-offset-2 hover:underline"
-                href="/privacy"
+                <p>
+                  CleanScape and our selected partners use cookies and similar
+                  technologies that are necessary to present this website and to
+                  give you the best experience. If you consent, we will also use
+                  cookies for statistics and marketing.
+                </p>
+                <p>
+                  Read our{" "}
+                  <Link
+                    className="font-bold text-primary underline-offset-2 hover:underline"
+                    href="/cookies"
+                  >
+                    cookie management policy
+                  </Link>{" "}
+                  to learn more about the cookies we use.
+                </p>
+                <p>
+                  You can withdraw or change your consent at any time by
+                  clicking <span className="font-semibold text-foreground">Manage cookies</span>{" "}
+                  at the bottom of each page.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2
+                className="text-lg font-black tracking-[-0.03em] text-foreground"
+                id="cleanscape-cookie-title"
               >
-                Privacy Policy
-              </Link>
-              .
-            </p>
-          </div>
+                Select the cookies you accept
+              </h2>
+              <div
+                className="mt-2 space-y-3 text-sm font-medium leading-6 text-muted-foreground"
+                id="cleanscape-cookie-copy"
+              >
+                <p>
+                  On this site we always use cookies that are essential for the
+                  site to work. If you consent, we will also use other types of
+                  cookies. You can give or withdraw consent below, and change it
+                  anytime via <span className="font-semibold text-foreground">Manage cookies</span>{" "}
+                  in the footer.
+                </p>
+                <p>
+                  Learn more in our{" "}
+                  <Link
+                    className="font-bold text-primary underline-offset-2 hover:underline"
+                    href="/cookies"
+                  >
+                    cookie management policy
+                  </Link>
+                  .
+                </p>
+              </div>
 
-          {showDetails ? (
-            <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-sm">
-              <label className="flex items-start gap-3">
-                <input
-                  checked
-                  className="mt-1"
-                  disabled
-                  readOnly
-                  type="checkbox"
-                />
-                <span>
-                  <span className="font-bold text-foreground">Necessary</span>
-                  <span className="mt-1 block text-muted-foreground">
-                    Necessary cookies help make a website usable by enabling
-                    basic functions like page navigation and access to secure
-                    areas of the website. The website cannot function properly
-                    without these cookies.
+              <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-sm">
+                <label className="flex items-start gap-3">
+                  <input
+                    checked
+                    className="mt-1"
+                    disabled
+                    readOnly
+                    type="checkbox"
+                  />
+                  <span>
+                    <span className="font-bold text-foreground">Necessary</span>
+                    <span className="mt-1 block text-muted-foreground">
+                      Essential for the site to work (security, login, booking).
+                      Always on.
+                    </span>
                   </span>
-                </span>
-              </label>
-              <label className="flex items-start gap-3">
-                <input
-                  checked={prefsEnabled}
-                  className="mt-1"
-                  onChange={(event) => setPrefsEnabled(event.target.checked)}
-                  type="checkbox"
-                />
-                <span>
-                  <span className="font-bold text-foreground">Preferences</span>
-                  <span className="mt-1 block text-muted-foreground">
-                    Preference cookies enable a website to remember information
-                    that changes the way the website behaves or looks, like your
-                    preferred language or the region that you are in.
+                </label>
+                <label className="flex items-start gap-3">
+                  <input
+                    checked={prefsEnabled}
+                    className="mt-1"
+                    onChange={(event) => setPrefsEnabled(event.target.checked)}
+                    type="checkbox"
+                  />
+                  <span>
+                    <span className="font-bold text-foreground">Preferences</span>
+                    <span className="mt-1 block text-muted-foreground">
+                      Remember choices that change how the site looks or behaves
+                      (for example theme).
+                    </span>
                   </span>
-                </span>
-              </label>
-              <label className="flex items-start gap-3">
-                <input
-                  checked={statistics}
-                  className="mt-1"
-                  onChange={(event) => setStatistics(event.target.checked)}
-                  type="checkbox"
-                />
-                <span>
-                  <span className="font-bold text-foreground">Statistics</span>
-                  <span className="mt-1 block text-muted-foreground">
-                    Statistic cookies help website owners to understand how
-                    visitors interact with websites by collecting and reporting
-                    information anonymously.
+                </label>
+                <label className="flex items-start gap-3">
+                  <input
+                    checked={statistics}
+                    className="mt-1"
+                    onChange={(event) => setStatistics(event.target.checked)}
+                    type="checkbox"
+                  />
+                  <span>
+                    <span className="font-bold text-foreground">Statistics</span>
+                    <span className="mt-1 block text-muted-foreground">
+                      Help us understand how visitors use the site (analytics).
+                    </span>
                   </span>
-                </span>
-              </label>
-              <label className="flex items-start gap-3">
-                <input
-                  checked={marketing}
-                  className="mt-1"
-                  onChange={(event) => setMarketing(event.target.checked)}
-                  type="checkbox"
-                />
-                <span>
-                  <span className="font-bold text-foreground">Marketing</span>
-                  <span className="mt-1 block text-muted-foreground">
-                    Marketing cookies are used to track visitors across
-                    websites. The intention is to display ads that are relevant
-                    and engaging for the individual user and thereby more
-                    valuable for publishers and third party advertisers.
+                </label>
+                <label className="flex items-start gap-3">
+                  <input
+                    checked={marketing}
+                    className="mt-1"
+                    onChange={(event) => setMarketing(event.target.checked)}
+                    type="checkbox"
+                  />
+                  <span>
+                    <span className="font-bold text-foreground">Marketing</span>
+                    <span className="mt-1 block text-muted-foreground">
+                      Used to show more relevant ads and measure campaigns.
+                    </span>
                   </span>
-                </span>
-              </label>
-            </div>
-          ) : null}
+                </label>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="shrink-0 border-t border-border bg-card px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <Button
-              className="h-11 w-full rounded-full bg-foreground px-5 font-black text-background hover:bg-foreground/90 sm:w-auto"
-              onClick={onAllowAll}
-              type="button"
-            >
-              Allow all
-            </Button>
-            <Button
-              className="h-11 w-full rounded-full px-5 font-black sm:w-auto"
-              onClick={onDeny}
-              type="button"
-              variant="outline"
-            >
-              Deny
-            </Button>
-            {showDetails ? (
+          {layer === "banner" ? (
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <Button
+                className="h-11 w-full rounded-full bg-foreground px-5 font-black text-background hover:bg-foreground/90 sm:w-auto"
+                onClick={onAcceptAll}
+                type="button"
+              >
+                Accept all cookies
+              </Button>
               <Button
                 className="h-11 w-full rounded-full px-5 font-black sm:w-auto"
+                onClick={onRejectOptional}
+                type="button"
+                variant="outline"
+              >
+                Reject optional cookies
+              </Button>
+              <Button
+                className="h-11 w-full rounded-full px-5 font-black sm:w-auto"
+                onClick={() => setLayer("preferences")}
+                type="button"
+                variant="ghost"
+              >
+                Cookie preferences
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <Button
+                className="h-11 w-full rounded-full bg-foreground px-5 font-black text-background hover:bg-foreground/90 sm:w-auto"
                 onClick={() =>
-                  onAllowSelection({
+                  onSaveSelection({
                     preferences: prefsEnabled,
                     analytics: statistics,
                     marketing,
                   })
                 }
                 type="button"
-                variant="secondary"
               >
-                Allow selection
+                Accept these cookies
               </Button>
-            ) : (
               <Button
                 className="h-11 w-full rounded-full px-5 font-black sm:w-auto"
-                onClick={() => setShowDetails(true)}
+                onClick={onRejectOptional}
                 type="button"
-                variant="ghost"
+                variant="outline"
               >
-                Customise
+                Reject optional cookies
               </Button>
-            )}
-          </div>
+              {!current ? (
+                <Button
+                  className="h-11 w-full rounded-full px-5 font-black sm:w-auto"
+                  onClick={() => setLayer("banner")}
+                  type="button"
+                  variant="ghost"
+                >
+                  Back
+                </Button>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
     </div>

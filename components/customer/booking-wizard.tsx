@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   Check,
   ChevronDown,
-  ChevronUp,
   Clock3,
   CreditCard,
   MapPin,
@@ -71,9 +70,13 @@ const blankDraft: BookingDraft = {
   addressId: null,
   alternateTimes: [],
   cleaningStandard: null,
+  customRecurrenceDates: [],
   estimatedDurationHours: null,
   guestAddress: null,
   isRecurring: false,
+  numBathrooms: null,
+  numBedrooms: null,
+  otherRoomTypes: [],
   preferSameCleaner: false,
   propertyCondition: null,
   promoCode: "",
@@ -170,6 +173,14 @@ export function BookingWizard({
           updated_at: "",
         }
       : null;
+  const roomsAddress: Address | null = selectedAddress
+    ? {
+        ...selectedAddress,
+        num_bathrooms: draft.numBathrooms ?? selectedAddress.num_bathrooms,
+        num_bedrooms: draft.numBedrooms ?? selectedAddress.num_bedrooms,
+        num_other_rooms: draft.otherRoomTypes.length,
+      }
+    : null;
   const selectedStandard = draft.serviceType
     ? normalizeStandard(draft.serviceType, draft.cleaningStandard)
     : null;
@@ -177,10 +188,10 @@ export function BookingWizard({
     ? SERVICES.find((item) => item.value === draft.serviceType)
     : null;
   const estimatedAmount =
-    draft.serviceType && selectedAddress && selectedStandard
+    draft.serviceType && roomsAddress && selectedStandard
       ? estimatePrice(
           draft.serviceType,
-          selectedAddress,
+          roomsAddress,
           selectedStandard,
           draft.selectedAddOns,
           {
@@ -196,9 +207,9 @@ export function BookingWizard({
     serviceType: draft.serviceType,
   });
   const duration = durationSummary({
-    bathrooms: selectedAddress?.num_bathrooms,
-    bedrooms: selectedAddress?.num_bedrooms,
-    otherRooms: selectedAddress?.num_other_rooms,
+    bathrooms: draft.numBathrooms ?? roomsAddress?.num_bathrooms,
+    bedrooms: draft.numBedrooms ?? roomsAddress?.num_bedrooms,
+    otherRooms: draft.otherRoomTypes.length,
     cleaningStandard: selectedStandard,
     selectedAddOns: draft.selectedAddOns,
     serviceType: draft.serviceType,
@@ -240,15 +251,25 @@ export function BookingWizard({
               initialDraft?.estimatedDurationHours ??
               null)
             : (initialDraft?.estimatedDurationHours ?? null),
+          numBedrooms: sameService
+            ? (parsed?.numBedrooms ?? initialDraft?.numBedrooms ?? null)
+            : (initialDraft?.numBedrooms ?? null),
+          numBathrooms: sameService
+            ? (parsed?.numBathrooms ?? initialDraft?.numBathrooms ?? null)
+            : (initialDraft?.numBathrooms ?? null),
+          otherRoomTypes: sameService
+            ? (parsed?.otherRoomTypes ?? [])
+            : [],
+          customRecurrenceDates: sameService
+            ? (parsed?.customRecurrenceDates ?? [])
+            : [],
           isRecurring: sameService
             ? Boolean(parsed?.isRecurring)
             : Boolean(initialDraft?.isRecurring),
           recurrencePattern: sameService
             ? (parsed?.recurrencePattern ?? null)
             : (initialDraft?.recurrencePattern ?? null),
-          preferSameCleaner: sameService
-            ? Boolean(parsed?.preferSameCleaner)
-            : Boolean(initialDraft?.preferSameCleaner),
+          preferSameCleaner: false,
           guestAddress: parsed?.guestAddress ?? null,
           addressId: parsed?.addressId ?? null,
         });
@@ -370,6 +391,34 @@ export function BookingWizard({
   }
 
   function goNext() {
+    if (stepId === "rooms") {
+      setDraft((current) => {
+        if (!current.guestAddress) return current;
+        return {
+          ...current,
+          guestAddress: {
+            ...current.guestAddress,
+            num_bathrooms: current.numBathrooms ?? current.guestAddress.num_bathrooms,
+            num_bedrooms: current.numBedrooms ?? current.guestAddress.num_bedrooms,
+            num_other_rooms: current.otherRoomTypes.length,
+          },
+        };
+      });
+    }
+    if (stepId === "frequency") {
+      setDraft((current) => {
+        if (
+          current.recurrencePattern === "custom" &&
+          current.customRecurrenceDates[0]
+        ) {
+          return {
+            ...current,
+            scheduledDate: current.customRecurrenceDates[0],
+          };
+        }
+        return current;
+      });
+    }
     if (stepId === "standard") {
       continueFromStandard();
       return;
@@ -416,11 +465,12 @@ export function BookingWizard({
       ...current,
       cleaningStandard: normalizeStandard(serviceType, standard),
       isRecurring: mode === "required_recurring",
-      preferSameCleaner: mode === "required_recurring",
+      preferSameCleaner: false,
       recommendationOutcome: "not_shown",
       recommendedCleaningStandard: null,
       recommendedServiceType: null,
       recurrencePattern: mode === "required_recurring" ? "weekly" : null,
+      customRecurrenceDates: [],
       scheduledDate:
         serviceType === "same_day" ? today : current.scheduledDate,
       selectedAddOns: [],
@@ -489,16 +539,24 @@ export function BookingWizard({
         return Boolean(draft.serviceType);
       case "address":
         return Boolean(draft.addressId || guestAddressComplete(draft.guestAddress));
+      case "rooms":
+        return draft.numBedrooms != null && draft.numBathrooms != null;
       case "standard":
         return Boolean(draft.cleaningStandard);
       case "frequency": {
         const mode = frequencyModeFor(draft.serviceType);
         if (mode === "required_recurring") {
+          if (draft.recurrencePattern === "custom") {
+            return draft.customRecurrenceDates.length >= 2;
+          }
           return Boolean(draft.isRecurring && draft.recurrencePattern);
         }
         if (mode === "optional") {
-          if (draft.isRecurring) return Boolean(draft.recurrencePattern);
-          return true;
+          if (!draft.isRecurring) return true;
+          if (draft.recurrencePattern === "custom") {
+            return draft.customRecurrenceDates.length >= 2;
+          }
+          return Boolean(draft.recurrencePattern);
         }
         return true;
       }
@@ -556,7 +614,7 @@ export function BookingWizard({
 
   return (
     <div className="mx-auto max-w-[720px] pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-8">
-      <section className="overflow-hidden rounded-[28px] bg-[#f3ebff] shadow-[0_18px_50px_rgba(49,44,121,0.12)]">
+      <section className="overflow-visible rounded-[28px] bg-[#f3ebff] shadow-[0_18px_50px_rgba(49,44,121,0.12)]">
         <header className="relative overflow-hidden px-5 pb-4 pt-6 sm:px-8 sm:pt-8">
           <div className="relative z-10 max-w-[58%] sm:max-w-[24rem]">
             <h1 className="text-[1.85rem] font-bold leading-[1.05] tracking-[-0.03em] text-[#c43d9a] sm:text-[2.35rem]">
@@ -640,6 +698,15 @@ export function BookingWizard({
               select={(id) => {
                 update("addressId", id);
                 update("guestAddress", null);
+                const chosen = addresses.find((item) => item.id === id);
+                if (chosen) {
+                  if (draft.numBedrooms == null) {
+                    update("numBedrooms", chosen.num_bedrooms ?? 1);
+                  }
+                  if (draft.numBathrooms == null) {
+                    update("numBathrooms", chosen.num_bathrooms ?? 1);
+                  }
+                }
               }}
               setShowForm={setShowAddressForm}
               showForm={
@@ -657,9 +724,9 @@ export function BookingWizard({
                     label: address.label,
                     latitude: address.latitude,
                     longitude: address.longitude,
-                    num_bathrooms: address.num_bathrooms ?? 1,
-                    num_bedrooms: address.num_bedrooms ?? 1,
-                    num_other_rooms: address.num_other_rooms ?? 0,
+                    num_bathrooms: draft.numBathrooms ?? address.num_bathrooms ?? 1,
+                    num_bedrooms: draft.numBedrooms ?? address.num_bedrooms ?? 1,
+                    num_other_rooms: draft.otherRoomTypes.length,
                     postcode: address.postcode,
                     property_type: address.property_type ?? "flat",
                     special_requirements: address.special_requirements,
@@ -673,6 +740,16 @@ export function BookingWizard({
                 update("guestAddress", null);
                 setShowAddressForm(false);
               }}
+            />
+          ) : null}
+          {stepId === "rooms" ? (
+            <RoomsStep
+              bathrooms={draft.numBathrooms}
+              bedrooms={draft.numBedrooms}
+              otherRoomTypes={draft.otherRoomTypes}
+              onBathrooms={(value) => update("numBathrooms", value)}
+              onBedrooms={(value) => update("numBedrooms", value)}
+              onOtherRooms={(value) => update("otherRoomTypes", value)}
             />
           ) : null}
           {stepId === "standard" && draft.serviceType ? (
@@ -713,7 +790,7 @@ export function BookingWizard({
           ) : null}
           {stepId === "checkout" &&
           draft.serviceType &&
-          selectedAddress &&
+          roomsAddress &&
           selectedStandard ? (
             needsAuth ? (
               <CheckoutAuthGate
@@ -723,7 +800,7 @@ export function BookingWizard({
             ) : stripePromise ? (
               <Elements stripe={stripePromise}>
                 <CheckoutStep
-                  address={selectedAddress}
+                  address={roomsAddress}
                   amount={promoAmount ?? estimatedAmount}
                   draft={{
                     ...draft,
@@ -985,8 +1062,8 @@ function AddressStep({
         Where will your cleaning take place
       </h2>
       <p className="mt-2 text-sm text-[#5b5478]">
-        Birmingham launch area — include bedrooms and bathrooms so we can size
-        the clean. No account needed yet.
+        Search and pick your address from the suggestions. Room details come
+        next.
       </p>
 
       {guestAsAddress && localOnly ? (
@@ -1000,14 +1077,6 @@ function AddressStep({
               <p className="mt-1 break-words text-sm text-[#5b5478]">
                 {guestAsAddress.address_line_1}, {guestAsAddress.city},{" "}
                 {guestAsAddress.postcode}
-              </p>
-              <p className="mt-2 text-xs capitalize text-[#7a7198]">
-                {guestAsAddress.property_type} ·{" "}
-                {guestAsAddress.num_bedrooms ?? 0} bed ·{" "}
-                {guestAsAddress.num_bathrooms ?? 0} bath
-                {(guestAsAddress.num_other_rooms ?? 0) > 0
-                  ? ` · ${guestAsAddress.num_other_rooms} other`
-                  : ""}
               </p>
             </div>
           </div>
@@ -1035,13 +1104,6 @@ function AddressStep({
                   </p>
                   <p className="mt-1 break-words text-sm text-[#5b5478]">
                     {address.address_line_1}, {address.city}, {address.postcode}
-                  </p>
-                  <p className="mt-2 text-xs capitalize text-[#7a7198]">
-                    {address.property_type} · {address.num_bedrooms ?? 0} bed ·{" "}
-                    {address.num_bathrooms ?? 0} bath
-                    {(address.num_other_rooms ?? 0) > 0
-                      ? ` · ${address.num_other_rooms} other`
-                      : ""}
                   </p>
                 </div>
               </div>
@@ -1076,7 +1138,7 @@ function AddressStep({
       ) : null}
 
       {showForm || (localOnly && !guestAsAddress) ? (
-        <div className="mt-5 overflow-x-auto rounded-2xl bg-white/70 p-3 sm:p-4">
+        <div className="relative z-20 mt-5 overflow-visible rounded-2xl bg-white/70 p-3 sm:p-4">
           <AddressForm
             address={localOnly ? guestAsAddress : null}
             compact
@@ -1086,6 +1148,152 @@ function AddressStep({
           />
         </div>
       ) : null}
+    </div>
+  );
+}
+
+const OTHER_ROOM_OPTIONS = [
+  { id: "living_room", label: "Living room" },
+  { id: "dining_room", label: "Dining room" },
+  { id: "kitchen", label: "Kitchen" },
+  { id: "study", label: "Study / office" },
+  { id: "utility", label: "Utility room" },
+  { id: "conservatory", label: "Conservatory" },
+  { id: "hallway", label: "Hallway / landing" },
+  { id: "playroom", label: "Playroom" },
+  { id: "garage", label: "Garage" },
+] as const;
+
+const ROOM_COUNT_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const;
+
+function RoomsStep({
+  bathrooms,
+  bedrooms,
+  onBathrooms,
+  onBedrooms,
+  onOtherRooms,
+  otherRoomTypes,
+}: {
+  bathrooms: number | null;
+  bedrooms: number | null;
+  onBathrooms: (value: number) => void;
+  onBedrooms: (value: number) => void;
+  onOtherRooms: (value: string[]) => void;
+  otherRoomTypes: string[];
+}) {
+  const [otherOpen, setOtherOpen] = useState(false);
+  const otherRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (!otherRef.current?.contains(event.target as Node)) {
+        setOtherOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
+
+  const otherLabel =
+    otherRoomTypes.length === 0
+      ? "None selected"
+      : otherRoomTypes
+          .map(
+            (id) =>
+              OTHER_ROOM_OPTIONS.find((option) => option.id === id)?.label ?? id,
+          )
+          .join(", ");
+
+  function toggleOther(id: string) {
+    const selected = new Set(otherRoomTypes);
+    if (selected.has(id)) selected.delete(id);
+    else selected.add(id);
+    onOtherRooms(Array.from(selected));
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+        Tell us about the rooms
+      </h2>
+      <p className="mt-2 text-sm text-[#5b5478]">
+        This helps size duration and price — separate from your address.
+      </p>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
+          <span>Bedrooms</span>
+          <select
+            className="h-12 w-full rounded-2xl border border-[#d9ccef] bg-white/80 px-4 text-sm"
+            onChange={(event) => onBedrooms(Number(event.target.value))}
+            value={bedrooms ?? ""}
+          >
+            <option disabled value="">
+              Select
+            </option>
+            {ROOM_COUNT_OPTIONS.map((count) => (
+              <option key={count} value={count}>
+                {count === 6 ? "6+" : count}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
+          <span>Bathrooms</span>
+          <select
+            className="h-12 w-full rounded-2xl border border-[#d9ccef] bg-white/80 px-4 text-sm"
+            onChange={(event) => onBathrooms(Number(event.target.value))}
+            value={bathrooms ?? ""}
+          >
+            <option disabled value="">
+              Select
+            </option>
+            {ROOM_COUNT_OPTIONS.map((count) => (
+              <option key={count} value={count}>
+                {count === 6 ? "6+" : count}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="relative mt-4" ref={otherRef}>
+        <p className="text-sm font-medium text-[#1c133b]">Other rooms</p>
+        <button
+          className="mt-2 flex min-h-12 w-full items-center justify-between rounded-2xl border border-[#d9ccef] bg-white/80 px-4 text-left text-sm text-[#1c133b] touch-manipulation"
+          onClick={() => setOtherOpen((current) => !current)}
+          type="button"
+        >
+          <span className="min-w-0 truncate text-[#5b5478]">{otherLabel}</span>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 shrink-0 text-[#6a45b8] transition",
+              otherOpen && "rotate-180",
+            )}
+          />
+        </button>
+        {otherOpen ? (
+          <div className="absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-auto rounded-2xl border border-[#d9ccef] bg-white p-2 shadow-[0_16px_40px_rgba(28,19,59,0.16)]">
+            {OTHER_ROOM_OPTIONS.map((option) => {
+              const active = otherRoomTypes.includes(option.id);
+              return (
+                <button
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm touch-manipulation",
+                    active ? "bg-[#efe6ff] text-[#1c133b]" : "hover:bg-[#f7f2fc]",
+                  )}
+                  key={option.id}
+                  onClick={() => toggleOther(option.id)}
+                  type="button"
+                >
+                  <span>{option.label}</span>
+                  {active ? <Check className="h-4 w-4 text-[#6a45b8]" /> : null}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -1363,19 +1571,36 @@ function FrequencyStep({
 }) {
   const mode = frequencyModeFor(draft.serviceType);
   const options = frequencyOptionsFor(draft.serviceType);
+  const minDate = new Date().toISOString().slice(0, 10);
+  const [viewMonth, setViewMonth] = useState(() => {
+    const seed = draft.customRecurrenceDates[0] ?? draft.scheduledDate;
+    return seed ? new Date(`${seed}T12:00:00`) : new Date();
+  });
 
   function selectFrequency(
-    value: "one_off" | "weekly" | "fortnightly" | "monthly",
+    value: "one_off" | "weekly" | "fortnightly" | "monthly" | "custom",
   ) {
     if (value === "one_off") {
       update("isRecurring", false);
       update("recurrencePattern", null);
       update("preferSameCleaner", false);
+      update("customRecurrenceDates", []);
       return;
     }
     update("isRecurring", true);
     update("recurrencePattern", value);
-    if (mode === "required_recurring") update("preferSameCleaner", true);
+    update("preferSameCleaner", false);
+    if (value !== "custom") update("customRecurrenceDates", []);
+  }
+
+  function toggleCustomDate(iso: string) {
+    if (iso < minDate) return;
+    const selected = new Set(draft.customRecurrenceDates);
+    if (selected.has(iso)) selected.delete(iso);
+    else selected.add(iso);
+    const next = Array.from(selected).sort();
+    update("customRecurrenceDates", next);
+    if (!draft.scheduledDate && next[0]) update("scheduledDate", next[0]);
   }
 
   const selectedValue = draft.isRecurring
@@ -1384,6 +1609,19 @@ function FrequencyStep({
       ? "one_off"
       : draft.recurrencePattern;
 
+  const year = viewMonth.getFullYear();
+  const month = viewMonth.getMonth();
+  const monthLabel = viewMonth.toLocaleString("en-GB", {
+    month: "long",
+    year: "numeric",
+  });
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: Array<number | null> = [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ];
+
   return (
     <div>
       <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
@@ -1391,8 +1629,8 @@ function FrequencyStep({
       </h2>
       <p className="mt-2 text-sm text-[#5b5478]">
         {mode === "required_recurring"
-          ? "Regular Cleaning is a recurring service — pick weekly or fortnightly."
-          : "One-off or recurring, depending on what you need."}
+          ? "Choose a rhythm, or build your own calendar of visits."
+          : "One-off, a set cadence, or customize your own calendar."}
       </p>
       <div className="mt-5 grid gap-3">
         {options.map((option) => {
@@ -1425,18 +1663,72 @@ function FrequencyStep({
         })}
       </div>
 
-      {draft.isRecurring ? (
-        <label className="mt-5 flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-2xl border border-[#d9ccef] bg-white/70 px-4 text-sm font-medium text-[#1c133b]">
-          Prefer the same cleaner each time
-          <input
-            checked={draft.preferSameCleaner}
-            className="h-4 w-4 accent-[#6a45b8]"
-            onChange={(event) =>
-              update("preferSameCleaner", event.target.checked)
-            }
-            type="checkbox"
-          />
-        </label>
+      {draft.recurrencePattern === "custom" ? (
+        <div className="mt-5">
+          <p className="text-sm text-[#5b5478]">
+            Tap the dates you want cleaned. Pick at least two upcoming visits.
+          </p>
+          <div className="mx-auto mt-3 max-w-sm rounded-[28px] bg-[#1c133b] p-4 text-white sm:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <button
+                aria-label="Previous month"
+                className="rounded-full px-2 py-1 text-lg"
+                onClick={() =>
+                  setViewMonth(new Date(year, month - 1, 1))
+                }
+                type="button"
+              >
+                ‹
+              </button>
+              <p className="font-semibold">{monthLabel}</p>
+              <button
+                aria-label="Next month"
+                className="rounded-full px-2 py-1 text-lg"
+                onClick={() =>
+                  setViewMonth(new Date(year, month + 1, 1))
+                }
+                type="button"
+              >
+                ›
+              </button>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center text-xs text-[#b7a8e0]">
+              {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
+                <span key={day}>{day}</span>
+              ))}
+            </div>
+            <div className="mt-2 grid grid-cols-7 gap-1 text-center text-sm">
+              {cells.map((day, index) => {
+                if (!day) return <span key={`e-${index}`} />;
+                const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                const disabled = iso < minDate;
+                const selected = draft.customRecurrenceDates.includes(iso);
+                return (
+                  <button
+                    className={cn(
+                      "mx-auto flex h-9 w-9 items-center justify-center rounded-full touch-manipulation",
+                      disabled && "opacity-30",
+                      selected && "bg-[#c43d9a] font-semibold",
+                      !selected && !disabled && "hover:bg-white/10",
+                    )}
+                    disabled={disabled}
+                    key={iso}
+                    onClick={() => toggleCustomDate(iso)}
+                    type="button"
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {draft.customRecurrenceDates.length ? (
+            <p className="mt-3 text-sm text-[#5b5478]">
+              {draft.customRecurrenceDates.length} date
+              {draft.customRecurrenceDates.length === 1 ? "" : "s"} selected
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
@@ -1456,91 +1748,55 @@ function DurationStep({
   const MIN_HOURS = 1;
   const MAX_HOURS = 12;
   const STEP_MINUTES = 15;
+  const ITEM_HEIGHT = 44;
 
   const totalMinutes = Math.round(hours * 60);
   const wholeHours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
+  const hourOptions = Array.from(
+    { length: MAX_HOURS - MIN_HOURS + 1 },
+    (_, index) => MIN_HOURS + index,
+  );
+  const minuteOptions = [0, 15, 30, 45];
 
-  function setTotalMinutes(next: number) {
+  function setFromParts(nextHours: number, nextMinutes: number) {
     const clamped = Math.min(
       MAX_HOURS * 60,
-      Math.max(MIN_HOURS * 60, next),
+      Math.max(MIN_HOURS * 60, nextHours * 60 + nextMinutes),
     );
     onChange(Number((clamped / 60).toFixed(2)));
-  }
-
-  function nudgeHours(delta: number) {
-    setTotalMinutes(totalMinutes + delta * 60);
-  }
-
-  function nudgeMinutes(deltaSteps: number) {
-    setTotalMinutes(totalMinutes + deltaSteps * STEP_MINUTES);
   }
 
   return (
     <div>
       <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">How long?</h2>
       <p className="mt-2 text-sm text-[#5b5478]">
-        Recommended from your service, cleaning level and add-ons — adjust if you
-        need more or less time.
+        Scroll the wheels to set hours and minutes — seeded from your service,
+        level and add-ons.
       </p>
-      <div className="mt-6 flex items-center justify-center gap-3">
-        <div className="flex flex-col items-center gap-1">
-          <button
-            aria-label="Increase hours"
-            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
-            disabled={totalMinutes >= MAX_HOURS * 60}
-            onClick={() => nudgeHours(1)}
-            type="button"
-          >
-            <ChevronUp className="h-5 w-5" />
-          </button>
-          <div className="flex h-24 w-28 flex-col items-center justify-center rounded-2xl bg-[#ebe3f8]">
-            <span className="text-4xl font-bold text-[#1c133b]">
-              {String(wholeHours).padStart(2, "0")}
-            </span>
-            <span className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
-              Hours
-            </span>
-          </div>
-          <button
-            aria-label="Decrease hours"
-            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
-            disabled={totalMinutes <= MIN_HOURS * 60}
-            onClick={() => nudgeHours(-1)}
-            type="button"
-          >
-            <ChevronDown className="h-5 w-5" />
-          </button>
+      <div className="mt-6 flex items-end justify-center gap-3">
+        <div className="flex flex-col items-center">
+          <DurationScrollColumn
+            itemHeight={ITEM_HEIGHT}
+            label="Hours"
+            onChange={(value) => setFromParts(value, minutes)}
+            options={hourOptions}
+            value={wholeHours}
+          />
         </div>
-        <span className="text-3xl font-bold text-[#1c133b]">:</span>
-        <div className="flex flex-col items-center gap-1">
-          <button
-            aria-label="Increase minutes"
-            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
-            disabled={totalMinutes >= MAX_HOURS * 60}
-            onClick={() => nudgeMinutes(1)}
-            type="button"
-          >
-            <ChevronUp className="h-5 w-5" />
-          </button>
-          <div className="flex h-24 w-28 flex-col items-center justify-center rounded-2xl bg-[#ebe3f8]">
-            <span className="text-4xl font-bold text-[#1c133b]">
-              {String(minutes).padStart(2, "0")}
-            </span>
-            <span className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
-              Minutes
-            </span>
-          </div>
-          <button
-            aria-label="Decrease minutes"
-            className="rounded-full p-1 text-[#6a45b8] transition hover:bg-[#ebe3f8] disabled:opacity-35 touch-manipulation"
-            disabled={totalMinutes <= MIN_HOURS * 60}
-            onClick={() => nudgeMinutes(-1)}
-            type="button"
-          >
-            <ChevronDown className="h-5 w-5" />
-          </button>
+        <span className="mb-10 text-3xl font-bold text-[#1c133b]">:</span>
+        <div className="flex flex-col items-center">
+          <DurationScrollColumn
+            itemHeight={ITEM_HEIGHT}
+            label="Minutes"
+            onChange={(value) => setFromParts(wholeHours, value)}
+            options={minuteOptions}
+            value={
+              minuteOptions.includes(minutes)
+                ? minutes
+                : Math.round(minutes / STEP_MINUTES) * STEP_MINUTES
+            }
+          />
         </div>
       </div>
       <div className="mt-5 rounded-full bg-[#e8d2b8] px-4 py-3 text-sm text-[#4a3a28]">
@@ -1550,6 +1806,92 @@ function DurationStep({
         {duration.propertyHint}
         {!hasWindowAddOn ? `. ${duration.windowsTip}` : "."}
       </div>
+    </div>
+  );
+}
+
+function DurationScrollColumn({
+  itemHeight,
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  itemHeight: number;
+  label: string;
+  onChange: (value: number) => void;
+  options: number[];
+  value: number;
+}) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const visibleCount = 3;
+  const pad = Math.floor(visibleCount / 2);
+
+  useEffect(() => {
+    const node = listRef.current;
+    if (!node) return;
+    const index = Math.max(0, options.indexOf(value));
+    node.scrollTop = index * itemHeight;
+  }, [itemHeight, options, value]);
+
+  function snapToNearest() {
+    const node = listRef.current;
+    if (!node) return;
+    const index = Math.round(node.scrollTop / itemHeight);
+    const clamped = Math.min(options.length - 1, Math.max(0, index));
+    node.scrollTo({ behavior: "smooth", top: clamped * itemHeight });
+    const next = options[clamped];
+    if (next != null && next !== value) onChange(next);
+  }
+
+  return (
+    <div className="w-28">
+      <div
+        aria-label={label}
+        className="relative h-[132px] overflow-hidden rounded-2xl bg-[#ebe3f8]"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-[44px] z-10 h-[44px] rounded-xl border border-[#6a45b8]/35 bg-white/35"
+        />
+        <div
+          className="h-full snap-y snap-mandatory overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          onScroll={() => {
+            if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+            scrollEndTimer.current = setTimeout(snapToNearest, 80);
+          }}
+          ref={listRef}
+        >
+          <div style={{ height: pad * itemHeight }} />
+          {options.map((option) => {
+            const active = option === value;
+            return (
+              <button
+                className={cn(
+                  "flex h-11 w-full snap-center items-center justify-center text-3xl font-bold transition touch-manipulation",
+                  active ? "text-[#1c133b]" : "text-[#1c133b]/35",
+                )}
+                key={option}
+                onClick={() => {
+                  onChange(option);
+                  listRef.current?.scrollTo({
+                    behavior: "smooth",
+                    top: options.indexOf(option) * itemHeight,
+                  });
+                }}
+                type="button"
+              >
+                {String(option).padStart(2, "0")}
+              </button>
+            );
+          })}
+          <div style={{ height: pad * itemHeight }} />
+        </div>
+      </div>
+      <p className="mt-2 text-center text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
+        {label}
+      </p>
     </div>
   );
 }
@@ -1802,9 +2144,9 @@ function CheckoutStep({
         label: draft.guestAddress.label,
         latitude: draft.guestAddress.latitude,
         longitude: draft.guestAddress.longitude,
-        num_bathrooms: draft.guestAddress.num_bathrooms,
-        num_bedrooms: draft.guestAddress.num_bedrooms,
-        num_other_rooms: draft.guestAddress.num_other_rooms,
+        num_bathrooms: draft.numBathrooms ?? draft.guestAddress.num_bathrooms,
+        num_bedrooms: draft.numBedrooms ?? draft.guestAddress.num_bedrooms,
+        num_other_rooms: draft.otherRoomTypes.length,
         postcode: draft.guestAddress.postcode,
         property_type: draft.guestAddress.property_type,
         special_requirements: draft.guestAddress.special_requirements,

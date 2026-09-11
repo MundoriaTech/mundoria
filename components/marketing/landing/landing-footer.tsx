@@ -123,7 +123,9 @@ export function LandingFooter({
             <Link className="transition hover:text-[#312c79]" href="/cookies">
               Cookie policy
             </Link>
-            <CookieSettingsLink className="transition hover:text-[#312c79]" />
+            <CookieSettingsLink className="transition hover:text-[#312c79]">
+              Manage cookies
+            </CookieSettingsLink>
             <Link className="transition hover:text-[#312c79]" href="/terms">
               Terms
             </Link>

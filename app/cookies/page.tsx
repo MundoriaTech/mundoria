@@ -20,7 +20,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Cookies are small text files that can be used by websites to make a user's experience more efficient. The law states that we can store cookies on your device if they are strictly necessary for the operation of this site. For all other types of cookies we need your permission. This site uses different types of cookies. Some cookies are placed by third party services that appear on our pages. You can at any time change or withdraw your consent using Cookies in the footer or Manage preferences below.",
+      "Cookies are small text files that can be used by websites to make a user's experience more efficient. The law states that we can store cookies on your device if they are strictly necessary for the operation of this site. For all other types of cookies we need your permission. This site uses different types of cookies. Some cookies are placed by third party services that appear on our pages. You can at any time change or withdraw your consent using Manage cookies in the footer.",
     title: "Your permission",
   },
   {
@@ -77,8 +77,9 @@ export default function CookiesPage() {
           Manage preferences
         </h2>
         <p className="mt-4 leading-8 text-muted-foreground">
-          Open the cookie settings dialog to allow all, deny, or customise
-          Necessary, Preferences, Statistics and Marketing cookies.
+          Open the cookie settings dialog to accept all, reject optional cookies,
+          or choose Preferences, Statistics and Marketing individually. Necessary
+          cookies always stay on.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <CookieSettingsLink className="rounded-full bg-[#221f50] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#37306c] hover:text-white">

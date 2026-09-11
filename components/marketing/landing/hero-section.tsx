@@ -2,336 +2,190 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { cn } from "@/lib/utils";
+import {
+  LANDING_NAV_PILL_H,
+  LANDING_NAV_TOP,
+} from "@/components/marketing/landing/landing-navbar";
 
-const HERO_SWAP_MS = 4000;
+/**
+ * Frame 106 — three die-cut cards.
+ * 1: original portrait; 2–3: Mask group (11)/(12).
+ */
+const HERO_STACK = [
+  {
+    alt: "CleanScape cleaner with spray bottle and brush",
+    src: "/images/marketing/landing/hero-stack-1.png",
+  },
+  {
+    alt: "CleanScape team cleaning a modern office",
+    src: "/images/marketing/landing/hero-stack-2.png",
+  },
+  {
+    alt: "CleanScape cleaner with supplies",
+    src: "/images/marketing/landing/hero-stack-3.png",
+  },
+] as const;
 
-const HERO_ALT_CLEANER = "/images/marketing/landing/hero-alt-cleaner.png";
-const HERO_ALT_WAVES = "/images/marketing/landing/hero-alt-waves.png";
+const CARD_SIZE = "w-[72%]";
 
-const ALT_PURPLE = "#291845";
-const ALT_GOLD = "#c79c66";
+/** Frame 106 */
+const HERO_PURPLE = "#4a3578";
+const HERO_BELOW_NAV = "3.75rem";
 
-/** Clears the top half of the metrics pill so images sit flush on it without being covered. */
-const METRICS_CLEARANCE = "pb-5 lg:pb-11";
-const METRICS_CLEARANCE_PX = 44; // desktop only — keep in sync with bottom on desktop cleaner
+const CARD_HOLD_MS = 3200;
+const CARD_TRANSITION_MS = 750;
+
+/**
+ * Frame 106 stack: front lower-left, middle up-right, back further right
+ * and slightly lower than middle (not a straight rising diagonal).
+ * Percentages are relative to the card’s own width via translate.
+ */
+const CARD_DEPTH_STYLE = [
+  {
+    // front — clear
+    transform: "translate(0%, 18%)",
+    zIndex: 3,
+    filter: "blur(0px)",
+    opacity: 1,
+  },
+  {
+    // middle — blurred, up and right
+    transform: "translate(14%, 4%)",
+    zIndex: 2,
+    filter: "blur(8px)",
+    opacity: 0.95,
+  },
+  {
+    // back — more blurred, further right, a touch lower than middle
+    transform: "translate(28%, 10%)",
+    zIndex: 1,
+    filter: "blur(12px)",
+    opacity: 0.9,
+  },
+] as const;
 
 export function HeroSection({ bookingHref }: { bookingHref: string }) {
-  const [variant, setVariant] = useState<"default" | "alt">("default");
-  const [hovered, setHovered] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const canHover = window.matchMedia("(hover: hover)").matches;
-
-    if (canHover) {
-      if (!hovered) {
-        setVariant("default");
-        return;
-      }
-      if (reduceMotion) {
-        setVariant("alt");
-        return;
-      }
-      setVariant("alt");
-      const id = window.setInterval(() => {
-        setVariant((current) => (current === "default" ? "alt" : "default"));
-      }, HERO_SWAP_MS);
-      return () => window.clearInterval(id);
-    }
-
-    const node = sectionRef.current;
-    if (!node || reduceMotion) return;
-
-    let intervalId: number | undefined;
-    const start = () => {
-      if (intervalId != null) return;
-      setVariant("alt");
-      intervalId = window.setInterval(() => {
-        setVariant((current) => (current === "default" ? "alt" : "default"));
-      }, HERO_SWAP_MS);
-    };
-    const stop = () => {
-      if (intervalId != null) {
-        window.clearInterval(intervalId);
-        intervalId = undefined;
-      }
-      setVariant("default");
-    };
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) start();
-        else stop();
-      },
-      { threshold: 0.35 },
-    );
-    observer.observe(node);
-    return () => {
-      stop();
-      observer.disconnect();
-    };
-  }, [hovered]);
+  const navBlock = `calc(${LANDING_NAV_TOP} + ${LANDING_NAV_PILL_H})`;
 
   return (
     <section
-      ref={sectionRef}
-      className="px-3 pb-6 pt-2 min-[380px]:px-4 sm:px-8 sm:pb-8 lg:pb-10"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className="relative isolate overflow-x-clip"
+      style={{
+        marginTop: `calc(-1 * ${navBlock})`,
+        paddingTop: `calc(${navBlock} + ${HERO_BELOW_NAV})`,
+        backgroundImage: `linear-gradient(180deg, ${HERO_PURPLE} 0%, ${HERO_PURPLE} 86%, #efebf9 86%, #efebf9 100%)`,
+      }}
     >
-      <div className="relative mx-auto w-full max-w-[1551px] pb-8 sm:pb-9 lg:pb-11">
-        {/*
-          Mobile: CSS grid stack — both heroes contribute height (no absolute clip).
-          Desktop: shared aspect box with height cap.
-        */}
-        <div
-          className={cn(
-            "relative w-full",
-            // Same grid cell → row height = max(default, alt); both stretch to match.
-            "max-lg:grid max-lg:items-stretch max-lg:[&>*]:col-start-1 max-lg:[&>*]:row-start-1 max-lg:[&>*]:h-full",
-            "lg:aspect-[1552/953] lg:max-h-[580px] xl:max-h-[620px]",
-          )}
-        >
-          <div
-            aria-hidden={variant !== "default"}
-            className={cn(
-              "transition-opacity duration-700 ease-in-out",
-              "max-lg:relative max-lg:h-full lg:absolute lg:inset-0",
-              variant === "default"
-                ? "z-10 opacity-100"
-                : "pointer-events-none z-0 opacity-0",
-            )}
-          >
-            <DefaultHero bookingHref={bookingHref} />
-          </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 bottom-[14%] overflow-hidden"
+      >
+        <Image
+          alt=""
+          className="object-cover object-center opacity-100 mix-blend-soft-light"
+          fill
+          priority
+          sizes="100vw"
+          src="/images/marketing/landing/hero-purple-texture.png"
+        />
+      </div>
 
-          <div
-            aria-hidden={variant !== "alt"}
-            className={cn(
-              "transition-opacity duration-700 ease-in-out",
-              "max-lg:relative max-lg:h-full lg:absolute lg:inset-0",
-              variant === "alt"
-                ? "z-10 opacity-100"
-                : "pointer-events-none z-0 opacity-0",
-            )}
+      <div className="relative mx-auto grid w-full max-w-[1320px] items-center gap-12 px-4 pb-28 sm:gap-14 sm:px-6 sm:pb-32 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-8 lg:px-8 lg:pb-40 lg:pt-2 xl:gap-6 xl:px-10 xl:pb-44">
+        <div className="relative z-10 max-w-xl text-left lg:max-w-[34rem] lg:justify-self-start lg:pb-8 lg:pl-0 xl:-ml-2">
+          <h1 className="text-balance text-[2.05rem] font-bold leading-[1.1] tracking-[-0.04em] text-white min-[400px]:text-[2.4rem] sm:text-[2.85rem] lg:text-[clamp(2.65rem,3.5vw,3.4rem)]">
+            Book Trusted Home
+            <br />
+            Cleaning service in Minutes
+          </h1>
+          <p className="mt-5 max-w-[30rem] text-pretty text-[15px] font-normal leading-6 text-white/95 sm:mt-6 sm:text-[17px] sm:leading-7">
+            Find cleaning jobs near you, choose when you work, and get paid for
+            the services you provide.
+          </p>
+          <Link
+            className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-[#ff5274] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#ff3d63] active:scale-[0.98] sm:mt-10 sm:min-h-[3.25rem] sm:px-9"
+            href={bookingHref}
           >
-            <AlternateHero bookingHref={bookingHref} />
-          </div>
+            Book a Service
+          </Link>
+        </div>
+
+        <div className="relative mx-auto w-full max-w-[520px] lg:mx-0 lg:mb-2 lg:ml-auto lg:max-w-none lg:justify-self-end xl:max-w-[620px]">
+          <HeroImageStack />
         </div>
       </div>
     </section>
   );
 }
 
-function DefaultHero({ bookingHref }: { bookingHref: string }) {
-  return (
-    <div className="relative isolate flex h-full min-h-full flex-col rounded-[20px] bg-white px-3 min-[380px]:px-5 sm:rounded-[38px] sm:px-10 sm:pt-2 lg:px-12 lg:pt-1">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[20px] sm:rounded-[38px]"
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(200.22deg, rgba(230, 229, 243, 0.51) 17%, rgba(139, 123, 185, 0.51) 86%)",
-          }}
-        />
-        <div
-          className="absolute inset-0 mix-blend-soft-light opacity-[0.74]"
-          style={{
-            backgroundImage:
-              "url(/images/marketing/landing/hero-stripes.png)",
-            backgroundPosition: "center",
-            backgroundSize: "cover",
-          }}
-        />
-      </div>
+function HeroImageStack() {
+  const [front, setFront] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
-      <div
-        className={cn(
-          "relative z-10 flex min-h-0 flex-1 flex-col rounded-[20px] sm:rounded-[38px]",
-          METRICS_CLEARANCE,
-        )}
-      >
-        <div className="mx-auto flex w-full max-w-[767px] shrink-0 flex-col items-center pt-5 text-center sm:pt-6 lg:pt-8">
-          <h1 className="text-[1.625rem] font-medium leading-[1.08] tracking-[-0.04em] text-[#1c133b] min-[380px]:text-[2rem] sm:text-4xl lg:text-[clamp(1.9rem,2.6vw,3rem)]">
-            Book Trusted Home
-            <br />
-            Cleaning service in Minutes
-          </h1>
-          <p className="mx-auto mt-2 max-w-[550px] text-pretty text-[13px] font-normal leading-5 text-[#1c133b] sm:mt-3 sm:text-[14px] sm:leading-[21px] lg:mt-3 lg:text-[clamp(0.875rem,1.15vw,0.9375rem)]">
-            From residential and commercial cleaning to short lets, moving home
-            and recovery support, book certified professionals, track every
-            visit, and pay only after the job is complete.
-          </p>
-          <Link
-            className="mt-3 inline-flex h-[29px] items-center justify-center rounded-2xl bg-[#1c133b] px-5 text-[12px] font-medium text-[#e6e5f3] transition hover:bg-[#1c133b]/90 sm:mt-4 lg:mt-4 lg:h-8 lg:px-6 lg:text-[13px]"
-            href={bookingHref}
-          >
-            Book a Service
-          </Link>
-        </div>
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
-        <div className="relative mx-auto mt-4 flex w-full max-w-[980px] flex-1 flex-col justify-end overflow-hidden sm:mt-5 lg:mt-2 lg:min-h-0 lg:overflow-visible">
-          <Image
-            alt="CleanScape cleaning professionals"
-            className="mx-auto h-auto w-full origin-bottom scale-[1.24] object-contain object-bottom lg:hidden"
-            height={503}
-            priority
-            sizes="100vw"
-            src="/images/marketing/landing/hero-cleaners.png"
-            width={1296}
-          />
-          <Image
-            alt="CleanScape cleaning professionals"
-            className="hidden object-contain object-bottom lg:block"
-            fill
-            priority
-            sizes="(min-width: 1280px) 980px, 70vw"
-            src="/images/marketing/landing/hero-cleaners.png"
-          />
-        </div>
-      </div>
+  useEffect(() => {
+    if (reduceMotion) return;
+    const id = window.setInterval(() => {
+      setFront((current) => (current + 1) % HERO_STACK.length);
+    }, CARD_HOLD_MS);
+    return () => window.clearInterval(id);
+  }, [reduceMotion]);
 
-      <HeroMetricsAnchor />
-    </div>
-  );
-}
-
-function AlternateHero({ bookingHref }: { bookingHref: string }) {
   return (
     <div
-      className="relative isolate flex h-full min-h-full flex-col rounded-[20px] sm:rounded-[38px]"
-      style={{ backgroundColor: ALT_PURPLE }}
+      aria-live="polite"
+      className="relative mx-auto aspect-[860/780] w-full max-w-[480px] translate-x-6 sm:max-w-[540px] sm:translate-x-10 lg:ml-auto lg:mr-0 lg:max-w-[580px] lg:translate-x-16 xl:translate-x-24"
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[20px] sm:rounded-[38px]">
-        <Image
-          alt=""
-          aria-hidden
-          className="object-cover object-center"
-          fill
-          priority
-          sizes="(min-width: 1551px) 1551px, 100vw"
-          src={HERO_ALT_WAVES}
-        />
-      </div>
+      {HERO_STACK.map((card, index) => {
+        const depth = (index - front + HERO_STACK.length) % HERO_STACK.length;
+        const style = CARD_DEPTH_STYLE[depth];
+        const isFront = depth === 0;
 
-      {/* Mobile stacked — intrinsic image (never clipped by fill/scale hacks) */}
-      <div
-        className={cn(
-          "relative z-10 flex min-h-0 flex-1 flex-col px-4 pt-5 min-[380px]:px-5 lg:hidden",
-          METRICS_CLEARANCE,
-        )}
-      >
-        <h2 className="shrink-0 text-balance text-left text-[1.5rem] font-semibold leading-[1.08] tracking-[-0.04em] text-white min-[380px]:text-[1.65rem]">
-          Book Trusted Home{" "}
-          <span style={{ color: ALT_GOLD }}>Cleaning</span> service in Minutes
-        </h2>
-        <p className="mt-3 max-w-md shrink-0 text-pretty text-left text-[13px] font-normal leading-5 text-white/95">
-          From residential and commercial cleaning to short lets, moving home
-          and recovery support, book certified professionals, track every visit,
-          and pay only after the job is complete.
-        </p>
-        <Link
-          className="mt-3 inline-flex w-fit shrink-0 items-center justify-center rounded-full px-4 py-2 text-[12px] font-medium text-[#1c133b] transition hover:brightness-110"
-          href={bookingHref}
-          style={{ backgroundColor: ALT_GOLD }}
-        >
-          Book a Service
-        </Link>
-
-        <div className="relative mt-4 w-full shrink-0">
-          <Image
-            alt="CleanScape cleaner giving a thumbs up"
-            className="mx-auto h-auto w-full origin-bottom scale-[1.08] object-contain object-bottom"
-            height={900}
-            priority
-            sizes="100vw"
-            src={HERO_ALT_CLEANER}
-            width={1200}
-          />
-        </div>
-      </div>
-
-      {/* Desktop: Frame 29 — cleaner centered, full asset visible, sits on metrics */}
-      <div className="absolute inset-0 z-10 hidden lg:block">
-        <div
-          className="pointer-events-none absolute inset-x-[8%] top-0 lg:inset-x-[10%]"
-          style={{ bottom: METRICS_CLEARANCE_PX }}
-        >
-          <Image
-            alt="CleanScape cleaner giving a thumbs up"
-            className="object-contain object-bottom"
-            fill
-            priority
-            sizes="900px"
-            src={HERO_ALT_CLEANER}
-          />
-        </div>
-
-        <h2 className="absolute left-[7%] top-[15%] max-w-[36%] text-left text-[clamp(1.9rem,3.4vw,3.35rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-white">
-          Book Trusted Home{" "}
-          <span style={{ color: ALT_GOLD }}>Cleaning</span> service in Minutes
-        </h2>
-
-        <div className="absolute right-[6.5%] top-[28%] flex max-w-[24%] flex-col items-end text-right">
-          <p className="text-pretty text-[clamp(0.8rem,1.1vw,0.9375rem)] font-normal leading-[1.45] text-white">
-            From residential and commercial cleaning to short lets, moving home
-            and recovery support, book certified professionals, track every
-            visit, and pay only after the job is complete.
-          </p>
-          <Link
-            className="mt-4 inline-flex items-center justify-center whitespace-nowrap rounded-full px-5 py-2.5 text-[clamp(0.7rem,1vw,0.8125rem)] font-medium text-[#1c133b] transition hover:brightness-110"
-            href={bookingHref}
-            style={{ backgroundColor: ALT_GOLD }}
+        return (
+          <div
+            className={`absolute left-0 top-0 aspect-square ${CARD_SIZE}`}
+            key={card.src}
+            style={{
+              transform: style.transform,
+              zIndex: style.zIndex,
+              opacity: style.opacity,
+              filter: isFront
+                ? "drop-shadow(0 28px 40px rgba(0,0,0,0.45))"
+                : "drop-shadow(0 18px 32px rgba(0,0,0,0.35))",
+              transition: reduceMotion
+                ? undefined
+                : `transform ${CARD_TRANSITION_MS}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${CARD_TRANSITION_MS}ms ease`,
+            }}
           >
-            Book a Service
-          </Link>
-        </div>
-      </div>
-
-      <HeroMetricsAnchor />
-    </div>
-  );
-}
-
-/** Centered on the container’s bottom edge; half the pill hangs outside. */
-function HeroMetricsAnchor() {
-  return (
-    <div className="pointer-events-none absolute bottom-0 left-1/2 z-20 w-[min(78%,420px)] -translate-x-1/2 translate-y-1/2 sm:w-[min(48%,520px)] lg:w-[min(72%,900px)]">
-      <div className="pointer-events-auto">
-        <HeroMetrics />
-      </div>
-    </div>
-  );
-}
-
-function HeroMetrics() {
-  return (
-    <div className="flex items-center justify-between gap-2 rounded-full border border-[#c79c66] bg-[#1c133b] px-3 py-1.5 text-white min-[400px]:gap-3 min-[400px]:px-3.5 sm:gap-4 sm:px-5 sm:py-2 lg:gap-8 lg:px-11 lg:py-5">
-      <Metric label={"Service\ncategories"} value="5" />
-      <Metric label={"Services\navailable"} value="20+" />
-      <Metric label={"Status\nvisibility"} value="Live" />
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex min-w-0 flex-col items-center gap-0 text-center sm:flex-row sm:items-center sm:gap-1 sm:text-left lg:gap-2.5">
-      <p className="text-[11px] font-normal leading-none tracking-tight text-[#c79c66] min-[400px]:text-xs sm:text-sm lg:text-4xl">
-        {value}
-      </p>
-      <p className="whitespace-pre-line text-[6px] font-normal leading-[1.1] text-white min-[400px]:text-[7px] sm:text-[9px] lg:text-base lg:leading-[17px]">
-        {label}
-      </p>
+            <div
+              className="relative h-full w-full"
+              style={{
+                filter: isFront ? undefined : style.filter,
+                transition: reduceMotion
+                  ? undefined
+                  : `filter ${CARD_TRANSITION_MS}ms ease`,
+              }}
+            >
+              <Image
+                alt={card.alt}
+                className="object-contain object-center"
+                fill
+                priority={index === 0}
+                sizes="(min-width: 1024px) 420px, 80vw"
+                src={card.src}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

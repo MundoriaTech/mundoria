@@ -49,7 +49,7 @@ function draftFromSearchParams(searchParams: {
       ? normalizeStandard(serviceTypeValue, recommendedStandardFor(serviceTypeValue))
       : null,
     isRecurring: mode === "required_recurring",
-    preferSameCleaner: mode === "required_recurring",
+    preferSameCleaner: false,
     recurrencePattern: mode === "required_recurring" ? "weekly" : null,
     scheduledDate:
       serviceTypeValue === "same_day"

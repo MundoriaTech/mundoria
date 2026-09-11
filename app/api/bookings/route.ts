@@ -99,8 +99,7 @@ export async function POST(request: Request) {
       is_recurring: parsed.data.isRecurring,
       payment_status: "released",
       promo_code_id: paymentIntent.metadata.promo_code_id || null,
-      prefer_same_cleaner:
-        parsed.data.isRecurring && parsed.data.preferSameCleaner,
+      prefer_same_cleaner: false,
       property_condition: parsed.data.propertyCondition,
       recently_moved: parsed.data.recentlyMoved,
       recommendation_outcome: parsed.data.recommendationOutcome,

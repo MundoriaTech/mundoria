@@ -23,6 +23,45 @@ export const landingNavLinks = [
   ["Support", "mailto:support@cleanscapeuk.com"],
 ] as const;
 
+/** Hover mega-panel items for Services (WeCasa-style). */
+export const landingServicesMenu = {
+  categories: [
+    {
+      description: "Homes, flats and family spaces",
+      href: "/cleaning/residential",
+      label: "Residential",
+    },
+    {
+      description: "Offices, retail and workplaces",
+      href: "/cleaning/commercial",
+      label: "Commercial",
+    },
+    {
+      description: "Airbnb and guest turnovers",
+      href: "/cleaning/short-lets",
+      label: "Short lets",
+    },
+    {
+      description: "Move-in, move-out and tenancy",
+      href: "/cleaning/moving-home",
+      label: "Moving home",
+    },
+    {
+      description: "Support when life needs care",
+      href: "/cleaning/recovery",
+      label: "Recovery",
+    },
+  ],
+  popular: [
+    { href: "/booking/new?service=regular", label: "Regular cleaning" },
+    { href: "/booking/new?service=one_off", label: "One-off clean" },
+    { href: "/booking/new?service=same_day", label: "Same-day clean" },
+    { href: "/booking/new?service=end_of_tenancy", label: "End of tenancy" },
+    { href: "/booking/new?service=deep_clean", label: "Deep clean" },
+    { href: "/booking/new?service=airbnb_turnover", label: "Airbnb turnover" },
+  ],
+} as const;
+
 export const landingCategoryImages: Record<string, string> = {
   commercial: "/images/marketing/landing/category-commercial.png",
   moving_home: "/images/marketing/landing/category-moving-home.png",

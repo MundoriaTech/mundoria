@@ -121,7 +121,7 @@ export interface Booking {
   checkin_verified: boolean;
   checkout_verified: boolean;
   is_recurring: boolean;
-  recurrence_pattern: "weekly" | "fortnightly" | "monthly" | null;
+  recurrence_pattern: "weekly" | "fortnightly" | "monthly" | "custom" | null;
   prefer_same_cleaner: boolean;
   preferred_cleaner_id: string | null;
   special_instructions: string | null;
@@ -223,9 +223,16 @@ export interface BookingDraft {
   alternateTimes: string[];
   /** Customer-editable session length in hours (seeded from estimate). */
   estimatedDurationHours: number | null;
+  /** Collected on the rooms step (not the address step). */
+  numBedrooms: number | null;
+  numBathrooms: number | null;
+  /** Named other rooms selected for the clean (living room, study, …). */
+  otherRoomTypes: string[];
   isRecurring: boolean;
-  recurrencePattern: "weekly" | "fortnightly" | "monthly" | null;
+  recurrencePattern: "weekly" | "fortnightly" | "monthly" | "custom" | null;
   preferSameCleaner: boolean;
+  /** Extra visit dates when recurrencePattern is custom. */
+  customRecurrenceDates: string[];
   promoCode: string;
   specialInstructions: string;
 }

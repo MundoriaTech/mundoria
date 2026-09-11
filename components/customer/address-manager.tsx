@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
-import { cloneElement, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
@@ -284,7 +284,7 @@ export function AddressForm({
     setValues((current) => ({ ...current, [key]: value }));
   }
 
-  function useSelectedPlace(place: GeoapifyFeature) {
+  function applySelectedPlace(place: GeoapifyFeature) {
     const properties = place.properties;
 
     setValues((current) => ({
@@ -393,6 +393,8 @@ export function AddressForm({
     />
   );
 
+  const showAccountExtras = !compact && !localOnly;
+
   return (
     <form className="space-y-4" onSubmit={submit}>
       {error ? (
@@ -401,119 +403,146 @@ export function AddressForm({
         </p>
       ) : null}
 
-      <Field label="Where will your cleaning take place">
+      <div className="space-y-2">
+        <p className="text-sm font-medium">
+          {compact ? "Search address" : "Where will your cleaning take place"}
+        </p>
         {mapsKey ? (
           <AddressAutocompleteInput
             apiKey={mapsKey}
-            input={addressInput}
-            onPlaceSelected={useSelectedPlace}
+            onPlaceSelected={(place) => {
+              applySelectedPlace(place);
+              if (localOnly && compact) {
+                const properties = place.properties;
+                const line1 =
+                  properties.formatted ||
+                  properties.address_line1 ||
+                  properties.street ||
+                  values.address_line_1;
+                const city =
+                  properties.city || properties.address_line2 || values.city;
+                const postcode = properties.postcode ?? values.postcode;
+                if (!city.trim() || !postcode.trim()) {
+                  setError(
+                    "Pick a suggestion that includes city and postcode.",
+                  );
+                  return;
+                }
+                const now = new Date().toISOString();
+                onSaved({
+                  address_line_1: line1.trim(),
+                  address_line_2: properties.address_line2 || null,
+                  city: city.trim(),
+                  created_at: now,
+                  customer_id: "",
+                  id: `guest-${crypto.randomUUID()}`,
+                  is_default: false,
+                  label: values.label.trim() || null,
+                  latitude: properties.lat ?? null,
+                  longitude: properties.lon ?? null,
+                  num_bathrooms: values.num_bathrooms,
+                  num_bedrooms: values.num_bedrooms,
+                  num_other_rooms: values.num_other_rooms,
+                  postcode: postcode.trim().toUpperCase(),
+                  property_type: values.property_type,
+                  special_requirements:
+                    values.special_requirements.trim() || null,
+                  updated_at: now,
+                });
+              }
+            }}
+            value={values.address_line_1}
+            onQueryChange={(next) => update("address_line_1", next)}
           />
         ) : (
           addressInput
         )}
         {values.city && values.postcode ? (
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {values.city} · {values.postcode.toUpperCase()}
           </p>
         ) : (
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Choose a suggestion so city and postcode fill in automatically.
           </p>
         )}
-      </Field>
-
-      <div className="grid grid-cols-3 gap-3">
-        <Field label="Bedrooms">
-          <Input
-            min={0}
-            onChange={(event) =>
-              update("num_bedrooms", Number(event.target.value))
-            }
-            type="number"
-            value={values.num_bedrooms}
-          />
-        </Field>
-        <Field label="Bathrooms">
-          <Input
-            min={0}
-            onChange={(event) =>
-              update("num_bathrooms", Number(event.target.value))
-            }
-            type="number"
-            value={values.num_bathrooms}
-          />
-        </Field>
-        <Field label="Other rooms">
-          <Input
-            min={0}
-            onChange={(event) =>
-              update("num_other_rooms", Number(event.target.value))
-            }
-            placeholder="Lounge, office…"
-            type="number"
-            value={values.num_other_rooms}
-          />
-        </Field>
       </div>
 
-      {!compact && !localOnly ? (
-        <Field label="Label">
-          <Input
-            onChange={(event) => update("label", event.target.value)}
-            placeholder="Home"
-            value={values.label}
-          />
-        </Field>
+      {showAccountExtras ? (
+        <>
+          <Field label="Label">
+            <Input
+              onChange={(event) => update("label", event.target.value)}
+              placeholder="Home"
+              value={values.label}
+            />
+          </Field>
+          <label className="flex items-center gap-3 text-sm">
+            <input
+              checked={values.is_default}
+              className="h-4 w-4 accent-emerald-700"
+              onChange={(event) => update("is_default", event.target.checked)}
+              type="checkbox"
+            />
+            Make this my default address
+          </label>
+          <Button disabled={saving} type="submit">
+            {saving ? (
+              "Saving…"
+            ) : (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Save address
+              </>
+            )}
+          </Button>
+        </>
       ) : null}
 
-      {!localOnly ? (
-        <label className="flex items-center gap-3 text-sm">
-          <input
-            checked={values.is_default}
-            className="h-4 w-4 accent-emerald-700"
-            onChange={(event) => update("is_default", event.target.checked)}
-            type="checkbox"
-          />
-          Make this my default address
-        </label>
+      {!compact && localOnly ? (
+        <Button disabled={saving} type="submit">
+          <Check className="mr-2 h-4 w-4" />
+          Continue with this address
+        </Button>
       ) : null}
 
-      <Button disabled={saving} type="submit">
-        {saving ? (
-          "Saving…"
-        ) : (
-          <>
-            <Check className="mr-2 h-4 w-4" />
-            {localOnly ? "Continue with this address" : "Save address"}
-          </>
-        )}
-      </Button>
+      {!localOnly && compact ? (
+        <Button disabled={saving} type="submit">
+          {saving ? (
+            "Saving…"
+          ) : (
+            <>
+              <Check className="mr-2 h-4 w-4" />
+              Save address
+            </>
+          )}
+        </Button>
+      ) : null}
     </form>
   );
 }
 
 function AddressAutocompleteInput({
   apiKey,
-  input,
   onPlaceSelected,
+  onQueryChange,
+  value,
 }: {
   apiKey: string;
-  input: React.ReactElement;
   onPlaceSelected: (place: GeoapifyFeature) => void;
+  onQueryChange: (value: string) => void;
+  value: string;
 }) {
-  const [query, setQuery] = useState(String(input.props.value ?? ""));
   const [suggestions, setSuggestions] = useState<GeoapifyFeature[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setQuery(String(input.props.value ?? ""));
-  }, [input.props.value]);
-
-  useEffect(() => {
-    if (query.trim().length < 3) {
+    if (value.trim().length < 3) {
       setSuggestions([]);
+      setOpen(false);
       return;
     }
 
@@ -526,10 +555,13 @@ function AddressAutocompleteInput({
         url.searchParams.set("filter", "countrycode:gb");
         url.searchParams.set("format", "geojson");
         url.searchParams.set("limit", "6");
-        url.searchParams.set("text", query);
+        url.searchParams.set("text", value);
 
         const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) return;
+        if (!response.ok) {
+          setSuggestions([]);
+          return;
+        }
 
         const data = (await response.json()) as GeoapifyAutocompleteResponse;
         setSuggestions(data.features ?? []);
@@ -547,61 +579,80 @@ function AddressAutocompleteInput({
       controller.abort();
       clearTimeout(timeout);
     };
-  }, [apiKey, query]);
+  }, [apiKey, value]);
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
 
   return (
-    <div className="relative">
-      {/** Clone the app's normal input so styling/validation stays identical. */}
-      {cloneElement(input, {
-        autoComplete: "off",
-        onBlur: () => {
-          blurTimer.current = setTimeout(() => setOpen(false), 150);
-        },
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setQuery(event.target.value);
-          input.props.onChange?.(event);
-        },
-        onFocus: () => {
+    <div className="relative z-30" ref={rootRef}>
+      <Input
+        autoComplete="off"
+        onBlur={() => {
+          blurTimer.current = setTimeout(() => setOpen(false), 180);
+        }}
+        onChange={(event) => onQueryChange(event.target.value)}
+        onFocus={() => {
           if (blurTimer.current) clearTimeout(blurTimer.current);
           if (suggestions.length) setOpen(true);
-        },
-        value: query,
-      })}
-      {open && (suggestions.length || loading) ? (
-        <div className="absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-xl border bg-background p-1 shadow-lg">
+        }}
+        placeholder="Enter your address here"
+        required
+        value={value}
+      />
+      {open && (suggestions.length > 0 || loading) ? (
+        <ul
+          className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-[80] max-h-72 overflow-auto rounded-xl border border-[#d9ccef] bg-white p-1 shadow-[0_16px_40px_rgba(28,19,59,0.18)]"
+          role="listbox"
+        >
           {loading ? (
-            <div className="px-3 py-2 text-sm text-muted-foreground">
+            <li className="px-3 py-2 text-sm text-muted-foreground">
               Searching addresses…
-            </div>
+            </li>
           ) : null}
-          {suggestions.map((suggestion) => (
-            <button
-              className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
-              key={`${suggestion.properties.lat}-${suggestion.properties.lon}-${suggestion.properties.formatted}`}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => {
-                onPlaceSelected(suggestion);
-                setQuery(
-                  suggestion.properties.address_line1 ||
-                    suggestion.properties.formatted ||
-                    query,
-                );
-                setOpen(false);
-              }}
-              type="button"
-            >
-              <span className="font-medium">
-                {suggestion.properties.address_line1 ||
-                  suggestion.properties.formatted}
-              </span>
-              {suggestion.properties.address_line2 ? (
-                <span className="mt-0.5 block text-xs text-muted-foreground">
-                  {suggestion.properties.address_line2}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </div>
+          {suggestions.map((suggestion) => {
+            const primary =
+              suggestion.properties.formatted ||
+              suggestion.properties.address_line1 ||
+              "Address";
+            return (
+              <li key={`${suggestion.properties.lat}-${suggestion.properties.lon}-${primary}`}>
+                <button
+                  className="block w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-[#efe6ff] touch-manipulation"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    if (blurTimer.current) clearTimeout(blurTimer.current);
+                    const formatted =
+                      suggestion.properties.formatted ||
+                      suggestion.properties.address_line1 ||
+                      value;
+                    onQueryChange(formatted);
+                    onPlaceSelected(suggestion);
+                    setOpen(false);
+                    setSuggestions([]);
+                  }}
+                  type="button"
+                >
+                  <span className="font-medium text-[#1c133b]">{primary}</span>
+                  {suggestion.properties.city || suggestion.properties.postcode ? (
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {[suggestion.properties.city, suggestion.properties.postcode]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  ) : null}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       ) : null}
     </div>
   );

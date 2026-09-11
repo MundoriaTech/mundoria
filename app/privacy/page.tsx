@@ -77,7 +77,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Essential cookies and similar technologies are required for authentication, security and core booking features. Analytics cookies (for example via Google Tag Manager or Google Analytics) are used only if you consent through our cookie banner. Marketing cookies for advertising pixels are off until you enable them. You can change your choice anytime using Cookies in the footer. Full category details are in our cookie policy.",
+      "Essential cookies and similar technologies are required for authentication, security and core booking features. Analytics cookies (for example via Google Tag Manager or Google Analytics) are used only if you consent through our cookie banner. Marketing cookies for advertising pixels are off until you enable them. You can change your choice anytime using Manage cookies in the footer. Full category details are in our cookie policy.",
     title: "Cookies",
   },
   {

@@ -4,7 +4,7 @@ import { Repeat2 } from "lucide-react";
 
 export interface RecurringValue {
   enabled: boolean;
-  frequency: "weekly" | "fortnightly" | "monthly" | null;
+  frequency: "weekly" | "fortnightly" | "monthly" | "custom" | null;
   preferSameCleaner: boolean;
 }
 
@@ -30,49 +30,33 @@ export function RecurringToggle({
               ...value,
               enabled: event.target.checked,
               frequency: event.target.checked ? value.frequency : null,
-              preferSameCleaner: event.target.checked
-                ? value.preferSameCleaner
-                : false,
+              preferSameCleaner: false,
             })
           }
           type="checkbox"
         />
       </label>
       {value.enabled ? (
-        <>
-          <select
-            aria-label="Recurring frequency"
-            className="h-11 w-full rounded-md border bg-background px-3 text-sm"
-            onChange={(event) =>
-              onChange({
-                ...value,
-                frequency: event.target.value as RecurringValue["frequency"],
-              })
-            }
-            value={value.frequency ?? ""}
-          >
-            <option disabled value="">
-              Choose frequency
-            </option>
-            <option value="weekly">Weekly</option>
-            <option value="fortnightly">Fortnightly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-          <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4 text-sm">
-            Prefer the same cleaner each time
-            <input
-              checked={value.preferSameCleaner}
-              className="h-4 w-4 accent-emerald-700"
-              onChange={(event) =>
-                onChange({
-                  ...value,
-                  preferSameCleaner: event.target.checked,
-                })
-              }
-              type="checkbox"
-            />
-          </label>
-        </>
+        <select
+          aria-label="Recurring frequency"
+          className="h-11 w-full rounded-md border bg-background px-3 text-sm"
+          onChange={(event) =>
+            onChange({
+              ...value,
+              frequency: event.target.value as RecurringValue["frequency"],
+              preferSameCleaner: false,
+            })
+          }
+          value={value.frequency ?? ""}
+        >
+          <option disabled value="">
+            Choose frequency
+          </option>
+          <option value="weekly">Weekly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="monthly">Monthly</option>
+          <option value="custom">Customize your calendar</option>
+        </select>
       ) : null}
     </div>
   );

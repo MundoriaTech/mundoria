@@ -13,6 +13,7 @@ export type BookingFlowStepId =
   | "category"
   | "service"
   | "address"
+  | "rooms"
   | "standard"
   | "addons"
   | "frequency"
@@ -29,6 +30,7 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   category: "Category",
   service: "Service",
   address: "Address",
+  rooms: "Rooms",
   standard: "Session",
   addons: "Add-ons",
   frequency: "Frequency",
@@ -126,6 +128,12 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
     return [
       { label: "Once a week", popular: true, value: "weekly" as const },
       { label: "Once a fortnight", popular: false, value: "fortnightly" as const },
+      { label: "Once a month", popular: false, value: "monthly" as const },
+      {
+        label: "Customize your calendar",
+        popular: false,
+        value: "custom" as const,
+      },
     ];
   }
   if (mode === "optional") {
@@ -134,6 +142,11 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
       { label: "Once a week", popular: true, value: "weekly" as const },
       { label: "Once a fortnight", popular: false, value: "fortnightly" as const },
       { label: "Once a month", popular: false, value: "monthly" as const },
+      {
+        label: "Customize your calendar",
+        popular: false,
+        value: "custom" as const,
+      },
     ];
   }
   return [];
@@ -148,7 +161,7 @@ export function getFlowSteps(
   if (!draft.serviceCategory) steps.push("category");
   if (!draft.serviceType) steps.push("service");
 
-  steps.push("address");
+  steps.push("address", "rooms");
 
   if (draft.serviceType) {
     const fixed = serviceDefinition(draft.serviceType).fixedStandard;
@@ -216,6 +229,15 @@ export function composeBookingNotes(draft: BookingDraft) {
   }
   if (draft.alternateTimes.length) {
     parts.push(`Also available at: ${draft.alternateTimes.join(", ")}`);
+  }
+  if (
+    draft.isRecurring &&
+    draft.recurrencePattern === "custom" &&
+    draft.customRecurrenceDates.length
+  ) {
+    parts.push(
+      `Custom calendar dates: ${draft.customRecurrenceDates.join(", ")}`,
+    );
   }
   return parts.join("\n\n");
 }

@@ -67,10 +67,10 @@ export function CookieSettingsWidget({
   );
 }
 
-/** Plain text control — use in footers like Wecasa’s “Cookies” link. */
+/** Plain text control — WeCasa-style “Manage cookies” / Cookies footer link. */
 export function CookieSettingsLink({
   className,
-  children = "Cookies",
+  children = "Manage cookies",
 }: {
   children?: React.ReactNode;
   className?: string;
