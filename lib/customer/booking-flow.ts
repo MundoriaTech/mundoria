@@ -2,6 +2,10 @@ import {
   estimateDuration,
   serviceDefinition,
 } from "@/lib/customer/services";
+import {
+  calculateOfficeQuote,
+  formatCleanerTime,
+} from "@/lib/customer/office-pricing";
 import type {
   BookingDraft,
   CleaningStandard,
@@ -157,17 +161,24 @@ export function getFlowSteps(
   draft: Pick<BookingDraft, "serviceCategory" | "serviceType">,
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
+  const isOffice = draft.serviceType === "office";
 
   if (!draft.serviceCategory) steps.push("category");
   if (!draft.serviceType) steps.push("service");
 
-  steps.push("address", "rooms");
+  steps.push("address");
 
-  if (draft.serviceType) {
-    const fixed = serviceDefinition(draft.serviceType).fixedStandard;
-    if (!fixed) steps.push("standard");
+  // Office: level first, then spaces (per commercial pricing logic).
+  if (isOffice) {
+    steps.push("standard", "rooms");
   } else {
-    steps.push("standard");
+    steps.push("rooms");
+    if (draft.serviceType) {
+      const fixed = serviceDefinition(draft.serviceType).fixedStandard;
+      if (!fixed) steps.push("standard");
+    } else {
+      steps.push("standard");
+    }
   }
 
   steps.push("addons");
@@ -180,7 +191,14 @@ export function getFlowSteps(
   return steps;
 }
 
-export function stepLabel(stepId: BookingFlowStepId) {
+export function stepLabel(
+  stepId: BookingFlowStepId,
+  draft?: Pick<BookingDraft, "serviceType">,
+) {
+  if (stepId === "rooms" && draft?.serviceType === "office") return "Spaces";
+  if (stepId === "standard" && draft?.serviceType === "office") {
+    return "Level";
+  }
   return STEP_LABELS[stepId];
 }
 
@@ -191,13 +209,31 @@ export function durationSummary(args: {
   cleaningStandard: CleaningStandard | null;
   selectedAddOns: string[];
   serviceType: ServiceType | null;
+  officeSpaces?: BookingDraft["officeSpaces"];
 }) {
   if (!args.serviceType || !args.cleaningStandard) return null;
   const hours = estimateDuration(
     args.serviceType,
     args.cleaningStandard,
     args.selectedAddOns,
+    { officeSpaces: args.officeSpaces },
   );
+
+  if (args.serviceType === "office" && args.officeSpaces?.length) {
+    const quote = calculateOfficeQuote(
+      args.officeSpaces,
+      args.cleaningStandard,
+    );
+    return {
+      hours,
+      minutes: Math.round((hours % 1) * 60),
+      wholeHours: Math.floor(hours),
+      propertyHint: `${formatCleanerTime(quote.totalMinutes)} · ${quote.allocatedCleaners} cleaner${quote.allocatedCleaners === 1 ? "" : "s"} (≤5 hrs each)`,
+      windowsTip:
+        "Price is based on cleaner-hours, not how long the visit lasts on the clock.",
+    };
+  }
+
   const beds = args.bedrooms ?? 1;
   const baths = args.bathrooms ?? 1;
   const other = args.otherRooms ?? 0;

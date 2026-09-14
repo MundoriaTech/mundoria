@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import twilio from "twilio";
 
 import { createBookingSchema } from "@/lib/customer/booking-schema";
+import { calculateOfficeQuote } from "@/lib/customer/office-pricing";
 import {
   formatMoney,
   formatServiceName,
@@ -86,14 +87,24 @@ export async function POST(request: Request) {
   );
   const platformAmount = Math.round(paymentIntent.amount * 0.2);
   const cleanerAmount = paymentIntent.amount - platformAmount;
+  const officeQuote =
+    parsed.data.serviceType === "office" && parsed.data.officeSpaces.length
+      ? calculateOfficeQuote(
+          parsed.data.officeSpaces,
+          parsed.data.cleaningStandard,
+        )
+      : null;
   const { data: booking, error } = await admin
     .from("bookings")
     .insert({
       address_id: parsed.data.addressId,
+      allocated_cleaners: officeQuote?.allocatedCleaners ?? 1,
       amount_cleaner: cleanerAmount,
       amount_platform: platformAmount,
       amount_total: paymentIntent.amount,
+      cleaner_hours: officeQuote?.cleanerHours ?? null,
       cleaning_standard: parsed.data.cleaningStandard,
+      commercial_spaces: officeQuote ? parsed.data.officeSpaces : null,
       customer_id: user.id,
       estimated_duration_hours: parsed.data.estimatedDurationHours,
       is_recurring: parsed.data.isRecurring,

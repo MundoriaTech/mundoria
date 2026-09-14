@@ -28,7 +28,6 @@ export const LANDING_NAV_PILL_H = "4.75rem"; /* ~76px — room for inner pad + C
 export const LANDING_NAV_PILL_RADIUS = "1.125rem"; /* 18px */
 
 const NAV_SCROLL_AT = 48;
-const NAV_DESKTOP_MQ = "(min-width: 1024px)";
 
 const NAV_LINK_CLASS =
   "whitespace-nowrap text-[12px] font-medium text-[#1c133b] transition hover:text-[#312c79] xl:text-[13px]";
@@ -48,19 +47,10 @@ export function LandingNavbar({
   const lastScrollY = useRef(0);
 
   useEffect(() => {
-    const desktopMq = window.matchMedia(NAV_DESKTOP_MQ);
     lastScrollY.current = window.scrollY;
 
     const update = () => {
       const y = window.scrollY;
-      const isDesktop = desktopMq.matches;
-
-      if (!isDesktop) {
-        setHidden(false);
-        lastScrollY.current = y;
-        return;
-      }
-
       const delta = y - lastScrollY.current;
       if (y < NAV_SCROLL_AT) {
         setHidden(false);
@@ -74,10 +64,8 @@ export function LandingNavbar({
 
     update();
     window.addEventListener("scroll", update, { passive: true });
-    desktopMq.addEventListener("change", update);
     return () => {
       window.removeEventListener("scroll", update);
-      desktopMq.removeEventListener("change", update);
     };
   }, []);
 

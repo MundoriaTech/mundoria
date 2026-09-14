@@ -17,6 +17,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import {
+  calculateOfficeQuote,
+  type OfficeSpaceSelection,
+} from "@/lib/customer/office-pricing";
 import type {
   Address,
   CleaningStandard,
@@ -563,7 +567,20 @@ export function estimatePrice(
     date?: string | null;
     time?: string | null;
   },
+  options?: {
+    officeSpaces?: OfficeSpaceSelection[];
+  },
 ) {
+  const scheduleMult = schedulePriceMultiplier(schedule?.date, schedule?.time);
+
+  if (serviceType === "office" && options?.officeSpaces?.length) {
+    const quote = calculateOfficeQuote(options.officeSpaces, standard);
+    return (
+      Math.round(quote.pricePence * scheduleMult) +
+      selectedAddOnTotal(selectedAddOns)
+    );
+  }
+
   const service = serviceDefinition(serviceType);
   const bedrooms = address.num_bedrooms ?? 1;
   const bathrooms = address.num_bathrooms ?? 1;
@@ -582,7 +599,7 @@ export function estimatePrice(
       otherRooms * 600) *
       propertyMultiplier *
       standardMultipliers[standard] *
-      schedulePriceMultiplier(schedule?.date, schedule?.time),
+      scheduleMult,
   );
 
   return base + selectedAddOnTotal(selectedAddOns);
@@ -592,7 +609,15 @@ export function estimateDuration(
   serviceType: ServiceType,
   standard: CleaningStandard = recommendedStandardFor(serviceType),
   selectedAddOns: string[] = [],
+  options?: {
+    officeSpaces?: OfficeSpaceSelection[];
+  },
 ) {
+  if (serviceType === "office" && options?.officeSpaces?.length) {
+    const quote = calculateOfficeQuote(options.officeSpaces, standard);
+    return Math.max(1, quote.jobDurationHours);
+  }
+
   const service = serviceDefinition(serviceType);
   const standardExtra =
     standard === "comprehensive" ? 1.5 : standard === "enhanced" ? 0.75 : 0;

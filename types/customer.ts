@@ -98,10 +98,25 @@ export interface BookingAddOn {
   created_at: string;
 }
 
+export type OfficeSpaceDraft = {
+  customLabel?: string;
+  quantity: number;
+  size: "small" | "medium" | "large" | "not_sure";
+  spaceType:
+    | "office_work_area"
+    | "meeting_room"
+    | "toilet"
+    | "kitchen"
+    | "reception"
+    | "corridor"
+    | "custom";
+};
+
 export interface Booking {
   id: string;
   customer_id: string;
   cleaner_id: string | null;
+  previous_cleaner_id?: string | null;
   address_id: string;
   service_type: ServiceType;
   service_category: ServiceCategory | null;
@@ -116,6 +131,13 @@ export interface Booking {
   scheduled_date: string;
   scheduled_start_time: string;
   estimated_duration_hours: number | null;
+  cleaner_hours?: number | null;
+  allocated_cleaners?: number | null;
+  commercial_spaces?: OfficeSpaceDraft[] | null;
+  booking_protected?: boolean;
+  confirmation_gate?: "none" | "t24" | "t6" | "t1";
+  confirmation_due_at?: string | null;
+  confirmation_responded_at?: string | null;
   actual_start_time: string | null;
   actual_end_time: string | null;
   checkin_verified: boolean;
@@ -228,6 +250,8 @@ export interface BookingDraft {
   numBathrooms: number | null;
   /** Named other rooms selected for the clean (living room, study, …). */
   otherRoomTypes: string[];
+  /** Office cleaning spaces (commercial → office). */
+  officeSpaces: OfficeSpaceDraft[];
   isRecurring: boolean;
   recurrencePattern: "weekly" | "fortnightly" | "monthly" | "custom" | null;
   preferSameCleaner: boolean;

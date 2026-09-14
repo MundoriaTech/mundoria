@@ -53,11 +53,17 @@ import {
   servicesForCategory,
   standardLabel,
 } from "@/lib/customer/services";
+import {
+  calculateOfficeQuote,
+  formatCleanerTime,
+  OFFICE_SPACE_OPTIONS,
+} from "@/lib/customer/office-pricing";
 import { cn } from "@/lib/utils";
 import type {
   Address,
   BookingDraft,
   CleaningStandard,
+  OfficeSpaceDraft,
   ServiceCategory,
   ServiceType,
 } from "@/types/customer";
@@ -76,6 +82,7 @@ const blankDraft: BookingDraft = {
   isRecurring: false,
   numBathrooms: null,
   numBedrooms: null,
+  officeSpaces: [],
   otherRoomTypes: [],
   preferSameCleaner: false,
   propertyCondition: null,
@@ -198,6 +205,7 @@ export function BookingWizard({
             date: draft.scheduledDate,
             time: draft.scheduledTime,
           },
+          { officeSpaces: draft.officeSpaces },
         )
       : 0;
   const recommendation = getSmartRecommendation({
@@ -211,9 +219,16 @@ export function BookingWizard({
     bedrooms: draft.numBedrooms ?? roomsAddress?.num_bedrooms,
     otherRooms: draft.otherRoomTypes.length,
     cleaningStandard: selectedStandard,
+    officeSpaces: draft.officeSpaces,
     selectedAddOns: draft.selectedAddOns,
     serviceType: draft.serviceType,
   });
+  const officeQuote =
+    draft.serviceType === "office" &&
+    selectedStandard &&
+    draft.officeSpaces.some((space) => space.quantity > 0)
+      ? calculateOfficeQuote(draft.officeSpaces, selectedStandard)
+      : null;
 
   useEffect(() => {
     try {
@@ -257,9 +272,12 @@ export function BookingWizard({
           numBathrooms: sameService
             ? (parsed?.numBathrooms ?? initialDraft?.numBathrooms ?? null)
             : (initialDraft?.numBathrooms ?? null),
+          officeSpaces: sameService
+            ? (parsed?.officeSpaces ?? initialDraft?.officeSpaces ?? [])
+            : (initialDraft?.officeSpaces ?? []),
           otherRoomTypes: sameService
-            ? (parsed?.otherRoomTypes ?? [])
-            : [],
+            ? (parsed?.otherRoomTypes ?? initialDraft?.otherRoomTypes ?? [])
+            : (initialDraft?.otherRoomTypes ?? []),
           customRecurrenceDates: sameService
             ? (parsed?.customRecurrenceDates ?? [])
             : [],
@@ -540,6 +558,9 @@ export function BookingWizard({
       case "address":
         return Boolean(draft.addressId || guestAddressComplete(draft.guestAddress));
       case "rooms":
+        if (draft.serviceType === "office") {
+          return draft.officeSpaces.some((space) => space.quantity > 0);
+        }
         return draft.numBedrooms != null && draft.numBathrooms != null;
       case "standard":
         return Boolean(draft.cleaningStandard);
@@ -743,14 +764,23 @@ export function BookingWizard({
             />
           ) : null}
           {stepId === "rooms" ? (
-            <RoomsStep
-              bathrooms={draft.numBathrooms}
-              bedrooms={draft.numBedrooms}
-              otherRoomTypes={draft.otherRoomTypes}
-              onBathrooms={(value) => update("numBathrooms", value)}
-              onBedrooms={(value) => update("numBedrooms", value)}
-              onOtherRooms={(value) => update("otherRoomTypes", value)}
-            />
+            draft.serviceType === "office" ? (
+              <OfficeSpacesStep
+                onChange={(value) => update("officeSpaces", value)}
+                quote={officeQuote}
+                spaces={draft.officeSpaces}
+                standard={selectedStandard}
+              />
+            ) : (
+              <RoomsStep
+                bathrooms={draft.numBathrooms}
+                bedrooms={draft.numBedrooms}
+                otherRoomTypes={draft.otherRoomTypes}
+                onBathrooms={(value) => update("numBathrooms", value)}
+                onBedrooms={(value) => update("numBedrooms", value)}
+                onOtherRooms={(value) => update("otherRoomTypes", value)}
+              />
+            )
           ) : null}
           {stepId === "standard" && draft.serviceType ? (
             <StandardStep
@@ -1165,6 +1195,157 @@ const OTHER_ROOM_OPTIONS = [
 ] as const;
 
 const ROOM_COUNT_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const;
+
+function OfficeSpacesStep({
+  onChange,
+  quote,
+  spaces,
+  standard,
+}: {
+  onChange: (value: OfficeSpaceDraft[]) => void;
+  quote: ReturnType<typeof calculateOfficeQuote> | null;
+  spaces: OfficeSpaceDraft[];
+  standard: CleaningStandard | null;
+}) {
+  function upsert(
+    spaceType: OfficeSpaceDraft["spaceType"],
+    patch: Partial<OfficeSpaceDraft>,
+  ) {
+    const existing = spaces.find((space) => space.spaceType === spaceType);
+    const next: OfficeSpaceDraft = {
+      quantity: existing?.quantity ?? 0,
+      size: existing?.size ?? "medium",
+      spaceType,
+      ...patch,
+    };
+    const others = spaces.filter((space) => space.spaceType !== spaceType);
+    if (next.quantity <= 0) {
+      onChange(others);
+      return;
+    }
+    onChange([...others, next]);
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+        Tell us about your office
+      </h2>
+      <p className="mt-2 text-sm text-[#5b5478]">
+        Choose spaces, how many you have, and their size. You never need to
+        calculate hours — CleanScape does that.
+      </p>
+      {!standard ? (
+        <p className="mt-4 rounded-2xl bg-[#f6f0ff] px-4 py-3 text-sm text-[#5b5478]">
+          Pick a cleaning level first so we can size each space accurately.
+        </p>
+      ) : null}
+
+      <div className="mt-5 grid gap-4">
+        {OFFICE_SPACE_OPTIONS.map((option) => {
+          const current = spaces.find(
+            (space) => space.spaceType === option.value,
+          );
+          const quantity = current?.quantity ?? 0;
+          const size = current?.size ?? "medium";
+          return (
+            <div
+              className="rounded-2xl border border-[#d9ccef] bg-white/80 p-4"
+              key={option.value}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-[#1c133b]">
+                  {option.label}
+                </p>
+                <select
+                  className="h-10 rounded-xl border border-[#d9ccef] bg-white px-3 text-sm"
+                  onChange={(event) =>
+                    upsert(option.value, {
+                      quantity: Number(event.target.value),
+                    })
+                  }
+                  value={quantity}
+                >
+                  {ROOM_COUNT_OPTIONS.map((count) => (
+                    <option key={count} value={count}>
+                      {count === 0 ? "None" : count === 6 ? "6+" : count}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {quantity > 0 ? (
+                <div className="mt-3 grid gap-2 sm:grid-cols-4">
+                  {(
+                    [
+                      ["small", "Small", option.sizeBands.small],
+                      ["medium", "Medium", option.sizeBands.medium],
+                      ["large", "Large", option.sizeBands.large],
+                      ["not_sure", "Not sure", "We’ll estimate"],
+                    ] as const
+                  ).map(([value, label, band]) => (
+                    <button
+                      className={cn(
+                        "rounded-xl border px-3 py-2 text-left text-xs touch-manipulation",
+                        size === value
+                          ? "border-[#6a45b8] bg-[#efe6ff] text-[#1c133b]"
+                          : "border-[#e8dff8] bg-white text-[#5b5478]",
+                      )}
+                      key={value}
+                      onClick={() => upsert(option.value, { size: value })}
+                      type="button"
+                    >
+                      <span className="block font-semibold">{label}</span>
+                      <span className="mt-0.5 block opacity-80">{band}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+
+      {quote ? (
+        <div className="mt-5 rounded-2xl border border-[#d9ccef] bg-[#faf7ff] p-4 shadow-[0_8px_24px_rgba(28,19,59,0.06)]">
+          <p className="text-sm font-semibold text-[#1c133b]">
+            {quote.lineItems
+              .map((item) => `${item.quantity} ${item.label.toLowerCase()}`)
+              .join(", ")}
+          </p>
+          <div className="mt-3 space-y-1.5 text-sm text-[#5b5478]">
+            {quote.lineItems.map((item) => (
+              <div
+                className="flex justify-between gap-3"
+                key={`${item.spaceType}-${item.size}`}
+              >
+                <span>
+                  {item.label}: {item.selectionLabel}
+                </span>
+                <span className="shrink-0 font-medium text-[#1c133b]">
+                  {item.totalMinutes} min
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-[#e8dff8] pt-3">
+            <span className="rounded-full bg-[#e8e0f9] px-3 py-1 text-xs font-semibold text-[#312c79]">
+              {formatCleanerTime(quote.totalMinutes)}
+            </span>
+            <span className="rounded-full bg-[#e8e0f9] px-3 py-1 text-xs font-semibold text-[#312c79]">
+              {quote.cleanerHours <= 5
+                ? `≤ 5 hrs → ${quote.allocatedCleaners} cleaner`
+                : `${quote.allocatedCleaners} cleaners · ~${quote.jobDurationHours} hr visit`}
+            </span>
+          </div>
+          <p className="mt-2 text-[11px] text-[#8a829e]">
+            Billing follows cleaner-hours, not visit duration. Size “Not sure”
+            uses an average estimate.
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function RoomsStep({
   bathrooms,

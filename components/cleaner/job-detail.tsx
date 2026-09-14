@@ -131,6 +131,33 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     router.refresh();
   }
 
+  async function confirmGate(confirmed: boolean) {
+    setWorking(true);
+    setError(null);
+    const response = await fetch(`/api/cleaner/jobs/${job.id}/confirm-gate`, {
+      body: JSON.stringify({ confirmed }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as { error?: string };
+    setWorking(false);
+    if (!response.ok) {
+      setError(result.error ?? "Unable to update confirmation.");
+      return;
+    }
+    if (confirmed) {
+      setJob((current) => ({
+        ...current,
+        confirmation_responded_at: new Date().toISOString(),
+        status:
+          current.confirmation_gate === "t1"
+            ? "cleaner_en_route"
+            : current.status,
+      }));
+    }
+    router.refresh();
+  }
+
   async function photo(file: File) {
     const supabase = createBrowserClient();
     const path = `${job.cleaner_id}/${job.id}/${Date.now()}-${file.name}`;
@@ -165,6 +192,42 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
           </Link>
         </Button>
       </div>
+
+      {job.confirmation_gate &&
+      job.confirmation_gate !== "none" &&
+      !job.confirmation_responded_at &&
+      ["matched", "confirmed"].includes(job.status) ? (
+        <section className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+          <h2 className="font-semibold text-amber-950">
+            {job.confirmation_gate === "t1"
+              ? "Confirm you’re on the way"
+              : "Confirm this booking"}
+          </h2>
+          <p className="mt-2 text-sm text-amber-900/80">
+            {job.confirmation_gate === "t24"
+              ? "Please confirm you can still take this clean (24-hour gate)."
+              : job.confirmation_gate === "t6"
+                ? "Reconfirm before the shorter 6-hour window closes."
+                : "Mark yourself on the way so the customer stays protected."}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              disabled={working}
+              onClick={() => void confirmGate(true)}
+            >
+              Confirm
+            </Button>
+            <Button
+              disabled={working}
+              onClick={() => void confirmGate(false)}
+              variant="outline"
+            >
+              Can’t make it
+            </Button>
+          </div>
+        </section>
+      ) : null}
+
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-xl border bg-background p-5">
           <h2 className="font-semibold">Job details</h2>

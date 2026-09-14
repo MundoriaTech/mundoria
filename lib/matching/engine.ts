@@ -189,14 +189,38 @@ export async function runMatchingEngine(
     return { considered, matched: false as const };
   }
 
+  const previousCleanerId = booking.cleaner_id as string | null;
   const { data: assigned } = await admin
     .from("bookings")
-    .update({ cleaner_id: winner.cleanerId, status: "matched" })
+    .update({
+      cleaner_id: winner.cleanerId,
+      previous_cleaner_id: previousCleanerId,
+      status: "matched",
+    })
     .eq("id", bookingId)
-    .in("status", ["pending_match", "no_show"])
+    .in("status", ["pending_match", "no_show", "matched"])
     .select("id")
     .maybeSingle();
   if (!assigned) return { considered, matched: false as const };
+
+  const { formEmergencyList } = await import("@/lib/matching/emergency-list");
+  await formEmergencyList(
+    bookingId,
+    winner.cleanerId,
+    ranked.map((candidate) => candidate.cleanerId),
+  );
+
+  if (Number(booking.allocated_cleaners ?? 1) > 1) {
+    await alertAdmins(
+      "multi_cleaner_job",
+      "Multi-cleaner office job matched",
+      `Booking ${bookingId.slice(0, 8)} needs ${booking.allocated_cleaners} cleaners. Primary matched; assign remaining team.`,
+      {
+        allocated_cleaners: booking.allocated_cleaners,
+        booking_id: bookingId,
+      },
+    );
+  }
 
   await admin.from("cleaner_job_responses").upsert(
     {
@@ -208,6 +232,14 @@ export async function runMatchingEngine(
     },
     { onConflict: "booking_id,cleaner_id" },
   );
+
+  const customerPushTitle = previousCleanerId
+    ? "Your cleaning professional has changed"
+    : "Your booking is protected";
+  const customerPushBody = previousCleanerId
+    ? `${winner.cleanerName?.split(" ")[0] ?? "A CleanScape professional"} is now assigned to your booking.`
+    : "We've matched a cleaner and kept backup professionals ready if anything changes.";
+
   await Promise.all([
     sendPushNotification(
       winner.cleanerId,
@@ -217,8 +249,8 @@ export async function runMatchingEngine(
     ),
     sendPushNotification(
       booking.customer_id,
-      "We found your cleaner",
-      "A cleaner has been matched to your booking.",
+      customerPushTitle,
+      customerPushBody,
       { booking_id: bookingId },
     ),
     sendCleanerJobOfferEmail(),

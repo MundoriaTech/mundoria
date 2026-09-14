@@ -217,6 +217,20 @@ export function BookingDetail({
         </div>
       )}
 
+      {booking.booking_protected &&
+      ["matched", "confirmed", "cleaner_en_route"].includes(booking.status) ? (
+        <Notice
+          body="Backup professionals are ready if anything changes. You won’t see operational detail — just a protected booking."
+          title="Your booking is protected"
+        />
+      ) : null}
+      {booking.previous_cleaner_id && booking.cleaner ? (
+        <Notice
+          body={`${booking.cleaner.full_name.split(" ")[0]} is now assigned to your clean.`}
+          title="Your cleaning professional has changed"
+        />
+      ) : null}
+
       {booking.checkin_verified ? (
         <Notice
           body="Your cleaner has arrived and checked in."
@@ -327,7 +341,9 @@ export function BookingDetail({
             </div>
           ) : (
             <p className="mt-4 text-sm text-muted-foreground">
-              We’re matching you with the best available cleaner.
+              {booking.booking_protected
+                ? "Your booking is protected — we’re arranging your CleanScape professional."
+                : "We’re matching you with the best available cleaner."}
             </p>
           )}
         </section>

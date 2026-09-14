@@ -87,6 +87,24 @@ export const bookingDraftSchema = z.object({
   serviceType,
   specialAttentionAreas: z.array(z.string().trim().min(1)).default([]),
   specialInstructions: z.string().trim().max(2000),
+  officeSpaces: z
+    .array(
+      z.object({
+        customLabel: z.string().trim().max(80).optional(),
+        quantity: z.number().int().min(0).max(50),
+        size: z.enum(["small", "medium", "large", "not_sure"]),
+        spaceType: z.enum([
+          "office_work_area",
+          "meeting_room",
+          "toilet",
+          "kitchen",
+          "reception",
+          "corridor",
+          "custom",
+        ]),
+      }),
+    )
+    .default([]),
 });
 
 export const createBookingSchema = bookingDraftSchema.extend({

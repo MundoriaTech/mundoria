@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       date: parsed.data.scheduledDate,
       time: parsed.data.scheduledTime,
     },
+    { officeSpaces: parsed.data.officeSpaces },
   );
   const discount = promo
     ? promo.discount_type === "percentage"
