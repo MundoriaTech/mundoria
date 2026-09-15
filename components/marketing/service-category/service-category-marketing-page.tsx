@@ -205,7 +205,7 @@ export function ServiceCategoryMarketingPage({
       <section className="bg-[#f3eef8] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#c45c3a] sm:text-3xl">
-            CleanScape FAQ
+            Mundoria FAQ
           </h2>
           <div className="mt-8 columns-1 gap-4 sm:columns-2 sm:gap-5">
             {faqs.map((faq) => (

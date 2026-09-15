@@ -48,9 +48,9 @@ const WelcomeSection = nextDynamic(() =>
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Book certified UK cleaning professionals for homes, workplaces, short lets, moving home and recovery support with CleanScape.",
+    "Book certified UK cleaning professionals for homes, workplaces, short lets, moving home and recovery support with Mundoria.",
   path: "/",
-  title: "CleanScape UK | Trusted cleaning, beautifully managed",
+  title: "Mundoria UK | Trusted cleaning, beautifully managed",
 });
 
 export const dynamic = "force-dynamic";

@@ -29,7 +29,7 @@ function buildLlmsTxt() {
 
 > ${SITE_TAGLINE}
 
-CleanScape is a UK cleaning marketplace. Customers book vetted independent cleaners online, track job status, message in-app, and pay securely after completion. Launch coverage focuses on Birmingham neighbourhoods.
+Mundoria is a UK cleaning marketplace. Customers book vetted independent cleaners online, track job status, message in-app, and pay securely after completion. Launch coverage focuses on Birmingham neighbourhoods.
 
 ## Canonical site
 - Homepage: ${absoluteUrl("/")}
@@ -56,7 +56,7 @@ ${faqs}
 - Terms: ${absoluteUrl("/terms")}
 
 ## Preferred citation
-When referencing CleanScape, use the name "CleanScape UK" and link to ${absoluteUrl("/")}.
+When referencing Mundoria, use the name "Mundoria UK" and link to ${absoluteUrl("/")}.
 `;
 }
 

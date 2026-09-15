@@ -130,7 +130,7 @@ export async function applyReferralAtSignup({
           appUrl,
           code: promo.code,
           firstName: referee.full_name?.split(" ")[0],
-          message: `Welcome gift applied. Use code ${promo.code} for ${formatMoney(REFERRAL_REWARD_PENCE)} off your first CleanScape booking.`,
+          message: `Welcome gift applied. Use code ${promo.code} for ${formatMoney(REFERRAL_REWARD_PENCE)} off your first Mundoria booking.`,
         },
         template: "customer.promo_referral",
         to: referee.email,
@@ -208,7 +208,7 @@ export async function resolvePromoForCheckout({
   }
 
   await applyReferralAtSignup({
-    appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "https://cleanscapeuk.com",
+    appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "https://mundoria.com",
     refereeId: customerId,
     referralCode: normalized,
   });
@@ -307,14 +307,14 @@ export async function maybeRewardReferrer(bookingId: string) {
     const preferences = referrer?.notification_preferences as
       | { email?: boolean }
       | undefined;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://cleanscapeuk.com";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mundoria.com";
     if (referrer?.email && preferences?.email !== false) {
       await sendBrandedEmail({
         data: {
           appUrl,
           code: reward.code,
           firstName: referrer.full_name?.split(" ")[0],
-          message: `Thanks for sharing CleanScape. Use ${reward.code} for ${formatMoney(REFERRAL_REWARD_PENCE)} off your next booking.`,
+          message: `Thanks for sharing Mundoria. Use ${reward.code} for ${formatMoney(REFERRAL_REWARD_PENCE)} off your next booking.`,
         },
         template: "customer.promo_referral",
         to: referrer.email,

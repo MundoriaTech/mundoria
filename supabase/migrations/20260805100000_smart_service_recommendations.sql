@@ -1,4 +1,4 @@
--- CleanScape Smart Service recommendation engine support.
+-- Mundoria Smart Service recommendation engine support.
 -- Enum values are added in 20260805099500_smart_service_enum_values.sql.
 
 do $$

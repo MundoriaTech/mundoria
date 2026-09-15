@@ -118,7 +118,7 @@ export async function calculateCleanerScores(referenceDate = new Date()) {
     if (tier !== cleaner.tier) {
       await sendPushNotification(
         cleaner.id,
-        "Your CleanScape tier changed",
+        "Your Mundoria tier changed",
         `You are now ${tier}. Your latest performance score is ${totalScore.toFixed(1)}.`,
         { tier, total_score: totalScore },
       );

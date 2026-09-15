@@ -344,7 +344,7 @@ export async function activateEmergencyList(
   await sendPushNotification(
     booking.customer_id,
     "Your booking is protected",
-    "We're arranging another CleanScape professional for your booking.",
+    "We're arranging another Mundoria professional for your booking.",
     { booking_id: bookingId },
   );
 
@@ -398,7 +398,7 @@ export async function notifyCustomerCleanerChanged(
   if (!booking) return;
 
   const previous = previousCleanerName?.split(" ")[0] ?? "Your cleaner";
-  const next = newCleanerName?.split(" ")[0] ?? "another CleanScape professional";
+  const next = newCleanerName?.split(" ")[0] ?? "another Mundoria professional";
 
   await sendPushNotification(
     booking.customer_id,

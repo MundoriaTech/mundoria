@@ -6,7 +6,7 @@ import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "CleanScape privacy policy explaining how customer, cleaner, booking, payment, location and support data is handled.",
+    "Mundoria privacy policy explaining how customer, cleaner, booking, payment, location and support data is handled.",
   path: "/privacy",
   title: "Privacy Policy",
 });
@@ -14,7 +14,7 @@ export const metadata: Metadata = buildPageMetadata({
 const sections: LegalSection[] = [
   {
     body:
-      "CleanScape is a two-sided cleaning services marketplace for customers, independent cleaning professionals and platform administrators. For privacy questions, contact support@cleanscapeuk.com. Before public launch, replace this section with your registered legal entity name, company number and postal address.",
+      "Mundoria is a two-sided cleaning services marketplace for customers, independent cleaning professionals and platform administrators. For privacy questions, contact support@mundoriauk.com. Before public launch, replace this section with your registered legal entity name, company number and postal address.",
     title: "Who we are",
   },
   {
@@ -24,7 +24,7 @@ const sections: LegalSection[] = [
       "Cleaner data: bio, services offered, working areas, availability, performance information, uploaded identity/DBS documents, payout preference and Stripe Connect status.",
       "Booking operations data: service type, scheduled date/time, status changes, check-in/check-out records, completion checklists, photos, cancellation and no-show records.",
       "Location data: customer address coordinates, cleaner working areas and cleaner GPS coordinates when a cleaner checks in, checks out or shares active job location.",
-      "Payment data: Stripe customer IDs, payment intent IDs, payment status, transfer IDs and payout records. CleanScape does not store full card numbers.",
+      "Payment data: Stripe customer IDs, payment intent IDs, payment status, transfer IDs and payout records. Mundoria does not store full card numbers.",
       "Technical data: device/browser details, IP address, logs, cookies/session tokens, error reports and usage events.",
     ],
     title: "Information we collect",
@@ -67,7 +67,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "CleanScape uses location data to support addresses, cleaner coverage areas, routes, active job updates and geofence check-in/check-out. Cleaner GPS data should only be captured during active job actions or live job tracking, not continuously outside the service context.",
+      "Mundoria uses location data to support addresses, cleaner coverage areas, routes, active job updates and geofence check-in/check-out. Cleaner GPS data should only be captured during active job actions or live job tracking, not continuously outside the service context.",
     title: "Location data",
   },
   {
@@ -103,12 +103,12 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "CleanScape is not intended for children. Users must be old enough to enter into a contract for marketplace services in their jurisdiction.",
+      "Mundoria is not intended for children. Users must be old enough to enter into a contract for marketplace services in their jurisdiction.",
     title: "Children",
   },
   {
     body:
-      "We may update this policy as CleanScape evolves. If changes are material, we will take reasonable steps to notify users or highlight the change in the app.",
+      "We may update this policy as Mundoria evolves. If changes are material, we will take reasonable steps to notify users or highlight the change in the app.",
     title: "Changes to this policy",
   },
 ];
@@ -116,7 +116,7 @@ const sections: LegalSection[] = [
 export default function PrivacyPage() {
   return (
     <LegalPage
-      intro="This policy explains what personal information CleanScape collects, why we use it, who we share it with, and the choices and rights users have."
+      intro="This policy explains what personal information Mundoria collects, why we use it, who we share it with, and the choices and rights users have."
       lastUpdated="27 July 2026"
       sections={sections}
       title="Privacy Policy"

@@ -1,6 +1,6 @@
-# CleanScape cron-job.org setup
+# Mundoria cron-job.org setup
 
-CleanScape uses cron-job.org for scheduled production operations on Vercel
+Mundoria uses cron-job.org for scheduled production operations on Vercel
 Hobby. Vercel-managed Cron Jobs are intentionally disabled in `vercel.json`.
 
 ## Required environment variable
@@ -24,7 +24,7 @@ Authorization: Bearer YOUR_CRON_SECRET
 ```
 
 Do not use cron-job.org's "Requires HTTP authentication" username/password
-fields. CleanScape uses a bearer token header, not Basic Auth.
+fields. Mundoria uses a bearer token header, not Basic Auth.
 
 ## Jobs
 
@@ -33,13 +33,13 @@ seconds.
 
 | Title | URL | Schedule | Purpose |
 | --- | --- | --- | --- |
-| CleanScape Admin Alerts | `https://cleanscapeuk.com/api/cron/admin-alerts` | `*/5 * * * *` | Sends queued admin alerts. |
-| CleanScape Check No-Shows | `https://cleanscapeuk.com/api/cron/check-no-shows` | `*/15 * * * *` | Detects no-show bookings and starts replacement matching. |
-| CleanScape Expire Job Offers | `https://cleanscapeuk.com/api/cron/expire-job-offers` | `*/5 * * * *` | Cascades expired cleaner offers onto the Emergency List. |
-| CleanScape Confirmation Gates | `https://cleanscapeuk.com/api/cron/confirmation-gates` | `*/10 * * * *` | Opens T−24/T−6/T−1 confirmations, prunes reserves, closes lists at start. |
-| CleanScape Apply Rating Holds | `https://cleanscapeuk.com/api/cron/apply-rating-holds` | `0 * * * *` | Applies held low ratings after the dispute window expires. |
-| CleanScape Weekly Payouts | `https://cleanscapeuk.com/api/cron/process-payouts` | `0 6 * * 1` | Processes weekly payout batches. |
-| CleanScape Monthly Scores | `https://cleanscapeuk.com/api/cron/calculate-scores` | `0 0 1 * *` | Recalculates cleaner performance scores monthly. |
+| Mundoria Admin Alerts | `https://mundoria.com/api/cron/admin-alerts` | `*/5 * * * *` | Sends queued admin alerts. |
+| Mundoria Check No-Shows | `https://mundoria.com/api/cron/check-no-shows` | `*/15 * * * *` | Detects no-show bookings and starts replacement matching. |
+| Mundoria Expire Job Offers | `https://mundoria.com/api/cron/expire-job-offers` | `*/5 * * * *` | Cascades expired cleaner offers onto the Emergency List. |
+| Mundoria Confirmation Gates | `https://mundoria.com/api/cron/confirmation-gates` | `*/10 * * * *` | Opens T−24/T−6/T−1 confirmations, prunes reserves, closes lists at start. |
+| Mundoria Apply Rating Holds | `https://mundoria.com/api/cron/apply-rating-holds` | `0 * * * *` | Applies held low ratings after the dispute window expires. |
+| Mundoria Weekly Payouts | `https://mundoria.com/api/cron/process-payouts` | `0 6 * * 1` | Processes weekly payout batches. |
+| Mundoria Monthly Scores | `https://mundoria.com/api/cron/calculate-scores` | `0 0 1 * *` | Recalculates cleaner performance scores monthly. |
 
 Use `Africa/Lagos` as the timezone for calendar-style schedules. For interval
 jobs such as every 5 or 15 minutes, either `Africa/Lagos` or `UTC` is fine.

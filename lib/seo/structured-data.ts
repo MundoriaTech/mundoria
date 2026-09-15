@@ -18,10 +18,10 @@ export function organizationSchema() {
       url: absoluteUrl("/faq"),
     },
     description:
-      "CleanScape connects UK customers with independent cleaning professionals for homes, workplaces and short-term rentals.",
+      "Mundoria connects UK customers with independent cleaning professionals for homes, workplaces and short-term rentals.",
     email: SUPPORT_EMAIL,
-    logo: absoluteUrl("/images/brand/cleanscape-logo.png"),
-    name: "CleanScape UK",
+    logo: absoluteUrl("/images/brand/mundoria-logo.png"),
+    name: "Mundoria UK",
     sameAs: [],
     url: absoluteUrl("/"),
   };
@@ -34,10 +34,10 @@ export function webSiteSchema() {
     description:
       "Book certified UK cleaning professionals with live booking status, messaging and secure payment.",
     inLanguage: "en-GB",
-    name: "CleanScape UK",
+    name: "Mundoria UK",
     publisher: {
       "@type": "Organization",
-      name: "CleanScape UK",
+      name: "Mundoria UK",
     },
     url: absoluteUrl("/"),
   };
@@ -58,7 +58,7 @@ export function localBusinessSchema() {
     })),
     description: LAUNCH_CITY.seoDescription,
     email: SUPPORT_EMAIL,
-    name: "CleanScape UK",
+    name: "Mundoria UK",
     url: absoluteUrl("/"),
   };
 }
@@ -96,13 +96,13 @@ export function serviceListSchema() {
         name: service.label,
         provider: {
           "@type": "Organization",
-          name: "CleanScape UK",
+          name: "Mundoria UK",
         },
         url: absoluteUrl(`/cleaning/${service.slug}`),
       },
       position: index + 1,
     })),
-    name: "CleanScape cleaning services",
+    name: "Mundoria cleaning services",
     numberOfItems: services.length,
   };
 }
@@ -125,7 +125,7 @@ export function allServicesStructuredData() {
     name: service.label,
     provider: {
       "@type": "Organization",
-      name: "CleanScape UK",
+      name: "Mundoria UK",
     },
     url: absoluteUrl(`/cleaning/${service.slug}`),
   }));

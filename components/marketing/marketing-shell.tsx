@@ -83,12 +83,19 @@ export function MarketingHero({
   return (
     <section className="border-b border-border bg-muted/40 px-5 py-16 sm:px-8 sm:py-20">
       <div className="mx-auto max-w-4xl">
+        <p className="text-[1.35rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.55rem]">
+          Mundoria
+        </p>
         {eyebrow ? (
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-primary">
+          <p className="mt-5 text-sm font-black uppercase tracking-[0.22em] text-primary">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-4 text-4xl font-black tracking-[-0.05em] text-foreground sm:text-6xl">
+        <h1
+          className={`text-4xl font-black tracking-[-0.05em] text-foreground sm:text-6xl ${
+            eyebrow ? "mt-4" : "mt-5"
+          }`}
+        >
           {title}
         </h1>
         <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-muted-foreground sm:text-lg">

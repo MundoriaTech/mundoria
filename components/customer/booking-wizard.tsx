@@ -101,8 +101,8 @@ const blankDraft: BookingDraft = {
   specialInstructions: "",
 };
 
-const BOOKING_DRAFT_KEY = "cleanscape-booking-draft-v2";
-const BOOKING_STEP_KEY = "cleanscape-booking-step-v2";
+const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
+const BOOKING_STEP_KEY = "mundoria-booking-step-v2";
 
 const LEVEL_CARD_STYLES: Record<
   CleaningStandard,
@@ -643,7 +643,7 @@ export function BookingWizard({
             </h1>
             <p className="mt-2 text-sm text-[#3b3358] sm:text-[15px]">
               {service?.description ??
-                "Choose what you need — CleanScape guides you from there."}
+                "Choose what you need — Mundoria guides you from there."}
             </p>
             <ul className="mt-4 space-y-1 text-sm text-[#1c133b]">
               <li className="flex items-center gap-2">
@@ -920,7 +920,7 @@ function CategoryStep({
         What do you need?
       </h2>
       <p className="mt-2 text-sm text-[#5b5478]">
-        Choose a CleanScape category to start.
+        Choose a Mundoria category to start.
       </p>
       <div className="mt-5 grid gap-3">
         {SERVICE_CATEGORIES.map((category) => {
@@ -978,6 +978,8 @@ function ServiceStep({
     "one_off",
     "same_day",
     "end_of_tenancy",
+    "airbnb_turnover",
+    "holiday_let",
   ]);
   let services = category ? servicesForCategory(category) : SERVICES;
   if (focusServices?.length) {
@@ -1233,7 +1235,7 @@ function OfficeSpacesStep({
       </h2>
       <p className="mt-2 text-sm text-[#5b5478]">
         Choose spaces, how many you have, and their size. You never need to
-        calculate hours — CleanScape does that.
+        calculate hours — Mundoria does that.
       </p>
       {!standard ? (
         <p className="mt-4 rounded-2xl bg-[#f6f0ff] px-4 py-3 text-sm text-[#5b5478]">
@@ -1521,7 +1523,7 @@ function StandardStep({
       <p className="mt-2 text-sm text-[#5b5478]">
         {service.fixedStandard
           ? `${service.label} is delivered to the ${standardLabel(service.fixedStandard)} standard.`
-          : "Choose intensity — we’ll nudge you if a better CleanScape fit appears."}
+          : "Choose intensity — we’ll nudge you if a better Mundoria fit appears."}
       </p>
 
       <div className="mt-5 overflow-hidden rounded-[1.35rem] border border-[#d9ccef]/80 bg-white/35">
@@ -1588,7 +1590,7 @@ function StandardStep({
         {sameServiceSuggestion ? (
           <div className="border-t border-[#e8d2b8]/80 bg-gradient-to-br from-[#f7ead8] to-[#f3ebff] px-4 py-4 sm:px-5">
             <p className="text-sm font-semibold text-[#1c133b]">
-              CleanScape tip
+              Mundoria tip
             </p>
             <p className="mt-1.5 text-sm leading-6 text-[#4a4266]">
               {recommendation.message}
@@ -1617,7 +1619,7 @@ function StandardStep({
         {differentServiceSuggestion && !acceptedDifferentService ? (
           <div className="border-t border-[#d9ccef] bg-gradient-to-br from-[#efe6ff] via-[#f3ebff] to-[#f7ead8] px-4 py-4 sm:px-5">
             <p className="text-sm font-semibold text-[#1c133b]">
-              A closer CleanScape match
+              A closer Mundoria match
             </p>
             <p className="mt-1.5 text-sm leading-6 text-[#4a4266]">
               {recommendation.message}
@@ -2527,7 +2529,7 @@ function CheckoutStep({
               }}
             />
             <p className="mt-3 text-xs text-[#7a7198]">
-              By providing your card information, you allow CleanScape to charge
+              By providing your card information, you allow Mundoria to charge
               your card for this booking in accordance with our terms.
             </p>
           </div>

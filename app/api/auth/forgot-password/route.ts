@@ -44,7 +44,7 @@ export async function POST(request: Request) {
           email,
           resetUrl,
           securityNote:
-            "For your safety, never forward password reset emails. CleanScape will never ask for your password by email.",
+            "For your safety, never forward password reset emails. Mundoria will never ask for your password by email.",
         },
         template: "auth.password_reset",
         to: email,

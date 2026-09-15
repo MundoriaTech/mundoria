@@ -91,7 +91,7 @@ async function bootstrapOAuthProfile({
     string(metadata.name) ||
     existing?.full_name ||
     email.split("@")[0] ||
-    "CleanScape user";
+    "Mundoria user";
   const avatarUrl =
     existing?.avatar_url || string(metadata.avatar_url) || string(metadata.picture);
   const existingRole = isUserRole(existing?.role) ? existing.role : null;

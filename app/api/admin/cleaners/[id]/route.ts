@@ -110,11 +110,11 @@ export async function POST(
       action === "approve"
         ? "You are approved and can now receive cleaning jobs."
         : action === "reject"
-          ? "Your application is on hold. CleanScape will follow up if more is needed."
+          ? "Your application is on hold. Mundoria will follow up if more is needed."
           : action === "suspend"
             ? "Your cleaner account has been temporarily suspended."
             : action === "remove"
-              ? "Your cleaner account has been removed from CleanScape."
+              ? "Your cleaner account has been removed from Mundoria."
               : `Your cleaner account was updated: ${action}.`,
     data: {},
     title:

@@ -30,7 +30,7 @@ export function buildReceiptLines(booking: ReceiptBooking) {
 }
 
 export function receiptTitle(booking: ReceiptBooking) {
-  return `CleanScape receipt · ${formatServiceName(booking.service_type)}`;
+  return `Mundoria receipt · ${formatServiceName(booking.service_type)}`;
 }
 
 export function receiptSummary(booking: ReceiptBooking) {

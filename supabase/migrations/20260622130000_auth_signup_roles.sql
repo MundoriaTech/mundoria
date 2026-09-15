@@ -21,7 +21,7 @@ begin
     coalesce(
       nullif(trim(new.raw_user_meta_data ->> 'full_name'), ''),
       nullif(split_part(coalesce(new.email, ''), '@', 1), ''),
-      'CleanScape user'
+      'Mundoria user'
     ),
     coalesce(new.email, new.id::text || '@pending.local'),
     nullif(trim(new.raw_user_meta_data ->> 'phone'), ''),

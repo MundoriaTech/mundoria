@@ -19,12 +19,15 @@ export default function SetupPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-emerald-50 px-6 py-12">
       <section className="w-full max-w-2xl rounded-2xl border bg-background p-6 shadow-sm sm:p-9">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+        <p className="text-xl font-black tracking-[-0.06em] text-[#1c133b]">
+          Mundoria
+        </p>
+        <span className="mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
           <CircleAlert className="h-6 w-6" />
         </span>
         <h1 className="mt-5 text-3xl font-semibold">Connect Supabase</h1>
         <p className="mt-2 text-muted-foreground">
-          CleanScape is running, but authentication and database access need
+          Mundoria is running, but authentication and database access need
           your Supabase project credentials.
         </p>
 

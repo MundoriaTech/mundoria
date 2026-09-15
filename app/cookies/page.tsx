@@ -7,7 +7,7 @@ import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "How CleanScape uses necessary, preference, statistics and marketing cookies, and how to change your consent.",
+    "How Mundoria uses necessary, preference, statistics and marketing cookies, and how to change your consent.",
   path: "/cookies",
   title: "Cookie Policy",
 });
@@ -35,7 +35,7 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Preference cookies enable a website to remember information that changes the way the website behaves or looks, like your preferred language or the region that you are in.",
-      "On CleanScape this includes optional personalisation such as theme preference when you allow Preferences.",
+      "On Mundoria this includes optional personalisation such as theme preference when you allow Preferences.",
       "Loaded only if you allow Preferences (or Allow all).",
     ],
     title: "Preferences",
@@ -43,7 +43,7 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Statistic cookies help website owners to understand how visitors interact with websites by collecting and reporting information anonymously.",
-      "On CleanScape: Google Tag Manager / Google Analytics 4.",
+      "On Mundoria: Google Tag Manager / Google Analytics 4.",
       "Typical duration: up to 2 years for analytics identifiers (provider-controlled).",
       "Consent Mode keeps analytics storage denied until you opt in.",
     ],
@@ -59,7 +59,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Learn more about who we are, how you can contact us and how we process personal data in our privacy policy. Questions: support@cleanscapeuk.com.",
+      "Learn more about who we are, how you can contact us and how we process personal data in our privacy policy. Questions: support@mundoriauk.com.",
     title: "More information",
   },
 ];
@@ -67,7 +67,7 @@ const sections: LegalSection[] = [
 export default function CookiesPage() {
   return (
     <LegalPage
-      intro="A short summary of the cookie categories CleanScape uses and how to give or withdraw consent — aligned with the choices in our cookie banner."
+      intro="A short summary of the cookie categories Mundoria uses and how to give or withdraw consent — aligned with the choices in our cookie banner."
       lastUpdated="7 September 2026"
       sections={sections}
       title="Cookie management policy"

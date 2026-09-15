@@ -44,9 +44,9 @@ export const MARKETING_SERVICES: MarketingService[] = SERVICES.map((service) => 
     categoryLabel: category.label,
     description: service.description,
     fromPrice: formatMoney(service.basePrice),
-    intro: `${service.label} with CleanScape — clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
+    intro: `${service.label} with Mundoria — clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
     label: service.label,
-    seoDescription: `${service.description} Book ${service.label.toLowerCase()} online with CleanScape. From ${formatMoney(service.basePrice)}.`,
+    seoDescription: `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${formatMoney(service.basePrice)}.`,
     slug,
     value: service.value,
   };
@@ -63,10 +63,10 @@ export function marketingServicesByCategory(category: ServiceCategory) {
 export const LAUNCH_CITY = {
   name: "Birmingham",
   seoDescription:
-    "Book trusted cleaners in Birmingham with CleanScape. Regular, deep, end-of-tenancy, Airbnb and office cleaning with clear pricing and live status.",
+    "Book trusted cleaners in Birmingham with Mundoria. Regular, deep, end-of-tenancy, Airbnb and office cleaning with clear pricing and live status.",
   slug: "birmingham",
   summary:
-    "CleanScape’s launch focus is Birmingham and nearby neighbourhoods where we can fulfil reliably — starting with central and south-west clusters.",
+    "Mundoria’s launch focus is Birmingham and nearby neighbourhoods where we can fulfil reliably — starting with central and south-west clusters.",
 } as const;
 
 export const BIRMINGHAM_AREAS: MarketingArea[] = [
@@ -115,13 +115,13 @@ export function birminghamAreaBySlug(slug: string) {
 export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   {
     answer:
-      "Enter your postcode in the booking flow, choose a service and cleaning standard, see your estimate, pick a time and pay securely. CleanScape then matches a suitable cleaner.",
-    question: "How does booking with CleanScape work?",
+      "Enter your postcode in the booking flow, choose a service and cleaning standard, see your estimate, pick a time and pay securely. Mundoria then matches a suitable cleaner.",
+    question: "How does booking with Mundoria work?",
   },
   {
     answer:
-      "CleanScape is launching with a Birmingham-first footprint, including neighbourhoods such as Edgbaston, Harborne, Moseley, Kings Heath, Selly Oak and the Jewellery Quarter. Coverage expands as cleaner supply is ready.",
-    question: "Where is CleanScape available?",
+      "Mundoria is launching with a Birmingham-first footprint, including neighbourhoods such as Edgbaston, Harborne, Moseley, Kings Heath, Selly Oak and the Jewellery Quarter. Coverage expands as cleaner supply is ready.",
+    question: "Where is Mundoria available?",
   },
   {
     answer:
@@ -130,7 +130,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Payment is taken securely through Stripe. For most bookings, CleanScape authorises or collects payment through the platform — you never pay the cleaner directly.",
+      "Payment is taken securely through Stripe. For most bookings, Mundoria authorises or collects payment through the platform — you never pay the cleaner directly.",
     question: "When do I pay?",
   },
   {
@@ -146,11 +146,11 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   {
     answer:
       "Yes. Independent cleaners can apply, complete onboarding, set availability and working areas, then accept jobs and receive payouts through Stripe Connect.",
-    question: "Can I become a CleanScape cleaner?",
+    question: "Can I become a Mundoria cleaner?",
   },
   {
     answer:
-      "Contact support@cleanscapeuk.com. For an active booking, use in-app messaging or your booking page so the right team can help quickly.",
+      "Contact support@mundoriauk.com. For an active booking, use in-app messaging or your booking page so the right team can help quickly.",
     question: "How do I contact support?",
   },
 ];
@@ -161,7 +161,7 @@ export const HOW_IT_WORKS_STEPS = [
     title: "Pick your service",
   },
   {
-    body: "Tell us about bedrooms, bathrooms and condition. CleanScape recommends the right standard and shows cleaner-time guidance.",
+    body: "Tell us about bedrooms, bathrooms and condition. Mundoria recommends the right standard and shows cleaner-time guidance.",
     title: "Get a clear estimate",
   },
   {

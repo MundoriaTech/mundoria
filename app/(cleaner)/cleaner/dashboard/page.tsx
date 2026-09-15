@@ -64,7 +64,7 @@ export default async function CleanerDashboardPage() {
               Ready for a brilliant day?
             </h1>
             <p className="mt-3 max-w-2xl leading-7 text-white/75">
-              Track today’s jobs, monitor performance, and keep your CleanScape
+              Track today’s jobs, monitor performance, and keep your Mundoria
               profile ready for better matches.
             </p>
           </div>

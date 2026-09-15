@@ -1,4 +1,4 @@
-export const CONSENT_STORAGE_KEY = "cleanscape-cookie-consent-v1";
+export const CONSENT_STORAGE_KEY = "mundoria-cookie-consent-v1";
 
 export type ConsentPreferences = {
   /** Preference cookies (theme / personalisation). */
@@ -51,10 +51,10 @@ export function readConsent(): ConsentDecision {
 export function writeConsent(preferences: ConsentPreferences) {
   window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(preferences));
   window.dispatchEvent(
-    new CustomEvent("cleanscape:consent-updated", { detail: preferences }),
+    new CustomEvent("mundoria:consent-updated", { detail: preferences }),
   );
 }
 
 export function openCookieSettings() {
-  window.dispatchEvent(new Event("cleanscape:open-cookie-settings"));
+  window.dispatchEvent(new Event("mundoria:open-cookie-settings"));
 }

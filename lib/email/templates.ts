@@ -110,67 +110,67 @@ function resolveTemplate(
           { label: "Account type", value: role || "Customer" },
           { label: "Email", value: data.email },
         ],
-        intro: firstName ? `Hi ${firstName}, welcome to CleanScape.` : "Welcome to CleanScape.",
-        preview: "Your CleanScape account is ready.",
-        subject: `Welcome to CleanScape${firstName ? `, ${firstName}` : ""}`,
-        title: "Welcome to CleanScape",
+        intro: firstName ? `Hi ${firstName}, welcome to Mundoria.` : "Welcome to Mundoria.",
+        preview: "Your Mundoria account is ready.",
+        subject: `Welcome to Mundoria${firstName ? `, ${firstName}` : ""}`,
+        title: "Welcome to Mundoria",
         tone: role === "cleaner" ? "cleaner" : "customer",
       };
     case "auth.password_reset":
       return {
         body:
-          "We received a request to reset your CleanScape password. This link is secure and should only be used by you. If you did not request this, you can ignore this email.",
+          "We received a request to reset your Mundoria password. This link is secure and should only be used by you. If you did not request this, you can ignore this email.",
         buttonHref: string(data.resetUrl),
         buttonLabel: "Reset password",
         cards: [{ label: "Requested for", value: data.email }],
         intro: firstName ? `Hi ${firstName},` : "Hi there,",
-        preview: "Reset your CleanScape password.",
-        subject: "Reset your CleanScape password",
+        preview: "Reset your Mundoria password.",
+        subject: "Reset your Mundoria password",
         title: "Reset your password",
         tone: "security",
       };
     case "auth.password_changed":
       return {
         body:
-          "Your CleanScape password was changed successfully. If this was you, no further action is needed. If you did not make this change, contact support immediately.",
+          "Your Mundoria password was changed successfully. If this was you, no further action is needed. If you did not make this change, contact support immediately.",
         buttonHref: `${appUrl}/login`,
         buttonLabel: "Sign in",
         intro: firstName ? `Hi ${firstName},` : "Hi there,",
-        preview: "Your CleanScape password was changed.",
-        subject: "Your CleanScape password was changed",
+        preview: "Your Mundoria password was changed.",
+        subject: "Your Mundoria password was changed",
         title: "Password changed",
         tone: "security",
       };
     case "auth.email_changed":
       return {
         body:
-          "The email address on your CleanScape account was changed. If you did not request this, contact support immediately.",
+          "The email address on your Mundoria account was changed. If you did not request this, contact support immediately.",
         cards: [
           { label: "Previous email", value: data.previousEmail },
           { label: "New email", value: data.newEmail },
         ],
-        preview: "Your CleanScape email address was changed.",
-        subject: "Your CleanScape email address was changed",
+        preview: "Your Mundoria email address was changed.",
+        subject: "Your Mundoria email address was changed",
         title: "Email address changed",
         tone: "security",
       };
     case "auth.account_closed":
       return {
         body:
-          "Your CleanScape account has been closed. We are sorry to see you go. If this was a mistake, contact support and we will help you review your options.",
+          "Your Mundoria account has been closed. We are sorry to see you go. If this was a mistake, contact support and we will help you review your options.",
         cards: [
           { label: "Closed account", value: data.email },
           { label: "Closed on", value: data.closedAt },
         ],
-        preview: "Your CleanScape account has been closed.",
-        subject: "Your CleanScape account has been closed",
+        preview: "Your Mundoria account has been closed.",
+        subject: "Your Mundoria account has been closed",
         title: "Account closed",
         tone: "security",
       };
     case "auth.admin_invitation":
       return {
         body:
-          `${string(data.invitedBy) || "A CleanScape admin"} invited you to join the CleanScape admin panel. This invitation is private, expires soon, and should not be forwarded.`,
+          `${string(data.invitedBy) || "A Mundoria admin"} invited you to join the Mundoria admin panel. This invitation is private, expires soon, and should not be forwarded.`,
         buttonHref: string(data.actionUrl),
         buttonLabel: "Accept admin invitation",
         cards: [
@@ -178,8 +178,8 @@ function resolveTemplate(
           { label: "Expires", value: data.expiresAt },
         ],
         intro: firstName ? `Hi ${firstName},` : "Hi there,",
-        preview: "You have been invited to administer CleanScape.",
-        subject: "Your CleanScape admin invitation",
+        preview: "You have been invited to administer Mundoria.",
+        subject: "Your Mundoria admin invitation",
         title: "Admin invitation",
         tone: "security",
       };
@@ -191,14 +191,14 @@ function resolveTemplate(
         buttonLabel: "View booking",
         cards: bookingCards(data),
         intro: firstName ? `Hi ${firstName}, your cleaner request is in.` : "Your cleaner request is in.",
-        preview: "Your CleanScape booking is confirmed.",
-        subject: "Your CleanScape booking is confirmed",
+        preview: "Your Mundoria booking is confirmed.",
+        subject: "Your Mundoria booking is confirmed",
         title: "Booking confirmed",
         tone: "customer",
       };
     case "customer.cleaner_matched":
       return {
-        body: "We have matched your booking with a certified CleanScape cleaner.",
+        body: "We have matched your booking with a certified Mundoria cleaner.",
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View cleaner",
         cards: bookingCards(data, [{ label: "Cleaner", value: data.cleanerName }]),
@@ -244,12 +244,12 @@ function resolveTemplate(
       };
     case "customer.booking_completed":
       return {
-        body: "Your cleaning has been completed and payment has been captured. Thank you for using CleanScape.",
+        body: "Your cleaning has been completed and payment has been captured. Thank you for using Mundoria.",
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View receipt",
         cards: bookingCards(data, [{ label: "Amount charged", value: data.amount }]),
-        preview: "Your CleanScape booking is complete.",
-        subject: "Your CleanScape booking is complete",
+        preview: "Your Mundoria booking is complete.",
+        subject: "Your Mundoria booking is complete",
         title: "Booking completed",
         tone: "success",
       };
@@ -260,8 +260,8 @@ function resolveTemplate(
         buttonHref: string(data.bookingUrl),
         buttonLabel: "Rate your cleaner",
         cards: bookingCards(data),
-        preview: "Rate your CleanScape cleaner.",
-        subject: "How was your CleanScape cleaning?",
+        preview: "Rate your Mundoria cleaner.",
+        subject: "How was your Mundoria cleaning?",
         title: "Rate your cleaner",
         tone: "customer",
       };
@@ -271,8 +271,8 @@ function resolveTemplate(
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View booking",
         cards: bookingCards(data),
-        preview: "Your CleanScape booking was cancelled.",
-        subject: "Your CleanScape booking was cancelled",
+        preview: "Your Mundoria booking was cancelled.",
+        subject: "Your Mundoria booking was cancelled",
         title: "Booking cancelled",
         tone: "warning",
       };
@@ -280,8 +280,8 @@ function resolveTemplate(
       return {
         body: "A refund has been issued for your booking. Your bank may take a few working days to show it.",
         cards: bookingCards(data, [{ label: "Refund amount", value: data.amount }]),
-        preview: "A CleanScape refund has been issued.",
-        subject: "Your CleanScape refund has been issued",
+        preview: "A Mundoria refund has been issued.",
+        subject: "Your Mundoria refund has been issued",
         title: "Refund issued",
         tone: "success",
       };
@@ -291,8 +291,8 @@ function resolveTemplate(
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View dispute",
         cards: disputeCards(data),
-        preview: "Your CleanScape dispute has been submitted.",
-        subject: "We received your CleanScape dispute",
+        preview: "Your Mundoria dispute has been submitted.",
+        subject: "We received your Mundoria dispute",
         title: "Dispute submitted",
         tone: "warning",
       };
@@ -302,8 +302,8 @@ function resolveTemplate(
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View booking",
         cards: disputeCards(data),
-        preview: "Your CleanScape dispute has been resolved.",
-        subject: "Your CleanScape dispute has been resolved",
+        preview: "Your Mundoria dispute has been resolved.",
+        subject: "Your Mundoria dispute has been resolved",
         title: "Dispute resolved",
         tone: "success",
       };
@@ -314,14 +314,14 @@ function resolveTemplate(
         buttonHref: string(data.messageUrl),
         buttonLabel: "Open messages",
         cards: bookingCards(data),
-        preview: "You have a new CleanScape message.",
-        subject: "New CleanScape message",
+        preview: "You have a new Mundoria message.",
+        subject: "New Mundoria message",
         title: "New message",
         tone: template.startsWith("cleaner.") ? "cleaner" : "customer",
       };
     case "customer.promo_referral":
       return {
-        body: string(data.message) || "You have a CleanScape promo or referral reward ready to use.",
+        body: string(data.message) || "You have a Mundoria promo or referral reward ready to use.",
         buttonHref: string(data.actionUrl) || `${appUrl}/booking/new`,
         buttonLabel: "Book a cleaner",
         cards: [
@@ -329,8 +329,8 @@ function resolveTemplate(
           { label: "Value", value: data.value },
           { label: "Expires", value: data.expiresAt },
         ],
-        preview: "Your CleanScape promo is ready.",
-        subject: "Your CleanScape promo is ready",
+        preview: "Your Mundoria promo is ready.",
+        subject: "Your Mundoria promo is ready",
         title: "Promo ready",
         tone: "customer",
       };
@@ -345,7 +345,7 @@ function resolveTemplate(
           { label: "Working areas", value: data.workingAreas },
         ],
         preview: "Your cleaner application is under review.",
-        subject: "Your CleanScape cleaner application is under review",
+        subject: "Your Mundoria cleaner application is under review",
         title: "Application submitted",
         tone: "cleaner",
       };
@@ -358,8 +358,8 @@ function resolveTemplate(
           { label: "Tier", value: data.tier || "Silver" },
           { label: "Certification score", value: data.certificationScore },
         ],
-        preview: "Your CleanScape cleaner account is certified.",
-        subject: "Your CleanScape cleaner account is certified",
+        preview: "Your Mundoria cleaner account is certified.",
+        subject: "Your Mundoria cleaner account is certified",
         title: "You are certified",
         tone: "success",
       };
@@ -373,7 +373,7 @@ function resolveTemplate(
         buttonLabel: "Review profile",
         cards: [{ label: "Reason", value: data.reason }],
         preview: "Your cleaner application needs attention.",
-        subject: "Your CleanScape cleaner application needs attention",
+        subject: "Your Mundoria cleaner application needs attention",
         title: "Application update",
         tone: "warning",
       };
@@ -386,8 +386,8 @@ function resolveTemplate(
           { label: "Estimated earnings", value: data.earnings },
           { label: "Respond by", value: data.respondBy },
         ]),
-        preview: "You have a new CleanScape job offer.",
-        subject: "New CleanScape job offer",
+        preview: "You have a new Mundoria job offer.",
+        subject: "New Mundoria job offer",
         title: "New job offer",
         tone: "cleaner",
       };
@@ -397,8 +397,8 @@ function resolveTemplate(
         buttonHref: string(data.jobUrl),
         buttonLabel: "View job",
         cards: bookingCards(data),
-        preview: "Your CleanScape job is confirmed.",
-        subject: "Your CleanScape job is confirmed",
+        preview: "Your Mundoria job is confirmed.",
+        subject: "Your Mundoria job is confirmed",
         title: "Job accepted",
         tone: "cleaner",
       };
@@ -408,8 +408,8 @@ function resolveTemplate(
         buttonHref: string(data.jobUrl),
         buttonLabel: "View jobs",
         cards: bookingCards(data),
-        preview: "A CleanScape job was cancelled.",
-        subject: "A CleanScape job was cancelled",
+        preview: "A Mundoria job was cancelled.",
+        subject: "A Mundoria job was cancelled",
         title: "Job cancelled",
         tone: "warning",
       };
@@ -424,7 +424,7 @@ function resolveTemplate(
           { label: "Dispute deadline", value: data.disputeDeadline },
         ],
         preview: "A rating is on hold for review.",
-        subject: "A CleanScape rating is on hold",
+        subject: "A Mundoria rating is on hold",
         title: "Rating hold opened",
         tone: "warning",
       };
@@ -437,8 +437,8 @@ function resolveTemplate(
           { label: "New tier", value: data.tier },
           { label: "Medallion score", value: data.score },
         ],
-        preview: "Your CleanScape tier has been updated.",
-        subject: "Your CleanScape tier has been updated",
+        preview: "Your Mundoria tier has been updated.",
+        subject: "Your Mundoria tier has been updated",
         title: "Tier updated",
         tone: "cleaner",
       };
@@ -449,11 +449,11 @@ function resolveTemplate(
     case "cleaner.stripe_connect_reminder":
       return {
         body:
-          "Connect your Stripe Express account so CleanScape can schedule payouts after completed jobs.",
+          "Connect your Stripe Express account so Mundoria can schedule payouts after completed jobs.",
         buttonHref: string(data.connectUrl) || `${appUrl}/cleaner/profile`,
         buttonLabel: "Connect Stripe Express",
         preview: "Connect Stripe to receive payouts.",
-        subject: "Connect Stripe to receive CleanScape payouts",
+        subject: "Connect Stripe to receive Mundoria payouts",
         title: "Set up payouts",
         tone: "warning",
       };
@@ -480,12 +480,12 @@ function resolveTemplate(
     case "admin.daily_summary":
     case "admin.alert":
       return {
-        body: string(data.body) || "An admin event needs review in CleanScape.",
+        body: string(data.body) || "An admin event needs review in Mundoria.",
         buttonHref: string(data.actionUrl) || `${appUrl}/admin/dashboard`,
         buttonLabel: "Open admin panel",
         cards: adminCards(data),
-        preview: string(data.preview) || "CleanScape admin alert.",
-        subject: string(data.subject) || `[CleanScape] ${string(data.title) || "Admin alert"}`,
+        preview: string(data.preview) || "Mundoria admin alert.",
+        subject: string(data.subject) || `[Mundoria] ${string(data.title) || "Admin alert"}`,
         title: string(data.title) || "Admin alert",
         tone: "admin",
       };
@@ -494,13 +494,13 @@ function resolveTemplate(
       return {
         body: string(data.body) || rowsToSentence(data),
         buttonHref: string(data.actionUrl),
-        buttonLabel: string(data.actionLabel) || "Open CleanScape",
+        buttonLabel: string(data.actionLabel) || "Open Mundoria",
         cards: Object.entries(data)
           .filter(([key]) => !["body", "actionUrl", "actionLabel", "subject", "title"].includes(key))
           .map(([label, value]) => ({ label: humanize(label), value })),
-        preview: string(data.preview) || string(data.subject) || "CleanScape notification.",
-        subject: string(data.subject) || "CleanScape notification",
-        title: string(data.title) || string(data.subject) || "CleanScape notification",
+        preview: string(data.preview) || string(data.subject) || "Mundoria notification.",
+        subject: string(data.subject) || "Mundoria notification",
+        title: string(data.title) || string(data.subject) || "Mundoria notification",
         tone: "admin",
       };
   }
@@ -522,8 +522,8 @@ function payoutTemplate(template: EmailTemplateId, data: Record<string, unknown>
       { label: "Period", value: data.period },
       { label: "Stripe transfer", value: data.transferId },
     ],
-    preview: failed ? "A CleanScape payout failed." : completed ? "Your CleanScape payout is complete." : "Your CleanScape payout is scheduled.",
-    subject: failed ? "CleanScape payout failed" : completed ? "CleanScape payout completed" : "CleanScape payout scheduled",
+    preview: failed ? "A Mundoria payout failed." : completed ? "Your Mundoria payout is complete." : "Your Mundoria payout is scheduled.",
+    subject: failed ? "Mundoria payout failed" : completed ? "Mundoria payout completed" : "Mundoria payout scheduled",
     title: failed ? "Payout failed" : completed ? "Payout completed" : "Payout scheduled",
     tone: failed ? "warning" : "success",
   };
@@ -532,8 +532,7 @@ function payoutTemplate(template: EmailTemplateId, data: Record<string, unknown>
 function renderBase(context: TemplateContext, data: Record<string, unknown>): RenderedEmail {
   const tone = toneStyles[context.tone ?? "customer"];
   const cards = (context.cards ?? []).filter((card) => card.value !== undefined && card.value !== null && String(card.value).trim() !== "");
-  const supportEmail = process.env.SUPPORT_EMAIL || "support@cleanscape.local";
-  const brandMarkUrl = `${emailAssetBaseUrl(data)}/images/brand/cleanscape-mark.png`;
+  const supportEmail = process.env.SUPPORT_EMAIL || "support@mundoriauk.local";
 
   const html = `<!doctype html>
 <html>
@@ -550,17 +549,8 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(90,81,170,0.14);">
             <tr>
               <td style="background:linear-gradient(135deg,#ffc79f 0%,#7669d1 48%,#221f50 100%);padding:30px 32px;color:#ffffff;">
-                <table role="presentation" cellspacing="0" cellpadding="0">
-                  <tr>
-                    <td style="vertical-align:middle;">
-                      <img src="${escapeAttribute(brandMarkUrl)}" width="36" height="50" alt="CleanScape" style="display:block;width:36px;height:50px;border:0;outline:none;text-decoration:none;">
-                    </td>
-                    <td style="vertical-align:middle;padding-left:12px;">
-                      <div style="font-size:25px;font-weight:900;letter-spacing:-0.06em;text-transform:lowercase;">cleanscape</div>
-                      <div style="margin-top:5px;font-size:13px;color:rgba(255,255,255,0.76);">Trusted cleaning, clearly managed.</div>
-                    </td>
-                  </tr>
-                </table>
+                <div style="font-size:25px;font-weight:900;letter-spacing:-0.06em;">Mundoria</div>
+                <div style="margin-top:5px;font-size:13px;color:rgba(255,255,255,0.76);">Trusted cleaning, clearly managed.</div>
               </td>
             </tr>
             <tr>
@@ -570,13 +560,13 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
                 ${context.intro ? `<p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#4e486e;">${escapeHtml(context.intro)}</p>` : ""}
                 <p style="margin:0;font-size:16px;line-height:1.65;color:#4e486e;">${escapeHtml(context.body)}</p>
                 ${cards.length ? renderCards(cards) : ""}
-                ${context.buttonHref ? renderButton(context.buttonHref, context.buttonLabel ?? "Open CleanScape", tone.accent) : ""}
+                ${context.buttonHref ? renderButton(context.buttonHref, context.buttonLabel ?? "Open Mundoria", tone.accent) : ""}
                 ${renderSecurityNote(data)}
               </td>
             </tr>
             <tr>
               <td style="padding:24px 32px;background:#fbfaff;border-top:1px solid #dedbfd;color:#6c668d;font-size:12px;line-height:1.6;">
-                <p style="margin:0 0 8px;">CleanScape sends service, account, and marketplace updates related to your account.</p>
+                <p style="margin:0 0 8px;">Mundoria sends service, account, and marketplace updates related to your account.</p>
                 <p style="margin:0;">Need help? Contact <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#5a51aa;font-weight:700;">${escapeHtml(supportEmail)}</a>.</p>
               </td>
             </tr>
@@ -593,28 +583,6 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
     subject: context.subject,
     text: renderText(context, cards, supportEmail),
   };
-}
-
-function emailAssetBaseUrl(data: Record<string, unknown>) {
-  const explicit =
-    process.env.EMAIL_ASSET_BASE_URL ||
-    process.env.NEXT_PUBLIC_EMAIL_ASSET_BASE_URL;
-  const candidate =
-    explicit ||
-    string(data.appUrl) ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "https://www.cleanscapeuk.com";
-  const url = candidate.replace(/\/$/, "");
-
-  if (
-    url.startsWith("https://") &&
-    !url.includes("localhost") &&
-    !url.includes("127.0.0.1")
-  ) {
-    return url;
-  }
-
-  return "https://www.cleanscapeuk.com";
 }
 
 function renderCards(cards: Array<{ label: string; value?: unknown }>) {
@@ -643,12 +611,12 @@ function renderSecurityNote(data: Record<string, unknown>) {
 
 function renderText(context: TemplateContext, cards: Array<{ label: string; value?: unknown }>, supportEmail: string) {
   return [
-    "CleanScape",
+    "Mundoria",
     context.title,
     context.intro,
     context.body,
     ...cards.map((card) => `${card.label}: ${formatValue(card.value)}`),
-    context.buttonHref ? `${context.buttonLabel ?? "Open CleanScape"}: ${context.buttonHref}` : "",
+    context.buttonHref ? `${context.buttonLabel ?? "Open Mundoria"}: ${context.buttonHref}` : "",
     `Need help? Contact ${supportEmail}.`,
   ]
     .filter(Boolean)
@@ -697,7 +665,7 @@ function rowsToSentence(data: Record<string, unknown>) {
   const values = Object.entries(data)
     .filter(([, value]) => value !== undefined && value !== null && String(value).trim())
     .map(([key, value]) => `${humanize(key)}: ${formatValue(value)}`);
-  return values.length ? values.join(". ") : "You have a new CleanScape notification.";
+  return values.length ? values.join(". ") : "You have a new Mundoria notification.";
 }
 
 function humanize(value: string) {

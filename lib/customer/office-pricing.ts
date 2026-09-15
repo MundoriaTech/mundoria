@@ -1,7 +1,7 @@
 import type { CleaningStandard } from "@/types/customer";
 
 /**
- * Office Cleaning time matrix from CleanScape commercial pricing logic.
+ * Office Cleaning time matrix from Mundoria commercial pricing logic.
  * Every minute value is for ONE cleaner.
  *
  * Commercial hourly rates are not final in the product docs — this placeholder

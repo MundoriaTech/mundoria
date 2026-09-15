@@ -77,7 +77,7 @@ export function LoginForm({
 
     if (requiredRole && profile.role !== requiredRole) {
       await supabase.auth.signOut();
-      setFormError("This sign-in page is only for CleanScape administrators.");
+      setFormError("This sign-in page is only for Mundoria administrators.");
       return;
     }
 

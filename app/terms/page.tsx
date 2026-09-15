@@ -5,7 +5,7 @@ import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "CleanScape terms for customers, independent cleaners, bookings, payments, cancellations, disputes and platform use.",
+    "Mundoria terms for customers, independent cleaners, bookings, payments, cancellations, disputes and platform use.",
   path: "/terms",
   title: "Terms of Service",
 });
@@ -13,12 +13,12 @@ export const metadata: Metadata = buildPageMetadata({
 const sections: LegalSection[] = [
   {
     body:
-      "These terms apply when you access or use CleanScape as a customer, cleaner or administrator. Before public launch, have these terms reviewed and replace this placeholder with the registered legal entity that operates CleanScape.",
+      "These terms apply when you access or use Mundoria as a customer, cleaner or administrator. Before public launch, have these terms reviewed and replace this placeholder with the registered legal entity that operates Mundoria.",
     title: "About these terms",
   },
   {
     body:
-      "CleanScape operates a marketplace that connects customers who need cleaning services with independent cleaning professionals. Cleaners are independent contractors, not employees of CleanScape. CleanScape provides the platform, matching, payment, messaging, status tracking, review and support tools.",
+      "Mundoria operates a marketplace that connects customers who need cleaning services with independent cleaning professionals. Cleaners are independent contractors, not employees of Mundoria. Mundoria provides the platform, matching, payment, messaging, status tracking, review and support tools.",
     title: "The marketplace",
   },
   {
@@ -41,31 +41,31 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "CleanScape may authorise a customer’s payment method at booking and capture payment after the job is completed. Stripe processes payment details. CleanScape does not store full card numbers. For cleaners, payouts are managed through Stripe Connect and may be subject to verification, platform commission, dispute holds, refunds, reversals or payout schedules.",
+      "Mundoria may authorise a customer’s payment method at booking and capture payment after the job is completed. Stripe processes payment details. Mundoria does not store full card numbers. For cleaners, payouts are managed through Stripe Connect and may be subject to verification, platform commission, dispute holds, refunds, reversals or payout schedules.",
     title: "Payments and payouts",
   },
   {
     body:
-      "Cancellation rules may depend on how close the cancellation is to the scheduled start time, whether a cleaner has already been matched or travelled, and whether a no-show or access issue occurs. The app may allow cancellation only before a configured cut-off. CleanScape may void authorisations, issue refunds or apply fees depending on the circumstances.",
+      "Cancellation rules may depend on how close the cancellation is to the scheduled start time, whether a cleaner has already been matched or travelled, and whether a no-show or access issue occurs. The app may allow cancellation only before a configured cut-off. Mundoria may void authorisations, issue refunds or apply fees depending on the circumstances.",
     title: "Cancellations and no-shows",
   },
   {
     bullets: [
       "Cleaners must complete onboarding before receiving jobs.",
       "Cleaners may be asked to provide identity documents, DBS information, services offered, working areas, availability and Stripe Connect payout details.",
-      "CleanScape may approve, reject, suspend or remove cleaner accounts to protect customers, cleaners and marketplace quality.",
+      "Mundoria may approve, reject, suspend or remove cleaner accounts to protect customers, cleaners and marketplace quality.",
       "Cleaners must not accept jobs they cannot complete safely, professionally and on time.",
     ],
     title: "Cleaner obligations",
   },
   {
     body:
-      "Customers and cleaners should use in-app messaging for booking-related communication. Users must not abuse, threaten, harass, discriminate, mislead, spam, bypass platform payments or use CleanScape for unlawful purposes.",
+      "Customers and cleaners should use in-app messaging for booking-related communication. Users must not abuse, threaten, harass, discriminate, mislead, spam, bypass platform payments or use Mundoria for unlawful purposes.",
     title: "User conduct",
   },
   {
     body:
-      "CleanScape may use completion checklists, photos, messages, ratings, GPS check-in/check-out records, booking history and payment records to review disputes. Customers should raise issues promptly and provide accurate evidence. Cleaners may be given a fair opportunity to respond where relevant.",
+      "Mundoria may use completion checklists, photos, messages, ratings, GPS check-in/check-out records, booking history and payment records to review disputes. Customers should raise issues promptly and provide accurate evidence. Cleaners may be given a fair opportunity to respond where relevant.",
     title: "Disputes, ratings and reviews",
   },
   {
@@ -75,12 +75,12 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "CleanScape may suspend or terminate access if a user breaches these terms, creates safety or fraud risks, fails verification, repeatedly cancels or no-shows, misuses payments, or otherwise harms the platform or other users.",
+      "Mundoria may suspend or terminate access if a user breaches these terms, creates safety or fraud risks, fails verification, repeatedly cancels or no-shows, misuses payments, or otherwise harms the platform or other users.",
     title: "Suspension and termination",
   },
   {
     body:
-      "CleanScape aims to provide reliable marketplace tools, but we do not guarantee uninterrupted availability, perfect matching, or that every cleaner or customer interaction will meet expectations. To the maximum extent permitted by law, CleanScape is not liable for indirect, incidental or consequential losses.",
+      "Mundoria aims to provide reliable marketplace tools, but we do not guarantee uninterrupted availability, perfect matching, or that every cleaner or customer interaction will meet expectations. To the maximum extent permitted by law, Mundoria is not liable for indirect, incidental or consequential losses.",
     title: "Service availability and liability",
   },
   {
@@ -95,7 +95,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Questions about these terms can be sent to support@cleanscapeuk.com.",
+      "Questions about these terms can be sent to support@mundoriauk.com.",
     title: "Contact",
   },
 ];
@@ -103,7 +103,7 @@ const sections: LegalSection[] = [
 export default function TermsPage() {
   return (
     <LegalPage
-      intro="These terms explain how CleanScape works, what customers and cleaners can expect, and the rules for using the marketplace."
+      intro="These terms explain how Mundoria works, what customers and cleaners can expect, and the rules for using the marketplace."
       lastUpdated="27 July 2026"
       sections={sections}
       title="Terms of Service"

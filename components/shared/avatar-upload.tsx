@@ -98,13 +98,13 @@ export function AvatarUpload({
         <div className="min-w-0">
           <p className="font-medium text-foreground">Profile photo</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pick a CleanScape look, or upload your own.
+            Pick a Mundoria look, or upload your own.
           </p>
         </div>
       </div>
 
       <div>
-        <p className="text-sm font-medium text-foreground">CleanScape looks</p>
+        <p className="text-sm font-medium text-foreground">Mundoria looks</p>
         <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-6">
           {DEFAULT_AVATARS.map((avatar) => {
             const selected = selectedDefaultId === avatar.id;

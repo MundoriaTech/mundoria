@@ -71,8 +71,8 @@ const SERVICE_CARDS = [
 const FAQS = [
   {
     answer:
-      "CleanScape is a technology-enabled marketplace that connects businesses with suitable cleaning professionals — with clear estimates, secure payment and live booking status.",
-    question: "What is CleanScape?",
+      "Mundoria is a technology-enabled marketplace that connects businesses with suitable cleaning professionals — with clear estimates, secure payment and live booking status.",
+    question: "What is Mundoria?",
     services: [
       {
         description: "Routine workplace cleaning for offices and studios.",
@@ -91,16 +91,16 @@ const FAQS = [
         name: "Communal area cleaning",
       },
     ],
-    servicesHeading: "What commercial cleaning services does CleanScape offer?",
+    servicesHeading: "What commercial cleaning services does Mundoria offer?",
   },
   {
     answer:
-      "Choose your commercial service, tell us about the premises, pick a time and pay securely. CleanScape matches a suitable cleaner and keeps you updated through arrival and completion.",
+      "Choose your commercial service, tell us about the premises, pick a time and pay securely. Mundoria matches a suitable cleaner and keeps you updated through arrival and completion.",
     question: "How do I book commercial cleaning?",
   },
   {
     answer:
-      "Enter your location during booking. CleanScape matches cleaners by area, availability and service fit — launching with Birmingham and nearby neighbourhoods.",
+      "Enter your location during booking. Mundoria matches cleaners by area, availability and service fit — launching with Birmingham and nearby neighbourhoods.",
     question: "Where is commercial cleaning available?",
   },
 ] as const;
@@ -284,7 +284,7 @@ export function CommercialCleaningPage({
       <section className="bg-[#f3eef8] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#c45c3a] sm:text-3xl">
-            CleanScape FAQ
+            Mundoria FAQ
           </h2>
           <div className="mt-8 columns-1 gap-4 sm:columns-2 sm:gap-5">
             {FAQS.map((faq) => (

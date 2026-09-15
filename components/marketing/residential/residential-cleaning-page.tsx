@@ -34,7 +34,7 @@ const FEATURES = [
     title: "We're flexible",
   },
   {
-    body: "Pick a cleaner, choose the service you need and book with ease. CleanScape makes getting your home cleaned simple from start to finish.",
+    body: "Pick a cleaner, choose the service you need and book with ease. Mundoria makes getting your home cleaned simple from start to finish.",
     icon: SimpleIcon,
     // White fill + purple lines
     iconClass:
@@ -74,13 +74,25 @@ const SERVICE_CARDS = [
     label: "End of Tenancy Cleaning",
     objectPosition: "object-center",
   },
+  {
+    href: "/booking/new?service=airbnb_turnover",
+    image: "/images/marketing/landing/str-airbnb.png",
+    label: "Airbnb Cleaning",
+    objectPosition: "object-center",
+  },
+  {
+    href: "/booking/new?service=holiday_let",
+    image: "/images/marketing/landing/str-holiday.png",
+    label: "Shortlet Cleaning",
+    objectPosition: "object-center",
+  },
 ] as const;
 
 const FAQS = [
   {
     answer:
-      "CleanScape helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, same-day help, a move-in or move-out clean, a one-off refresh or an end of tenancy clean, we make it easy to book trusted cleaners.",
-    question: "What is CleanScape?",
+      "Mundoria helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, same-day help, a move-in or move-out clean, a one-off refresh, an end of tenancy clean, or guest-ready Airbnb and shortlet turns, we make it easy to book trusted cleaners.",
+    question: "What is Mundoria?",
     services: [
       {
         description: "Keep your home clean and fresh with scheduled visits.",
@@ -102,8 +114,16 @@ const FAQS = [
         description: "Move-out cleaning designed for landlord and agent standards.",
         name: "End of tenancy cleaning",
       },
+      {
+        description: "Guest-ready turnover cleans between Airbnb stays.",
+        name: "Airbnb cleaning",
+      },
+      {
+        description: "Shortlet cleans with guest-ready presentation.",
+        name: "Shortlet cleaning",
+      },
     ],
-    servicesHeading: "What residential cleaning services does CleanScape offer?",
+    servicesHeading: "What residential cleaning services does Mundoria offer?",
   },
   {
     answer:
@@ -112,7 +132,7 @@ const FAQS = [
   },
   {
     answer:
-      "CleanScape helps you find cleaning professionals available in your area. Simply enter your location when booking to see the services and cleaners available near you.",
+      "Mundoria helps you find cleaning professionals available in your area. Simply enter your location when booking to see the services and cleaners available near you.",
     question: "How do I find a cleaner near me?",
   },
 ] as const;
@@ -298,7 +318,7 @@ export function ResidentialCleaningPage({
       <section className="bg-[#f3eef8] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#c45c3a] sm:text-3xl">
-            CleanScape FAQ
+            Mundoria FAQ
           </h2>
           <div className="mt-8 columns-1 gap-4 sm:columns-2 sm:gap-5">
             {FAQS.map((faq) => (

@@ -12,9 +12,9 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "See how CleanScape booking works — choose a service, get a clear estimate, book securely and track the clean from match to checklist completion.",
+    "See how Mundoria booking works — choose a service, get a clear estimate, book securely and track the clean from match to checklist completion.",
   path: "/how-it-works",
-  title: "How CleanScape Works | CleanScape",
+  title: "How Mundoria Works | Mundoria",
 });
 
 export default function HowItWorksPage() {
@@ -24,13 +24,13 @@ export default function HowItWorksPage() {
   return (
     <MarketingShell>
       <MarketingHero
-        description="CleanScape is designed so customers never feel like they’re filling in an insurance form — tell us what you need, see a clear estimate, then book."
+        description="Mundoria is designed so customers never feel like they’re filling in an insurance form — tell us what you need, see a clear estimate, then book."
         eyebrow="Product"
         primaryHref={bookingHref}
         primaryLabel="Start booking"
         secondaryHref="/faq"
         secondaryLabel="Read FAQ"
-        title="How CleanScape works"
+        title="How Mundoria works"
       />
 
       <section className="px-5 py-16 sm:px-8">

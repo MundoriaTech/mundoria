@@ -1,28 +1,24 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-const MARK_SRC = "/images/brand/cleanscape-mark.png";
-const MARK_WIDTH = 135;
-const MARK_HEIGHT = 190;
-
-export function BrandMark({ className }: { className?: string }) {
+/** Temporary text wordmark until the Mundoria logo artwork is ready. */
+export function BrandMark({
+  className,
+  variant = "default",
+}: {
+  className?: string;
+  variant?: "default" | "onDark";
+}) {
   return (
     <span
-      aria-hidden="true"
       className={cn(
-        "relative inline-flex h-11 w-8 items-center justify-center",
+        "inline-flex items-center text-xl font-black tracking-[-0.06em]",
+        variant === "onDark" ? "text-white" : "text-foreground",
         className,
       )}
     >
-      <Image
-        alt=""
-        className="h-full w-full object-contain"
-        height={MARK_HEIGHT}
-        src={MARK_SRC}
-        width={MARK_WIDTH}
-      />
+      Mundoria
     </span>
   );
 }
@@ -36,25 +32,27 @@ export function BrandLogo({
 }: {
   className?: string;
   href?: string;
+  /** @deprecated Ignored — logo is text-only until artwork ships. */
   markClassName?: string;
   showWordmark?: boolean;
   wordmarkClassName?: string;
 }) {
+  void markClassName;
+
   return (
     <Link
-      aria-label="CleanScape home"
-      className={cn("inline-flex items-center gap-2.5", className)}
+      aria-label="Mundoria home"
+      className={cn("inline-flex items-center", className)}
       href={href}
     >
-      <BrandMark className={cn("h-10 w-7", markClassName)} />
       {showWordmark ? (
         <span
           className={cn(
-            "text-xl font-black lowercase tracking-[-0.06em] text-foreground",
+            "text-xl font-black tracking-[-0.06em] text-foreground",
             wordmarkClassName,
           )}
         >
-          cleanscape
+          Mundoria
         </span>
       ) : null}
     </Link>

@@ -10,8 +10,8 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
   faqs: [
     {
       answer:
-        "CleanScape is a technology-enabled marketplace that connects you with suitable cleaning professionals — with clear estimates, secure payment and live booking status.",
-      question: "What is CleanScape?",
+        "Mundoria is a technology-enabled marketplace that connects you with suitable cleaning professionals — with clear estimates, secure payment and live booking status.",
+      question: "What is Mundoria?",
       services: [
         {
           description: "Move-out cleaning designed for landlord and agent standards.",
@@ -26,16 +26,16 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
           name: "Move-out cleaning",
         },
       ],
-      servicesHeading: "What moving home cleaning services does CleanScape offer?",
+      servicesHeading: "What moving home cleaning services does Mundoria offer?",
     },
     {
       answer:
-        "Choose end of tenancy, move-in or move-out, tell us about the property, pick a time and pay securely. CleanScape matches a suitable cleaner for the handover.",
+        "Choose end of tenancy, move-in or move-out, tell us about the property, pick a time and pay securely. Mundoria matches a suitable cleaner for the handover.",
       question: "How do I book moving home cleaning?",
     },
     {
       answer:
-        "Enter your location during booking. CleanScape matches cleaners by area and availability — launching with Birmingham and nearby neighbourhoods.",
+        "Enter your location during booking. Mundoria matches cleaners by area and availability — launching with Birmingham and nearby neighbourhoods.",
       question: "Where is this available?",
     },
   ],
@@ -90,8 +90,8 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
   faqs: [
     {
       answer:
-        "CleanScape connects hosts and operators with cleaning professionals for consistent, guest-ready property turnarounds.",
-      question: "What is CleanScape?",
+        "Mundoria connects hosts and operators with cleaning professionals for consistent, guest-ready property turnarounds.",
+      question: "What is Mundoria?",
       services: [
         {
           description: "Fast, guest-ready resets between stays.",
@@ -106,7 +106,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
           name: "Serviced accommodation cleaning",
         },
       ],
-      servicesHeading: "What short-let cleaning services does CleanScape offer?",
+      servicesHeading: "What short-let cleaning services does Mundoria offer?",
     },
     {
       answer:
@@ -147,7 +147,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
     {
       href: "/booking/new?service=holiday_let",
       image: "/images/marketing/landing/str-holiday.png",
-      label: "Holiday Let Cleaning",
+      label: "Shortlet Cleaning",
     },
     {
       href: "/booking/new?service=serviced_accommodation",
@@ -161,7 +161,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
 };
 
 export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
-  bookCta: "Book CleanScape Recovery",
+  bookCta: "Book Mundoria Recovery",
   bullets: [
     "Cleaning that adapts when life does",
     "Share preferences before the cleaner arrives",
@@ -170,35 +170,29 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   faqs: [
     {
       answer:
-        "CleanScape Recovery is a cleaning service for times when life changes — pregnancy, recovery, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
-      question: "What is CleanScape Recovery?",
+        "Mundoria Recovery is a cleaning service for times when life changes — pregnancy, recovery, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
+      question: "What is Mundoria Recovery?",
       services: [
         {
-          description: "Supportive home cleaning during pregnancy.",
-          name: "Pregnancy support cleaning",
+          description:
+            "Supportive home cleaning during pregnancy and after birth.",
+          name: "Pregnancy and Postpartum Cleaning",
         },
         {
-          description: "Comprehensive support cleaning after birth.",
-          name: "Postpartum cleaning",
-        },
-        {
-          description: "Extra-care cleaning while recovering from illness.",
-          name: "Illness recovery cleaning",
-        },
-        {
-          description: "Supportive cleaning after injury or limited mobility.",
-          name: "Injury recovery cleaning",
+          description:
+            "Extra-care cleaning while recovering from illness, injury or limited mobility.",
+          name: "Illness and Injury Recovery Cleaning",
         },
         {
           description: "A comprehensive clean before or after hospital discharge.",
-          name: "Hospital discharge home cleaning",
+          name: "Hospital Discharge Home Cleaning",
         },
         {
           description: "Respectful practical cleaning support after bereavement.",
-          name: "Bereavement support cleaning",
+          name: "Bereavement Support Cleaning",
         },
       ],
-      servicesHeading: "What CleanScape Recovery services are available?",
+      servicesHeading: "What Mundoria Recovery services are available?",
     },
     {
       answer:
@@ -207,13 +201,13 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
     },
     {
       answer:
-        "Choose the Recovery service that fits your situation, tell us about your home, share preferences, pick a time and pay securely through CleanScape.",
+        "Choose the Recovery service that fits your situation, tell us about your home, share preferences, pick a time and pay securely through Mundoria.",
       question: "How do I book?",
     },
   ],
   features: [
     {
-      body: "When circumstances change, you need someone dependable. CleanScape matches vetted cleaners and keeps you updated through the booking.",
+      body: "When circumstances change, you need someone dependable. Mundoria matches vetted cleaners and keeps you updated through the booking.",
       icon: "reliable",
       title: "We're reliable",
     },
@@ -234,22 +228,12 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
     {
       href: "/booking/new?service=pregnancy_support",
       image: "/images/marketing/landing/recovery-pregnancy.png",
-      label: "Pregnancy Support Cleaning",
-    },
-    {
-      href: "/booking/new?service=postpartum",
-      image: "/images/marketing/landing/recovery-postpartum.png",
-      label: "Postpartum Cleaning",
+      label: "Pregnancy and Postpartum Cleaning",
     },
     {
       href: "/booking/new?service=illness_recovery",
       image: "/images/marketing/landing/recovery-illness.png",
-      label: "Illness Recovery Cleaning",
-    },
-    {
-      href: "/booking/new?service=post_injury",
-      image: "/images/marketing/landing/recovery-injury.png",
-      label: "Injury Recovery Cleaning",
+      label: "Illness and Injury Recovery Cleaning",
     },
     {
       href: "/booking/new?service=hospital_discharge",
@@ -262,8 +246,8 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
       label: "Bereavement Support Cleaning",
     },
   ],
-  servicesGridClassName: "lg:grid-cols-2 xl:grid-cols-3",
-  servicesTitle: "Choose your CleanScape Recovery service",
+  servicesGridClassName: "lg:grid-cols-2",
+  servicesTitle: "Choose your Mundoria Recovery service",
   subtitle: "Cleaning that adapts when life does — with a little more consideration",
-  title: "CleanScape Recovery",
+  title: "Mundoria Recovery",
 };

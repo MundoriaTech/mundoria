@@ -17,7 +17,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 export const metadata: Metadata = buildPageMetadata({
   description: LAUNCH_CITY.seoDescription,
   path: `/cleaners/${LAUNCH_CITY.slug}`,
-  title: "Cleaners in Birmingham | CleanScape",
+  title: "Cleaners in Birmingham | Mundoria",
 });
 
 export default function BirminghamCleanersPage() {
@@ -60,7 +60,7 @@ export default function BirminghamCleanersPage() {
               name: area.name,
             })),
             description: LAUNCH_CITY.seoDescription,
-            name: "CleanScape Birmingham",
+            name: "Mundoria Birmingham",
             url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
           },
         ]}
@@ -82,7 +82,7 @@ export default function BirminghamCleanersPage() {
             Neighbourhoods we prioritise
           </h2>
           <p className="mt-3 max-w-2xl text-sm font-medium text-muted-foreground">
-            We publish areas where CleanScape aims to fulfil reliably — not
+            We publish areas where Mundoria aims to fulfil reliably — not
             every West Midlands town at once.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

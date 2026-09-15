@@ -28,7 +28,7 @@ export function WelcomeSection({ customerHref }: { customerHref: string }) {
           </h2>
           <p className="mt-4 max-w-sm text-pretty text-[13px] font-normal leading-5 text-white sm:text-[12px] sm:leading-[17px]">
             Book, message, track, confirm and pay from one calm place.
-            CleanScape keeps the service simple on the surface and rigorous
+            Mundoria keeps the service simple on the surface and rigorous
             underneath.
           </p>
         </div>

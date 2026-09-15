@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   await admin.from("notifications").insert({
     body: parsed.data.content.slice(0, 140),
     data: { booking_id: parsed.data.bookingId },
-    title: `New message from ${sender?.full_name ?? "CleanScape"}`,
+    title: `New message from ${sender?.full_name ?? "Mundoria"}`,
     type: "message",
     user_id: receiverId,
   });
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       body: parsed.data.content.slice(0, 140),
       data: { booking_id: parsed.data.bookingId },
       playerId: receiver?.onesignal_player_id ?? null,
-      title: `New message from ${sender?.full_name ?? "CleanScape"}`,
+      title: `New message from ${sender?.full_name ?? "Mundoria"}`,
     });
   }
 
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
           receiver.role === "cleaner"
             ? `${appUrl}/cleaner/messages/${parsed.data.bookingId}`
             : `${appUrl}/messages/${parsed.data.bookingId}`,
-        senderName: sender?.full_name ?? "CleanScape",
+        senderName: sender?.full_name ?? "Mundoria",
       },
       template:
         receiver.role === "cleaner"

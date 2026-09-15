@@ -21,7 +21,6 @@ import { useEffect, useState } from "react";
 
 import { AdminAlerts } from "@/components/admin/admin-alerts";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
-import { BrandMark } from "@/components/shared/brand-mark";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -120,10 +119,9 @@ export function AdminShell({
             href="/admin/dashboard"
             onClick={() => setOpen(false)}
           >
-            <BrandMark className="h-10 w-7 shrink-0 sm:h-11 sm:w-8" />
             <span className="min-w-0">
-              <span className="block truncate text-base tracking-[-0.04em]">
-                cleanscape
+              <span className="block truncate text-xl font-black tracking-[-0.06em]">
+                Mundoria
               </span>
               <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-white/60">
                 admin

@@ -4,7 +4,7 @@ import { useId } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** CleanScape cookie palette — warm baked golds. */
+/** Mundoria cookie palette — warm baked golds. */
 const COOKIE = {
   center: "#f7e4a8",
   mid: "#f0cf7a",

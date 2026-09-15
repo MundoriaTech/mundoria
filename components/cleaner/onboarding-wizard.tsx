@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
-import { BrandMark } from "@/components/shared/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SERVICES } from "@/lib/customer/services";
@@ -73,7 +72,7 @@ export function OnboardingWizard({
   const [prefix, setPrefix] = useState("");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("cleanscape-cleaner-onboarding");
+    const saved = window.localStorage.getItem("mundoria-cleaner-onboarding");
     if (saved) {
       try {
         setData((current) =>
@@ -83,14 +82,14 @@ export function OnboardingWizard({
           }),
         );
       } catch {
-        window.localStorage.removeItem("cleanscape-cleaner-onboarding");
+        window.localStorage.removeItem("mundoria-cleaner-onboarding");
       }
     }
   }, []);
 
   useEffect(() => {
     window.localStorage.setItem(
-      "cleanscape-cleaner-onboarding",
+      "mundoria-cleaner-onboarding",
       JSON.stringify(data),
     );
   }, [data]);
@@ -184,7 +183,7 @@ export function OnboardingWizard({
         return;
       }
 
-      window.localStorage.removeItem("cleanscape-cleaner-onboarding");
+      window.localStorage.removeItem("mundoria-cleaner-onboarding");
       router.refresh();
     } catch (submitError) {
       setError(
@@ -202,10 +201,9 @@ export function OnboardingWizard({
       <div className="mx-auto max-w-3xl">
         <div className="rounded-[2rem] bg-[#221f50] p-6 text-white shadow-2xl shadow-[#221f50]/15 sm:p-8">
           <div className="flex items-center gap-3">
-            <BrandMark />
             <div>
               <p className="text-sm font-semibold text-white/70">
-                CleanScape Pro
+                Mundoria Pro
               </p>
               <h1 className="text-2xl font-semibold tracking-[-0.04em] sm:text-4xl">
                 Build your cleaner profile
@@ -335,7 +333,7 @@ export function OnboardingWizard({
               <Heading title="Location consent" />
               <div className="rounded-2xl border border-border bg-background p-5 text-sm leading-6">
                 <p>
-                  CleanScape records your GPS position only when you check in
+                  Mundoria records your GPS position only when you check in
                   and check out of an active job. This creates an audit trail for
                   no-show and completion disputes. We do not track your location
                   outside active job actions.
@@ -353,7 +351,7 @@ export function OnboardingWizard({
                     type="checkbox"
                   />
                   <span>
-                    I understand and agree that CleanScape may capture my GPS
+                    I understand and agree that Mundoria may capture my GPS
                     coordinates when I check in and check out of an active job.
                   </span>
                 </label>

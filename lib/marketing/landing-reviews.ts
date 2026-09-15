@@ -19,7 +19,7 @@ export const landingReviewPlaceholders: LandingReview[] = [
     id: "review-daniel",
     name: "Daniel",
     quote:
-      "Turnovers used to be a panic. CleanScape gives me the status trail I need before a guest arrives.",
+      "Turnovers used to be a panic. Mundoria gives me the status trail I need before a guest arrives.",
   },
   {
     detail: "Deep clean customer",

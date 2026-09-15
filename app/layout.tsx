@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     icon: [
       { type: "image/x-icon", url: "/favicon.ico" },
       { type: "image/png", url: "/images/brand/favicon-32.png" },
-      { type: "image/png", url: "/images/brand/cleanscape-mark.png" },
+      { type: "image/png", url: "/images/brand/mundoria-mark.png" },
     ],
   },
   openGraph: {
@@ -62,7 +62,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('cleanscape-theme');document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('mundoria-theme');document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`,
           }}
         />
         <script

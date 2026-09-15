@@ -28,12 +28,12 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
     <AuthShell
       description={
         returningFromBooking
-          ? "Looks like you already have a CleanScape account. Sign in to finish your booking."
+          ? "Looks like you already have a Mundoria account. Sign in to finish your booking."
           : "Welcome back. Your next booking or job is waiting."
       }
       footer={
         <>
-          New to CleanScape?{" "}
+          New to Mundoria?{" "}
           <Link
             className="font-semibold text-[#291845] hover:underline"
             href={signupHref}

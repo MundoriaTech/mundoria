@@ -11,9 +11,9 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Become a CleanScape cleaner in Birmingham. Flexible jobs, clear checklists, in-app messaging and Stripe Connect payouts after onboarding and vetting.",
+    "Become a Mundoria cleaner in Birmingham. Flexible jobs, clear checklists, in-app messaging and Stripe Connect payouts after onboarding and vetting.",
   path: "/for-cleaners",
-  title: "Become a Cleaner | CleanScape",
+  title: "Become a Cleaner | Mundoria",
 });
 
 const benefits = [
@@ -42,13 +42,13 @@ export default function ForCleanersPage() {
   return (
     <MarketingShell>
       <MarketingHero
-        description="CleanScape is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."
+        description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."
         eyebrow="Cleaners"
         primaryHref={signupHref}
         primaryLabel="Apply as a cleaner"
         secondaryHref="/how-it-works"
         secondaryLabel="See the customer journey"
-        title="Work with CleanScape"
+        title="Work with Mundoria"
       />
 
       <section className="px-5 py-16 sm:px-8">

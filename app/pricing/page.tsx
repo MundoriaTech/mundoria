@@ -15,9 +15,9 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "CleanScape pricing guidance for regular, deep, end-of-tenancy, Airbnb and office cleaning. See starting prices and book online with a clear estimate.",
+    "Mundoria pricing guidance for regular, deep, end-of-tenancy, Airbnb and office cleaning. See starting prices and book online with a clear estimate.",
   path: "/pricing",
-  title: "Cleaning Prices | CleanScape",
+  title: "Cleaning Prices | Mundoria",
 });
 
 export default function PricingPage() {

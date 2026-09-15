@@ -156,7 +156,7 @@ export function AdminInvitationsManager({
       >
         <Input
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="admin@cleanscapeuk.com"
+          placeholder="admin@mundoriauk.com"
           required
           type="email"
           value={email}

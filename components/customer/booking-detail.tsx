@@ -334,7 +334,7 @@ export function BookingDetail({
                     {cleanerTierLabel(booking.cleaner.tier)}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    CleanScape medallion
+                    Mundoria medallion
                   </span>
                 </div>
               </div>
@@ -342,7 +342,7 @@ export function BookingDetail({
           ) : (
             <p className="mt-4 text-sm text-muted-foreground">
               {booking.booking_protected
-                ? "Your booking is protected — we’re arranging your CleanScape professional."
+                ? "Your booking is protected — we’re arranging your Mundoria professional."
                 : "We’re matching you with the best available cleaner."}
             </p>
           )}
@@ -384,7 +384,7 @@ export function BookingDetail({
             <div>
               <h2 className="text-lg font-semibold">How was your clean?</h2>
               <p className="text-sm text-muted-foreground">
-                Share a simple mood rating. CleanScape uses this internally for
+                Share a simple mood rating. Mundoria uses this internally for
                 fair medallion scoring.
               </p>
             </div>

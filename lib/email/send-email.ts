@@ -39,10 +39,10 @@ export async function sendBrandedEmail({
 
 function defaultFrom(template: EmailTemplateId) {
   const fallback = template.startsWith("admin.")
-    ? "CleanScape Alerts <alerts@resend.dev>"
+    ? "Mundoria Alerts <alerts@resend.dev>"
     : template.startsWith("auth.")
-      ? "CleanScape Security <security@resend.dev>"
-      : "CleanScape <notifications@resend.dev>";
+      ? "Mundoria Security <security@resend.dev>"
+      : "Mundoria <notifications@resend.dev>";
 
   return process.env.RESEND_FROM_EMAIL ?? fallback;
 }

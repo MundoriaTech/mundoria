@@ -1,18 +1,18 @@
 ---
-description: CleanScape marketing icon style (Phosphor duotone + sticker edge)
+description: Mundoria marketing icon style (Phosphor duotone + sticker edge)
 alwaysApply: true
 ---
 
-# CleanScape icon style
+# Mundoria icon style
 
-When adding or updating marketing/feature icons on public pages, use this established CleanScape style — do not invent new custom SVG sticker drawings or switch libraries without being asked.
+When adding or updating marketing/feature icons on public pages, use this established Mundoria style — do not invent new custom SVG sticker drawings or switch libraries without being asked.
 
 ## Stack
 - Prefer **Phosphor Icons** (`@phosphor-icons/react`) with `weight="duotone"`.
 - Keep **lucide-react** for small UI chrome (nav chevrons, form controls, etc.), not for branded feature illustrations.
 
 ## Colour mix (duotone layers)
-Colour the two SVG paths creatively with **purple, white, and orange** (CleanScape brand):
+Colour the two SVG paths creatively with **purple, white, and orange** (Mundoria brand):
 - Soft fill = `path:first-child` at full opacity (`!opacity-100`) with peach/lavender/white fill
 - Linework = `path:last-child` with purple (`#312c79` / `#5b3d9e`) or orange (`#d4694a`)
 - Vary the mix per icon (e.g. orange fill + purple lines, or lavender fill + orange lines, or white fill + purple lines)

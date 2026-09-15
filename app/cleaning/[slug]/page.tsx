@@ -30,7 +30,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   return buildPageMetadata({
     description: service.seoDescription,
     path: `/cleaning/${service.slug}`,
-    title: `${service.label} in the UK | CleanScape`,
+    title: `${service.label} in the UK | Mundoria`,
   });
 }
 
@@ -89,7 +89,7 @@ export default function CleaningServicePage({ params }: PageProps) {
             },
             provider: {
               "@type": "Organization",
-              name: "CleanScape",
+              name: "Mundoria",
               url: absoluteUrl("/"),
             },
             url: absoluteUrl(`/cleaning/${service.slug}`),
@@ -104,7 +104,7 @@ export default function CleaningServicePage({ params }: PageProps) {
         primaryLabel={`Book ${service.label}`}
         secondaryHref="/cleaners/birmingham"
         secondaryLabel="Birmingham coverage"
-        title={`${service.label} with CleanScape`}
+        title={`${service.label} with Mundoria`}
       />
 
       <section className="px-5 py-16 sm:px-8">

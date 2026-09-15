@@ -1,6 +1,13 @@
-import Link from "next/link";
+"use client";
 
-import { landingCategoryImages } from "@/components/marketing/landing/constants";
+import Link from "next/link";
+import { useState } from "react";
+
+import { CategoryLoopMedia } from "@/components/marketing/landing/category-loop-media";
+import {
+  landingCategoryImages,
+  landingCategoryLoops,
+} from "@/components/marketing/landing/constants";
 import { LazyImage } from "@/components/shared/lazy-image";
 import { SERVICE_CATEGORIES } from "@/lib/customer/services";
 import type { ServiceCategoryDefinition } from "@/lib/customer/services";
@@ -16,15 +23,15 @@ const smartMainCategories = [
 const smartCategoryLabels: Record<(typeof smartMainCategories)[number], string> =
   {
     commercial: "Commercial Cleaning",
-    recovery: "Cleanscape recovery Cleaning",
+    recovery: "Mundoria Recovery Cleaning",
     residential: "Residential Cleaning",
   };
 
 /** Bottom label bar colours from the landing design. */
 const smartCategoryBarColors: Record<(typeof smartMainCategories)[number], string> =
   {
-    commercial: "#F5BB95",
-    recovery: "#8B40A7",
+    commercial: "#FC9297",
+    recovery: "#8B40A8",
     residential: "#CF4696",
   };
 
@@ -54,7 +61,7 @@ export function ServiceCategoriesSection({
               </h2>
             </div>
             <p className="mt-3 max-w-[376px] text-pretty text-[13px] font-light leading-5 text-black sm:mt-4 sm:leading-[17px]">
-              Choose a category to start. CleanScape guides you to the right
+              Choose a category to start. Mundoria guides you to the right
               service, cleaning standard and optional add-ons.
             </p>
           </div>
@@ -87,6 +94,8 @@ function CategoryCard({
   category: ServiceCategoryDefinition;
   label: string;
 }) {
+  const [active, setActive] = useState(false);
+
   const href =
     bookingHref === "/setup"
       ? "/setup"
@@ -98,21 +107,40 @@ function CategoryCard({
             ? "/cleaning/recovery"
             : `${bookingHref}?category=${category.value}`;
 
+  const loop = landingCategoryLoops[category.value];
+  const stillSrc =
+    landingCategoryImages[category.value] ?? landingCategoryImages.residential;
+
   return (
     <Link
       className="group relative mx-auto block aspect-[295/284] w-full max-w-[22rem] overflow-hidden rounded-tl-[24px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)] min-[480px]:max-w-none sm:rounded-tl-[29px] min-[480px]:[&:last-child]:col-span-2 min-[480px]:[&:last-child]:mx-auto min-[480px]:[&:last-child]:max-w-[calc(50%-0.625rem)] lg:[&:last-child]:col-span-1 lg:[&:last-child]:max-w-none"
       href={href}
+      onBlur={() => setActive(false)}
+      onFocus={() => setActive(true)}
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
     >
-      <LazyImage
-        alt={label}
-        className="object-cover transition duration-500 group-hover:scale-[1.03]"
-        fill
-        sizes="(min-width: 1024px) 295px, (min-width: 480px) 45vw, 92vw"
-        src={
-          landingCategoryImages[category.value] ??
-          landingCategoryImages.residential
-        }
-      />
+      {loop?.video ? (
+        <CategoryLoopMedia
+          active={active}
+          alt={label}
+          mediaClassName={
+            category.value === "commercial"
+              ? "scale-[1.18] -translate-y-[10%] translate-x-[6%] group-hover:scale-[1.22]"
+              : undefined
+          }
+          posterSrc={loop.poster}
+          videoSrc={loop.video}
+        />
+      ) : (
+        <LazyImage
+          alt={label}
+          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+          fill
+          sizes="(min-width: 1024px) 295px, (min-width: 480px) 45vw, 92vw"
+          src={stillSrc}
+        />
+      )}
 
       <div
         className="absolute inset-x-0 bottom-0 z-10 flex min-h-0 items-center px-3 py-2 min-[400px]:px-3.5 min-[400px]:py-2.5"

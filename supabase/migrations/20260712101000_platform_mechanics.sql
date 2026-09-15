@@ -1,4 +1,4 @@
--- CleanScape platform mechanics:
+-- Mundoria platform mechanics:
 -- certification-led cleaner visibility, medallion score ratings,
 -- rating dispute holds, GPS consent, guided disputes, and service checklists.
 

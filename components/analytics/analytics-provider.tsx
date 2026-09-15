@@ -54,15 +54,15 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       setPreferences(detail);
     }
 
-    window.addEventListener("cleanscape:open-cookie-settings", onOpenSettings);
-    window.addEventListener("cleanscape:consent-updated", onConsentUpdated);
+    window.addEventListener("mundoria:open-cookie-settings", onOpenSettings);
+    window.addEventListener("mundoria:consent-updated", onConsentUpdated);
     return () => {
       window.removeEventListener(
-        "cleanscape:open-cookie-settings",
+        "mundoria:open-cookie-settings",
         onOpenSettings,
       );
       window.removeEventListener(
-        "cleanscape:consent-updated",
+        "mundoria:consent-updated",
         onConsentUpdated,
       );
     };
@@ -142,8 +142,8 @@ function CookieConsentBanner({
 
   return (
     <div
-      aria-describedby="cleanscape-cookie-copy"
-      aria-labelledby="cleanscape-cookie-title"
+      aria-describedby="mundoria-cookie-copy"
+      aria-labelledby="mundoria-cookie-title"
       aria-modal="true"
       className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-[2px] sm:items-end sm:p-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))] md:items-center"
       role="dialog"
@@ -154,16 +154,16 @@ function CookieConsentBanner({
             <>
               <h2
                 className="text-lg font-black tracking-[-0.03em] text-foreground"
-                id="cleanscape-cookie-title"
+                id="mundoria-cookie-title"
               >
                 This website uses cookies
               </h2>
               <div
                 className="mt-2 space-y-3 text-sm font-medium leading-6 text-muted-foreground"
-                id="cleanscape-cookie-copy"
+                id="mundoria-cookie-copy"
               >
                 <p>
-                  CleanScape and our selected partners use cookies and similar
+                  Mundoria and our selected partners use cookies and similar
                   technologies that are necessary to present this website and to
                   give you the best experience. If you consent, we will also use
                   cookies for statistics and marketing.
@@ -189,13 +189,13 @@ function CookieConsentBanner({
             <>
               <h2
                 className="text-lg font-black tracking-[-0.03em] text-foreground"
-                id="cleanscape-cookie-title"
+                id="mundoria-cookie-title"
               >
                 Select the cookies you accept
               </h2>
               <div
                 className="mt-2 space-y-3 text-sm font-medium leading-6 text-muted-foreground"
-                id="cleanscape-cookie-copy"
+                id="mundoria-cookie-copy"
               >
                 <p>
                   On this site we always use cookies that are essential for the

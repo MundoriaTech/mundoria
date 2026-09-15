@@ -18,7 +18,7 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-export const THEME_KEY = "cleanscape-theme";
+export const THEME_KEY = "mundoria-theme";
 
 function readStoredTheme(): ThemeMode {
   if (typeof window === "undefined") return "light";

@@ -33,5 +33,5 @@ export const SESSION_POLICY: Record<
   },
 };
 
-export const SESSION_STARTED_KEY = "cleanscape-session-started-at";
-export const SESSION_ACTIVITY_KEY = "cleanscape-session-activity-at";
+export const SESSION_STARTED_KEY = "mundoria-session-started-at";
+export const SESSION_ACTIVITY_KEY = "mundoria-session-activity-at";

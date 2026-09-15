@@ -38,7 +38,7 @@ export default async function CompleteProfilePage({
 
   return (
     <AuthShell
-      description="Google created your session. Add the details CleanScape needs for booking updates and marketplace safety."
+      description="Google created your session. Add the details Mundoria needs for booking updates and marketplace safety."
       footer="You can switch accounts from the form above."
       title="Complete your profile"
     >

@@ -1,4 +1,4 @@
-/** Figma landing palette — mapped to CleanScape brand tokens where possible. */
+/** Figma landing palette — mapped to Mundoria brand tokens where possible. */
 export const landingColors = {
   navy: "#1c133b",
   purple: "#312c79",
@@ -20,7 +20,7 @@ export const landingNavLinks = [
   ["Review", "#reviews"],
   ["Coverage", "#coverage"],
   ["For cleaners", "/for-cleaners"],
-  ["Support", "mailto:support@cleanscapeuk.com"],
+  ["Support", "mailto:support@mundoriauk.com"],
 ] as const;
 
 /** Hover mega-panel items for Services (WeCasa-style). */
@@ -77,15 +77,15 @@ export const landingCategoryLoops: Record<
   { poster: string; video?: string }
 > = {
   commercial: {
-    poster: "/images/marketing/landing/category-loop-commercial-poster.jpg",
+    poster: "/images/marketing/landing/category-loop-commercial-poster.png",
     video: "/images/marketing/landing/category-loop-commercial.mp4",
   },
   recovery: {
-    poster: "/images/marketing/landing/category-loop-recovery-poster.jpg",
+    poster: "/images/marketing/landing/category-loop-recovery-poster.png",
     video: "/images/marketing/landing/category-loop-recovery.mp4",
   },
   residential: {
-    poster: "/images/marketing/landing/category-loop-residential-poster.jpg",
+    poster: "/images/marketing/landing/category-loop-residential-poster.png",
     video: "/images/marketing/landing/category-loop-residential.mp4",
   },
 };

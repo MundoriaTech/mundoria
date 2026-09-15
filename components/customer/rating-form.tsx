@@ -105,7 +105,7 @@ export function RatingForm({
       <div>
         <p className="text-sm font-medium">How did this clean feel?</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Customers see medallions, not scores. This helps CleanScape track
+          Customers see medallions, not scores. This helps Mundoria track
           quality fairly behind the scenes.
         </p>
         <div className="mt-4 grid gap-3">

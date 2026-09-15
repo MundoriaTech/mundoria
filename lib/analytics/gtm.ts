@@ -69,7 +69,7 @@ function injectScript(src: string, id: string) {
 export function loadGoogleTagManager() {
   const gtmId = getGtmId();
   if (!gtmId || typeof window === "undefined") return false;
-  if (document.getElementById("cleanscape-gtm")) return true;
+  if (document.getElementById("mundoria-gtm")) return true;
 
   ensureDataLayer();
   window.dataLayer?.push({
@@ -79,7 +79,7 @@ export function loadGoogleTagManager() {
 
   injectScript(
     `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`,
-    "cleanscape-gtm",
+    "mundoria-gtm",
   );
   return true;
 }
@@ -88,12 +88,12 @@ export function loadGoogleTagManager() {
 export function loadGa4Direct() {
   const measurementId = getGaMeasurementId();
   if (!measurementId || typeof window === "undefined") return false;
-  if (document.getElementById("cleanscape-ga4")) return true;
+  if (document.getElementById("mundoria-ga4")) return true;
 
   ensureDataLayer();
   injectScript(
     `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`,
-    "cleanscape-ga4",
+    "mundoria-ga4",
   );
   window.gtag?.("js", new Date());
   window.gtag?.("config", measurementId, { anonymize_ip: true });

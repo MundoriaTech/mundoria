@@ -12,9 +12,9 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Answers about CleanScape booking, pricing, coverage in Birmingham, cleaner vetting, cancellations and support.",
+    "Answers about Mundoria booking, pricing, coverage in Birmingham, cleaner vetting, cancellations and support.",
   path: "/faq",
-  title: "FAQ | CleanScape",
+  title: "FAQ | Mundoria",
 });
 
 export default function FaqPage() {
@@ -62,7 +62,7 @@ export default function FaqPage() {
         </div>
         <p className="mx-auto mt-10 max-w-3xl text-sm text-muted-foreground">
           Still stuck?{" "}
-          <Link className="font-bold text-primary" href="mailto:support@cleanscapeuk.com">
+          <Link className="font-bold text-primary" href="mailto:support@mundoriauk.com">
             Email support
           </Link>{" "}
           or read{" "}

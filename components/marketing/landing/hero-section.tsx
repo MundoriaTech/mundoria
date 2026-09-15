@@ -16,15 +16,15 @@ import {
  */
 const HERO_STACK = [
   {
-    alt: "CleanScape cleaner with spray bottle and brush",
+    alt: "Mundoria cleaner with spray bottle and brush",
     src: "/images/marketing/landing/hero-stack-1.png",
   },
   {
-    alt: "CleanScape team cleaning a modern office",
+    alt: "Mundoria team cleaning a modern office",
     src: "/images/marketing/landing/hero-stack-2.png",
   },
   {
-    alt: "CleanScape cleaner with supplies",
+    alt: "Mundoria cleaner with supplies",
     src: "/images/marketing/landing/hero-stack-3.png",
   },
 ] as const;
@@ -118,7 +118,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
           <h1 className="text-balance text-[2.05rem] font-bold leading-[1.1] tracking-[-0.04em] text-white min-[400px]:text-[2.4rem] sm:text-[2.85rem] lg:text-[clamp(2.65rem,3.5vw,3.4rem)]">
             Book Trusted Home
             <br />
-            Cleaning service in Minutes
+            Cleaning Service in Minutes
           </h1>
           <p className="mt-5 max-w-[30rem] text-pretty text-[15px] font-normal leading-6 text-white/95 sm:mt-6 sm:text-[17px] sm:leading-7">
             Find cleaning jobs near you, choose when you work, and get paid for

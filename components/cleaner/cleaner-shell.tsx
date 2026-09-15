@@ -12,7 +12,6 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { BrandMark } from "@/components/shared/brand-mark";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -46,10 +45,9 @@ export function CleanerShell({
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="min-w-0">
             <Link className="flex items-center gap-3" href="/cleaner/dashboard">
-              <BrandMark className="h-10 w-7 shrink-0" />
               <span className="min-w-0">
-                <span className="block truncate font-bold tracking-tight text-foreground">
-                  CleanScape Pro
+                <span className="block truncate text-xl font-black tracking-[-0.06em] text-foreground">
+                  Mundoria Pro
                 </span>
                 <span className="block truncate text-xs text-muted-foreground">
                   {profile.full_name.split(" ")[0]} ·{" "}
@@ -109,8 +107,8 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
             </p>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
               {cleaner.status === "in_training"
-                ? "CleanScape has put your application on hold. You can still update your profile and finish Stripe setup. Job offers appear after you’re approved."
-                : "You can explore your dashboard, update your profile, and connect Stripe now. New job offers will appear after CleanScape approves your application."}
+                ? "Mundoria has put your application on hold. You can still update your profile and finish Stripe setup. Job offers appear after you’re approved."
+                : "You can explore your dashboard, update your profile, and connect Stripe now. New job offers will appear after Mundoria approves your application."}
             </p>
             {!cleaner.stripe_onboarding_complete ? (
               <p className="mt-2 text-xs text-muted-foreground">
@@ -131,7 +129,7 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
           <p className="font-semibold">Account {cleaner.status}</p>
           <p className="mt-1 text-sm">
             Your cleaner account cannot receive job offers right now. Contact
-            CleanScape support if you think this is a mistake.
+            Mundoria support if you think this is a mistake.
           </p>
         </div>
       </div>

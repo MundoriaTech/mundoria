@@ -8,9 +8,9 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Moving home cleaning with CleanScape — end of tenancy, move-in and move-out cleans with clear pricing and vetted cleaners in Birmingham.",
+    "Moving home cleaning with Mundoria — end of tenancy, move-in and move-out cleans with clear pricing and vetted cleaners in Birmingham.",
   path: "/cleaning/moving-home",
-  title: "Moving Home Cleaning | CleanScape",
+  title: "Moving Home Cleaning | Mundoria",
 });
 
 export default function MovingHomeCleaningRoute() {
@@ -31,7 +31,7 @@ export default function MovingHomeCleaningRoute() {
           name: "Moving Home Cleaning",
           provider: {
             "@type": "Organization",
-            name: "CleanScape",
+            name: "Mundoria",
             url: absoluteUrl("/"),
           },
           url: absoluteUrl("/cleaning/moving-home"),

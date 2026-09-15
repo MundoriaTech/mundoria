@@ -22,7 +22,7 @@ export default async function AdminInvitePage({
 
   return (
     <AuthShell
-      description="Create your invite-only CleanScape admin account."
+      description="Create your invite-only Mundoria admin account."
       footer={
         <>
           Already accepted?{" "}

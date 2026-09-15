@@ -29,9 +29,9 @@ export function generateMetadata({ params }: PageProps): Metadata {
   const area = birminghamAreaBySlug(params.area);
   if (!area) return {};
   return buildPageMetadata({
-    description: `Book cleaners in ${area.name}, Birmingham with CleanScape. ${area.description}`,
+    description: `Book cleaners in ${area.name}, Birmingham with Mundoria. ${area.description}`,
     path: `/cleaners/${LAUNCH_CITY.slug}/${area.slug}`,
-    title: `Cleaners in ${area.name}, Birmingham | CleanScape`,
+    title: `Cleaners in ${area.name}, Birmingham | Mundoria`,
   });
 }
 
@@ -83,7 +83,7 @@ export default function BirminghamAreaPage({ params }: PageProps) {
             name: `Cleaning services in ${area.name}`,
             provider: {
               "@type": "Organization",
-              name: "CleanScape",
+              name: "Mundoria",
               url: absoluteUrl("/"),
             },
             url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`),

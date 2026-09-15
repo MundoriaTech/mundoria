@@ -51,7 +51,7 @@ export function LandingFooter({
       links: [
         ["How it works", "/how-it-works"],
         ["Coverage", "#coverage"],
-        ["About CleanScape", "#about"],
+        ["About Mundoria", "#about"],
         ["Privacy", "/privacy"],
         ["Cookie policy", "/cookies"],
         ["Terms", "/terms"],
@@ -67,22 +67,22 @@ export function LandingFooter({
           <div className="sm:col-span-2 lg:col-span-1">
             <LandingLogo href="/" />
             <p className="mt-5 max-w-xl text-pretty text-sm font-light leading-7 text-muted-foreground sm:mt-6">
-              CleanScape connects UK customers with independent cleaning
+              Mundoria connects UK customers with independent cleaning
               professionals for regular cleaning, deep cleans, Airbnb turnovers
               and tenancy handovers.
             </p>
             <div className="mt-5 grid gap-2 text-sm font-medium text-muted-foreground sm:mt-6">
               <a
                 className="w-fit break-all transition hover:text-[#312c79]"
-                href="mailto:support@cleanscapeuk.com"
+                href="mailto:support@mundoriauk.com"
               >
-                support@cleanscapeuk.com
+                support@mundoriauk.com
               </a>
               <a
                 className="w-fit break-all transition hover:text-[#312c79]"
-                href="mailto:hello@cleanscapeuk.com"
+                href="mailto:hello@mundoriauk.com"
               >
-                hello@cleanscapeuk.com
+                hello@mundoriauk.com
               </a>
             </div>
           </div>
@@ -110,9 +110,9 @@ export function LandingFooter({
 
         <div className="flex flex-col gap-5 pt-8 text-sm font-medium text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p>© 2026 CleanScape UK. All rights reserved.</p>
+            <p>© 2026 Mundoria UK. All rights reserved.</p>
             <p className="mt-2 max-w-2xl text-pretty text-xs leading-6">
-              Cleaners on CleanScape are independent contractors. Availability,
+              Cleaners on Mundoria are independent contractors. Availability,
               pricing and coverage may vary by location and service type.
             </p>
           </div>
@@ -137,7 +137,7 @@ export function LandingFooter({
             </Link>
             <a
               className="transition hover:text-[#312c79]"
-              href="mailto:support@cleanscapeuk.com"
+              href="mailto:support@mundoriauk.com"
             >
               Support
             </a>

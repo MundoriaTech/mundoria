@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         firstName: profile?.full_name?.split(" ")[0],
         fullName: profile?.full_name,
         securityNote:
-          "If you did not change this password, contact CleanScape support immediately and do not use links from unexpected emails.",
+          "If you did not change this password, contact Mundoria support immediately and do not use links from unexpected emails.",
       },
       template: "auth.password_changed",
       to: user.email,

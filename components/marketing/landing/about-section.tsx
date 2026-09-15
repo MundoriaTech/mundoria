@@ -34,7 +34,7 @@ export function AboutSection({
       <div className="relative mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-10">
         <div className="relative mx-auto aspect-[4/5] w-full max-w-sm sm:max-w-md lg:mx-0 lg:max-w-lg">
           <LazyImage
-            alt="CleanScape brand illustration of a friendly cleaner"
+            alt="Mundoria brand illustration of a friendly cleaner"
             className="object-contain object-bottom"
             fill
             sizes="(min-width: 1024px) 420px, 90vw"

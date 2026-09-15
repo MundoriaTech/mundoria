@@ -11,7 +11,6 @@ import { usePathname } from "next/navigation";
 
 import { NotificationBell } from "@/components/customer/notification-bell";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
-import { BrandMark } from "@/components/shared/brand-mark";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -45,9 +44,8 @@ export function CustomerShell({
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="min-w-0">
             <Link className="flex items-center gap-3" href="/dashboard">
-              <BrandMark className="h-10 w-7 shrink-0" />
-              <span className="truncate text-lg font-bold tracking-tight text-foreground">
-                cleanscape
+              <span className="truncate text-xl font-black tracking-[-0.06em] text-foreground">
+                Mundoria
               </span>
             </Link>
           </div>

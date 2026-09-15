@@ -95,7 +95,7 @@ function LoadedGeoapifyMapView({
   const markerRefs = useRef<Marker[]>([]);
   const [mapReady, setMapReady] = useState(false);
   const sourceId = useMemo(
-    () => `cleanscape-overlays-${Math.random().toString(36).slice(2)}`,
+    () => `mundoria-overlays-${Math.random().toString(36).slice(2)}`,
     [],
   );
 

@@ -105,14 +105,9 @@ function ReceiptDocument({
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-border bg-card shadow-sm">
       <header className="flex items-start justify-between gap-4 border-b bg-[#221f50] px-6 py-6 text-white sm:px-8">
-        <div className="flex items-center gap-3">
-          <BrandMark className="h-12 w-9" />
-          <div>
-            <p className="text-xl font-black lowercase tracking-[-0.06em]">
-              cleanscape
-            </p>
-            <p className="mt-1 text-sm text-white/70">Service receipt</p>
-          </div>
+        <div>
+          <BrandMark className="text-2xl text-white" variant="onDark" />
+          <p className="mt-1 text-sm text-white/70">Service receipt</p>
         </div>
         <div className="text-right text-sm">
           <p className="font-mono text-white/80">#{booking.id.slice(0, 8)}</p>
@@ -192,7 +187,7 @@ function ReceiptDocument({
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            CleanScape service fee
+            Mundoria service fee
           </p>
           <p className="mt-2 text-lg font-bold">
             {formatMoney(lines.platformAmount)}

@@ -8,9 +8,9 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "CleanScape Recovery — personalised cleaning support for pregnancy, postpartum, illness, injury, hospital discharge and bereavement. Cleaning, not healthcare.",
+    "Mundoria Recovery — personalised cleaning support for pregnancy, postpartum, illness, injury, hospital discharge and bereavement. Cleaning, not healthcare.",
   path: "/cleaning/recovery",
-  title: "CleanScape Recovery | CleanScape",
+  title: "Mundoria Recovery | Mundoria",
 });
 
 export default function RecoveryCleaningRoute() {
@@ -28,10 +28,10 @@ export default function RecoveryCleaningRoute() {
           areaServed: { "@type": "City", name: "Birmingham" },
           description:
             "Cleaning that adapts when life does — with more personal consideration.",
-          name: "CleanScape Recovery",
+          name: "Mundoria Recovery",
           provider: {
             "@type": "Organization",
-            name: "CleanScape",
+            name: "Mundoria",
             url: absoluteUrl("/"),
           },
           url: absoluteUrl("/cleaning/recovery"),

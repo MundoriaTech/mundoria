@@ -1,6 +1,6 @@
-# CleanScape
+# Mundoria
 
-CleanScape is a two-sided cleaning-services marketplace built with Next.js 14,
+Mundoria is a two-sided cleaning-services marketplace built with Next.js 14,
 TypeScript, Tailwind CSS, Supabase, Stripe Connect, and supporting messaging and
 notification services.
 
@@ -14,7 +14,7 @@ Use `npm run typecheck`, `npm run lint`, and `npm run build` before shipping.
 
 ## Production scheduled jobs
 
-CleanScape uses cron-job.org for scheduled production operations when deployed
+Mundoria uses cron-job.org for scheduled production operations when deployed
 on Vercel Hobby. Vercel-managed Cron Jobs are disabled in `vercel.json` so Hobby
 deployments are not blocked by frequent schedules.
 

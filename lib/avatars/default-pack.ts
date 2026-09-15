@@ -1,5 +1,5 @@
 /**
- * CleanScape default avatar pack — Discord-style illustrated options.
+ * Mundoria default avatar pack — Discord-style illustrated options.
  * Paths are public URLs stored on `profiles.avatar_url` when selected.
  */
 export type DefaultAvatar = {

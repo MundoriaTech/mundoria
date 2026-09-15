@@ -54,7 +54,7 @@ export function HowItWorksSection() {
           </h2>
           <p className="mt-5 max-w-md text-pretty text-[13px] font-light leading-6 text-[#1c133b]/80 sm:max-w-[18rem] sm:leading-7">
             Customers should not need to understand marketplace mechanics.
-            CleanScape keeps those details tidy in the background.
+            Mundoria keeps those details tidy in the background.
           </p>
         </div>
 

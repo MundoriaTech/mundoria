@@ -34,7 +34,7 @@ export function AdminAuthShell({
             Invite-only platform access
           </p>
           <h1 className="mt-7 text-5xl font-semibold leading-[1.02] tracking-[-0.06em]">
-            CleanScape command centre.
+            Mundoria command centre.
           </h1>
           <p className="mt-6 max-w-lg text-base leading-8 text-white/65">
             Secure access for authorised operators managing bookings, cleaner

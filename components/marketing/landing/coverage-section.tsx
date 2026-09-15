@@ -15,7 +15,7 @@ export function CoverageSection() {
     >
       <div className="mx-auto max-w-6xl">
         <h2 className="max-w-md text-balance text-[1.75rem] font-medium leading-tight text-white sm:text-[32px] sm:leading-[35px]">
-          CleanScape services in our top cities
+          Mundoria services in our top cities
         </h2>
         <p className="mt-3 max-w-2xl text-pretty text-[14px] font-normal leading-[1.55] text-white/90">
           Now serving {LAUNCH_CITY.name} neighbourhood by neighbourhood. More

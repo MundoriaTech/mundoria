@@ -91,7 +91,7 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
       const role = result.role ?? values.role;
       if (result.referralPromoCode) {
         window.sessionStorage.setItem(
-          "cleanscape-welcome-promo",
+          "mundoria-welcome-promo",
           result.referralPromoCode,
         );
       }

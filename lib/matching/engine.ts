@@ -237,7 +237,7 @@ export async function runMatchingEngine(
     ? "Your cleaning professional has changed"
     : "Your booking is protected";
   const customerPushBody = previousCleanerId
-    ? `${winner.cleanerName?.split(" ")[0] ?? "A CleanScape professional"} is now assigned to your booking.`
+    ? `${winner.cleanerName?.split(" ")[0] ?? "A Mundoria professional"} is now assigned to your booking.`
     : "We've matched a cleaner and kept backup professionals ready if anything changes.";
 
   await Promise.all([
