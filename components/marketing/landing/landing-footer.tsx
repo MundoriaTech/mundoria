@@ -50,6 +50,7 @@ export function LandingFooter({
     {
       links: [
         ["How it works", "/how-it-works"],
+        ["Contact us", "/contact"],
         ["Coverage", "#coverage"],
         ["About Mundoria", "#about"],
         ["Privacy", "/privacy"],
@@ -126,6 +127,9 @@ export function LandingFooter({
             <CookieSettingsLink className="transition hover:text-[#312c79]">
               Manage cookies
             </CookieSettingsLink>
+            <Link className="transition hover:text-[#312c79]" href="/contact">
+              Contact
+            </Link>
             <Link className="transition hover:text-[#312c79]" href="/terms">
               Terms
             </Link>
@@ -135,12 +139,6 @@ export function LandingFooter({
             >
               Login
             </Link>
-            <a
-              className="transition hover:text-[#312c79]"
-              href="mailto:support@mundoriauk.com"
-            >
-              Support
-            </a>
           </div>
         </div>
       </div>

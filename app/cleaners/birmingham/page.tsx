@@ -3,6 +3,12 @@ import Link from "next/link";
 
 import { JsonLd } from "@/components/marketing/json-ld";
 import {
+  BrandedCardLink,
+  BrandedCtaBand,
+  BrandedPageWash,
+  BrandedSection,
+} from "@/components/marketing/branded-page-sections";
+import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
@@ -66,67 +72,72 @@ export default function BirminghamCleanersPage() {
         ]}
       />
 
-      <MarketingHero
-        description={LAUNCH_CITY.summary}
-        eyebrow="Coverage"
-        primaryHref={bookingHref}
-        primaryLabel="Book in Birmingham"
-        secondaryHref="/cleaning"
-        secondaryLabel="Browse services"
-        title="Cleaners in Birmingham"
-      />
+      <BrandedPageWash>
+        <MarketingHero
+          description={LAUNCH_CITY.summary}
+          eyebrow="Coverage"
+          primaryHref={bookingHref}
+          primaryLabel="Book in Birmingham"
+          secondaryHref="/cleaning"
+          secondaryLabel="Browse services"
+          title="Cleaners in Birmingham"
+        />
 
-      <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-black tracking-[-0.04em] text-foreground">
+        <BrandedSection>
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
             Neighbourhoods we prioritise
           </h2>
-          <p className="mt-3 max-w-2xl text-sm font-medium text-muted-foreground">
-            We publish areas where Mundoria aims to fulfil reliably — not
-            every West Midlands town at once.
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+            We publish areas where Mundoria aims to fulfil reliably — not every
+            West Midlands town at once.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {BIRMINGHAM_AREAS.map((area) => (
-              <Link
-                className="rounded-2xl border border-border bg-card p-6 transition hover:border-primary/40"
+              <BrandedCardLink
+                description={area.description}
                 href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
                 key={area.slug}
-              >
-                <h3 className="text-xl font-black text-foreground">
-                  {area.name}
-                </h3>
-                <p className="mt-3 text-sm font-medium leading-6 text-muted-foreground">
-                  {area.description}
-                </p>
-              </Link>
+                label={area.name}
+                meta="Birmingham"
+              />
             ))}
           </div>
-        </div>
-      </section>
+        </BrandedSection>
 
-      <section className="border-t border-border bg-muted/30 px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-black tracking-[-0.04em] text-foreground">
+        <BrandedSection tone="lavender">
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
             Popular Birmingham cleaning services
           </h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {popular.map((service) => (
-              <Link
-                className="rounded-2xl border border-border bg-card p-6 transition hover:border-primary/40"
+              <BrandedCardLink
+                description={`From ${service.fromPrice}`}
                 href={`/cleaning/${service.slug}`}
                 key={service.slug}
-              >
-                <h3 className="text-lg font-black text-foreground">
-                  {service.label} in Birmingham
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  From {service.fromPrice}
-                </p>
-              </Link>
+                label={`${service.label} in Birmingham`}
+                meta={service.categoryLabel}
+              />
             ))}
           </div>
-        </div>
-      </section>
+          <p className="mt-8 text-sm text-[#5a5470]">
+            Looking for something else?{" "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href="/cleaning"
+            >
+              Browse all services
+            </Link>
+            .
+          </p>
+        </BrandedSection>
+
+        <BrandedCtaBand
+          body="Enter your Birmingham postcode and service — we’ll show a clear estimate before you book."
+          href={bookingHref}
+          label="Book in Birmingham"
+          title="Ready to book in Birmingham?"
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

@@ -40,6 +40,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
   switch (event.type) {
+    case "payment_intent.amount_capturable_updated": {
+      const intent = event.data.object;
+      await admin
+        .from("bookings")
+        .update({ payment_status: "held" })
+        .eq("stripe_payment_intent_id", intent.id)
+        .in("payment_status", ["unpaid", "held"]);
+      break;
+    }
     case "payment_intent.succeeded": {
       const intent = event.data.object;
       await admin

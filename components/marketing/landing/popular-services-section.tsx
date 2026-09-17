@@ -44,7 +44,7 @@ const popularServices: PopularService[] = [
     description: "Fast turnovers with checklist-led guest-ready standards.",
     href: "/booking/new?service=airbnb_turnover",
     image: "/images/marketing/landing/popular-regular.png",
-    title: "Airbnb Cleaning",
+    title: "Airbnb/Shortlet Cleaning",
   },
   {
     color: "#45347e",

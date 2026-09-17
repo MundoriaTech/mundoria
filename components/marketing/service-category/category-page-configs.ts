@@ -94,12 +94,8 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
       question: "What is Mundoria?",
       services: [
         {
-          description: "Fast, guest-ready resets between stays.",
-          name: "Airbnb cleaning",
-        },
-        {
-          description: "Reliable holiday-let cleans with guest-ready presentation.",
-          name: "Holiday let cleaning",
+          description: "Fast, guest-ready resets between Airbnb and shortlet stays.",
+          name: "Airbnb/Shortlet cleaning",
         },
         {
           description: "Structured turnover cleaning for serviced accommodation.",
@@ -110,7 +106,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
     },
     {
       answer:
-        "Choose Airbnb, holiday let or serviced accommodation cleaning, share property and turnover details, pick a slot and pay securely.",
+        "Choose Airbnb/Shortlet or serviced accommodation cleaning, share property and turnover details, pick a slot and pay securely.",
       question: "How do I book short-let cleaning?",
     },
     {
@@ -142,12 +138,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
     {
       href: "/booking/new?service=airbnb_turnover",
       image: "/images/marketing/landing/str-airbnb.png",
-      label: "Airbnb Cleaning",
-    },
-    {
-      href: "/booking/new?service=holiday_let",
-      image: "/images/marketing/landing/str-holiday.png",
-      label: "Shortlet Cleaning",
+      label: "Airbnb/Shortlet Cleaning",
     },
     {
       href: "/booking/new?service=serviced_accommodation",
@@ -156,7 +147,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
     },
   ],
   servicesTitle: "Choose your Airbnb & short-let cleaning service",
-  subtitle: "Guest-ready cleans for Airbnb, holiday lets and serviced stays",
+  subtitle: "Guest-ready cleans for Airbnb, shortlets and serviced stays",
   title: "Airbnb & Short Lets",
 };
 

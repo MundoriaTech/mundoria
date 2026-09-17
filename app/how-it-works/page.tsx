@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
+import {
+  BrandedCtaBand,
+  BrandedPageWash,
+  BrandedSection,
+} from "@/components/marketing/branded-page-sections";
 import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
-import { Button } from "@/components/ui/button";
 import { HOW_IT_WORKS_STEPS } from "@/lib/seo/marketing";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
@@ -23,52 +26,45 @@ export default function HowItWorksPage() {
 
   return (
     <MarketingShell>
-      <MarketingHero
-        description="Mundoria is designed so customers never feel like they’re filling in an insurance form — tell us what you need, see a clear estimate, then book."
-        eyebrow="Product"
-        primaryHref={bookingHref}
-        primaryLabel="Start booking"
-        secondaryHref="/faq"
-        secondaryLabel="Read FAQ"
-        title="How Mundoria works"
-      />
+      <BrandedPageWash>
+        <MarketingHero
+          description="Mundoria is designed so customers never feel like they’re filling in an insurance form — tell us what you need, see a clear estimate, then book."
+          eyebrow="Product"
+          primaryHref={bookingHref}
+          primaryLabel="Start booking"
+          secondaryHref="/faq"
+          secondaryLabel="Read FAQ"
+          title="How Mundoria works"
+        />
 
-      <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2">
-          {HOW_IT_WORKS_STEPS.map((step, index) => (
-            <article
-              className="rounded-[1.5rem] border border-border bg-card p-7"
-              key={step.title}
-            >
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-primary">
-                Step {index + 1}
-              </p>
-              <h2 className="mt-4 text-2xl font-black tracking-[-0.04em] text-foreground">
-                {step.title}
-              </h2>
-              <p className="mt-3 text-sm font-medium leading-7 text-muted-foreground">
-                {step.body}
-              </p>
-            </article>
-          ))}
-        </div>
-        <div className="mx-auto mt-12 max-w-7xl rounded-[1.5rem] bg-foreground px-6 py-10 text-background sm:px-10">
-          <h2 className="text-3xl font-black tracking-[-0.04em]">
-            From booking to cleaner confirmed
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm font-medium text-background/70">
-            After payment, your booking enters matching. Once a cleaner accepts,
-            you see confirmation details and can follow status through arrival
-            and completion.
-          </p>
-          <Button
-            asChild
-            className="mt-6 h-12 rounded-full bg-background px-6 font-black text-foreground hover:bg-background/90"
-          >
-            <Link href={bookingHref}>Book a clean</Link>
-          </Button>
-        </div>
-      </section>
+        <BrandedSection>
+          <div className="grid gap-4 md:grid-cols-2">
+            {HOW_IT_WORKS_STEPS.map((step, index) => (
+              <article
+                className="rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)] sm:p-7"
+                key={step.title}
+              >
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#823fb2]">
+                  Step {index + 1}
+                </p>
+                <h2 className="mt-3 text-xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                  {step.title}
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+                  {step.body}
+                </p>
+              </article>
+            ))}
+          </div>
+        </BrandedSection>
+
+        <BrandedCtaBand
+          body="After payment, your booking enters matching. Once a cleaner accepts, you see confirmation and live status through arrival and completion."
+          href={bookingHref}
+          label="Book a clean"
+          title="From booking to cleaner confirmed"
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

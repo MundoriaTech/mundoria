@@ -109,20 +109,35 @@ export async function POST(request: Request) {
       .eq("id", user.id);
   }
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount,
-    currency: "gbp",
-    customer: stripeCustomerId,
-    metadata: {
-      address_id: parsed.data.addressId,
-      cleaning_standard: parsed.data.cleaningStandard,
-      promo_code_id: promo?.id ?? "",
-      selected_add_ons: parsed.data.selectedAddOns.join(","),
-      service_type: parsed.data.serviceType,
-      supabase_user_id: user.id,
+  const idempotencyKey = [
+    "book",
+    user.id,
+    parsed.data.addressId,
+    parsed.data.serviceType,
+    parsed.data.scheduledDate,
+    parsed.data.scheduledTime,
+    String(amount),
+    parsed.data.selectedAddOns.slice().sort().join("-") || "none",
+  ].join("_");
+
+  const paymentIntent = await stripe.paymentIntents.create(
+    {
+      amount,
+      capture_method: "manual",
+      currency: "gbp",
+      customer: stripeCustomerId,
+      metadata: {
+        address_id: parsed.data.addressId,
+        cleaning_standard: parsed.data.cleaningStandard,
+        promo_code_id: promo?.id ?? "",
+        selected_add_ons: parsed.data.selectedAddOns.join(","),
+        service_type: parsed.data.serviceType,
+        supabase_user_id: user.id,
+      },
+      setup_future_usage: "off_session",
     },
-    setup_future_usage: "off_session",
-  });
+    { idempotencyKey: idempotencyKey.slice(0, 255) },
+  );
 
   return NextResponse.json({
     amount,

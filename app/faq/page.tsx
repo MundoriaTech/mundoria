@@ -3,6 +3,11 @@ import Link from "next/link";
 
 import { JsonLd } from "@/components/marketing/json-ld";
 import {
+  BrandedCtaBand,
+  BrandedPageWash,
+  BrandedSection,
+} from "@/components/marketing/branded-page-sections";
+import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
@@ -37,45 +42,66 @@ export default function FaqPage() {
           })),
         }}
       />
-      <MarketingHero
-        description="Straight answers about booking, pricing, Birmingham coverage and becoming a cleaner."
-        eyebrow="Help"
-        primaryHref={bookingHref}
-        primaryLabel="Book a clean"
-        secondaryHref="/how-it-works"
-        secondaryLabel="How it works"
-        title="Frequently asked questions"
-      />
+      <BrandedPageWash>
+        <MarketingHero
+          description="Straight answers about booking, pricing, Birmingham coverage and becoming a cleaner."
+          eyebrow="Help"
+          primaryHref={bookingHref}
+          primaryLabel="Book a clean"
+          secondaryHref="/contact"
+          secondaryLabel="Contact us"
+          title="Frequently asked questions"
+        />
 
-      <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-3xl divide-y divide-border border-y border-border">
-          {MARKETING_FAQS.map((item) => (
-            <article className="py-8" key={item.question}>
-              <h2 className="text-xl font-black tracking-[-0.03em] text-foreground">
-                {item.question}
-              </h2>
-              <p className="mt-3 text-sm font-medium leading-7 text-muted-foreground">
-                {item.answer}
-              </p>
-            </article>
-          ))}
-        </div>
-        <p className="mx-auto mt-10 max-w-3xl text-sm text-muted-foreground">
-          Still stuck?{" "}
-          <Link className="font-bold text-primary" href="mailto:support@mundoriauk.com">
-            Email support
-          </Link>{" "}
-          or read{" "}
-          <Link className="font-bold text-primary" href="/privacy">
-            privacy
-          </Link>{" "}
-          and{" "}
-          <Link className="font-bold text-primary" href="/terms">
-            terms
-          </Link>
-          .
-        </p>
-      </section>
+        <BrandedSection>
+          <div className="columns-1 gap-4 sm:columns-2">
+            {MARKETING_FAQS.map((item) => (
+              <article
+                className="mb-4 break-inside-avoid rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 px-5 py-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)] sm:mb-5 sm:px-6 sm:py-6"
+                key={item.question}
+              >
+                <h2 className="text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
+                  {item.question}
+                </h2>
+                <p className="mt-2.5 text-sm leading-6 text-[#5a5470]">
+                  {item.answer}
+                </p>
+              </article>
+            ))}
+          </div>
+          <p className="mt-10 text-sm text-[#5a5470]">
+            Still stuck?{" "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href="/contact"
+            >
+              Contact us
+            </Link>{" "}
+            or read{" "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href="/privacy"
+            >
+              privacy
+            </Link>{" "}
+            and{" "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href="/terms"
+            >
+              terms
+            </Link>
+            .
+          </p>
+        </BrandedSection>
+
+        <BrandedCtaBand
+          body="Get a clear estimate before you book — then track the clean from match to checklist."
+          href={bookingHref}
+          label="Book a clean"
+          title="Ready to book?"
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

@@ -77,13 +77,7 @@ const SERVICE_CARDS = [
   {
     href: "/booking/new?service=airbnb_turnover",
     image: "/images/marketing/landing/str-airbnb.png",
-    label: "Airbnb Cleaning",
-    objectPosition: "object-center",
-  },
-  {
-    href: "/booking/new?service=holiday_let",
-    image: "/images/marketing/landing/str-holiday.png",
-    label: "Shortlet Cleaning",
+    label: "Airbnb/Shortlet Cleaning",
     objectPosition: "object-center",
   },
 ] as const;
@@ -115,12 +109,8 @@ const FAQS = [
         name: "End of tenancy cleaning",
       },
       {
-        description: "Guest-ready turnover cleans between Airbnb stays.",
-        name: "Airbnb cleaning",
-      },
-      {
-        description: "Shortlet cleans with guest-ready presentation.",
-        name: "Shortlet cleaning",
+        description: "Guest-ready turnover cleans between Airbnb and shortlet stays.",
+        name: "Airbnb/Shortlet cleaning",
       },
     ],
     servicesHeading: "What residential cleaning services does Mundoria offer?",

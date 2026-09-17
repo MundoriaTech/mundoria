@@ -1,0 +1,345 @@
+/**
+ * Seed thousands of users into a hosted or local Supabase project via the
+ * service-role API. Prefer `supabase db reset` (uses supabase/seed.sql) for
+ * local — this script is for remote projects where SQL seed isn't applied.
+ *
+ * Usage:
+ *   NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run seed
+ *
+ * Demo logins (password SeedPass123!):
+ *   demo.customer@seed.mundoria.local
+ *   demo.cleaner@seed.mundoria.local
+ */
+
+import { createClient } from "@supabase/supabase-js";
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const CUSTOMERS = Number(process.env.SEED_CUSTOMERS ?? 2500);
+const CLEANERS = Number(process.env.SEED_CLEANERS ?? 1500);
+const BOOKINGS = Number(process.env.SEED_BOOKINGS ?? 4000);
+const PASSWORD = "SeedPass123!";
+const BATCH = 25;
+
+if (!url || !serviceKey) {
+  console.error(
+    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
+  );
+  process.exit(1);
+}
+
+const admin = createClient(url, serviceKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+
+// Keep to enums present on older hosted DBs (pre same_day / office migrations).
+const SERVICES = [
+  "regular",
+  "one_off",
+  "deep_clean",
+  "end_of_tenancy",
+  "airbnb_turnover",
+  "post_construction",
+];
+const STATUSES = [
+  "pending_match",
+  "matched",
+  "confirmed",
+  "in_progress",
+  "completed",
+  "cancelled",
+];
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function createUser({ email, fullName, role, phone }) {
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    password: PASSWORD,
+    user_metadata: { full_name: fullName, phone, role },
+  });
+  if (!error && data.user) return data.user;
+
+  if (error && !/already|registered|exists/i.test(error.message)) {
+    throw error;
+  }
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("id,email")
+    .eq("email", email)
+    .maybeSingle();
+  return profile ? { id: profile.id, email: profile.email } : null;
+}
+
+async function ensureDemoUsers() {
+  const demos = [
+    {
+      email: "demo.customer@seed.mundoria.local",
+      fullName: "Demo Customer",
+      role: "customer",
+      phone: "+447700900001",
+    },
+    {
+      email: "demo.cleaner@seed.mundoria.local",
+      fullName: "Demo Cleaner",
+      role: "cleaner",
+      phone: "+447711900001",
+    },
+  ];
+  for (const demo of demos) {
+    await createUser(demo);
+  }
+}
+
+async function createBatch(role, count, offset) {
+  const ids = [];
+  for (let i = 0; i < count; i += 1) {
+    const n = offset + i + 1;
+    const email = `${role}${String(n).padStart(4, "0")}@seed.mundoria.local`;
+    try {
+      const user = await createUser({
+        email,
+        fullName: `${role === "customer" ? "Customer" : "Cleaner"} ${n}`,
+        phone: `+4477${role === "customer" ? "0" : "1"}${String(n).padStart(7, "0")}`.slice(
+          0,
+          13,
+        ),
+        role,
+      });
+      if (user?.id) ids.push(user.id);
+    } catch (error) {
+      console.warn(`skip ${email}:`, error.message ?? error);
+    }
+    if ((i + 1) % BATCH === 0) {
+      process.stdout.write(
+        `\r${role}s: ${offset + i + 1}/${offset + count}   `,
+      );
+      await sleep(150);
+    }
+  }
+  process.stdout.write("\n");
+  return ids;
+}
+
+async function activateCleaners(cleanerIds) {
+  console.log(`Activating ${cleanerIds.length} cleaners…`);
+  for (let i = 0; i < cleanerIds.length; i += BATCH) {
+    const slice = cleanerIds.slice(i, i + BATCH);
+    await admin
+      .from("cleaner_profiles")
+      .update({
+        bio: "Seeded Birmingham-area cleaner for end-to-end testing.",
+        dbs_verified: true,
+        id_verified: true,
+        onboarding_complete: true,
+        status: "active",
+        working_radius_km: 12,
+      })
+      .in("id", slice);
+
+    const services = slice.flatMap((cleanerId) =>
+      SERVICES.map((service_type) => ({
+        cleaner_id: cleanerId,
+        is_active: true,
+        service_type,
+      })),
+    );
+    await admin.from("cleaner_services").upsert(services, {
+      onConflict: "cleaner_id,service_type",
+      ignoreDuplicates: true,
+    });
+
+    const areas = slice.map((cleanerId, idx) => ({
+      cleaner_id: cleanerId,
+      latitude: 52.47 + (idx % 50) / 1000,
+      longitude: -1.92 - (idx % 50) / 1000,
+      postcode_prefix: ["B1", "B2", "B5", "B15", "B29"][idx % 5],
+    }));
+    await admin.from("cleaner_working_areas").insert(areas);
+  }
+}
+
+async function seedAddresses(customerIds) {
+  console.log(`Ensuring addresses for ${customerIds.length} customers…`);
+  let created = 0;
+  let skipped = 0;
+  for (let i = 0; i < customerIds.length; i += BATCH) {
+    const slice = customerIds.slice(i, i + BATCH);
+    const { data: existing } = await admin
+      .from("addresses")
+      .select("customer_id")
+      .in("customer_id", slice)
+      .eq("is_default", true);
+    const have = new Set((existing ?? []).map((row) => row.customer_id));
+    const missing = slice.filter((id) => !have.has(id));
+    skipped += slice.length - missing.length;
+    if (missing.length) {
+      const rows = missing.map((customerId, idx) => {
+        const n = i + idx;
+        return {
+          address_line_1: `${10 + (n % 200)} Seed Street`,
+          city: "Birmingham",
+          customer_id: customerId,
+          is_default: true,
+          label: "Home",
+          latitude: 52.47 + (n % 80) / 1000,
+          longitude: -1.92 - (n % 80) / 1000,
+          num_bathrooms: 1 + (n % 2),
+          num_bedrooms: 1 + (n % 4),
+          postcode: `B${1 + (n % 15)} ${1 + (n % 9)}AA`,
+          property_type:
+            n % 5 === 0 ? "office" : n % 2 === 0 ? "flat" : "house",
+        };
+      });
+      const { error } = await admin.from("addresses").insert(rows);
+      if (error) {
+        console.warn(`address batch error @${i}:`, error.message);
+      } else {
+        created += rows.length;
+      }
+    }
+    process.stdout.write(
+      `\raddresses: ${Math.min(i + BATCH, customerIds.length)}/${customerIds.length}   `,
+    );
+  }
+  process.stdout.write(
+    `\naddresses created: ${created}, already present: ${skipped}\n`,
+  );
+}
+
+async function loadSeedAddresses(customerIds) {
+  const addresses = [];
+  for (let i = 0; i < customerIds.length; i += 100) {
+    const chunk = customerIds.slice(i, i + 100);
+    const { data, error } = await admin
+      .from("addresses")
+      .select("id,customer_id")
+      .in("customer_id", chunk)
+      .eq("is_default", true);
+    if (error) {
+      console.warn(`address load error @${i}:`, error.message);
+      continue;
+    }
+    if (data?.length) addresses.push(...data);
+  }
+  return addresses;
+}
+
+async function loadSeedProfileIds(role) {
+  const ids = [];
+  let from = 0;
+  const pageSize = 1000;
+  for (;;) {
+    const { data, error } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("role", role)
+      .like("email", "%@seed.mundoria.local")
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+    if (!data?.length) break;
+    ids.push(...data.map((row) => row.id));
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return ids;
+}
+
+async function seedBookings(customerIds, cleanerIds) {
+  console.log(`Creating ~${BOOKINGS} bookings…`);
+  console.log("service types:", SERVICES.join(", "));
+  const addresses = await loadSeedAddresses(customerIds);
+  if (!addresses?.length) {
+    console.warn("No addresses found — skip bookings");
+    return;
+  }
+  console.log(`Using ${addresses.length} addresses for bookings`);
+
+  const rows = [];
+  for (let i = 0; i < BOOKINGS; i += 1) {
+    const address = addresses[i % addresses.length];
+    const status = STATUSES[i % STATUSES.length];
+    const total = 4500 + (i % 40) * 250;
+    const cleaner = Math.floor(total * 0.8);
+    rows.push({
+      address_id: address.id,
+      amount_cleaner: cleaner,
+      amount_platform: total - cleaner,
+      amount_total: total,
+      cleaner_id:
+        status === "pending_match"
+          ? null
+          : cleanerIds[i % cleanerIds.length] ?? null,
+      customer_id: address.customer_id,
+      estimated_duration_hours: 2 + (i % 4),
+      is_recurring: false,
+      payment_status:
+        status === "completed"
+          ? "released"
+          : status === "cancelled"
+            ? "refunded"
+            : "held",
+      scheduled_date: new Date(Date.now() + ((i % 60) - 20) * 86400000)
+        .toISOString()
+        .slice(0, 10),
+      scheduled_start_time: ["09:00", "10:00", "11:00", "14:00", "16:00"][i % 5],
+      service_type: SERVICES[i % SERVICES.length],
+      special_instructions: `Seed booking #${i + 1}`,
+      status,
+    });
+    if (rows.length >= 150) {
+      const { error } = await admin
+        .from("bookings")
+        .insert(rows.splice(0, rows.length));
+      if (error) console.warn("booking batch error:", error.message);
+      process.stdout.write(`\rbookings: ${i + 1}/${BOOKINGS}   `);
+      await sleep(50);
+    }
+  }
+  if (rows.length) {
+    const { error } = await admin.from("bookings").insert(rows);
+    if (error) console.warn("booking final error:", error.message);
+  }
+  process.stdout.write("\n");
+}
+
+async function main() {
+  const mode = process.env.SEED_MODE ?? "full";
+  console.log(
+    `Seeding Mundoria → ${url}\n` +
+      `mode=${mode} customers=${CUSTOMERS} cleaners=${CLEANERS} bookings=${BOOKINGS}`,
+  );
+
+  let customerIds = [];
+  let cleanerIds = [];
+
+  if (mode === "backfill" || mode === "bookings") {
+    customerIds = await loadSeedProfileIds("customer");
+    cleanerIds = await loadSeedProfileIds("cleaner");
+    console.log(
+      `Backfill from existing seed profiles: ${customerIds.length} customers, ${cleanerIds.length} cleaners`,
+    );
+  } else {
+    await ensureDemoUsers();
+    customerIds = await createBatch("customer", CUSTOMERS, 0);
+    cleanerIds = await createBatch("cleaner", CLEANERS, 0);
+    await activateCleaners(cleanerIds);
+  }
+
+  if (mode !== "bookings") {
+    await seedAddresses(customerIds);
+  }
+  await seedBookings(customerIds, cleanerIds);
+  console.log("\nDone.");
+  console.log("Demo customer: demo.customer@seed.mundoria.local / SeedPass123!");
+  console.log("Demo cleaner:  demo.cleaner@seed.mundoria.local / SeedPass123!");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

@@ -14,6 +14,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     { data: messages },
     { data: cleaners },
     { data: addOns },
+    { data: team },
   ] = await Promise.all([
     admin.from("bookings").select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone)").eq("id", params.id).single(),
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
@@ -21,6 +22,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     admin.from("messages").select("*,sender:profiles!messages_sender_id_fkey(full_name)").eq("booking_id", params.id).order("created_at"),
     admin.from("profiles").select("id,full_name,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
     admin.from("booking_add_ons").select("*").eq("booking_id", params.id).order("created_at"),
+    admin.from("booking_team_members").select("cleaner_id").eq("booking_id", params.id),
   ]);
   if (!booking) notFound();
   let payment: { id: string; status: string; amount: number; amount_capturable: number } | null = null;
@@ -50,6 +52,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             <p><b>Status:</b> {booking.status}</p>
             <p className="sm:col-span-2"><b>Address:</b> {booking.address?.address_line_1}, {booking.address?.city}</p>
             <p><b>Amount:</b> {formatMoney(booking.amount_total)}</p>
+            <p><b>Payment:</b> {booking.payment_status}</p>
+            <p><b>Allocated cleaners:</b> {booking.allocated_cleaners ?? 1}</p>
+            <p><b>Cleaner hours:</b> {booking.cleaner_hours ?? "—"}</p>
             <p><b>Property condition:</b> {booking.property_condition?.replaceAll("_", " ") ?? "—"}</p>
             <p><b>Recently moved:</b> {booking.recently_moved == null ? "—" : booking.recently_moved ? "Yes" : "No"}</p>
             <p className="sm:col-span-2"><b>Special attention:</b> {(booking.special_attention_areas ?? []).join(", ") || "None"}</p>
@@ -57,7 +62,16 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             <p className="sm:col-span-2"><b>Recommendation:</b> {booking.recommendation_outcome?.replaceAll("_", " ") ?? "not shown"}{booking.recommended_service_type ? ` → ${formatServiceName(booking.recommended_service_type)}` : ""}</p>
           </div>
         </section>
-        <BookingActions bookingId={params.id} cleaners={(cleaners ?? []).map((cleaner) => ({ id: cleaner.id, full_name: cleaner.full_name }))} currentStatus={booking.status} />
+        <BookingActions
+          allocatedCleaners={booking.allocated_cleaners ?? 1}
+          bookingId={params.id}
+          cleaners={(cleaners ?? []).map((cleaner) => ({
+            id: cleaner.id,
+            full_name: cleaner.full_name,
+          }))}
+          currentStatus={booking.status}
+          teamMemberIds={(team ?? []).map((row) => row.cleaner_id)}
+        />
       </div>
       <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Stripe payment</h2>

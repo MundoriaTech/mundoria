@@ -11,6 +11,7 @@ import {
   formatServiceName,
   SERVICE_ADD_ONS,
 } from "@/lib/customer/services";
+import { createRecurringFollowOnBookings } from "@/lib/bookings/recurring";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -56,13 +57,15 @@ export async function POST(request: Request) {
       paymentIntent.metadata.cleaning_standard !== parsed.data.cleaningStandard) ||
     (paymentIntent.metadata.selected_add_ons !== undefined &&
       metadataAddOns !== requestAddOns) ||
-    paymentIntent.status !== "succeeded"
+    !["requires_capture", "succeeded"].includes(paymentIntent.status)
   ) {
     return NextResponse.json(
       { error: "Payment could not be verified." },
       { status: 400 },
     );
   }
+
+  const paymentHeld = paymentIntent.status === "requires_capture";
 
   const [{ data: address }, { data: profile }] = await Promise.all([
     admin
@@ -108,9 +111,9 @@ export async function POST(request: Request) {
       customer_id: user.id,
       estimated_duration_hours: parsed.data.estimatedDurationHours,
       is_recurring: parsed.data.isRecurring,
-      payment_status: "released",
+      payment_status: paymentHeld ? "held" : "released",
       promo_code_id: paymentIntent.metadata.promo_code_id || null,
-      prefer_same_cleaner: false,
+      prefer_same_cleaner: parsed.data.preferSameCleaner,
       property_condition: parsed.data.propertyCondition,
       recently_moved: parsed.data.recentlyMoved,
       recommendation_outcome: parsed.data.recommendationOutcome,
@@ -141,6 +144,19 @@ export async function POST(request: Request) {
       await stripe.paymentIntents.cancel(paymentIntent.id);
     }
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (parsed.data.isRecurring) {
+    try {
+      await createRecurringFollowOnBookings({
+        admin,
+        customDates: parsed.data.customRecurrenceDates ?? [],
+        parent: booking,
+        pattern: parsed.data.recurrencePattern,
+      });
+    } catch (seriesError) {
+      Sentry.captureException(seriesError);
+    }
   }
 
   if (selectedAddOnDefs.length) {

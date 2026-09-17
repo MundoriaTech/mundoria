@@ -4,10 +4,11 @@ import type { CleaningStandard } from "@/types/customer";
  * Office Cleaning time matrix from Mundoria commercial pricing logic.
  * Every minute value is for ONE cleaner.
  *
- * Commercial hourly rates are not final in the product docs — this placeholder
- * is used until platform commercial rates are configured.
+ * Override via COMMERCIAL_HOURLY_RATE_PENCE until platform rates are finalised.
  */
-export const OFFICE_HOURLY_RATE_PENCE = 3500;
+export const OFFICE_HOURLY_RATE_PENCE = Number(
+  process.env.COMMERCIAL_HOURLY_RATE_PENCE ?? 3500,
+);
 export const MAX_HOURS_PER_CLEANER = 5;
 
 export type OfficeSpaceType =

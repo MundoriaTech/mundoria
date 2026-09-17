@@ -20,6 +20,7 @@ export type BookingFlowStepId =
   | "rooms"
   | "standard"
   | "addons"
+  | "preferences"
   | "frequency"
   | "duration"
   | "date"
@@ -37,6 +38,7 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   rooms: "Rooms",
   standard: "Session",
   addons: "Add-ons",
+  preferences: "Preferences",
   frequency: "Frequency",
   duration: "Duration",
   date: "Date",
@@ -182,6 +184,10 @@ export function getFlowSteps(
   }
 
   steps.push("addons");
+
+  if (propertyQuestionModeFor(draft.serviceType) === "recovery") {
+    steps.push("preferences");
+  }
 
   if (frequencyModeFor(draft.serviceType) !== "none") {
     steps.push("frequency");

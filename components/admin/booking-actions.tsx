@@ -8,22 +8,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function BookingActions({
+  allocatedCleaners = 1,
   bookingId,
   cleaners,
   currentStatus,
+  teamMemberIds = [],
 }: {
+  allocatedCleaners?: number;
   bookingId: string;
   cleaners: { id: string; full_name: string }[];
   currentStatus: string;
+  teamMemberIds?: string[];
 }) {
   const router = useRouter();
   const { confirm, error: showError, success } = useFeedback();
   const [cleanerId, setCleanerId] = useState("");
+  const [teamIds, setTeamIds] = useState<string[]>(teamMemberIds);
   const [status, setStatus] = useState(currentStatus);
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
+  const needsTeam = allocatedCleaners > 1;
 
-  async function act(action: "reassign" | "status" | "rematch") {
+  async function act(
+    action: "reassign" | "status" | "rematch" | "assignTeam",
+  ) {
     if (action === "rematch") {
       const ok = await confirm({
         action: "Find replacement",
@@ -39,6 +47,7 @@ export function BookingActions({
       body: JSON.stringify({
         action,
         cleanerId: cleanerId || null,
+        cleanerIds: action === "assignTeam" ? teamIds : undefined,
         note,
         status,
       }),
@@ -65,10 +74,20 @@ export function BookingActions({
           ? "Cleaner reassigned"
           : action === "rematch"
             ? "Rematch started"
-            : "Booking updated",
+            : action === "assignTeam"
+              ? "Team assigned"
+              : "Booking updated",
       note: "The change is in the audit trail.",
     });
     router.refresh();
+  }
+
+  function toggleTeamMember(id: string) {
+    setTeamIds((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id].slice(0, allocatedCleaners),
+    );
   }
 
   return (
@@ -100,6 +119,46 @@ export function BookingActions({
           Reassign
         </Button>
       </div>
+
+      {needsTeam ? (
+        <div className="mt-4 rounded-lg border border-dashed border-border p-3">
+          <p className="text-sm font-semibold">
+            Multi-cleaner team ({teamIds.length}/{allocatedCleaners})
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Primary stays on Reassign above. Add the remaining team here.
+          </p>
+          <div className="mt-3 max-h-40 space-y-2 overflow-y-auto">
+            {cleaners.map((cleaner) => (
+              <label
+                className="flex items-center gap-2 text-sm"
+                key={cleaner.id}
+              >
+                <input
+                  checked={teamIds.includes(cleaner.id)}
+                  className="accent-primary"
+                  onChange={() => toggleTeamMember(cleaner.id)}
+                  type="checkbox"
+                />
+                {cleaner.full_name}
+              </label>
+            ))}
+          </div>
+          <Button
+            className="mt-3 min-h-11 w-full"
+            disabled={
+              note.length < 3 ||
+              teamIds.length === 0 ||
+              teamIds.length > allocatedCleaners
+            }
+            onClick={() => void act("assignTeam")}
+            variant="outline"
+          >
+            Save team
+          </Button>
+        </div>
+      ) : null}
+
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <select
           className="h-11 min-w-0 w-full flex-1 rounded-md border border-input bg-background px-3 text-sm text-foreground"

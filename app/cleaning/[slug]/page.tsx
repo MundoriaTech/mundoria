@@ -4,10 +4,15 @@ import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/marketing/json-ld";
 import {
+  BrandedCardLink,
+  BrandedCtaBand,
+  BrandedPageWash,
+  BrandedSection,
+} from "@/components/marketing/branded-page-sections";
+import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
-import { Button } from "@/components/ui/button";
 import {
   MARKETING_SERVICES,
   marketingServiceBySlug,
@@ -97,98 +102,101 @@ export default function CleaningServicePage({ params }: PageProps) {
         ]}
       />
 
-      <MarketingHero
-        description={service.intro}
-        eyebrow={service.categoryLabel}
-        primaryHref={bookingHref}
-        primaryLabel={`Book ${service.label}`}
-        secondaryHref="/cleaners/birmingham"
-        secondaryLabel="Birmingham coverage"
-        title={`${service.label} with Mundoria`}
-      />
+      <BrandedPageWash>
+        <MarketingHero
+          description={service.intro}
+          eyebrow={service.categoryLabel}
+          primaryHref={bookingHref}
+          primaryLabel={`Book ${service.label}`}
+          secondaryHref="/cleaners/birmingham"
+          secondaryLabel="Birmingham coverage"
+          title={`${service.label} with Mundoria`}
+        />
 
-      <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.4fr_0.8fr]">
-          <div>
-            <h2 className="text-3xl font-black tracking-[-0.04em] text-foreground">
-              What’s included in the booking journey
-            </h2>
-            <ul className="mt-6 space-y-4 text-sm font-medium leading-7 text-muted-foreground">
-              <li>
-                Clear service description and recommended cleaning standard
-                where a choice applies.
-              </li>
-              <li>
-                Property details that feed time and price guidance — not a blank
-                “hours needed” guess.
-              </li>
-              <li>
-                Live status after booking: matching, arrival, checklist
-                completion and secure payment through the platform.
-              </li>
-              <li>
-                Starting estimates from {service.fromPrice}, depending on
-                property size, standard, schedule and add-ons.
-              </li>
-            </ul>
-            <Button
-              asChild
-              className="mt-8 h-12 rounded-full bg-foreground px-6 font-black text-background hover:bg-foreground/90"
-            >
-              <Link href={bookingHref}>Continue to booking</Link>
-            </Button>
+        <BrandedSection>
+          <div className="grid gap-8 lg:grid-cols-[1.4fr_0.85fr]">
+            <div>
+              <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                What’s included in the booking journey
+              </h2>
+              <ul className="mt-6 space-y-4 text-sm leading-7 text-[#5a5470]">
+                <li>
+                  Clear service description and recommended cleaning standard
+                  where a choice applies.
+                </li>
+                <li>
+                  Property details that feed time and price guidance — not a
+                  blank “hours needed” guess.
+                </li>
+                <li>
+                  Live status after booking: matching, arrival, checklist
+                  completion and secure payment through the platform.
+                </li>
+                <li>
+                  Starting estimates from {service.fromPrice}, depending on
+                  property size, standard, schedule and add-ons.
+                </li>
+              </ul>
+              <Link
+                className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-7 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+                href={bookingHref}
+              >
+                Continue to booking
+              </Link>
+            </div>
+            <aside className="rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)] sm:p-7">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#823fb2]">
+                At a glance
+              </p>
+              <dl className="mt-5 space-y-4 text-sm">
+                <div>
+                  <dt className="font-medium text-[#5a5470]">Category</dt>
+                  <dd className="mt-1 font-semibold text-[#1c133b]">
+                    {service.categoryLabel}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-[#5a5470]">From</dt>
+                  <dd className="mt-1 font-semibold text-[#1c133b]">
+                    {service.fromPrice}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-[#5a5470]">Launch focus</dt>
+                  <dd className="mt-1 font-semibold text-[#1c133b]">
+                    Birmingham & nearby areas
+                  </dd>
+                </div>
+              </dl>
+            </aside>
           </div>
-          <aside className="rounded-[1.5rem] border border-border bg-muted/40 p-6">
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-primary">
-              At a glance
-            </p>
-            <dl className="mt-5 space-y-4 text-sm">
-              <div>
-                <dt className="font-bold text-muted-foreground">Category</dt>
-                <dd className="mt-1 font-black text-foreground">
-                  {service.categoryLabel}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-bold text-muted-foreground">From</dt>
-                <dd className="mt-1 font-black text-foreground">
-                  {service.fromPrice}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-bold text-muted-foreground">Launch focus</dt>
-                <dd className="mt-1 font-black text-foreground">
-                  Birmingham & nearby areas
-                </dd>
-              </div>
-            </dl>
-          </aside>
-        </div>
-      </section>
+        </BrandedSection>
 
-      {related.length ? (
-        <section className="border-t border-border bg-card px-5 py-16 sm:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-black tracking-[-0.04em] text-foreground">
+        {related.length ? (
+          <BrandedSection tone="cream">
+            <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
               Related {service.categoryLabel.toLowerCase()}
             </h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((item) => (
-                <Link
-                  className="rounded-2xl border border-border p-5 transition hover:border-primary/40"
+                <BrandedCardLink
+                  description={`From ${item.fromPrice}`}
                   href={`/cleaning/${item.slug}`}
                   key={item.slug}
-                >
-                  <p className="font-black text-foreground">{item.label}</p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    From {item.fromPrice}
-                  </p>
-                </Link>
+                  label={item.label}
+                />
               ))}
             </div>
-          </div>
-        </section>
-      ) : null}
+          </BrandedSection>
+        ) : null}
+
+        <BrandedCtaBand
+          body="Tell us about your space and get a clear estimate before you confirm."
+          href={bookingHref}
+          label={`Book ${service.label}`}
+          title="Ready to book?"
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

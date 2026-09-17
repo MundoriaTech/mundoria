@@ -15,16 +15,22 @@ export async function createManualPaymentIntent({
   customerId: string;
   stripeCustomerId?: string | null;
 }) {
-  const intent = await getStripe().paymentIntents.create({
-    amount,
-    currency: "gbp",
-    customer: stripeCustomerId ?? undefined,
-    metadata: {
-      booking_id: bookingId ?? "",
-      supabase_user_id: customerId,
+  const intent = await getStripe().paymentIntents.create(
+    {
+      amount,
+      capture_method: "manual",
+      currency: "gbp",
+      customer: stripeCustomerId ?? undefined,
+      metadata: {
+        booking_id: bookingId ?? "",
+        supabase_user_id: customerId,
+      },
+      setup_future_usage: "off_session",
     },
-    setup_future_usage: "off_session",
-  });
+    bookingId
+      ? { idempotencyKey: `manual_${bookingId}_${amount}`.slice(0, 255) }
+      : undefined,
+  );
   if (bookingId) {
     await createAdminClient()
       .from("bookings")

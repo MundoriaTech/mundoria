@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
@@ -41,6 +42,7 @@ export function CleanerShell({
   return (
     <div className="min-h-screen bg-background pb-[calc(4rem+env(safe-area-inset-bottom)+1rem)]">
       <SessionTimeoutGuard audience="cleaner" />
+      <OneSignalEnroll />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="min-w-0">

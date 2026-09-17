@@ -4,10 +4,15 @@ import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/marketing/json-ld";
 import {
+  BrandedCardLink,
+  BrandedCtaBand,
+  BrandedPageWash,
+  BrandedSection,
+} from "@/components/marketing/branded-page-sections";
+import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
-import { Button } from "@/components/ui/button";
 import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
@@ -91,56 +96,49 @@ export default function BirminghamAreaPage({ params }: PageProps) {
         ]}
       />
 
-      <MarketingHero
-        description={area.description}
-        eyebrow={`${area.name} · Birmingham`}
-        primaryHref={bookingHref}
-        primaryLabel={`Book in ${area.name}`}
-        secondaryHref={`/cleaners/${LAUNCH_CITY.slug}`}
-        secondaryLabel="All Birmingham areas"
-        title={`Cleaners in ${area.name}`}
-      />
+      <BrandedPageWash>
+        <MarketingHero
+          description={area.description}
+          eyebrow={`${area.name} · Birmingham`}
+          primaryHref={bookingHref}
+          primaryLabel={`Book in ${area.name}`}
+          secondaryHref={`/cleaners/${LAUNCH_CITY.slug}`}
+          secondaryLabel="All Birmingham areas"
+          title={`Cleaners in ${area.name}`}
+        />
 
-      <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-black tracking-[-0.04em] text-foreground">
+        <BrandedSection>
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
             Services customers book in {area.name}
           </h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {popular.map((service) => (
-              <Link
-                className="rounded-2xl border border-border bg-card p-6 transition hover:border-primary/40"
+              <BrandedCardLink
+                description={service.description}
                 href={`/cleaning/${service.slug}`}
                 key={service.slug}
-              >
-                <h3 className="text-lg font-black text-foreground">
-                  {service.label}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {service.description}
-                </p>
-              </Link>
+                label={service.label}
+                meta={service.categoryLabel}
+              />
             ))}
           </div>
-          <Button
-            asChild
-            className="mt-8 h-12 rounded-full bg-foreground px-6 font-black text-background hover:bg-foreground/90"
+          <Link
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-7 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+            href={bookingHref}
           >
-            <Link href={bookingHref}>Check availability</Link>
-          </Button>
-        </div>
-      </section>
+            Check availability
+          </Link>
+        </BrandedSection>
 
-      <section className="border-t border-border bg-muted/30 px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-black text-foreground">
+        <BrandedSection tone="lavender">
+          <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-xl">
             Nearby Birmingham areas
           </h2>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {otherAreas.map((item) => (
               <li key={item.slug}>
                 <Link
-                  className="block rounded-xl border border-border bg-card px-4 py-4 text-sm font-bold text-foreground transition hover:border-primary/40"
+                  className="block rounded-[1.15rem] border border-[#e4daf5]/80 bg-white/85 px-4 py-4 text-sm font-semibold text-[#1c133b] shadow-[0_8px_22px_rgba(49,44,121,0.05)] transition hover:-translate-y-0.5 hover:text-[#6a45b8]"
                   href={`/cleaners/${LAUNCH_CITY.slug}/${item.slug}`}
                 >
                   {item.name}
@@ -148,8 +146,15 @@ export default function BirminghamAreaPage({ params }: PageProps) {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
+        </BrandedSection>
+
+        <BrandedCtaBand
+          body={`Book cleaning in ${area.name} with a clear estimate and live status.`}
+          href={bookingHref}
+          label={`Book in ${area.name}`}
+          title={`Need a cleaner in ${area.name}?`}
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

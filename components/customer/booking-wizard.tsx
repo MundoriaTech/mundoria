@@ -581,6 +581,8 @@ export function BookingWizard({
         }
         return true;
       }
+      case "preferences":
+        return draft.specialAttentionAreas.length > 0;
       case "duration":
         return (
           draft.estimatedDurationHours != null &&
@@ -799,6 +801,9 @@ export function BookingWizard({
           {stepId === "addons" ? (
             <AddOnsStep draft={draft} update={update} />
           ) : null}
+          {stepId === "preferences" ? (
+            <RecoveryPreferencesStep draft={draft} update={update} />
+          ) : null}
           {stepId === "frequency" ? (
             <FrequencyStep draft={draft} update={update} />
           ) : null}
@@ -979,7 +984,6 @@ function ServiceStep({
     "same_day",
     "end_of_tenancy",
     "airbnb_turnover",
-    "holiday_let",
   ]);
   let services = category ? servicesForCategory(category) : SERVICES;
   if (focusServices?.length) {
@@ -987,7 +991,9 @@ function ServiceStep({
   } else if (category === "residential") {
     services = services.filter(
       (item) =>
-        primaryResidential.has(item.value) || item.value === selected,
+        (primaryResidential.has(item.value) || item.value === selected) &&
+        // Airbnb/Shortlet is one picker option (airbnb_turnover); holiday_let kept for legacy links.
+        (item.value !== "holiday_let" || item.value === selected),
     );
   }
 
@@ -1742,6 +1748,111 @@ function AddOnsStep({
   );
 }
 
+function RecoveryPreferencesStep({
+  draft,
+  update,
+}: {
+  draft: BookingDraft;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
+}) {
+  const priorityAreas = [
+    "Kitchen",
+    "Bathrooms",
+    "Bedrooms",
+    "Living areas",
+    "Hallways / access",
+    "Laundry area",
+  ];
+
+  function toggleArea(area: string) {
+    const next = draft.specialAttentionAreas.includes(area)
+      ? draft.specialAttentionAreas.filter((item) => item !== area)
+      : [...draft.specialAttentionAreas, area];
+    update("specialAttentionAreas", next);
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+        Recovery preferences
+      </h2>
+      <p className="mt-2 text-sm text-[#5b5478]">
+        Tell us what matters most for this visit — products, fragrance, and
+        priority rooms. This is cleaning support, not healthcare.
+      </p>
+
+      <p className="mt-6 text-sm font-semibold text-[#1c133b]">
+        Priority areas
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {priorityAreas.map((area) => {
+          const active = draft.specialAttentionAreas.includes(area);
+          return (
+            <button
+              className={cn(
+                "rounded-full border px-3.5 py-2 text-sm font-semibold touch-manipulation",
+                active
+                  ? "border-[#6a45b8] bg-[#6a45b8] text-white"
+                  : "border-[#d9ccef] bg-[#ebe3f8] text-[#1c133b]",
+              )}
+              key={area}
+              onClick={() => toggleArea(area)}
+              type="button"
+            >
+              {area}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="mt-6 text-sm font-semibold text-[#1c133b]">
+        Access / mobility notes
+      </p>
+      <div className="mt-3 grid gap-2">
+        {(
+          [
+            ["maintained", "Standard access"],
+            ["extra_attention", "Extra care needed around the home"],
+            ["neglected", "Needs a more thorough first visit"],
+          ] as const
+        ).map(([value, label]) => {
+          const active = draft.propertyCondition === value;
+          return (
+            <button
+              className={cn(
+                "rounded-2xl border px-4 py-3 text-left text-sm font-semibold touch-manipulation",
+                active
+                  ? "border-[#6a45b8] bg-[#6a45b8] text-white"
+                  : "border-[#d9ccef] bg-[#ebe3f8] text-[#1c133b]",
+              )}
+              key={value}
+              onClick={() => update("propertyCondition", value)}
+              type="button"
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      <label className="mt-6 block">
+        <span className="text-sm font-semibold text-[#1c133b]">
+          Products, fragrance & other notes
+        </span>
+        <textarea
+          className="mt-2 min-h-[110px] w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] focus:ring-2"
+          onChange={(event) => update("specialInstructions", event.target.value)}
+          placeholder="e.g. fragrance-free only, avoid bleach, leave bedroom door closed…"
+          value={draft.specialInstructions}
+        />
+      </label>
+    </div>
+  );
+}
+
 function FrequencyStep({
   draft,
   update,
@@ -1772,7 +1883,6 @@ function FrequencyStep({
     }
     update("isRecurring", true);
     update("recurrencePattern", value);
-    update("preferSameCleaner", false);
     if (value !== "custom") update("customRecurrenceDates", []);
   }
 
@@ -1912,6 +2022,27 @@ function FrequencyStep({
             </p>
           ) : null}
         </div>
+      ) : null}
+
+      {draft.isRecurring ? (
+        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#d9ccef] bg-white/80 px-4 py-3">
+          <input
+            checked={draft.preferSameCleaner}
+            className="mt-1 h-4 w-4 accent-[#6a45b8]"
+            onChange={(event) =>
+              update("preferSameCleaner", event.target.checked)
+            }
+            type="checkbox"
+          />
+          <span>
+            <span className="block text-sm font-semibold text-[#1c133b]">
+              Prefer the same cleaner each visit
+            </span>
+            <span className="mt-0.5 block text-xs text-[#5b5478]">
+              We’ll try to keep your matched cleaner for the rest of the series.
+            </span>
+          </span>
+        </label>
       ) : null}
     </div>
   );
@@ -2400,8 +2531,11 @@ function CheckoutStep({
       if (stripeError || !paymentIntent) {
         throw new Error(stripeError?.message ?? "Card payment failed.");
       }
-      if (paymentIntent.status !== "succeeded") {
-        throw new Error("Payment was not completed. Please try again.");
+      if (
+        paymentIntent.status !== "requires_capture" &&
+        paymentIntent.status !== "succeeded"
+      ) {
+        throw new Error("Payment was not authorised. Please try again.");
       }
 
       const bookingResponse = await fetch("/api/bookings", {

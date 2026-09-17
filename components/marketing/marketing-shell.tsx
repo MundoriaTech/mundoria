@@ -81,37 +81,37 @@ export function MarketingHero({
   title: string;
 }) {
   return (
-    <section className="border-b border-border bg-muted/40 px-5 py-16 sm:px-8 sm:py-20">
+    <section className="border-b border-[#eadfce]/80 bg-[#f7f2ea] px-5 py-16 sm:px-8 sm:py-20">
       <div className="mx-auto max-w-4xl">
         <p className="text-[1.35rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.55rem]">
           Mundoria
         </p>
         {eyebrow ? (
-          <p className="mt-5 text-sm font-black uppercase tracking-[0.22em] text-primary">
+          <p className="mt-5 text-sm font-black uppercase tracking-[0.22em] text-[#823fb2]">
             {eyebrow}
           </p>
         ) : null}
         <h1
-          className={`text-4xl font-black tracking-[-0.05em] text-foreground sm:text-6xl ${
+          className={`text-4xl font-black tracking-[-0.05em] text-[#1c133b] sm:text-6xl ${
             eyebrow ? "mt-4" : "mt-5"
           }`}
         >
           {title}
         </h1>
-        <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-muted-foreground sm:text-lg">
+        <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#5a5470] sm:text-lg">
           {description}
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button
             asChild
-            className="h-12 rounded-full bg-foreground px-6 font-black text-background hover:bg-foreground/90"
+            className="h-12 rounded-full bg-[#6a45b8] px-6 font-black text-white hover:bg-[#5a38a3]"
           >
             <Link href={primaryHref}>{primaryLabel}</Link>
           </Button>
           {secondaryHref && secondaryLabel ? (
             <Button
               asChild
-              className="h-12 rounded-full px-6 font-black"
+              className="h-12 rounded-full border-[#d9ccef] bg-white/80 px-6 font-black text-[#312c79] hover:bg-white"
               variant="outline"
             >
               <Link href={secondaryHref}>{secondaryLabel}</Link>

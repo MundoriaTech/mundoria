@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 
 import { NotificationBell } from "@/components/customer/notification-bell";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
+import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ export function CustomerShell({
   return (
     <div className="min-h-screen bg-background pb-[calc(4rem+env(safe-area-inset-bottom)+1rem)]">
       <SessionTimeoutGuard audience="customer" />
+      <OneSignalEnroll />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="min-w-0">

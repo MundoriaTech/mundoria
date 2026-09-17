@@ -20,7 +20,6 @@ export const landingNavLinks = [
   ["Review", "#reviews"],
   ["Coverage", "#coverage"],
   ["For cleaners", "/for-cleaners"],
-  ["Support", "mailto:support@mundoriauk.com"],
 ] as const;
 
 /** Hover mega-panel items for Services (WeCasa-style). */
@@ -58,7 +57,7 @@ export const landingServicesMenu = {
     { href: "/booking/new?service=same_day", label: "Same-day clean" },
     { href: "/booking/new?service=end_of_tenancy", label: "End of tenancy" },
     { href: "/booking/new?service=deep_clean", label: "Deep clean" },
-    { href: "/booking/new?service=airbnb_turnover", label: "Airbnb turnover" },
+    { href: "/booking/new?service=airbnb_turnover", label: "Airbnb/Shortlet" },
   ],
 } as const;
 

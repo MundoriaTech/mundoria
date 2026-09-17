@@ -96,8 +96,11 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
         bookable("move_in", bookingHref),
         bookable("move_out", bookingHref),
         bookable("end_of_tenancy", bookingHref),
-        bookable("airbnb_turnover", bookingHref),
-        bookable("holiday_let", bookingHref, "Shortlet Cleaning"),
+        bookable(
+          "airbnb_turnover",
+          bookingHref,
+          "Airbnb/Shortlet Cleaning",
+        ),
       ],
     },
     {

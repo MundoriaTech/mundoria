@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import {
+  BrandedCtaBand,
+  BrandedPageWash,
+  BrandedSection,
+} from "@/components/marketing/branded-page-sections";
+import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
-import { Button } from "@/components/ui/button";
 import {
   MARKETING_SERVICES,
   popularMarketingServices,
@@ -27,49 +31,53 @@ export default function PricingPage() {
 
   return (
     <MarketingShell>
-      <MarketingHero
-        description="Estimates are shown before checkout. Final price depends on service, cleaning standard, property size, schedule and add-ons — never a surprise fee after you book."
-        eyebrow="Pricing"
-        primaryHref={bookingHref}
-        primaryLabel="Get my price"
-        secondaryHref="/cleaning"
-        secondaryLabel="Browse services"
-        title="Clear cleaning prices"
-      />
+      <BrandedPageWash>
+        <MarketingHero
+          description="Estimates are shown before checkout. Final price depends on service, cleaning standard, property size, schedule and add-ons — never a surprise fee after you book."
+          eyebrow="Pricing"
+          primaryHref={bookingHref}
+          primaryLabel="Get my price"
+          secondaryHref="/cleaning"
+          secondaryLabel="Browse services"
+          title="Clear cleaning prices"
+        />
 
-      <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-black tracking-[-0.04em] text-foreground">
+        <BrandedSection>
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
             Starting prices
           </h2>
-          <p className="mt-3 max-w-2xl text-sm font-medium text-muted-foreground">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
             “From” prices are service baselines. Your booking flow calculates a
             fuller estimate for your property.
           </p>
-          <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-border">
+          <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 shadow-[0_12px_32px_rgba(49,44,121,0.06)]">
             <table className="w-full text-left text-sm">
-              <thead className="bg-muted/60">
+              <thead className="bg-[#efe6ff]/80">
                 <tr>
-                  <th className="px-5 py-4 font-black text-foreground">Service</th>
-                  <th className="px-5 py-4 font-black text-foreground">Category</th>
-                  <th className="px-5 py-4 font-black text-foreground">From</th>
+                  <th className="px-5 py-4 font-semibold text-[#1c133b]">
+                    Service
+                  </th>
+                  <th className="px-5 py-4 font-semibold text-[#1c133b]">
+                    Category
+                  </th>
+                  <th className="px-5 py-4 font-semibold text-[#1c133b]">From</th>
                 </tr>
               </thead>
               <tbody>
                 {featured.map((service) => (
-                  <tr className="border-t border-border" key={service.slug}>
+                  <tr className="border-t border-[#eee8f7]" key={service.slug}>
                     <td className="px-5 py-4">
                       <Link
-                        className="font-bold text-foreground hover:text-primary"
+                        className="font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
                         href={`/cleaning/${service.slug}`}
                       >
                         {service.label}
                       </Link>
                     </td>
-                    <td className="px-5 py-4 text-muted-foreground">
+                    <td className="px-5 py-4 text-[#5a5470]">
                       {service.categoryLabel}
                     </td>
-                    <td className="px-5 py-4 font-black text-foreground">
+                    <td className="px-5 py-4 font-semibold text-[#1c133b]">
                       {service.fromPrice}
                     </td>
                   </tr>
@@ -77,18 +85,19 @@ export default function PricingPage() {
               </tbody>
             </table>
           </div>
-          <p className="mt-4 text-xs font-medium text-muted-foreground">
+          <p className="mt-4 text-xs font-medium text-[#5a5470]">
             Showing popular services. Full catalogue: {MARKETING_SERVICES.length}{" "}
             services.
           </p>
-          <Button
-            asChild
-            className="mt-8 h-12 rounded-full bg-foreground px-6 font-black text-background hover:bg-foreground/90"
-          >
-            <Link href={bookingHref}>Calculate my estimate</Link>
-          </Button>
-        </div>
-      </section>
+        </BrandedSection>
+
+        <BrandedCtaBand
+          body="Tell us about your space and we’ll calculate a clear estimate before checkout."
+          href={bookingHref}
+          label="Calculate my estimate"
+          title="Want your exact price?"
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

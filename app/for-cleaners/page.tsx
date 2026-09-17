@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
+import {
+  BrandedCtaBand,
+  BrandedPageWash,
+  BrandedSection,
+} from "@/components/marketing/branded-page-sections";
 import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
-import { Button } from "@/components/ui/button";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -41,51 +44,42 @@ export default function ForCleanersPage() {
 
   return (
     <MarketingShell>
-      <MarketingHero
-        description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."
-        eyebrow="Cleaners"
-        primaryHref={signupHref}
-        primaryLabel="Apply as a cleaner"
-        secondaryHref="/how-it-works"
-        secondaryLabel="See the customer journey"
-        title="Work with Mundoria"
-      />
+      <BrandedPageWash>
+        <MarketingHero
+          description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."
+          eyebrow="Cleaners"
+          primaryHref={signupHref}
+          primaryLabel="Apply as a cleaner"
+          secondaryHref="/how-it-works"
+          secondaryLabel="See the customer journey"
+          title="Work with Mundoria"
+        />
 
-      <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2">
-          {benefits.map((item) => (
-            <article
-              className="rounded-[1.5rem] border border-border bg-card p-7"
-              key={item.title}
-            >
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-foreground">
-                {item.title}
-              </h2>
-              <p className="mt-3 text-sm font-medium leading-7 text-muted-foreground">
-                {item.body}
-              </p>
-            </article>
-          ))}
-        </div>
-
-        <div className="mx-auto mt-12 max-w-7xl rounded-[1.5rem] bg-foreground px-6 py-10 text-background sm:flex sm:items-center sm:justify-between sm:px-10">
-          <div>
-            <h2 className="text-3xl font-black tracking-[-0.04em]">
-              Ready to join?
-            </h2>
-            <p className="mt-2 max-w-xl text-sm font-medium text-background/70">
-              Create a cleaner account, complete onboarding and wait for admin
-              approval before jobs appear in your feed.
-            </p>
+        <BrandedSection>
+          <div className="grid gap-4 md:grid-cols-2">
+            {benefits.map((item) => (
+              <article
+                className="rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)] sm:p-7"
+                key={item.title}
+              >
+                <h2 className="text-xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                  {item.title}
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+                  {item.body}
+                </p>
+              </article>
+            ))}
           </div>
-          <Button
-            asChild
-            className="mt-6 h-12 rounded-full bg-background px-6 font-black text-foreground hover:bg-background/90 sm:mt-0"
-          >
-            <Link href={signupHref}>Create cleaner account</Link>
-          </Button>
-        </div>
-      </section>
+        </BrandedSection>
+
+        <BrandedCtaBand
+          body="Create a cleaner account, complete onboarding and wait for admin approval before jobs appear in your feed."
+          href={signupHref}
+          label="Create cleaner account"
+          title="Ready to join?"
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

@@ -40,6 +40,7 @@ seconds.
 | Mundoria Apply Rating Holds | `https://mundoria.com/api/cron/apply-rating-holds` | `0 * * * *` | Applies held low ratings after the dispute window expires. |
 | Mundoria Weekly Payouts | `https://mundoria.com/api/cron/process-payouts` | `0 6 * * 1` | Processes weekly payout batches. |
 | Mundoria Monthly Scores | `https://mundoria.com/api/cron/calculate-scores` | `0 0 1 * *` | Recalculates cleaner performance scores monthly. |
+| Mundoria Recurring Payments | `https://mundoria.com/api/cron/recurring-payments` | `0 9 * * *` | Prepares PaymentIntents and reminds customers for unpaid series visits (T−7…T−2). |
 
 Use `Africa/Lagos` as the timezone for calendar-style schedules. For interval
 jobs such as every 5 or 15 minutes, either `Africa/Lagos` or `UTC` is fine.

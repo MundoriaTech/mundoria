@@ -222,6 +222,14 @@ export async function runMatchingEngine(
     );
   }
 
+  if (booking.prefer_same_cleaner) {
+    await admin
+      .from("bookings")
+      .update({ preferred_cleaner_id: winner.cleanerId })
+      .eq("parent_booking_id", bookingId)
+      .neq("status", "cancelled");
+  }
+
   await admin.from("cleaner_job_responses").upsert(
     {
       booking_id: bookingId,
