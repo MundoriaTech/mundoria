@@ -74,8 +74,9 @@ const starMaskStyle = {
   maskPosition: "center top",
 } as const;
 
-/** px/s — desktop marquee only */
-const AUTO_SCROLL_SPEED = 36;
+/** px/s — softer on touch / narrow viewports */
+const AUTO_SCROLL_SPEED_DESKTOP = 36;
+const AUTO_SCROLL_SPEED_SOFT = 24;
 const MANUAL_PAUSE_MS = 5000;
 
 function resolveServiceHref(bookingBaseHref: string, serviceHref: string) {
@@ -102,7 +103,7 @@ function PopularServiceCard({
     <Link
       aria-label={`Book ${label}`}
       className={cn(
-        "relative block h-[340px] w-[min(82vw,300px)] shrink-0 overflow-hidden rounded-[21px] outline-none transition",
+        "group relative block h-[340px] w-[min(82vw,300px)] shrink-0 overflow-hidden rounded-[21px] outline-none transition",
         "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c133b]",
         "active:brightness-[0.97] md:h-[372px] md:w-[371px] md:hover:-translate-y-0.5",
         className,
@@ -149,29 +150,11 @@ function PopularServiceCard({
   );
 }
 
-function scrollSnapByCard(
-  scroller: HTMLDivElement | null,
-  direction: "left" | "right",
-) {
-  if (!scroller) return;
-  const card = scroller.querySelector("a");
-  if (!card) return;
-
-  const styles = window.getComputedStyle(scroller);
-  const gap = Number.parseFloat(styles.columnGap || styles.gap || "16") || 16;
-  const step = card.getBoundingClientRect().width + gap;
-  scroller.scrollBy({
-    left: direction === "left" ? -step : step,
-    behavior: "smooth",
-  });
-}
-
 export function PopularServicesSection({
   bookingBaseHref,
 }: {
   bookingBaseHref: string;
 }) {
-  const mobileScrollerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
@@ -203,7 +186,7 @@ export function PopularServicesSection({
     let lastTs = 0;
     let isVisible = false;
     let reduceMotion = false;
-    let allowAutoScroll = false;
+    let scrollSpeed = AUTO_SCROLL_SPEED_SOFT;
 
     const measure = () => {
       loopWidthRef.current = track.scrollWidth / 2;
@@ -230,9 +213,8 @@ export function PopularServicesSection({
       lastTs = ts;
 
       if (
-        !allowAutoScroll ||
-        !isVisible ||
         reduceMotion ||
+        !isVisible ||
         ts < pauseUntilRef.current ||
         dragRef.current.active ||
         loopWidthRef.current <= 0
@@ -240,7 +222,7 @@ export function PopularServicesSection({
         return;
       }
 
-      offsetRef.current += AUTO_SCROLL_SPEED * dt;
+      offsetRef.current += scrollSpeed * dt;
       apply();
     };
 
@@ -274,6 +256,7 @@ export function PopularServicesSection({
 
       if (!drag.active) {
         if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        // Vertical intent → let the page scroll
         if (Math.abs(dy) > Math.abs(dx)) {
           drag.pointerId = null;
           return;
@@ -306,13 +289,14 @@ export function PopularServicesSection({
     };
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const hoverQuery = window.matchMedia(
-      "(hover: hover) and (pointer: fine)",
+    const softQuery = window.matchMedia(
+      "(hover: none), (pointer: coarse), (max-width: 767px)",
     );
     const syncMotionPrefs = () => {
       reduceMotion = motionQuery.matches;
-      // C: marquee only on precise hover devices — touch stays still
-      allowAutoScroll = hoverQuery.matches && !motionQuery.matches;
+      scrollSpeed = softQuery.matches
+        ? AUTO_SCROLL_SPEED_SOFT
+        : AUTO_SCROLL_SPEED_DESKTOP;
     };
     syncMotionPrefs();
 
@@ -341,7 +325,7 @@ export function PopularServicesSection({
     viewport.addEventListener("pointercancel", onPointerUp);
     document.addEventListener("visibilitychange", onVisibilityChange);
     motionQuery.addEventListener("change", syncMotionPrefs);
-    hoverQuery.addEventListener("change", syncMotionPrefs);
+    softQuery.addEventListener("change", syncMotionPrefs);
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -354,11 +338,11 @@ export function PopularServicesSection({
       viewport.removeEventListener("pointercancel", onPointerUp);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       motionQuery.removeEventListener("change", syncMotionPrefs);
-      hoverQuery.removeEventListener("change", syncMotionPrefs);
+      softQuery.removeEventListener("change", syncMotionPrefs);
     };
   }, []);
 
-  function scrollDesktopByCard(direction: "left" | "right") {
+  function scrollByCard(direction: "left" | "right") {
     pauseAutoScrollRef.current?.();
 
     const track = trackRef.current;
@@ -392,90 +376,48 @@ export function PopularServicesSection({
         </h2>
 
         <div className="relative mt-8 min-w-0 sm:mt-10">
-          {/* A: native snap on touch / narrow viewports */}
-          <div className="md:hidden">
+          <div
+            className="w-full min-w-0 cursor-grab overflow-hidden active:cursor-grabbing touch-pan-y"
+            ref={viewportRef}
+            style={{ touchAction: "pan-y" }}
+          >
             <div
-              className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              ref={mobileScrollerRef}
+              className="flex w-max gap-4 will-change-transform md:gap-[26px]"
+              ref={trackRef}
             >
-              {popularServices.map((service) => (
+              {carouselServices.map((service, index) => (
                 <PopularServiceCard
                   bookingBaseHref={bookingBaseHref}
-                  className="snap-start"
-                  key={service.title}
+                  key={`${service.title}-${index}`}
+                  onNavigate={(event) => {
+                    if (dragRef.current.moved) {
+                      event.preventDefault();
+                    }
+                  }}
                   service={service}
                 />
               ))}
             </div>
-
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                aria-label="Previous popular services"
-                className="flex size-11 items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white touch-manipulation"
-                onClick={() =>
-                  scrollSnapByCard(mobileScrollerRef.current, "left")
-                }
-                type="button"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-              <button
-                aria-label="Next popular services"
-                className="flex size-11 items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white touch-manipulation"
-                onClick={() =>
-                  scrollSnapByCard(mobileScrollerRef.current, "right")
-                }
-                type="button"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
           </div>
 
-          {/* Desktop marquee — auto-scroll only with fine pointer (C) */}
-          <div className="hidden md:block">
-            <div
-              className="w-full min-w-0 cursor-grab overflow-hidden active:cursor-grabbing"
-              ref={viewportRef}
+          {/* Desktop-only steppers — mobile uses soft auto-slide + swipe */}
+          <div className="mt-5 hidden justify-end gap-2 md:flex">
+            <button
+              aria-label="Previous popular services"
+              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
+              onClick={() => scrollByCard("left")}
+              type="button"
             >
-              <div
-                className="flex w-max gap-[26px] will-change-transform"
-                ref={trackRef}
-              >
-                {carouselServices.map((service, index) => (
-                  <PopularServiceCard
-                    bookingBaseHref={bookingBaseHref}
-                    className="group"
-                    key={`${service.title}-${index}`}
-                    onNavigate={(event) => {
-                      if (dragRef.current.moved) {
-                        event.preventDefault();
-                      }
-                    }}
-                    service={service}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                aria-label="Previous popular services"
-                className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
-                onClick={() => scrollDesktopByCard("left")}
-                type="button"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-              <button
-                aria-label="Next popular services"
-                className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
-                onClick={() => scrollDesktopByCard("right")}
-                type="button"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
+              <ChevronLeft className="size-4" />
+            </button>
+            <button
+              aria-label="Next popular services"
+              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
+              onClick={() => scrollByCard("right")}
+              type="button"
+            >
+              <ChevronRight className="size-4" />
+            </button>
           </div>
         </div>
       </div>
