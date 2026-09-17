@@ -54,10 +54,8 @@ function usePrefersHover() {
   return prefersHover;
 }
 
-function useInView<T extends Element>(
-  amount = 0.55,
-): [RefObject<T | null>, boolean] {
-  const ref = useRef<T | null>(null);
+function useInView(amount = 0.55): [RefObject<HTMLAnchorElement>, boolean] {
+  const ref = useRef<HTMLAnchorElement>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
@@ -133,7 +131,7 @@ function CategoryCard({
 }) {
   const [hovered, setHovered] = useState(false);
   const prefersHover = usePrefersHover();
-  const [cardRef, inView] = useInView<HTMLAnchorElement>(0.5);
+  const [cardRef, inView] = useInView(0.5);
   const active = prefersHover ? hovered : inView;
 
   const href =
