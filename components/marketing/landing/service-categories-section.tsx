@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 import { CategoryLoopMedia } from "@/components/marketing/landing/category-loop-media";
 import {
@@ -11,6 +11,7 @@ import {
 import { LazyImage } from "@/components/shared/lazy-image";
 import { SERVICE_CATEGORIES } from "@/lib/customer/services";
 import type { ServiceCategoryDefinition } from "@/lib/customer/services";
+import { cn } from "@/lib/utils";
 
 /** Landing “Smart Service categories” — three primary entry points. */
 const smartMainCategories = [
@@ -37,6 +38,41 @@ const smartCategoryBarColors: Record<(typeof smartMainCategories)[number], strin
 
 function getCategory(value: string) {
   return SERVICE_CATEGORIES.find((category) => category.value === value)!;
+}
+
+function usePrefersHover() {
+  const [prefersHover, setPrefersHover] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sync = () => setPrefersHover(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  return prefersHover;
+}
+
+function useInView<T extends Element>(
+  amount = 0.55,
+): [RefObject<T | null>, boolean] {
+  const ref = useRef<T | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "0px 0px -12% 0px", threshold: amount },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [amount]);
+
+  return [ref, inView];
 }
 
 export function ServiceCategoriesSection({
@@ -67,7 +103,8 @@ export function ServiceCategoriesSection({
           </div>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[480px]:gap-5 sm:mt-12 sm:gap-6 lg:mt-[72px] lg:mx-auto lg:max-w-[921px] lg:grid-cols-3 lg:gap-6">
+        {/* 1-col until lg — avoids the awkward 2+1 orphan mid layout on phones/tablets */}
+        <div className="mt-8 grid grid-cols-1 gap-3.5 sm:mt-10 sm:gap-5 lg:mx-auto lg:mt-[72px] lg:max-w-[921px] lg:grid-cols-3 lg:gap-6">
           {smartMainCategories.map((value) => (
             <CategoryCard
               barColor={smartCategoryBarColors[value]}
@@ -94,7 +131,10 @@ function CategoryCard({
   category: ServiceCategoryDefinition;
   label: string;
 }) {
-  const [active, setActive] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const prefersHover = usePrefersHover();
+  const [cardRef, inView] = useInView<HTMLAnchorElement>(0.5);
+  const active = prefersHover ? hovered : inView;
 
   const href =
     bookingHref === "/setup"
@@ -113,12 +153,17 @@ function CategoryCard({
 
   return (
     <Link
-      className="group relative mx-auto block aspect-[295/284] w-full max-w-[22rem] overflow-hidden rounded-tl-[24px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)] min-[480px]:max-w-none sm:rounded-tl-[29px] min-[480px]:[&:last-child]:col-span-2 min-[480px]:[&:last-child]:mx-auto min-[480px]:[&:last-child]:max-w-[calc(50%-0.625rem)] lg:[&:last-child]:col-span-1 lg:[&:last-child]:max-w-none"
+      className={cn(
+        "group relative mx-auto block w-full max-w-[22rem] overflow-hidden rounded-tl-[24px] shadow-[0_10px_28px_rgba(28,19,59,0.14)] transition duration-300",
+        "aspect-[16/10] sm:aspect-[4/3] lg:aspect-[295/284] lg:max-w-none",
+        "hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.18)] sm:rounded-tl-[29px]",
+      )}
       href={href}
-      onBlur={() => setActive(false)}
-      onFocus={() => setActive(true)}
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
+      onBlur={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      ref={cardRef}
     >
       {loop?.video ? (
         <CategoryLoopMedia
@@ -137,16 +182,16 @@ function CategoryCard({
           alt={label}
           className="object-cover transition duration-500 group-hover:scale-[1.03]"
           fill
-          sizes="(min-width: 1024px) 295px, (min-width: 480px) 45vw, 92vw"
+          sizes="(min-width: 1024px) 295px, 92vw"
           src={stillSrc}
         />
       )}
 
       <div
-        className="absolute inset-x-0 bottom-0 z-10 flex min-h-0 items-center px-3 py-2 min-[400px]:px-3.5 min-[400px]:py-2.5"
+        className="absolute inset-x-0 bottom-0 z-10 flex min-h-[3rem] items-center px-3.5 py-2.5 sm:min-h-[3.25rem] sm:px-4 sm:py-3"
         style={{ backgroundColor: barColor }}
       >
-        <p className="text-[13px] font-bold leading-snug text-white min-[400px]:text-[15px] min-[400px]:leading-tight">
+        <p className="text-pretty text-[14px] font-bold leading-snug text-white sm:text-[15px] sm:leading-tight lg:text-[15px]">
           {label}
         </p>
       </div>

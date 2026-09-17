@@ -14,7 +14,7 @@ type CategoryLoopMediaProps = {
   videoSrc?: string;
 };
 
-/** Still poster by default; video plays while `active` (card hover/focus). */
+/** Still poster by default; video plays while `active` (hover/focus or in-view on touch). */
 export function CategoryLoopMedia({
   active,
   alt,
@@ -81,7 +81,7 @@ export function CategoryLoopMedia({
         )}
         fill
         quality={90}
-        sizes="(min-width: 1024px) 295px, (min-width: 480px) 45vw, 92vw"
+        sizes="(min-width: 1024px) 295px, 92vw"
         src={posterSrc}
       />
 
@@ -97,7 +97,7 @@ export function CategoryLoopMedia({
           muted
           playsInline
           poster={posterSrc}
-          preload="auto"
+          preload="metadata"
           ref={videoRef}
         >
           <source src={videoSrc} type="video/mp4" />
