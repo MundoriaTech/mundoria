@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { LazyImage } from "@/components/shared/lazy-image";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
+import { cn } from "@/lib/utils";
 
 const STAR_FRAME_MASK = "/images/marketing/landing/star-frame-mask.png";
 
@@ -73,15 +74,104 @@ const starMaskStyle = {
   maskPosition: "center top",
 } as const;
 
-/** px/frame at ~60fps ≈ previous 0.6px / 16ms cadence */
+/** px/s — desktop marquee only */
 const AUTO_SCROLL_SPEED = 36;
 const MANUAL_PAUSE_MS = 5000;
+
+function resolveServiceHref(bookingBaseHref: string, serviceHref: string) {
+  return bookingBaseHref === "/setup"
+    ? "/setup"
+    : serviceHref.replace("/booking/new", bookingBaseHref);
+}
+
+function PopularServiceCard({
+  bookingBaseHref,
+  className,
+  onNavigate,
+  service,
+}: {
+  bookingBaseHref: string;
+  className?: string;
+  onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  service: PopularService;
+}) {
+  const href = resolveServiceHref(bookingBaseHref, service.href);
+  const label = service.title.replace("\n", " ");
+
+  return (
+    <Link
+      aria-label={`Book ${label}`}
+      className={cn(
+        "relative block h-[340px] w-[min(82vw,300px)] shrink-0 overflow-hidden rounded-[21px] outline-none transition",
+        "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c133b]",
+        "active:brightness-[0.97] md:h-[372px] md:w-[371px] md:hover:-translate-y-0.5",
+        className,
+      )}
+      href={href}
+      onClick={onNavigate}
+      style={{ backgroundColor: service.color }}
+    >
+      <div
+        className="absolute inset-x-0 top-0 h-[220px] md:h-[255px]"
+        style={starMaskStyle}
+      >
+        <LazyImage
+          alt=""
+          className="object-cover object-[center_30%]"
+          fill
+          sizes="(min-width: 768px) 371px, 82vw"
+          src={service.image}
+        />
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 px-5 pb-6 pt-4 md:px-8 md:pb-7">
+        <h3 className="max-w-[15.5rem] whitespace-pre-line text-[1.375rem] font-medium leading-[1.08] text-[#e9e1fa] md:text-[32px] md:leading-[33px]">
+          {service.title}
+        </h3>
+        <p className="mt-2 max-w-[15rem] text-[12px] font-light leading-[1.25] text-white md:text-[13px] md:leading-[14px]">
+          {service.description}
+        </p>
+      </div>
+
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-6 right-5 transition md:bottom-8 md:right-6 md:group-hover:scale-105"
+      >
+        <LazyImage
+          alt=""
+          className="h-[25px] w-[31px]"
+          height={25}
+          src="/images/marketing/landing/Arrow.png"
+          width={31}
+        />
+      </span>
+    </Link>
+  );
+}
+
+function scrollSnapByCard(
+  scroller: HTMLDivElement | null,
+  direction: "left" | "right",
+) {
+  if (!scroller) return;
+  const card = scroller.querySelector("a");
+  if (!card) return;
+
+  const styles = window.getComputedStyle(scroller);
+  const gap = Number.parseFloat(styles.columnGap || styles.gap || "16") || 16;
+  const step = card.getBoundingClientRect().width + gap;
+  scroller.scrollBy({
+    left: direction === "left" ? -step : step,
+    behavior: "smooth",
+  });
+}
 
 export function PopularServicesSection({
   bookingBaseHref,
 }: {
   bookingBaseHref: string;
 }) {
+  const mobileScrollerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
@@ -113,9 +203,9 @@ export function PopularServicesSection({
     let lastTs = 0;
     let isVisible = false;
     let reduceMotion = false;
+    let allowAutoScroll = false;
 
     const measure = () => {
-      // First half of the duplicated track = one seamless loop
       loopWidthRef.current = track.scrollWidth / 2;
     };
 
@@ -140,6 +230,7 @@ export function PopularServicesSection({
       lastTs = ts;
 
       if (
+        !allowAutoScroll ||
         !isVisible ||
         reduceMotion ||
         ts < pauseUntilRef.current ||
@@ -183,7 +274,6 @@ export function PopularServicesSection({
 
       if (!drag.active) {
         if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-        // Vertical intent → let the page scroll
         if (Math.abs(dy) > Math.abs(dx)) {
           drag.pointerId = null;
           return;
@@ -215,11 +305,16 @@ export function PopularServicesSection({
       }
     };
 
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncMotion = () => {
-      reduceMotion = mediaQuery.matches;
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const hoverQuery = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    );
+    const syncMotionPrefs = () => {
+      reduceMotion = motionQuery.matches;
+      // C: marquee only on precise hover devices — touch stays still
+      allowAutoScroll = hoverQuery.matches && !motionQuery.matches;
     };
-    syncMotion();
+    syncMotionPrefs();
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -245,7 +340,8 @@ export function PopularServicesSection({
     viewport.addEventListener("pointerup", onPointerUp);
     viewport.addEventListener("pointercancel", onPointerUp);
     document.addEventListener("visibilitychange", onVisibilityChange);
-    mediaQuery.addEventListener("change", syncMotion);
+    motionQuery.addEventListener("change", syncMotionPrefs);
+    hoverQuery.addEventListener("change", syncMotionPrefs);
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -257,17 +353,18 @@ export function PopularServicesSection({
       viewport.removeEventListener("pointerup", onPointerUp);
       viewport.removeEventListener("pointercancel", onPointerUp);
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      mediaQuery.removeEventListener("change", syncMotion);
+      motionQuery.removeEventListener("change", syncMotionPrefs);
+      hoverQuery.removeEventListener("change", syncMotionPrefs);
     };
   }, []);
 
-  function scrollByCard(direction: "left" | "right") {
+  function scrollDesktopByCard(direction: "left" | "right") {
     pauseAutoScrollRef.current?.();
 
     const track = trackRef.current;
     if (!track) return;
 
-    const card = track.querySelector("article");
+    const card = track.querySelector("a");
     if (!card) return;
 
     const styles = window.getComputedStyle(track);
@@ -295,90 +392,90 @@ export function PopularServicesSection({
         </h2>
 
         <div className="relative mt-8 min-w-0 sm:mt-10">
-          <div
-            className="w-full min-w-0 cursor-grab overflow-hidden active:cursor-grabbing touch-pan-y"
-            ref={viewportRef}
-            style={{ touchAction: "pan-y" }}
-          >
+          {/* A: native snap on touch / narrow viewports */}
+          <div className="md:hidden">
             <div
-              className="flex w-max gap-4 will-change-transform sm:gap-[26px]"
-              ref={trackRef}
+              className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              ref={mobileScrollerRef}
             >
-              {carouselServices.map((service, index) => {
-                const href =
-                  bookingBaseHref === "/setup"
-                    ? "/setup"
-                    : service.href.replace("/booking/new", bookingBaseHref);
+              {popularServices.map((service) => (
+                <PopularServiceCard
+                  bookingBaseHref={bookingBaseHref}
+                  className="snap-start"
+                  key={service.title}
+                  service={service}
+                />
+              ))}
+            </div>
 
-                return (
-                  <article
-                    className="relative h-[340px] w-[min(82vw,300px)] shrink-0 overflow-hidden rounded-[21px] sm:h-[372px] sm:w-[371px]"
-                    key={`${service.title}-${index}`}
-                    style={{ backgroundColor: service.color }}
-                  >
-                    <div
-                      className="absolute inset-x-0 top-0 h-[220px] sm:h-[255px]"
-                      style={starMaskStyle}
-                    >
-                      <LazyImage
-                        alt=""
-                        className="object-cover object-[center_30%]"
-                        fill
-                        sizes="(min-width: 640px) 371px, 82vw"
-                        src={service.image}
-                      />
-                    </div>
-
-                    <div className="absolute inset-x-0 bottom-0 px-5 pb-6 pt-4 sm:px-8 sm:pb-7">
-                      <h3 className="max-w-[15.5rem] whitespace-pre-line text-[1.375rem] font-medium leading-[1.08] text-[#e9e1fa] sm:text-[32px] sm:leading-[33px]">
-                        {service.title}
-                      </h3>
-                      <p className="mt-2 max-w-[15rem] text-[12px] font-light leading-[1.25] text-white sm:text-[13px] sm:leading-[14px]">
-                        {service.description}
-                      </p>
-                    </div>
-
-                    <Link
-                      aria-label={`Book ${service.title.replace("\n", " ")}`}
-                      className="absolute bottom-6 right-5 transition hover:scale-105 sm:bottom-8 sm:right-6"
-                      href={href}
-                      onClick={(event) => {
-                        if (dragRef.current.moved) {
-                          event.preventDefault();
-                        }
-                      }}
-                    >
-                      <LazyImage
-                        alt=""
-                        className="h-[25px] w-[31px]"
-                        height={25}
-                        src="/images/marketing/landing/Arrow.png"
-                        width={31}
-                      />
-                    </Link>
-                  </article>
-                );
-              })}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                aria-label="Previous popular services"
+                className="flex size-11 items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white touch-manipulation"
+                onClick={() =>
+                  scrollSnapByCard(mobileScrollerRef.current, "left")
+                }
+                type="button"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <button
+                aria-label="Next popular services"
+                className="flex size-11 items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white touch-manipulation"
+                onClick={() =>
+                  scrollSnapByCard(mobileScrollerRef.current, "right")
+                }
+                type="button"
+              >
+                <ChevronRight className="size-4" />
+              </button>
             </div>
           </div>
 
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              aria-label="Previous popular services"
-              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
-              onClick={() => scrollByCard("left")}
-              type="button"
+          {/* Desktop marquee — auto-scroll only with fine pointer (C) */}
+          <div className="hidden md:block">
+            <div
+              className="w-full min-w-0 cursor-grab overflow-hidden active:cursor-grabbing"
+              ref={viewportRef}
             >
-              <ChevronLeft className="size-4" />
-            </button>
-            <button
-              aria-label="Next popular services"
-              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
-              onClick={() => scrollByCard("right")}
-              type="button"
-            >
-              <ChevronRight className="size-4" />
-            </button>
+              <div
+                className="flex w-max gap-[26px] will-change-transform"
+                ref={trackRef}
+              >
+                {carouselServices.map((service, index) => (
+                  <PopularServiceCard
+                    bookingBaseHref={bookingBaseHref}
+                    className="group"
+                    key={`${service.title}-${index}`}
+                    onNavigate={(event) => {
+                      if (dragRef.current.moved) {
+                        event.preventDefault();
+                      }
+                    }}
+                    service={service}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                aria-label="Previous popular services"
+                className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
+                onClick={() => scrollDesktopByCard("left")}
+                type="button"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <button
+                aria-label="Next popular services"
+                className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
+                onClick={() => scrollDesktopByCard("right")}
+                type="button"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
