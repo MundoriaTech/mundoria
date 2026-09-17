@@ -169,7 +169,9 @@ function CategoryCard({
           alt={label}
           mediaClassName={
             category.value === "commercial"
-              ? "scale-[1.18] -translate-y-[10%] translate-x-[6%] group-hover:scale-[1.22]"
+              ? // Landscape source: subject sits left. Mobile/wide cards need object-position;
+                // near-square lg cards keep the original scale/shift crop.
+                "object-[16%_40%] scale-[1.06] group-hover:scale-[1.1] lg:object-center lg:scale-[1.18] lg:-translate-y-[10%] lg:translate-x-[6%] lg:group-hover:scale-[1.22]"
               : undefined
           }
           posterSrc={loop.poster}
