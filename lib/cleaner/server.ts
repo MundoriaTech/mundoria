@@ -121,9 +121,11 @@ export async function getAvailableJobs(cleanerId: string) {
       .select("booking_id")
       .eq("cleaner_id", cleanerId),
   ]);
-  if (cleaner?.status !== "certified" && cleaner?.status !== "active") {
+  if (!cleaner || (cleaner.status !== "certified" && cleaner.status !== "active")) {
     return [];
   }
+
+  const cleanerTier = cleaner.tier;
 
   const [{ data: pending }, { data: teamJobs }] = await Promise.all([
     admin
@@ -188,14 +190,14 @@ export async function getAvailableJobs(cleanerId: string) {
   function eligible(booking: CleanerJob) {
     const day = new Date(`${booking.scheduled_date}T12:00:00`).getDay();
     const slot = (availability ?? []).find((item) => item.day_of_week === day);
+    if (!slot) return false;
     const postcode = booking.address?.postcode?.toUpperCase() ?? "";
     const requiredTier = minimumTier[booking.service_type] ?? "bronze";
     return (
       serviceSet.has(booking.service_type) &&
-      tierRank[cleaner.tier as keyof typeof tierRank] >=
+      tierRank[cleanerTier as keyof typeof tierRank] >=
         tierRank[requiredTier] &&
       prefixes.some((prefix) => postcode.startsWith(prefix)) &&
-      Boolean(slot) &&
       booking.scheduled_start_time >= slot.start_time &&
       booking.scheduled_start_time <= slot.end_time &&
       !declined.has(booking.id)
