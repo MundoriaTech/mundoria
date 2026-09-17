@@ -24,6 +24,13 @@
     --input: 242 38% 88%;
     --ring: 244 37% 50%;
     --radius: 1rem;
+    --landing-nav-pill-h: 3.625rem; /* ~58px mobile */
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --landing-nav-pill-h: 4.75rem; /* ~76px desktop */
+    }
   }
 
   .dark {

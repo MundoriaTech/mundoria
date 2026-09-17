@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
@@ -10,6 +10,7 @@ import {
   LANDING_NAV_PILL_RADIUS,
   LANDING_NAV_TOP,
 } from "@/components/marketing/landing/nav-metrics";
+import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-scroll-hide";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +27,7 @@ import type { Profile } from "@/types/auth";
  * Measured from Frame 105 (1024×92 export):
  * bar ~75px tall, corner radius ~18px (gently curved sides, not stadium),
  * lavender #e8e0f9, CTA pills ~26–36px with clear inset from the bar edges.
+ * Mobile uses a shorter pill via --landing-nav-pill-h.
  */
 
 export {
@@ -33,8 +35,6 @@ export {
   LANDING_NAV_PILL_RADIUS,
   LANDING_NAV_TOP,
 } from "@/components/marketing/landing/nav-metrics";
-
-const NAV_SCROLL_AT = 48;
 
 const NAV_LINK_CLASS =
   "whitespace-nowrap text-[12px] font-medium text-[#1c133b] transition hover:text-[#312c79] xl:text-[13px]";
@@ -50,36 +50,13 @@ export function LandingNavbar({
   const loginHref = configured ? "/login" : "/setup";
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
   const firstName = viewer?.full_name.trim().split(/\s+/)[0] ?? "";
-  const [hidden, setHidden] = useState(false);
-  const lastScrollY = useRef(0);
-
-  useEffect(() => {
-    lastScrollY.current = window.scrollY;
-
-    const update = () => {
-      const y = window.scrollY;
-      const delta = y - lastScrollY.current;
-      if (y < NAV_SCROLL_AT) {
-        setHidden(false);
-      } else if (delta > 6) {
-        setHidden(true);
-      } else if (delta < -6) {
-        setHidden(false);
-      }
-      lastScrollY.current = y;
-    };
-
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", update);
-    };
-  }, []);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const hidden = useLandingNavScrollHide(mobileOpen);
 
   return (
     <header
       className={cn(
-        "pointer-events-none sticky top-0 z-50 bg-transparent px-5 sm:px-8 lg:px-14 xl:px-20",
+        "pointer-events-none sticky top-0 z-50 bg-transparent px-4 sm:px-8 lg:px-14 xl:px-20",
         "transition-transform duration-300 ease-out motion-reduce:transition-none",
         hidden && "-translate-y-[calc(100%+0.75rem)]",
       )}
@@ -87,20 +64,20 @@ export function LandingNavbar({
     >
       <div
         className={cn(
-          "pointer-events-auto relative mx-auto flex w-full max-w-[1040px] -translate-y-0.5 items-center justify-between gap-5 shadow-[0_18px_48px_rgba(28,19,59,0.28)] sm:gap-6",
+          "pointer-events-auto relative mx-auto flex w-full max-w-[1040px] -translate-y-0.5 items-center justify-between gap-3 shadow-[0_18px_48px_rgba(28,19,59,0.28)] sm:gap-6",
           hidden && "pointer-events-none",
         )}
         style={{
           backgroundColor: "#e8e0f9",
           borderRadius: LANDING_NAV_PILL_RADIUS,
           height: LANDING_NAV_PILL_H,
-          paddingLeft: "1.75rem",
-          paddingRight: "1rem",
-          paddingTop: "0.75rem",
-          paddingBottom: "0.75rem",
+          paddingLeft: "1.25rem",
+          paddingRight: "0.75rem",
+          paddingTop: "0.5rem",
+          paddingBottom: "0.5rem",
         }}
       >
-        <LandingLogo className="h-7 sm:h-8" href="/" priority />
+        <LandingLogo className="h-6 sm:h-8" href="/" priority />
 
         <nav
           aria-label="Primary navigation"
@@ -162,6 +139,8 @@ export function LandingNavbar({
           accountHref={accountHref}
           customerHref={customerHref}
           loginHref={loginHref}
+          mobileOpen={mobileOpen}
+          onMobileOpenChange={setMobileOpen}
           viewer={viewer}
         />
       </div>
@@ -297,14 +276,46 @@ function MobileNav({
   loginHref,
   accountHref,
   viewer,
+  mobileOpen,
+  onMobileOpenChange,
 }: {
   customerHref: string;
   loginHref: string;
   accountHref: string;
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
+  mobileOpen: boolean;
+  onMobileOpenChange: (open: boolean) => void;
 }) {
+  const [servicesOpen, setServicesOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) {
+      setServicesOpen(false);
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onMobileOpenChange(false);
+      }
+    }
+
+    document.addEventListener("keydown", onKey);
+    panelRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mobileOpen, onMobileOpenChange]);
+
   return (
-    <div className="flex items-center gap-2 lg:hidden">
+    <div className="flex items-center gap-1.5 lg:hidden">
       {viewer ? (
         <Link
           aria-label={`Open account for ${viewer.full_name}`}
@@ -319,87 +330,133 @@ function MobileNav({
           />
         </Link>
       ) : null}
-      <details className="relative">
-        <summary className="flex h-9 cursor-pointer list-none items-center rounded-full border border-[#1c133b]/12 bg-white/70 px-4 text-sm font-semibold text-[#1c133b] [&::-webkit-details-marker]:hidden">
-          Menu
-        </summary>
-        <div className="absolute right-0 top-12 z-50 w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.25rem] border border-border bg-white shadow-2xl">
-          <nav
-            aria-label="Mobile navigation"
-            className="grid divide-y divide-border"
+      <Link
+        className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation"
+        href={customerHref}
+      >
+        Book a clean
+      </Link>
+      <button
+        aria-expanded={mobileOpen}
+        aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-[#1c133b] touch-manipulation"
+        onClick={() => onMobileOpenChange(!mobileOpen)}
+        type="button"
+      >
+        {mobileOpen ? (
+          <X className="size-4" strokeWidth={2.25} />
+        ) : (
+          <Menu className="size-4" strokeWidth={2.25} />
+        )}
+      </button>
+
+      {mobileOpen ? (
+        <div className="fixed inset-0 z-[70]">
+          <button
+            aria-label="Close menu"
+            className="absolute inset-0 bg-black/35"
+            onClick={() => onMobileOpenChange(false)}
+            type="button"
+          />
+          <div
+            className="absolute inset-x-4 top-[calc(var(--landing-nav-pill-h)+max(1.25rem,env(safe-area-inset-top,0px)+0.5rem)+0.35rem)] max-h-[min(75dvh,32rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.22)] outline-none sm:inset-x-8"
+            ref={panelRef}
+            tabIndex={-1}
           >
-            <details className="group">
-              <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 text-sm font-medium text-muted-foreground hover:bg-muted [&::-webkit-details-marker]:hidden">
-                Services
-                <ChevronDown className="size-4 transition group-open:rotate-180" />
-              </summary>
-              <div className="bg-[#f8f4ff] pb-2">
-                {landingServicesMenu.categories.map((item) => (
-                  <Link
-                    className="block px-5 py-2.5 text-sm font-medium text-[#1c133b] hover:bg-white/70"
-                    href={item.href}
-                    key={item.href}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <Link
-                  className="block px-5 py-2.5 text-sm font-semibold text-[#312c79]"
-                  href="/cleaning"
+            <nav aria-label="Mobile navigation" className="grid">
+              <div className="border-b border-border">
+                <button
+                  aria-expanded={servicesOpen}
+                  className="flex min-h-12 w-full items-center justify-between px-5 py-3.5 text-left text-sm font-medium text-[#1c133b] touch-manipulation"
+                  onClick={() => setServicesOpen((value) => !value)}
+                  type="button"
                 >
-                  All services
-                </Link>
+                  Services
+                  <ChevronDown
+                    className={cn(
+                      "size-4 transition",
+                      servicesOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+                {servicesOpen ? (
+                  <div className="bg-[#f8f4ff] pb-2">
+                    {landingServicesMenu.categories.map((item) => (
+                      <Link
+                        className="block min-h-11 px-5 py-2.5 text-sm font-medium text-[#1c133b] touch-manipulation"
+                        href={item.href}
+                        key={item.href}
+                        onClick={() => onMobileOpenChange(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    <Link
+                      className="block min-h-11 px-5 py-2.5 text-sm font-semibold text-[#312c79] touch-manipulation"
+                      href="/cleaning"
+                      onClick={() => onMobileOpenChange(false)}
+                    >
+                      All services
+                    </Link>
+                  </div>
+                ) : null}
               </div>
-            </details>
-            {landingNavLinks
-              .filter(([label]) => label !== "Services")
-              .map(([label, href]) =>
-                href.startsWith("mailto:") ? (
-                  <a
-                    className="px-5 py-3.5 text-sm font-medium text-muted-foreground hover:bg-muted"
-                    href={href}
-                    key={label}
-                  >
-                    {label}
-                  </a>
-                ) : (
+              {landingNavLinks
+                .filter(([label]) => label !== "Services")
+                .map(([label, href]) =>
+                  href.startsWith("mailto:") ? (
+                    <a
+                      className="flex min-h-12 items-center border-b border-border px-5 py-3.5 text-sm font-medium text-[#1c133b] touch-manipulation"
+                      href={href}
+                      key={label}
+                      onClick={() => onMobileOpenChange(false)}
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <Link
+                      className="flex min-h-12 items-center border-b border-border px-5 py-3.5 text-sm font-medium text-[#1c133b] touch-manipulation"
+                      href={href}
+                      key={label}
+                      onClick={() => onMobileOpenChange(false)}
+                    >
+                      {label}
+                    </Link>
+                  ),
+                )}
+            </nav>
+            <div className="grid gap-2 bg-[#f6f0ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {viewer ? (
+                <Button
+                  asChild
+                  className="h-11 rounded-full text-sm font-semibold"
+                  variant="outline"
+                >
                   <Link
-                    className="px-5 py-3.5 text-sm font-medium text-muted-foreground hover:bg-muted"
-                    href={href}
-                    key={label}
+                    href={accountHref}
+                    onClick={() => onMobileOpenChange(false)}
                   >
-                    {label}
+                    Dashboard
                   </Link>
-                ),
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className="h-11 rounded-full text-sm font-semibold text-[#1c133b] hover:brightness-95"
+                  style={{ backgroundColor: landingColors.peach }}
+                >
+                  <Link
+                    href={loginHref}
+                    onClick={() => onMobileOpenChange(false)}
+                  >
+                    Log in
+                  </Link>
+                </Button>
               )}
-          </nav>
-          <div className="grid gap-2 bg-[#f6f0ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <Button
-              asChild
-              className="h-11 rounded-full bg-[#1c133b] text-sm font-semibold text-white hover:bg-[#1c133b]/90"
-            >
-              <Link href={customerHref}>Book a clean</Link>
-            </Button>
-            {viewer ? (
-              <Button
-                asChild
-                className="h-11 rounded-full text-sm font-semibold"
-                variant="outline"
-              >
-                <Link href={accountHref}>Dashboard</Link>
-              </Button>
-            ) : (
-              <Button
-                asChild
-                className="h-11 rounded-full text-sm font-semibold text-[#1c133b] hover:brightness-95"
-                style={{ backgroundColor: landingColors.peach }}
-              >
-                <Link href={loginHref}>Log in</Link>
-              </Button>
-            )}
+            </div>
           </div>
         </div>
-      </details>
+      ) : null}
     </div>
   );
 }

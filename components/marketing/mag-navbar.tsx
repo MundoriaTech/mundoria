@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import {
@@ -9,6 +9,7 @@ import {
   LANDING_NAV_PILL_RADIUS,
   LANDING_NAV_TOP,
 } from "@/components/marketing/landing/nav-metrics";
+import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-scroll-hide";
 import { magThemeFor } from "@/lib/content/mag-theme";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,6 @@ export type MagNavCategory = {
   posts: Array<{ href: string; title: string }>;
 };
 
-const NAV_SCROLL_AT = 48;
 const NAV_LINK_CLASS =
   "whitespace-nowrap text-[12px] font-medium text-[#1c133b] transition hover:text-[#312c79] xl:text-[13px]";
 
@@ -177,33 +177,36 @@ export function MagNavbar({
   bookingHref: string;
   categories: MagNavCategory[];
 }) {
-  const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const lastScrollY = useRef(0);
+  const hidden = useLandingNavScrollHide(mobileOpen);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    lastScrollY.current = window.scrollY;
-    const update = () => {
-      const y = window.scrollY;
-      const delta = y - lastScrollY.current;
-      if (y < NAV_SCROLL_AT) {
-        setHidden(false);
-      } else if (delta > 6) {
-        setHidden(true);
-      } else if (delta < -6) {
-        setHidden(false);
+    if (!mobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMobileOpen(false);
       }
-      lastScrollY.current = y;
+    }
+
+    document.addEventListener("keydown", onKey);
+    panelRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKey);
     };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, []);
+  }, [mobileOpen]);
 
   return (
     <header
       className={cn(
-        "pointer-events-none sticky top-0 z-50 bg-transparent px-5 sm:px-8 lg:px-14 xl:px-20",
+        "pointer-events-none sticky top-0 z-50 bg-transparent px-4 sm:px-8 lg:px-14 xl:px-20",
         "transition-transform duration-300 ease-out motion-reduce:transition-none",
         hidden && "-translate-y-[calc(100%+0.75rem)]",
       )}
@@ -211,22 +214,22 @@ export function MagNavbar({
     >
       <div
         className={cn(
-          "pointer-events-auto relative mx-auto flex w-full max-w-[1040px] -translate-y-0.5 items-center justify-between gap-4 shadow-[0_18px_48px_rgba(28,19,59,0.28)] sm:gap-5",
+          "pointer-events-auto relative mx-auto flex w-full max-w-[1040px] -translate-y-0.5 items-center justify-between gap-3 shadow-[0_18px_48px_rgba(28,19,59,0.28)] sm:gap-5",
           hidden && "pointer-events-none",
         )}
         style={{
           backgroundColor: "#e8e0f9",
           borderRadius: LANDING_NAV_PILL_RADIUS,
           height: LANDING_NAV_PILL_H,
-          paddingLeft: "1.75rem",
-          paddingRight: "1rem",
-          paddingTop: "0.75rem",
-          paddingBottom: "0.75rem",
+          paddingLeft: "1.25rem",
+          paddingRight: "0.75rem",
+          paddingTop: "0.5rem",
+          paddingBottom: "0.5rem",
         }}
       >
         <Link
           aria-label="Mundoria Mag home"
-          className="shrink-0 text-[1.15rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.3rem]"
+          className="shrink-0 text-[1.05rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.3rem]"
           href="/blog"
         >
           Mundoria <span className="text-[#d4694a]">Mag</span>
@@ -245,7 +248,7 @@ export function MagNavbar({
           </Link>
         </nav>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Link
             className="hidden rounded-full px-3 py-1.5 text-[12px] font-semibold text-[#1c133b] transition hover:bg-white/55 sm:inline"
             href="/"
@@ -253,29 +256,40 @@ export function MagNavbar({
             mundoriauk.com
           </Link>
           <Link
-            className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
+            className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 sm:px-4"
             href={bookingHref}
           >
             Book a clean
           </Link>
           <button
             aria-expanded={mobileOpen}
-            aria-label="Open magazine menu"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/60 text-[#1c133b] lg:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-[#1c133b] touch-manipulation lg:hidden"
             onClick={() => setMobileOpen((value) => !value)}
             type="button"
           >
-            <ChevronDown
-              className={cn(
-                "size-4 transition-transform",
-                mobileOpen && "rotate-180",
-              )}
-            />
+            {mobileOpen ? (
+              <X className="size-4" strokeWidth={2.25} />
+            ) : (
+              <Menu className="size-4" strokeWidth={2.25} />
+            )}
           </button>
         </div>
+      </div>
 
-        {mobileOpen ? (
-          <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[70] overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white p-4 shadow-[0_24px_60px_rgba(28,19,59,0.18)] lg:hidden">
+      {mobileOpen ? (
+        <div className="pointer-events-auto fixed inset-0 z-[70] lg:hidden">
+          <button
+            aria-label="Close menu"
+            className="absolute inset-0 bg-black/35"
+            onClick={() => setMobileOpen(false)}
+            type="button"
+          />
+          <div
+            className="absolute inset-x-4 top-[calc(var(--landing-nav-pill-h)+max(1.25rem,env(safe-area-inset-top,0px)+0.5rem)+0.35rem)] max-h-[min(70dvh,28rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#1c133b]/08 bg-white p-4 shadow-[0_24px_60px_rgba(28,19,59,0.22)] outline-none sm:inset-x-8"
+            ref={panelRef}
+            tabIndex={-1}
+          >
             <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4694a]">
               Topics
             </p>
@@ -285,7 +299,7 @@ export function MagNavbar({
                 return (
                   <li key={category.href}>
                     <Link
-                      className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-semibold text-[#1c133b]"
+                      className="flex min-h-11 items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-semibold text-[#1c133b] touch-manipulation"
                       href={category.href}
                       onClick={() => setMobileOpen(false)}
                     >
@@ -300,25 +314,32 @@ export function MagNavbar({
                 );
               })}
             </ul>
-            <div className="mt-3 border-t border-[#eadfce]/80 pt-3">
+            <div className="mt-3 border-t border-[#eadfce]/80 pt-2">
               <Link
-                className="block px-2 py-2 text-sm font-semibold text-[#6a45b8]"
+                className="flex min-h-11 items-center px-2 text-sm font-semibold text-[#6a45b8] touch-manipulation"
                 href="/blog"
                 onClick={() => setMobileOpen(false)}
               >
                 All stories
               </Link>
               <Link
-                className="block px-2 py-2 text-sm font-semibold text-[#6a45b8]"
+                className="flex min-h-11 items-center px-2 text-sm font-semibold text-[#6a45b8] touch-manipulation"
                 href="/help"
                 onClick={() => setMobileOpen(false)}
               >
                 Help Centre
               </Link>
+              <Link
+                className="flex min-h-11 items-center px-2 text-sm font-semibold text-[#6a45b8] touch-manipulation"
+                href="/"
+                onClick={() => setMobileOpen(false)}
+              >
+                mundoriauk.com
+              </Link>
             </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </header>
   );
 }

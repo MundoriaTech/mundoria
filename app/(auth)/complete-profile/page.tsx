@@ -3,8 +3,11 @@ import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { CompleteProfileForm } from "@/components/auth/complete-profile-form";
 import { dashboardForRole, safeRedirectPath } from "@/lib/auth/redirects";
+import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
 import { isUserRole } from "@/types/auth";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Complete profile",
@@ -15,6 +18,10 @@ export default async function CompleteProfilePage({
 }: {
   searchParams: { next?: string };
 }) {
+  if (!hasSupabasePublicConfig()) {
+    redirect("/setup");
+  }
+
   const supabase = createServerClient();
   const {
     data: { user },
