@@ -10,7 +10,6 @@ import { loadStripe } from "@stripe/stripe-js";
 import {
   ChevronDown,
   ChevronUp,
-  Clock3,
   CreditCard,
   MapPin,
   Plus,
