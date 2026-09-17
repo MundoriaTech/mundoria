@@ -16,15 +16,20 @@ export default async function CleanerJobPage({
     data: { user },
   } = await supabase.auth.getUser();
   const admin = createAdminClient();
-  const [{ data }, { data: addOns }] = await Promise.all([
+  const [{ data }, { data: teamRow }, { data: addOns }] = await Promise.all([
     admin
       .from("bookings")
       .select(
         "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,phone)",
       )
       .eq("id", params.id)
+      .maybeSingle(),
+    admin
+      .from("booking_team_members")
+      .select("role")
+      .eq("booking_id", params.id)
       .eq("cleaner_id", user!.id)
-      .single(),
+      .maybeSingle(),
     admin
       .from("booking_add_ons")
       .select("*")
@@ -32,10 +37,21 @@ export default async function CleanerJobPage({
       .order("created_at"),
   ]);
 
-  if (!data) notFound();
+  const allowed =
+    data && (data.cleaner_id === user!.id || Boolean(teamRow));
+  if (!data || !allowed) notFound();
 
   const job = data as CleanerJob;
   job.add_ons = (addOns ?? []) as BookingAddOn[];
+  if (
+    teamRow?.role === "secondary" &&
+    job.amount_cleaner &&
+    job.allocated_cleaners
+  ) {
+    job.amount_cleaner = Math.floor(
+      job.amount_cleaner / Math.max(1, job.allocated_cleaners),
+    );
+  }
 
   return <JobDetail initialJob={job} />;
 }

@@ -8,9 +8,8 @@ import {
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import {
-  ArrowLeft,
-  Check,
   ChevronDown,
+  ChevronUp,
   Clock3,
   CreditCard,
   MapPin,
@@ -18,17 +17,29 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
+import { Broom, Drop, PawPrint, ShirtFolded, Sparkle, SprayBottle, type Icon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
+import {
+  BookingBasket,
+  BookingBasketSheet,
+} from "@/components/customer/booking-basket";
+import { BookingCalendar } from "@/components/customer/booking-calendar";
+import { BookingChrome } from "@/components/customer/booking-chrome";
+import {
+  BookingLoadingOverlay,
+  BookingSpinner,
+} from "@/components/customer/booking-loader";
 import { AddressForm } from "@/components/customer/address-manager";
-import { TimeSlotPicker } from "@/components/shared/time-slot-picker";
+import { TimeSlotPicker, slotsFinishingByWindowEnd } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   composeBookingNotes,
-  bookingFlowHeroImage,
+  bookingCategoryImages,
+  bookingServiceImages,
   durationSummary,
   frequencyModeFor,
   frequencyOptionsFor,
@@ -40,11 +51,11 @@ import {
   availableAddOns,
   allowedStandards,
   categoryDefinition,
-  CLEANING_STANDARDS,
   estimatePrice,
   formatMoney,
   formatServiceName,
   getSmartRecommendation,
+  indicativeFromPrice,
   normalizeStandard,
   recommendedStandardFor,
   selectedAddOnTotal,
@@ -79,11 +90,13 @@ const blankDraft: BookingDraft = {
   customRecurrenceDates: [],
   estimatedDurationHours: null,
   guestAddress: null,
+  hasPets: null,
   isRecurring: false,
   numBathrooms: null,
   numBedrooms: null,
   officeSpaces: [],
   otherRoomTypes: [],
+  petTypes: [],
   preferSameCleaner: false,
   propertyCondition: null,
   promoCode: "",
@@ -104,21 +117,37 @@ const blankDraft: BookingDraft = {
 const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
 const BOOKING_STEP_KEY = "mundoria-booking-step-v2";
 
-const LEVEL_CARD_STYLES: Record<
+const STANDARD_ICONS: Record<
   CleaningStandard,
-  { bg: string; icon: string }
+  { Icon: Icon; className: string }
 > = {
   essential: {
-    bg: "bg-[#f7f0d8]",
-    icon: "🪣",
+    Icon: Broom,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
   },
   enhanced: {
-    bg: "bg-[#f8e4d4]",
-    icon: "🧴",
+    Icon: Drop,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
   },
   comprehensive: {
-    bg: "bg-[#f6d6d4]",
-    icon: "✨",
+    Icon: Sparkle,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffe566] [&_path:last-child]:!fill-[#d4694a]",
+  },
+};
+
+const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
+  cleaning_products: {
+    Icon: SprayBottle,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+  },
+  ironing: {
+    Icon: ShirtFolded,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
   },
 };
 
@@ -135,6 +164,7 @@ export function BookingWizard({
 }) {
   const router = useRouter();
   const [addresses, setAddresses] = useState(initialAddresses);
+  const [basketOpen, setBasketOpen] = useState(false);
   const [draft, setDraft] = useState<BookingDraft>({
     ...blankDraft,
     ...initialDraft,
@@ -153,7 +183,6 @@ export function BookingWizard({
   const needsAuth = !userId;
   const flowSteps = useMemo(() => getFlowSteps(draft), [draft]);
   const stepId = flowSteps[Math.min(stepIndex, flowSteps.length - 1)]!;
-  const heroImage = bookingFlowHeroImage(draft);
   const savedAddress = addresses.find(
     (address) => address.id === draft.addressId,
   );
@@ -194,20 +223,31 @@ export function BookingWizard({
   const service = draft.serviceType
     ? SERVICES.find((item) => item.value === draft.serviceType)
     : null;
+  const hasPropertySizing =
+    Boolean(roomsAddress) &&
+    (draft.serviceType === "office"
+      ? draft.officeSpaces.some((space) => space.quantity > 0)
+      : draft.numBedrooms != null && draft.numBathrooms != null);
   const estimatedAmount =
-    draft.serviceType && roomsAddress && selectedStandard
-      ? estimatePrice(
-          draft.serviceType,
-          roomsAddress,
-          selectedStandard,
-          draft.selectedAddOns,
-          {
-            date: draft.scheduledDate,
-            time: draft.scheduledTime,
-          },
-          { officeSpaces: draft.officeSpaces },
-        )
+    draft.serviceType && selectedStandard
+      ? hasPropertySizing && roomsAddress
+        ? estimatePrice(
+            draft.serviceType,
+            roomsAddress,
+            selectedStandard,
+            draft.selectedAddOns,
+            {
+              date: draft.scheduledDate,
+              time: draft.scheduledTime,
+            },
+            { officeSpaces: draft.officeSpaces },
+          )
+        : indicativeFromPrice(draft.serviceType) +
+          selectedAddOnTotal(draft.selectedAddOns)
       : 0;
+  const priceIsIndicative = Boolean(
+    draft.serviceType && estimatedAmount > 0 && !hasPropertySizing,
+  );
   const recommendation = getSmartRecommendation({
     propertyCondition: draft.propertyCondition,
     recentlyMoved: draft.recentlyMoved,
@@ -251,6 +291,8 @@ export function BookingWizard({
                 ...parsed,
                 alternateTimes: parsed.alternateTimes ?? [],
                 guestAddress: parsed.guestAddress ?? null,
+                hasPets: parsed.hasPets ?? null,
+                petTypes: parsed.petTypes ?? [],
               }
             : {}),
           // Deep-link / category seed always wins over a stale draft service.
@@ -296,7 +338,11 @@ export function BookingWizard({
       if (sameService && Number.isFinite(storedStep) && storedStep >= 0) {
         setStepIndex(storedStep);
       } else if (urlService) {
-        setStepIndex(0);
+        // Category + service are pre-filled; start at address.
+        setStepIndex(2);
+      } else if (initialDraft?.serviceCategory) {
+        // Category seeded only; start at service picker.
+        setStepIndex(1);
       } else if (Number.isFinite(storedStep) && storedStep >= 0) {
         setStepIndex(storedStep);
       }
@@ -383,6 +429,14 @@ export function BookingWizard({
   }, [draft.recentlyMoved, draft.serviceType]);
 
   function goBack() {
+    if (stepId === "address" && showAddressForm && addresses.length > 0) {
+      setShowAddressForm(false);
+      return;
+    }
+    if (stepId === "checkout" && needsAuth && authMode !== "ask") {
+      setAuthMode("ask");
+      return;
+    }
     if (stepIndex === 0) {
       const categoryExit: Partial<Record<string, string>> = {
         residential: "/cleaning/residential",
@@ -395,14 +449,6 @@ export function BookingWizard({
         (draft.serviceCategory && categoryExit[draft.serviceCategory]) ||
         "/cleaning";
       router.push(exitHref);
-      return;
-    }
-    if (stepId === "address" && showAddressForm && addresses.length > 0) {
-      setShowAddressForm(false);
-      return;
-    }
-    if (stepId === "checkout" && needsAuth && authMode !== "ask") {
-      setAuthMode("ask");
       return;
     }
     setStepIndex((current) => Math.max(0, current - 1));
@@ -466,6 +512,8 @@ export function BookingWizard({
     setDraft((current) => ({
       ...current,
       cleaningStandard: null,
+      hasPets: null,
+      petTypes: [],
       recommendationOutcome: "not_shown",
       recommendedCleaningStandard: null,
       recommendedServiceType: null,
@@ -496,6 +544,8 @@ export function BookingWizard({
         SERVICES.find((item) => item.value === serviceType)?.category ??
         current.serviceCategory,
       serviceType,
+      hasPets: null,
+      petTypes: [],
     }));
   }
 
@@ -583,6 +633,8 @@ export function BookingWizard({
       }
       case "preferences":
         return draft.specialAttentionAreas.length > 0;
+      case "pets":
+        return draft.hasPets !== null;
       case "duration":
         return (
           draft.estimatedDurationHours != null &&
@@ -628,264 +680,320 @@ export function BookingWizard({
     setPromoAmount(response.ok ? (result.amount ?? null) : null);
   }
 
+  const displayAmount = promoAmount ?? estimatedAmount;
   const priceLabel =
     estimatedAmount > 0
-      ? formatMoney(promoAmount ?? estimatedAmount)
-      : "Price";
-  const timeLabel = draft.scheduledTime || "Available Time";
-  const cleanerLabel = "Cleaner";
+      ? `${priceIsIndicative ? "From " : ""}${formatMoney(displayAmount)}`
+      : null;
+  const addOnLines = draft.serviceType
+    ? availableAddOns(draft.serviceType)
+        .filter((item) => draft.selectedAddOns.includes(item.id))
+        .map((item) => ({
+          label: item.label,
+          amount: item.amount,
+        }))
+    : [];
 
-  return (
-    <div className="mx-auto max-w-[720px] pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-8">
-      <section className="overflow-visible rounded-[28px] bg-[#f3ebff] shadow-[0_18px_50px_rgba(49,44,121,0.12)]">
-        <header className="relative overflow-hidden px-5 pb-4 pt-6 sm:px-8 sm:pt-8">
-          <div className="relative z-10 max-w-[58%] sm:max-w-[24rem]">
-            <h1 className="text-[1.85rem] font-bold leading-[1.05] tracking-[-0.03em] text-[#c43d9a] sm:text-[2.35rem]">
-              {service?.label ?? "Book a cleaner"}
-            </h1>
-            <p className="mt-2 text-sm text-[#3b3358] sm:text-[15px]">
-              {service?.description ??
-                "Choose what you need — Mundoria guides you from there."}
-            </p>
-            <ul className="mt-4 space-y-1 text-sm text-[#1c133b]">
-              <li className="flex items-center gap-2">
-                <span className="text-[#c43d9a]">•</span>
-                <span>
-                  {estimatedAmount > 0 ? (
-                    <>
-                      <span className="font-semibold">Price</span> {priceLabel}
-                    </>
-                  ) : (
-                    "Price"
-                  )}
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-[#c43d9a]">•</span>
-                <span>
-                  {draft.scheduledTime ? (
-                    <>
-                      <span className="font-semibold">Available Time</span>{" "}
-                      {timeLabel}
-                    </>
-                  ) : (
-                    timeLabel
-                  )}
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-[#c43d9a]">•</span>
-                {cleanerLabel}
-              </li>
-            </ul>
-          </div>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 w-[48%] sm:w-[42%]"
-          >
-            <div className="relative h-full w-full min-h-[11rem]">
-              <LazyImage
-                alt=""
-                className="object-cover object-center"
-                fill
-                priority
-                sizes="(min-width: 640px) 300px, 45vw"
-                src={heroImage}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#f3ebff] via-[#f3ebff]/55 to-transparent" />
-            </div>
-          </div>
-        </header>
+  const frequencyLabel = (() => {
+    if (!draft.serviceType) return null;
+    const mode = frequencyModeFor(draft.serviceType);
+    if (mode === "none") return "Once";
+    if (!draft.isRecurring) return "Once";
+    if (draft.recurrencePattern === "weekly") return "Once a week";
+    if (draft.recurrencePattern === "fortnightly") return "Once a fortnight";
+    if (draft.recurrencePattern === "monthly") return "Once a month";
+    if (draft.recurrencePattern === "custom") return "Custom schedule";
+    return "Regular";
+  })();
 
-        <div className="px-5 pb-6 sm:px-8 sm:pb-8">
-          {stepId === "category" ? (
-            <CategoryStep
-              selected={draft.serviceCategory}
-              select={selectCategory}
-            />
-          ) : null}
-          {stepId === "service" ? (
-            <ServiceStep
-              category={draft.serviceCategory}
-              focusServices={focusServices}
-              selected={draft.serviceType}
-              select={selectService}
-            />
-          ) : null}
-          {stepId === "address" ? (
-            <AddressStep
-              addresses={userId ? addresses : []}
-              guestAddress={draft.guestAddress}
-              localOnly={!userId}
-              selectedId={draft.addressId}
-              select={(id) => {
-                update("addressId", id);
-                update("guestAddress", null);
-                const chosen = addresses.find((item) => item.id === id);
-                if (chosen) {
-                  if (draft.numBedrooms == null) {
-                    update("numBedrooms", chosen.num_bedrooms ?? 1);
-                  }
-                  if (draft.numBathrooms == null) {
-                    update("numBathrooms", chosen.num_bathrooms ?? 1);
-                  }
-                }
-              }}
-              setShowForm={setShowAddressForm}
-              showForm={
-                showAddressForm ||
-                (Boolean(userId) && addresses.length === 0) ||
-                (!userId && !guestAddressComplete(draft.guestAddress))
+  function jumpToStep(id: (typeof flowSteps)[number]) {
+    const index = flowSteps.indexOf(id);
+    if (index >= 0) {
+      setBasketOpen(false);
+      setStepIndex(index);
+    }
+  }
+
+  const basketProps = {
+    addOns: addOnLines,
+    address: selectedAddress,
+    alternateTimes: draft.alternateTimes,
+    amount: estimatedAmount > 0 ? displayAmount : null,
+    bathrooms: draft.numBathrooms,
+    bedrooms: draft.numBedrooms,
+    customDates:
+      draft.recurrencePattern === "custom"
+        ? draft.customRecurrenceDates
+        : [],
+    durationHours: draft.estimatedDurationHours ?? duration?.hours ?? null,
+    frequencyLabel,
+    hasPets: draft.hasPets,
+    onJumpAddress: () => jumpToStep("address"),
+    onJumpSchedule: () => {
+      if (flowSteps.includes("date")) jumpToStep("date");
+      else if (flowSteps.includes("time")) jumpToStep("time");
+    },
+    onJumpService: () => {
+      if (flowSteps.includes("service")) jumpToStep("service");
+      else if (flowSteps.includes("category")) jumpToStep("category");
+    },
+    priorityAreas: draft.specialAttentionAreas,
+    priceIsIndicative,
+    scheduledDate: draft.scheduledDate,
+    scheduledTime: draft.scheduledTime,
+    serviceLabel: service?.label ?? null,
+    standardLabel: selectedStandard
+      ? standardLabel(selectedStandard)
+      : null,
+  };
+
+  const basket = <BookingBasket {...basketProps} />;
+
+  const stepBody = (
+    <>
+      {stepId === "category" ? (
+        <CategoryStep
+          selected={draft.serviceCategory}
+          select={selectCategory}
+        />
+      ) : null}
+      {stepId === "service" ? (
+        <ServiceStep
+          category={draft.serviceCategory}
+          focusServices={focusServices}
+          selected={draft.serviceType}
+          select={selectService}
+        />
+      ) : null}
+      {stepId === "address" ? (
+        <AddressStep
+          addresses={userId ? addresses : []}
+          guestAddress={draft.guestAddress}
+          localOnly={!userId}
+          selectedId={draft.addressId}
+          select={(id) => {
+            update("addressId", id);
+            update("guestAddress", null);
+            const chosen = addresses.find((item) => item.id === id);
+            if (chosen) {
+              if (draft.numBedrooms == null) {
+                update("numBedrooms", chosen.num_bedrooms ?? 1);
               }
-              userId={userId}
-              onSaved={(address) => {
-                if (!userId || address.id.startsWith("guest-")) {
-                  update("guestAddress", {
-                    address_line_1: address.address_line_1,
-                    address_line_2: address.address_line_2,
-                    city: address.city,
-                    label: address.label,
-                    latitude: address.latitude,
-                    longitude: address.longitude,
-                    num_bathrooms: draft.numBathrooms ?? address.num_bathrooms ?? 1,
-                    num_bedrooms: draft.numBedrooms ?? address.num_bedrooms ?? 1,
-                    num_other_rooms: draft.otherRoomTypes.length,
-                    postcode: address.postcode,
-                    property_type: address.property_type ?? "flat",
-                    special_requirements: address.special_requirements,
-                  });
-                  update("addressId", null);
-                  setShowAddressForm(false);
-                  return;
-                }
+              if (draft.numBathrooms == null) {
+                update("numBathrooms", chosen.num_bathrooms ?? 1);
+              }
+            }
+          }}
+          setShowForm={setShowAddressForm}
+          showForm={
+            showAddressForm ||
+            (Boolean(userId) && addresses.length === 0) ||
+            (!userId && !guestAddressComplete(draft.guestAddress))
+          }
+          userId={userId}
+          onSaved={(address) => {
+            if (!userId || address.id.startsWith("guest-")) {
+              update("guestAddress", {
+                address_line_1: address.address_line_1,
+                address_line_2: address.address_line_2,
+                city: address.city,
+                label: address.label,
+                latitude: address.latitude,
+                longitude: address.longitude,
+                num_bathrooms:
+                  draft.numBathrooms ?? address.num_bathrooms ?? 1,
+                num_bedrooms:
+                  draft.numBedrooms ?? address.num_bedrooms ?? 1,
+                num_other_rooms: draft.otherRoomTypes.length,
+                postcode: address.postcode,
+                property_type: address.property_type ?? "flat",
+                special_requirements: address.special_requirements,
+              });
+              update("addressId", null);
+              setShowAddressForm(false);
+              return;
+            }
+            setAddresses((current) => [address, ...current]);
+            update("addressId", address.id);
+            update("guestAddress", null);
+            setShowAddressForm(false);
+          }}
+        />
+      ) : null}
+      {stepId === "rooms" ? (
+        draft.serviceType === "office" ? (
+          <OfficeSpacesStep
+            onChange={(value) => update("officeSpaces", value)}
+            quote={officeQuote}
+            spaces={draft.officeSpaces}
+            standard={selectedStandard}
+          />
+        ) : (
+          <RoomsStep
+            bathrooms={draft.numBathrooms}
+            bedrooms={draft.numBedrooms}
+            onBathrooms={(value) => update("numBathrooms", value)}
+            onBedrooms={(value) => update("numBedrooms", value)}
+          />
+        )
+      ) : null}
+      {stepId === "standard" && draft.serviceType ? (
+        <StandardStep
+          draft={draft}
+          recommendation={recommendation}
+          selected={selectedStandard}
+          select={(value) => {
+            update("cleaningStandard", value);
+            update("recommendationOutcome", "not_shown");
+          }}
+          serviceType={draft.serviceType}
+          update={update}
+        />
+      ) : null}
+      {stepId === "addons" ? (
+        <AddOnsStep draft={draft} update={update} />
+      ) : null}
+      {stepId === "pets" ? (
+        <PetsStep draft={draft} update={update} />
+      ) : null}
+      {stepId === "preferences" ? (
+        <RecoveryPreferencesStep draft={draft} update={update} />
+      ) : null}
+      {stepId === "duration" && duration ? (
+        <DurationStep
+          duration={duration}
+          hours={draft.estimatedDurationHours ?? duration.hours}
+          onChange={(value) => update("estimatedDurationHours", value)}
+        />
+      ) : null}
+      {stepId === "date" ? (
+        <DateStep draft={draft} update={update} />
+      ) : null}
+      {stepId === "frequency" ? (
+        <FrequencyStep draft={draft} update={update} />
+      ) : null}
+      {stepId === "time" ? (
+        <TimeStep
+          draft={draft}
+          durationHours={
+            draft.estimatedDurationHours ?? duration?.hours ?? 2
+          }
+          update={update}
+        />
+      ) : null}
+      {stepId === "checkout" &&
+      draft.serviceType &&
+      roomsAddress &&
+      selectedStandard ? (
+        needsAuth ? (
+          <CheckoutAuthGate authMode={authMode} onModeChange={setAuthMode} />
+        ) : stripePromise ? (
+          <Elements stripe={stripePromise}>
+            <CheckoutStep
+              address={roomsAddress}
+              amount={displayAmount}
+              draft={{
+                ...draft,
+                cleaningStandard: selectedStandard,
+                serviceType: draft.serviceType,
+              }}
+              onAddressPersisted={(address) => {
                 setAddresses((current) => [address, ...current]);
                 update("addressId", address.id);
                 update("guestAddress", null);
-                setShowAddressForm(false);
               }}
-            />
-          ) : null}
-          {stepId === "rooms" ? (
-            draft.serviceType === "office" ? (
-              <OfficeSpacesStep
-                onChange={(value) => update("officeSpaces", value)}
-                quote={officeQuote}
-                spaces={draft.officeSpaces}
-                standard={selectedStandard}
-              />
-            ) : (
-              <RoomsStep
-                bathrooms={draft.numBathrooms}
-                bedrooms={draft.numBedrooms}
-                otherRoomTypes={draft.otherRoomTypes}
-                onBathrooms={(value) => update("numBathrooms", value)}
-                onBedrooms={(value) => update("numBedrooms", value)}
-                onOtherRooms={(value) => update("otherRoomTypes", value)}
-              />
-            )
-          ) : null}
-          {stepId === "standard" && draft.serviceType ? (
-            <StandardStep
-              applyRecommendation={applyRecommendation}
-              draft={draft}
-              recommendation={recommendation}
-              selected={selectedStandard}
-              select={(value) => {
-                update("cleaningStandard", value);
-                update("recommendationOutcome", "not_shown");
-              }}
-              serviceType={draft.serviceType}
+              promoFeedback={promoFeedback}
               update={update}
+              userId={userId}
+              validatePromo={() => void validatePromo()}
             />
-          ) : null}
-          {stepId === "addons" ? (
-            <AddOnsStep draft={draft} update={update} />
-          ) : null}
-          {stepId === "preferences" ? (
-            <RecoveryPreferencesStep draft={draft} update={update} />
-          ) : null}
-          {stepId === "frequency" ? (
-            <FrequencyStep draft={draft} update={update} />
-          ) : null}
-          {stepId === "duration" && duration ? (
-            <DurationStep
-              duration={duration}
-              hasWindowAddOn={draft.selectedAddOns.includes(
-                "interior_windows",
-              )}
-              hours={draft.estimatedDurationHours ?? duration.hours}
-              onChange={(value) => update("estimatedDurationHours", value)}
-            />
-          ) : null}
-          {stepId === "date" ? (
-            <DateStep draft={draft} update={update} />
-          ) : null}
-          {stepId === "time" ? (
-            <TimeStep draft={draft} update={update} />
-          ) : null}
-          {stepId === "checkout" &&
-          draft.serviceType &&
-          roomsAddress &&
-          selectedStandard ? (
-            needsAuth ? (
-              <CheckoutAuthGate
-                authMode={authMode}
-                onModeChange={setAuthMode}
-              />
-            ) : stripePromise ? (
-              <Elements stripe={stripePromise}>
-                <CheckoutStep
-                  address={roomsAddress}
-                  amount={promoAmount ?? estimatedAmount}
-                  draft={{
-                    ...draft,
-                    cleaningStandard: selectedStandard,
-                    serviceType: draft.serviceType,
-                  }}
-                  onAddressPersisted={(address) => {
-                    setAddresses((current) => [address, ...current]);
-                    update("addressId", address.id);
-                    update("guestAddress", null);
-                  }}
-                  promoFeedback={promoFeedback}
-                  update={update}
-                  userId={userId}
-                  validatePromo={() => void validatePromo()}
-                />
-              </Elements>
-            ) : (
-              <p className="rounded-2xl border border-[#d9ccef] bg-white/70 p-4 text-sm text-[#3b3358]">
-                Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure
-                payment.
-              </p>
-            )
-          ) : null}
-        </div>
-      </section>
+          </Elements>
+        ) : (
+          <p className="rounded-2xl bg-[#f3f3f5] p-4 text-sm text-[#5a5470]">
+            Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure payment.
+          </p>
+        )
+      ) : null}
+    </>
+  );
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e4daf5] bg-[#f3ebff]/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:static sm:mt-5 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-        <div className="mx-auto flex max-w-[720px] gap-3">
-          <button
-            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#e8ddf8] px-4 text-sm font-semibold text-[#5b3d9e] transition hover:bg-[#ddd0f2] touch-manipulation sm:flex-none sm:px-6"
-            onClick={goBack}
-            type="button"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Previous
-          </button>
-          {stepId !== "checkout" ? (
-            <button
-              className="inline-flex min-h-12 flex-[1.6] items-center justify-center rounded-full bg-[#6a45b8] px-4 text-sm font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:opacity-45 touch-manipulation sm:flex-none sm:px-8"
-              disabled={!canContinue()}
-              onClick={goNext}
-              type="button"
-            >
-              Next
-            </button>
-          ) : null}
+  return (
+    <BookingChrome onBack={goBack} signedIn={Boolean(userId)}>
+      <div
+        className={cn(
+          // WeCasa funnel: 1140px shell, 20px side/top pad. Keep large bottom pad at every
+          // breakpoint so the fixed Next bar never clips the last cards.
+          "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-10 md:px-5 md:pt-5 xl:px-0 xl:pt-5",
+          stepId === "checkout"
+            ? "pb-10"
+            : "pb-[calc(5.5rem+env(safe-area-inset-bottom))]",
+        )}
+      >
+        <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:gap-0">
+          <div className="min-w-0 w-full lg:w-[49.13%]">{stepBody}</div>
+          <div className="hidden lg:ml-[8.77%] lg:flex lg:w-[42.1%] lg:shrink-0">
+            {basket}
+          </div>
         </div>
       </div>
-    </div>
+
+      {stepId !== "checkout" ? (
+        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#eeeef1] bg-white px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5 xl:px-0">
+          <div className="mx-auto flex w-full max-w-[1140px] flex-col items-center lg:items-stretch">
+            {/* Mobile: WeCasa row — total | ↑/↓ | Next */}
+            <div className="relative flex w-full items-center lg:hidden">
+              <button
+                aria-expanded={basketOpen}
+                aria-label={basketOpen ? "Close basket" : "Open basket"}
+                className="min-w-0 flex-1 truncate text-left text-base font-bold tabular-nums text-[#1c133b] touch-manipulation"
+                onClick={() => setBasketOpen((open) => !open)}
+                type="button"
+              >
+                {priceLabel ?? "My basket"}
+              </button>
+              <button
+                aria-expanded={basketOpen}
+                aria-label={basketOpen ? "Close basket" : "Open basket"}
+                className="absolute left-1/2 top-1/2 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[#1c133b] touch-manipulation"
+                onClick={() => setBasketOpen((open) => !open)}
+                type="button"
+              >
+                {basketOpen ? (
+                  <ChevronDown className="h-5 w-5" strokeWidth={2.5} />
+                ) : (
+                  <ChevronUp className="h-5 w-5" strokeWidth={2.5} />
+                )}
+              </button>
+              <button
+                className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
+                disabled={!canContinue()}
+                onClick={goNext}
+                type="button"
+              >
+                Next
+              </button>
+            </div>
+            {/* Desktop: Next under the left column */}
+            <div className="hidden w-full lg:flex lg:w-[49.13%] lg:justify-center">
+              <button
+                className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
+                disabled={!canContinue()}
+                onClick={goNext}
+                type="button"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <BookingBasketSheet
+        {...basketProps}
+        onClose={() => setBasketOpen(false)}
+        open={basketOpen}
+      />
+    </BookingChrome>
   );
 }
 
@@ -896,21 +1004,39 @@ function CheckoutAuthGate({
   authMode: BookingAuthMode;
   onModeChange: (mode: BookingAuthMode) => void;
 }) {
+  const title =
+    authMode === "ask"
+      ? "Where should we send your booking?"
+      : authMode === "create"
+        ? "Create your account"
+        : "Sign in";
+  const subtitle =
+    authMode === "ask"
+      ? "Your selections are already saved. Add an email to continue."
+      : authMode === "create"
+        ? "Name and a password — then you’ll go straight back to booking."
+        : "Enter your password to continue this booking.";
+
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        Almost there — create your account
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        {title}
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        Sign in or create an account to confirm payment and save your booking.
-        Your details stay on this device until then.
-      </p>
-      <div className="mt-5">
-        <BookingAuthPrompt mode={authMode} onModeChange={onModeChange} />
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">{subtitle}</p>
+      <div className="mt-8 max-w-md">
+        <BookingAuthPrompt
+          hideTitle
+          mode={authMode}
+          onModeChange={onModeChange}
+        />
       </div>
     </div>
   );
 }
+
+const MAIN_BOOKING_CATEGORIES = SERVICE_CATEGORIES.filter((category) =>
+  ["residential", "commercial", "recovery"].includes(category.value),
+);
 
 function CategoryStep({
   select,
@@ -921,41 +1047,44 @@ function CategoryStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
         What do you need?
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        Choose a Mundoria category to start.
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        Choose a category to start your booking.
       </p>
-      <div className="mt-5 grid gap-3">
-        {SERVICE_CATEGORIES.map((category) => {
-          const Icon = category.icon;
+      <div className="mt-8 grid gap-3">
+        {MAIN_BOOKING_CATEGORIES.map((category) => {
           const active = selected === category.value;
+          const image = bookingCategoryImages[category.value];
           return (
             <button
               className={cn(
-                "rounded-2xl border border-[#d9ccef] bg-white/70 p-4 text-left transition hover:border-[#6a45b8] touch-manipulation",
-                active && "border-[#6a45b8] ring-2 ring-[#6a45b8]/25",
+                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-3 text-left transition hover:bg-[#ececef] touch-manipulation sm:p-4",
+                active && "border-[#6a45b8] bg-white",
               )}
               key={category.value}
               onClick={() => select(category.value)}
               type="button"
             >
-              <div className="flex items-start gap-3">
-                <span className="shrink-0 rounded-xl bg-[#efe6ff] p-2 text-[#6a45b8]">
-                  <Icon className="h-5 w-5" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white sm:h-[4.5rem] sm:w-[4.5rem]">
+                  <LazyImage
+                    alt=""
+                    className="object-cover object-center"
+                    fill
+                    sizes="72px"
+                    src={image}
+                  />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-[#1c133b]">
                     {category.label}
                   </p>
-                  <p className="mt-1 text-sm text-[#5b5478]">
+                  <p className="mt-1 text-sm leading-5 text-[#5a5470]">
                     {category.description}
                   </p>
                 </div>
-                {active ? (
-                  <Check className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
-                ) : null}
               </div>
             </button>
           );
@@ -999,49 +1128,70 @@ function ServiceStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
         {focusServices?.length === 2 &&
         focusServices.includes("move_in") &&
         focusServices.includes("move_out")
           ? "Move-in or move-out?"
-          : `Select your service`}
+          : "Choose your cleaning session"}
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
         {focusServices?.length === 2 &&
         focusServices.includes("move_in") &&
         focusServices.includes("move_out")
           ? "Choose whether you need a move-in or move-out clean."
           : category
-            ? `Choose within ${categoryDefinition(category).label}.`
-            : "Pick the sub-service that fits."}
+            ? `Pick a service within ${categoryDefinition(category).label}.`
+            : "Pick the service that fits."}
       </p>
-      <div className="mt-5 grid gap-3">
-        {services.map((item) => {
-          const Icon = item.icon;
+      <div className="mt-8 grid gap-3">
+        {services.map((item, index) => {
           const active = selected === item.value;
+          const popular = item.value === "regular";
+          const image = bookingServiceImages[item.value];
           return (
             <button
               className={cn(
-                "rounded-2xl border border-[#d9ccef] bg-white/70 p-4 text-left transition hover:border-[#6a45b8] touch-manipulation",
-                active && "border-[#6a45b8] ring-2 ring-[#6a45b8]/25",
+                "relative rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-3 text-left transition hover:bg-[#ececef] touch-manipulation sm:p-4",
+                active && "border-[#6a45b8] bg-white",
               )}
               key={item.value}
               onClick={() => select(item.value)}
               type="button"
             >
-              <div className="flex items-start gap-3">
-                <span className="shrink-0 rounded-xl bg-[#efe6ff] p-2 text-[#6a45b8]">
-                  <Icon className="h-5 w-5" />
+              {popular ? (
+                <span className="absolute right-3 top-3 z-10 rounded bg-[#c79c66] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c133b]">
+                  Popular
                 </span>
-                <div className="min-w-0 flex-1">
+              ) : null}
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white sm:h-[4.5rem] sm:w-[4.5rem]">
+                  <LazyImage
+                    alt=""
+                    className="object-cover object-center"
+                    fill
+                    sizes="72px"
+                    src={image}
+                  />
+                </span>
+                <div className={cn("min-w-0 flex-1", popular && "pr-16")}>
                   <p className="font-semibold text-[#1c133b]">{item.label}</p>
-                  <p className="mt-1 text-sm text-[#5b5478]">
-                    {item.description}
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#1c133b]">
+                    From {formatMoney(indicativeFromPrice(item.value))}
                   </p>
+                  {active ? (
+                    <ul className="mt-2 space-y-1 text-sm text-[#5a5470]">
+                      <li>· {item.description}</li>
+                      {index === 0 ? (
+                        <li>· Clear estimate before you confirm</li>
+                      ) : null}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-sm leading-5 text-[#5a5470] line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
                 </div>
-                {active ? (
-                  <Check className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
-                ) : null}
               </div>
             </button>
           );
@@ -1096,23 +1246,24 @@ function AddressStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        Where will your cleaning take place
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        Where will your cleaning take place?
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        Search and pick your address from the suggestions. Room details come
-        next.
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        🕵️ To find your address easily, enter it as:{" "}
+        <strong className="font-semibold text-[#1c133b]">number</strong>, street,
+        city, postcode.
       </p>
 
       {guestAsAddress && localOnly ? (
-        <div className="mt-5 rounded-2xl border border-[#6a45b8] bg-white/70 p-4 ring-2 ring-[#6a45b8]/25">
+        <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
           <div className="flex gap-3">
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
             <div className="min-w-0">
               <p className="font-semibold text-[#1c133b]">
                 {guestAsAddress.label ?? "Your address"}
               </p>
-              <p className="mt-1 break-words text-sm text-[#5b5478]">
+              <p className="mt-1 break-words text-sm text-[#5a5470]">
                 {guestAsAddress.address_line_1}, {guestAsAddress.city},{" "}
                 {guestAsAddress.postcode}
               </p>
@@ -1122,13 +1273,12 @@ function AddressStep({
       ) : null}
 
       {addresses.length ? (
-        <div className="mt-5 grid gap-3">
+        <div className="mt-8 grid gap-3">
           {addresses.map((address) => (
             <button
               className={cn(
-                "rounded-2xl border border-[#d9ccef] bg-white/70 p-4 text-left touch-manipulation",
-                selectedId === address.id &&
-                  "border-[#6a45b8] ring-2 ring-[#6a45b8]/25",
+                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left touch-manipulation",
+                selectedId === address.id && "border-[#6a45b8] bg-white",
               )}
               key={address.id}
               onClick={() => select(address.id)}
@@ -1140,7 +1290,7 @@ function AddressStep({
                   <p className="font-semibold text-[#1c133b]">
                     {address.label ?? "Address"}
                   </p>
-                  <p className="mt-1 break-words text-sm text-[#5b5478]">
+                  <p className="mt-1 break-words text-sm text-[#5a5470]">
                     {address.address_line_1}, {address.city}, {address.postcode}
                   </p>
                 </div>
@@ -1152,7 +1302,7 @@ function AddressStep({
 
       {!localOnly ? (
         <button
-          className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#6a45b8] bg-white/60 px-4 text-sm font-semibold text-[#6a45b8] touch-manipulation sm:w-auto"
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#1c133b] bg-white px-4 text-sm font-semibold text-[#1c133b] touch-manipulation sm:w-auto"
           onClick={() => setShowForm(!showForm)}
           type="button"
         >
@@ -1167,7 +1317,7 @@ function AddressStep({
         </button>
       ) : guestAsAddress ? (
         <button
-          className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#6a45b8] bg-white/60 px-4 text-sm font-semibold text-[#6a45b8] touch-manipulation sm:w-auto"
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#1c133b] bg-white px-4 text-sm font-semibold text-[#1c133b] touch-manipulation sm:w-auto"
           onClick={() => setShowForm(true)}
           type="button"
         >
@@ -1176,7 +1326,7 @@ function AddressStep({
       ) : null}
 
       {showForm || (localOnly && !guestAsAddress) ? (
-        <div className="relative z-20 mt-5 overflow-visible rounded-2xl bg-white/70 p-3 sm:p-4">
+        <div className="relative z-20 mt-6 overflow-visible rounded-2xl border border-[#e8e8eb] bg-white p-3 sm:p-4">
           <AddressForm
             address={localOnly ? guestAsAddress : null}
             compact
@@ -1189,18 +1339,6 @@ function AddressStep({
     </div>
   );
 }
-
-const OTHER_ROOM_OPTIONS = [
-  { id: "living_room", label: "Living room" },
-  { id: "dining_room", label: "Dining room" },
-  { id: "kitchen", label: "Kitchen" },
-  { id: "study", label: "Study / office" },
-  { id: "utility", label: "Utility room" },
-  { id: "conservatory", label: "Conservatory" },
-  { id: "hallway", label: "Hallway / landing" },
-  { id: "playroom", label: "Playroom" },
-  { id: "garage", label: "Garage" },
-] as const;
 
 const ROOM_COUNT_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const;
 
@@ -1291,8 +1429,8 @@ function OfficeSpacesStep({
                       ["not_sure", "Not sure", "We’ll estimate"],
                     ] as const
                   ).map(([value, label, band]) => (
-                    <button
-                      className={cn(
+              <button
+                className={cn(
                         "rounded-xl border px-3 py-2 text-left text-xs touch-manipulation",
                         size === value
                           ? "border-[#6a45b8] bg-[#efe6ff] text-[#1c133b]"
@@ -1300,18 +1438,18 @@ function OfficeSpacesStep({
                       )}
                       key={value}
                       onClick={() => upsert(option.value, { size: value })}
-                      type="button"
-                    >
+                type="button"
+              >
                       <span className="block font-semibold">{label}</span>
                       <span className="mt-0.5 block opacity-80">{band}</span>
-                    </button>
-                  ))}
-                </div>
+              </button>
+            ))}
+          </div>
               ) : null}
             </div>
           );
         })}
-      </div>
+        </div>
 
       {quote ? (
         <div className="mt-5 rounded-2xl border border-[#d9ccef] bg-[#faf7ff] p-4 shadow-[0_8px_24px_rgba(28,19,59,0.06)]">
@@ -1344,7 +1482,7 @@ function OfficeSpacesStep({
                 ? `≤ 5 hrs → ${quote.allocatedCleaners} cleaner`
                 : `${quote.allocatedCleaners} cleaners · ~${quote.jobDurationHours} hr visit`}
             </span>
-          </div>
+        </div>
           <p className="mt-2 text-[11px] text-[#8a829e]">
             Billing follows cleaner-hours, not visit duration. Size “Not sure”
             uses an average estimate.
@@ -1360,60 +1498,26 @@ function RoomsStep({
   bedrooms,
   onBathrooms,
   onBedrooms,
-  onOtherRooms,
-  otherRoomTypes,
 }: {
   bathrooms: number | null;
   bedrooms: number | null;
   onBathrooms: (value: number) => void;
   onBedrooms: (value: number) => void;
-  onOtherRooms: (value: string[]) => void;
-  otherRoomTypes: string[];
 }) {
-  const [otherOpen, setOtherOpen] = useState(false);
-  const otherRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onPointerDown(event: MouseEvent) {
-      if (!otherRef.current?.contains(event.target as Node)) {
-        setOtherOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
-  }, []);
-
-  const otherLabel =
-    otherRoomTypes.length === 0
-      ? "None selected"
-      : otherRoomTypes
-          .map(
-            (id) =>
-              OTHER_ROOM_OPTIONS.find((option) => option.id === id)?.label ?? id,
-          )
-          .join(", ");
-
-  function toggleOther(id: string) {
-    const selected = new Set(otherRoomTypes);
-    if (selected.has(id)) selected.delete(id);
-    else selected.add(id);
-    onOtherRooms(Array.from(selected));
-  }
-
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
         Tell us about the rooms
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
         This helps size duration and price — separate from your address.
       </p>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
           <span>Bedrooms</span>
           <select
-            className="h-12 w-full rounded-2xl border border-[#d9ccef] bg-white/80 px-4 text-sm"
+            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#f3f3f5] px-4 text-sm"
             onChange={(event) => onBedrooms(Number(event.target.value))}
             value={bedrooms ?? ""}
           >
@@ -1430,7 +1534,7 @@ function RoomsStep({
         <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
           <span>Bathrooms</span>
           <select
-            className="h-12 w-full rounded-2xl border border-[#d9ccef] bg-white/80 px-4 text-sm"
+            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#f3f3f5] px-4 text-sm"
             onChange={(event) => onBathrooms(Number(event.target.value))}
             value={bathrooms ?? ""}
           >
@@ -1445,50 +1549,11 @@ function RoomsStep({
           </select>
         </label>
       </div>
-
-      <div className="relative mt-4" ref={otherRef}>
-        <p className="text-sm font-medium text-[#1c133b]">Other rooms</p>
-        <button
-          className="mt-2 flex min-h-12 w-full items-center justify-between rounded-2xl border border-[#d9ccef] bg-white/80 px-4 text-left text-sm text-[#1c133b] touch-manipulation"
-          onClick={() => setOtherOpen((current) => !current)}
-          type="button"
-        >
-          <span className="min-w-0 truncate text-[#5b5478]">{otherLabel}</span>
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 shrink-0 text-[#6a45b8] transition",
-              otherOpen && "rotate-180",
-            )}
-          />
-        </button>
-        {otherOpen ? (
-          <div className="absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-auto rounded-2xl border border-[#d9ccef] bg-white p-2 shadow-[0_16px_40px_rgba(28,19,59,0.16)]">
-            {OTHER_ROOM_OPTIONS.map((option) => {
-              const active = otherRoomTypes.includes(option.id);
-              return (
-                <button
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm touch-manipulation",
-                    active ? "bg-[#efe6ff] text-[#1c133b]" : "hover:bg-[#f7f2fc]",
-                  )}
-                  key={option.id}
-                  onClick={() => toggleOther(option.id)}
-                  type="button"
-                >
-                  <span>{option.label}</span>
-                  {active ? <Check className="h-4 w-4 text-[#6a45b8]" /> : null}
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-      </div>
     </div>
   );
 }
 
 function StandardStep({
-  applyRecommendation,
   draft,
   recommendation,
   select,
@@ -1496,7 +1561,6 @@ function StandardStep({
   serviceType,
   update,
 }: {
-  applyRecommendation: () => void;
   draft: BookingDraft;
   recommendation: ReturnType<typeof getSmartRecommendation>;
   select: (standard: CleaningStandard) => void;
@@ -1513,163 +1577,150 @@ function StandardStep({
     recommendation?.shouldShow &&
     !recommendation.autoApplied &&
     recommendation.recommendedServiceType === serviceType;
-  const differentServiceSuggestion =
-    recommendation?.shouldShow &&
-    !recommendation.autoApplied &&
-    recommendation.recommendedServiceType !== serviceType;
-  const acceptedDifferentService =
-    draft.recommendationOutcome === "accepted" &&
-    draft.serviceType === recommendation?.recommendedServiceType;
+
+  function priceFor(standard: CleaningStandard) {
+    const stub: Address = {
+      address_line_1: "",
+      address_line_2: null,
+      city: "",
+      created_at: "",
+      customer_id: "",
+      id: "standard-price",
+      is_default: false,
+      label: null,
+      latitude: null,
+      longitude: null,
+      num_bathrooms: draft.numBathrooms ?? 1,
+      num_bedrooms: draft.numBedrooms ?? 1,
+      num_other_rooms: draft.otherRoomTypes.length,
+      postcode: "",
+      property_type: "flat",
+      special_requirements: null,
+      updated_at: "",
+    };
+    return estimatePrice(serviceType, stub, standard, draft.selectedAddOns);
+  }
+
+  const recommended = service.recommendedStandard;
+  const canUpgradeToEnhanced = standards.some(
+    (item) => item.value === "enhanced",
+  );
+  const canUpgradeToComprehensive = standards.some(
+    (item) => item.value === "comprehensive",
+  );
+  const intensityBlurb = (() => {
+    if (service.fixedStandard) {
+      return `This clean runs at the ${standardLabel(service.fixedStandard)} level so quality stays consistent.`;
+    }
+    if (recommended === "essential" && canUpgradeToEnhanced) {
+      return "Essential is the right pick for what you’ve chosen — upgrade to Enhanced if you want a wider cleaning scope.";
+    }
+    if (recommended === "enhanced" && canUpgradeToComprehensive) {
+      return "Enhanced is the right pick for what you’ve chosen — step up to Comprehensive if you need a fuller reset.";
+    }
+    if (recommended === "enhanced" && canUpgradeToEnhanced) {
+      return "Enhanced is the right pick for what you’ve chosen — Essential is still available if you want a lighter visit.";
+    }
+    if (recommended === "comprehensive") {
+      return "Comprehensive is the right pick for what you’ve chosen — it’s built for a deeper, handover-ready clean.";
+    }
+    return "Start with the recommended intensity — you can step up if you need more covered in the visit.";
+  })();
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
         Pick a Cleaning Session
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        {service.fixedStandard
-          ? `${service.label} is delivered to the ${standardLabel(service.fixedStandard)} standard.`
-          : "Choose intensity — we’ll nudge you if a better Mundoria fit appears."}
-      </p>
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">{intensityBlurb}</p>
 
-      <div className="mt-5 overflow-hidden rounded-[1.35rem] border border-[#d9ccef]/80 bg-white/35">
-        <div className="grid gap-2.5 p-3 sm:p-4">
-          {CLEANING_STANDARDS.map((standard) => {
-            const disabled = !standards.some(
-              (item) => item.value === standard.value,
-            );
-            const active = selected === standard.value;
-            const style = LEVEL_CARD_STYLES[standard.value];
-            const isServiceRecommended =
-              service.recommendedStandard === standard.value;
-            const isSmartSuggested =
-              sameServiceSuggestion &&
-              recommendation.recommendedStandard === standard.value &&
-              selected !== standard.value;
+      <div className="mt-8 grid gap-3">
+        {standards.map((standard) => {
+          const active = selected === standard.value;
+          const { Icon, className: iconClass } = STANDARD_ICONS[standard.value];
+          const isServiceRecommended =
+            service.recommendedStandard === standard.value;
+          const isSmartSuggested =
+            sameServiceSuggestion &&
+            recommendation.recommendedStandard === standard.value &&
+            selected !== standard.value;
+          const showRecommended = !isSmartSuggested && isServiceRecommended;
 
-            return (
-              <button
-                className={cn(
-                  "relative rounded-2xl border border-transparent p-4 text-left transition touch-manipulation",
-                  style.bg,
-                  active && "ring-2 ring-[#1c133b]",
-                  isSmartSuggested && !active && "ring-2 ring-[#c79c66]/70",
-                  disabled && "cursor-not-allowed opacity-40",
-                )}
-                disabled={disabled}
-                key={standard.value}
-                onClick={() => select(standard.value)}
-                type="button"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl" aria-hidden>
-                    {style.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-bold text-[#1c133b]">
-                        {standard.label}
-                      </p>
-                      {isSmartSuggested ? (
-                        <span className="rounded-full bg-[#e8d2b8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6b4a28]">
-                          Better fit
-                        </span>
-                      ) : isServiceRecommended ? (
-                        <span className="rounded-full bg-[#efe6ff] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6a45b8]">
-                          Popular
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 text-sm text-[#4a4266]">
-                      {standard.description}
-                    </p>
-                  </div>
-                  {active ? (
-                    <Check className="h-5 w-5 shrink-0 text-[#1c133b]" />
-                  ) : null}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {sameServiceSuggestion ? (
-          <div className="border-t border-[#e8d2b8]/80 bg-gradient-to-br from-[#f7ead8] to-[#f3ebff] px-4 py-4 sm:px-5">
-            <p className="text-sm font-semibold text-[#1c133b]">
-              Mundoria tip
-            </p>
-            <p className="mt-1.5 text-sm leading-6 text-[#4a4266]">
-              {recommendation.message}
-            </p>
+          return (
             <button
-              className="mt-3 inline-flex min-h-10 items-center rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white transition hover:bg-[#312c79] touch-manipulation"
-              onClick={() => {
-                select(recommendation.recommendedStandard);
-                update("recommendationOutcome", "accepted");
-                update(
-                  "recommendedCleaningStandard",
-                  recommendation.recommendedStandard,
-                );
-                update(
-                  "recommendedServiceType",
-                  recommendation.recommendedServiceType,
-                );
-              }}
+              className={cn(
+                "relative rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                active && "border-[#6a45b8] bg-white",
+                isSmartSuggested && !active && "border-[#c79c66]/80",
+              )}
+              key={standard.value}
+              onClick={() => select(standard.value)}
               type="button"
             >
-              Use {standardLabel(recommendation.recommendedStandard)}
+              {showRecommended ? (
+                <span className="absolute right-3 top-3 z-10 rounded bg-[#c79c66] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c133b]">
+                  Recommended
+                </span>
+              ) : null}
+              {isSmartSuggested ? (
+                <span className="absolute right-3 top-3 z-10 rounded bg-[#e8d2b8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6b4a28]">
+                  Better fit
+                </span>
+              ) : null}
+              <div
+                className={cn(
+                  "flex items-start gap-3",
+                  (showRecommended || isSmartSuggested) && "pr-14",
+                )}
+              >
+                <Icon
+                  aria-hidden
+                  className={cn("mt-0.5 h-6 w-6 shrink-0", iconClass)}
+                  weight="duotone"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-[#1c133b]">
+                    {standard.label}
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#1c133b]">
+                    From {formatMoney(priceFor(standard.value))}
+                  </p>
+                  <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+                    {standard.description}
+                  </p>
+                </div>
+              </div>
             </button>
-          </div>
-        ) : null}
-
-        {differentServiceSuggestion && !acceptedDifferentService ? (
-          <div className="border-t border-[#d9ccef] bg-gradient-to-br from-[#efe6ff] via-[#f3ebff] to-[#f7ead8] px-4 py-4 sm:px-5">
-            <p className="text-sm font-semibold text-[#1c133b]">
-              A closer Mundoria match
-            </p>
-            <p className="mt-1.5 text-sm leading-6 text-[#4a4266]">
-              {recommendation.message}
-            </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <Button
-                className="min-h-11 flex-1 rounded-full bg-[#6a45b8] touch-manipulation hover:bg-[#5a38a3]"
-                onClick={applyRecommendation}
-                type="button"
-              >
-                Switch to{" "}
-                {formatServiceName(recommendation.recommendedServiceType)}
-              </Button>
-              <Button
-                className="min-h-11 flex-1 rounded-full touch-manipulation"
-                onClick={() => {
-                  update("recommendationOutcome", "overridden");
-                  update(
-                    "recommendedServiceType",
-                    recommendation.recommendedServiceType,
-                  );
-                  update(
-                    "recommendedCleaningStandard",
-                    recommendation.recommendedStandard,
-                  );
-                }}
-                type="button"
-                variant="outline"
-              >
-                Keep {formatServiceName(serviceType)}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-
-        {!recommendation?.shouldShow && selected ? (
-          <div className="border-t border-[#d9ccef]/70 bg-[#efe6ff]/55 px-4 py-3 text-sm text-[#3b3358] sm:px-5">
-            <span className="font-semibold text-[#1c133b]">
-              {standardLabel(selected)}
-            </span>{" "}
-            looks right for this booking — next you can add optional extras.
-          </div>
-        ) : null}
+          );
+        })}
       </div>
+
+      {sameServiceSuggestion ? (
+        <div className="mt-4 rounded-2xl bg-[#f3f3f5] px-4 py-4 sm:px-5">
+          <p className="text-sm font-semibold text-[#1c133b]">Mundoria tip</p>
+          <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">
+            {recommendation.message}
+          </p>
+          <button
+            className="mt-3 inline-flex min-h-10 items-center rounded-full bg-[#6a45b8] px-4 text-sm font-semibold text-white transition hover:bg-[#5a38a3] touch-manipulation"
+            onClick={() => {
+              select(recommendation.recommendedStandard);
+              update("recommendationOutcome", "accepted");
+              update(
+                "recommendedCleaningStandard",
+                recommendation.recommendedStandard,
+              );
+              update(
+                "recommendedServiceType",
+                recommendation.recommendedServiceType,
+              );
+            }}
+            type="button"
+          >
+            Use {standardLabel(recommendation.recommendedStandard)}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1695,55 +1746,150 @@ function AddOnsStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        Personalise the clean
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        Do you have any other needs?
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        Add-ons customise scope without creating standalone services. Interior
-        windows are an add-on only.
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        Add-ons customise the clean. Interior windows are an add-on only.
       </p>
-      <div className="mt-4 flex items-end justify-between gap-3">
-        <p className="text-sm text-[#5b5478]">
-          {addOns.length
-            ? "Select any extras you would like included."
-            : "No add-ons for this service."}
-        </p>
-        <p className="shrink-0 text-sm font-bold text-[#1c133b]">
-          {formatMoney(selectedAddOnTotal(draft.selectedAddOns))}
-        </p>
-      </div>
       {addOns.length ? (
-        <div className="mt-4 grid gap-3">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
           {addOns.map((addOn) => {
             const selected = draft.selectedAddOns.includes(addOn.id);
+            const icon = ADD_ON_ICONS[addOn.id];
+            const AddOnIcon = icon?.Icon;
             return (
               <button
                 className={cn(
-                  "rounded-2xl border border-[#d9ccef] bg-white/70 p-4 text-left touch-manipulation",
-                  selected && "border-[#6a45b8] ring-2 ring-[#6a45b8]/25",
+                  "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left touch-manipulation",
+                  selected && "border-[#6a45b8] bg-white",
                 )}
                 key={addOn.id}
                 onClick={() => toggleAddOn(addOn.id)}
                 type="button"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[#1c133b]">
-                      {addOn.label}
-                    </p>
-                    <p className="mt-1 text-sm text-[#5b5478]">
-                      {addOn.description}
+                <div className="flex items-start gap-3">
+                  {AddOnIcon ? (
+                    <AddOnIcon
+                      aria-hidden
+                      className={cn(
+                        "mt-0.5 h-6 w-6 shrink-0",
+                        icon?.className,
+                      )}
+                      weight="duotone"
+                    />
+                  ) : null}
+                  <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[#1c133b]">
+                        {addOn.label}
+                      </p>
+                      <p className="mt-1 text-sm text-[#5a5470]">
+                        {addOn.description}
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-sm font-bold text-[#1c133b]">
+                      +{formatMoney(addOn.amount)}
                     </p>
                   </div>
-                  <p className="shrink-0 text-sm font-bold text-[#1c133b]">
-                    {formatMoney(addOn.amount)}
-                  </p>
                 </div>
               </button>
             );
           })}
         </div>
-      ) : null}
+      ) : (
+        <p className="mt-8 text-sm text-[#5a5470]">
+          No add-ons for this service — continue to the next step.
+        </p>
+      )}
+      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
+        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
+          i
+        </span>
+        <p>
+          Included: your estimate covers the selected session. Equipment
+          (vacuum, mop, sponges) should be available at the property unless
+          arranged otherwise.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function PetsStep({
+  draft,
+  update,
+}: {
+  draft: BookingDraft;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
+}) {
+  const pawIconClass =
+    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]";
+  const presenceOptions = [
+    {
+      crossed: false,
+      label: "Yes, furry or scaly housemates",
+      value: true,
+    },
+    {
+      crossed: true,
+      label: "Nope, pet-free zone",
+      value: false,
+    },
+  ] as const;
+
+  function selectHasPets(value: boolean) {
+    update("hasPets", value);
+    if (!value) update("petTypes", []);
+  }
+
+  return (
+    <div>
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        Do you have any pets?
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        Some cleaners have allergies or prefer not to work around animals — this
+        helps us match you well.
+      </p>
+      <div className="mt-8 grid gap-3">
+        {presenceOptions.map((option) => {
+          const active = draft.hasPets === option.value;
+          return (
+            <button
+              className={cn(
+                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                active && "border-[#6a45b8] bg-white",
+              )}
+              key={option.label}
+              onClick={() => selectHasPets(option.value)}
+              type="button"
+            >
+              <div className="flex items-center gap-3">
+                <span className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center">
+                  <PawPrint
+                    aria-hidden
+                    className={cn("h-6 w-6", pawIconClass)}
+                    weight="duotone"
+                  />
+                  {option.crossed ? (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute left-1/2 top-1/2 h-[2px] w-[130%] -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-full bg-[#312c79]"
+                    />
+                  ) : null}
+                </span>
+                <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
+                  {option.label}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1791,8 +1937,8 @@ function RecoveryPreferencesStep({
         {priorityAreas.map((area) => {
           const active = draft.specialAttentionAreas.includes(area);
           return (
-            <button
-              className={cn(
+          <button
+            className={cn(
                 "rounded-full border px-3.5 py-2 text-sm font-semibold touch-manipulation",
                 active
                   ? "border-[#6a45b8] bg-[#6a45b8] text-white"
@@ -1800,10 +1946,10 @@ function RecoveryPreferencesStep({
               )}
               key={area}
               onClick={() => toggleArea(area)}
-              type="button"
-            >
+            type="button"
+          >
               {area}
-            </button>
+          </button>
           );
         })}
       </div>
@@ -1830,13 +1976,13 @@ function RecoveryPreferencesStep({
               )}
               key={value}
               onClick={() => update("propertyCondition", value)}
-              type="button"
+        type="button"
             >
               {label}
             </button>
           );
         })}
-      </div>
+        </div>
 
       <label className="mt-6 block">
         <span className="text-sm font-semibold text-[#1c133b]">
@@ -1866,10 +2012,6 @@ function FrequencyStep({
   const mode = frequencyModeFor(draft.serviceType);
   const options = frequencyOptionsFor(draft.serviceType);
   const minDate = new Date().toISOString().slice(0, 10);
-  const [viewMonth, setViewMonth] = useState(() => {
-    const seed = draft.customRecurrenceDates[0] ?? draft.scheduledDate;
-    return seed ? new Date(`${seed}T12:00:00`) : new Date();
-  });
 
   function selectFrequency(
     value: "one_off" | "weekly" | "fortnightly" | "monthly" | "custom",
@@ -1883,17 +2025,26 @@ function FrequencyStep({
     }
     update("isRecurring", true);
     update("recurrencePattern", value);
-    if (value !== "custom") update("customRecurrenceDates", []);
+    if (value === "custom") {
+      const seed = draft.scheduledDate;
+      const current = draft.customRecurrenceDates;
+      const next =
+        seed && !current.includes(seed)
+          ? [...current, seed].sort()
+          : current.length
+            ? current
+            : seed
+              ? [seed]
+              : [];
+      update("customRecurrenceDates", next);
+    } else {
+      update("customRecurrenceDates", []);
+    }
   }
 
-  function toggleCustomDate(iso: string) {
-    if (iso < minDate) return;
-    const selected = new Set(draft.customRecurrenceDates);
-    if (selected.has(iso)) selected.delete(iso);
-    else selected.add(iso);
-    const next = Array.from(selected).sort();
-    update("customRecurrenceDates", next);
-    if (!draft.scheduledDate && next[0]) update("scheduledDate", next[0]);
+  function onCustomDatesChange(dates: string[]) {
+    update("customRecurrenceDates", dates);
+    if (dates[0]) update("scheduledDate", dates[0]);
   }
 
   const selectedValue = draft.isRecurring
@@ -1902,55 +2053,42 @@ function FrequencyStep({
       ? "one_off"
       : draft.recurrencePattern;
 
-  const year = viewMonth.getFullYear();
-  const month = viewMonth.getMonth();
-  const monthLabel = viewMonth.toLocaleString("en-GB", {
-    month: "long",
-    year: "numeric",
-  });
-  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells: Array<number | null> = [
-    ...Array.from({ length: firstWeekday }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-  ];
-
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        How often do you want your session to happen
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        How often do you want your session to happen?
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
         {mode === "required_recurring"
           ? "Choose a rhythm, or build your own calendar of visits."
           : "One-off, a set cadence, or customize your own calendar."}
       </p>
-      <div className="mt-5 grid gap-3">
+      <div className="mt-8 grid gap-3">
         {options.map((option) => {
           const active = selectedValue === option.value;
           return (
             <button
               className={cn(
-                "relative rounded-2xl border border-[#d9ccef] bg-[#ebe3f8] px-4 py-4 text-left text-base font-semibold text-[#1c133b] touch-manipulation",
-                active && "bg-[#6a45b8] text-white",
+                "relative rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
               onClick={() => selectFrequency(option.value)}
               type="button"
             >
-              {option.label}
               {option.popular ? (
-                <span
-                  className={cn(
-                    "absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-2.5 py-1 text-[11px] font-bold",
-                    active
-                      ? "bg-white/20 text-white"
-                      : "bg-[#c43d9a] text-white",
-                  )}
-                >
+                <span className="absolute right-3 top-3 z-10 rounded bg-[#c79c66] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c133b]">
                   Popular
                 </span>
               ) : null}
+              <p
+                className={cn(
+                  "font-semibold text-[#1c133b]",
+                  option.popular && "pr-16",
+                )}
+              >
+                {option.label}
+              </p>
             </button>
           );
         })}
@@ -1958,91 +2096,23 @@ function FrequencyStep({
 
       {draft.recurrencePattern === "custom" ? (
         <div className="mt-5">
-          <p className="text-sm text-[#5b5478]">
+          <p className="text-sm text-[#5a5470]">
             Tap the dates you want cleaned. Pick at least two upcoming visits.
           </p>
-          <div className="mx-auto mt-3 max-w-sm rounded-[28px] bg-[#1c133b] p-4 text-white sm:p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <button
-                aria-label="Previous month"
-                className="rounded-full px-2 py-1 text-lg"
-                onClick={() =>
-                  setViewMonth(new Date(year, month - 1, 1))
-                }
-                type="button"
-              >
-                ‹
-              </button>
-              <p className="font-semibold">{monthLabel}</p>
-              <button
-                aria-label="Next month"
-                className="rounded-full px-2 py-1 text-lg"
-                onClick={() =>
-                  setViewMonth(new Date(year, month + 1, 1))
-                }
-                type="button"
-              >
-                ›
-              </button>
-            </div>
-            <div className="grid grid-cols-7 gap-1 text-center text-xs text-[#b7a8e0]">
-              {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
-                <span key={day}>{day}</span>
-              ))}
-            </div>
-            <div className="mt-2 grid grid-cols-7 gap-1 text-center text-sm">
-              {cells.map((day, index) => {
-                if (!day) return <span key={`e-${index}`} />;
-                const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                const disabled = iso < minDate;
-                const selected = draft.customRecurrenceDates.includes(iso);
-                return (
-                  <button
-                    className={cn(
-                      "mx-auto flex h-9 w-9 items-center justify-center rounded-full touch-manipulation",
-                      disabled && "opacity-30",
-                      selected && "bg-[#c43d9a] font-semibold",
-                      !selected && !disabled && "hover:bg-white/10",
-                    )}
-                    disabled={disabled}
-                    key={iso}
-                    onClick={() => toggleCustomDate(iso)}
-                    type="button"
-                  >
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <BookingCalendar
+            className="mt-3"
+            minDate={minDate}
+            mode="multi"
+            onChange={onCustomDatesChange}
+            selectedDates={draft.customRecurrenceDates}
+          />
           {draft.customRecurrenceDates.length ? (
-            <p className="mt-3 text-sm text-[#5b5478]">
+            <p className="mt-3 text-sm text-[#5a5470]">
               {draft.customRecurrenceDates.length} date
               {draft.customRecurrenceDates.length === 1 ? "" : "s"} selected
             </p>
           ) : null}
         </div>
-      ) : null}
-
-      {draft.isRecurring ? (
-        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#d9ccef] bg-white/80 px-4 py-3">
-          <input
-            checked={draft.preferSameCleaner}
-            className="mt-1 h-4 w-4 accent-[#6a45b8]"
-            onChange={(event) =>
-              update("preferSameCleaner", event.target.checked)
-            }
-            type="checkbox"
-          />
-          <span>
-            <span className="block text-sm font-semibold text-[#1c133b]">
-              Prefer the same cleaner each visit
-            </span>
-            <span className="mt-0.5 block text-xs text-[#5b5478]">
-              We’ll try to keep your matched cleaner for the rest of the series.
-            </span>
-          </span>
-        </label>
       ) : null}
     </div>
   );
@@ -2050,162 +2120,63 @@ function FrequencyStep({
 
 function DurationStep({
   duration,
-  hasWindowAddOn,
   hours,
   onChange,
 }: {
   duration: NonNullable<ReturnType<typeof durationSummary>>;
-  hasWindowAddOn: boolean;
   hours: number;
   onChange: (hours: number) => void;
 }) {
-  const MIN_HOURS = 1;
-  const MAX_HOURS = 12;
-  const STEP_MINUTES = 15;
-  const ITEM_HEIGHT = 44;
+  const options = [
+    2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 9, 10, 11, 12,
+  ];
 
-  const totalMinutes = Math.round(hours * 60);
-  const wholeHours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  const hourOptions = Array.from(
-    { length: MAX_HOURS - MIN_HOURS + 1 },
-    (_, index) => MIN_HOURS + index,
-  );
-  const minuteOptions = [0, 15, 30, 45];
-
-  function setFromParts(nextHours: number, nextMinutes: number) {
-    const clamped = Math.min(
-      MAX_HOURS * 60,
-      Math.max(MIN_HOURS * 60, nextHours * 60 + nextMinutes),
-    );
-    onChange(Number((clamped / 60).toFixed(2)));
+  function labelFor(value: number) {
+    const total = Math.round(value * 60);
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    if (m === 0) return `${h}h`;
+    if (m === 30) return `${h}h30`;
+    return `${h}h${String(m).padStart(2, "0")}`;
   }
+
+  const nearest =
+    options.find((option) => Math.abs(option - hours) < 0.01) ??
+    options.reduce((best, option) =>
+      Math.abs(option - hours) < Math.abs(best - hours) ? option : best,
+    );
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">How long?</h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        Scroll the wheels to set hours and minutes — seeded from your service,
-        level and add-ons.
-      </p>
-      <div className="mt-6 flex items-end justify-center gap-3">
-        <div className="flex flex-col items-center">
-          <DurationScrollColumn
-            itemHeight={ITEM_HEIGHT}
-            label="Hours"
-            onChange={(value) => setFromParts(value, minutes)}
-            options={hourOptions}
-            value={wholeHours}
-          />
-        </div>
-        <span className="mb-10 text-3xl font-bold text-[#1c133b]">:</span>
-        <div className="flex flex-col items-center">
-          <DurationScrollColumn
-            itemHeight={ITEM_HEIGHT}
-            label="Minutes"
-            onChange={(value) => setFromParts(wholeHours, value)}
-            options={minuteOptions}
-            value={
-              minuteOptions.includes(minutes)
-                ? minutes
-                : Math.round(minutes / STEP_MINUTES) * STEP_MINUTES
-            }
-          />
-        </div>
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        How long?
+      </h2>
+      <div className="mt-8 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+        {options.map((option) => {
+          const active = option === nearest;
+          return (
+            <button
+              className={cn(
+                "inline-flex h-12 items-center justify-center rounded-xl bg-[#f3f3f5] text-sm font-semibold text-[#1c133b] transition touch-manipulation",
+                active && "border-2 border-[#6a45b8] bg-white",
+              )}
+              key={option}
+              onClick={() => onChange(option)}
+              type="button"
+            >
+              {labelFor(option)}
+            </button>
+          );
+        })}
       </div>
-      <div className="mt-5 rounded-full bg-[#e8d2b8] px-4 py-3 text-sm text-[#4a3a28]">
-        <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#c79c66] text-[11px] font-bold text-white">
-          !
+      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
+        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
+          i
         </span>
-        {duration.propertyHint}
-        {!hasWindowAddOn ? `. ${duration.windowsTip}` : "."}
+        <p>
+          {duration.propertyHint}. {duration.windowsTip}
+        </p>
       </div>
-    </div>
-  );
-}
-
-function DurationScrollColumn({
-  itemHeight,
-  label,
-  onChange,
-  options,
-  value,
-}: {
-  itemHeight: number;
-  label: string;
-  onChange: (value: number) => void;
-  options: number[];
-  value: number;
-}) {
-  const listRef = useRef<HTMLDivElement>(null);
-  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const visibleCount = 3;
-  const pad = Math.floor(visibleCount / 2);
-
-  useEffect(() => {
-    const node = listRef.current;
-    if (!node) return;
-    const index = Math.max(0, options.indexOf(value));
-    node.scrollTop = index * itemHeight;
-  }, [itemHeight, options, value]);
-
-  function snapToNearest() {
-    const node = listRef.current;
-    if (!node) return;
-    const index = Math.round(node.scrollTop / itemHeight);
-    const clamped = Math.min(options.length - 1, Math.max(0, index));
-    node.scrollTo({ behavior: "smooth", top: clamped * itemHeight });
-    const next = options[clamped];
-    if (next != null && next !== value) onChange(next);
-  }
-
-  return (
-    <div className="w-28">
-      <div
-        aria-label={label}
-        className="relative h-[132px] overflow-hidden rounded-2xl bg-[#ebe3f8]"
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-[44px] z-10 h-[44px] rounded-xl border border-[#6a45b8]/35 bg-white/35"
-        />
-        <div
-          className="h-full snap-y snap-mandatory overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          onScroll={() => {
-            if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
-            scrollEndTimer.current = setTimeout(snapToNearest, 80);
-          }}
-          ref={listRef}
-        >
-          <div style={{ height: pad * itemHeight }} />
-          {options.map((option) => {
-            const active = option === value;
-            return (
-              <button
-                className={cn(
-                  "flex h-11 w-full snap-center items-center justify-center text-3xl font-bold transition touch-manipulation",
-                  active ? "text-[#1c133b]" : "text-[#1c133b]/35",
-                )}
-                key={option}
-                onClick={() => {
-                  onChange(option);
-                  listRef.current?.scrollTo({
-                    behavior: "smooth",
-                    top: options.indexOf(option) * itemHeight,
-                  });
-                }}
-                type="button"
-              >
-                {String(option).padStart(2, "0")}
-              </button>
-            );
-          })}
-          <div style={{ height: pad * itemHeight }} />
-        </div>
-      </div>
-      <p className="mt-2 text-center text-xs font-semibold uppercase tracking-wide text-[#6a45b8]">
-        {label}
-      </p>
     </div>
   );
 }
@@ -2221,182 +2192,205 @@ function DateStep({
   ) => void;
 }) {
   const minDate = new Date().toISOString().slice(0, 10);
-  const view = draft.scheduledDate
-    ? new Date(`${draft.scheduledDate}T12:00:00`)
-    : new Date();
-  const year = view.getFullYear();
-  const month = view.getMonth();
-  const monthLabel = view.toLocaleString("en-GB", {
-    month: "long",
-    year: "numeric",
-  });
-  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells: Array<number | null> = [
-    ...Array.from({ length: firstWeekday }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-  ];
-
-  function shiftMonth(delta: number) {
-    const next = new Date(year, month + delta, 1);
-    const iso = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
-    if (iso < minDate.slice(0, 8) + "01") return;
-    update("scheduledDate", iso < minDate ? minDate : iso);
-  }
-
-  function pickDay(day: number) {
-    const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    if (iso < minDate) return;
-    update("scheduledDate", iso);
-  }
+  const selectedLabel = draft.scheduledDate
+    ? new Date(`${draft.scheduledDate}T12:00:00`).toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })
+    : null;
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        Date of first appointment
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        Date of your appointment
       </h2>
-      <div className="mx-auto mt-5 max-w-sm rounded-[28px] bg-[#1c133b] p-4 text-white sm:p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <button
-            aria-label="Previous month"
-            className="rounded-full px-2 py-1 text-lg"
-            onClick={() => shiftMonth(-1)}
-            type="button"
-          >
-            ‹
-          </button>
-          <p className="font-semibold">{monthLabel}</p>
-          <button
-            aria-label="Next month"
-            className="rounded-full px-2 py-1 text-lg"
-            onClick={() => shiftMonth(1)}
-            type="button"
-          >
-            ›
-          </button>
-        </div>
-        <div className="grid grid-cols-7 gap-1 text-center text-xs text-[#b7a8e0]">
-          {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
-            <span key={day}>{day}</span>
-          ))}
-        </div>
-        <div className="mt-2 grid grid-cols-7 gap-1 text-center text-sm">
-          {cells.map((day, index) => {
-            if (!day) return <span key={`e-${index}`} />;
-            const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-            const disabled = iso < minDate;
-            const selected = draft.scheduledDate === iso;
-            return (
-              <button
-                className={cn(
-                  "mx-auto flex h-9 w-9 items-center justify-center rounded-full",
-                  selected && "bg-[#c43d9a] font-bold",
-                  disabled && "opacity-30",
-                )}
-                disabled={disabled}
-                key={iso}
-                onClick={() => pickDay(day)}
-                type="button"
-              >
-                {day}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <BookingCalendar
+        className="mt-8"
+        minDate={minDate}
+        mode="single"
+        onChange={(dates) => update("scheduledDate", dates[0] ?? "")}
+        selectedDate={draft.scheduledDate}
+      />
+      {selectedLabel ? (
+        <p className="mt-4 text-base font-semibold text-[#1c133b]">
+          Your appointment is on {selectedLabel}
+        </p>
+      ) : null}
     </div>
   );
 }
 
 function TimeStep({
   draft,
+  durationHours,
   update,
 }: {
   draft: BookingDraft;
+  durationHours: number;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
   ) => void;
 }) {
-  function toggleAlternate(slot: string) {
-    if (slot === draft.scheduledTime) return;
-    const next = new Set(draft.alternateTimes);
-    if (next.has(slot)) next.delete(slot);
-    else next.add(slot);
-    update(
-      "alternateTimes",
-      Array.from(next).filter((item) => item !== draft.scheduledTime),
+  const [showFlexPrompt, setShowFlexPrompt] = useState(false);
+  const flexPromptSeenRef = useRef(false);
+
+  const allowedSlots = useMemo(
+    () => slotsFinishingByWindowEnd(durationHours),
+    [durationHours],
+  );
+  const allowed = useMemo(() => new Set(allowedSlots), [allowedSlots]);
+
+  const selectedSlots = useMemo(() => {
+    const slots = [
+      draft.scheduledTime,
+      ...draft.alternateTimes,
+    ].filter(Boolean) as string[];
+    return Array.from(new Set(slots));
+  }, [draft.alternateTimes, draft.scheduledTime]);
+
+  useEffect(() => {
+    if (draft.scheduledTime && !allowed.has(draft.scheduledTime)) {
+      update("scheduledTime", "");
+    }
+    const nextAlternates = draft.alternateTimes.filter((slot) =>
+      allowed.has(slot),
     );
+    if (nextAlternates.length !== draft.alternateTimes.length) {
+      update("alternateTimes", nextAlternates);
+    }
+    // Clamp when duration (allowed set) changes; update is stable enough for this step.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-clamp on slot/duration changes
+  }, [allowed, draft.alternateTimes, draft.scheduledTime]);
+
+  function applySelection(slots: string[]) {
+    const unique = Array.from(new Set(slots.filter((slot) => allowed.has(slot))));
+    update("scheduledTime", unique[0] ?? "");
+    update("alternateTimes", unique.slice(1));
   }
+
+  function toggleSlot(slot: string) {
+    if (!allowed.has(slot)) return;
+    const wasEmpty = selectedSlots.length === 0;
+    if (selectedSlots.includes(slot)) {
+      applySelection(selectedSlots.filter((item) => item !== slot));
+      return;
+    }
+    applySelection([...selectedSlots, slot]);
+    if (wasEmpty && !flexPromptSeenRef.current) {
+      flexPromptSeenRef.current = true;
+      setShowFlexPrompt(true);
+    }
+  }
+
+  function dismissFlexPrompt() {
+    setShowFlexPrompt(false);
+  }
+
+  const customDates =
+    draft.recurrencePattern === "custom" ? draft.customRecurrenceDates : [];
+  const isSharedCustomDays = customDates.length > 1;
+  const heading = isSharedCustomDays
+    ? "What times work on these days?"
+    : draft.scheduledDate
+      ? `What is your availability on ${new Date(
+          `${draft.scheduledDate}T12:00:00`,
+        ).toLocaleDateString("en-GB", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        })}?`
+      : "When do you want your session?";
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        When do you want your sessions to be?
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        {heading}
       </h2>
-      <p className="mt-2 flex items-center gap-2 text-sm text-[#5b5478]">
-        <Clock3 className="h-4 w-4" />
-        Choose your preferred start time
-        {draft.scheduledDate ? ` for ${draft.scheduledDate}` : ""}.
+      {isSharedCustomDays ? (
+        <ul className="mt-3 space-y-1 text-sm font-medium text-[#1c133b]">
+          {customDates.map((date) => (
+            <li key={date}>
+              ·{" "}
+              {new Date(`${date}T12:00:00`).toLocaleDateString("en-GB", {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+              })}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        {isSharedCustomDays ? (
+          <>
+            These slots apply to every day you selected. Are you flexible? Select{" "}
+            <strong className="font-semibold text-[#1c133b]">several slots.</strong>
+          </>
+        ) : (
+          <>
+            Are you flexible? Select{" "}
+            <strong className="font-semibold text-[#1c133b]">several slots.</strong>
+          </>
+        )}
       </p>
       <TimeSlotPicker
-        className="mt-4"
+        availability={allowedSlots}
+        className="mt-8"
         date={draft.scheduledDate || new Date().toISOString().slice(0, 10)}
-        onChange={(slot) => {
-          update("scheduledTime", slot);
-          update(
-            "alternateTimes",
-            draft.alternateTimes.filter((item) => item !== slot),
-          );
-        }}
-        value={draft.scheduledTime}
+        onChange={toggleSlot}
+        values={selectedSlots}
       />
 
-      <div className="mt-6">
-        <p className="font-semibold text-[#1c133b]">I can also do (optional)</p>
-        <p className="mt-1 text-sm text-[#5b5478]">
-          Add more times that work for you.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {draft.alternateTimes.map((slot) => (
+      {showFlexPrompt ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div
+            aria-labelledby="flex-prompt-title"
+            aria-modal="true"
+            className="relative w-full max-w-md rounded-[1.75rem] bg-white px-6 pb-6 pt-8 shadow-[0_24px_60px_rgba(28,19,59,0.28)]"
+            role="dialog"
+          >
             <button
-              className="inline-flex items-center gap-2 rounded-full bg-[#ebe3f8] px-3 py-1.5 text-sm font-medium text-[#5b3d9e]"
-              key={slot}
-              onClick={() => toggleAlternate(slot)}
+              aria-label="Close"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#f3f3f5] text-[#1c133b] touch-manipulation"
+              onClick={dismissFlexPrompt}
               type="button"
             >
-              {slot}
-              <span aria-hidden>×</span>
+              ×
             </button>
-          ))}
-          <button
-            className="rounded-xl border border-dashed border-[#6a45b8] px-3 py-1.5 text-sm font-semibold text-[#6a45b8]"
-            onClick={() => {
-              const candidate = ["12:30", "15:00", "17:00", "09:30"].find(
-                (slot) =>
-                  slot !== draft.scheduledTime &&
-                  !draft.alternateTimes.includes(slot),
-              );
-              if (candidate) toggleAlternate(candidate);
-            }}
-            type="button"
-          >
-            + Add another time
-          </button>
-        </div>
-        {draft.scheduledTime ? (
-          <div className="mt-4">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#7a7198]">
-              Tap a slot below to add as alternate
+            <h3
+              className="pr-8 text-xl font-bold tracking-[-0.02em] text-[#1c133b]"
+              id="flex-prompt-title"
+            >
+              {isSharedCustomDays
+                ? "Flexible on other times too?"
+                : "Available at other times on the same day?"}
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+              {isSharedCustomDays
+                ? "The more slots you add, the easier it will be for us to match a cleaner across all your dates."
+                : "The more slots you add, the easier it will be for us to find the ideal pro for you."}
             </p>
-            <TimeSlotPicker
-              date={draft.scheduledDate || new Date().toISOString().slice(0, 10)}
-              onChange={toggleAlternate}
-              value={undefined}
-            />
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                className="rounded-full border border-[#1c133b] bg-white px-4 py-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
+                onClick={dismissFlexPrompt}
+                type="button"
+              >
+                No, keep going
+              </button>
+              <button
+                className="rounded-full bg-[#1c133b] px-4 py-3 text-sm font-semibold text-white touch-manipulation"
+                onClick={dismissFlexPrompt}
+                type="button"
+              >
+                Yes, add new ones
+              </button>
+            </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -2431,6 +2425,9 @@ function CheckoutStep({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [paymentPhase, setPaymentPhase] = useState<
+    "idle" | "saving" | "authorising" | "confirming"
+  >("idle");
   const [showCard, setShowCard] = useState(true);
   const [resolvedAddress, setResolvedAddress] = useState(address);
 
@@ -2488,6 +2485,7 @@ function CheckoutStep({
     if (!card) return;
 
     setProcessing(true);
+    setPaymentPhase("saving");
     try {
       const savedAddress = await ensureSavedAddress();
       const payload = {
@@ -2497,6 +2495,7 @@ function CheckoutStep({
         specialInstructions: composeBookingNotes(draft),
       };
 
+      setPaymentPhase("authorising");
       const authorizationResponse = await fetch(
         "/api/bookings/payment-intent",
         {
@@ -2511,7 +2510,7 @@ function CheckoutStep({
         paymentIntentId?: string;
       };
       if (!authorizationResponse.ok || !authorization.clientSecret) {
-        throw new Error(authorization.error ?? "Unable to charge payment.");
+        throw new Error(authorization.error ?? "Unable to authorise payment.");
       }
 
       const { error: stripeError, paymentIntent } =
@@ -2538,6 +2537,7 @@ function CheckoutStep({
         throw new Error("Payment was not authorised. Please try again.");
       }
 
+      setPaymentPhase("confirming");
       const bookingResponse = await fetch("/api/bookings", {
         body: JSON.stringify({
           ...payload,
@@ -2565,6 +2565,7 @@ function CheckoutStep({
           : "Unable to complete booking.",
       );
       setProcessing(false);
+      setPaymentPhase("idle");
     }
   }
 
@@ -2591,8 +2592,8 @@ function CheckoutStep({
         </p>
         <p className="mt-3 text-2xl font-bold text-[#1c133b]">
           {formatMoney(amount)}
-        </p>
-      </div>
+          </p>
+        </div>
 
       <label className="mt-5 block">
         <span className="sr-only">Special requirements</span>
@@ -2650,21 +2651,22 @@ function CheckoutStep({
         </button>
         {showCard ? (
           <div className="mt-3 rounded-2xl border border-[#d9ccef] bg-white/80 p-4">
-            <CardElement
-              options={{
-                hidePostalCode: true,
-                style: {
-                  base: {
+        <CardElement
+          options={{
+            hidePostalCode: true,
+            style: {
+              base: {
                     color: "#1c133b",
-                    fontFamily: "system-ui, sans-serif",
-                    fontSize: "16px",
-                  },
-                },
-              }}
-            />
+                fontFamily: "system-ui, sans-serif",
+                fontSize: "16px",
+              },
+            },
+          }}
+        />
             <p className="mt-3 text-xs text-[#7a7198]">
-              By providing your card information, you allow Mundoria to charge
-              your card for this booking in accordance with our terms.
+              By providing your card information, you allow Mundoria to
+              authorise a hold on your card for this booking in accordance with
+              our terms. The charge is captured after the clean is completed.
             </p>
           </div>
         ) : null}
@@ -2672,8 +2674,8 @@ function CheckoutStep({
 
       <div className="mt-6 divide-y divide-[#e4daf5] border-y border-[#e4daf5]">
         <TrustRow
-          icon={<span className="text-[10px] font-bold leading-none">24H</span>}
-          subtitle="Up to 24 hours before each session."
+          icon={<span className="text-[10px] font-bold leading-none">48H</span>}
+          subtitle="Free up to 48 hours before each session."
           title="Free cancellation"
         />
         <TrustRow
@@ -2691,10 +2693,87 @@ function CheckoutStep({
       <div className="mt-5 flex gap-3 rounded-2xl bg-[#efe6ff] p-4 text-sm text-[#3b3358]">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
         <p>
-          Your card is charged when you confirm. Qualifying cancellations are
-          refunded to the original payment method.
+          We authorise (hold) your card when you confirm. The payment is
+          captured after the clean — not upfront as a final charge.{" "}
+          <a
+            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            href="/help/article/why-pay-in-advance"
+          >
+            How payment works
+          </a>
+          .
         </p>
       </div>
+
+      {processing ? (
+        <BookingLoadingOverlay
+          detail={
+            paymentPhase === "saving"
+              ? "Saving your address securely."
+              : paymentPhase === "authorising"
+                ? "Placing a hold on your card — not the final charge."
+                : "Almost done — creating your booking."
+          }
+          label={
+            paymentPhase === "saving"
+              ? "Saving…"
+              : paymentPhase === "authorising"
+                ? "Authorising payment…"
+                : "Confirming booking…"
+          }
+        />
+      ) : null}
+
+      {processing ? (
+        <ol className="mt-5 space-y-2 rounded-2xl border border-[#e4daf5] bg-white/80 p-4 text-sm">
+          {(
+            [
+              { id: "saving", label: "Saving your address" },
+              { id: "authorising", label: "Authorising card hold" },
+              { id: "confirming", label: "Confirming your booking" },
+            ] as const
+          ).map((step, index, list) => {
+            const currentIndex = list.findIndex(
+              (item) => item.id === paymentPhase,
+            );
+            const stepIndex = index;
+            const done = currentIndex > stepIndex;
+            const active = paymentPhase === step.id;
+            return (
+              <li
+                className={cn(
+                  "flex items-center gap-3",
+                  active
+                    ? "font-semibold text-[#1c133b]"
+                    : done
+                      ? "text-[#5b5478]"
+                      : "text-[#8b8798]",
+                )}
+                key={step.id}
+              >
+                <span
+                  className={cn(
+                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                    active || done
+                      ? "bg-[#6a45b8] text-white"
+                      : "bg-[#efe6ff] text-[#6a45b8]",
+                  )}
+                >
+                  {active ? (
+                    <BookingSpinner size="sm" tone="inverse" />
+                  ) : done ? (
+                    "✓"
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+                {step.label}
+                {active ? "…" : null}
+              </li>
+            );
+          })}
+        </ol>
+      ) : null}
 
       {error ? (
         <p className="mt-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
@@ -2708,7 +2787,18 @@ function CheckoutStep({
         size="lg"
         type="submit"
       >
-        {processing ? "Charging your card…" : "Book my cleaning"}
+        {processing ? (
+          <span className="inline-flex items-center gap-2">
+            <BookingSpinner size="sm" tone="inverse" />
+            {paymentPhase === "saving"
+              ? "Saving…"
+              : paymentPhase === "authorising"
+                ? "Authorising payment…"
+                : "Confirming booking…"}
+          </span>
+        ) : (
+          "Book my cleaning"
+        )}
       </Button>
     </form>
   );

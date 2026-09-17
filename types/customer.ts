@@ -153,6 +153,7 @@ export interface Booking {
   amount_cleaner: number | null;
   amount_platform: number | null;
   payment_status: "unpaid" | "held" | "released" | "refunded";
+  parent_booking_id?: string | null;
   cleaner_live_latitude: number | null;
   cleaner_live_longitude: number | null;
   cleaner_location_updated_at: string | null;
@@ -257,6 +258,10 @@ export interface BookingDraft {
   preferSameCleaner: boolean;
   /** Extra visit dates when recurrencePattern is custom. */
   customRecurrenceDates: string[];
+  /** Whether pets are present at the property (null = not answered). */
+  hasPets: boolean | null;
+  /** Optional pet types when hasPets is true (e.g. Dog, Cat, Other). */
+  petTypes: string[];
   promoCode: string;
   specialInstructions: string;
 }

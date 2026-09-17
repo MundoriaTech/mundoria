@@ -150,7 +150,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Contact support@mundoriauk.com. For an active booking, use in-app messaging or your booking page so the right team can help quickly.",
+      "Use Contact us to open chat with the Mundoria team, or visit the Help Centre. For an active booking, use in-app messaging so the right people see the full context.",
     question: "How do I contact support?",
   },
 ];

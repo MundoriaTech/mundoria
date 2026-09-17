@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "seed": "node --env-file=.env.local scripts/seed-e2e.mjs"
+    "seed": "node --env-file=.env.local scripts/seed-e2e.mjs",
+    "seed:content": "node --env-file=.env.local scripts/seed-content.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

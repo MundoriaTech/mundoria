@@ -9,6 +9,15 @@ import {
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
 import {
+  LocationFaqBlock,
+  LocationFeaturedCleaners,
+  LocationHowToBook,
+  LocationReviews,
+  LocationServicesExplainer,
+  LocationTrustStrip,
+  LocationWhatsCovered,
+} from "@/components/marketing/location-seo-sections";
+import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
@@ -17,6 +26,10 @@ import {
   LAUNCH_CITY,
   popularMarketingServices,
 } from "@/lib/seo/marketing";
+import {
+  BIRMINGHAM_LOCATION_CLEANERS,
+  BIRMINGHAM_LOCATION_REVIEWS,
+} from "@/lib/seo/location-social-proof";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -74,13 +87,20 @@ export default function BirminghamCleanersPage() {
 
       <BrandedPageWash>
         <MarketingHero
-          description={LAUNCH_CITY.summary}
-          eyebrow="Coverage"
+          description="One-off or regular house cleaning with tried & vetted cleaners in your area — clear estimates from booking to checklist."
+          eyebrow="Birmingham · From clear online estimates"
           primaryHref={bookingHref}
           primaryLabel="Book in Birmingham"
           secondaryHref="/cleaning"
           secondaryLabel="Browse services"
-          title="Cleaners in Birmingham"
+          title="Domestic cleaners in Birmingham"
+        />
+
+        <LocationTrustStrip />
+
+        <LocationFeaturedCleaners
+          cleaners={[...BIRMINGHAM_LOCATION_CLEANERS]}
+          place="Birmingham"
         />
 
         <BrandedSection>
@@ -88,8 +108,8 @@ export default function BirminghamCleanersPage() {
             Neighbourhoods we prioritise
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-            We publish areas where Mundoria aims to fulfil reliably — not every
-            West Midlands town at once.
+            Mundoria cleaners are available in these Birmingham areas and their
+            surroundings:
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {BIRMINGHAM_AREAS.map((area) => (
@@ -106,7 +126,7 @@ export default function BirminghamCleanersPage() {
 
         <BrandedSection tone="lavender">
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-            Popular Birmingham cleaning services
+            Looking for something different in cleaning?
           </h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {popular.map((service) => (
@@ -119,13 +139,29 @@ export default function BirminghamCleanersPage() {
               />
             ))}
           </div>
-          <p className="mt-8 text-sm text-[#5a5470]">
-            Looking for something else?{" "}
+        </BrandedSection>
+
+        <LocationReviews
+          place="Birmingham"
+          reviews={[...BIRMINGHAM_LOCATION_REVIEWS]}
+        />
+
+        <LocationServicesExplainer place="Birmingham" />
+        <LocationWhatsCovered place="Birmingham" />
+        <LocationHowToBook place="Birmingham" />
+        <LocationFaqBlock place="Birmingham" />
+
+        <BrandedSection tone="cream">
+          <h2 className="text-[1.35rem] font-semibold text-[#1c133b]">
+            From the Mundoria Mag
+          </h2>
+          <p className="mt-2 text-sm text-[#5a5470]">
+            Tips for hosts, households and cleaners —{" "}
             <Link
               className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-              href="/cleaning"
+              href="/blog"
             >
-              Browse all services
+              read the blog
             </Link>
             .
           </p>

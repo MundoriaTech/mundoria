@@ -42,11 +42,17 @@ export async function POST(request: Request) {
   switch (event.type) {
     case "payment_intent.amount_capturable_updated": {
       const intent = event.data.object;
-      await admin
+      const { data: booking } = await admin
         .from("bookings")
         .update({ payment_status: "held" })
         .eq("stripe_payment_intent_id", intent.id)
-        .in("payment_status", ["unpaid", "held"]);
+        .in("payment_status", ["unpaid", "held"])
+        .select("id,status")
+        .maybeSingle();
+      if (booking?.status === "pending_match") {
+        const { runMatchingEngine } = await import("@/lib/matching/engine");
+        await runMatchingEngine(booking.id).catch(() => undefined);
+      }
       break;
     }
     case "payment_intent.succeeded": {

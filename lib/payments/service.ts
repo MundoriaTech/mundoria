@@ -49,57 +49,81 @@ export async function scheduleCleanerPayout(bookingId: string) {
   const admin = createAdminClient();
   const { data: booking } = await admin
     .from("bookings")
-    .select("cleaner_id,amount_total,amount_cleaner")
+    .select("cleaner_id,amount_total,amount_cleaner,allocated_cleaners")
     .eq("id", bookingId)
     .single();
   if (!booking?.cleaner_id) throw new Error("Assigned cleaner not found.");
-  const { data: cleaner } = await admin
-    .from("cleaner_profiles")
-    .select("payout_preference")
-    .eq("id", booking.cleaner_id)
-    .single();
-  const today = new Date();
-  const weekly = cleaner?.payout_preference !== "monthly";
-  const periodStart = weekly
-    ? startOfWeek(today, { weekStartsOn: 1 })
-    : startOfMonth(today);
-  const periodEnd = weekly
-    ? endOfWeek(today, { weekStartsOn: 1 })
-    : endOfMonth(today);
-  const { data: existing } = await admin
-    .from("payouts")
-    .select("*")
-    .eq("cleaner_id", booking.cleaner_id)
-    .eq("period_start", periodStart.toISOString().slice(0, 10))
-    .eq("period_end", periodEnd.toISOString().slice(0, 10))
-    .eq("status", "pending")
-    .maybeSingle();
-  if (existing) {
-    await admin
+
+  const { data: team } = await admin
+    .from("booking_team_members")
+    .select("cleaner_id,role")
+    .eq("booking_id", bookingId);
+
+  const cleanerIds = Array.from(
+    new Set([
+      booking.cleaner_id,
+      ...((team ?? []).map((row) => row.cleaner_id as string)),
+    ]),
+  );
+  const share = Math.floor(
+    Number(booking.amount_cleaner ?? 0) / Math.max(1, cleanerIds.length),
+  );
+  const grossShare = Math.floor(
+    Number(booking.amount_total ?? 0) / Math.max(1, cleanerIds.length),
+  );
+
+  let lastPayoutId: string | null = null;
+  for (const cleanerId of cleanerIds) {
+    const { data: cleaner } = await admin
+      .from("cleaner_profiles")
+      .select("payout_preference")
+      .eq("id", cleanerId)
+      .single();
+    const today = new Date();
+    const weekly = cleaner?.payout_preference !== "monthly";
+    const periodStart = weekly
+      ? startOfWeek(today, { weekStartsOn: 1 })
+      : startOfMonth(today);
+    const periodEnd = weekly
+      ? endOfWeek(today, { weekStartsOn: 1 })
+      : endOfMonth(today);
+    const { data: existing } = await admin
       .from("payouts")
-      .update({
-        gross_amount: existing.gross_amount + (booking.amount_total ?? 0),
-        net_amount: existing.net_amount + (booking.amount_cleaner ?? 0),
-        total_jobs: existing.total_jobs + 1,
+      .select("*")
+      .eq("cleaner_id", cleanerId)
+      .eq("period_start", periodStart.toISOString().slice(0, 10))
+      .eq("period_end", periodEnd.toISOString().slice(0, 10))
+      .eq("status", "pending")
+      .maybeSingle();
+    if (existing) {
+      await admin
+        .from("payouts")
+        .update({
+          gross_amount: existing.gross_amount + grossShare,
+          net_amount: existing.net_amount + share,
+          total_jobs: existing.total_jobs + 1,
+        })
+        .eq("id", existing.id);
+      lastPayoutId = existing.id;
+      continue;
+    }
+    const { data: payout, error } = await admin
+      .from("payouts")
+      .insert({
+        cleaner_id: cleanerId,
+        gross_amount: grossShare,
+        net_amount: share,
+        period_end: periodEnd.toISOString().slice(0, 10),
+        period_start: periodStart.toISOString().slice(0, 10),
+        status: "pending",
+        total_jobs: 1,
       })
-      .eq("id", existing.id);
-    return existing.id;
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    lastPayoutId = payout.id;
   }
-  const { data: payout, error } = await admin
-    .from("payouts")
-    .insert({
-      cleaner_id: booking.cleaner_id,
-      gross_amount: booking.amount_total ?? 0,
-      net_amount: booking.amount_cleaner ?? 0,
-      period_end: periodEnd.toISOString().slice(0, 10),
-      period_start: periodStart.toISOString().slice(0, 10),
-      status: "pending",
-      total_jobs: 1,
-    })
-    .select("id")
-    .single();
-  if (error) throw new Error(error.message);
-  return payout.id;
+  return lastPayoutId;
 }
 
 export async function captureBookingPayment(bookingId: string) {

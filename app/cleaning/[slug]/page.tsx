@@ -102,7 +102,7 @@ export default function CleaningServicePage({ params }: PageProps) {
         ]}
       />
 
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description={service.intro}
           eyebrow={service.categoryLabel}
@@ -111,6 +111,7 @@ export default function CleaningServicePage({ params }: PageProps) {
           secondaryHref="/cleaners/birmingham"
           secondaryLabel="Birmingham coverage"
           title={`${service.label} with Mundoria`}
+          underNav
         />
 
         <BrandedSection>

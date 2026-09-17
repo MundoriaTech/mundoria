@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { CreditCard, FileText } from "lucide-react";
 import Link from "next/link";
 
 import { PriceDisplay } from "@/components/shared/price-display";
@@ -15,35 +15,91 @@ export default async function CustomerPaymentsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: bookings }, { data: vouchers }] = await Promise.all([
-    supabase
-      .from("bookings")
-      .select("*, address:addresses(city, postcode)")
-      .eq("customer_id", user!.id)
-      .eq("payment_status", "released")
-      .order("scheduled_date", { ascending: false }),
-    supabase
-      .from("promo_codes")
-      .select("code, discount_value, uses_count, max_uses, kind, valid_until, is_active")
-      .eq("owner_user_id", user!.id)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: dueBookings }, { data: bookings }, { data: vouchers }] =
+    await Promise.all([
+      supabase
+        .from("bookings")
+        .select("*, address:addresses(city, postcode)")
+        .eq("customer_id", user!.id)
+        .eq("payment_status", "unpaid")
+        .neq("status", "cancelled")
+        .order("scheduled_date", { ascending: true }),
+      supabase
+        .from("bookings")
+        .select("*, address:addresses(city, postcode)")
+        .eq("customer_id", user!.id)
+        .eq("payment_status", "released")
+        .order("scheduled_date", { ascending: false }),
+      supabase
+        .from("promo_codes")
+        .select(
+          "code, discount_value, uses_count, max_uses, kind, valid_until, is_active",
+        )
+        .eq("owner_user_id", user!.id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false }),
+    ]);
 
+  const due = (dueBookings ?? []) as Booking[];
   const receipts = (bookings ?? []) as Booking[];
   const usableVouchers = (vouchers ?? []).filter(
-    (voucher) => voucher.max_uses === null || voucher.uses_count < voucher.max_uses,
+    (voucher) =>
+      voucher.max_uses === null || voucher.uses_count < voucher.max_uses,
   );
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Payments & receipts</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Payments & receipts
+        </h1>
         <p className="mt-2 text-muted-foreground">
-          Download invoices for completed cleans and see any referral vouchers
-          ready to use.
+          Authorise unpaid visits here, then find receipts after a clean when
+          payment is captured.{" "}
+          <Link
+            className="font-medium text-primary underline-offset-2 hover:underline"
+            href="/help/article/why-pay-in-advance"
+          >
+            how payment works
+          </Link>
+          .
         </p>
       </div>
+
+      {due.length ? (
+        <section>
+          <h2 className="font-semibold">Payment due</h2>
+          <div className="mt-4 space-y-3">
+            {due.map((booking) => (
+              <article
+                className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                key={booking.id}
+              >
+                <div className="min-w-0">
+                  <p className="font-medium text-amber-950">
+                    {formatServiceName(booking.service_type)}
+                  </p>
+                  <p className="mt-1 text-sm text-amber-900/80">
+                    {booking.scheduled_date}
+                    {booking.address
+                      ? ` · ${booking.address.city}, ${booking.address.postcode}`
+                      : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <PriceDisplay amount={booking.amount_total} />
+                  <Button asChild size="sm">
+                    <Link href={`/booking/${booking.id}`}>
+                      <CreditCard className="mr-1.5 h-3.5 w-3.5" />
+                      Authorise
+                    </Link>
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border bg-card p-5 shadow-sm">
         <h2 className="font-semibold">Your vouchers</h2>

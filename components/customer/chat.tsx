@@ -149,7 +149,7 @@ export function Chat({
         {error ? <p className="mb-2 text-sm text-destructive">{error}</p> : null}
         <div className="flex gap-2">
           <textarea
-            className="max-h-28 min-h-11 flex-1 resize-none rounded-xl border bg-background px-3 py-2.5 text-sm"
+            className="max-h-28 min-h-11 flex-1 resize-none rounded-xl border border-[#e8e8eb] bg-white px-3 py-2.5 text-sm text-[#1c133b]"
             onChange={(event) => setContent(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {

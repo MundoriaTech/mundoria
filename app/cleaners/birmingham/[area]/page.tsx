@@ -10,6 +10,15 @@ import {
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
 import {
+  LocationFaqBlock,
+  LocationFeaturedCleaners,
+  LocationHowToBook,
+  LocationReviews,
+  LocationServicesExplainer,
+  LocationTrustStrip,
+  LocationWhatsCovered,
+} from "@/components/marketing/location-seo-sections";
+import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
@@ -19,6 +28,10 @@ import {
   birminghamAreaBySlug,
   popularMarketingServices,
 } from "@/lib/seo/marketing";
+import {
+  BIRMINGHAM_LOCATION_CLEANERS,
+  BIRMINGHAM_LOCATION_REVIEWS,
+} from "@/lib/seo/location-social-proof";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -48,6 +61,14 @@ export default function BirminghamAreaPage({ params }: PageProps) {
   const bookingHref = configured ? "/booking/new" : "/setup";
   const popular = popularMarketingServices(4);
   const otherAreas = BIRMINGHAM_AREAS.filter((item) => item.slug !== area.slug);
+  const place = `${area.name}, Birmingham`;
+  const localCleaners = BIRMINGHAM_LOCATION_CLEANERS.filter((cleaner) =>
+    cleaner.areas.toLowerCase().includes(area.name.split(" ")[0]!.toLowerCase()),
+  );
+  const featured =
+    localCleaners.length >= 3
+      ? localCleaners
+      : BIRMINGHAM_LOCATION_CLEANERS.slice(0, 6);
 
   return (
     <MarketingShell>
@@ -82,7 +103,7 @@ export default function BirminghamAreaPage({ params }: PageProps) {
             "@type": "Service",
             areaServed: {
               "@type": "Place",
-              name: `${area.name}, Birmingham`,
+              name: place,
             },
             description: area.description,
             name: `Cleaning services in ${area.name}`,
@@ -98,7 +119,7 @@ export default function BirminghamAreaPage({ params }: PageProps) {
 
       <BrandedPageWash>
         <MarketingHero
-          description={area.description}
+          description={`One-off or regular house cleaning in ${area.name}. Tried & vetted cleaners nearby — clear estimates before you book.`}
           eyebrow={`${area.name} · Birmingham`}
           primaryHref={bookingHref}
           primaryLabel={`Book in ${area.name}`}
@@ -107,9 +128,13 @@ export default function BirminghamAreaPage({ params }: PageProps) {
           title={`Cleaners in ${area.name}`}
         />
 
+        <LocationTrustStrip />
+
+        <LocationFeaturedCleaners cleaners={[...featured]} place={area.name} />
+
         <BrandedSection>
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-            Services customers book in {area.name}
+            Looking for something different in cleaning?
           </h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {popular.map((service) => (
@@ -122,18 +147,25 @@ export default function BirminghamAreaPage({ params }: PageProps) {
               />
             ))}
           </div>
-          <Link
-            className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-7 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
-            href={bookingHref}
-          >
-            Check availability
-          </Link>
         </BrandedSection>
+
+        <LocationReviews
+          place={area.name}
+          reviews={[...BIRMINGHAM_LOCATION_REVIEWS]}
+        />
+
+        <LocationServicesExplainer place={place} />
+        <LocationWhatsCovered place={place} />
+        <LocationHowToBook place={place} />
+        <LocationFaqBlock place={place} />
 
         <BrandedSection tone="lavender">
           <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-xl">
-            Nearby Birmingham areas
+            Domestic cleaners near {area.name}
           </h2>
+          <p className="mt-2 text-sm text-[#5a5470]">
+            Mundoria pros are available in these towns and their surroundings:
+          </p>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {otherAreas.map((item) => (
               <li key={item.slug}>

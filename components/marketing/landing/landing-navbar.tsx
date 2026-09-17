@@ -5,6 +5,11 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
+import {
+  LANDING_NAV_PILL_H,
+  LANDING_NAV_PILL_RADIUS,
+  LANDING_NAV_TOP,
+} from "@/components/marketing/landing/nav-metrics";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,10 +27,12 @@ import type { Profile } from "@/types/auth";
  * bar ~75px tall, corner radius ~18px (gently curved sides, not stadium),
  * lavender #e8e0f9, CTA pills ~26–36px with clear inset from the bar edges.
  */
-export const LANDING_NAV_TOP =
-  "max(1.25rem, env(safe-area-inset-top, 0px) + 0.5rem)";
-export const LANDING_NAV_PILL_H = "4.75rem"; /* ~76px — room for inner pad + CTA pills */
-export const LANDING_NAV_PILL_RADIUS = "1.125rem"; /* 18px */
+
+export {
+  LANDING_NAV_PILL_H,
+  LANDING_NAV_PILL_RADIUS,
+  LANDING_NAV_TOP,
+} from "@/components/marketing/landing/nav-metrics";
 
 const NAV_SCROLL_AT = 48;
 

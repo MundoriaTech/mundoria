@@ -4,7 +4,12 @@ import { useState } from "react";
 
 import { BookingCard } from "@/components/customer/booking-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
 import { Button } from "@/components/ui/button";
+import { PAGE_SIZES } from "@/lib/pagination";
 import type { Booking } from "@/types/customer";
 
 export function BookingsList({
@@ -19,6 +24,11 @@ export function BookingsList({
     tab === "past"
       ? ["completed", "cancelled"].includes(booking.status)
       : !["completed", "cancelled"].includes(booking.status),
+  );
+  const { page, pageItems, setPage, totalItems } = usePagedItems(
+    filtered,
+    PAGE_SIZES.app,
+    tab,
   );
 
   return (
@@ -40,15 +50,24 @@ export function BookingsList({
         </Button>
       </div>
       {filtered.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {filtered.map((booking) => (
-            <BookingCard
-              booking={booking}
-              key={booking.id}
-              showRebook={tab === "past"}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {pageItems.map((booking) => (
+              <BookingCard
+                booking={booking}
+                key={booking.id}
+                showRebook={tab === "past"}
+              />
+            ))}
+          </div>
+          <ClientPagination
+            className="mt-6"
+            onPageChange={setPage}
+            page={page}
+            pageSize={PAGE_SIZES.app}
+            totalItems={totalItems}
+          />
+        </>
       ) : (
         <EmptyState
           message={`No ${tab} bookings yet.`}

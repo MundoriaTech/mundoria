@@ -9,6 +9,7 @@ import {
   formatServiceName,
   standardLabel,
 } from "@/lib/customer/services";
+import { paymentStatusLabel } from "@/lib/customer/payment-status";
 import { buildReceiptLines } from "@/lib/customer/receipt";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Booking, BookingAddOn } from "@/types/customer";
@@ -111,8 +112,8 @@ function ReceiptDocument({
         </div>
         <div className="text-right text-sm">
           <p className="font-mono text-white/80">#{booking.id.slice(0, 8)}</p>
-          <p className="mt-1 capitalize text-white/70">
-            {booking.payment_status === "released" ? "Paid" : booking.payment_status}
+          <p className="mt-1 text-white/70">
+            {paymentStatusLabel(booking.payment_status)}
           </p>
         </div>
       </header>

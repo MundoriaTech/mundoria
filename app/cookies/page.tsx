@@ -59,7 +59,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Learn more about who we are, how you can contact us and how we process personal data in our privacy policy. Questions: support@mundoriauk.com.",
+      "Learn more about who we are, how you can contact us and how we process personal data in our privacy policy. Questions: use Contact us on the website.",
     title: "More information",
   },
 ];

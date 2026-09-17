@@ -95,7 +95,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Questions about these terms can be sent to support@mundoriauk.com.",
+      "Questions about these terms can be sent through Contact us on the website.",
     title: "Contact",
   },
 ];

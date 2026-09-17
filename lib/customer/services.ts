@@ -114,7 +114,8 @@ export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
     value: "commercial",
   },
   {
-    description: "Cleaning that adapts when life does — with more personal consideration.",
+    description:
+      "Pregnancy, postpartum, illness, injury, hospital discharge and bereavement support cleans.",
     icon: HeartHandshake,
     label: "Mundoria Recovery",
     value: "recovery",
@@ -331,60 +332,30 @@ export const SERVICES: ServiceDefinition[] = [
 
 export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
   {
-    amount: 1200,
-    categories: ["residential", "moving_home", "short_term_rental"],
-    description: "Interior fridge clean and wipe-down.",
-    id: "inside_fridge",
-    label: "Inside fridge",
-  },
-  {
     amount: 1800,
-    categories: ["residential", "moving_home", "short_term_rental"],
-    description: "Oven interior clean for grease and residue.",
-    id: "inside_oven",
-    label: "Inside oven",
+    categories: [
+      "residential",
+      "moving_home",
+      "short_term_rental",
+      "commercial",
+      "recovery",
+    ],
+    description: "Extra time for pressing and folding during the visit.",
+    id: "ironing",
+    label: "Ironing",
   },
   {
-    amount: 1500,
-    categories: ["residential", "moving_home", "short_term_rental"],
-    description: "Interior cupboard/cabinet wipe-down.",
-    id: "inside_cabinets",
-    label: "Inside cabinets",
-  },
-  {
-    amount: 1400,
-    categories: ["residential", "moving_home", "commercial", "short_term_rental"],
-    description: "Interior window glass and sill clean.",
-    id: "interior_windows",
-    label: "Interior windows",
-  },
-  {
-    amount: 2000,
-    categories: ["residential", "short_term_rental"],
-    description: "Light clean of balcony or patio area.",
-    id: "balcony_patio",
-    label: "Balcony or patio",
-  },
-  {
-    amount: 1600,
-    categories: ["residential", "short_term_rental", "recovery"],
-    description: "Additional limescale and bathroom-detail time.",
-    id: "extra_bathroom_detail",
-    label: "Extra bathroom detail",
-  },
-  {
-    amount: 1000,
-    description: "Change bed linen supplied by customer or host.",
-    id: "linen_change",
-    label: "Linen change",
-    services: ["airbnb_turnover", "holiday_let", "serviced_accommodation"],
-  },
-  {
-    amount: 2200,
-    categories: ["recovery"],
-    description: "Extra care time for sensitive recovery-support bookings.",
-    id: "recovery_priority",
-    label: "Recovery priority care",
+    amount: 800,
+    categories: [
+      "residential",
+      "moving_home",
+      "short_term_rental",
+      "commercial",
+      "recovery",
+    ],
+    description: "Cleaner brings standard cleaning products for the session.",
+    id: "cleaning_products",
+    label: "Cleaning products",
   },
 ];
 
@@ -478,16 +449,29 @@ export function standardLabel(standard: CleaningStandard) {
 
 export function allowedStandards(serviceType: ServiceType) {
   const fixed = serviceDefinition(serviceType).fixedStandard;
-  return fixed
-    ? CLEANING_STANDARDS.filter((standard) => standard.value === fixed)
-    : CLEANING_STANDARDS;
+  if (fixed) {
+    return CLEANING_STANDARDS.filter((standard) => standard.value === fixed);
+  }
+  // Comprehensive is for deep cleans / handover-style work — not routine Regular.
+  if (serviceType === "regular") {
+    return CLEANING_STANDARDS.filter(
+      (standard) => standard.value !== "comprehensive",
+    );
+  }
+  return CLEANING_STANDARDS;
 }
 
 export function normalizeStandard(
   serviceType: ServiceType,
   standard: CleaningStandard | null,
 ) {
-  return serviceDefinition(serviceType).fixedStandard ?? standard ?? serviceDefinition(serviceType).recommendedStandard;
+  const preferred =
+    serviceDefinition(serviceType).fixedStandard ??
+    standard ??
+    serviceDefinition(serviceType).recommendedStandard;
+  const allowed = allowedStandards(serviceType).map((item) => item.value);
+  if (allowed.includes(preferred)) return preferred;
+  return allowed[0] ?? preferred;
 }
 
 export function recommendedStandardFor(serviceType: ServiceType) {
@@ -654,14 +638,11 @@ export function getSmartRecommendation({
 
   if (
     serviceType === "regular" &&
-    (propertyCondition === "neglected" || normalizedStandard === "comprehensive")
+    propertyCondition === "neglected"
   ) {
     return {
       autoApplied: false,
-      message:
-        propertyCondition === "neglected"
-          ? `Based on your selections, ${serviceDefinition("deep_clean").label} may be more suitable because your property ${conditionLabels.neglected}.`
-          : `Choosing Comprehensive on a Regular clean often points to ${serviceDefinition("deep_clean").label} — a fuller reset without stretching a routine visit.`,
+      message: `Based on your selections, ${serviceDefinition("deep_clean").label} may be more suitable because your property ${conditionLabels.neglected}.`,
       recommendedServiceType: "deep_clean",
       recommendedStandard: "enhanced",
       shouldShow: true,
@@ -709,6 +690,39 @@ export function formatMoney(amountInPence: number | null | undefined) {
     currency: "GBP",
     style: "currency",
   }).format((amountInPence ?? 0) / 100);
+}
+
+/** Baseline “from” price for cards / early basket (1 bed · 1 bath · recommended standard). */
+export function indicativeFromPrice(serviceType: ServiceType) {
+  const service = serviceDefinition(serviceType);
+  if (serviceType === "office") {
+    return service.basePrice;
+  }
+  const stub = {
+    address_line_1: "",
+    address_line_2: null,
+    city: "",
+    created_at: "",
+    customer_id: "",
+    id: "indicative",
+    is_default: false,
+    label: null,
+    latitude: null,
+    longitude: null,
+    num_bathrooms: 1,
+    num_bedrooms: 1,
+    num_other_rooms: 0,
+    postcode: "",
+    property_type: "flat" as const,
+    special_requirements: null,
+    updated_at: "",
+  };
+  return estimatePrice(
+    serviceType,
+    stub,
+    normalizeStandard(serviceType, null),
+    [],
+  );
 }
 
 export function formatServiceName(serviceType: ServiceType) {

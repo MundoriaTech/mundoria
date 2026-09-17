@@ -10,6 +10,7 @@ import { FormStatus } from "@/components/auth/form-status";
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { dashboardForRole } from "@/lib/auth/redirects";
 import {
   signupSchema,
@@ -25,7 +26,13 @@ interface SignupResponse {
   role?: UserRole;
 }
 
-export function SignupForm({ redirectTo }: { redirectTo?: string }) {
+export function SignupForm({
+  redirectTo,
+  role,
+}: {
+  redirectTo?: string;
+  role: Extract<UserRole, "customer" | "cleaner">;
+}) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -38,7 +45,6 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
     handleSubmit,
     register,
     setValue,
-    watch,
   } = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -47,12 +53,16 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
       password: "",
       phone: "",
       referral_code: "",
-      role: "customer",
+      role,
     },
   });
-  const selectedRole = watch("role");
 
   useEffect(() => {
+    setValue("role", role);
+  }, [role, setValue]);
+
+  useEffect(() => {
+    if (role !== "customer") return;
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
     if (ref) {
@@ -61,7 +71,7 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
         shouldValidate: true,
       });
     }
-  }, [setValue]);
+  }, [role, setValue]);
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
@@ -69,7 +79,7 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
 
     try {
       const response = await fetch("/api/auth/signup", {
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, role }),
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });
@@ -88,7 +98,7 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
         return;
       }
 
-      const role = result.role ?? values.role;
+      const accountRole = result.role ?? role;
       if (result.referralPromoCode) {
         window.sessionStorage.setItem(
           "mundoria-welcome-promo",
@@ -96,9 +106,9 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
         );
       }
       const destination =
-        role === "customer" && nextPath
+        accountRole === "customer" && nextPath
           ? nextPath
-          : dashboardForRole(role);
+          : dashboardForRole(accountRole);
       router.replace(destination);
       router.refresh();
     } catch (error) {
@@ -115,16 +125,16 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
     <div className="space-y-6">
       <OAuthButton
         label={
-          selectedRole === "cleaner"
+          role === "cleaner"
             ? "Continue with Google as a cleaner"
             : "Continue with Google as a customer"
         }
         next={
-          selectedRole === "customer" && nextPath
+          role === "customer" && nextPath
             ? nextPath
-            : dashboardForRole(selectedRole)
+            : dashboardForRole(role)
         }
-        role={selectedRole}
+        role={role}
       />
       <Divider />
       <form className="space-y-5" onSubmit={onSubmit}>
@@ -165,58 +175,15 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
         </FormField>
 
         <FormField error={errors.password} htmlFor="password" label="Password">
-          <Input
+          <PasswordInput
             autoComplete="new-password"
             id="password"
             placeholder="At least 8 characters"
-            type="password"
             {...register("password")}
           />
         </FormField>
 
-        <fieldset>
-          <legend className="text-sm font-medium">I want to</legend>
-          <input type="hidden" {...register("role")} />
-          <div
-            aria-label="Account type"
-            className="mt-2 grid gap-3 sm:grid-cols-2"
-            role="radiogroup"
-          >
-            <RoleOption
-              checked={selectedRole === "customer"}
-              description="Book trusted cleaners"
-              label="Hire a cleaner"
-              onSelect={() =>
-                setValue("role", "customer", {
-                  shouldDirty: true,
-                  shouldTouch: true,
-                  shouldValidate: true,
-                })
-              }
-              value="customer"
-            />
-            <RoleOption
-              checked={selectedRole === "cleaner"}
-              description="Find cleaning work"
-              label="Work as a cleaner"
-              onSelect={() =>
-                setValue("role", "cleaner", {
-                  shouldDirty: true,
-                  shouldTouch: true,
-                  shouldValidate: true,
-                })
-              }
-              value="cleaner"
-            />
-          </div>
-          {errors.role ? (
-            <p className="mt-2 text-sm text-destructive" role="alert">
-              {errors.role.message}
-            </p>
-          ) : null}
-        </fieldset>
-
-        {selectedRole === "customer" ? (
+        {role === "customer" ? (
           <FormField
             error={errors.referral_code}
             htmlFor="referral_code"
@@ -232,44 +199,14 @@ export function SignupForm({ redirectTo }: { redirectTo?: string }) {
         ) : null}
 
         <Button className="w-full" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Creating account…" : "Create account"}
+          {isSubmitting
+            ? "Creating account…"
+            : role === "cleaner"
+              ? "Create cleaner account"
+              : "Create customer account"}
         </Button>
       </form>
     </div>
-  );
-}
-
-function RoleOption({
-  checked,
-  description,
-  label,
-  onSelect,
-  value,
-}: {
-  checked: boolean;
-  description: string;
-  label: string;
-  onSelect: () => void;
-  value: "customer" | "cleaner";
-}) {
-  return (
-    <button
-      aria-checked={checked}
-      className={`rounded-lg border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-        checked
-          ? "border-primary bg-primary/5 ring-1 ring-primary"
-          : "hover:border-primary/50"
-      }`}
-      onClick={onSelect}
-      role="radio"
-      type="button"
-      value={value}
-    >
-      <span className="block text-sm font-medium">{label}</span>
-      <span className="mt-1 block text-xs text-muted-foreground">
-        {description}
-      </span>
-    </button>
   );
 }
 

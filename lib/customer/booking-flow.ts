@@ -20,6 +20,7 @@ export type BookingFlowStepId =
   | "rooms"
   | "standard"
   | "addons"
+  | "pets"
   | "preferences"
   | "frequency"
   | "duration"
@@ -37,7 +38,8 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   address: "Address",
   rooms: "Rooms",
   standard: "Session",
-  addons: "Add-ons",
+  addons: "Personalize",
+  pets: "Pets",
   preferences: "Preferences",
   frequency: "Frequency",
   duration: "Duration",
@@ -46,12 +48,12 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   checkout: "Book",
 };
 
-/** Sub-service imagery for the booking flow header (matches marketing cards). */
+/** Sub-service imagery for booking cards (matches category-page service cards). */
 export const bookingServiceImages: Record<ServiceType, string> = {
   regular: "/images/marketing/landing/residential-regular.png",
   deep_clean: "/images/marketing/landing/residential-deep.png",
   one_off: "/images/marketing/landing/residential-one-off.png",
-  same_day: "/images/marketing/landing/residential-one-off.png",
+  same_day: "/images/marketing/landing/residential-deep.png",
   end_of_tenancy: "/images/marketing/landing/moving-end-of-tenancy.png",
   move_in: "/images/marketing/landing/moving-move-in.png",
   move_out: "/images/marketing/landing/moving-move-out.png",
@@ -63,9 +65,9 @@ export const bookingServiceImages: Record<ServiceType, string> = {
   educational_facility: "/images/marketing/landing/commercial-education.png",
   communal_area: "/images/marketing/landing/commercial-communal.png",
   pregnancy_support: "/images/marketing/landing/recovery-pregnancy.png",
-  postpartum: "/images/marketing/landing/recovery-postpartum.png",
+  postpartum: "/images/marketing/landing/recovery-pregnancy.png",
   illness_recovery: "/images/marketing/landing/recovery-illness.png",
-  post_injury: "/images/marketing/landing/recovery-injury.png",
+  post_injury: "/images/marketing/landing/recovery-illness.png",
   hospital_discharge: "/images/marketing/landing/recovery-hospital.png",
   bereavement_support: "/images/marketing/landing/recovery-bereavement.png",
   post_construction: "/images/marketing/landing/category-residential.png",
@@ -73,11 +75,11 @@ export const bookingServiceImages: Record<ServiceType, string> = {
 };
 
 export const bookingCategoryImages: Record<ServiceCategory, string> = {
-  residential: "/images/marketing/landing/category-residential.png",
+  residential: "/images/booking/categories/residential.jpg",
   moving_home: "/images/marketing/landing/category-moving-home.png",
   short_term_rental: "/images/marketing/landing/category-str.png",
-  commercial: "/images/marketing/landing/category-commercial.png",
-  recovery: "/images/marketing/landing/category-recovery.png",
+  commercial: "/images/booking/categories/commercial.jpg?v=5",
+  recovery: "/images/booking/categories/recovery.jpg",
   exterior: "/images/marketing/landing/category-exterior.png",
 };
 
@@ -160,13 +162,16 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
 
 /** Steps for the current draft — skips category/service when already chosen. */
 export function getFlowSteps(
-  draft: Pick<BookingDraft, "serviceCategory" | "serviceType">,
+  draft: Pick<
+    BookingDraft,
+    "serviceCategory" | "serviceType" | "recurrencePattern"
+  >,
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
   const isOffice = draft.serviceType === "office";
 
-  if (!draft.serviceCategory) steps.push("category");
-  if (!draft.serviceType) steps.push("service");
+  // Always keep category + service in the flow so Back can revisit them.
+  steps.push("category", "service");
 
   steps.push("address");
 
@@ -184,16 +189,20 @@ export function getFlowSteps(
   }
 
   steps.push("addons");
+  steps.push("pets");
 
   if (propertyQuestionModeFor(draft.serviceType) === "recovery") {
     steps.push("preferences");
   }
 
+  steps.push("duration");
+  steps.push("date");
+
   if (frequencyModeFor(draft.serviceType) !== "none") {
     steps.push("frequency");
   }
 
-  steps.push("duration", "date", "time", "checkout");
+  steps.push("time", "checkout");
   return steps;
 }
 
@@ -269,17 +278,31 @@ export function composeBookingNotes(draft: BookingDraft) {
   if (draft.specialInstructions.trim()) {
     parts.push(draft.specialInstructions.trim());
   }
-  if (draft.alternateTimes.length) {
-    parts.push(`Also available at: ${draft.alternateTimes.join(", ")}`);
+  if (draft.hasPets === true) {
+    const types = draft.petTypes.length
+      ? ` (${draft.petTypes.join(", ")})`
+      : "";
+    parts.push(`Pets present${types}.`);
+  } else if (draft.hasPets === false) {
+    parts.push("No pets.");
   }
   if (
     draft.isRecurring &&
     draft.recurrencePattern === "custom" &&
     draft.customRecurrenceDates.length
   ) {
+    const times = [draft.scheduledTime, ...draft.alternateTimes]
+      .filter(Boolean)
+      .join(", ");
     parts.push(
-      `Custom calendar dates: ${draft.customRecurrenceDates.join(", ")}`,
+      `Custom calendar dates: ${draft.customRecurrenceDates.join(", ")}.${
+        times
+          ? ` Shared preferred times for every date: ${times}.`
+          : ""
+      }`,
     );
+  } else if (draft.alternateTimes.length) {
+    parts.push(`Also available at: ${draft.alternateTimes.join(", ")}`);
   }
   return parts.join("\n\n");
 }

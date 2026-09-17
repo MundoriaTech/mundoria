@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
+import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import {
   LAUNCH_CITY,
   popularMarketingServices,
@@ -25,6 +26,7 @@ export function LandingFooter({
         ["Customer login", loginHref],
         ["Pricing", "/pricing"],
         ["FAQ", "/faq"],
+        ["Help Centre", "/help"],
       ],
       title: "Customers",
     },
@@ -50,9 +52,9 @@ export function LandingFooter({
     {
       links: [
         ["How it works", "/how-it-works"],
-        ["Contact us", "/contact"],
+        ["Mundoria Mag", "/blog"],
+        ["Help Centre", "/help"],
         ["Coverage", "#coverage"],
-        ["About Mundoria", "#about"],
         ["Privacy", "/privacy"],
         ["Cookie policy", "/cookies"],
         ["Terms", "/terms"],
@@ -72,19 +74,8 @@ export function LandingFooter({
               professionals for regular cleaning, deep cleans, Airbnb turnovers
               and tenancy handovers.
             </p>
-            <div className="mt-5 grid gap-2 text-sm font-medium text-muted-foreground sm:mt-6">
-              <a
-                className="w-fit break-all transition hover:text-[#312c79]"
-                href="mailto:support@mundoriauk.com"
-              >
-                support@mundoriauk.com
-              </a>
-              <a
-                className="w-fit break-all transition hover:text-[#312c79]"
-                href="mailto:hello@mundoriauk.com"
-              >
-                hello@mundoriauk.com
-              </a>
+            <div className="mt-5 sm:mt-6">
+              <ContactSupportButton className="text-sm font-semibold text-[#6a45b8] transition hover:text-[#5a38a3]" />
             </div>
           </div>
 
@@ -127,9 +118,7 @@ export function LandingFooter({
             <CookieSettingsLink className="transition hover:text-[#312c79]">
               Manage cookies
             </CookieSettingsLink>
-            <Link className="transition hover:text-[#312c79]" href="/contact">
-              Contact
-            </Link>
+            <ContactSupportButton className="transition hover:text-[#312c79]" />
             <Link className="transition hover:text-[#312c79]" href="/terms">
               Terms
             </Link>

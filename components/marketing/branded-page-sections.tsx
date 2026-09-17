@@ -1,13 +1,26 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { cn } from "@/lib/utils";
 
 /** Soft cream page wash used across secondary marketing pages. */
-export function BrandedPageWash({ children }: { children: ReactNode }) {
+export function BrandedPageWash({
+  children,
+  underNav = false,
+}: {
+  children: ReactNode;
+  /** Pull wash behind the sticky landing navbar (no white strip above the hero). */
+  underNav?: boolean;
+}) {
   return (
-    <div className="relative overflow-hidden bg-[#faf8ff]">
+    <div
+      className="relative overflow-hidden bg-[#faf8ff]"
+      style={
+        underNav ? { marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` } : undefined
+      }
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[28rem]"

@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
 import { Input } from "@/components/ui/input";
+import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminDispute } from "@/types/admin";
 
 export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
@@ -20,12 +25,18 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
       ),
     [date, disputes, status, type],
   );
+  const filterKey = `${type}|${status}|${date}`;
+  const { page, pageItems, setPage, totalItems } = usePagedItems(
+    rows,
+    PAGE_SIZES.admin,
+    filterKey,
+  );
 
   return (
     <div className="min-w-0">
       <div className="grid gap-3 sm:grid-cols-3">
         <select
-          className="h-11 rounded-md border border-input bg-background px-3 text-foreground"
+          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-[#1c133b]"
           onChange={(event) => setType(event.target.value)}
           value={type}
         >
@@ -37,7 +48,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
           ))}
         </select>
         <select
-          className="h-11 rounded-md border border-input bg-background px-3 text-foreground"
+          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-[#1c133b]"
           onChange={(event) => setStatus(event.target.value)}
           value={status}
         >
@@ -56,7 +67,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
       </div>
 
       <div className="mt-5 space-y-3 md:hidden">
-        {rows.map((item) => (
+        {pageItems.map((item) => (
           <Link
             className="block rounded-xl border border-border bg-card p-4 transition active:bg-muted/40"
             href={`/admin/disputes/${item.id}`}
@@ -101,7 +112,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((item) => (
+            {pageItems.map((item) => (
               <tr className="border-t" key={item.id}>
                 <td className="p-3">
                   {new Date(item.created_at).toLocaleDateString("en-GB")}
@@ -127,6 +138,14 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
           </tbody>
         </table>
       </div>
+
+      <ClientPagination
+        className="mt-5"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </div>
   );
 }

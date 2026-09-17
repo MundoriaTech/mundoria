@@ -5,9 +5,14 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { Input } from "@/components/ui/input";
 import { formatServiceName, SERVICES } from "@/lib/customer/services";
+import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminBooking } from "@/types/admin";
 
 export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
@@ -37,6 +42,12 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
       ),
     [bookings, from, search, service, status, to, zone],
   );
+  const filterKey = `${search}|${status}|${service}|${from}|${to}|${zone}`;
+  const { page, pageItems, setPage, totalItems } = usePagedItems(
+    filtered,
+    PAGE_SIZES.admin,
+    filterKey,
+  );
 
   return (
     <div className="min-w-0">
@@ -50,7 +61,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           />
         </label>
         <select
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
           onChange={(event) => setStatus(event.target.value)}
           value={status}
         >
@@ -73,7 +84,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           ))}
         </select>
         <select
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
           onChange={(event) => setService(event.target.value)}
           value={service}
         >
@@ -103,7 +114,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
       </div>
 
       <div className="mt-5 space-y-3 lg:hidden">
-        {filtered.map((booking) => (
+        {pageItems.map((booking) => (
           <Link
             className="block rounded-xl border border-border bg-card p-4 transition active:bg-muted/40"
             href={`/admin/booking/${booking.id}`}
@@ -156,7 +167,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((booking) => (
+            {pageItems.map((booking) => (
               <tr className="border-t" key={booking.id}>
                 <td className="p-3">
                   <Link
@@ -182,6 +193,14 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           </tbody>
         </table>
       </div>
+
+      <ClientPagination
+        className="mt-5"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </div>
   );
 }

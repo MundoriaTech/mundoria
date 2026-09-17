@@ -7,16 +7,20 @@ import { useState } from "react";
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 export type BookingAuthMode = "ask" | "create" | "signin";
 
 const RETURN_PATH = "/booking/new";
 
 export function BookingAuthPrompt({
+  hideTitle = false,
   mode,
   onModeChange,
 }: {
+  hideTitle?: boolean;
   mode: BookingAuthMode;
   onModeChange: (mode: BookingAuthMode) => void;
 }) {
@@ -113,23 +117,27 @@ export function BookingAuthPrompt({
 
   return (
     <div className="mx-auto w-full max-w-sm">
-      <h2 className="text-xl font-semibold tracking-tight text-foreground">
-        {mode === "ask"
-          ? "Where should we send your booking?"
-          : mode === "create"
-            ? "Create your account"
-            : "Sign in"}
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        {mode === "ask"
-          ? "Your selections are already saved. Add an email to continue to your address."
-          : mode === "create"
-            ? "Name and a password — then you’ll go straight back to booking."
-            : "Enter your password to continue this booking."}
-      </p>
+      {!hideTitle ? (
+        <>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            {mode === "ask"
+              ? "Where should we send your booking?"
+              : mode === "create"
+                ? "Create your account"
+                : "Sign in"}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {mode === "ask"
+              ? "Your selections are already saved. Add an email to continue to your address."
+              : mode === "create"
+                ? "Name and a password — then you’ll go straight back to booking."
+                : "Enter your password to continue this booking."}
+          </p>
+        </>
+      ) : null}
 
       {mode === "ask" ? (
-        <div className="mt-6 space-y-4">
+        <div className={cn("space-y-4", !hideTitle && "mt-6")}>
           <form className="space-y-3" onSubmit={continueWithEmail}>
             <Input
               autoComplete="email"
@@ -162,7 +170,7 @@ export function BookingAuthPrompt({
 
       {mode === "create" ? (
         <form
-          className="mt-6 space-y-3"
+          className={cn("space-y-3", !hideTitle && "mt-6")}
           onSubmit={(event) => void createAccount(event)}
         >
           <EmailChip email={email} onEdit={() => setMode("ask")} />
@@ -173,12 +181,11 @@ export function BookingAuthPrompt({
             placeholder="Full name"
             value={fullName}
           />
-          <Input
+          <PasswordInput
             autoComplete="new-password"
             className="h-11"
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Password"
-            type="password"
             value={password}
           />
           <Button className="h-11 w-full" disabled={busy} type="submit">
@@ -196,7 +203,7 @@ export function BookingAuthPrompt({
 
       {mode === "signin" ? (
         <form
-          className="mt-6 space-y-3"
+          className={cn("space-y-3", !hideTitle && "mt-6")}
           onSubmit={(event) => void signIn(event)}
         >
           {email ? (
@@ -211,12 +218,11 @@ export function BookingAuthPrompt({
               value={email}
             />
           )}
-          <Input
+          <PasswordInput
             autoComplete="current-password"
             className="h-11"
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Password"
-            type="password"
             value={password}
           />
           <Button className="h-11 w-full" disabled={busy} type="submit">

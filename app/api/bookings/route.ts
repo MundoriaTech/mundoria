@@ -210,7 +210,7 @@ export async function POST(request: Request) {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Your card has been charged ${formatMoney(paymentIntent.amount)}.`;
+  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. We’ve authorised a hold of ${formatMoney(paymentIntent.amount)} — charged after the clean.`;
   const preferences = profile.notification_preferences as {
     email?: boolean;
     sms?: boolean;

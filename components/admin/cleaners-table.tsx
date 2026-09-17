@@ -4,9 +4,14 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { Input } from "@/components/ui/input";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { Input } from "@/components/ui/input";
+import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminCleaner } from "@/types/admin";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -60,6 +65,12 @@ export function CleanersTable({
       }),
     [area, cleaners, search, tab, tier, workingAreas],
   );
+  const filterKey = `${tab}|${search}|${tier}|${area}`;
+  const { page, pageItems, setPage, totalItems } = usePagedItems(
+    filtered,
+    PAGE_SIZES.admin,
+    filterKey,
+  );
 
   return (
     <div className="min-w-0">
@@ -88,7 +99,7 @@ export function CleanersTable({
           />
         </label>
         <select
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
           onChange={(event) => setTier(event.target.value)}
           value={tier}
         >
@@ -107,7 +118,7 @@ export function CleanersTable({
       </div>
 
       <div className="mt-5 space-y-3 md:hidden">
-        {filtered.map((cleaner) => {
+        {pageItems.map((cleaner) => {
           const status = cleaner.cleaner_profiles?.status;
           return (
             <Link
@@ -179,7 +190,7 @@ export function CleanersTable({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((cleaner) => (
+            {pageItems.map((cleaner) => (
               <tr className="border-t" key={cleaner.id}>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
@@ -244,6 +255,14 @@ export function CleanersTable({
           </tbody>
         </table>
       </div>
+
+      <ClientPagination
+        className="mt-5"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </div>
   );
 }

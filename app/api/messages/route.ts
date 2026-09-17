@@ -31,10 +31,23 @@ export async function POST(request: Request) {
     .select("customer_id, cleaner_id")
     .eq("id", parsed.data.bookingId)
     .single();
+
+  let isTeamMember = false;
+  if (booking && user.id !== booking.customer_id && user.id !== booking.cleaner_id) {
+    const { data: team } = await createAdminClient()
+      .from("booking_team_members")
+      .select("id")
+      .eq("booking_id", parsed.data.bookingId)
+      .eq("cleaner_id", user.id)
+      .maybeSingle();
+    isTeamMember = Boolean(team);
+  }
+
   if (
     !booking ||
     !booking.cleaner_id ||
-    ![booking.customer_id, booking.cleaner_id].includes(user.id)
+    (![booking.customer_id, booking.cleaner_id].includes(user.id) &&
+      !isTeamMember)
   ) {
     return NextResponse.json(
       { error: "This conversation is not available." },

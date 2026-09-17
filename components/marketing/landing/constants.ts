@@ -17,8 +17,8 @@ export const landingColors = {
 export const landingNavLinks = [
   ["Services", "/cleaning"],
   ["How it works", "/how-it-works"],
-  ["Review", "#reviews"],
-  ["Coverage", "#coverage"],
+  ["Help", "/help"],
+  ["Mag", "/blog"],
   ["For cleaners", "/for-cleaners"],
 ] as const;
 

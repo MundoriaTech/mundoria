@@ -22,6 +22,9 @@ const PUBLIC_MARKETING_PREFIXES = [
   "/cleaning",
   "/cleaners",
   "/faq",
+  "/help",
+  "/blog",
+  "/contact",
   "/how-it-works",
   "/pricing",
   "/for-cleaners",
@@ -114,7 +117,10 @@ export async function middleware(request: NextRequest) {
     return redirectWithSession(loginUrl, response);
   }
 
-  if (user && AUTH_ROUTES.includes(pathname)) {
+  if (
+    user &&
+    (AUTH_ROUTES.includes(pathname) || pathname.startsWith("/signup"))
+  ) {
     const redirectTo = request.nextUrl.searchParams.get("redirectTo");
     const destination = safeRedirectPath(
       redirectTo,

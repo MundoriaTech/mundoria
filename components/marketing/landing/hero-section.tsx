@@ -8,7 +8,7 @@ import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-fi
 import {
   LANDING_NAV_PILL_H,
   LANDING_NAV_TOP,
-} from "@/components/marketing/landing/landing-navbar";
+} from "@/components/marketing/landing/nav-metrics";
 
 /**
  * Frame 106 — three die-cut cards.

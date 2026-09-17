@@ -1,5 +1,4 @@
 import { BookingWizard } from "@/components/customer/booking-wizard";
-import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import {
   normalizeStandard,
   recommendedStandardFor,
@@ -8,7 +7,6 @@ import {
 } from "@/lib/customer/services";
 import { frequencyModeFor } from "@/lib/customer/booking-flow";
 import { createServerClient } from "@/lib/supabase/server";
-import { isUserRole, type Profile } from "@/types/auth";
 import type {
   Address,
   Booking,
@@ -85,26 +83,14 @@ export default async function NewBookingPage({
     searchParams,
   );
   const focusServices = focusServicesFromSearchParams(searchParams.focus);
-  let viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null =
-    null;
 
   if (user) {
-    const [{ data }, { data: profile }] = await Promise.all([
-      supabase
-        .from("addresses")
-        .select("*")
-        .eq("customer_id", user.id)
-        .order("is_default", { ascending: false }),
-      supabase
-        .from("profiles")
-        .select("id,full_name,avatar_url,role")
-        .eq("id", user.id)
-        .maybeSingle(),
-    ]);
+    const { data } = await supabase
+      .from("addresses")
+      .select("*")
+      .eq("customer_id", user.id)
+      .order("is_default", { ascending: false });
     addresses = (data ?? []) as Address[];
-    if (profile && isUserRole(profile.role)) {
-      viewer = profile;
-    }
 
     if (searchParams.rebook) {
       const { data: bookingData } = await supabase
@@ -135,16 +121,11 @@ export default async function NewBookingPage({
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f7f2ea] text-foreground">
-      <LandingNavbar customerHref="/booking/new" viewer={viewer} />
-      <div className="px-3 py-5 sm:px-6 sm:py-8">
-        <BookingWizard
-          focusServices={focusServices}
-          initialAddresses={addresses}
-          initialDraft={initialDraft}
-          userId={user?.id ?? null}
-        />
-      </div>
-    </main>
+    <BookingWizard
+      focusServices={focusServices}
+      initialAddresses={addresses}
+      initialDraft={initialDraft}
+      userId={user?.id ?? null}
+    />
   );
 }

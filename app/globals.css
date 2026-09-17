@@ -69,6 +69,35 @@
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }
+
+  /* Keep form controls light even when html.dark / system dark mode is on. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]),
+  textarea,
+  select {
+    color-scheme: light;
+    background-color: #ffffff;
+    color: #1c133b;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #8b8798;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-text-fill-color: #1c133b;
+    caret-color: #1c133b;
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    transition: background-color 99999s ease-out;
+  }
 }
 
 @layer utilities {

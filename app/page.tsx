@@ -59,7 +59,7 @@ export default async function HomePage() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
   const customerHref = bookingHref;
-  const cleanerHref = configured ? "/signup" : "/setup";
+  const cleanerHref = configured ? "/signup/cleaner" : "/setup";
 
   return (
     <MarketingShell>

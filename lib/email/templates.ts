@@ -186,7 +186,7 @@ function resolveTemplate(
     case "customer.booking_confirmed":
       return {
         body:
-          "Your booking is confirmed and your card has been charged. You can view the receipt anytime from your booking.",
+          "Your booking is confirmed. We’ve authorised a hold on your card — the charge is captured after the clean is completed. You can follow payment progress on your booking page.",
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View booking",
         cards: bookingCards(data),
@@ -244,7 +244,7 @@ function resolveTemplate(
       };
     case "customer.booking_completed":
       return {
-        body: "Your cleaning has been completed and payment has been captured. Thank you for using Mundoria.",
+        body: "Your cleaning has been completed and payment has been captured. Thank you for using Mundoria — your receipt is ready on the booking page.",
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View receipt",
         cards: bookingCards(data, [{ label: "Amount charged", value: data.amount }]),

@@ -307,6 +307,54 @@ async function seedBookings(customerIds, cleanerIds) {
   process.stdout.write("\n");
 }
 
+const RATING_COMMENTS = [
+  "Kitchen and bathrooms looked genuinely finished — not a rushed wipe.",
+  "Clear updates throughout and the checklist matched what we asked for.",
+  "Punctual, careful and professional. Would book again.",
+  "End-of-tenancy photos made the agent handover much easier.",
+  "Guest-ready every time for our short-let — status stays in the app.",
+  "Prefer same cleaner worked for us. Communication stayed clear.",
+  "Empty-property clean left it ready for the new keys.",
+  "Special-attention notes were actually followed. Thorough finish.",
+];
+
+async function seedRatings() {
+  const { data: bookings, error } = await admin
+    .from("bookings")
+    .select("id,customer_id,cleaner_id")
+    .eq("status", "completed")
+    .not("cleaner_id", "is", null)
+    .limit(80);
+  if (error) {
+    console.warn("ratings load error:", error.message);
+    return;
+  }
+  if (!bookings?.length) {
+    console.log("No completed bookings — skip ratings");
+    return;
+  }
+
+  const rows = bookings.map((booking, i) => ({
+    application_status: "applied",
+    booking_id: booking.id,
+    cleaner_id: booking.cleaner_id,
+    comment: RATING_COMMENTS[i % RATING_COMMENTS.length],
+    customer_id: booking.customer_id,
+    overall_score: 4.5 + (i % 6) * 0.1,
+    room_ratings: { bathroom: 5, kitchen: 5 },
+  }));
+
+  const { error: insertError } = await admin.from("ratings").upsert(rows, {
+    onConflict: "booking_id",
+    ignoreDuplicates: true,
+  });
+  if (insertError) {
+    console.warn("ratings seed error:", insertError.message);
+    return;
+  }
+  console.log(`Seeded up to ${rows.length} ratings on completed bookings`);
+}
+
 async function main() {
   const mode = process.env.SEED_MODE ?? "full";
   console.log(
@@ -334,6 +382,7 @@ async function main() {
     await seedAddresses(customerIds);
   }
   await seedBookings(customerIds, cleanerIds);
+  await seedRatings();
   console.log("\nDone.");
   console.log("Demo customer: demo.customer@seed.mundoria.local / SeedPass123!");
   console.log("Demo cleaner:  demo.cleaner@seed.mundoria.local / SeedPass123!");

@@ -7,6 +7,7 @@ import { FormField } from "@/components/auth/form-field";
 import { FormStatus } from "@/components/auth/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function AdminInviteAcceptForm({
   email,
@@ -80,14 +81,13 @@ export function AdminInviteAcceptForm({
       </FormField>
 
       <FormField htmlFor="password" label="Create password">
-        <Input
+        <PasswordInput
           autoComplete="new-password"
           id="password"
           minLength={8}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="At least 8 characters"
           required
-          type="password"
           value={password}
         />
       </FormField>

@@ -15,7 +15,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import { CleanerMap } from "@/components/customer/cleaner-map";
 import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
+import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
 import { RatingForm } from "@/components/customer/rating-form";
+import { RescheduleModal } from "@/components/customer/reschedule-modal";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
@@ -25,6 +27,16 @@ import {
   formatServiceName,
   standardLabel,
 } from "@/lib/customer/services";
+import {
+  PAYMENT_HELP_HREF,
+  paymentStatusDescription,
+  paymentStatusLabel,
+} from "@/lib/customer/payment-status";
+import {
+  canCustomerChangeSchedule,
+  canCustomerReschedule,
+  scheduleChangeFeePreview,
+} from "@/lib/bookings/schedule";
 import { cleanerTierLabel } from "@/lib/cleaner/tier";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -68,20 +80,42 @@ export function BookingDetail({
   const [booking, setBooking] = useState(initialBooking);
   const [showCancel, setShowCancel] = useState(false);
   const [showDispute, setShowDispute] = useState(false);
+  const [showPay, setShowPay] = useState(false);
+  const [showReschedule, setShowReschedule] = useState(false);
   const [showRating, setShowRating] = useState(
     booking.status === "completed" && !hasRating,
   );
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const canCancel = useMemo(() => {
-    const scheduled = new Date(
-      `${booking.scheduled_date}T${booking.scheduled_start_time}`,
-    );
-    return (
-      scheduled.getTime() - Date.now() > 6 * 60 * 60 * 1000 &&
-      ["pending_match", "matched", "confirmed"].includes(booking.status)
-    );
-  }, [booking]);
+  const canCancel = useMemo(
+    () =>
+      canCustomerChangeSchedule({
+        scheduledDate: booking.scheduled_date,
+        scheduledStartTime: booking.scheduled_start_time,
+        status: booking.status,
+      }),
+    [booking],
+  );
+  const canReschedule = useMemo(
+    () =>
+      canCustomerReschedule({
+        scheduledDate: booking.scheduled_date,
+        scheduledStartTime: booking.scheduled_start_time,
+        status: booking.status,
+      }),
+    [booking],
+  );
+  const feePreview = useMemo(
+    () =>
+      scheduleChangeFeePreview({
+        amountTotal: Number(booking.amount_total ?? 0),
+        scheduledDate: booking.scheduled_date,
+        scheduledStartTime: booking.scheduled_start_time,
+      }),
+    [booking],
+  );
+  const needsPayment =
+    booking.payment_status === "unpaid" && booking.status !== "cancelled";
 
   useEffect(() => {
     const supabase = createBrowserClient();
@@ -182,6 +216,23 @@ export function BookingDetail({
           </p>
         </div>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+          {needsPayment ? (
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => setShowPay(true)}
+            >
+              Authorise payment
+            </Button>
+          ) : null}
+          {canReschedule ? (
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => setShowReschedule(true)}
+              variant="outline"
+            >
+              Change date &amp; time
+            </Button>
+          ) : null}
           <Button
             className="min-h-11 w-full sm:w-auto"
             onClick={() => setShowDispute(true)}
@@ -213,9 +264,51 @@ export function BookingDetail({
         <BookingProgress activeIndex={activeIndex} />
       ) : (
         <div className="rounded-xl bg-muted p-4 text-sm text-foreground">
-          This booking was cancelled. Any payment taken has been refunded.
+          This booking was cancelled.
+          {booking.payment_status === "refunded"
+            ? " Any payment taken has been refunded."
+            : booking.payment_status === "held"
+              ? " The card hold has been released where applicable."
+              : ""}
         </div>
       )}
+
+      {booking.status !== "cancelled" ? (
+        <div
+          className={cn(
+            "rounded-xl border p-4 text-sm",
+            booking.payment_status === "released"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+              : booking.payment_status === "held"
+                ? "border-[#d9ccef] bg-[#efe6ff] text-[#3b3358]"
+                : booking.payment_status === "refunded"
+                  ? "border-border bg-muted text-foreground"
+                  : "border-amber-200 bg-amber-50 text-amber-950",
+          )}
+        >
+          <p className="font-semibold">
+            {paymentStatusLabel(booking.payment_status)}
+          </p>
+          <p className="mt-1 leading-6">
+            {paymentStatusDescription(booking.payment_status)}{" "}
+            <Link
+              className="font-semibold underline-offset-2 hover:underline"
+              href={PAYMENT_HELP_HREF}
+            >
+              How payment works
+            </Link>
+          </p>
+          {needsPayment ? (
+            <Button
+              className="mt-3 min-h-11"
+              onClick={() => setShowPay(true)}
+              size="sm"
+            >
+              Authorise {formatMoney(booking.amount_total ?? 0)}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       {booking.booking_protected &&
       ["matched", "confirmed", "cleaner_en_route"].includes(booking.status) ? (
@@ -294,8 +387,13 @@ export function BookingDetail({
             ) : null}
             <Detail
               icon={ShieldCheck}
-              label="Amount paid"
+              label="Booking total"
               value={formatMoney(booking.amount_total)}
+            />
+            <Detail
+              icon={ShieldCheck}
+              label="Payment status"
+              value={paymentStatusLabel(booking.payment_status)}
             />
             {["completed", "awaiting_customer_confirmation"].includes(
               booking.status,
@@ -307,6 +405,11 @@ export function BookingDetail({
                   </Link>
                 </Button>
               </div>
+            ) : booking.payment_status === "held" ? (
+              <p className="pt-1 text-xs text-muted-foreground">
+                Your receipt becomes available after the clean when payment is
+                captured.
+              </p>
             ) : null}
           </div>
         </section>
@@ -406,7 +509,13 @@ export function BookingDetail({
         <ConfirmModal
           action="Confirm cancellation"
           confirmDisabled={reason.trim().length < 3}
-          description="Eligible cancellations are refunded to your original payment method. Tell us why you’re cancelling."
+          description={
+            feePreview.feePence <= 0
+              ? "Free cancellation — you’re more than 48 hours before the visit. Eligible refunds go to your original payment method."
+              : feePreview.feePence >= Number(booking.amount_total ?? 0)
+                ? "Within 24 hours of the visit, the full booking amount is retained. Tell us why you’re cancelling."
+                : `Within 48 hours of the visit, a ${formatMoney(feePreview.feePence)} cancellation fee applies. The rest is refunded to your original payment method.`
+          }
           onCancel={() => setShowCancel(false)}
           onConfirm={cancelBooking}
           title="Cancel this booking?"
@@ -419,6 +528,47 @@ export function BookingDetail({
           />
           {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
         </ConfirmModal>
+      ) : null}
+
+      {showPay ? (
+        <FollowOnPayModal
+          amount={Number(booking.amount_total ?? 0)}
+          bookingId={booking.id}
+          onClose={() => setShowPay(false)}
+          onPaid={() => {
+            setShowPay(false);
+            success({
+              kind: "sent",
+              title: "Payment authorised",
+              note: "We’ll match a cleaner for this visit shortly.",
+            });
+            router.refresh();
+          }}
+        />
+      ) : null}
+
+      {showReschedule ? (
+        <RescheduleModal
+          bookingId={booking.id}
+          durationHours={booking.estimated_duration_hours ?? 2}
+          initialDate={booking.scheduled_date}
+          initialTime={booking.scheduled_start_time}
+          onClose={() => setShowReschedule(false)}
+          onSaved={({ date, time }) => {
+            setShowReschedule(false);
+            setBooking((current) => ({
+              ...current,
+              scheduled_date: date,
+              scheduled_start_time: time,
+            }));
+            success({
+              kind: "sent",
+              title: "Visit rescheduled",
+              note: "Your cleaner will be asked to confirm the new time if already assigned.",
+            });
+            router.refresh();
+          }}
+        />
       ) : null}
 
       {showRating && booking.cleaner_id ? (

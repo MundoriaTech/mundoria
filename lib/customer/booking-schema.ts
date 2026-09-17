@@ -75,6 +75,8 @@ export const bookingDraftSchema = z.object({
   recommendedCleaningStandard: cleaningStandard.nullable().default(null),
   recommendedServiceType: serviceType.nullable().default(null),
   recentlyMoved: z.boolean().nullable().default(null),
+  hasPets: z.boolean().nullable().default(null),
+  petTypes: z.array(z.string().trim().min(1)).max(8).default([]),
   scheduledDate: z.string().date(),
   scheduledTime: z.string().regex(/^\d{2}:\d{2}$/),
   alternateTimes: z

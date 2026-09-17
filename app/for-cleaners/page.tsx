@@ -40,7 +40,7 @@ const benefits = [
 
 export default function ForCleanersPage() {
   const configured = hasSupabasePublicConfig();
-  const signupHref = configured ? "/signup" : "/setup";
+  const signupHref = configured ? "/signup/cleaner" : "/setup";
 
   return (
     <MarketingShell>

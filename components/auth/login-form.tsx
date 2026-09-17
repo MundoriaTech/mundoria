@@ -11,6 +11,7 @@ import { FormStatus } from "@/components/auth/form-status";
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { dashboardForRole, safeRedirectPath } from "@/lib/auth/redirects";
 import { loginSchema, type LoginValues } from "@/lib/auth/schemas";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -118,11 +119,10 @@ export function LoginForm({
         </FormField>
 
         <FormField error={errors.password} htmlFor="password" label="Password">
-          <Input
+          <PasswordInput
             autoComplete="current-password"
             className={fieldClassName}
             id="password"
-            type="password"
             {...register("password")}
           />
         </FormField>

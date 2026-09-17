@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { FormField } from "@/components/auth/form-field";
 import { FormStatus } from "@/components/auth/form-status";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   updatePasswordSchema,
   type UpdatePasswordValues,
@@ -63,10 +63,9 @@ export function UpdatePasswordForm() {
     <form className="space-y-5" onSubmit={onSubmit}>
       <FormStatus message={formError} />
       <FormField error={errors.password} htmlFor="password" label="New password">
-        <Input
+        <PasswordInput
           autoComplete="new-password"
           id="password"
-          type="password"
           {...register("password")}
         />
       </FormField>
@@ -75,10 +74,9 @@ export function UpdatePasswordForm() {
         htmlFor="confirmPassword"
         label="Confirm new password"
       >
-        <Input
+        <PasswordInput
           autoComplete="new-password"
           id="confirmPassword"
-          type="password"
           {...register("confirmPassword")}
         />
       </FormField>
