@@ -14,7 +14,7 @@ export const metadata: Metadata = buildPageMetadata({
 const sections: LegalSection[] = [
   {
     body:
-      "Mundoria is a two-sided cleaning services marketplace for customers, independent cleaning professionals and platform administrators. For privacy questions, use Contact us on the website. Before public launch, replace this section with your registered legal entity name, company number and postal address.",
+      "Mundoria operates a two-sided cleaning services marketplace for customers, independent cleaning professionals and platform administrators. For privacy questions, use Contact us on the website or email support@mundoriauk.com.",
     title: "Who we are",
   },
   {

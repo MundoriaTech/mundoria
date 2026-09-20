@@ -181,7 +181,11 @@ export async function POST(request: Request) {
         await stripe.paymentIntents.cancel(paymentIntent.id);
       }
       return NextResponse.json(
-        { error: "Unable to save booking add-ons." },
+        {
+          error:
+            "Unable to save booking add-ons. Please try again without add-ons, or contact support.",
+          details: addOnError.message,
+        },
         { status: 400 },
       );
     }

@@ -123,7 +123,7 @@ export function CleanersTable({
           return (
             <Link
               className="block rounded-xl border border-border bg-card p-4 transition active:bg-muted/40"
-              href={`/admin/cleaner/${cleaner.id}`}
+              href={`/admin/cleaners/${cleaner.id}`}
               key={cleaner.id}
             >
               <div className="flex items-start gap-3">
@@ -233,7 +233,7 @@ export function CleanersTable({
                 <td>
                   <Link
                     className="font-medium text-primary"
-                    href={`/admin/cleaner/${cleaner.id}`}
+                    href={`/admin/cleaners/${cleaner.id}`}
                   >
                     Review
                   </Link>

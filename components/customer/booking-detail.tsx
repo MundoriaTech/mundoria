@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Check,
   Clock3,
+  Hourglass,
   MapPin,
   MessageCircle,
   ShieldCheck,
@@ -18,10 +19,16 @@ import { CompletionChecklistConfirmation } from "@/components/customer/completio
 import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
 import { RatingForm } from "@/components/customer/rating-form";
 import { RescheduleModal } from "@/components/customer/reschedule-modal";
+import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
 import { Button } from "@/components/ui/button";
+import {
+  formatConfirmByDeadline,
+  isCleanerVisibleToCustomer,
+  isWaitingForCleanerAcceptance,
+} from "@/lib/customer/booking-visibility";
 import {
   formatMoney,
   formatServiceName,
@@ -42,38 +49,20 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Booking, BookingChecklistItem } from "@/types/customer";
 
-const progress = [
-  "pending_match",
-  "matched",
-  "confirmed",
-  "cleaner_en_route",
-  "in_progress",
-  "awaiting_customer_confirmation",
-  "completed",
-] as const;
-
-const progressLabel: Record<(typeof progress)[number], string> = {
-  pending_match: "Finding cleaner",
-  matched: "Matched",
-  confirmed: "Confirmed",
-  cleaner_en_route: "En route",
-  in_progress: "In progress",
-  awaiting_customer_confirmation: "Confirm clean",
-  completed: "Completed",
-};
-
 export function BookingDetail({
   checklistItems,
   customerId,
   hasCompletionConfirmation,
   hasRating,
   initialBooking,
+  offerExpiresAt = null,
 }: {
   checklistItems: BookingChecklistItem[];
   customerId: string;
   hasCompletionConfirmation: boolean;
   hasRating: boolean;
   initialBooking: Booking;
+  offerExpiresAt?: string | null;
 }) {
   const router = useRouter();
   const { success } = useFeedback();
@@ -117,6 +106,19 @@ export function BookingDetail({
   const needsPayment =
     booking.payment_status === "unpaid" && booking.status !== "cancelled";
 
+  const waitingForCleaner = isWaitingForCleanerAcceptance(booking.status);
+  const cleanerVisible = isCleanerVisibleToCustomer(booking.status);
+
+  useEffect(() => {
+    setBooking(initialBooking);
+  }, [initialBooking]);
+
+  useEffect(() => {
+    if (cleanerVisible && booking.cleaner_id && !booking.cleaner) {
+      router.refresh();
+    }
+  }, [booking.cleaner, booking.cleaner_id, cleanerVisible, router]);
+
   useEffect(() => {
     const supabase = createBrowserClient();
     const channel = supabase
@@ -130,10 +132,20 @@ export function BookingDetail({
           table: "bookings",
         },
         (payload) => {
+          const next = payload.new as Booking;
           setBooking((current) => ({
             ...current,
-            ...(payload.new as Booking),
+            ...next,
+            cleaner: isCleanerVisibleToCustomer(next.status)
+              ? current.cleaner
+              : null,
           }));
+          if (
+            isCleanerVisibleToCustomer(next.status) &&
+            !isCleanerVisibleToCustomer(booking.status)
+          ) {
+            router.refresh();
+          }
         },
       )
       .on(
@@ -164,7 +176,7 @@ export function BookingDetail({
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [booking.id]);
+  }, [booking.id, booking.status, router]);
 
   async function cancelBooking() {
     setError(null);
@@ -189,9 +201,9 @@ export function BookingDetail({
     router.refresh();
   }
 
-  const activeIndex = progress.indexOf(
-    booking.status === "disputed" ? "completed" : booking.status as typeof progress[number],
-  );
+  const confirmByLabel = offerExpiresAt
+    ? formatConfirmByDeadline(offerExpiresAt)
+    : null;
   const destination =
     booking.address?.latitude !== null &&
     booking.address?.latitude !== undefined &&
@@ -240,7 +252,7 @@ export function BookingDetail({
           >
             Report issue
           </Button>
-          {booking.cleaner_id ? (
+          {cleanerVisible && booking.cleaner_id ? (
             <Button asChild className="min-h-11 w-full sm:w-auto" variant="outline">
               <Link href={`/messages/${booking.id}`}>
                 <MessageCircle className="mr-2 h-4 w-4" />
@@ -260,9 +272,7 @@ export function BookingDetail({
         </div>
       </div>
 
-      {booking.status !== "cancelled" ? (
-        <BookingProgress activeIndex={activeIndex} />
-      ) : (
+      {booking.status === "cancelled" ? (
         <div className="rounded-xl bg-muted p-4 text-sm text-foreground">
           This booking was cancelled.
           {booking.payment_status === "refunded"
@@ -270,6 +280,12 @@ export function BookingDetail({
             : booking.payment_status === "held"
               ? " The card hold has been released where applicable."
               : ""}
+        </div>
+      ) : waitingForCleaner ? (
+        <LookingForCleanerCard confirmByLabel={confirmByLabel} />
+      ) : (
+        <div className="flex items-center gap-3">
+          <BookingStatusBadge status={booking.status} />
         </div>
       )}
 
@@ -311,13 +327,14 @@ export function BookingDetail({
       ) : null}
 
       {booking.booking_protected &&
-      ["matched", "confirmed", "cleaner_en_route"].includes(booking.status) ? (
+      cleanerVisible &&
+      ["confirmed", "cleaner_en_route"].includes(booking.status) ? (
         <Notice
           body="Backup professionals are ready if anything changes. You won’t see operational detail — just a protected booking."
           title="Your booking is protected"
         />
       ) : null}
-      {booking.previous_cleaner_id && booking.cleaner ? (
+      {cleanerVisible && booking.previous_cleaner_id && booking.cleaner ? (
         <Notice
           body={`${booking.cleaner.full_name.split(" ")[0]} is now assigned to your clean.`}
           title="Your cleaning professional has changed"
@@ -416,7 +433,7 @@ export function BookingDetail({
 
         <section className="rounded-xl border bg-background p-4 sm:p-5">
           <h2 className="text-lg font-semibold">Your cleaner</h2>
-          {booking.cleaner ? (
+          {cleanerVisible && booking.cleaner ? (
             <div className="mt-5 flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-lg font-bold text-primary">
                 {booking.cleaner.avatar_url ? (
@@ -442,11 +459,14 @@ export function BookingDetail({
                 </div>
               </div>
             </div>
+          ) : waitingForCleaner ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              We’re looking for your cleaner. You’ll see their details once your
+              session is confirmed.
+            </p>
           ) : (
             <p className="mt-4 text-sm text-muted-foreground">
-              {booking.booking_protected
-                ? "Your booking is protected — we’re arranging your Mundoria professional."
-                : "We’re matching you with the best available cleaner."}
+              Cleaner details will appear here once your session is confirmed.
             </p>
           )}
         </section>
@@ -540,7 +560,7 @@ export function BookingDetail({
             success({
               kind: "sent",
               title: "Payment authorised",
-              note: "We’ll match a cleaner for this visit shortly.",
+              note: "We’re looking for your cleaner — you’ll see confirmation once they accept.",
             });
             router.refresh();
           }}
@@ -610,102 +630,32 @@ export function BookingDetail({
   );
 }
 
-function BookingProgress({ activeIndex }: { activeIndex: number }) {
-  const current =
-    activeIndex >= 0
-      ? progress[Math.min(activeIndex, progress.length - 1)]
-      : progress[0];
-
+function LookingForCleanerCard({
+  confirmByLabel,
+}: {
+  confirmByLabel: string | null;
+}) {
   return (
-    <section className="rounded-xl border bg-background p-4 sm:p-5">
-      <div className="md:hidden">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Status
-        </p>
-        <p className="mt-1 text-base font-semibold text-foreground">
-          {progressLabel[current]}
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Step {Math.max(activeIndex, 0) + 1} of {progress.length}
-        </p>
-        <ol className="mt-4 space-y-0">
-          {progress.map((status, index) => {
-            const done = index < activeIndex;
-            const currentStep = index === activeIndex;
-            return (
-              <li className="flex gap-3" key={status}>
-                <div className="flex flex-col items-center">
-                  <span
-                    className={cn(
-                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold",
-                      done || currentStep
-                        ? "border-primary bg-primary text-white"
-                        : "border-border bg-card text-muted-foreground",
-                    )}
-                  >
-                    {done ? <Check className="h-3.5 w-3.5" /> : index + 1}
-                  </span>
-                  {index < progress.length - 1 ? (
-                    <span
-                      className={cn(
-                        "my-1 w-0.5 flex-1 min-h-[1rem]",
-                        done ? "bg-primary" : "bg-muted",
-                      )}
-                    />
-                  ) : null}
-                </div>
-                <p
-                  className={cn(
-                    "pb-4 pt-1 text-sm",
-                    currentStep
-                      ? "font-semibold text-foreground"
-                      : done
-                        ? "text-foreground"
-                        : "text-muted-foreground",
-                    index === progress.length - 1 && "pb-0",
-                  )}
-                >
-                  {progressLabel[status]}
-                </p>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-
-      <div className="hidden md:block">
-        <div className="flex items-start">
-          {progress.map((status, index) => (
-            <div className="flex min-w-0 flex-1 items-start" key={status}>
-              <div className="flex w-full flex-col items-center text-center">
-                <span
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold",
-                    index <= activeIndex
-                      ? "border-primary bg-primary text-white"
-                      : "border-border bg-card text-muted-foreground",
-                  )}
-                >
-                  {index < activeIndex ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    index + 1
-                  )}
-                </span>
-                <span className="mt-2 max-w-[6.5rem] text-xs leading-snug">
-                  {progressLabel[status]}
-                </span>
-              </div>
-              {index < progress.length - 1 ? (
-                <span
-                  className={cn(
-                    "mt-4 h-0.5 min-w-[0.75rem] flex-1",
-                    index < activeIndex ? "bg-primary" : "bg-muted",
-                  )}
-                />
-              ) : null}
-            </div>
-          ))}
+    <section className="overflow-hidden rounded-2xl border border-[#e8e0f5] bg-gradient-to-b from-[#f6f2ff] to-white">
+      <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-6">
+        <div className="min-w-0 flex-1">
+          <span className="inline-flex items-center rounded-full bg-[#312c79]/10 px-2.5 py-1 text-xs font-semibold text-[#312c79]">
+            In progress
+          </span>
+          <h2 className="mt-3 text-xl font-semibold tracking-tight text-[#312c79] sm:text-2xl">
+            We are looking for your cleaner
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[#4a4468] sm:text-base">
+            {confirmByLabel
+              ? `Your session will be confirmed no later than ${confirmByLabel}.`
+              : "Your session will be confirmed shortly — we’ll email you as soon as a cleaner accepts."}
+          </p>
+        </div>
+        <div
+          aria-hidden
+          className="mx-auto flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_0_0_6px_rgba(255,255,255,0.9),0_12px_28px_rgba(49,44,121,0.12)] sm:mx-0 sm:h-32 sm:w-32"
+        >
+          <Hourglass className="h-12 w-12 text-[#d4694a] sm:h-14 sm:w-14" strokeWidth={1.5} />
         </div>
       </div>
     </section>

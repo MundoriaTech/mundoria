@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { CustomerShell } from "@/components/customer/customer-shell";
+import { buildPrivateMetadata } from "@/lib/seo/site";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = buildPrivateMetadata("Account");
 
 export default async function CustomerLayout({
   children,

@@ -47,7 +47,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   const area = birminghamAreaBySlug(params.area);
   if (!area) return {};
   return buildPageMetadata({
-    description: `Book cleaners in ${area.name}, Birmingham with Mundoria. ${area.description}`,
+    description: `${area.seoIntro} ${area.description}`,
     path: `/cleaners/${LAUNCH_CITY.slug}/${area.slug}`,
     title: `Cleaners in ${area.name}, Birmingham | Mundoria`,
   });
@@ -69,6 +69,7 @@ export default function BirminghamAreaPage({ params }: PageProps) {
     localCleaners.length >= 3
       ? localCleaners
       : BIRMINGHAM_LOCATION_CLEANERS.slice(0, 6);
+  const faqs = [...area.faqs, ...sharedLocationFaqs(place)];
 
   return (
     <MarketingShell>
@@ -105,7 +106,7 @@ export default function BirminghamAreaPage({ params }: PageProps) {
               "@type": "Place",
               name: place,
             },
-            description: area.description,
+            description: area.seoIntro,
             name: `Cleaning services in ${area.name}`,
             provider: {
               "@type": "Organization",
@@ -114,12 +115,24 @@ export default function BirminghamAreaPage({ params }: PageProps) {
             },
             url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`),
           },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((item) => ({
+              "@type": "Question",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: item.answer,
+              },
+              name: item.question,
+            })),
+          },
         ]}
       />
 
       <BrandedPageWash>
         <MarketingHero
-          description={`One-off or regular house cleaning in ${area.name}. Tried & vetted cleaners nearby — clear estimates before you book.`}
+          description={area.seoIntro}
           eyebrow={`${area.name} · Birmingham`}
           primaryHref={bookingHref}
           primaryLabel={`Book in ${area.name}`}
@@ -129,6 +142,25 @@ export default function BirminghamAreaPage({ params }: PageProps) {
         />
 
         <LocationTrustStrip />
+
+        <BrandedSection>
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            Why book Mundoria in {area.name}
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#5a5470]">
+            {area.description}
+          </p>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-3">
+            {area.highlights.map((item) => (
+              <li
+                className="rounded-[1.25rem] border border-[#e4daf5]/80 bg-white/90 px-4 py-4 text-sm font-medium leading-6 text-[#1c133b] shadow-[0_8px_22px_rgba(49,44,121,0.05)]"
+                key={item}
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </BrandedSection>
 
         <LocationFeaturedCleaners cleaners={[...featured]} place={area.name} />
 
@@ -157,7 +189,7 @@ export default function BirminghamAreaPage({ params }: PageProps) {
         <LocationServicesExplainer place={place} />
         <LocationWhatsCovered place={place} />
         <LocationHowToBook place={place} />
-        <LocationFaqBlock place={place} />
+        <LocationFaqBlock extraFaqs={area.faqs} place={place} />
 
         <BrandedSection tone="lavender">
           <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-xl">
@@ -189,4 +221,23 @@ export default function BirminghamAreaPage({ params }: PageProps) {
       </BrandedPageWash>
     </MarketingShell>
   );
+}
+
+function sharedLocationFaqs(place: string) {
+  return [
+    {
+      answer: `Mundoria offers regular cleaning, one-off and deep cleans, end-of-tenancy / move cleans, Airbnb & short-let turnovers, commercial cleans and Mundoria Recovery support across ${place}.`,
+      question: `What cleaning services does Mundoria offer in ${place}?`,
+    },
+    {
+      answer:
+        "Enter your postcode, choose a service and cleaning standard, set duration and schedule, then pay securely. We match a suitable cleaner and keep you updated through arrival and completion.",
+      question: `How do I book a home cleaning session in ${place}?`,
+    },
+    {
+      answer:
+        "Estimates depend on service, property size, cleaning standard, schedule and add-ons. You’ll see a clear price before checkout — never a surprise fee after you book.",
+      question: `How much is a Mundoria cleaner in ${place}?`,
+    },
+  ];
 }

@@ -7,6 +7,7 @@
  *   NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run seed
  *
  * Demo logins (password SeedPass123!):
+ *   admin@seed.mundoria.local
  *   demo.customer@seed.mundoria.local
  *   demo.cleaner@seed.mundoria.local
  */
@@ -32,15 +33,38 @@ const admin = createClient(url, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-// Keep to enums present on older hosted DBs (pre same_day / office migrations).
+// Prefer the full live catalogue; fall back if older DBs lack some enums.
 const SERVICES = [
   "regular",
   "one_off",
+  "same_day",
   "deep_clean",
   "end_of_tenancy",
+  "move_in",
+  "move_out",
   "airbnb_turnover",
-  "post_construction",
+  "holiday_let",
+  "serviced_accommodation",
+  "office",
+  "retail_hospitality",
+  "educational_facility",
+  "communal_area",
+  "pregnancy_support",
+  "postpartum",
+  "illness_recovery",
+  "post_injury",
+  "hospital_discharge",
+  "bereavement_support",
 ];
+
+/** Prefix "B" matches any Birmingham postcode (B1, B15, B69, …). */
+const MATCH_AREA = {
+  latitude: 52.4862,
+  longitude: -1.8904,
+  postcode_prefix: "B",
+};
+
+const MATCH_HOURS = { end_time: "23:00", start_time: "06:00" };
 const STATUSES = [
   "pending_match",
   "matched",
@@ -78,6 +102,12 @@ async function createUser({ email, fullName, role, phone }) {
 async function ensureDemoUsers() {
   const demos = [
     {
+      email: "admin@seed.mundoria.local",
+      fullName: "Seed Admin",
+      role: "admin",
+      phone: "+447700900000",
+    },
+    {
       email: "demo.customer@seed.mundoria.local",
       fullName: "Demo Customer",
       role: "customer",
@@ -91,7 +121,16 @@ async function ensureDemoUsers() {
     },
   ];
   for (const demo of demos) {
-    await createUser(demo);
+    const user = await createUser(demo);
+    if (user?.id && demo.role === "admin") {
+      const { error } = await admin
+        .from("profiles")
+        .update({ full_name: demo.fullName, role: "admin" })
+        .eq("id", user.id);
+      if (error) {
+        console.warn("Could not promote seed admin profile:", error.message);
+      }
+    }
   }
 }
 
@@ -126,41 +165,93 @@ async function createBatch(role, count, offset) {
 }
 
 async function activateCleaners(cleanerIds) {
-  console.log(`Activating ${cleanerIds.length} cleaners…`);
+  console.log(`Activating ${cleanerIds.length} cleaners for broad matching…`);
   for (let i = 0; i < cleanerIds.length; i += BATCH) {
     const slice = cleanerIds.slice(i, i + BATCH);
-    await admin
-      .from("cleaner_profiles")
-      .update({
-        bio: "Seeded Birmingham-area cleaner for end-to-end testing.",
-        dbs_verified: true,
-        id_verified: true,
-        onboarding_complete: true,
-        status: "active",
-        working_radius_km: 12,
-      })
-      .in("id", slice);
-
-    const services = slice.flatMap((cleanerId) =>
-      SERVICES.map((service_type) => ({
-        cleaner_id: cleanerId,
-        is_active: true,
-        service_type,
-      })),
+    await makeCleanersMatchReady(slice);
+    process.stdout.write(
+      `\rmatch-ready cleaners: ${Math.min(i + BATCH, cleanerIds.length)}/${cleanerIds.length}   `,
     );
-    await admin.from("cleaner_services").upsert(services, {
+  }
+  process.stdout.write("\n");
+}
+
+/** Make cleaners eligible for almost any demo booking (service / day / B* postcode). */
+async function makeCleanersMatchReady(cleanerIds) {
+  if (!cleanerIds.length) return;
+
+  await admin
+    .from("cleaner_profiles")
+    .update({
+      bio: "Seeded Birmingham cleaner — available across Mundoria demo bookings.",
+      dbs_verified: true,
+      id_verified: true,
+      onboarding_complete: true,
+      references_verified: true,
+      status: "active",
+      working_radius_km: 80,
+    })
+    .in("id", cleanerIds);
+
+  for (const service_type of SERVICES) {
+    const services = cleanerIds.map((cleaner_id) => ({
+      cleaner_id,
+      is_active: true,
+      service_type,
+    }));
+    const { error } = await admin.from("cleaner_services").upsert(services, {
       onConflict: "cleaner_id,service_type",
       ignoreDuplicates: true,
     });
-
-    const areas = slice.map((cleanerId, idx) => ({
-      cleaner_id: cleanerId,
-      latitude: 52.47 + (idx % 50) / 1000,
-      longitude: -1.92 - (idx % 50) / 1000,
-      postcode_prefix: ["B1", "B2", "B5", "B15", "B29"][idx % 5],
-    }));
-    await admin.from("cleaner_working_areas").insert(areas);
+    if (error) {
+      console.warn(`service ${service_type}:`, error.message);
+    }
   }
+
+  // Replace areas with a single Birmingham-wide prefix so any B* postcode matches.
+  await admin.from("cleaner_working_areas").delete().in("cleaner_id", cleanerIds);
+  await admin.from("cleaner_working_areas").insert(
+    cleanerIds.map((cleaner_id) => ({
+      cleaner_id,
+      ...MATCH_AREA,
+    })),
+  );
+
+  // One wide slot every day covers morning / afternoon / evening bookings.
+  await admin.from("cleaner_availability").delete().in("cleaner_id", cleanerIds);
+  const availability = cleanerIds.flatMap((cleaner_id) =>
+    [0, 1, 2, 3, 4, 5, 6].map((day_of_week) => ({
+      cleaner_id,
+      day_of_week,
+      end_time: MATCH_HOURS.end_time,
+      is_available: true,
+      start_time: MATCH_HOURS.start_time,
+    })),
+  );
+  const { error: availabilityError } = await admin
+    .from("cleaner_availability")
+    .insert(availability);
+  if (availabilityError) {
+    console.warn("availability:", availabilityError.message);
+  }
+}
+
+/** Free match-ready cleaners from future seed jobs so demo bookings are not blocked. */
+async function freeCleanersForNewMatches(cleanerIds) {
+  if (!cleanerIds.length) return;
+  const today = new Date().toISOString().slice(0, 10);
+  for (let i = 0; i < cleanerIds.length; i += BATCH) {
+    const slice = cleanerIds.slice(i, i + BATCH);
+    await admin
+      .from("bookings")
+      .update({ cleaner_id: null, status: "pending_match" })
+      .in("cleaner_id", slice)
+      .gte("scheduled_date", today)
+      .not("status", "in", '("completed","cancelled","in_progress")');
+  }
+  console.log(
+    `Cleared future assignments on ${cleanerIds.length} seed cleaners so they can match new demo bookings.`,
+  );
 }
 
 async function seedAddresses(customerIds) {
@@ -362,6 +453,20 @@ async function main() {
       `mode=${mode} customers=${CUSTOMERS} cleaners=${CLEANERS} bookings=${BOOKINGS}`,
   );
 
+  // Always ensure demo admin/customer/cleaner exist (incl. backfill/bookings modes).
+  await ensureDemoUsers();
+
+  if (mode === "match-ready") {
+    const cleanerIds = await loadSeedProfileIds("cleaner");
+    console.log(`Boosting ${cleanerIds.length} seed cleaners for guaranteed matching…`);
+    await activateCleaners(cleanerIds);
+    await freeCleanersForNewMatches(cleanerIds);
+    console.log("\nDone. Demo bookings with any B* postcode / service / daytime slot should match.");
+    console.log("Demo customer: demo.customer@seed.mundoria.local / SeedPass123!");
+    console.log("Demo cleaner:  demo.cleaner@seed.mundoria.local / SeedPass123!");
+    return;
+  }
+
   let customerIds = [];
   let cleanerIds = [];
 
@@ -371,8 +476,9 @@ async function main() {
     console.log(
       `Backfill from existing seed profiles: ${customerIds.length} customers, ${cleanerIds.length} cleaners`,
     );
+    await activateCleaners(cleanerIds);
+    await freeCleanersForNewMatches(cleanerIds);
   } else {
-    await ensureDemoUsers();
     customerIds = await createBatch("customer", CUSTOMERS, 0);
     cleanerIds = await createBatch("cleaner", CLEANERS, 0);
     await activateCleaners(cleanerIds);
@@ -383,7 +489,12 @@ async function main() {
   }
   await seedBookings(customerIds, cleanerIds);
   await seedRatings();
+
+  // After seeding historical bookings, free cleaners again for live demo matching.
+  await freeCleanersForNewMatches(cleanerIds);
+
   console.log("\nDone.");
+  console.log("Demo admin:    admin@seed.mundoria.local / SeedPass123!");
   console.log("Demo customer: demo.customer@seed.mundoria.local / SeedPass123!");
   console.log("Demo cleaner:  demo.cleaner@seed.mundoria.local / SeedPass123!");
 }

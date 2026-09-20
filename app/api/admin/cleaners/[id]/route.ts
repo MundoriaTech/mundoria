@@ -127,7 +127,9 @@ export async function POST(
     user_id: params.id,
   });
 
+  revalidatePath(`/admin/cleaners/${params.id}`);
   revalidatePath(`/admin/cleaner/${params.id}`);
+  revalidatePath("/admin/cleaners");
   revalidatePath("/admin/cleaners");
   revalidatePath("/admin/dashboard");
 

@@ -155,6 +155,24 @@ export async function listHelpArticlesForCollection(
   }
 }
 
+/** All published help articles — used for sitemap generation. */
+export async function listPublishedHelpArticles(): Promise<
+  Array<Pick<HelpArticle, "slug" | "title"> & { updated_at?: string | null }>
+> {
+  const supabase = createPublicSupabaseClient();
+  if (!supabase) return [];
+  try {
+    const { data } = await supabase
+      .from("help_articles")
+      .select("slug,title")
+      .eq("published", true)
+      .order("sort_order", { ascending: true });
+    return (data as Array<Pick<HelpArticle, "slug" | "title">>) ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function getHelpArticleBySlug(
   slug: string,
 ): Promise<(HelpArticle & { collection?: HelpCollection | null }) | null> {

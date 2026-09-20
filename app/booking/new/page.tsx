@@ -6,6 +6,7 @@ import {
   SERVICE_CATEGORIES,
 } from "@/lib/customer/services";
 import { frequencyModeFor } from "@/lib/customer/booking-flow";
+import { buildPrivateMetadata } from "@/lib/seo/site";
 import { createServerClient } from "@/lib/supabase/server";
 import type {
   Address,
@@ -15,7 +16,7 @@ import type {
   ServiceType,
 } from "@/types/customer";
 
-export const metadata = { title: "Book a cleaner" };
+export const metadata = buildPrivateMetadata("Book a cleaner");
 export const dynamic = "force-dynamic";
 
 const serviceCategorySet = new Set(

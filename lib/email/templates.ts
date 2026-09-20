@@ -37,6 +37,7 @@ export type EmailTemplateId =
   | "customer.cleaner_checked_out"
   | "customer.cleaner_en_route"
   | "customer.cleaner_matched"
+  | "customer.session_confirmed"
   | "customer.dispute_resolved"
   | "customer.dispute_submitted"
   | "customer.message_received"
@@ -198,13 +199,34 @@ function resolveTemplate(
       };
     case "customer.cleaner_matched":
       return {
-        body: "We have matched your booking with a certified Mundoria cleaner.",
+        body: "We’re looking for your cleaner now. You’ll get another email as soon as your session is confirmed.",
         buttonHref: string(data.bookingUrl),
-        buttonLabel: "View cleaner",
-        cards: bookingCards(data, [{ label: "Cleaner", value: data.cleanerName }]),
-        preview: "Your cleaner has been matched.",
-        subject: "Your cleaner has been matched",
-        title: "Cleaner matched",
+        buttonLabel: "View booking",
+        cards: bookingCards(data, data.confirmBy
+          ? [{ label: "Confirm by", value: data.confirmBy }]
+          : []),
+        intro: firstName
+          ? `Hi ${firstName}, we’re finding your cleaner.`
+          : "We’re finding your cleaner.",
+        preview: "We’re looking for your cleaner.",
+        subject: "We’re looking for your cleaner",
+        title: "Looking for your cleaner",
+        tone: "customer",
+      };
+    case "customer.session_confirmed":
+      return {
+        body: "Your cleaner has accepted and your session is confirmed. You can message them from your booking page.",
+        buttonHref: string(data.bookingUrl),
+        buttonLabel: "View booking",
+        cards: bookingCards(data, [
+          { label: "Cleaner", value: data.cleanerName },
+        ]),
+        intro: firstName
+          ? `Hi ${firstName}, your session is confirmed.`
+          : "Your session is confirmed.",
+        preview: "Your Mundoria session is confirmed.",
+        subject: "Your session is confirmed",
+        title: "Session confirmed",
         tone: "customer",
       };
     case "customer.cleaner_en_route":

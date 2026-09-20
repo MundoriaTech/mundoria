@@ -161,8 +161,14 @@ export function LocationHowToBook({ place }: { place: string }) {
   );
 }
 
-export function LocationFaqBlock({ place }: { place: string }) {
-  const faqs = LOCATION_FAQS(place);
+export function LocationFaqBlock({
+  extraFaqs = [],
+  place,
+}: {
+  extraFaqs?: Array<{ answer: string; question: string }>;
+  place: string;
+}) {
+  const faqs = [...extraFaqs, ...LOCATION_FAQS(place)];
   return (
     <BrandedSection>
       <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">

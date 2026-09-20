@@ -177,7 +177,7 @@ export async function POST(request: Request) {
           appUrl,
           cleanerEmail: profile.email,
           cleanerName: value.full_name,
-          cleanerUrl: `${appUrl}/admin/cleaner/${user.id}`,
+          cleanerUrl: `${appUrl}/admin/cleaners/${user.id}`,
           yearsExperience: value.years_experience,
         },
         template: "admin.cleaner_application_submitted",

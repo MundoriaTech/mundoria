@@ -24,6 +24,10 @@ const PRIVATE_PREFIXES = [
   "/update-password",
   "/forgot-password",
   "/admin-invite",
+  "/login",
+  "/login/",
+  "/signup",
+  "/signup/",
 ] as const;
 
 const PUBLIC_MARKETING_ALLOW = [
@@ -32,6 +36,11 @@ const PUBLIC_MARKETING_ALLOW = [
   "/cleaning/",
   "/cleaners/",
   "/faq",
+  "/help",
+  "/help/",
+  "/blog",
+  "/blog/",
+  "/contact",
   "/how-it-works",
   "/pricing",
   "/for-cleaners",

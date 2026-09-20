@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { isCleanerVisibleToCustomer } from "@/lib/customer/booking-visibility";
 import type {
   Booking,
   CleanerPublicProfile,
@@ -31,13 +32,17 @@ export async function getCustomerBookings(
   const cleanerIds = Array.from(
     new Set(
       bookings
+        .filter((booking) => isCleanerVisibleToCustomer(booking.status))
         .map((booking) => booking.cleaner_id)
         .filter((id): id is string => Boolean(id)),
     ),
   );
 
   if (!cleanerIds.length) {
-    return bookings;
+    return bookings.map((booking) => ({
+      ...booking,
+      cleaner: null,
+    }));
   }
 
   const { data: cleaners } = await supabase
@@ -53,8 +58,9 @@ export async function getCustomerBookings(
 
   return bookings.map((booking) => ({
     ...booking,
-    cleaner: booking.cleaner_id
-      ? cleanerMap.get(booking.cleaner_id) ?? null
-      : null,
+    cleaner:
+      booking.cleaner_id && isCleanerVisibleToCustomer(booking.status)
+        ? cleanerMap.get(booking.cleaner_id) ?? null
+        : null,
   }));
 }

@@ -1,12 +1,16 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
+import { buildPrivateMetadata } from "@/lib/seo/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = buildPrivateMetadata("Admin");
 
 export default async function AdminLayout({
   children,

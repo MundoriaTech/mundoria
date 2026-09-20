@@ -3,14 +3,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { buildPrivateMetadata } from "@/lib/seo/site";
 import {
   hasSupabasePublicConfig,
   missingSupabasePublicConfig,
 } from "@/lib/supabase/config";
 
-export const metadata = {
-  title: "Project setup",
-};
+export const metadata = buildPrivateMetadata("Project setup");
 
 export default function SetupPage() {
   if (hasSupabasePublicConfig()) redirect("/login");

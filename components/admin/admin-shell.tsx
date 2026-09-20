@@ -47,6 +47,7 @@ function pageTitle(pathname: string) {
       pathname === item.href || pathname.startsWith(`${item.href}/`),
   );
   if (match) return match.label;
+  if (pathname.startsWith("/admin/cleaners/")) return "Cleaner";
   if (pathname.startsWith("/admin/cleaner/")) return "Cleaner";
   if (pathname.startsWith("/admin/customer/")) return "Customer";
   if (pathname.startsWith("/admin/booking/")) return "Booking";
@@ -140,7 +141,12 @@ export function AdminShell({
         <nav className="relative min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-3 pb-4">
           {items.map((item) => {
             const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+              item.href === "/admin/cleaners"
+                ? pathname === item.href ||
+                  pathname.startsWith("/admin/cleaners/") ||
+                  pathname.startsWith("/admin/cleaner/")
+                : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 className={cn(

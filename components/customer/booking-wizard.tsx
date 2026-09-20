@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import { Broom, Drop, PawPrint, ShirtFolded, Sparkle, SprayBottle, type Icon } from "@phosphor-icons/react";
+import { Bed, Broom, CookingPot, Door, Drop, Fire, Heart, PawPrint, Plant, Sparkle, Square, type Icon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -138,15 +138,45 @@ const STANDARD_ICONS: Record<
 };
 
 const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
-  cleaning_products: {
-    Icon: SprayBottle,
+  balcony_patio: {
+    Icon: Plant,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#b8d4c8] [&_path:last-child]:!fill-[#312c79]",
+  },
+  extra_bathroom_detail: {
+    Icon: Drop,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#8ec5e8] [&_path:last-child]:!fill-[#312c79]",
+  },
+  inside_cabinets: {
+    Icon: Door,
     className:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
   },
-  ironing: {
-    Icon: ShirtFolded,
+  inside_fridge: {
+    Icon: CookingPot,
     className:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
+  },
+  inside_oven: {
+    Icon: Fire,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#d4694a]",
+  },
+  interior_windows: {
+    Icon: Square,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#312c79]",
+  },
+  linen_change: {
+    Icon: Bed,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
+  },
+  recovery_priority: {
+    Icon: Heart,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a8c0] [&_path:last-child]:!fill-[#312c79]",
   },
 };
 

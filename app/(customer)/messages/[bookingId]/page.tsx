@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { Chat } from "@/components/customer/chat";
+import { isCleanerVisibleToCustomer } from "@/lib/customer/booking-visibility";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Message } from "@/types/customer";
+import type { BookingStatus, Message } from "@/types/customer";
 
 export default async function CustomerMessagesPage({
   params,
@@ -16,7 +17,7 @@ export default async function CustomerMessagesPage({
   const [{ data: booking }, { data: messages }] = await Promise.all([
     supabase
       .from("bookings")
-      .select("customer_id, cleaner_id")
+      .select("customer_id, cleaner_id, status")
       .eq("id", params.bookingId)
       .eq("customer_id", user!.id)
       .single(),
@@ -26,7 +27,12 @@ export default async function CustomerMessagesPage({
       .eq("booking_id", params.bookingId)
       .order("created_at"),
   ]);
-  if (!booking?.cleaner_id) notFound();
+  if (
+    !booking?.cleaner_id ||
+    !isCleanerVisibleToCustomer(booking.status as BookingStatus)
+  ) {
+    notFound();
+  }
 
   const [{ data: customer }, { data: cleaner }] = await Promise.all([
     supabase

@@ -1,5 +1,6 @@
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 
+import { formatServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
 import { alertAdmins } from "@/lib/notifications/admin";
@@ -183,8 +184,11 @@ export async function runMatchingEngine(
     await alertAdmins(
       "matching_failed",
       "No cleaner available",
-      `Booking ${bookingId.slice(0, 8)} remains unmatched.`,
-      { booking_id: bookingId },
+      `Booking ${bookingId.slice(0, 8)} remains unmatched (${formatServiceName(booking.service_type)} · ${booking.scheduled_date} ${booking.scheduled_start_time} · ${booking.address.postcode}). Open Admin → Bookings to rematch.`,
+      {
+        booking_id: bookingId,
+        bookingUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin/bookings`,
+      },
     );
     return { considered, matched: false as const };
   }
@@ -231,11 +235,13 @@ export async function runMatchingEngine(
       .neq("status", "cancelled");
   }
 
+  const respondBy = addMinutes(new Date(), 30);
+
   await admin.from("cleaner_job_responses").upsert(
     {
       booking_id: bookingId,
       cleaner_id: winner.cleanerId,
-      expires_at: addMinutes(new Date(), 30).toISOString(),
+      expires_at: respondBy.toISOString(),
       offered_at: new Date().toISOString(),
       response: "expired",
     },
@@ -243,11 +249,17 @@ export async function runMatchingEngine(
   );
 
   const customerPushTitle = previousCleanerId
-    ? "Your cleaning professional has changed"
-    : "Your booking is protected";
+    ? "We’re arranging a new cleaner"
+    : "We’re looking for your cleaner";
   const customerPushBody = previousCleanerId
-    ? `${winner.cleanerName?.split(" ")[0] ?? "A Mundoria professional"} is now assigned to your booking.`
-    : "We've matched a cleaner and kept backup professionals ready if anything changes.";
+    ? "Your previous cleaner couldn’t take this job. We’re finding another Mundoria professional for you."
+    : `Your session will be confirmed no later than ${respondBy.toLocaleString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+      })}.`;
 
   await Promise.all([
     sendPushNotification(
@@ -263,7 +275,7 @@ export async function runMatchingEngine(
       { booking_id: bookingId },
     ),
     sendCleanerJobOfferEmail(),
-    sendCustomerCleanerMatchedEmail(),
+    sendCustomerLookingForCleanerEmail(),
   ]);
   return { cleanerId: winner.cleanerId, considered, matched: true as const };
 
@@ -277,7 +289,7 @@ export async function runMatchingEngine(
         bookingId,
         earnings: booking.amount_cleaner ? `£${(Number(booking.amount_cleaner) / 100).toFixed(2)}` : undefined,
         jobUrl: `${appUrl}/cleaner/job/${bookingId}`,
-        respondBy: addMinutes(new Date(), 30).toLocaleString("en-GB"),
+        respondBy: respondBy.toLocaleString("en-GB"),
         scheduledDate: booking.scheduled_date,
         scheduledTime: booking.scheduled_start_time?.slice(0, 5),
         serviceName: String(booking.service_type).replaceAll("_", " "),
@@ -287,7 +299,7 @@ export async function runMatchingEngine(
     });
   }
 
-  function sendCustomerCleanerMatchedEmail() {
+  function sendCustomerLookingForCleanerEmail() {
     const customer = Array.isArray(booking.customer)
       ? booking.customer[0]
       : booking.customer;
@@ -302,7 +314,13 @@ export async function runMatchingEngine(
         appUrl,
         bookingId,
         bookingUrl: `${appUrl}/booking/${bookingId}`,
-        cleanerName: winner.cleanerName,
+        confirmBy: respondBy.toLocaleString("en-GB", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         firstName: customer.full_name?.split(" ")[0],
         fullName: customer.full_name,
         scheduledDate: booking.scheduled_date,

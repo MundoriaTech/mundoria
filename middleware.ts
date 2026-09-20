@@ -59,16 +59,17 @@ function requiredRole(pathname: string): UserRole | null {
     return null;
   }
 
-  if (pathname === "/cleaner" || pathname.startsWith("/cleaner/")) {
-    return "cleaner";
-  }
-
+  // Admin paths first so /admin/cleaners/... is never treated as cleaner UI.
   if (pathname === "/admin/login") {
     return null;
   }
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     return "admin";
+  }
+
+  if (pathname === "/cleaner" || pathname.startsWith("/cleaner/")) {
+    return "cleaner";
   }
 
   if (pathMatches(pathname, CUSTOMER_PREFIXES)) {

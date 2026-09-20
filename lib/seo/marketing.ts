@@ -21,7 +21,10 @@ export type MarketingService = {
 
 export type MarketingArea = {
   description: string;
+  faqs: Array<{ answer: string; question: string }>;
+  highlights: string[];
   name: string;
+  seoIntro: string;
   slug: string;
 };
 
@@ -33,11 +36,18 @@ function toSlug(label: string) {
     .replace(/^-|-$/g, "");
 }
 
+/** Stable unique marketing slugs when labels would collide. */
+const SERVICE_SLUG_OVERRIDES: Partial<Record<ServiceType, string>> = {
+  airbnb_turnover: "airbnb-shortlet-cleaning",
+  holiday_let: "holiday-let-cleaning",
+};
+
 export const MARKETING_SERVICES: MarketingService[] = SERVICES.map((service) => {
   const category = SERVICE_CATEGORIES.find(
     (item) => item.value === service.category,
   )!;
-  const slug = toSlug(service.label);
+  const slug =
+    SERVICE_SLUG_OVERRIDES[service.value] ?? toSlug(service.label);
   return {
     bookingHref: `/booking/new?service=${service.value}`,
     category: service.category,
@@ -73,37 +83,151 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
   {
     description:
       "City-centre apartments, professionals and short-let properties with high demand for reliable turnovers.",
+    faqs: [
+      {
+        answer:
+          "Yes. Jewellery Quarter flats and short-lets are a core Mundoria focus — regular cleans, guest turnovers and one-off deep cleans with clear estimates.",
+        question: "Can Mundoria clean apartments in the Jewellery Quarter?",
+      },
+      {
+        answer:
+          "Same-day and next-day options appear when cleaner supply allows. Book early for weekend turnovers around city-centre check-outs.",
+        question: "How quickly can I book a city-centre cleaner?",
+      },
+    ],
+    highlights: [
+      "Apartment and loft cleans suited to converted warehouse living",
+      "Short-let turnovers timed around guest check-out windows",
+      "Quiet weekday slots for professionals working from home",
+    ],
     name: "Jewellery Quarter",
+    seoIntro:
+      "Trusted cleaners for Jewellery Quarter apartments, lofts and short-lets — clear pricing before you book, live status through arrival and completion.",
     slug: "jewellery-quarter",
   },
   {
     description:
       "Family homes and student areas needing regular upkeep, deep cleans and flexible one-off visits.",
+    faqs: [
+      {
+        answer:
+          "Yes. Edgbaston bookings commonly cover family homes, HMOs and nearby student houses with regular, deep and end-of-tenancy options.",
+        question: "Does Mundoria cover family homes in Edgbaston?",
+      },
+      {
+        answer:
+          "Share pet notes in the booking. Cleaners follow your preferences for closed doors, product sensitivity and which rooms to prioritise.",
+        question: "Can I book with pets in the home?",
+      },
+    ],
+    highlights: [
+      "Family homes and larger Victorian properties",
+      "Flexible one-off cleans around university term dates",
+      "Deep cleans before guests or after busy weeks",
+    ],
     name: "Edgbaston",
+    seoIntro:
+      "Book Mundoria cleaners in Edgbaston for family homes and nearby student streets — recommended duration, transparent price and vetted pros.",
     slug: "edgbaston",
   },
   {
     description:
       "Residential streets with strong demand for recurring cleans and end-of-tenancy handovers.",
+    faqs: [
+      {
+        answer:
+          "Weekly, fortnightly and monthly options are available where supply allows. You can also customise dates after choosing frequency.",
+        question: "Can I set a recurring clean in Harborne?",
+      },
+      {
+        answer:
+          "Yes. End-of-tenancy and move-out cleans are popular in Harborne for landlords and agents who need checklist-led handovers.",
+        question: "Do you offer end-of-tenancy cleaning in Harborne?",
+      },
+    ],
+    highlights: [
+      "Recurring cleans for busy Harborne households",
+      "Landlord-ready end-of-tenancy standards",
+      "Add-ons like oven or fridge cleans when needed",
+    ],
     name: "Harborne",
+    seoIntro:
+      "Harborne house cleaning with Mundoria — recurring visits, move cleans and deep cleans with a clear estimate and live booking updates.",
     slug: "harborne",
   },
   {
     description:
       "Independent homes and rentals that benefit from checklist-led cleans and clear booking status.",
+    faqs: [
+      {
+        answer:
+          "Yes. Moseley bookings suit independent homes, rentals and hosts who want checklist-led presentation without agency mark-ups.",
+        question: "Is Mundoria available for Moseley rentals?",
+      },
+      {
+        answer:
+          "Choose Enhanced or Comprehensive standards for a deeper finish, or add oven, fridge and interior windows as optional extras.",
+        question: "What if my Moseley home needs a deeper clean?",
+      },
+    ],
+    highlights: [
+      "Independent homes and character properties",
+      "Checklist-led cleans with transparent status",
+      "Host-friendly turnovers for local short-lets",
+    ],
     name: "Moseley",
+    seoIntro:
+      "Find Mundoria cleaners in Moseley for homes and rentals — book online, see the price first, and track your visit from match to finish.",
     slug: "moseley",
   },
   {
     description:
       "Busy households and landlords looking for dependable deep and move-related cleaning.",
+    faqs: [
+      {
+        answer:
+          "Yes. Kings Heath landlords and agents use Mundoria for end-of-tenancy, move-in and deep cleans with clear before-you-book pricing.",
+        question: "Can landlords book Mundoria in Kings Heath?",
+      },
+      {
+        answer:
+          "You manage eligible changes in your account. Fee windows are shown before you confirm — typically free more than 48 hours ahead.",
+        question: "How do cancellations work for Kings Heath bookings?",
+      },
+    ],
+    highlights: [
+      "Deep cleans for busy family homes",
+      "Move-in and move-out support for landlords",
+      "Reliable weekday and weekend fulfilment paths",
+    ],
     name: "Kings Heath",
+    seoIntro:
+      "Kings Heath cleaning with Mundoria — deep cleans, moving home support and regular visits with vetted cleaners and live status.",
     slug: "kings-heath",
   },
   {
     description:
       "Student and residential demand for regular, one-off and end-of-tenancy cleaning.",
+    faqs: [
+      {
+        answer:
+          "Yes. Selly Oak is a priority area for student houses, HMOs and end-of-tenancy handovers around term dates.",
+        question: "Does Mundoria clean student houses in Selly Oak?",
+      },
+      {
+        answer:
+          "Book early near end of term. You’ll see available slots in the flow, with duration sized to bedrooms and bathrooms.",
+        question: "When should I book an end-of-tenancy clean in Selly Oak?",
+      },
+    ],
+    highlights: [
+      "Student houses and HMO-friendly cleans",
+      "End-of-tenancy demand around term changeovers",
+      "One-off resets after parties or exams",
+    ],
     name: "Selly Oak",
+    seoIntro:
+      "Book Mundoria cleaners in Selly Oak for student houses and residential streets — clear estimates, vetted pros and live booking status.",
     slug: "selly-oak",
   },
 ];
@@ -111,6 +235,14 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
 export function birminghamAreaBySlug(slug: string) {
   return BIRMINGHAM_AREAS.find((area) => area.slug === slug) ?? null;
 }
+
+export const MARKETING_CATEGORY_PATHS = [
+  "/cleaning/residential",
+  "/cleaning/moving-home",
+  "/cleaning/short-lets",
+  "/cleaning/commercial",
+  "/cleaning/recovery",
+] as const;
 
 export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   {
