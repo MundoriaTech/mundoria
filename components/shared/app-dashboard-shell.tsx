@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
-import { UserAvatar } from "@/components/shared/user-avatar";
+import { AccountMenu } from "@/components/shared/account-menu";
 import { cn } from "@/lib/utils";
 
 export type AppShellNavItem = {
@@ -16,6 +16,7 @@ export type AppShellNavItem = {
 };
 
 export function AppDashboardShell({
+  accountMenuItems,
   brandHref,
   brandLabel,
   children,
@@ -24,6 +25,11 @@ export function AppDashboardShell({
   profile,
   topSlot,
 }: {
+  accountMenuItems: Array<{
+    href: string;
+    icon: LucideIcon;
+    label: string;
+  }>;
   brandHref: string;
   brandLabel?: string;
   children: React.ReactNode;
@@ -38,7 +44,6 @@ export function AppDashboardShell({
   topSlot?: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const firstName = profile.full_name.trim().split(/\s+/)[0] || "Account";
   const cols = Math.min(Math.max(navItems.length, 3), 5);
 
   return (
@@ -47,7 +52,10 @@ export function AppDashboardShell({
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6">
           <div className="flex min-w-0 items-center gap-6">
             <div className="min-w-0">
-              <LandingLogo className="text-[1.25rem] sm:text-[1.35rem]" href={brandHref} />
+              <LandingLogo
+                className="text-[1.25rem] sm:text-[1.35rem]"
+                href={brandHref}
+              />
               {brandLabel ? (
                 <p className="-mt-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
                   {brandLabel}
@@ -77,21 +85,7 @@ export function AppDashboardShell({
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
             {headerExtra}
-            <Link
-              aria-label="Open account"
-              className="inline-flex items-center gap-2 rounded-full py-1 pl-1 pr-1.5 transition hover:bg-[#f3eef8] dark:hover:bg-muted sm:pr-2.5"
-              href={profileHref(navItems)}
-            >
-              <UserAvatar
-                name={profile.full_name}
-                seed={profile.id}
-                size="sm"
-                url={profile.avatar_url}
-              />
-              <span className="hidden truncate text-sm font-medium tracking-tight text-[#1c133b] sm:inline dark:text-foreground">
-                {firstName}
-              </span>
-            </Link>
+            <AccountMenu items={accountMenuItems} profile={profile} />
           </div>
         </div>
       </header>
@@ -134,10 +128,4 @@ export function AppDashboardShell({
 function isActive(pathname: string, item: AppShellNavItem) {
   if (item.exact) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
-}
-
-function profileHref(navItems: AppShellNavItem[]) {
-  return (
-    navItems.find((item) => /profile|account/i.test(item.label))?.href ?? "#"
-  );
 }

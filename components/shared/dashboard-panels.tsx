@@ -259,3 +259,91 @@ export function DashboardEmptyCard({
     </div>
   );
 }
+
+export function UpcomingSessionBars({
+  emptyAction,
+  sessions,
+}: {
+  emptyAction?: ReactNode;
+  sessions: Array<{
+    ctaHref: string;
+    ctaLabel: string;
+    href: string;
+    id: string;
+    meta: string;
+    secondaryHref?: string | null;
+    secondaryLabel?: string | null;
+    statusLabel: string;
+    statusTone: "waiting" | "confirmed" | "neutral";
+    title: string;
+  }>;
+}) {
+  if (!sessions.length) {
+    return (
+      <DashboardEmptyCard
+        action={emptyAction}
+        body="When you book, upcoming cleans show up here as notification bars — date, status, and quick actions."
+        title="Nothing scheduled yet"
+      />
+    );
+  }
+
+  return (
+    <ul className="space-y-3">
+      {sessions.map((session) => (
+        <li key={session.id}>
+          <div
+            className={cn(
+              "overflow-hidden rounded-[1.35rem] border shadow-[0_10px_28px_rgba(49,44,121,0.07)]",
+              session.statusTone === "waiting"
+                ? "border-[#f0a888]/50 bg-[#fff6f0]"
+                : "border-[#e8def8]/90 bg-white",
+            )}
+          >
+            <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 sm:py-4">
+              <Link className="min-w-0 flex-1" href={session.href}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={cn(
+                      "inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-tight",
+                      session.statusTone === "waiting" &&
+                        "bg-[#e8bcac] text-[#1c133b]",
+                      session.statusTone === "confirmed" &&
+                        "bg-[#efe6ff] text-[#312c79]",
+                      session.statusTone === "neutral" &&
+                        "bg-[#f3efe6] text-[#1c133b]",
+                    )}
+                  >
+                    {session.statusLabel}
+                  </span>
+                  <p className="font-semibold tracking-tight text-[#1c133b]">
+                    {session.title}
+                  </p>
+                </div>
+                <p className="mt-1.5 text-sm font-light text-[#5a5470]">
+                  {session.meta}
+                </p>
+              </Link>
+              <div className="flex flex-wrap gap-2 sm:shrink-0">
+                <Link
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+                  href={session.ctaHref}
+                >
+                  {session.ctaLabel}
+                </Link>
+                {session.secondaryHref && session.secondaryLabel ? (
+                  <Link
+                    className="inline-flex h-10 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+                    href={session.secondaryHref}
+                  >
+                    {session.secondaryLabel}
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}

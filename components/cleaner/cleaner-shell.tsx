@@ -12,6 +12,7 @@ import {
 
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { CLEANER_ACCOUNT_MENU } from "@/components/shared/account-menu";
 import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
 import type { Profile } from "@/types/auth";
@@ -39,6 +40,7 @@ export function CleanerShell({
       <SessionTimeoutGuard audience="cleaner" />
       <OneSignalEnroll />
       <AppDashboardShell
+        accountMenuItems={CLEANER_ACCOUNT_MENU}
         brandHref="/cleaner/dashboard"
         brandLabel="Pro"
         headerExtra={

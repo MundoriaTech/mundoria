@@ -2,18 +2,16 @@ import { CalendarCheck as CalendarCheckLucide, Plus } from "lucide-react";
 import Link from "next/link";
 
 import {
-  DashboardEmptyCard,
   DashboardHistoryList,
   DashboardSection,
   DashboardStatTiles,
   DashboardWelcomeBanner,
-  SessionHighlightCard,
+  UpcomingSessionBars,
 } from "@/components/shared/dashboard-panels";
 import { Button } from "@/components/ui/button";
 import {
   isCleanerVisibleToCustomer,
   isWaitingForCleanerAcceptance,
-  sessionPhotoForService,
 } from "@/lib/customer/booking-visibility";
 import { getCustomerBookings } from "@/lib/customer/server";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
@@ -102,20 +100,28 @@ export default async function CustomerDashboardPage() {
         ]}
       />
 
-      <DashboardSection eyebrow="Your home" title="Next session">
-        {next ? (
-          <NextSessionCard booking={next} />
-        ) : (
-          <DashboardEmptyCard
-            action={
-              <Button asChild className="rounded-full bg-[#1c133b] hover:bg-[#312c79]">
-                <Link href={DASHBOARD_BOOK_HREF}>Start a booking</Link>
-              </Button>
-            }
-            body="When you book, you’ll see a session card here — status, cleaner, and quick actions."
-            title="Nothing scheduled yet"
-          />
-        )}
+      <DashboardSection
+        action={
+          upcoming.length > 1 ? (
+            <Link
+              className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href="/bookings"
+            >
+              View all
+            </Link>
+          ) : null
+        }
+        eyebrow="Coming up"
+        title="Upcoming cleans"
+      >
+        <UpcomingSessionBars
+          emptyAction={
+            <Button asChild className="rounded-full bg-[#1c133b] hover:bg-[#312c79]">
+              <Link href={DASHBOARD_BOOK_HREF}>Start a booking</Link>
+            </Button>
+          }
+          sessions={upcoming.map((booking) => sessionBar(booking))}
+        />
       </DashboardSection>
 
       {customer.referral_code ? (
@@ -176,79 +182,43 @@ export default async function CustomerDashboardPage() {
   );
 }
 
-function NextSessionCard({ booking }: { booking: Booking }) {
+function sessionBar(booking: Booking) {
   const waiting = isWaitingForCleanerAcceptance(booking.status);
   const cleanerVisible = isCleanerVisibleToCustomer(booking.status);
   const cleanerName = cleanerVisible
     ? booking.cleaner?.full_name?.split(" ")[0] ?? null
     : null;
+  const when = new Date(
+    `${booking.scheduled_date}T${booking.scheduled_start_time}`,
+  ).toLocaleString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const person = cleanerName
+    ? `with ${cleanerName}`
+    : waiting
+      ? "looking for a cleaner"
+      : "cleaner TBC";
 
-  return (
-    <SessionHighlightCard
-      actions={
-        <>
-          <Link
-            className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
-            href={`/booking/${booking.id}`}
-          >
-            Manage session
-          </Link>
-          {cleanerVisible && booking.cleaner_id ? (
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
-              href={`/messages/${booking.id}`}
-            >
-              Message
-            </Link>
-          ) : null}
-          <Link
-            className="inline-flex h-11 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
-            href={`/booking/${booking.id}`}
-          >
-            {waiting ? "View request" : "Change / cancel"}
-          </Link>
-        </>
-      }
-      meta={[
-        {
-          label: "Date",
-          value: new Date(
-            `${booking.scheduled_date}T12:00:00`,
-          ).toLocaleDateString("en-GB", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          }),
-        },
-        { label: "Time", value: booking.scheduled_start_time.slice(0, 5) },
-        {
-          label: "Cleaner",
-          value: cleanerName
-            ? cleanerName
-            : waiting
-              ? "Looking for cleaner"
-              : "TBC",
-        },
-        {
-          label: "Total",
-          value: booking.amount_total
-            ? formatMoney(booking.amount_total)
-            : "—",
-        },
-      ]}
-      personLine={
-        cleanerName
-          ? `With ${cleanerName}`
-          : waiting
-            ? "We are looking for your cleaner"
-            : undefined
-      }
-      photoSrc={sessionPhotoForService(booking.service_type)}
-      statusLabel={waiting ? "Looking for cleaner" : "Confirmed session"}
-      statusTone={waiting ? "waiting" : "confirmed"}
-      title={formatServiceName(booking.service_type)}
-    />
-  );
+  return {
+    ctaHref: `/booking/${booking.id}`,
+    ctaLabel: waiting ? "View request" : "Manage session",
+    href: `/booking/${booking.id}`,
+    id: booking.id,
+    meta: `${when} · ${person}`,
+    secondaryHref:
+      !waiting && cleanerVisible && booking.cleaner_id
+        ? `/messages/${booking.id}`
+        : null,
+    secondaryLabel:
+      !waiting && cleanerVisible && booking.cleaner_id ? "Message" : null,
+    statusLabel: waiting ? "Looking for cleaner" : "Confirmed",
+    statusTone: waiting ? ("waiting" as const) : ("confirmed" as const),
+    title: formatServiceName(booking.service_type),
+  };
 }
 
 function formatNextSlot(booking: Booking) {

@@ -116,7 +116,9 @@ export function BookingActions({
           onClick={() => void act("reassign")}
           variant="outline"
         >
-          Reassign
+          {currentStatus === "pending_match" || !currentStatus
+            ? "Assign cleaner"
+            : "Reassign"}
         </Button>
       </div>
 

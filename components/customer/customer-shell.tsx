@@ -10,6 +10,7 @@ import {
 import { NotificationBell } from "@/components/customer/notification-bell";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
+import { CUSTOMER_ACCOUNT_MENU } from "@/components/shared/account-menu";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
@@ -37,6 +38,7 @@ export function CustomerShell({
       <SessionTimeoutGuard audience="customer" />
       <OneSignalEnroll />
       <AppDashboardShell
+        accountMenuItems={CUSTOMER_ACCOUNT_MENU}
         brandHref="/dashboard"
         headerExtra={
           <NotificationBell
