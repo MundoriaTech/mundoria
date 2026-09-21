@@ -1,18 +1,19 @@
-import {
-  CalendarCheck,
-  Clock3,
-  Sparkles,
-  Star,
-  Trophy,
-  type LucideIcon,
-} from "lucide-react";
+import { BriefcaseBusiness, CalendarCheck } from "lucide-react";
 import Link from "next/link";
 
 import { TierBadge } from "@/components/cleaner/tier-badge";
-import { Button } from "@/components/ui/button";
+import {
+  DashboardEmptyCard,
+  DashboardHistoryList,
+  DashboardSection,
+  DashboardStatTiles,
+  DashboardWelcomeBanner,
+  SessionHighlightCard,
+} from "@/components/shared/dashboard-panels";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
 import { nextTier, TIER_REQUIREMENTS } from "@/lib/cleaner/tier";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { sessionPhotoForService } from "@/lib/customer/booking-visibility";
 import { createServerClient } from "@/lib/supabase/server";
 
 export default async function CleanerDashboardPage() {
@@ -25,12 +26,18 @@ export default async function CleanerDashboardPage() {
     getCleanerJobs(user!.id),
   ]);
   const cleaner = context.cleanerProfile;
+  const profile = context.profile;
+  const firstName = profile.full_name.trim().split(/\s+/)[0] || "there";
   const today = new Date().toISOString().slice(0, 10);
-  const todayJobs = jobs.filter(
-    (job) =>
-      job.scheduled_date === today &&
-      !["cancelled", "completed"].includes(job.status),
-  );
+  const activeJobs = jobs
+    .filter((job) => !["cancelled", "completed"].includes(job.status))
+    .sort(
+      (a, b) =>
+        new Date(`${a.scheduled_date}T${a.scheduled_start_time}`).getTime() -
+        new Date(`${b.scheduled_date}T${b.scheduled_start_time}`).getTime(),
+    );
+  const todayJobs = activeJobs.filter((job) => job.scheduled_date === today);
+  const nextJob = todayJobs[0] ?? activeJobs[0] ?? null;
   const completed = jobs.filter((job) => job.status === "completed");
   const week = completed
     .filter(
@@ -42,6 +49,7 @@ export default async function CleanerDashboardPage() {
       (job) => new Date(job.scheduled_date).getMonth() === new Date().getMonth(),
     )
     .reduce((sum, job) => sum + (job.amount_cleaner ?? 0), 0);
+  const recent = completed.slice(0, 5);
   const next = nextTier(cleaner.tier);
   const requirement = TIER_REQUIREMENTS[next];
   const hasCompletedJobs = cleaner.total_jobs > 0;
@@ -50,129 +58,203 @@ export default async function CleanerDashboardPage() {
     : 0;
 
   return (
-    <div className="space-y-7">
-      <section className="relative isolate overflow-hidden rounded-[2rem] bg-[#221f50] p-7 text-white shadow-2xl shadow-[#221f50]/15 sm:p-9">
-        <div className="absolute -right-20 top-0 -z-10 h-56 w-56 rounded-full bg-[#7669d1]/45 blur-3xl" />
-        <div className="absolute -bottom-20 left-10 -z-10 h-44 w-44 rounded-full bg-[#ffc79f]/30 blur-3xl" />
-        <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white/80">
-          <Sparkles className="h-4 w-4 text-[#ffc79f]" />
-          Cleaner dashboard
-        </p>
-        <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-8 pb-4">
+      <DashboardWelcomeBanner
+        actions={
+          <>
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full bg-white px-3.5 text-xs font-semibold text-[#1c133b] shadow-[0_8px_20px_rgba(28,19,59,0.16)] transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
+              href="/cleaner/jobs"
+            >
+              <BriefcaseBusiness className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+              View jobs
+            </Link>
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/18 sm:h-12 sm:px-6 sm:text-sm"
+              href="/cleaner/earnings"
+            >
+              <CalendarCheck className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+              Earnings
+            </Link>
+          </>
+        }
+        eyebrow="Mundoria Pro"
+        firstName={firstName}
+        subtitle="Your sessions, earnings and medallion progress — ready for a brilliant day."
+      />
+
+      <DashboardStatTiles
+        items={[
+          {
+            icon: "calendarBlank",
+            label: "Today",
+            value: String(todayJobs.length),
+          },
+          {
+            icon: "currencyGbp",
+            label: "This week",
+            tone: "lavenderOrange",
+            value: formatMoney(week),
+          },
+          {
+            icon: "currencyGbp",
+            label: "This month",
+            tone: "lineOnly",
+            value: formatMoney(month),
+          },
+          {
+            icon: "mapPin",
+            label: "Next job",
+            value: nextJob
+              ? `${nextJob.scheduled_start_time.slice(0, 5)} · ${nextJob.address?.city ?? "Job"}`
+              : "None",
+          },
+        ]}
+      />
+
+      <DashboardSection eyebrow="On the schedule" title="Next session">
+        {nextJob ? (
+          <SessionHighlightCard
+            actions={
+              <>
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+                  href={`/cleaner/job/${nextJob.id}`}
+                >
+                  Open job
+                </Link>
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+                  href={`/cleaner/messages/${nextJob.id}`}
+                >
+                  Message
+                </Link>
+              </>
+            }
+            meta={[
+              {
+                label: "Date",
+                value: new Date(
+                  `${nextJob.scheduled_date}T12:00:00`,
+                ).toLocaleDateString("en-GB", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                }),
+              },
+              {
+                label: "Time",
+                value: nextJob.scheduled_start_time.slice(0, 5),
+              },
+              {
+                label: "Area",
+                value: nextJob.address?.city ?? "—",
+              },
+              {
+                label: "Earn",
+                value: nextJob.amount_cleaner
+                  ? formatMoney(nextJob.amount_cleaner)
+                  : "—",
+              },
+            ]}
+            personLine={
+              nextJob.scheduled_date === today
+                ? "Today’s session"
+                : "Upcoming session"
+            }
+            photoSrc={sessionPhotoForService(nextJob.service_type)}
+            statusLabel={
+              nextJob.status === "matched" ? "Offer pending" : "Confirmed"
+            }
+            statusTone={nextJob.status === "matched" ? "waiting" : "confirmed"}
+            title={formatServiceName(nextJob.service_type)}
+          />
+        ) : (
+          <DashboardEmptyCard
+            body="When Mundoria offers you a session, it will appear here with area, time and earnings."
+            title="No jobs lined up"
+          />
+        )}
+      </DashboardSection>
+
+      <section className="overflow-hidden rounded-[1.75rem] bg-[#f3efe6] p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
-              Ready for a brilliant day?
-            </h1>
-            <p className="mt-3 max-w-2xl leading-7 text-white/75">
-              Track today’s jobs, monitor performance, and keep your Mundoria
-              profile ready for better matches.
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+              Medallion
             </p>
+            <div className="mt-2">
+              <TierBadge tier={cleaner.tier} />
+            </div>
           </div>
-          <Button
-            asChild
-            className="bg-[#ffc79f] font-bold text-[#221f50] hover:bg-[#ffd4b8]"
-          >
-            <Link href="/cleaner/jobs">View jobs</Link>
-          </Button>
-        </div>
-      </section>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Stat label="This week" value={formatMoney(week)} />
-        <Stat label="This month" value={formatMoney(month)} />
-      </div>
-
-      <section className="rounded-[1.75rem] border border-border bg-card p-6 shadow-sm">
-        <div className="flex justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Current tier</p>
-            <TierBadge className="mt-2" tier={cleaner.tier} />
-          </div>
-          <Trophy className="h-8 w-8 text-[#ffc06f]" />
-        </div>
-        <div className="mt-4 h-2 rounded-full bg-muted">
           <div
-            className="h-2 rounded-full bg-gradient-to-r from-[#5a51aa] to-[#ffc79f]"
+            aria-hidden
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-lg"
+          >
+            ★
+          </div>
+        </div>
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/70">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-[#312c79] to-[#d4694a]"
             style={{ width: `${tierProgress}%` }}
           />
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="mt-2 text-sm font-light text-[#3d3a48]">
           {hasCompletedJobs
             ? `${cleaner.performance_score}/100 toward ${next}`
             : `Progress toward ${next} starts after completed jobs and ratings.`}
         </p>
-      </section>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <Stat
-          label="Performance"
-          value={hasCompletedJobs ? `${cleaner.performance_score}/100` : "No data yet"}
-        />
-        <Stat
-          icon={Star}
-          label="Rating"
-          value={hasCompletedJobs ? `${cleaner.rating}/5` : "No ratings yet"}
-        />
-        <Stat
-          label="On time"
-          value={hasCompletedJobs ? `${cleaner.on_time_rate}%` : "No jobs yet"}
-        />
-        <Stat
-          label="Acceptance"
-          value={
-            hasCompletedJobs || Number(cleaner.acceptance_rate) !== 100
-              ? `${cleaner.acceptance_rate}%`
-              : "No offers yet"
-          }
-        />
-      </div>
-
-      <section>
-        <h2 className="mb-4 text-xl font-semibold tracking-tight text-foreground">
-          Today&apos;s jobs
-        </h2>
-        <div className="space-y-3">
-          {todayJobs.map((job) => (
-            <a
-              className="flex justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#5a51aa]/10"
-              href={`/cleaner/job/${job.id}`}
-              key={job.id}
-            >
-              <span>
-                <b>{formatServiceName(job.service_type)}</b>
-                <small className="mt-1 block text-muted-foreground">
-                  {job.scheduled_start_time.slice(0, 5)} · {job.address?.city}
-                </small>
-              </span>
-              <CalendarCheck className="text-primary" />
-            </a>
-          ))}
-          {!todayJobs.length ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-              <Clock3 className="mx-auto mb-3 h-6 w-6 text-primary" />
-              No jobs today.
-            </div>
-          ) : null}
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <MiniStat
+            label="Rating"
+            value={hasCompletedJobs ? `${cleaner.rating}/5` : "No ratings yet"}
+          />
+          <MiniStat
+            label="On time"
+            value={hasCompletedJobs ? `${cleaner.on_time_rate}%` : "No jobs yet"}
+          />
+          <MiniStat
+            label="Acceptance"
+            value={
+              hasCompletedJobs || Number(cleaner.acceptance_rate) !== 100
+                ? `${cleaner.acceptance_rate}%`
+                : "No offers yet"
+            }
+          />
         </div>
       </section>
+
+      <DashboardSection eyebrow="Done & dusted" title="Recent completed">
+        <DashboardHistoryList
+          actionHref="/cleaner/jobs"
+          actionLabel="All jobs"
+          emptyBody="Completed sessions will show here with earnings."
+          emptyTitle="No completed jobs yet"
+          rows={recent.map((job) => ({
+            amount: job.amount_cleaner ? formatMoney(job.amount_cleaner) : "—",
+            date: new Date(`${job.scheduled_date}T12:00:00`).toLocaleDateString(
+              "en-GB",
+              { day: "numeric", month: "short", year: "numeric" },
+            ),
+            href: `/cleaner/job/${job.id}`,
+            person: job.address?.city ?? "—",
+            service: formatServiceName(job.service_type),
+            status: "Completed",
+          }))}
+        />
+      </DashboardSection>
     </div>
   );
 }
 
-function Stat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon?: LucideIcon;
-  label: string;
-  value: string;
-}) {
+function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm">
-      {Icon ? <Icon className="mb-3 h-5 w-5 text-primary" /> : null}
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+    <div className="rounded-[1.25rem] bg-white/70 px-4 py-3">
+      <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
         {value}
       </p>
     </div>

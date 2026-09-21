@@ -1,4 +1,5 @@
 import { CleanersTable } from "@/components/admin/cleaners-table";
+import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminCleaner } from "@/types/admin";
 
@@ -25,10 +26,9 @@ export default async function AdminCleanersPage() {
   })) as AdminCleaner[];
   return (
     <div className="min-w-0">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Cleaners</h1>
-      <p className="mb-5 mt-2 text-sm text-muted-foreground sm:mb-7 sm:text-base">
+      <AdminPageIntro>
         Review applications and monitor cleaner quality.
-      </p>
+      </AdminPageIntro>
       <CleanersTable cleaners={cleaners} workingAreas={workingAreas} />
     </div>
   );

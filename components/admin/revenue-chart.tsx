@@ -23,20 +23,24 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
   const hasRevenue = data.some((point) => point.revenue > 0);
 
   return (
-    <section className="min-w-0 overflow-hidden rounded-xl border bg-card p-4 sm:p-5">
+    <section className="min-w-0 overflow-hidden rounded-[1.5rem] border border-[#e8e0f4] bg-white p-4 shadow-[0_12px_28px_rgba(49,44,121,0.04)] sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-semibold">Revenue</h2>
-          <p className="text-sm text-muted-foreground">Captured platform revenue</p>
+          <h2 className="font-semibold text-[#1c133b]">Revenue</h2>
+          <p className="text-sm text-[#5a5470]">Captured platform revenue</p>
         </div>
-        <div className="flex w-full rounded-lg bg-muted p-1 sm:w-auto">
+        <div className="flex w-full rounded-full bg-[#f3eef8] p-1 sm:w-auto">
           {(["daily", "weekly", "monthly"] as const).map((value) => (
             <Button
               key={value}
               onClick={() => setPeriod(value)}
               size="sm"
               variant={period === value ? "default" : "ghost"}
-              className="flex-1 capitalize sm:flex-none"
+              className={
+                period === value
+                  ? "flex-1 rounded-full capitalize sm:flex-none"
+                  : "flex-1 rounded-full capitalize text-[#5a5470] sm:flex-none"
+              }
             >
               {value}
             </Button>
@@ -48,36 +52,64 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
           <ResponsiveContainer height="100%" width="100%">
             {period === "daily" ? (
               <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" fontSize={11} tickLine={false} />
-                <YAxis
-                  fontSize={11}
-                  tickFormatter={(value) => `£${Math.round(value / 100)}`}
+                <CartesianGrid stroke="#efe8f8" strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  axisLine={false}
+                  dataKey="label"
+                  tick={{ fill: "#8b8798", fontSize: 11 }}
                   tickLine={false}
                 />
-                <Tooltip formatter={(value) => formatMoney(Number(value))} />
-                <Bar dataKey="revenue" fill="#5a51aa" radius={[8, 8, 0, 0]} />
+                <YAxis
+                  axisLine={false}
+                  tick={{ fill: "#8b8798", fontSize: 11 }}
+                  tickFormatter={(value) => formatMoney(Number(value))}
+                  tickLine={false}
+                  width={72}
+                />
+                <Tooltip
+                  contentStyle={{
+                    border: "1px solid #e8e0f4",
+                    borderRadius: 12,
+                    background: "#fff",
+                  }}
+                  formatter={(value) => formatMoney(Number(value))}
+                />
+                <Bar dataKey="revenue" fill="#823fb2" radius={[8, 8, 0, 0]} />
               </BarChart>
             ) : (
               <AreaChart data={data}>
                 <defs>
-                  <linearGradient id="revenue" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor="#059669" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+                  <linearGradient id="magRevenue" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#823fb2" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#823fb2" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" fontSize={11} tickLine={false} />
-                <YAxis
-                  fontSize={11}
-                  tickFormatter={(value) => `£${Math.round(value / 100)}`}
+                <CartesianGrid stroke="#efe8f8" strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  axisLine={false}
+                  dataKey="label"
+                  tick={{ fill: "#8b8798", fontSize: 11 }}
                   tickLine={false}
                 />
-                <Tooltip formatter={(value) => formatMoney(Number(value))} />
+                <YAxis
+                  axisLine={false}
+                  tick={{ fill: "#8b8798", fontSize: 11 }}
+                  tickFormatter={(value) => formatMoney(Number(value))}
+                  tickLine={false}
+                  width={72}
+                />
+                <Tooltip
+                  contentStyle={{
+                    border: "1px solid #e8e0f4",
+                    borderRadius: 12,
+                    background: "#fff",
+                  }}
+                  formatter={(value) => formatMoney(Number(value))}
+                />
                 <Area
                   dataKey="revenue"
-                  fill="url(#revenue)"
-                  stroke="#059669"
+                  fill="url(#magRevenue)"
+                  stroke="#1c133b"
                   strokeWidth={2}
                   type="monotone"
                 />
@@ -85,12 +117,8 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
             )}
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 text-center">
-            <p className="font-semibold text-foreground">No captured revenue yet</p>
-            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-              This chart starts filling after jobs are completed and their held
-              Stripe payments are captured.
-            </p>
+          <div className="flex h-full items-center justify-center rounded-2xl bg-[#f7f4fb] text-sm text-[#5a5470]">
+            No captured revenue yet for this view.
           </div>
         )}
       </div>
@@ -102,18 +130,25 @@ function aggregate(
   points: RevenuePoint[],
   period: "daily" | "weekly" | "monthly",
 ) {
-  const groups = new Map<string, number>();
-  points.forEach((point) => {
-    const date = new Date(`${point.date}T12:00:00`);
-    let key = point.date;
-    if (period === "weekly") {
-      const start = new Date(date);
-      start.setDate(date.getDate() - date.getDay());
-      key = `W/C ${start.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}`;
-    } else if (period === "monthly") {
-      key = date.toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
-    }
-    groups.set(key, (groups.get(key) ?? 0) + point.revenue);
-  });
-  return Array.from(groups, ([date, revenue]) => ({ date, revenue }));
+  const buckets = new Map<string, number>();
+  for (const point of points) {
+    const key =
+      period === "daily"
+        ? point.date
+        : period === "weekly"
+          ? weekKey(point.date)
+          : point.date.slice(0, 7);
+    buckets.set(key, (buckets.get(key) ?? 0) + point.revenue);
+  }
+  return Array.from(buckets.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-14)
+    .map(([label, revenue]) => ({ label, revenue }));
+}
+
+function weekKey(date: string) {
+  const d = new Date(`${date}T12:00:00`);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  return d.toISOString().slice(0, 10);
 }

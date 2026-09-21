@@ -1,16 +1,13 @@
 import {
-  Activity,
   AlertTriangle,
-  Banknote,
-  CalendarCheck,
   Star,
-  UserRoundCheck,
 } from "lucide-react";
 import Link from "next/link";
 
 import { OperationsMap } from "@/components/admin/operations-map";
 import { RematchButton } from "@/components/admin/rematch-button";
 import { RevenueChart } from "@/components/admin/revenue-chart";
+import { DashboardStatTiles } from "@/components/shared/dashboard-stat-tiles";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminBooking, RevenuePoint } from "@/types/admin";
@@ -80,47 +77,83 @@ export default async function AdminDashboardPage() {
   });
 
   return (
-    <div className="space-y-7">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{weekday}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-4xl">
-            Dashboard
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Jobs running today, cleaners waiting for review, and money in.
-          </p>
+    <div className="space-y-6 sm:space-y-7">
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-[#1c133b] px-5 py-6 text-white shadow-[0_20px_48px_rgba(28,19,59,0.18)] sm:px-7 sm:py-8">
+        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#f0a888]/25 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 left-10 h-44 w-44 rounded-full bg-[#823fb2]/45 blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f0a888]">
+              {weekday}
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
+              Operations desk
+            </h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-white/70">
+              Jobs running today, cleaners waiting for review, and money coming
+              in.
+            </p>
+          </div>
+          {pending > 0 ? (
+            <Link
+              className="inline-flex w-full items-center justify-center rounded-full bg-[#d4694a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c45a3c] sm:w-auto"
+              href="/admin/cleaners"
+            >
+              Review {pending} cleaner{pending === 1 ? "" : "s"}
+            </Link>
+          ) : (
+            <Link
+              className="inline-flex w-full items-center justify-center rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15 sm:w-auto"
+              href="/admin/bookings"
+            >
+              Open bookings
+            </Link>
+          )}
         </div>
-        {pending > 0 ? (
-          <Link
-            className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground sm:w-auto"
-            href="/admin/cleaners"
-          >
-            Review {pending} cleaner{pending === 1 ? "" : "s"}
-          </Link>
-        ) : null}
-      </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi icon={CalendarCheck} label="Bookings today" value={String(todayBookings.length)} />
-        <Kpi icon={Activity} label="Jobs in progress" value={String(active.length)} />
-        <Kpi icon={Banknote} label="Revenue today" value={formatMoney(revenueToday)} />
-        <Kpi icon={UserRoundCheck} label="Cleaners to review" value={String(pending)} />
-      </div>
+      <DashboardStatTiles
+        items={[
+          {
+            icon: "calendarCheck",
+            label: "Bookings today",
+            tone: "peachPurple",
+            value: String(todayBookings.length),
+          },
+          {
+            icon: "pulse",
+            label: "Jobs in progress",
+            tone: "lavenderOrange",
+            value: String(active.length),
+          },
+          {
+            icon: "currencyGbp",
+            label: "Revenue today",
+            tone: "lineOnly",
+            value: formatMoney(revenueToday),
+          },
+          {
+            icon: "usersThree",
+            label: "Cleaners to review",
+            tone: "peachPurple",
+            value: String(pending),
+          },
+        ]}
+      />
 
       {alerts.length ? (
-        <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground">
-          <p className="font-semibold">
+        <div className="space-y-3 rounded-[1.5rem] border border-amber-300/60 bg-[#fff8ef] p-4 sm:p-5">
+          <p className="font-semibold text-[#1c133b]">
             <AlertTriangle className="mr-2 inline h-5 w-5 text-amber-600" />
             {alerts.length} cancelled booking{alerts.length > 1 ? "s" : ""} still
             need a new cleaner (payment held).
           </p>
           {alerts.slice(0, 3).map((booking) => (
             <div
-              className="flex flex-col gap-3 rounded-xl bg-card p-3 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-2xl bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
               key={booking.id}
             >
-              <span className="text-sm">
+              <span className="text-sm text-[#4a4266]">
                 Booking {booking.id.slice(0, 8)} ·{" "}
                 {booking.scheduled_start_time.slice(0, 5)}
               </span>
@@ -132,9 +165,15 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-5 xl:grid-cols-[1.4fr_.6fr]">
         <RevenueChart points={revenuePoints} />
-        <section className="rounded-xl border border-border bg-card p-5">
-          <h2 className="text-lg font-semibold tracking-tight">Quality</h2>
-          <Health label="Average rating" value={`${avgRating.toFixed(2)}/5`} icon={Star} />
+        <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
+          <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+            Quality
+          </h2>
+          <Health
+            icon={Star}
+            label="Average rating"
+            value={`${avgRating.toFixed(2)}/5`}
+          />
           <Health
             label="No-show rate"
             value={`${finishedLike ? ((noShowBookings / finishedLike) * 100).toFixed(1) : 0}%`}
@@ -146,11 +185,13 @@ export default async function AdminDashboardPage() {
         </section>
       </div>
 
-      <section className="rounded-xl border border-border bg-card p-5">
+      <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">Live map</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+              Live map
+            </h2>
+            <p className="text-sm text-[#5a5470]">
               Pending, en route, and in-progress jobs
             </p>
           </div>
@@ -166,9 +207,11 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
-        <h2 className="text-lg font-semibold tracking-tight">Recent activity</h2>
-        <div className="mt-4 divide-y divide-border">
+      <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-4 shadow-[0_12px_28px_rgba(49,44,121,0.04)] sm:p-5">
+        <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+          Recent activity
+        </h2>
+        <div className="mt-4 divide-y divide-[#efe8f8]">
           {[
             ...all.slice(0, 7).map((booking) => ({
               date: booking.created_at,
@@ -183,41 +226,19 @@ export default async function AdminDashboardPage() {
             .slice(0, 10)
             .map((item, index) => (
               <div
-                className="flex flex-col gap-1 border-b border-border py-3 text-sm last:border-0 sm:flex-row sm:justify-between sm:gap-4"
+                className="flex flex-col gap-1 py-3 text-sm last:border-0 sm:flex-row sm:justify-between sm:gap-4"
                 key={`${item.date}-${index}`}
               >
-                <span className="min-w-0 font-medium text-foreground">
+                <span className="min-w-0 font-medium text-[#1c133b]">
                   {item.text}
                 </span>
-                <span className="shrink-0 text-muted-foreground">
+                <span className="shrink-0 text-[#5a5470]">
                   {new Date(item.date).toLocaleString("en-GB")}
                 </span>
               </div>
             ))}
         </div>
       </section>
-    </div>
-  );
-}
-
-function Kpi({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 transition hover:border-primary/30">
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-primary">
-        <Icon className="h-5 w-5" />
-      </span>
-      <p className="mt-4 text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
-        {value}
-      </p>
     </div>
   );
 }
@@ -232,12 +253,12 @@ function Health({
   value: string;
 }) {
   return (
-    <div className="mt-5 flex items-center justify-between border-b border-border pb-4 last:border-0">
-      <span className="flex items-center gap-2 text-sm text-muted-foreground">
-        {Icon ? <Icon className="h-4 w-4" /> : null}
+    <div className="mt-5 flex items-center justify-between border-b border-[#efe8f8] pb-4 last:border-0">
+      <span className="flex items-center gap-2 text-sm text-[#5a5470]">
+        {Icon ? <Icon className="h-4 w-4 text-[#823fb2]" /> : null}
         {label}
       </span>
-      <b className="text-foreground">{value}</b>
+      <b className="text-[#1c133b]">{value}</b>
     </div>
   );
 }

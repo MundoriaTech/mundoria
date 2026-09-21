@@ -1,12 +1,25 @@
-import { ArrowRight, Gift } from "lucide-react";
+import { CalendarCheck as CalendarCheckLucide, Plus } from "lucide-react";
 import Link from "next/link";
 
-import { BookingCard } from "@/components/customer/booking-card";
-import { DashboardGreeting } from "@/components/customer/dashboard-greeting";
+import {
+  DashboardEmptyCard,
+  DashboardHistoryList,
+  DashboardSection,
+  DashboardStatTiles,
+  DashboardWelcomeBanner,
+  SessionHighlightCard,
+} from "@/components/shared/dashboard-panels";
 import { Button } from "@/components/ui/button";
+import {
+  isCleanerVisibleToCustomer,
+  isWaitingForCleanerAcceptance,
+  sessionPhotoForService,
+} from "@/lib/customer/booking-visibility";
 import { getCustomerBookings } from "@/lib/customer/server";
+import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
+import type { Booking } from "@/types/customer";
 
 export const metadata = { title: "Customer dashboard" };
 
@@ -27,127 +40,230 @@ export default async function CustomerDashboardPage() {
         new Date(`${booking.scheduled_date}T${booking.scheduled_start_time}`) >=
           now,
     )
-    .slice(0, 2);
+    .sort(
+      (a, b) =>
+        new Date(`${a.scheduled_date}T${a.scheduled_start_time}`).getTime() -
+        new Date(`${b.scheduled_date}T${b.scheduled_start_time}`).getTime(),
+    );
   const recent = bookings
-    .filter((booking) =>
-      ["completed", "cancelled"].includes(booking.status),
-    )
+    .filter((booking) => ["completed", "cancelled"].includes(booking.status))
     .reverse()
-    .slice(0, 3);
+    .slice(0, 5);
+  const completedCount = bookings.filter((b) => b.status === "completed").length;
+  const totalSpent = bookings
+    .filter((b) => b.status === "completed" && b.payment_status === "released")
+    .reduce((sum, b) => sum + Number(b.amount_total ?? 0), 0);
+  const next = upcoming[0] ?? null;
   const customer = profile as Profile;
   const firstName = customer.full_name.trim().split(/\s+/)[0] || "there";
 
   return (
-    <div className="space-y-8">
-      <DashboardGreeting firstName={firstName} />
+    <div className="space-y-8 pb-4">
+      <DashboardWelcomeBanner
+        actions={
+          <>
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full bg-white px-3.5 text-xs font-semibold text-[#1c133b] shadow-[0_8px_20px_rgba(28,19,59,0.16)] transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
+              href="/booking/new"
+            >
+              <Plus className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+              Book a cleaner
+            </Link>
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/18 sm:h-12 sm:px-6 sm:text-sm"
+              href="/bookings"
+            >
+              <CalendarCheckLucide className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+              View sessions
+            </Link>
+          </>
+        }
+        firstName={firstName}
+        subtitle="Keep track of your cleaning services, upcoming bookings, and past appointments."
+      />
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        <Insight label="Upcoming" value={String(upcoming.length)} />
-        <Insight label="Recent history" value={String(recent.length)} />
-        <Insight
-          label="Referral code"
-          value={customer.referral_code ?? "—"}
-        />
-      </section>
+      <DashboardStatTiles
+        items={[
+          {
+            icon: "calendarBlank",
+            label: "Upcoming",
+            value: String(upcoming.length),
+          },
+          {
+            icon: "sparkle",
+            label: "Completed",
+            tone: "lavenderOrange",
+            value: String(completedCount),
+          },
+          {
+            icon: "currencyGbp",
+            label: "Total spent",
+            tone: "lineOnly",
+            value: totalSpent ? formatMoney(totalSpent) : "£0",
+          },
+          {
+            icon: "calendarCheck",
+            label: "Next clean",
+            value: next ? formatNextSlot(next) : "Not set",
+          },
+        ]}
+      />
 
-      <SectionHeading href="/bookings" title="Upcoming bookings" />
-      {upcoming.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {upcoming.map((booking) => (
-            <BookingCard booking={booking} key={booking.id} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          action="/booking/new"
-          body="When you book your next clean, it’ll appear here."
-          title="Nothing scheduled yet"
-        />
-      )}
+      <DashboardSection eyebrow="Your home" title="Next session">
+        {next ? (
+          <NextSessionCard booking={next} />
+        ) : (
+          <DashboardEmptyCard
+            action={
+              <Button asChild className="rounded-full bg-[#1c133b] hover:bg-[#312c79]">
+                <Link href="/booking/new">Start a booking</Link>
+              </Button>
+            }
+            body="When you book, you’ll see a session card here — status, cleaner, and quick actions."
+            title="Nothing scheduled yet"
+          />
+        )}
+      </DashboardSection>
 
       {customer.referral_code ? (
-        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <div className="flex items-start gap-3 sm:gap-4">
-            <Gift className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <div className="min-w-0">
-              <h2 className="font-semibold text-foreground">
-                Give £10, get £10
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Share your code{" "}
-                <span className="font-semibold text-foreground">
-                  {customer.referral_code}
-                </span>
-                . Friends get £10 off their first clean; you get £10 after they
-                complete it.
-              </p>
-            </div>
-          </div>
+        <section className="rounded-[1.75rem] bg-[#f3efe6] p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            Share Mundoria
+          </p>
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+            Give £10, get £10
+          </h2>
+          <p className="mt-2 max-w-xl text-sm font-light leading-6 text-[#3d3a48]">
+            Share code{" "}
+            <span className="font-semibold text-[#312c79]">
+              {customer.referral_code}
+            </span>
+            . Friends get £10 off their first clean; you get £10 after they
+            complete it.
+          </p>
         </section>
       ) : null}
 
-      <SectionHeading href="/bookings?tab=past" title="Recent history" />
-      {recent.length ? (
-        <div className="grid gap-4 lg:grid-cols-3">
-          {recent.map((booking) => (
-            <BookingCard booking={booking} compact key={booking.id} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          body="Your completed and cancelled bookings will live here."
-          title="No booking history"
+      <DashboardSection eyebrow="Past visits" title="Session history">
+        <DashboardHistoryList
+          actionHref="/bookings?tab=past"
+          actionLabel="View all history"
+          emptyBody="Completed and cancelled sessions will appear here."
+          emptyTitle="No session history yet"
+          rows={recent.map((booking) => ({
+            amount: booking.amount_total
+              ? formatMoney(booking.amount_total)
+              : "—",
+            date: new Date(
+              `${booking.scheduled_date}T12:00:00`,
+            ).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }),
+            href: `/booking/${booking.id}`,
+            person: personLabel(booking),
+            service: formatServiceName(booking.service_type),
+            status: booking.status.replaceAll("_", " "),
+          }))}
         />
-      )}
+      </DashboardSection>
     </div>
   );
 }
 
-function Insight({ label, value }: { label: string; value: string }) {
+function NextSessionCard({ booking }: { booking: Booking }) {
+  const waiting = isWaitingForCleanerAcceptance(booking.status);
+  const cleanerVisible = isCleanerVisibleToCustomer(booking.status);
+  const cleanerName = cleanerVisible
+    ? booking.cleaner?.full_name?.split(" ")[0] ?? null
+    : null;
+
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-2 truncate text-2xl font-bold tracking-tight text-foreground">
-        {value}
-      </p>
-    </div>
+    <SessionHighlightCard
+      actions={
+        <>
+          <Link
+            className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+            href={`/booking/${booking.id}`}
+          >
+            Manage session
+          </Link>
+          {cleanerVisible && booking.cleaner_id ? (
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+              href={`/messages/${booking.id}`}
+            >
+              Message
+            </Link>
+          ) : null}
+          <Link
+            className="inline-flex h-11 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+            href={`/booking/${booking.id}`}
+          >
+            {waiting ? "View request" : "Change / cancel"}
+          </Link>
+        </>
+      }
+      meta={[
+        {
+          label: "Date",
+          value: new Date(
+            `${booking.scheduled_date}T12:00:00`,
+          ).toLocaleDateString("en-GB", {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+          }),
+        },
+        { label: "Time", value: booking.scheduled_start_time.slice(0, 5) },
+        {
+          label: "Cleaner",
+          value: cleanerName
+            ? cleanerName
+            : waiting
+              ? "Looking for cleaner"
+              : "TBC",
+        },
+        {
+          label: "Total",
+          value: booking.amount_total
+            ? formatMoney(booking.amount_total)
+            : "—",
+        },
+      ]}
+      personLine={
+        cleanerName
+          ? `With ${cleanerName}`
+          : waiting
+            ? "We are looking for your cleaner"
+            : undefined
+      }
+      photoSrc={sessionPhotoForService(booking.service_type)}
+      statusLabel={waiting ? "Looking for cleaner" : "Confirmed session"}
+      statusTone={waiting ? "waiting" : "confirmed"}
+      title={formatServiceName(booking.service_type)}
+    />
   );
 }
 
-function SectionHeading({ href, title }: { href: string; title: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <h2 className="text-xl font-semibold tracking-tight text-foreground">
-        {title}
-      </h2>
-      <Link
-        className="inline-flex min-h-11 items-center gap-1 px-1 text-sm font-medium text-primary"
-        href={href}
-      >
-        See all <ArrowRight className="h-4 w-4" />
-      </Link>
-    </div>
-  );
+function formatNextSlot(booking: Booking) {
+  return new Date(
+    `${booking.scheduled_date}T${booking.scheduled_start_time}`,
+  ).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function EmptyState({
-  action,
-  body,
-  title,
-}: {
-  action?: string;
-  body: string;
-  title: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-      <h3 className="font-semibold">{title}</h3>
-      <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-      {action ? (
-        <Button asChild className="mt-4" size="sm" variant="outline">
-          <Link href={action}>Start a booking</Link>
-        </Button>
-      ) : null}
-    </div>
-  );
+function personLabel(booking: Booking) {
+  if (
+    isCleanerVisibleToCustomer(booking.status) &&
+    booking.cleaner?.full_name
+  ) {
+    return booking.cleaner.full_name.split(" ")[0]!;
+  }
+  return "—";
 }

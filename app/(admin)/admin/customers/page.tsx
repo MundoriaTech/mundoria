@@ -1,4 +1,5 @@
 import { CustomersTable } from "@/components/admin/customers-table";
+import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = { title: "Customers" };
@@ -46,13 +47,9 @@ export default async function AdminCustomersPage() {
 
   return (
     <div className="min-w-0">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-        Customers
-      </h1>
-      <p className="mb-6 mt-2 text-sm text-muted-foreground sm:mb-7 sm:text-base">
+      <AdminPageIntro>
         Customer accounts and spend. Cleaners are managed separately.
-      </p>
-
+      </AdminPageIntro>
       <CustomersTable customers={customers} />
     </div>
   );

@@ -221,15 +221,15 @@ export function AdminAlerts({
       <Button
         aria-expanded={open}
         aria-label="Admin alerts"
-        className="relative h-11 w-11"
+        className="relative h-10 w-10 rounded-full border border-[#e4daf5] bg-white text-[#1c133b] hover:bg-[#f0e9fb]"
         onClick={() => setOpen(!open)}
         ref={triggerRef}
         size="icon"
         variant="ghost"
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-4 w-4" />
         {unread ? (
-          <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d4694a] px-1 text-[10px] font-bold text-white">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}

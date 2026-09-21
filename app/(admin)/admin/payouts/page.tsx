@@ -29,14 +29,9 @@ export default async function AdminPayoutsPage() {
   return (
     <div className="min-w-0">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Payouts
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            Review and process cleaner transfers.
-          </p>
-        </div>
+        <p className="max-w-xl text-sm leading-6 text-[#5a5470] sm:text-base">
+          Review and process cleaner transfers.
+        </p>
         <div className="w-full sm:w-auto">
           <ProcessPayoutsButton />
         </div>
@@ -50,7 +45,7 @@ export default async function AdminPayoutsPage() {
       <div className="mt-6 space-y-3 md:hidden">
         {payouts.map((item) => (
           <div
-            className="rounded-xl border border-border bg-card p-4"
+            className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-4 shadow-[0_8px_20px_rgba(49,44,121,0.04)]"
             key={item.id}
           >
             <div className="flex items-start justify-between gap-3">
@@ -86,17 +81,17 @@ export default async function AdminPayoutsPage() {
         ) : null}
       </div>
 
-      <div className="mt-6 hidden overflow-x-auto rounded-xl border bg-card md:block">
+      <div className="mt-6 hidden overflow-x-auto rounded-[1.25rem] border border-[#e8e0f4] bg-white shadow-[0_8px_20px_rgba(49,44,121,0.04)] md:block">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
-            <tr className="bg-muted/50 text-left">
-              <th className="p-3">Cleaner</th>
-              <th>Period</th>
-              <th>Jobs</th>
-              <th>Gross</th>
-              <th>Net</th>
-              <th>Status</th>
-              <th>Transfer ID</th>
+            <tr className="bg-[#f7f4fb] text-left text-[#5a5470]">
+              <th className="p-3 font-semibold">Cleaner</th>
+              <th className="font-semibold">Period</th>
+              <th className="font-semibold">Jobs</th>
+              <th className="font-semibold">Gross</th>
+              <th className="font-semibold">Net</th>
+              <th className="font-semibold">Status</th>
+              <th className="font-semibold">Transfer ID</th>
             </tr>
           </thead>
           <tbody>
@@ -126,9 +121,13 @@ export default async function AdminPayoutsPage() {
 
 function Card({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border bg-card p-4 sm:p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
+    <div className="rounded-[1.25rem] border border-[#e8e0f4] bg-[#efe6ff] p-4 sm:p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-[#1c133b]">
+        {value}
+      </p>
     </div>
   );
 }

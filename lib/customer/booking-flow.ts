@@ -169,6 +169,10 @@ export function getFlowSteps(
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
   const isOffice = draft.serviceType === "office";
+  const category = draft.serviceType
+    ? serviceDefinition(draft.serviceType).category
+    : draft.serviceCategory;
+  const isCommercial = category === "commercial";
 
   // Always keep category + service in the flow so Back can revisit them.
   steps.push("category", "service");
@@ -188,8 +192,11 @@ export function getFlowSteps(
     }
   }
 
-  steps.push("addons");
-  steps.push("pets");
+  // Home-style personalisation — not for commercial premises.
+  if (!isCommercial) {
+    steps.push("addons");
+    steps.push("pets");
+  }
 
   if (propertyQuestionModeFor(draft.serviceType) === "recovery") {
     steps.push("preferences");

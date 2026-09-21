@@ -43,21 +43,18 @@ export default async function AdminTeamPage() {
 
   return (
     <div className="space-y-7">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Team</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Admins who can review cleaners, bookings, and payouts. Invite new
-          people here — accounts cannot self-register.
-        </p>
-      </div>
+      <p className="max-w-2xl text-sm leading-6 text-[#5a5470] sm:text-base">
+        Admins who can review cleaners, bookings, and payouts. Invite new people
+        here — accounts cannot self-register.
+      </p>
 
       <AdminProfileForm initialProfile={me as Profile} />
 
-      <section className="rounded-xl border border-border bg-card p-5">
+      <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h2 className="font-semibold">Administrators</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h2 className="font-semibold text-[#1c133b]">Administrators</h2>
+            <p className="mt-1 text-sm text-[#5a5470]">
               {admins?.length ?? 0} active account
               {(admins?.length ?? 0) === 1 ? "" : "s"}
             </p>

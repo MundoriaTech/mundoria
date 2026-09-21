@@ -12,17 +12,14 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="space-y-7">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Settings</h1>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-          Fees, matching defaults, and other platform rules. Manage admin
-          accounts on the{" "}
-          <Link className="font-medium text-primary" href="/admin/team">
-            Team
-          </Link>{" "}
-          page.
-        </p>
-      </div>
+      <p className="max-w-2xl text-sm leading-6 text-[#5a5470] sm:text-base">
+        Fees, matching defaults, and other platform rules. Manage admin accounts
+        on the{" "}
+        <Link className="font-semibold text-[#6a45b8]" href="/admin/team">
+          Team
+        </Link>{" "}
+        page.
+      </p>
       <SettingsForm initial={settings} />
     </div>
   );

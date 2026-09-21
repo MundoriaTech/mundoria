@@ -6,15 +6,11 @@ import {
   MessageCircle,
   UserRound,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { NotificationBell } from "@/components/customer/notification-bell";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
+import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
-import { UserAvatar } from "@/components/shared/user-avatar";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
 
@@ -25,10 +21,10 @@ interface CustomerShellProps {
 }
 
 const navItems = [
-  { href: "/dashboard", icon: Home, label: "Home" },
-  { href: "/bookings", icon: CalendarDays, label: "Bookings" },
+  { exact: true, href: "/dashboard", icon: Home, label: "Home" },
+  { href: "/bookings", icon: CalendarDays, label: "Sessions" },
   { href: "/messages", icon: MessageCircle, label: "Messages" },
-  { href: "/profile", icon: UserRound, label: "Profile" },
+  { href: "/profile", icon: UserRound, label: "Account" },
 ];
 
 export function CustomerShell({
@@ -36,71 +32,24 @@ export function CustomerShell({
   initialNotifications,
   profile,
 }: CustomerShellProps) {
-  const pathname = usePathname();
-
   return (
-    <div className="min-h-screen bg-background pb-[calc(4rem+env(safe-area-inset-bottom)+1rem)]">
+    <>
       <SessionTimeoutGuard audience="customer" />
       <OneSignalEnroll />
-      <header className="sticky top-0 z-30 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="min-w-0">
-            <Link className="flex items-center gap-3" href="/dashboard">
-              <span className="truncate text-xl font-black tracking-[-0.06em] text-foreground">
-                Mundoria
-              </span>
-            </Link>
-          </div>
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <ThemeToggle className="h-11 w-11" />
-            <NotificationBell
-              initialNotifications={initialNotifications}
-              userId={profile.id}
-            />
-            <Link
-              aria-label="Open profile"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full ring-offset-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              href="/profile"
-            >
-              <UserAvatar
-                name={profile.full_name}
-                seed={profile.id}
-                size="sm"
-                url={profile.avatar_url}
-              />
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <AppDashboardShell
+        brandHref="/dashboard"
+        headerExtra={
+          <NotificationBell
+            initialNotifications={initialNotifications}
+            userId={profile.id}
+          />
+        }
+        navItems={navItems}
+        profile={profile}
+        roleLabel="Customer"
+      >
         {children}
-      </div>
-
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
-        <div className="mx-auto grid h-16 max-w-lg grid-cols-4">
-          {navItems.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
-            const Icon = item.icon;
-
-            return (
-              <Link
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors",
-                  active ? "text-primary" : "text-muted-foreground",
-                )}
-                href={item.href}
-                key={item.href}
-              >
-                <Icon className="h-5 w-5" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-    </div>
+      </AppDashboardShell>
+    </>
   );
 }

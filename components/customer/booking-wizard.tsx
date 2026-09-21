@@ -327,7 +327,7 @@ export function BookingWizard({
           // Deep-link / category seed always wins over a stale draft service.
           ...(initialDraft ?? {}),
           alternateTimes: sameService
-            ? (parsed?.alternateTimes ?? [])
+            ? (parsed?.alternateTimes ?? []).slice(0, 6)
             : [],
           selectedAddOns: sameService ? (parsed?.selectedAddOns ?? []) : [],
           scheduledDate: sameService ? (parsed?.scheduledDate ?? "") : "",
@@ -2263,7 +2263,9 @@ function TimeStep({
   ) => void;
 }) {
   const [showFlexPrompt, setShowFlexPrompt] = useState(false);
+  const [slotLimitHint, setSlotLimitHint] = useState(false);
   const flexPromptSeenRef = useRef(false);
+  const maxTimeSlots = 7; // 1 preferred + up to 6 alternates (schema limit)
 
   const allowedSlots = useMemo(
     () => slotsFinishingByWindowEnd(durationHours),
@@ -2283,10 +2285,13 @@ function TimeStep({
     if (draft.scheduledTime && !allowed.has(draft.scheduledTime)) {
       update("scheduledTime", "");
     }
-    const nextAlternates = draft.alternateTimes.filter((slot) =>
-      allowed.has(slot),
-    );
-    if (nextAlternates.length !== draft.alternateTimes.length) {
+    const nextAlternates = draft.alternateTimes
+      .filter((slot) => allowed.has(slot))
+      .slice(0, maxTimeSlots - 1);
+    if (
+      nextAlternates.length !== draft.alternateTimes.length ||
+      nextAlternates.some((slot, index) => slot !== draft.alternateTimes[index])
+    ) {
       update("alternateTimes", nextAlternates);
     }
     // Clamp when duration (allowed set) changes; update is stable enough for this step.
@@ -2294,7 +2299,9 @@ function TimeStep({
   }, [allowed, draft.alternateTimes, draft.scheduledTime]);
 
   function applySelection(slots: string[]) {
-    const unique = Array.from(new Set(slots.filter((slot) => allowed.has(slot))));
+    const unique = Array.from(
+      new Set(slots.filter((slot) => allowed.has(slot))),
+    ).slice(0, maxTimeSlots);
     update("scheduledTime", unique[0] ?? "");
     update("alternateTimes", unique.slice(1));
   }
@@ -2303,9 +2310,15 @@ function TimeStep({
     if (!allowed.has(slot)) return;
     const wasEmpty = selectedSlots.length === 0;
     if (selectedSlots.includes(slot)) {
+      setSlotLimitHint(false);
       applySelection(selectedSlots.filter((item) => item !== slot));
       return;
     }
+    if (selectedSlots.length >= maxTimeSlots) {
+      setSlotLimitHint(true);
+      return;
+    }
+    setSlotLimitHint(false);
     applySelection([...selectedSlots, slot]);
     if (wasEmpty && !flexPromptSeenRef.current) {
       flexPromptSeenRef.current = true;
@@ -2371,6 +2384,12 @@ function TimeStep({
         onChange={toggleSlot}
         values={selectedSlots}
       />
+      {slotLimitHint ? (
+        <p className="mt-3 text-sm font-medium text-[#5a5470]">
+          You can select up to {maxTimeSlots} time slots. Deselect one to add
+          another.
+        </p>
+      ) : null}
 
       {showFlexPrompt ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -2520,6 +2539,7 @@ function CheckoutStep({
       const payload = {
         ...draft,
         addressId: savedAddress.id,
+        alternateTimes: draft.alternateTimes.slice(0, 6),
         guestAddress: null,
         specialInstructions: composeBookingNotes(draft),
       };

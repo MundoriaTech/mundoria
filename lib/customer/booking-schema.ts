@@ -67,7 +67,7 @@ export const bookingDraftSchema = z.object({
     .nullable(),
   customRecurrenceDates: z
     .array(z.string().date())
-    .max(24)
+    .max(24, "You can select up to 24 custom dates.")
     .default([]),
   recommendationOutcome: z
     .enum(["not_shown", "accepted", "overridden", "auto_applied"])
@@ -76,19 +76,25 @@ export const bookingDraftSchema = z.object({
   recommendedServiceType: serviceType.nullable().default(null),
   recentlyMoved: z.boolean().nullable().default(null),
   hasPets: z.boolean().nullable().default(null),
-  petTypes: z.array(z.string().trim().min(1)).max(8).default([]),
+  petTypes: z
+    .array(z.string().trim().min(1))
+    .max(8, "Please choose up to 8 pet types.")
+    .default([]),
   scheduledDate: z.string().date(),
   scheduledTime: z.string().regex(/^\d{2}:\d{2}$/),
   alternateTimes: z
     .array(z.string().regex(/^\d{2}:\d{2}$/))
-    .max(6)
+    .max(6, "Please choose up to 7 time slots (one preferred, plus alternatives).")
     .default([]),
   estimatedDurationHours: z.number().min(1).max(12),
   selectedAddOns: z.array(z.string().trim().min(1)).default([]),
   serviceCategory,
   serviceType,
   specialAttentionAreas: z.array(z.string().trim().min(1)).default([]),
-  specialInstructions: z.string().trim().max(2000),
+  specialInstructions: z
+    .string()
+    .trim()
+    .max(2000, "Please keep special instructions under 2,000 characters."),
   officeSpaces: z
     .array(
       z.object({
