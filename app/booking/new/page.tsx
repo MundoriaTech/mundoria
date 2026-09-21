@@ -64,13 +64,21 @@ function focusServicesFromSearchParams(focus?: string): ServiceType[] | undefine
   return undefined;
 }
 
+function safeReturnTo(value?: string) {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
 export default async function NewBookingPage({
   searchParams,
 }: {
   searchParams: {
     category?: string;
     focus?: string;
+    fresh?: string;
     rebook?: string;
+    returnTo?: string;
     service?: string;
   };
 }) {
@@ -84,6 +92,8 @@ export default async function NewBookingPage({
     searchParams,
   );
   const focusServices = focusServicesFromSearchParams(searchParams.focus);
+  const fresh = searchParams.fresh === "1" || searchParams.fresh === "true";
+  const returnTo = safeReturnTo(searchParams.returnTo);
 
   if (user) {
     const { data } = await supabase
@@ -124,8 +134,10 @@ export default async function NewBookingPage({
   return (
     <BookingWizard
       focusServices={focusServices}
+      fresh={fresh}
       initialAddresses={addresses}
       initialDraft={initialDraft}
+      returnTo={returnTo}
       userId={user?.id ?? null}
     />
   );

@@ -182,13 +182,17 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
 
 export function BookingWizard({
   focusServices,
+  fresh = false,
   initialAddresses,
   initialDraft,
+  returnTo = null,
   userId,
 }: {
   focusServices?: ServiceType[];
+  fresh?: boolean;
   initialAddresses: Address[];
   initialDraft?: Partial<BookingDraft>;
+  returnTo?: string | null;
   userId: string | null;
 }) {
   const router = useRouter();
@@ -301,6 +305,21 @@ export function BookingWizard({
 
   useEffect(() => {
     try {
+      if (fresh) {
+        window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+        window.localStorage.removeItem(BOOKING_STEP_KEY);
+        setDraft({
+          ...blankDraft,
+          ...initialDraft,
+          alternateTimes: initialDraft?.alternateTimes ?? [],
+        });
+        if (initialDraft?.serviceType) setStepIndex(2);
+        else if (initialDraft?.serviceCategory) setStepIndex(1);
+        else setStepIndex(0);
+        setHydrated(true);
+        return;
+      }
+
       const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
       const storedStep = Number(
         window.localStorage.getItem(BOOKING_STEP_KEY) ?? "",
@@ -467,6 +486,10 @@ export function BookingWizard({
       return;
     }
     if (stepIndex === 0) {
+      if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+        router.push(returnTo);
+        return;
+      }
       const categoryExit: Partial<Record<string, string>> = {
         residential: "/cleaning/residential",
         moving_home: "/cleaning/moving-home",

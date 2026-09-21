@@ -21,7 +21,7 @@ export function JobFeed({
   assigned: CleanerJob[];
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"available" | "upcoming" | "past">(
+  const [tab, setTab] = useState<"available" | "upcoming" | "past" | "cancelled">(
     "available",
   );
   const [now, setNow] = useState(Date.now());
@@ -36,11 +36,11 @@ export function JobFeed({
     () =>
       tab === "available"
         ? available
-        : assigned.filter((job) =>
-            tab === "past"
-              ? ["completed", "cancelled"].includes(job.status)
-              : !["completed", "cancelled"].includes(job.status),
-          ),
+        : assigned.filter((job) => {
+            if (tab === "cancelled") return job.status === "cancelled";
+            if (tab === "past") return job.status === "completed";
+            return !["completed", "cancelled"].includes(job.status);
+          }),
     [assigned, available, tab],
   );
 
@@ -84,7 +84,7 @@ export function JobFeed({
   return (
     <div>
       <div className="mb-6 flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
-        {(["available", "upcoming", "past"] as const).map((item) => (
+        {(["available", "upcoming", "past", "cancelled"] as const).map((item) => (
           <Button
             className="min-h-11 min-w-[5.5rem] flex-1 capitalize sm:min-w-0"
             key={item}

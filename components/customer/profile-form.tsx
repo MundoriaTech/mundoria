@@ -6,6 +6,7 @@ import {
   CreditCard,
   LogOut,
   MapPin,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,6 +25,9 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
   const [profile, setProfile] = useState(initialProfile);
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   async function saveProfile(event: React.FormEvent) {
     event.preventDefault();
@@ -67,6 +71,29 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
     await createBrowserClient().auth.signOut();
     router.replace("/login");
     router.refresh();
+  }
+
+  async function deleteAccount() {
+    setDeleting(true);
+    setStatus(null);
+    try {
+      const response = await fetch("/api/account/delete", {
+        body: JSON.stringify({ confirmation: deleteConfirm.trim() }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (!response.ok) {
+        setStatus(result.error ?? "Could not delete your account.");
+        return;
+      }
+      router.replace("/?account=deleted");
+      router.refresh();
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -238,9 +265,66 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
               <LogOut className="mr-2 h-4 w-4" />
               Log out
             </Button>
+            <Button
+              className="justify-start text-destructive"
+              onClick={() => {
+                setDeleteOpen(true);
+                setDeleteConfirm("");
+                setStatus(null);
+              }}
+              variant="ghost"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete account
+            </Button>
           </div>
         </section>
       </div>
+
+      {deleteOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-md rounded-[1.5rem] bg-white p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold text-[#1c133b]">
+              Delete your Mundoria account?
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+              This removes your personal details and signs you out. Cancel any
+              upcoming sessions first. Type{" "}
+              <span className="font-semibold text-[#1c133b]">DELETE</span> to
+              confirm.
+            </p>
+            <Input
+              className="mt-4"
+              onChange={(event) => setDeleteConfirm(event.target.value)}
+              placeholder="DELETE"
+              value={deleteConfirm}
+            />
+            {status ? (
+              <p className="mt-3 text-sm text-destructive">{status}</p>
+            ) : null}
+            <div className="mt-5 flex justify-end gap-2">
+              <Button
+                onClick={() => {
+                  setDeleteOpen(false);
+                  setStatus(null);
+                }}
+                type="button"
+                variant="outline"
+              >
+                Keep account
+              </Button>
+              <Button
+                disabled={deleting || deleteConfirm.trim() !== "DELETE"}
+                onClick={() => void deleteAccount()}
+                type="button"
+                variant="destructive"
+              >
+                {deleting ? "Deleting…" : "Delete forever"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

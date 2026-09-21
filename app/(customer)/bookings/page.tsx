@@ -14,18 +14,19 @@ export default async function CustomerBookingsPage({
     data: { user },
   } = await supabase.auth.getUser();
   const bookings = await getCustomerBookings(supabase, user!.id);
+  const tab =
+    searchParams.tab === "past" || searchParams.tab === "cancelled"
+      ? searchParams.tab
+      : "upcoming";
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold tracking-tight">Your bookings</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">Your sessions</h1>
       <p className="mt-2 text-muted-foreground">
-        Keep an eye on upcoming cleans or revisit previous jobs.
+        Upcoming cleans, completed visits, and cancelled sessions.
       </p>
       <div className="mt-8">
-        <BookingsList
-          bookings={bookings}
-          initialTab={searchParams.tab === "past" ? "past" : "upcoming"}
-        />
+        <BookingsList bookings={bookings} initialTab={tab} />
       </div>
     </div>
   );

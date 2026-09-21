@@ -119,9 +119,9 @@ export function DashboardGreeting({ firstName }: { firstName: string }) {
           asChild
           className="bg-[#ffc79f] font-bold text-[#221f50] hover:bg-[#ffd4b8]"
         >
-          <Link href="/booking/new">
+          <Link href="/booking/new?fresh=1&returnTo=/dashboard">
             <Plus className="mr-2 h-4 w-4" />
-            Book a cleaner
+            Book a session
           </Link>
         </Button>
         <Button

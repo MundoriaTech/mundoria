@@ -21,6 +21,8 @@ import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
 import type { Booking } from "@/types/customer";
 
+const DASHBOARD_BOOK_HREF = "/booking/new?fresh=1&returnTo=/dashboard";
+
 export const metadata = { title: "Customer dashboard" };
 
 export default async function CustomerDashboardPage() {
@@ -50,9 +52,6 @@ export default async function CustomerDashboardPage() {
     .reverse()
     .slice(0, 5);
   const completedCount = bookings.filter((b) => b.status === "completed").length;
-  const totalSpent = bookings
-    .filter((b) => b.status === "completed" && b.payment_status === "released")
-    .reduce((sum, b) => sum + Number(b.amount_total ?? 0), 0);
   const next = upcoming[0] ?? null;
   const customer = profile as Profile;
   const firstName = customer.full_name.trim().split(/\s+/)[0] || "there";
@@ -64,10 +63,10 @@ export default async function CustomerDashboardPage() {
           <>
             <Link
               className="inline-flex h-9 items-center justify-center rounded-full bg-white px-3.5 text-xs font-semibold text-[#1c133b] shadow-[0_8px_20px_rgba(28,19,59,0.16)] transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
-              href="/booking/new"
+              href={DASHBOARD_BOOK_HREF}
             >
               <Plus className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
-              Book a cleaner
+              Book a session
             </Link>
             <Link
               className="inline-flex h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/18 sm:h-12 sm:px-6 sm:text-sm"
@@ -96,12 +95,6 @@ export default async function CustomerDashboardPage() {
             value: String(completedCount),
           },
           {
-            icon: "currencyGbp",
-            label: "Total spent",
-            tone: "lineOnly",
-            value: totalSpent ? formatMoney(totalSpent) : "£0",
-          },
-          {
             icon: "calendarCheck",
             label: "Next clean",
             value: next ? formatNextSlot(next) : "Not set",
@@ -116,7 +109,7 @@ export default async function CustomerDashboardPage() {
           <DashboardEmptyCard
             action={
               <Button asChild className="rounded-full bg-[#1c133b] hover:bg-[#312c79]">
-                <Link href="/booking/new">Start a booking</Link>
+                <Link href={DASHBOARD_BOOK_HREF}>Start a booking</Link>
               </Button>
             }
             body="When you book, you’ll see a session card here — status, cleaner, and quick actions."
@@ -167,6 +160,17 @@ export default async function CustomerDashboardPage() {
             status: booking.status.replaceAll("_", " "),
           }))}
         />
+        {bookings.some((booking) => booking.status === "cancelled") ? (
+          <p className="pt-2 text-sm text-[#5a5470]">
+            Looking for cancelled sessions?{" "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href="/bookings?tab=cancelled"
+            >
+              View cancelled
+            </Link>
+          </p>
+        ) : null}
       </DashboardSection>
     </div>
   );
