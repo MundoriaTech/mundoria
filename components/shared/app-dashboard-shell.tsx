@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
-import { AccountMenu } from "@/components/shared/account-menu";
+import {
+  AccountMenu,
+  type AccountMenuItem,
+} from "@/components/shared/account-menu";
 import { cn } from "@/lib/utils";
 
 export type AppShellNavItem = {
@@ -25,11 +28,7 @@ export function AppDashboardShell({
   profile,
   topSlot,
 }: {
-  accountMenuItems: Array<{
-    href: string;
-    icon: LucideIcon;
-    label: string;
-  }>;
+  accountMenuItems: AccountMenuItem[];
   brandHref: string;
   brandLabel?: string;
   children: React.ReactNode;

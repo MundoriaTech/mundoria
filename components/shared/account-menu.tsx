@@ -6,6 +6,7 @@ import {
   LogOut,
   MapPin,
   UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,9 +16,9 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-type AccountMenuItem = {
+export type AccountMenuItem = {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   label: string;
 };
 
