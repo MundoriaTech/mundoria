@@ -1,8 +1,9 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type LucideIcon } from "react";
+import { useEffect, useState } from "react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
