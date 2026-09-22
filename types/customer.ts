@@ -199,12 +199,22 @@ export interface Notification {
   created_at: string;
 }
 
+export type MessageAttachmentType = "image" | "video";
+
+export interface MessageAttachment {
+  url: string;
+  type: MessageAttachmentType;
+  mime: string;
+  name?: string;
+}
+
 export interface Message {
   id: string;
   booking_id: string;
   sender_id: string;
   receiver_id: string;
   content: string;
+  attachments?: MessageAttachment[];
   is_read: boolean;
   created_at: string;
   sender?: {
@@ -256,6 +266,10 @@ export interface BookingDraft {
   isRecurring: boolean;
   recurrencePattern: "weekly" | "fortnightly" | "monthly" | "custom" | null;
   preferSameCleaner: boolean;
+  /** When rebooking: keep this cleaner preferred for matching, if available. */
+  preferredCleanerId: string | null;
+  /** Explicit rebook answer — null until the customer chooses. */
+  rebookCleanerChoice: "same" | "new" | null;
   /** Extra visit dates when recurrencePattern is custom. */
   customRecurrenceDates: string[];
   /** Whether pets are present at the property (null = not answered). */

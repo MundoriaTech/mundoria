@@ -1,19 +1,15 @@
 "use client";
 
 import {
-  CalendarDays,
-  Check,
-  Clock3,
   Hourglass,
-  MapPin,
   MessageCircle,
-  ShieldCheck,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { BookingSummaryCard } from "@/components/customer/booking-basket";
 import { CleanerMap } from "@/components/customer/cleaner-map";
 import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
 import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
@@ -355,67 +351,40 @@ export function BookingDetail({
       ) : null}
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-        <section className="rounded-xl border bg-background p-4 sm:p-5">
-          <h2 className="text-lg font-semibold">Booking details</h2>
-          <div className="mt-5 space-y-4 text-sm">
-            <Detail
-              icon={ShieldCheck}
-              label="Cleaning standard"
-              value={standardLabel(booking.cleaning_standard ?? "enhanced")}
-            />
-            <Detail
-              icon={CalendarDays}
-              label="Date"
-              value={new Date(
-                `${booking.scheduled_date}T12:00:00`,
-              ).toLocaleDateString("en-GB", {
-                dateStyle: "long",
-              })}
-            />
-            <Detail
-              icon={Clock3}
-              label="Time"
-              value={booking.scheduled_start_time.slice(0, 5)}
-            />
-            <Detail
-              icon={MapPin}
-              label="Address"
-              value={
-                booking.address
-                  ? `${booking.address.address_line_1}, ${booking.address.city}, ${booking.address.postcode}`
-                  : "Unavailable"
-              }
-            />
-            {booking.special_attention_areas?.length ? (
-              <Detail
-                icon={Check}
-                label="Special attention"
-                value={booking.special_attention_areas.join(", ")}
-              />
-            ) : null}
-            {booking.add_ons?.length ? (
-              <Detail
-                icon={Check}
-                label="Add-ons"
-                value={booking.add_ons
-                  .map((addOn) => `${addOn.label} (${formatMoney(addOn.amount)})`)
-                  .join(", ")}
-              />
-            ) : null}
-            <Detail
-              icon={ShieldCheck}
-              label="Booking total"
-              value={formatMoney(booking.amount_total)}
-            />
-            <Detail
-              icon={ShieldCheck}
-              label="Payment status"
-              value={paymentStatusLabel(booking.payment_status)}
-            />
+        <div className="space-y-4">
+          <BookingSummaryCard
+            addOns={(booking.add_ons ?? []).map((addOn) => ({
+              amount: addOn.amount,
+              label: addOn.label,
+            }))}
+            address={booking.address ?? null}
+            amount={
+              booking.amount_total != null ? Number(booking.amount_total) : null
+            }
+            bathrooms={booking.address?.num_bathrooms ?? null}
+            bedrooms={booking.address?.num_bedrooms ?? null}
+            durationHours={booking.estimated_duration_hours}
+            frequencyLabel={frequencyLabelForBooking(booking)}
+            hasPets={petsFromNotes(booking.special_instructions)}
+            priorityAreas={booking.special_attention_areas ?? []}
+            scheduledDate={booking.scheduled_date}
+            scheduledTime={booking.scheduled_start_time}
+            serviceLabel={formatServiceName(booking.service_type)}
+            standardLabel={standardLabel(booking.cleaning_standard ?? "enhanced")}
+            title="Booking details"
+          />
+
+          <div className="rounded-[1.25rem] bg-[#f3f3f5] px-5 py-4 text-sm text-[#5a5470]">
+            <div className="flex items-center justify-between gap-3 text-[#1c133b]">
+              <span className="font-semibold">Payment</span>
+              <span className="font-semibold">
+                {paymentStatusLabel(booking.payment_status)}
+              </span>
+            </div>
             {["completed", "awaiting_customer_confirmation"].includes(
               booking.status,
             ) || booking.payment_status === "released" ? (
-              <div className="pt-1">
+              <div className="mt-3">
                 <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
                   <Link href={`/booking/${booking.id}/receipt`}>
                     View receipt / invoice
@@ -423,19 +392,19 @@ export function BookingDetail({
                 </Button>
               </div>
             ) : booking.payment_status === "held" ? (
-              <p className="pt-1 text-xs text-muted-foreground">
+              <p className="mt-2 text-xs text-[#8b8798]">
                 Your receipt becomes available after the clean when payment is
                 captured.
               </p>
             ) : null}
           </div>
-        </section>
+        </div>
 
-        <section className="rounded-xl border bg-background p-4 sm:p-5">
-          <h2 className="text-lg font-semibold">Your cleaner</h2>
+        <section className="overflow-hidden rounded-[1.25rem] bg-[#f3f3f5] p-4 sm:p-5">
+          <h2 className="text-base font-bold text-[#1c133b]">Your cleaner</h2>
           {cleanerVisible && booking.cleaner ? (
             <div className="mt-5 flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-lg font-bold text-primary">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white text-lg font-bold text-[#6a45b8]">
                 {booking.cleaner.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -448,24 +417,26 @@ export function BookingDetail({
                 )}
               </div>
               <div className="min-w-0">
-                <p className="truncate font-semibold">{booking.cleaner.full_name}</p>
+                <p className="truncate font-semibold text-[#1c133b]">
+                  {booking.cleaner.full_name}
+                </p>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold capitalize text-amber-800">
+                  <span className="rounded-full bg-[#efe6ff] px-2 py-0.5 text-xs font-semibold capitalize text-[#6a45b8]">
                     {cleanerTierLabel(booking.cleaner.tier)}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-[#8b8798]">
                     Mundoria medallion
                   </span>
                 </div>
               </div>
             </div>
           ) : waitingForCleaner ? (
-            <p className="mt-4 text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-[#5a5470]">
               We’re looking for your cleaner. You’ll see their details once your
               session is confirmed.
             </p>
           ) : (
-            <p className="mt-4 text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-[#5a5470]">
               Cleaner details will appear here once your session is confirmed.
             </p>
           )}
@@ -662,24 +633,20 @@ function LookingForCleanerCard({
   );
 }
 
-function Detail({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex min-w-0 gap-3">
-      <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-0.5 break-words font-medium">{value}</p>
-      </div>
-    </div>
-  );
+function frequencyLabelForBooking(booking: Booking) {
+  if (!booking.is_recurring) return "Once";
+  if (booking.recurrence_pattern === "weekly") return "Once a week";
+  if (booking.recurrence_pattern === "fortnightly") return "Once a fortnight";
+  if (booking.recurrence_pattern === "monthly") return "Once a month";
+  if (booking.recurrence_pattern === "custom") return "Custom calendar";
+  return "Recurring";
+}
+
+function petsFromNotes(notes: string | null) {
+  if (!notes) return null;
+  if (/pets present/i.test(notes)) return true;
+  if (/no pets/i.test(notes)) return false;
+  return null;
 }
 
 function Modal({

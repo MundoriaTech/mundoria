@@ -2,6 +2,7 @@ import { addDays, format } from "date-fns";
 import { NextResponse } from "next/server";
 
 import { isAuthorizedCron } from "@/lib/cron/auth";
+import { ensureUpcomingRecurringFollowOns } from "@/lib/bookings/recurring";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import {
   createInAppNotification,
@@ -12,8 +13,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatServiceName } from "@/lib/customer/services";
 
 /**
- * Reminds customers and prepares PaymentIntents for unpaid recurring visits
- * scheduled between T−7 and T−2 days from now.
+ * Rolls forward the next unpaid recurring visit when needed, then reminds
+ * customers and prepares PaymentIntents for visits in the T−7…T−2 window.
  */
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
@@ -21,6 +22,14 @@ export async function GET(request: Request) {
   }
 
   const admin = createAdminClient();
+
+  let rolled = { created: 0 };
+  try {
+    rolled = await ensureUpcomingRecurringFollowOns(admin);
+  } catch {
+    // Payment prep should still run even if roll-forward fails.
+  }
+
   const today = new Date();
   const from = format(addDays(today, 2), "yyyy-MM-dd");
   const to = format(addDays(today, 7), "yyyy-MM-dd");
@@ -112,6 +121,7 @@ export async function GET(request: Request) {
     failures: failures.length,
     prepared,
     reminded,
+    rolledForward: rolled.created,
     scanned: bookings?.length ?? 0,
   });
 }

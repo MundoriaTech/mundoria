@@ -14,6 +14,7 @@ import type {
 } from "@/types/customer";
 
 export type BookingFlowStepId =
+  | "cleaner"
   | "category"
   | "service"
   | "address"
@@ -33,6 +34,7 @@ export type FrequencyMode = "none" | "optional" | "required_recurring";
 export type PropertyQuestionMode = "home" | "commercial" | "moving" | "recovery";
 
 const STEP_LABELS: Record<BookingFlowStepId, string> = {
+  cleaner: "Cleaner",
   category: "Category",
   service: "Service",
   address: "Address",
@@ -166,6 +168,7 @@ export function getFlowSteps(
     BookingDraft,
     "serviceCategory" | "serviceType" | "recurrencePattern"
   >,
+  options?: { includeCleanerChoice?: boolean },
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
   const isOffice = draft.serviceType === "office";
@@ -173,6 +176,11 @@ export function getFlowSteps(
     ? serviceDefinition(draft.serviceType).category
     : draft.serviceCategory;
   const isCommercial = category === "commercial";
+
+  // Rebook: ask to keep the previous cleaner before the rest of the flow.
+  if (options?.includeCleanerChoice) {
+    steps.push("cleaner");
+  }
 
   // Always keep category + service in the flow so Back can revisit them.
   steps.push("category", "service");

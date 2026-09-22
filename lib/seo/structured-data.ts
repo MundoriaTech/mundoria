@@ -20,7 +20,7 @@ export function organizationSchema() {
     description:
       "Mundoria connects UK customers with independent cleaning professionals for homes, workplaces and short-term rentals.",
     email: SUPPORT_EMAIL,
-    logo: absoluteUrl("/images/brand/mundoria-logo.png"),
+    logo: absoluteUrl("/images/brand/mundoria-wordmark.png"),
     name: "Mundoria UK",
     sameAs: [],
     url: absoluteUrl("/"),

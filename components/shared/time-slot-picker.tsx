@@ -49,6 +49,7 @@ export function TimeSlotPicker({
   date,
   formatSlotPrice,
   onChange,
+  primaryValue,
   value,
   values,
 }: {
@@ -58,6 +59,11 @@ export function TimeSlotPicker({
   /** Optional price label per slot (e.g. "£62"). */
   formatSlotPrice?: (slot: string) => string | null;
   onChange: (slot: string) => void;
+  /**
+   * Preferred / main time when using multi-select `values`.
+   * Coloured differently from alternate (extra) slots.
+   */
+  primaryValue?: string | null;
   value?: string;
   /** When set, highlight multiple selected slots (flexible availability). */
   values?: string[];
@@ -74,6 +80,12 @@ export function TimeSlotPicker({
   const selectedSet = new Set(
     values?.length ? values : value ? [value] : [],
   );
+  const preferred =
+    primaryValue && selectedSet.has(primaryValue)
+      ? primaryValue
+      : values?.length
+        ? values[0]
+        : value ?? null;
 
   return (
     <div
@@ -85,13 +97,24 @@ export function TimeSlotPicker({
       {dayWindowSlots.map((slot) => {
         const enabled = available.has(slot);
         const selected = selectedSet.has(slot);
+        const isPreferred = selected && preferred === slot;
+        const isAlternate = selected && !isPreferred;
         const priceLabel = formatSlotPrice?.(slot) ?? null;
         return (
           <button
+            aria-label={
+              isPreferred
+                ? `${slot}, preferred time`
+                : isAlternate
+                  ? `${slot}, extra time`
+                  : slot
+            }
             aria-pressed={selected}
             className={cn(
               "flex min-h-12 flex-col items-center justify-center rounded-xl bg-[#f3f3f5] px-1.5 py-2 text-sm text-[#1c133b] transition-colors touch-manipulation sm:px-2",
-              selected &&
+              isPreferred &&
+                "border-2 border-transparent bg-[#ff5274] font-semibold text-white",
+              isAlternate &&
                 "border-2 border-transparent bg-[#6a45b8] font-semibold text-white",
               !selected && enabled && "hover:bg-[#ececef]",
               !enabled &&

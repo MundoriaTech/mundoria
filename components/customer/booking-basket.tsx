@@ -90,10 +90,7 @@ function BasketSection({
       <div className="flex w-full items-center gap-1 px-2 py-2 sm:px-3">
         <button
           className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 text-left touch-manipulation hover:bg-white/60"
-          onClick={() => {
-            if (onEdit) onEdit();
-            else onToggle();
-          }}
+          onClick={onToggle}
           type="button"
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[#6a45b8]">
@@ -108,6 +105,15 @@ function BasketSection({
             </span>
           ) : null}
         </button>
+        {onEdit ? (
+          <button
+            className="shrink-0 rounded-full px-2.5 py-1.5 text-xs font-semibold text-[#6a45b8] touch-manipulation hover:bg-white/60"
+            onClick={onEdit}
+            type="button"
+          >
+            Edit
+          </button>
+        ) : null}
         <button
           aria-expanded={open}
           aria-label={open ? "Hide details" : "Show details"}
@@ -140,6 +146,7 @@ function BasketPanel({
   durationHours,
   frequencyLabel,
   hasPets = null,
+  headerTitle = "My basket",
   onJumpAddress,
   onJumpSchedule,
   onJumpService,
@@ -150,7 +157,7 @@ function BasketPanel({
   serviceLabel,
   standardLabel,
   showHeader = true,
-}: BasketProps & { showHeader?: boolean }) {
+}: BasketProps & { headerTitle?: string; showHeader?: boolean }) {
   const [open, setOpen] = useState({
     address: true,
     schedule: true,
@@ -170,7 +177,7 @@ function BasketPanel({
       <div className="overflow-hidden rounded-[1.25rem] bg-[#f3f3f5]">
         {showHeader ? (
           <p className="px-5 pt-5 text-center text-base font-bold text-[#1c133b]">
-            My basket
+            {headerTitle}
           </p>
         ) : null}
         <div className="flex flex-col items-center px-6 pb-8 pt-6 text-center">
@@ -228,7 +235,7 @@ function BasketPanel({
     <div className="overflow-hidden rounded-[1.25rem] bg-[#f3f3f5]">
       {showHeader ? (
         <p className="border-b border-[#e8e8eb] px-5 py-4 text-center text-base font-bold text-[#1c133b]">
-          My basket
+          {headerTitle}
         </p>
       ) : null}
 
@@ -337,6 +344,14 @@ export function BookingBasket(props: BasketProps) {
       <BasketPanel {...props} />
     </aside>
   );
+}
+
+/** Read-only basket-style summary — used on booking detail. */
+export function BookingSummaryCard({
+  title = "Booking details",
+  ...props
+}: BasketProps & { title?: string }) {
+  return <BasketPanel {...props} headerTitle={title} />;
 }
 
 /** Mobile bottom sheet — WeCasa-style “My basket”. Closed via bar chevron. */

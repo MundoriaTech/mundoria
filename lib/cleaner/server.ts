@@ -48,7 +48,7 @@ export async function getCleanerJobs(cleanerId: string) {
     admin
       .from("bookings")
       .select(
-        "*, address:addresses(*), customer:profiles!bookings_customer_id_fkey(full_name,phone)",
+        "*, address:addresses(*), customer:profiles!bookings_customer_id_fkey(full_name,phone,avatar_url)",
       )
       .eq("cleaner_id", cleanerId)
       .order("scheduled_date"),
@@ -67,7 +67,7 @@ export async function getCleanerJobs(cleanerId: string) {
     const { data } = await admin
       .from("bookings")
       .select(
-        "*, address:addresses(*), customer:profiles!bookings_customer_id_fkey(full_name,phone)",
+        "*, address:addresses(*), customer:profiles!bookings_customer_id_fkey(full_name,phone,avatar_url)",
       )
       .in("id", teamIds)
       .order("scheduled_date");

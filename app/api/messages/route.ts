@@ -1,21 +1,55 @@
+import { NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { sendOneSignalNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { MessageAttachment } from "@/types/customer";
 
-const schema = z.object({
-  bookingId: z.string().uuid(),
-  content: z.string().trim().min(1).max(2000),
+const attachmentSchema = z.object({
+  url: z
+    .string()
+    .url()
+    .max(2000)
+    .refine(
+      (url) => url.includes("/storage/v1/object/public/message-media/"),
+      "Invalid media URL.",
+    ),
+  type: z.enum(["image", "video"]),
+  mime: z.string().min(3).max(100),
+  name: z.string().max(200).optional(),
 });
+
+const schema = z
+  .object({
+    bookingId: z.string().uuid(),
+    content: z.string().trim().max(2000).default(""),
+    attachments: z.array(attachmentSchema).max(4).default([]),
+  })
+  .refine(
+    (value) => value.content.length > 0 || value.attachments.length > 0,
+    { message: "Message cannot be empty." },
+  );
+
+function previewBody(content: string, attachments: MessageAttachment[]) {
+  if (content) return content.slice(0, 140);
+  const hasVideo = attachments.some((item) => item.type === "video");
+  const hasImage = attachments.some((item) => item.type === "image");
+  if (hasVideo && hasImage) return "Sent media";
+  if (hasVideo) return "Sent a video";
+  if (hasImage) return "Sent a photo";
+  return "Sent an attachment";
+}
 
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success) {
-    return NextResponse.json({ error: "Message cannot be empty." }, { status: 400 });
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Message cannot be empty." },
+      { status: 400 },
+    );
   }
 
   const supabase = createRouteHandlerClient({ cookies });
@@ -57,11 +91,15 @@ export async function POST(request: Request) {
 
   const receiverId =
     user.id === booking.customer_id ? booking.cleaner_id : booking.customer_id;
+  const attachments = parsed.data.attachments as MessageAttachment[];
+  const content = parsed.data.content;
+
   const { data: message, error } = await supabase
     .from("messages")
     .insert({
+      attachments,
       booking_id: parsed.data.bookingId,
-      content: parsed.data.content,
+      content,
       receiver_id: receiverId,
       sender_id: user.id,
     })
@@ -81,8 +119,10 @@ export async function POST(request: Request) {
       .single(),
   ]);
 
+  const body = previewBody(content, attachments);
+
   await admin.from("notifications").insert({
-    body: parsed.data.content.slice(0, 140),
+    body,
     data: { booking_id: parsed.data.bookingId },
     title: `New message from ${sender?.full_name ?? "Mundoria"}`,
     type: "message",
@@ -94,7 +134,7 @@ export async function POST(request: Request) {
     | undefined;
   if (preferences?.push !== false) {
     await sendOneSignalNotification({
-      body: parsed.data.content.slice(0, 140),
+      body,
       data: { booking_id: parsed.data.bookingId },
       playerId: receiver?.onesignal_player_id ?? null,
       title: `New message from ${sender?.full_name ?? "Mundoria"}`,

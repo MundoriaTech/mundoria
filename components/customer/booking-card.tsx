@@ -1,10 +1,8 @@
-import { CalendarDays, Clock3, MapPin, RotateCcw } from "lucide-react";
+import { ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
 
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
-import { PriceDisplay } from "@/components/shared/price-display";
-import { Button } from "@/components/ui/button";
-import { formatServiceName } from "@/lib/customer/services";
+import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import type { Booking } from "@/types/customer";
 
 export function BookingCard({
@@ -16,66 +14,71 @@ export function BookingCard({
   compact?: boolean;
   showRebook?: boolean;
 }) {
-  return (
-    <article className="rounded-xl border bg-card p-4 shadow-sm">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-        <div className="min-w-0">
-          <p className="break-words font-semibold">
-            {formatServiceName(booking.service_type)}
-          </p>
-          <p className="mt-1 truncate text-sm text-muted-foreground">
-            {booking.cleaner?.full_name ?? "Finding your cleaner"}
-          </p>
-        </div>
-        <BookingStatusBadge className="self-start" status={booking.status} />
-      </div>
+  const when = new Date(
+    `${booking.scheduled_date}T${booking.scheduled_start_time}`,
+  );
+  const day = when.toLocaleDateString("en-GB", { day: "numeric" });
+  const month = when.toLocaleDateString("en-GB", { month: "short" });
+  const weekday = when.toLocaleDateString("en-GB", { weekday: "short" });
+  const time = booking.scheduled_start_time.slice(0, 5);
+  const place = booking.address
+    ? compact
+      ? (booking.address.city ?? booking.address.postcode)
+      : `${booking.address.address_line_1}, ${booking.address.city}`
+    : null;
+  const person = booking.cleaner?.full_name?.split(" ")[0] ?? null;
 
-      <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-        <p className="flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 shrink-0" />
-          {new Date(`${booking.scheduled_date}T12:00:00`).toLocaleDateString(
-            "en-GB",
-            { day: "numeric", month: "short", year: "numeric" },
-          )}
-        </p>
-        <p className="flex items-center gap-2">
-          <Clock3 className="h-4 w-4 shrink-0" />
-          {booking.scheduled_start_time.slice(0, 5)}
-        </p>
-        {!compact ? (
-          <p className="flex items-center gap-2 sm:col-span-2">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span className="min-w-0 break-words">
-              {booking.address
-                ? `${booking.address.address_line_1}, ${booking.address.city}`
-                : "Address unavailable"}
+  return (
+    <li className="border-b border-[#ece8f3] last:border-b-0 dark:border-border">
+      <div className="flex items-start gap-3 py-4 sm:gap-4 sm:py-5">
+        <Link
+          className="group flex min-w-0 flex-1 items-start gap-3 sm:gap-4"
+          href={`/booking/${booking.id}`}
+        >
+          <div className="flex w-12 shrink-0 flex-col items-center pt-0.5 leading-none">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-[#8b8798]">
+              {month}
             </span>
-          </p>
+            <span className="mt-0.5 text-xl font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+              {day}
+            </span>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground sm:text-[15px]">
+                {formatServiceName(booking.service_type)}
+              </h3>
+              <BookingStatusBadge
+                className="!bg-[#f3efe6] !text-[#312c79]"
+                status={booking.status}
+              />
+            </div>
+            <p className="mt-1 truncate text-xs text-[#5a5470] dark:text-muted-foreground sm:text-sm">
+              {weekday} · {time}
+              {person ? ` · ${person}` : ""}
+              {place ? ` · ${place}` : ""}
+            </p>
+            {booking.amount_total ? (
+              <p className="mt-1.5 text-sm font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+                {formatMoney(booking.amount_total)}
+              </p>
+            ) : null}
+          </div>
+
+          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-[#c4bfd4] transition group-hover:text-[#6a45b8]" />
+        </Link>
+
+        {showRebook ? (
+          <Link
+            className="mt-0.5 inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-[#e4dcf2] bg-white px-3 text-xs font-semibold text-[#312c79] transition hover:bg-[#f7f2ea] dark:border-border dark:bg-card"
+            href={`/booking/new?rebook=${booking.id}`}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Rebook
+          </Link>
         ) : null}
       </div>
-
-      <div className="mt-4 flex flex-col gap-3 border-t pt-3 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
-        <span className="text-sm font-semibold">
-          {booking.amount_total ? (
-            <PriceDisplay amount={booking.amount_total} />
-          ) : (
-            "Pending"
-          )}
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {showRebook ? (
-            <Button asChild className="min-h-11" size="sm" variant="outline">
-              <Link href={`/booking/new?rebook=${booking.id}`}>
-                <RotateCcw className="mr-1 h-3.5 w-3.5" />
-                Rebook
-              </Link>
-            </Button>
-          ) : null}
-          <Button asChild className="min-h-11" size="sm" variant="ghost">
-            <Link href={`/booking/${booking.id}`}>View details</Link>
-          </Button>
-        </div>
-      </div>
-    </article>
+    </li>
   );
 }

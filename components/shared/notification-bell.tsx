@@ -64,8 +64,20 @@ export function NotificationBell({
 
   useEffect(() => {
     const supabase = createBrowserClient();
+    const channelName = `notifications-${userId}`;
+
+    // Avoid colliding with a leftover channel (Strict Mode remount / duplicate mounts).
+    for (const existing of supabase.getChannels()) {
+      if (
+        existing.topic === channelName ||
+        existing.topic === `realtime:${channelName}`
+      ) {
+        void supabase.removeChannel(existing);
+      }
+    }
+
     const channel = supabase
-      .channel(`notifications-${userId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {

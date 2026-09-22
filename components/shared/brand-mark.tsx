@@ -1,8 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 
+import {
+  MUNDORIA_WORDMARK_HEIGHT,
+  MUNDORIA_WORDMARK_SRC,
+  MUNDORIA_WORDMARK_WIDTH,
+} from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
-/** Temporary text wordmark until the Mundoria logo artwork is ready. */
 export function BrandMark({
   className,
   variant = "default",
@@ -11,15 +16,17 @@ export function BrandMark({
   variant?: "default" | "onDark";
 }) {
   return (
-    <span
+    <Image
+      alt="Mundoria"
       className={cn(
-        "inline-flex items-center text-xl font-black tracking-[-0.06em]",
-        variant === "onDark" ? "text-white" : "text-foreground",
+        "h-7 w-auto",
+        variant === "onDark" && "brightness-0 invert",
         className,
       )}
-    >
-      Mundoria
-    </span>
+      height={MUNDORIA_WORDMARK_HEIGHT}
+      src={MUNDORIA_WORDMARK_SRC}
+      width={MUNDORIA_WORDMARK_WIDTH}
+    />
   );
 }
 
@@ -32,12 +39,16 @@ export function BrandLogo({
 }: {
   className?: string;
   href?: string;
-  /** @deprecated Ignored — logo is text-only until artwork ships. */
+  /** @deprecated Ignored — full wordmark image is used. */
   markClassName?: string;
   showWordmark?: boolean;
   wordmarkClassName?: string;
 }) {
   void markClassName;
+
+  if (!showWordmark) {
+    return null;
+  }
 
   return (
     <Link
@@ -45,16 +56,13 @@ export function BrandLogo({
       className={cn("inline-flex items-center", className)}
       href={href}
     >
-      {showWordmark ? (
-        <span
-          className={cn(
-            "text-xl font-black tracking-[-0.06em] text-foreground",
-            wordmarkClassName,
-          )}
-        >
-          Mundoria
-        </span>
-      ) : null}
+      <Image
+        alt="Mundoria"
+        className={cn("h-7 w-auto", wordmarkClassName)}
+        height={MUNDORIA_WORDMARK_HEIGHT}
+        src={MUNDORIA_WORDMARK_SRC}
+        width={MUNDORIA_WORDMARK_WIDTH}
+      />
     </Link>
   );
 }

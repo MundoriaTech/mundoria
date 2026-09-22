@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
     icon: [
       { type: "image/x-icon", url: "/favicon.ico" },
-      { type: "image/png", url: "/images/brand/favicon-32.png" },
-      { type: "image/png", url: "/images/brand/mundoria-mark.png" },
+      { type: "image/png", sizes: "32x32", url: "/images/brand/favicon-32.png" },
+      { type: "image/png", sizes: "512x512", url: "/images/brand/mundoria-mark.png" },
     ],
   },
   openGraph: {

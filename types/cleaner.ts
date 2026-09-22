@@ -69,7 +69,11 @@ export interface CleanerAvailability {
 
 export interface CleanerJob extends Booking {
   address?: Address | null;
-  customer?: { full_name: string; phone: string | null } | null;
+  customer?: {
+    full_name: string;
+    phone: string | null;
+    avatar_url?: string | null;
+  } | null;
 }
 
 export interface PerformanceHistory {

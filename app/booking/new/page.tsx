@@ -12,6 +12,7 @@ import type {
   Address,
   Booking,
   BookingDraft,
+  CleanerPublicProfile,
   ServiceCategory,
   ServiceType,
 } from "@/types/customer";
@@ -49,6 +50,8 @@ function draftFromSearchParams(searchParams: {
       : null,
     isRecurring: mode === "required_recurring",
     preferSameCleaner: false,
+    preferredCleanerId: null,
+    rebookCleanerChoice: null,
     recurrencePattern: mode === "required_recurring" ? "weekly" : null,
     scheduledDate:
       serviceTypeValue === "same_day"
@@ -91,6 +94,7 @@ export default async function NewBookingPage({
   let initialDraft: Partial<BookingDraft> | undefined = draftFromSearchParams(
     searchParams,
   );
+  let previousCleaner: CleanerPublicProfile | null = null;
   const focusServices = focusServicesFromSearchParams(searchParams.focus);
   const fresh = searchParams.fresh === "1" || searchParams.fresh === "true";
   const returnTo = safeReturnTo(searchParams.returnTo);
@@ -113,14 +117,25 @@ export default async function NewBookingPage({
       const booking = bookingData as Booking | null;
 
       if (booking) {
+        if (booking.cleaner_id) {
+          const { data: cleaner } = await supabase
+            .from("cleaner_public_profiles")
+            .select("*")
+            .eq("id", booking.cleaner_id)
+            .maybeSingle();
+          previousCleaner = (cleaner as CleanerPublicProfile | null) ?? null;
+        }
+
         initialDraft = {
           addressId: booking.address_id,
           cleaningStandard: booking.cleaning_standard,
           estimatedDurationHours: booking.estimated_duration_hours,
           isRecurring: booking.is_recurring,
-          preferSameCleaner: booking.prefer_same_cleaner,
+          preferSameCleaner: false,
+          preferredCleanerId: null,
           propertyCondition: booking.property_condition,
           recentlyMoved: booking.recently_moved,
+          rebookCleanerChoice: null,
           recurrencePattern: booking.recurrence_pattern,
           serviceCategory: booking.service_category,
           serviceType: booking.service_type,
@@ -137,6 +152,7 @@ export default async function NewBookingPage({
       fresh={fresh}
       initialAddresses={addresses}
       initialDraft={initialDraft}
+      previousCleaner={previousCleaner}
       returnTo={returnTo}
       userId={user?.id ?? null}
     />

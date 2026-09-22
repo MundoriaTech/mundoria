@@ -4,6 +4,7 @@ export * from "@/components/shared/booking-status-badge";
 export * from "@/components/shared/brand-mark";
 export * from "@/components/shared/chat-message";
 export * from "@/components/shared/confirm-modal";
+export * from "@/components/shared/conversation-list";
 export * from "@/components/shared/empty-state";
 export * from "@/components/shared/feedback-provider";
 export * from "@/components/shared/file-upload";

@@ -1,32 +1,40 @@
+import Image from "next/image";
 import Link from "next/link";
 
+import {
+  MUNDORIA_WORDMARK_HEIGHT,
+  MUNDORIA_WORDMARK_SRC,
+  MUNDORIA_WORDMARK_WIDTH,
+} from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 type LandingLogoProps = {
   className?: string;
   href?: string;
-  /** Kept for call-site compatibility; unused while the mark is text-only. */
   priority?: boolean;
-  /** Default for light surfaces; onDark for navy / inverted sections. */
+  /** Default for light surfaces; onDark lightens the artwork for navy / inverted sections. */
   variant?: "default" | "onDark";
 };
 
-/** Temporary text wordmark until the Mundoria logo artwork is ready. */
 export function LandingLogo({
   className,
   href,
+  priority = false,
   variant = "default",
 }: LandingLogoProps) {
   const wordmark = (
-    <span
+    <Image
+      alt="Mundoria"
       className={cn(
-        "inline-flex items-center text-[1.35rem] font-black tracking-[-0.06em] sm:text-[1.55rem]",
-        variant === "onDark" ? "text-white" : "text-[#1c133b]",
+        "h-7 w-auto sm:h-8",
+        variant === "onDark" && "brightness-0 invert",
         className,
       )}
-    >
-      Mundoria
-    </span>
+      height={MUNDORIA_WORDMARK_HEIGHT}
+      priority={priority}
+      src={MUNDORIA_WORDMARK_SRC}
+      width={MUNDORIA_WORDMARK_WIDTH}
+    />
   );
 
   if (!href) {
@@ -34,7 +42,11 @@ export function LandingLogo({
   }
 
   return (
-    <Link aria-label="Mundoria home" className="shrink-0" href={href}>
+    <Link
+      aria-label="Mundoria home"
+      className="inline-flex shrink-0 items-center"
+      href={href}
+    >
       {wordmark}
     </Link>
   );

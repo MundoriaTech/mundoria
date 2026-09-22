@@ -57,6 +57,7 @@ export const bookingDraftSchema = z.object({
   cleaningStandard,
   isRecurring: z.boolean(),
   preferSameCleaner: z.boolean(),
+  preferredCleanerId: z.string().uuid().nullable().optional(),
   promoCode: z.string().trim().max(40),
   propertyCondition: z
     .enum(["maintained", "extra_attention", "neglected"])

@@ -97,6 +97,36 @@ export async function POST(request: Request) {
           parsed.data.cleaningStandard,
         )
       : null;
+
+  let preferredCleanerId: string | null = null;
+  if (parsed.data.preferSameCleaner && parsed.data.preferredCleanerId) {
+    const { data: pastWithCleaner } = await admin
+      .from("bookings")
+      .select("id")
+      .eq("customer_id", user.id)
+      .eq("cleaner_id", parsed.data.preferredCleanerId)
+      .limit(1)
+      .maybeSingle();
+    if (pastWithCleaner) {
+      preferredCleanerId = parsed.data.preferredCleanerId;
+    }
+  }
+
+  // Idempotent: same PaymentIntent must never create a second booking.
+  const { data: existingBooking } = await admin
+    .from("bookings")
+    .select("id")
+    .eq("stripe_payment_intent_id", paymentIntent.id)
+    .eq("customer_id", user.id)
+    .maybeSingle();
+  if (existingBooking) {
+    return NextResponse.json({
+      bookingId: existingBooking.id,
+      matching: { matched: false },
+      reused: true,
+    });
+  }
+
   const { data: booking, error } = await admin
     .from("bookings")
     .insert({
@@ -113,7 +143,8 @@ export async function POST(request: Request) {
       is_recurring: parsed.data.isRecurring,
       payment_status: paymentHeld ? "held" : "released",
       promo_code_id: paymentIntent.metadata.promo_code_id || null,
-      prefer_same_cleaner: parsed.data.preferSameCleaner,
+      prefer_same_cleaner: Boolean(preferredCleanerId),
+      preferred_cleaner_id: preferredCleanerId,
       property_condition: parsed.data.propertyCondition,
       recently_moved: parsed.data.recentlyMoved,
       recommendation_outcome: parsed.data.recommendationOutcome,
@@ -135,6 +166,21 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
+    // Race: another request inserted first — return that booking, do not cancel PI.
+    const { data: raced } = await admin
+      .from("bookings")
+      .select("id")
+      .eq("stripe_payment_intent_id", paymentIntent.id)
+      .eq("customer_id", user.id)
+      .maybeSingle();
+    if (raced) {
+      return NextResponse.json({
+        bookingId: raced.id,
+        matching: { matched: false },
+        reused: true,
+      });
+    }
+
     if (paymentIntent.status === "succeeded") {
       await stripe.refunds.create({
         payment_intent: paymentIntent.id,

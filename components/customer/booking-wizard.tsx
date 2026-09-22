@@ -64,14 +64,13 @@ import {
   standardLabel,
 } from "@/lib/customer/services";
 import {
-  calculateOfficeQuote,
-  formatCleanerTime,
   OFFICE_SPACE_OPTIONS,
 } from "@/lib/customer/office-pricing";
 import { cn } from "@/lib/utils";
 import type {
   Address,
   BookingDraft,
+  CleanerPublicProfile,
   CleaningStandard,
   OfficeSpaceDraft,
   ServiceCategory,
@@ -97,8 +96,10 @@ const blankDraft: BookingDraft = {
   otherRoomTypes: [],
   petTypes: [],
   preferSameCleaner: false,
+  preferredCleanerId: null,
   propertyCondition: null,
   promoCode: "",
+  rebookCleanerChoice: null,
   recurrencePattern: null,
   recommendationOutcome: "not_shown",
   recommendedCleaningStandard: null,
@@ -185,6 +186,7 @@ export function BookingWizard({
   fresh = false,
   initialAddresses,
   initialDraft,
+  previousCleaner = null,
   returnTo = null,
   userId,
 }: {
@@ -192,6 +194,7 @@ export function BookingWizard({
   fresh?: boolean;
   initialAddresses: Address[];
   initialDraft?: Partial<BookingDraft>;
+  previousCleaner?: CleanerPublicProfile | null;
   returnTo?: string | null;
   userId: string | null;
 }) {
@@ -211,10 +214,17 @@ export function BookingWizard({
   const [authMode, setAuthMode] = useState<BookingAuthMode>("ask");
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
   const lastRecommendedDurationRef = useRef<number | null>(null);
+  const skipHistoryRef = useRef(false);
+  const historyReadyRef = useRef(false);
 
   const needsAuth = !userId;
-  const flowSteps = useMemo(() => getFlowSteps(draft), [draft]);
+  const includeCleanerChoice = Boolean(previousCleaner);
+  const flowSteps = useMemo(
+    () => getFlowSteps(draft, { includeCleanerChoice }),
+    [draft, includeCleanerChoice],
+  );
   const stepId = flowSteps[Math.min(stepIndex, flowSteps.length - 1)]!;
   const savedAddress = addresses.find(
     (address) => address.id === draft.addressId,
@@ -296,14 +306,11 @@ export function BookingWizard({
     selectedAddOns: draft.selectedAddOns,
     serviceType: draft.serviceType,
   });
-  const officeQuote =
-    draft.serviceType === "office" &&
-    selectedStandard &&
-    draft.officeSpaces.some((space) => space.quantity > 0)
-      ? calculateOfficeQuote(draft.officeSpaces, selectedStandard)
-      : null;
-
   useEffect(() => {
+    const cleanerOffset = previousCleaner ? 1 : 0;
+    const addressStepIndex = 2 + cleanerOffset;
+    const serviceStepIndex = 1 + cleanerOffset;
+
     try {
       if (fresh) {
         window.localStorage.removeItem(BOOKING_DRAFT_KEY);
@@ -312,9 +319,13 @@ export function BookingWizard({
           ...blankDraft,
           ...initialDraft,
           alternateTimes: initialDraft?.alternateTimes ?? [],
+          preferSameCleaner: initialDraft?.preferSameCleaner ?? false,
+          preferredCleanerId: initialDraft?.preferredCleanerId ?? null,
+          rebookCleanerChoice: initialDraft?.rebookCleanerChoice ?? null,
         });
-        if (initialDraft?.serviceType) setStepIndex(2);
-        else if (initialDraft?.serviceCategory) setStepIndex(1);
+        if (previousCleaner) setStepIndex(0);
+        else if (initialDraft?.serviceType) setStepIndex(addressStepIndex);
+        else if (initialDraft?.serviceCategory) setStepIndex(serviceStepIndex);
         else setStepIndex(0);
         setHydrated(true);
         return;
@@ -377,20 +388,44 @@ export function BookingWizard({
           recurrencePattern: sameService
             ? (parsed?.recurrencePattern ?? null)
             : (initialDraft?.recurrencePattern ?? null),
-          preferSameCleaner: false,
-          guestAddress: parsed?.guestAddress ?? null,
-          addressId: parsed?.addressId ?? null,
+          preferSameCleaner: previousCleaner
+            ? (sameService ? Boolean(parsed?.preferSameCleaner) : false)
+            : false,
+          preferredCleanerId: previousCleaner
+            ? sameService
+              ? (parsed?.preferredCleanerId ?? null)
+              : null
+            : null,
+          rebookCleanerChoice: previousCleaner
+            ? sameService
+              ? (parsed?.rebookCleanerChoice ?? null)
+              : null
+            : null,
+          guestAddress: sameService
+            ? (parsed?.guestAddress ?? null)
+            : (initialDraft?.guestAddress ?? null),
+          addressId: sameService
+            ? (parsed?.addressId ?? initialDraft?.addressId ?? null)
+            : (initialDraft?.addressId ?? null),
         });
       }
 
-      if (sameService && Number.isFinite(storedStep) && storedStep >= 0) {
+      if (previousCleaner && !sameService) {
+        setStepIndex(0);
+      } else if (
+        previousCleaner &&
+        sameService &&
+        !parsed?.rebookCleanerChoice
+      ) {
+        setStepIndex(0);
+      } else if (sameService && Number.isFinite(storedStep) && storedStep >= 0) {
         setStepIndex(storedStep);
       } else if (urlService) {
         // Category + service are pre-filled; start at address.
-        setStepIndex(2);
+        setStepIndex(addressStepIndex);
       } else if (initialDraft?.serviceCategory) {
         // Category seeded only; start at service picker.
-        setStepIndex(1);
+        setStepIndex(serviceStepIndex);
       } else if (Number.isFinite(storedStep) && storedStep >= 0) {
         setStepIndex(storedStep);
       }
@@ -422,6 +457,52 @@ export function BookingWizard({
   useEffect(() => {
     if (stepId !== "checkout") setAuthMode("ask");
   }, [stepId]);
+
+  // Sync wizard steps with browser history so mouse/trackpad Back matches in-app Back.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!historyReadyRef.current) {
+      historyReadyRef.current = true;
+      const url = new URL(window.location.href);
+      url.searchParams.set("step", String(stepIndex));
+      window.history.replaceState({ bookingStep: stepIndex }, "", url);
+      return;
+    }
+    if (skipHistoryRef.current) {
+      skipHistoryRef.current = false;
+      return;
+    }
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("step") === String(stepIndex)) return;
+    url.searchParams.set("step", String(stepIndex));
+    window.history.pushState({ bookingStep: stepIndex }, "", url);
+  }, [hydrated, stepIndex]);
+
+  useEffect(() => {
+    function onPopState(event: PopStateEvent) {
+      if (checkoutBusy) {
+        // Re-assert current step so the URL doesn't drift while payment is in flight.
+        const url = new URL(window.location.href);
+        url.searchParams.set("step", String(stepIndex));
+        window.history.pushState({ bookingStep: stepIndex }, "", url);
+        return;
+      }
+      const step = event.state?.bookingStep;
+      if (typeof step === "number" && step >= 0) {
+        skipHistoryRef.current = true;
+        setStepIndex(Math.min(step, Math.max(0, flowSteps.length - 1)));
+        return;
+      }
+      // No wizard state — leave the funnel.
+      if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+        router.push(returnTo);
+        return;
+      }
+      router.push("/cleaning");
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [checkoutBusy, flowSteps.length, returnTo, router, stepIndex]);
 
   // Keep step index valid when the flow shrinks (e.g. service selected).
   useEffect(() => {
@@ -477,6 +558,7 @@ export function BookingWizard({
   }, [draft.recentlyMoved, draft.serviceType]);
 
   function goBack() {
+    if (checkoutBusy) return;
     if (stepId === "address" && showAddressForm && addresses.length > 0) {
       setShowAddressForm(false);
       return;
@@ -583,7 +665,12 @@ export function BookingWizard({
       ...current,
       cleaningStandard: normalizeStandard(serviceType, standard),
       isRecurring: mode === "required_recurring",
-      preferSameCleaner: false,
+      preferSameCleaner: current.rebookCleanerChoice === "same",
+      preferredCleanerId:
+        current.rebookCleanerChoice === "same" && previousCleaner
+          ? previousCleaner.id
+          : null,
+      rebookCleanerChoice: current.rebookCleanerChoice,
       recommendationOutcome: "not_shown",
       recommendedCleaningStandard: null,
       recommendedServiceType: null,
@@ -653,6 +740,8 @@ export function BookingWizard({
 
   function canContinue() {
     switch (stepId) {
+      case "cleaner":
+        return draft.rebookCleanerChoice === "same" || draft.rebookCleanerChoice === "new";
       case "category":
         return Boolean(draft.serviceCategory);
       case "service":
@@ -803,6 +892,24 @@ export function BookingWizard({
 
   const stepBody = (
     <>
+      {stepId === "cleaner" && previousCleaner ? (
+        <CleanerChoiceStep
+          cleaner={previousCleaner}
+          selected={draft.rebookCleanerChoice}
+          onSelect={(choice) => {
+            setDraft((current) => ({
+              ...current,
+              preferSameCleaner: choice === "same",
+              preferredCleanerId:
+                choice === "same" ? previousCleaner.id : null,
+              rebookCleanerChoice: choice,
+            }));
+            setStepIndex((current) =>
+              Math.min(flowSteps.length - 1, current + 1),
+            );
+          }}
+        />
+      ) : null}
       {stepId === "category" ? (
         <CategoryStep
           selected={draft.serviceCategory}
@@ -876,7 +983,6 @@ export function BookingWizard({
         draft.serviceType === "office" ? (
           <OfficeSpacesStep
             onChange={(value) => update("officeSpaces", value)}
-            quote={officeQuote}
             spaces={draft.officeSpaces}
             standard={selectedStandard}
           />
@@ -954,6 +1060,7 @@ export function BookingWizard({
                 update("addressId", address.id);
                 update("guestAddress", null);
               }}
+              onProcessingChange={setCheckoutBusy}
               promoFeedback={promoFeedback}
               update={update}
               userId={userId}
@@ -970,7 +1077,11 @@ export function BookingWizard({
   );
 
   return (
-    <BookingChrome onBack={goBack} signedIn={Boolean(userId)}>
+    <BookingChrome
+      backDisabled={checkoutBusy}
+      onBack={goBack}
+      signedIn={Boolean(userId)}
+    >
       <div
         className={cn(
           // WeCasa funnel: 1140px shell, 20px side/top pad. Keep large bottom pad at every
@@ -1089,6 +1200,87 @@ function CheckoutAuthGate({
 const MAIN_BOOKING_CATEGORIES = SERVICE_CATEGORIES.filter((category) =>
   ["residential", "commercial", "recovery"].includes(category.value),
 );
+
+function CleanerChoiceStep({
+  cleaner,
+  onSelect,
+  selected,
+}: {
+  cleaner: CleanerPublicProfile;
+  onSelect: (choice: "same" | "new") => void;
+  selected: "same" | "new" | null;
+}) {
+  const firstName = cleaner.full_name.trim().split(/\s+/)[0] || "your cleaner";
+
+  return (
+    <div>
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        Would you like to continue with {firstName} or pick someone else?
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        We’ll try to match {firstName} first when they’re available. If not,
+        we’ll find another Mundoria professional for you.
+      </p>
+
+      <div className="mt-8 flex items-center gap-4 rounded-2xl border border-[#e8def8] bg-white p-4 sm:p-5">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3eef9] text-xl font-bold text-[#6a45b8]">
+          {cleaner.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              alt={cleaner.full_name}
+              className="h-full w-full object-cover"
+              src={cleaner.avatar_url}
+            />
+          ) : (
+            cleaner.full_name.charAt(0)
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-lg font-semibold text-[#1c133b]">
+            {cleaner.full_name}
+          </p>
+          <p className="mt-0.5 text-sm text-[#5a5470]">
+            Your previous Mundoria cleaner
+            {cleaner.rating > 0
+              ? ` · ${cleaner.rating.toFixed(1)} rating`
+              : ""}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3">
+        <button
+          className={cn(
+            "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-5 py-4 text-left transition hover:bg-[#ececef] touch-manipulation",
+            selected === "same" && "border-[#6a45b8] bg-white",
+          )}
+          onClick={() => onSelect("same")}
+          type="button"
+        >
+          <p className="font-semibold text-[#1c133b]">
+            Continue with {firstName}
+          </p>
+          <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+            Prefer the cleaner you already know, when they’re free.
+          </p>
+        </button>
+        <button
+          className={cn(
+            "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-5 py-4 text-left transition hover:bg-[#ececef] touch-manipulation",
+            selected === "new" && "border-[#6a45b8] bg-white",
+          )}
+          onClick={() => onSelect("new")}
+          type="button"
+        >
+          <p className="font-semibold text-[#1c133b]">Pick someone else</p>
+          <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+            Match any suitable Mundoria cleaner for this booking.
+          </p>
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function CategoryStep({
   select,
@@ -1396,12 +1588,10 @@ const ROOM_COUNT_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const;
 
 function OfficeSpacesStep({
   onChange,
-  quote,
   spaces,
   standard,
 }: {
   onChange: (value: OfficeSpaceDraft[]) => void;
-  quote: ReturnType<typeof calculateOfficeQuote> | null;
   spaces: OfficeSpaceDraft[];
   standard: CleaningStandard | null;
 }) {
@@ -1481,8 +1671,8 @@ function OfficeSpacesStep({
                       ["not_sure", "Not sure", "We’ll estimate"],
                     ] as const
                   ).map(([value, label, band]) => (
-              <button
-                className={cn(
+                    <button
+                      className={cn(
                         "rounded-xl border px-3 py-2 text-left text-xs touch-manipulation",
                         size === value
                           ? "border-[#6a45b8] bg-[#efe6ff] text-[#1c133b]"
@@ -1490,57 +1680,18 @@ function OfficeSpacesStep({
                       )}
                       key={value}
                       onClick={() => upsert(option.value, { size: value })}
-                type="button"
-              >
+                      type="button"
+                    >
                       <span className="block font-semibold">{label}</span>
                       <span className="mt-0.5 block opacity-80">{band}</span>
-              </button>
-            ))}
-          </div>
+                    </button>
+                  ))}
+                </div>
               ) : null}
             </div>
           );
         })}
-        </div>
-
-      {quote ? (
-        <div className="mt-5 rounded-2xl border border-[#d9ccef] bg-[#faf7ff] p-4 shadow-[0_8px_24px_rgba(28,19,59,0.06)]">
-          <p className="text-sm font-semibold text-[#1c133b]">
-            {quote.lineItems
-              .map((item) => `${item.quantity} ${item.label.toLowerCase()}`)
-              .join(", ")}
-          </p>
-          <div className="mt-3 space-y-1.5 text-sm text-[#5b5478]">
-            {quote.lineItems.map((item) => (
-              <div
-                className="flex justify-between gap-3"
-                key={`${item.spaceType}-${item.size}`}
-              >
-                <span>
-                  {item.label}: {item.selectionLabel}
-                </span>
-                <span className="shrink-0 font-medium text-[#1c133b]">
-                  {item.totalMinutes} min
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2 border-t border-[#e8dff8] pt-3">
-            <span className="rounded-full bg-[#e8e0f9] px-3 py-1 text-xs font-semibold text-[#312c79]">
-              {formatCleanerTime(quote.totalMinutes)}
-            </span>
-            <span className="rounded-full bg-[#e8e0f9] px-3 py-1 text-xs font-semibold text-[#312c79]">
-              {quote.cleanerHours <= 5
-                ? `≤ 5 hrs → ${quote.allocatedCleaners} cleaner`
-                : `${quote.allocatedCleaners} cleaners · ~${quote.jobDurationHours} hr visit`}
-            </span>
-        </div>
-          <p className="mt-2 text-[11px] text-[#8a829e]">
-            Billing follows cleaner-hours, not visit duration. Size “Not sure”
-            uses an average estimate.
-          </p>
-        </div>
-      ) : null}
+      </div>
     </div>
   );
 }
@@ -2071,7 +2222,6 @@ function FrequencyStep({
     if (value === "one_off") {
       update("isRecurring", false);
       update("recurrencePattern", null);
-      update("preferSameCleaner", false);
       update("customRecurrenceDates", []);
       return;
     }
@@ -2405,8 +2555,27 @@ function TimeStep({
         className="mt-8"
         date={draft.scheduledDate || new Date().toISOString().slice(0, 10)}
         onChange={toggleSlot}
+        primaryValue={draft.scheduledTime || null}
         values={selectedSlots}
       />
+      {selectedSlots.length > 0 ? (
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-[#5a5470]">
+          <span className="inline-flex items-center gap-2">
+            <span
+              aria-hidden
+              className="h-3 w-3 rounded-sm bg-[#ff5274]"
+            />
+            Preferred time
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span
+              aria-hidden
+              className="h-3 w-3 rounded-sm bg-[#6a45b8]"
+            />
+            Extra times
+          </span>
+        </div>
+      ) : null}
       {slotLimitHint ? (
         <p className="mt-3 text-sm font-medium text-[#5a5470]">
           You can select up to {maxTimeSlots} time slots. Deselect one to add
@@ -2471,6 +2640,7 @@ function CheckoutStep({
   amount,
   draft,
   onAddressPersisted,
+  onProcessingChange,
   promoFeedback,
   update,
   userId,
@@ -2483,6 +2653,7 @@ function CheckoutStep({
     serviceType: ServiceType;
   };
   onAddressPersisted: (address: Address) => void;
+  onProcessingChange?: (busy: boolean) => void;
   promoFeedback: string | null;
   update: <K extends keyof BookingDraft>(
     key: K,
@@ -2496,6 +2667,7 @@ function CheckoutStep({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const payingRef = useRef(false);
   const [paymentPhase, setPaymentPhase] = useState<
     "idle" | "saving" | "authorising" | "confirming"
   >("idle");
@@ -2505,6 +2677,10 @@ function CheckoutStep({
   useEffect(() => {
     setResolvedAddress(address);
   }, [address]);
+
+  useEffect(() => {
+    onProcessingChange?.(processing);
+  }, [onProcessingChange, processing]);
 
   async function ensureSavedAddress(): Promise<Address> {
     if (draft.addressId && !draft.addressId.startsWith("guest-")) {
@@ -2551,10 +2727,12 @@ function CheckoutStep({
   async function pay(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    if (payingRef.current || processing) return;
     if (!stripe || !elements) return;
     const card = elements.getElement(CardElement);
     if (!card) return;
 
+    payingRef.current = true;
     setProcessing(true);
     setPaymentPhase("saving");
     try {
@@ -2631,6 +2809,7 @@ function CheckoutStep({
       router.replace(`/booking/${booking.bookingId}`);
       router.refresh();
     } catch (paymentError) {
+      payingRef.current = false;
       setError(
         paymentError instanceof Error
           ? paymentError.message

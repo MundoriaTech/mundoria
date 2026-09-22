@@ -12,7 +12,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { isUserRole, type Profile } from "@/types/auth";
 
-async function getMarketingViewer() {
+export async function getMarketingViewer() {
   if (!hasSupabasePublicConfig()) {
     return null;
   }
