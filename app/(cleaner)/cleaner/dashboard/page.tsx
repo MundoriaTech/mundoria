@@ -1,5 +1,6 @@
 import { BriefcaseBusiness, CalendarCheck } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { CleanerOfferHighlight } from "@/components/cleaner/offer-highlight";
 import { TierBadge } from "@/components/cleaner/tier-badge";
@@ -32,13 +33,15 @@ export default async function CleanerDashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
   const [context, jobs, available] = await Promise.all([
-    getCleanerContext(supabase, user!.id),
-    getCleanerJobs(user!.id),
-    getAvailableJobs(user!.id),
+    getCleanerContext(supabase, user.id),
+    getCleanerJobs(user.id),
+    getAvailableJobs(user.id),
   ]);
   const cleaner = context.cleanerProfile;
   const profile = context.profile;
+  if (!cleaner || !profile) redirect("/");
   const firstName = profile.full_name.trim().split(/\s+/)[0] || "there";
   const today = new Date().toISOString().slice(0, 10);
   const activeJobs = jobs
