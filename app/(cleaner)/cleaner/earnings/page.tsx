@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { EarningsControls } from "@/components/cleaner/earnings-controls";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
@@ -14,15 +15,17 @@ export default async function CleanerEarningsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
   const [ctx, jobs, { data: payouts }] = await Promise.all([
-    getCleanerContext(supabase, user!.id),
-    getCleanerJobs(user!.id),
+    getCleanerContext(supabase, user.id),
+    getCleanerJobs(user.id),
     supabase
       .from("payouts")
       .select("*")
-      .eq("cleaner_id", user!.id)
+      .eq("cleaner_id", user.id)
       .order("created_at", { ascending: false }),
   ]);
+  if (!ctx.cleanerProfile) redirect("/");
   const done = jobs.filter((job) => job.status === "completed");
   const sum = (days: number) =>
     done
