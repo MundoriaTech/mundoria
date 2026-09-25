@@ -20,6 +20,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import {
+  AdminBackLink,
+  adminParentBackLink,
+} from "@/components/admin/admin-back-link";
 import { AdminAlerts } from "@/components/admin/admin-alerts";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
@@ -110,6 +114,12 @@ function pageTitle(pathname: string) {
     ) {
       return "Booking";
     }
+    if (
+      match.href === "/admin/disputes" &&
+      pathname !== "/admin/disputes"
+    ) {
+      return "Dispute";
+    }
     return match.label;
   }
   if (pathname.startsWith("/admin/booking/")) return "Booking";
@@ -181,6 +191,7 @@ export function AdminShell({
   const [signingOut, setSigningOut] = useState(false);
   const title = pageTitle(pathname);
   const eyebrow = pageEyebrow(pathname);
+  const backLink = adminParentBackLink(pathname);
   const firstName = admin.full_name.trim().split(/\s+/)[0] || "Admin";
   const isMagEditor =
     pathname.startsWith("/admin/mag/") && pathname !== "/admin/mag";
@@ -318,9 +329,17 @@ export function AdminShell({
           <div className="min-w-0 flex-1">
             {!hidePageTitle ? (
               <div className="lg:hidden">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
-                  {eyebrow}
-                </p>
+                {backLink ? (
+                  <AdminBackLink
+                    className="min-h-0 py-0 text-xs"
+                    href={backLink.href}
+                    label={backLink.label}
+                  />
+                ) : (
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
+                    {eyebrow}
+                  </p>
+                )}
                 <p className="truncate text-sm font-semibold">{title}</p>
               </div>
             ) : (
@@ -369,9 +388,17 @@ export function AdminShell({
       >
         {!hidePageTitle ? (
           <div className="mb-5 hidden lg:block">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
-              {eyebrow}
-            </p>
+            {backLink ? (
+              <AdminBackLink
+                className="mb-2"
+                href={backLink.href}
+                label={backLink.label}
+              />
+            ) : (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
+                {eyebrow}
+              </p>
+            )}
             <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-3xl">
               {title}
             </h1>

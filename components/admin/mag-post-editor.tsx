@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -166,10 +167,11 @@ export function MagPostEditor({
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
           <div className="min-w-0">
             <Link
-              className="text-xs font-medium text-white/70 hover:text-white"
+              className="inline-flex items-center gap-0.5 text-xs font-medium text-white/70 transition hover:text-white"
               href="/admin/mag"
             >
-              ← Mag desk
+              <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2} />
+              Mag desk
             </Link>
             <p className="truncate text-sm font-semibold sm:text-base">
               {isEdit ? "Edit Mag post" : "New Mag post"}

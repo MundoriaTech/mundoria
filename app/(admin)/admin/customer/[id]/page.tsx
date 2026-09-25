@@ -42,10 +42,7 @@ export default async function AdminCustomerPage({
   return (
     <div className="min-w-0 space-y-5 sm:space-y-6">
       <div>
-        <Link className="text-sm text-primary hover:underline" href="/admin/customers">
-          ← Customers
-        </Link>
-        <h1 className="mt-3 break-words text-2xl font-semibold tracking-tight sm:text-3xl">
+        <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
           {profile.full_name}
         </h1>
         <p className="break-all text-sm text-muted-foreground sm:text-base">
