@@ -49,7 +49,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     forceLightDocument();
   }, [ready]);
 
-  const setTheme = (_mode: ThemeMode) => {
+  const setTheme = (mode: ThemeMode) => {
+    void mode;
     forceLightDocument();
     try {
       window.localStorage.setItem(THEME_KEY, "light");
