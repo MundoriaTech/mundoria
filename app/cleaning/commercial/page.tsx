@@ -16,7 +16,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default function CommercialCleaningRoute() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured
-    ? "/booking/new?category=commercial"
+    ? "/booking/new?category=commercial&returnTo=/cleaning/commercial"
     : "/setup";
 
   return (

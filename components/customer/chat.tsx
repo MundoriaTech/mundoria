@@ -1,39 +1,13 @@
 "use client";
 
 import { ImagePlus, Loader2, Send, Smile, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { ChatEmojiPicker } from "@/components/customer/chat-emoji-picker";
 import { ChatMessage } from "@/components/shared/chat-message";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Message, MessageAttachment } from "@/types/customer";
-
-const EMOJIS = [
-  "😀",
-  "😊",
-  "😍",
-  "😂",
-  "🙌",
-  "👍",
-  "🙏",
-  "✨",
-  "💪",
-  "🏠",
-  "🧹",
-  "🧼",
-  "🫧",
-  "🔑",
-  "⏰",
-  "📍",
-  "✅",
-  "❗",
-  "❤️",
-  "🧡",
-  "💜",
-  "👋",
-  "😅",
-  "🤗",
-];
 
 const MAX_ATTACHMENTS = 4;
 const IMAGE_MAX_MB = 10;
@@ -72,6 +46,7 @@ export function Chat({
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const closeEmoji = useCallback(() => setEmojiOpen(false), []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -306,18 +281,12 @@ export function Chat({
         onSubmit={sendMessage}
       >
         {emojiOpen ? (
-          <div className="absolute bottom-[calc(100%-0.25rem)] left-3 right-3 z-10 grid grid-cols-8 gap-1 rounded-[1.25rem] border border-[#ece8f3] bg-white p-2 shadow-[0_16px_40px_rgba(28,19,59,0.12)] dark:border-border dark:bg-card sm:left-auto sm:right-4 sm:w-72">
-            {EMOJIS.map((emoji) => (
-              <button
-                className="flex h-9 items-center justify-center rounded-lg text-lg transition hover:bg-[#f3efe6]"
-                key={emoji}
-                onClick={() => insertEmoji(emoji)}
-                type="button"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+          <ChatEmojiPicker
+            onClose={closeEmoji}
+            onPick={(emoji) => {
+              insertEmoji(emoji);
+            }}
+          />
         ) : null}
 
         {pending.length ? (

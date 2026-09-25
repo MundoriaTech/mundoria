@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { cleanerTierLabel } from "@/lib/cleaner/tier";
-import type { CleanerTier } from "@/types/cleaner";
+import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
 
 const STATUS_AFTER: Record<string, string> = {
   approve: "certified",
   reject: "in_training",
   suspend: "suspended",
   remove: "removed",
+  fail_interview: "in_training",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -26,12 +27,24 @@ const STATUS_LABEL: Record<string, string> = {
   removed: "Banned",
 };
 
+const INTERVIEW_LABEL: Record<InterviewStatus, string> = {
+  not_started: "Not started",
+  awaiting: "Awaiting call",
+  completed: "Completed",
+  failed: "Failed",
+};
+
 export function CleanerReviewPanel({
   bio,
   cleanerId,
   currentStatus,
   currentTier,
+  hasHeadshot,
+  hasUtr,
+  interviewStatus,
   medallionScore,
+  skillsExamPassed,
+  skillsExamScore,
   totalJobs,
   yearsExperience,
 }: {
@@ -39,7 +52,12 @@ export function CleanerReviewPanel({
   cleanerId: string;
   currentStatus: string;
   currentTier: CleanerTier;
+  hasHeadshot: boolean;
+  hasUtr: boolean;
+  interviewStatus: InterviewStatus;
   medallionScore: number;
+  skillsExamPassed: boolean;
+  skillsExamScore: number | null;
   totalJobs: number;
   yearsExperience: number;
 }) {
@@ -47,6 +65,7 @@ export function CleanerReviewPanel({
   const { confirm, error: showError, success } = useFeedback();
   const [reason, setReason] = useState("");
   const [status, setStatus] = useState(currentStatus);
+  const [interview, setInterview] = useState(interviewStatus);
   const [tier, setTier] = useState<CleanerTier>(currentTier);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -54,6 +73,7 @@ export function CleanerReviewPanel({
 
   useEffect(() => setStatus(currentStatus), [currentStatus]);
   useEffect(() => setTier(currentTier), [currentTier]);
+  useEffect(() => setInterview(interviewStatus), [interviewStatus]);
 
   async function act(action: string) {
     if (!reasonIsValid) {
@@ -97,6 +117,8 @@ export function CleanerReviewPanel({
     const nextStatus = STATUS_AFTER[action];
     if (nextStatus) setStatus(nextStatus);
     if (action === "approve") setTier("silver");
+    if (action === "complete_interview") setInterview("completed");
+    if (action === "fail_interview") setInterview("failed");
     setMessage(null);
     success({
       kind: "done",
@@ -109,7 +131,11 @@ export function CleanerReviewPanel({
               ? "Cleaner suspended"
               : action === "remove"
                 ? "Cleaner banned"
-                : "Cleaner updated",
+                : action === "complete_interview"
+                  ? "Interview marked complete"
+                  : action === "fail_interview"
+                    ? "Interview marked failed"
+                    : "Cleaner updated",
       note: "The decision is logged against this account.",
     });
     router.refresh();
@@ -117,6 +143,12 @@ export function CleanerReviewPanel({
 
   const isCertified = status === "certified" || status === "active";
   const statusLabel = STATUS_LABEL[status] ?? status.replaceAll("_", " ");
+  const canApprove =
+    interview === "completed" &&
+    skillsExamPassed &&
+    hasHeadshot &&
+    hasUtr &&
+    !isCertified;
 
   return (
     <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1fr_.65fr]">
@@ -130,11 +162,34 @@ export function CleanerReviewPanel({
           </div>
           <TierBadge size="sm" tier={tier} />
         </div>
-        <div className="mt-5 grid grid-cols-3 gap-2 text-center sm:gap-3">
+        <div className="mt-5 grid grid-cols-2 gap-2 text-center sm:grid-cols-4 sm:gap-3">
           <Metric label="Score" value={medallionScore} />
           <Metric label="Jobs" value={totalJobs} />
           <Metric label="Status" value={statusLabel} />
+          <Metric label="Interview" value={INTERVIEW_LABEL[interview]} />
         </div>
+        <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+          <li>
+            Headshot:{" "}
+            <span className="font-medium text-foreground">
+              {hasHeadshot ? "Uploaded" : "Missing"}
+            </span>
+          </li>
+          <li>
+            UTR:{" "}
+            <span className="font-medium text-foreground">
+              {hasUtr ? "Provided" : "Missing"}
+            </span>
+          </li>
+          <li>
+            Skills exam:{" "}
+            <span className="font-medium text-foreground">
+              {skillsExamPassed
+                ? `Passed${skillsExamScore != null ? ` (${skillsExamScore}/8)` : ""}`
+                : "Not passed"}
+            </span>
+          </li>
+        </ul>
       </section>
 
       <section className="rounded-xl border bg-card p-4 sm:p-5">
@@ -142,8 +197,8 @@ export function CleanerReviewPanel({
           <div>
             <h2 className="font-semibold">Decide</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Check their documents, then approve them for live jobs — or hold /
-              remove the account. A short note is kept for your records.
+              Complete the phone interview, check documents, then approve for
+              live jobs — or hold / remove the account.
             </p>
           </div>
           <div className="flex gap-3 text-xs text-muted-foreground sm:shrink-0 sm:flex-col sm:text-right">
@@ -163,17 +218,40 @@ export function CleanerReviewPanel({
         <Input
           className="mt-4"
           onChange={(event) => setReason(event.target.value)}
-          placeholder="Note, e.g. DBS and ID checked"
+          placeholder="Note, e.g. Interview done — DBS and ID checked"
           value={reason}
         />
 
         <div className="mt-4 grid gap-2">
+          {interview !== "completed" && interview !== "failed" ? (
+            <>
+              <Button
+                className="min-h-11"
+                disabled={!reasonIsValid || busy}
+                onClick={() => void act("complete_interview")}
+              >
+                Mark phone interview complete
+              </Button>
+              <Button
+                className="min-h-11"
+                disabled={!reasonIsValid || busy}
+                onClick={() => void act("fail_interview")}
+                variant="outline"
+              >
+                Mark interview failed
+              </Button>
+            </>
+          ) : null}
           <Button
             className="min-h-11"
-            disabled={!reasonIsValid || busy || isCertified}
+            disabled={!reasonIsValid || busy || !canApprove}
             onClick={() => void act("approve")}
           >
-            {isCertified ? "Already approved" : "Approve for live jobs"}
+            {isCertified
+              ? "Already approved"
+              : canApprove
+                ? "Approve for live jobs"
+                : "Approve (interview + checks required)"}
           </Button>
           <Button
             className="min-h-11"

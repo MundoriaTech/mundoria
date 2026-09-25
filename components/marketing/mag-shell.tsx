@@ -5,6 +5,7 @@ import {
   MagNavbar,
   type MagNavCategory,
 } from "@/components/marketing/mag-navbar";
+import { getMarketingViewer } from "@/components/marketing/marketing-shell";
 import { ZohoSalesIqWidget } from "@/components/shared/zoho-salesiq";
 import {
   BLOG_CATEGORIES,
@@ -23,6 +24,8 @@ export async function MagShell({
 }) {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
+  const viewer = await getMarketingViewer();
+  const showBookCta = viewer?.role !== "cleaner";
   const posts = await listPublishedBlogPosts();
 
   const categories: MagNavCategory[] = BLOG_CATEGORIES.filter(
@@ -46,9 +49,13 @@ export async function MagShell({
         className,
       )}
     >
-      <MagNavbar bookingHref={bookingHref} categories={categories} />
+      <MagNavbar
+        bookingHref={bookingHref}
+        categories={categories}
+        showBookCta={showBookCta}
+      />
       <main className="flex-1">{children}</main>
-      <MagFooter bookingHref={bookingHref} />
+      <MagFooter bookingHref={bookingHref} showBookCta={showBookCta} />
       <ZohoSalesIqWidget />
     </div>
   );

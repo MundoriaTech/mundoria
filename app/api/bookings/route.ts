@@ -37,6 +37,22 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient();
+  const { data: roleProfile } = await admin
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (roleProfile?.role !== "customer") {
+    return NextResponse.json(
+      {
+        error:
+          "Only customer accounts can create bookings. Sign in with a customer account, or create one separately from your cleaner account.",
+      },
+      { status: 403 },
+    );
+  }
+
   const stripe = getStripe();
   const paymentIntent = await stripe.paymentIntents.retrieve(
     parsed.data.paymentIntentId,

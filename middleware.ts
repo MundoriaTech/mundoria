@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { safeRedirectPath } from "@/lib/auth/redirects";
+import { isCustomerBookingPath, safeRedirectPath } from "@/lib/auth/redirects";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/middleware";
 import { ROLE_DASHBOARDS, type UserRole } from "@/types/auth";
@@ -55,6 +55,7 @@ function isPublicMarketingPath(pathname: string) {
 
 function requiredRole(pathname: string): UserRole | null {
   // Guest booking flow (WeCasa-style): start without an account.
+  // Signed-in cleaners are redirected away below — guests stay allowed.
   if (pathname === "/booking/new") {
     return null;
   }
@@ -110,6 +111,18 @@ export async function middleware(request: NextRequest) {
   const { phone, response, user, role } = await updateSession(request);
   const protectedRole = requiredRole(pathname);
 
+  // Cleaners cannot book as customers — keep /booking/new open for guests only.
+  if (
+    user &&
+    role === "cleaner" &&
+    (pathname === "/booking/new" || isCustomerBookingPath(pathname))
+  ) {
+    return redirectWithSession(
+      new URL(ROLE_DASHBOARDS.cleaner, request.url),
+      response,
+    );
+  }
+
   if (protectedRole && !user) {
     const loginPath = protectedRole === "admin" ? "/admin/login" : "/login";
     const loginUrl = new URL(loginPath, request.url);
@@ -127,6 +140,16 @@ export async function middleware(request: NextRequest) {
       redirectTo,
       role ? ROLE_DASHBOARDS[role] : "/",
     );
+    // Don't bounce signed-in cleaners into customer booking via redirectTo.
+    if (
+      role === "cleaner" &&
+      isCustomerBookingPath(destination.split("?")[0] ?? destination)
+    ) {
+      return redirectWithSession(
+        new URL(ROLE_DASHBOARDS.cleaner, request.url),
+        response,
+      );
+    }
     return redirectWithSession(new URL(destination, request.url), response);
   }
 

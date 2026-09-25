@@ -7,9 +7,9 @@ alwaysApply: true
 
 ## Remote
 
-- **Always push to the organization repo:** `git@github.com:Mundoria/mundoria.git` (`origin`).
-- Do **not** push to `personal` (`MarithaMiracle/mundoria`) unless the user explicitly asks.
-- Before pushing, confirm `origin` points to `Mundoria/mundoria`.
+- **Always push to the organization repo:** `git@github.com:MundoriaTech/mundoria.git` (`origin`).
+- Do **not** push to `personal` (`MarithaMiracle/cleanscape` or similar) unless the user explicitly asks.
+- Before pushing, confirm `origin` points to `MundoriaTech/mundoria`.
 
 ## Collaborators & commit identity
 
@@ -20,6 +20,13 @@ alwaysApply: true
 - If a Cursor-related account appears on the repo, remove it from **Settings → Collaborators** and uninstall the **Cursor GitHub App** under **Settings → Integrations → Applications** (org owner may be required).
 - Do not invite GitHub Apps or bots to the repo unless the user explicitly requests it.
 
+## No Cursor commit attribution (mandatory)
+
+- **Never** add `Co-authored-by: Cursor <cursoragent@cursor.com>` (or any Cursor/cursoragent trailer) to commit messages or PRs.
+- After every `git commit`, verify the message has **no** Cursor co-author / "Made with Cursor" trailer. If the environment injected one and the commit is still local (not pushed), amend once to remove it.
+- Do not use `--trailer` flags that attribute work to Cursor.
+- Author and committer must both be `Maritha Miracle <marithamiracle@gmail.com>` only.
+
 ## Pull requests
 
-- Create PRs against `Mundoria/mundoria`, not the personal fork.
+- Create PRs against `MundoriaTech/mundoria`, not the personal fork.

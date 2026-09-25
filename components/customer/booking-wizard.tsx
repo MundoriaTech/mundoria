@@ -16,7 +16,22 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import { Bed, Broom, CookingPot, Door, Drop, Fire, Heart, PawPrint, Plant, Sparkle, Square, type Icon } from "@phosphor-icons/react";
+import {
+  Bed,
+  Broom,
+  CookingPot,
+  Door,
+  Drop,
+  Fire,
+  Heart,
+  PawPrint,
+  Plant,
+  ShirtFolded,
+  Sparkle,
+  SprayBottle,
+  Square,
+  type Icon,
+} from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -144,6 +159,11 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
     className:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#b8d4c8] [&_path:last-child]:!fill-[#312c79]",
   },
+  cleaning_products: {
+    Icon: SprayBottle,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#8ec5e8] [&_path:last-child]:!fill-[#312c79]",
+  },
   extra_bathroom_detail: {
     Icon: Drop,
     className:
@@ -168,6 +188,11 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
     Icon: Square,
     className:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#312c79]",
+  },
+  ironing: {
+    Icon: ShirtFolded,
+    className:
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
   },
   linen_change: {
     Icon: Bed,
@@ -218,6 +243,10 @@ export function BookingWizard({
   const lastRecommendedDurationRef = useRef<number | null>(null);
   const skipHistoryRef = useRef(false);
   const historyReadyRef = useRef(false);
+  const lastSyncedStepRef = useRef(0);
+  /** How many wizard pushState entries sit above the funnel entry (0 after refresh). */
+  const wizardDepthRef = useRef(0);
+  const exitBookingFlowRef = useRef<() => void>(() => undefined);
 
   const needsAuth = !userId;
   const includeCleanerChoice = Boolean(previousCleaner);
@@ -461,48 +490,70 @@ export function BookingWizard({
   // Sync wizard steps with browser history so mouse/trackpad Back matches in-app Back.
   useEffect(() => {
     if (!hydrated) return;
+
+    const writeStep = (mode: "push" | "replace", step: number) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("step", String(step));
+      const state = { bookingStep: step };
+      if (mode === "push") {
+        window.history.pushState(state, "", url);
+        wizardDepthRef.current += 1;
+      } else {
+        window.history.replaceState(state, "", url);
+      }
+      lastSyncedStepRef.current = step;
+    };
+
     if (!historyReadyRef.current) {
       historyReadyRef.current = true;
-      const url = new URL(window.location.href);
-      url.searchParams.set("step", String(stepIndex));
-      window.history.replaceState({ bookingStep: stepIndex }, "", url);
+      wizardDepthRef.current = 0;
+      writeStep("replace", stepIndex);
       return;
     }
     if (skipHistoryRef.current) {
       skipHistoryRef.current = false;
+      lastSyncedStepRef.current = stepIndex;
+      wizardDepthRef.current = Math.max(0, stepIndex);
       return;
     }
-    const url = new URL(window.location.href);
-    if (url.searchParams.get("step") === String(stepIndex)) return;
-    url.searchParams.set("step", String(stepIndex));
-    window.history.pushState({ bookingStep: stepIndex }, "", url);
+    if (lastSyncedStepRef.current === stepIndex) return;
+
+    if (stepIndex > lastSyncedStepRef.current) {
+      writeStep("push", stepIndex);
+      return;
+    }
+    // Jumps / clamps backward — replace current entry; reset depth to this step.
+    writeStep("replace", stepIndex);
+    wizardDepthRef.current = Math.max(0, stepIndex);
   }, [hydrated, stepIndex]);
 
   useEffect(() => {
     function onPopState(event: PopStateEvent) {
       if (checkoutBusy) {
-        // Re-assert current step so the URL doesn't drift while payment is in flight.
         const url = new URL(window.location.href);
         url.searchParams.set("step", String(stepIndex));
         window.history.pushState({ bookingStep: stepIndex }, "", url);
+        lastSyncedStepRef.current = stepIndex;
+        wizardDepthRef.current += 1;
         return;
       }
       const step = event.state?.bookingStep;
       if (typeof step === "number" && step >= 0) {
         skipHistoryRef.current = true;
+        wizardDepthRef.current = Math.max(0, step);
         setStepIndex(Math.min(step, Math.max(0, flowSteps.length - 1)));
         return;
       }
-      // No wizard state — leave the funnel.
-      if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
-        router.push(returnTo);
-        return;
+      wizardDepthRef.current = 0;
+      // Browser left the funnel. Only force a destination if we're still on
+      // the booking URL (e.g. history entry had no bookingStep state).
+      if (window.location.pathname.startsWith("/booking/new")) {
+        exitBookingFlowRef.current();
       }
-      router.push("/cleaning");
     }
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [checkoutBusy, flowSteps.length, returnTo, router, stepIndex]);
+  }, [checkoutBusy, flowSteps.length, stepIndex]);
 
   // Keep step index valid when the flow shrinks (e.g. service selected).
   useEffect(() => {
@@ -557,6 +608,25 @@ export function BookingWizard({
     }
   }, [draft.recentlyMoved, draft.serviceType]);
 
+  function exitBookingFlow() {
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+      router.push(returnTo);
+      return;
+    }
+    const categoryExit: Partial<Record<string, string>> = {
+      residential: "/cleaning/residential",
+      moving_home: "/cleaning/moving-home",
+      short_term_rental: "/cleaning/short-lets",
+      commercial: "/cleaning/commercial",
+      recovery: "/cleaning/recovery",
+    };
+    const exitHref =
+      (draft.serviceCategory && categoryExit[draft.serviceCategory]) ||
+      "/cleaning";
+    router.push(exitHref);
+  }
+  exitBookingFlowRef.current = exitBookingFlow;
+
   function goBack() {
     if (checkoutBusy) return;
     if (stepId === "address" && showAddressForm && addresses.length > 0) {
@@ -568,21 +638,13 @@ export function BookingWizard({
       return;
     }
     if (stepIndex === 0) {
-      if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
-        router.push(returnTo);
-        return;
-      }
-      const categoryExit: Partial<Record<string, string>> = {
-        residential: "/cleaning/residential",
-        moving_home: "/cleaning/moving-home",
-        short_term_rental: "/cleaning/short-lets",
-        commercial: "/cleaning/commercial",
-        recovery: "/cleaning/recovery",
-      };
-      const exitHref =
-        (draft.serviceCategory && categoryExit[draft.serviceCategory]) ||
-        "/cleaning";
-      router.push(exitHref);
+      exitBookingFlow();
+      return;
+    }
+    // Pop a real history entry when we pushed one (keeps mouse Back aligned).
+    // After refresh there is no step stack — step down in state instead.
+    if (wizardDepthRef.current > 0) {
+      window.history.back();
       return;
     }
     setStepIndex((current) => Math.max(0, current - 1));
@@ -1953,7 +2015,7 @@ function AddOnsStep({
         Do you have any other needs?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        Add-ons customise the clean. Interior windows are an add-on only.
+        Optional extras for this clean — skip if you don’t need any.
       </p>
       {addOns.length ? (
         <div className="mt-8 grid gap-3 sm:grid-cols-2">

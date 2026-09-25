@@ -16,7 +16,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default function ShortLetsCleaningRoute() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured
-    ? "/booking/new?category=short_term_rental"
+    ? "/booking/new?category=short_term_rental&returnTo=/cleaning/short-lets"
     : "/setup";
 
   return (

@@ -2,7 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { dashboardForRole, safeRedirectPath } from "@/lib/auth/redirects";
+import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isUserRole, type UserRole } from "@/types/auth";
@@ -33,7 +33,9 @@ export async function GET(request: Request) {
       const fallback = isUserRole(profile?.role)
         ? dashboardForRole(profile.role)
         : "/";
-      const next = safeRedirectPath(requestedNext, fallback);
+      const next = isUserRole(profile?.role)
+        ? redirectForRole(profile.role, requestedNext, fallback)
+        : redirectForRole("customer", requestedNext, fallback);
       const isPasswordReset = next === "/update-password";
 
       if (

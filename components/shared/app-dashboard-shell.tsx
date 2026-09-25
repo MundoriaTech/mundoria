@@ -74,13 +74,13 @@ export function AppDashboardShell({
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] text-[#1c133b] dark:bg-background dark:text-foreground">
+    <div className="min-h-screen bg-[#faf8ff] text-[#1c133b]">
       {desktop ? (
         <LandingNavbar customerHref={bookingHref} viewer={viewer} />
       ) : null}
 
       {!desktop ? (
-        <header className="sticky top-0 z-30 border-b border-[#ece3f9]/90 bg-[#faf8ff]/92 pt-[env(safe-area-inset-top)] backdrop-blur-xl dark:border-border dark:bg-background/90">
+        <header className="sticky top-0 z-30 border-b border-[#ece3f9]/90 bg-[#faf8ff]/92 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
             <div className="min-w-0">
               <LandingLogo className="text-[1.25rem]" href={brandHref} />
@@ -137,7 +137,7 @@ export function AppDashboardShell({
                         "flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium tracking-tight transition",
                         active
                           ? "bg-white text-[#1c133b] shadow-[0_1px_2px_rgba(28,19,59,0.06)] ring-1 ring-[#ece3f9]"
-                          : "text-[#6b6680] hover:bg-white/70 hover:text-[#1c133b] dark:text-muted-foreground dark:hover:bg-muted",
+                          : "text-[#6b6680] hover:bg-white/70 hover:text-[#1c133b]",
                       )}
                       href={item.href}
                       key={item.href}
@@ -165,7 +165,7 @@ export function AppDashboardShell({
       </div>
 
       {!desktop ? (
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#ece3f9] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl dark:border-border dark:bg-background/95">
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#ece3f9] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
           <div
             className="mx-auto grid h-16 max-w-lg"
             style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
@@ -177,9 +177,7 @@ export function AppDashboardShell({
                 <Link
                   className={cn(
                     "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition",
-                    active
-                      ? "text-[#1c133b] dark:text-primary"
-                      : "text-[#8b8798] dark:text-muted-foreground",
+                    active ? "text-[#1c133b]" : "text-[#8b8798]",
                   )}
                   href={item.href}
                   key={item.href}

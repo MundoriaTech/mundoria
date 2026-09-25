@@ -9,6 +9,18 @@ export type CleanerStatus =
   | "suspended"
   | "removed";
 
+export type DocumentReviewStatus =
+  | "missing"
+  | "pending"
+  | "verified"
+  | "rejected";
+
+export type InterviewStatus =
+  | "not_started"
+  | "awaiting"
+  | "completed"
+  | "failed";
+
 export interface CleanerProfile {
   id: string;
   bio: string | null;
@@ -25,10 +37,21 @@ export interface CleanerProfile {
   no_show_count: number;
   dbs_verified: boolean;
   dbs_document_url: string | null;
-  dbs_document_status: "missing" | "pending" | "verified" | "rejected";
+  dbs_document_status: DocumentReviewStatus;
   id_verified: boolean;
   id_document_url: string | null;
-  id_document_status: "missing" | "pending" | "verified" | "rejected";
+  id_document_status: DocumentReviewStatus;
+  headshot_url: string | null;
+  headshot_status: DocumentReviewStatus;
+  utr_number: string | null;
+  utr_verified: boolean;
+  interview_status: InterviewStatus;
+  interview_notes: string | null;
+  interview_completed_at: string | null;
+  interview_completed_by: string | null;
+  skills_exam_passed: boolean;
+  skills_exam_score: number | null;
+  skills_exam_completed_at: string | null;
   onboarding_complete: boolean;
   status: CleanerStatus;
   certification_score: number | null;

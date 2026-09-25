@@ -12,7 +12,7 @@ import { OAuthButton } from "@/components/auth/oauth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
-import { dashboardForRole, safeRedirectPath } from "@/lib/auth/redirects";
+import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
 import { loginSchema, type LoginValues } from "@/lib/auth/schemas";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -83,7 +83,7 @@ export function LoginForm({
     }
 
     const dashboard = dashboardForRole(profile.role);
-    router.replace(safeRedirectPath(redirectTo ?? null, dashboard));
+    router.replace(redirectForRole(profile.role, redirectTo ?? null, dashboard));
     router.refresh();
   });
 
@@ -93,7 +93,7 @@ export function LoginForm({
         <>
           <OAuthButton
             className="h-12 rounded-xl border-[#ddd6eb] bg-white text-[#414141] hover:bg-white/90"
-            next={safeRedirectPath(redirectTo ?? null, "/dashboard")}
+            next={redirectForRole("customer", redirectTo ?? null, "/dashboard")}
           />
           <div className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#9a93ad]">
             <span className="h-px flex-1 bg-[#ddd6eb]" />

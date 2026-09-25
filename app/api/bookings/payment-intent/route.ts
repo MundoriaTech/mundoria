@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       .single(),
     supabase
       .from("profiles")
-      .select("full_name, email, phone, stripe_customer_id")
+      .select("full_name, email, phone, stripe_customer_id, role")
       .eq("id", user.id)
       .single(),
   ]);
@@ -46,6 +46,16 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Address or customer profile not found" },
       { status: 404 },
+    );
+  }
+
+  if (profile.role !== "customer") {
+    return NextResponse.json(
+      {
+        error:
+          "Only customer accounts can book. Use a customer account, separate from your cleaner login.",
+      },
+      { status: 403 },
     );
   }
 

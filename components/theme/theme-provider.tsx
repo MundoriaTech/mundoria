@@ -8,7 +8,8 @@ import React, {
   useState,
 } from "react";
 
-export type ThemeMode = "light" | "dark";
+/** Mundoria is light-branded only — dark mode is not supported. */
+export type ThemeMode = "light";
 
 type ThemeContextValue = {
   theme: ThemeMode;
@@ -20,52 +21,46 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export const THEME_KEY = "mundoria-theme";
 
-function readStoredTheme(): ThemeMode {
-  if (typeof window === "undefined") return "light";
-
-  try {
-    const saved = window.localStorage.getItem(THEME_KEY);
-    if (saved === "dark") return "dark";
-    // "light", "system", missing, or anything else → light (app default)
-    if (saved === "system") {
-      window.localStorage.setItem(THEME_KEY, "light");
-    }
-  } catch {
-    // Ignore storage errors.
-  }
-
-  return "light";
+function forceLightDocument() {
+  if (typeof document === "undefined") return;
+  document.documentElement.classList.remove("dark");
+  document.documentElement.style.colorScheme = "light";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("light");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const stored = readStoredTheme();
-    setThemeState(stored);
-    document.documentElement.classList.toggle("dark", stored === "dark");
+    forceLightDocument();
+    try {
+      // Migrate any leftover dark / system preference to light.
+      const saved = window.localStorage.getItem(THEME_KEY);
+      if (saved && saved !== "light") {
+        window.localStorage.setItem(THEME_KEY, "light");
+      }
+    } catch {
+      // Ignore storage errors.
+    }
     setReady(true);
   }, []);
 
   useEffect(() => {
     if (!ready) return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [ready, theme]);
+    forceLightDocument();
+  }, [ready]);
 
-  const setTheme = (mode: ThemeMode) => {
-    setThemeState(mode);
+  const setTheme = (_mode: ThemeMode) => {
+    forceLightDocument();
     try {
-      window.localStorage.setItem(THEME_KEY, mode);
+      window.localStorage.setItem(THEME_KEY, "light");
     } catch {
-      // Ignore storage errors (incognito / blocked cookies).
+      // Ignore storage errors.
     }
-    document.documentElement.classList.toggle("dark", mode === "dark");
   };
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme, resolvedTheme: theme, setTheme }),
-    [theme],
+    () => ({ theme: "light", resolvedTheme: "light", setTheme }),
+    [],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { isUserRole } from "@/types/auth";
 
 export type BookingAuthMode = "ask" | "create" | "signin";
 
@@ -103,11 +104,29 @@ export function BookingAuthPrompt({
     setMessage(null);
     try {
       const supabase = createBrowserClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
       if (error) throw new Error(error.message);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profile && isUserRole(profile.role) && profile.role !== "customer") {
+        await supabase.auth.signOut();
+        setMessage(
+          profile.role === "cleaner"
+            ? "Cleaner accounts can’t book. Create or sign in with a customer account instead."
+            : "This account can’t continue a booking. Use a customer account.",
+        );
+        setBusy(false);
+        return;
+      }
+
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to sign in.");

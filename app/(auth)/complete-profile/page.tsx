@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { CompleteProfileForm } from "@/components/auth/complete-profile-form";
-import { dashboardForRole, safeRedirectPath } from "@/lib/auth/redirects";
+import { redirectForRole } from "@/lib/auth/redirects";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
 import { isUserRole } from "@/types/auth";
@@ -37,7 +37,7 @@ export default async function CompleteProfilePage({
     .eq("id", user.id)
     .single();
   const role = isUserRole(profile?.role) ? profile.role : "customer";
-  const next = safeRedirectPath(searchParams.next ?? null, dashboardForRole(role));
+  const next = redirectForRole(role, searchParams.next ?? null);
 
   if (profile?.phone?.trim()) {
     redirect(next);
@@ -45,8 +45,12 @@ export default async function CompleteProfilePage({
 
   return (
     <AuthShell
-      description="Google created your session. Add the details Mundoria needs for booking updates and marketplace safety."
-      footer="You can switch accounts from the form above."
+      description={
+        role === "cleaner"
+          ? "Google created your session. Add a phone number so Mundoria can reach you about jobs."
+          : "Google created your session. Add the details Mundoria needs for booking updates and marketplace safety."
+      }
+      footer="Need a different account type? Sign out and create the matching customer or cleaner account."
       title="Complete your profile"
     >
       <CompleteProfileForm

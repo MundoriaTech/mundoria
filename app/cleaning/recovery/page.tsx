@@ -16,7 +16,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default function RecoveryCleaningRoute() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured
-    ? "/booking/new?category=recovery"
+    ? "/booking/new?category=recovery&returnTo=/cleaning/recovery"
     : "/setup";
 
   return (

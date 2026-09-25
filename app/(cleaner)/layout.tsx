@@ -18,6 +18,7 @@ export default async function CleanerLayout({ children }: { children: React.Reac
   if(!user) redirect("/login");
   const context=await getCleanerContext(supabase,user.id);
   if(!context.profile || context.profile.role!=="cleaner") redirect("/");
+  if(!context.cleanerProfile) redirect("/");
   if(!context.cleanerProfile.onboarding_complete) return <OnboardingWizard cleaner={context.cleanerProfile} profile={context.profile as Profile} />;
   return <CleanerShell cleaner={context.cleanerProfile} profile={context.profile as Profile}>{children}</CleanerShell>;
 }

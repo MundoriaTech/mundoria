@@ -1,6 +1,7 @@
 import { BriefcaseBusiness, CalendarCheck } from "lucide-react";
 import Link from "next/link";
 
+import { CleanerOfferHighlight } from "@/components/cleaner/offer-highlight";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import {
   DashboardEmptyCard,
@@ -10,20 +11,31 @@ import {
   DashboardWelcomeBanner,
   SessionHighlightCard,
 } from "@/components/shared/dashboard-panels";
-import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
-import { nextTier, TIER_REQUIREMENTS } from "@/lib/cleaner/tier";
+import {
+  getAvailableJobs,
+  getCleanerContext,
+  getCleanerJobs,
+} from "@/lib/cleaner/server";
+import {
+  cleanerTierLabel,
+  nextTier,
+  TIER_REQUIREMENTS,
+} from "@/lib/cleaner/tier";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { sessionPhotoForService } from "@/lib/customer/booking-visibility";
 import { createServerClient } from "@/lib/supabase/server";
+
+export const metadata = { title: "Cleaner dashboard" };
 
 export default async function CleanerDashboardPage() {
   const supabase = createServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [context, jobs] = await Promise.all([
+  const [context, jobs, available] = await Promise.all([
     getCleanerContext(supabase, user!.id),
     getCleanerJobs(user!.id),
+    getAvailableJobs(user!.id),
   ]);
   const cleaner = context.cleanerProfile;
   const profile = context.profile;
@@ -38,6 +50,7 @@ export default async function CleanerDashboardPage() {
     );
   const todayJobs = activeJobs.filter((job) => job.scheduled_date === today);
   const nextJob = todayJobs[0] ?? activeJobs[0] ?? null;
+  const topOffer = available[0] ?? null;
   const completed = jobs.filter((job) => job.status === "completed");
   const week = completed
     .filter(
@@ -80,7 +93,7 @@ export default async function CleanerDashboardPage() {
         }
         eyebrow="Mundoria Pro"
         firstName={firstName}
-        subtitle="Your sessions, earnings and medallion progress — ready for a brilliant day."
+        subtitle="Track today’s sessions, earnings, and your medallion progress."
       />
 
       <DashboardStatTiles
@@ -105,15 +118,22 @@ export default async function CleanerDashboardPage() {
           {
             icon: "mapPin",
             label: "Next job",
-            value: nextJob
-              ? `${nextJob.scheduled_start_time.slice(0, 5)} · ${nextJob.address?.city ?? "Job"}`
-              : "None",
+            value: topOffer
+              ? "Offer"
+              : nextJob
+                ? `${nextJob.scheduled_start_time.slice(0, 5)} · ${nextJob.address?.city ?? "Job"}`
+                : "None",
           },
         ]}
       />
 
-      <DashboardSection eyebrow="On the schedule" title="Next session">
-        {nextJob ? (
+      <DashboardSection
+        eyebrow="On the schedule"
+        title={topOffer ? "Respond to offer" : "Next session"}
+      >
+        {topOffer ? (
+          <CleanerOfferHighlight job={topOffer} />
+        ) : nextJob ? (
           <SessionHighlightCard
             actions={
               <>
@@ -177,7 +197,7 @@ export default async function CleanerDashboardPage() {
         )}
       </DashboardSection>
 
-      <section className="overflow-hidden rounded-[1.75rem] bg-[#f3efe6] p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
+      <section className="overflow-hidden rounded-[1.75rem] border border-[#e8e0d6]/80 bg-[#f3efe6] p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
@@ -187,12 +207,12 @@ export default async function CleanerDashboardPage() {
               <TierBadge tier={cleaner.tier} />
             </div>
           </div>
-          <div
-            aria-hidden
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-lg"
+          <Link
+            className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            href="/cleaner/performance"
           >
-            ★
-          </div>
+            View details
+          </Link>
         </div>
         <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/70">
           <div
@@ -202,8 +222,8 @@ export default async function CleanerDashboardPage() {
         </div>
         <p className="mt-2 text-sm font-light text-[#3d3a48]">
           {hasCompletedJobs
-            ? `${cleaner.performance_score}/100 toward ${next}`
-            : `Progress toward ${next} starts after completed jobs and ratings.`}
+            ? `${cleaner.performance_score}/100 toward ${cleanerTierLabel(next)}`
+            : `Progress toward ${cleanerTierLabel(next)} starts after completed jobs and ratings.`}
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <MiniStat

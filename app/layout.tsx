@@ -60,9 +60,10 @@ export default function RootLayout({
   return (
     <html className={poppins.variable} lang="en" suppressHydrationWarning>
       <head>
+        <meta name="color-scheme" content="light" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('mundoria-theme');document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`,
+            __html: `(function(){try{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';var t=localStorage.getItem('mundoria-theme');if(t&&t!=='light'){localStorage.setItem('mundoria-theme','light');}}catch(e){}})();`,
           }}
         />
         <script

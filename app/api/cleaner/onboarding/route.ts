@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { scoreSkillsExam, SKILLS_EXAM_PASS_SCORE, SKILLS_EXAM_QUESTIONS } from "@/lib/cleaner/skills-exam";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -33,14 +34,23 @@ const schema = z.object({
     .max(2000, "Bio is too long"),
   dbs_document_url: requiredString("DBS certificate"),
   full_name: z.string().trim().min(2, "Full name is required"),
+  headshot_url: requiredString("Profile headshot"),
   id_document_url: requiredString("Government-issued ID"),
   location_tracking_consent_accepted: z.literal(true, {
     errorMap: () => ({ message: "Location consent is required" }),
   }),
-  location_tracking_consent_version: z.string().trim().default("cleaner-location-consent-v1"),
+  location_tracking_consent_version: z
+    .string()
+    .trim()
+    .default("cleaner-location-consent-v1"),
   payout_preference: z.enum(["weekly", "monthly"]),
   phone: z.string().trim().min(7, "Enter a valid phone number"),
   services: requiredStringList("Select at least one service"),
+  skills_exam_answers: z.record(z.string(), z.number().int().min(0).max(3)),
+  utr_number: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "UTR must be exactly 10 digits"),
   working_areas: requiredStringList("Add at least one working area"),
   years_experience: z.number().int().min(0).max(60),
 });
@@ -69,6 +79,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Cleaner account required" }, { status: 403 });
   }
 
+  const exam = scoreSkillsExam(parsed.data.skills_exam_answers);
+  if (!exam.passed) {
+    return NextResponse.json(
+      {
+        error: `Skills check: you scored ${exam.score}/${exam.total}. You need at least ${SKILLS_EXAM_PASS_SCORE}/${SKILLS_EXAM_QUESTIONS.length} to continue — review the questions and try again.`,
+      },
+      { status: 400 },
+    );
+  }
+
   let stripeOnboardingComplete = false;
 
   if (profile.stripe_account_id && process.env.STRIPE_SECRET_KEY) {
@@ -85,21 +105,30 @@ export async function POST(request: Request) {
   }
 
   const value = parsed.data;
+  const now = new Date().toISOString();
   const { error } = await admin
     .from("cleaner_profiles")
     .update({
       bio: value.bio,
       dbs_document_status: "pending",
       dbs_document_url: value.dbs_document_url,
+      headshot_status: "pending",
+      headshot_url: value.headshot_url,
       id_document_status: "pending",
       id_document_url: value.id_document_url,
-      location_tracking_consent_at: new Date().toISOString(),
+      interview_status: "awaiting",
+      location_tracking_consent_at: now,
       location_tracking_consent_version:
         value.location_tracking_consent_version,
       onboarding_complete: true,
       payout_preference: value.payout_preference,
-      stripe_onboarding_complete: stripeOnboardingComplete,
+      skills_exam_completed_at: now,
+      skills_exam_passed: true,
+      skills_exam_score: exam.score,
       status: "pending",
+      stripe_onboarding_complete: stripeOnboardingComplete,
+      utr_number: value.utr_number,
+      utr_verified: false,
       years_experience: value.years_experience,
     })
     .eq("id", user.id);
@@ -108,7 +137,11 @@ export async function POST(request: Request) {
   await Promise.all([
     admin
       .from("profiles")
-      .update({ full_name: value.full_name, phone: value.phone })
+      .update({
+        avatar_url: value.headshot_url,
+        full_name: value.full_name,
+        phone: value.phone,
+      })
       .eq("id", user.id),
     admin.from("cleaner_services").delete().eq("cleaner_id", user.id),
     admin.from("cleaner_working_areas").delete().eq("cleaner_id", user.id),
@@ -139,7 +172,7 @@ export async function POST(request: Request) {
   if (admins?.length) {
     await admin.from("notifications").insert(
       admins.map((recipient) => ({
-        body: `${value.full_name} submitted identity documents for review.`,
+        body: `${value.full_name} submitted onboarding — schedule a phone interview.`,
         data: { cleaner_id: user.id },
         title: "New cleaner application",
         type: "cleaner_application",
@@ -148,7 +181,7 @@ export async function POST(request: Request) {
     );
   }
   await admin.from("admin_alert_queue").insert({
-    body: `${value.full_name} submitted identity documents for review.`,
+    body: `${value.full_name} submitted onboarding — schedule a phone interview.`,
     data: { cleaner_id: user.id },
     title: "New cleaner application",
     type: "cleaner_application",

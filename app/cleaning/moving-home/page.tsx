@@ -16,7 +16,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default function MovingHomeCleaningRoute() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured
-    ? "/booking/new?category=moving_home"
+    ? "/booking/new?category=moving_home&returnTo=/cleaning/moving-home"
     : "/setup";
 
   return (

@@ -36,9 +36,29 @@ export async function getCleanerContext(
   return {
     areas: (areas ?? []) as CleanerArea[],
     availability: (availability ?? []) as CleanerAvailability[],
-    cleanerProfile: cleanerProfile as CleanerProfile,
+    cleanerProfile: normalizeCleanerProfile(cleanerProfile),
     profile,
     services: (services ?? []) as CleanerService[],
+  };
+}
+
+function normalizeCleanerProfile(
+  row: CleanerProfile | null,
+): CleanerProfile | null {
+  if (!row) return null;
+  return {
+    ...row,
+    headshot_status: row.headshot_status ?? "missing",
+    headshot_url: row.headshot_url ?? null,
+    interview_completed_at: row.interview_completed_at ?? null,
+    interview_completed_by: row.interview_completed_by ?? null,
+    interview_notes: row.interview_notes ?? null,
+    interview_status: row.interview_status ?? "not_started",
+    skills_exam_completed_at: row.skills_exam_completed_at ?? null,
+    skills_exam_passed: Boolean(row.skills_exam_passed),
+    skills_exam_score: row.skills_exam_score ?? null,
+    utr_number: row.utr_number ?? null,
+    utr_verified: Boolean(row.utr_verified),
   };
 }
 

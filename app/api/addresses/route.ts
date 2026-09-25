@@ -83,10 +83,9 @@ async function saveAddress(request: Request, mode: "create" | "update") {
     );
   }
 
-  // Cleaners can still book for themselves; ensure address ownership is their user id.
-  if (profile.role !== "customer" && profile.role !== "cleaner") {
+  if (profile.role !== "customer") {
     return NextResponse.json(
-      { error: "Only customer accounts can save booking addresses." },
+      { error: "Only customer accounts can save booking addresses. Cleaners use a separate customer account to book." },
       { status: 403 },
     );
   }

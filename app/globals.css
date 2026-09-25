@@ -34,30 +34,27 @@
   }
 
   .dark {
-    /* True near-black surfaces — not blue-slate */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 244 48% 68%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 25 95% 72%;
-    --accent-foreground: 0 0% 8%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
-    --ring: 244 48% 68%;
+    /* Mundoria stays light-branded. Keep tokens identical to :root so any
+       leftover `dark` class or dark: utility cannot paint pure black. */
+    --background: 0 0% 100%;
+    --foreground: 246 45% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 246 45% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 246 45% 14%;
+    --primary: 244 37% 50%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 242 70% 94%;
+    --secondary-foreground: 246 45% 18%;
+    --muted: 242 70% 96%;
+    --muted-foreground: 246 12% 43%;
+    --accent: 25 100% 82%;
+    --accent-foreground: 246 45% 14%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 242 38% 88%;
+    --input: 242 38% 88%;
+    --ring: 244 37% 50%;
   }
 
   * {
@@ -66,18 +63,18 @@
 
   html {
     scroll-behavior: smooth;
-    color-scheme: light;
+    color-scheme: light only;
   }
 
   html.dark {
-    color-scheme: dark;
+    color-scheme: light only;
   }
 
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }
 
-  /* Keep form controls light even when html.dark / system dark mode is on. */
+  /* Keep form controls light even when the OS is in dark mode. */
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]),
   textarea,
   select {
@@ -232,6 +229,38 @@
 
     100% {
       transform: scale(1.2) translate3d(1.5%, 1.2%, 0);
+    }
+  }
+
+  @keyframes medallion-shine {
+    0% {
+      transform: translateX(-120%) rotate(18deg);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.55;
+    }
+    55% {
+      opacity: 0.2;
+    }
+    100% {
+      transform: translateX(120%) rotate(18deg);
+      opacity: 0;
+    }
+  }
+
+  .medallion-shine {
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.55) 50%,
+      transparent 65%
+    );
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .medallion-shine {
+      animation: medallion-shine 4.5s ease-in-out infinite;
     }
   }
 }

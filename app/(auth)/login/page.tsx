@@ -28,8 +28,8 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
     <AuthShell
       description={
         returningFromBooking
-          ? "Looks like you already have a Mundoria account. Sign in to finish your booking."
-          : "Welcome back. Your next booking or job is waiting."
+          ? "Looks like you already have a Mundoria customer account. Sign in to finish your booking."
+          : "Welcome back. Sign in to your customer or cleaner account."
       }
       footer={
         <>

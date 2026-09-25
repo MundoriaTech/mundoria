@@ -6,7 +6,7 @@ import { TierBadge } from "@/components/cleaner/tier-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { CleanerTier } from "@/types/cleaner";
+import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Needs review",
@@ -38,11 +38,15 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
   const signed = await Promise.all(
     (
       [
-        ["DBS certificate", cleaner.dbs_document_url],
-        ["Government ID", cleaner.id_document_url],
+        ["DBS certificate", cleaner.dbs_document_url, "storage"],
+        ["Government ID", cleaner.id_document_url, "storage"],
+        ["Headshot", cleaner.headshot_url, "public"],
       ] as const
-    ).map(async ([label, path]) => {
+    ).map(async ([label, path, kind]) => {
       if (!path) return { label, path: null as string | null, url: null as string | null };
+      if (kind === "public" || path.startsWith("http")) {
+        return { label, path, url: path };
+      }
       const { data } = await admin.storage
         .from("cleaner-documents")
         .createSignedUrl(path, 60 * 30);
@@ -83,15 +87,54 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         cleanerId={params.id}
         currentStatus={cleaner.status}
         currentTier={cleaner.tier as CleanerTier}
+        hasHeadshot={Boolean(cleaner.headshot_url)}
+        hasUtr={Boolean(cleaner.utr_number)}
+        interviewStatus={
+          (cleaner.interview_status as InterviewStatus | null) ?? "not_started"
+        }
         medallionScore={cleaner.medallion_score ?? 0}
+        skillsExamPassed={Boolean(cleaner.skills_exam_passed)}
+        skillsExamScore={cleaner.skills_exam_score ?? null}
         totalJobs={cleaner.total_jobs}
         yearsExperience={cleaner.years_experience ?? 0}
       />
 
       <section className="rounded-xl border bg-card p-4 sm:p-5">
+        <h2 className="font-semibold">Compliance</h2>
+        <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-muted-foreground">UTR</dt>
+            <dd className="font-medium">
+              {cleaner.utr_number
+                ? `${cleaner.utr_number}${cleaner.utr_verified ? " · verified" : " · pending"}`
+                : "Not provided"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Skills exam</dt>
+            <dd className="font-medium">
+              {cleaner.skills_exam_passed
+                ? `Passed (${cleaner.skills_exam_score ?? "—"}/8)`
+                : "Not passed"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Interview</dt>
+            <dd className="font-medium capitalize">
+              {(cleaner.interview_status ?? "not_started").replaceAll("_", " ")}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Phone</dt>
+            <dd className="font-medium">{profile.phone ?? "No phone"}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Documents</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Open DBS and ID here without leaving the admin portal.
+          Open DBS, ID, and headshot here without leaving the admin portal.
         </p>
         <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap">
           {signed.map((document) => (

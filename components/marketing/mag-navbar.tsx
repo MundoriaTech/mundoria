@@ -173,9 +173,11 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
 export function MagNavbar({
   bookingHref,
   categories,
+  showBookCta = true,
 }: {
   bookingHref: string;
   categories: MagNavCategory[];
+  showBookCta?: boolean;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
@@ -253,14 +255,16 @@ export function MagNavbar({
             className="hidden rounded-full px-3 py-1.5 text-[12px] font-semibold text-[#1c133b] transition hover:bg-white/55 sm:inline"
             href="/"
           >
-            mundoriauk.com
+            Home
           </Link>
-          <Link
-            className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 sm:px-4"
-            href={bookingHref}
-          >
-            Book a clean
-          </Link>
+          {showBookCta ? (
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 sm:px-4"
+              href={bookingHref}
+            >
+              Book a clean
+            </Link>
+          ) : null}
           <button
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -334,7 +338,7 @@ export function MagNavbar({
                 href="/"
                 onClick={() => setMobileOpen(false)}
               >
-                mundoriauk.com
+                Home
               </Link>
             </div>
           </div>

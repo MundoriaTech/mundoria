@@ -49,6 +49,7 @@ export function LandingNavbar({
   const configured = hasSupabasePublicConfig();
   const loginHref = configured ? "/login" : "/setup";
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
+  const showBookCta = viewer?.role !== "cleaner";
   const firstName = viewer?.full_name.trim().split(/\s+/)[0] ?? "";
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
@@ -127,12 +128,14 @@ export function LandingNavbar({
               Log in
             </Link>
           )}
-          <Link
-            className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
-            href={customerHref}
-          >
-            Book a clean
-          </Link>
+          {showBookCta ? (
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
+              href={customerHref}
+            >
+              Book a clean
+            </Link>
+          ) : null}
         </div>
 
         <MobileNav
@@ -141,6 +144,7 @@ export function LandingNavbar({
           loginHref={loginHref}
           mobileOpen={mobileOpen}
           onMobileOpenChange={setMobileOpen}
+          showBookCta={showBookCta}
           viewer={viewer}
         />
       </div>
@@ -278,6 +282,7 @@ function MobileNav({
   viewer,
   mobileOpen,
   onMobileOpenChange,
+  showBookCta,
 }: {
   customerHref: string;
   loginHref: string;
@@ -285,6 +290,7 @@ function MobileNav({
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
   mobileOpen: boolean;
   onMobileOpenChange: (open: boolean) => void;
+  showBookCta: boolean;
 }) {
   const [servicesOpen, setServicesOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -330,12 +336,14 @@ function MobileNav({
           />
         </Link>
       ) : null}
-      <Link
-        className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation"
-        href={customerHref}
-      >
-        Book a clean
-      </Link>
+      {showBookCta ? (
+        <Link
+          className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation"
+          href={customerHref}
+        >
+          Book a clean
+        </Link>
+      ) : null}
       <button
         aria-expanded={mobileOpen}
         aria-label={mobileOpen ? "Close menu" : "Open menu"}

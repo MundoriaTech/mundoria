@@ -4,7 +4,13 @@ import { CookieSettingsLink } from "@/components/analytics/cookie-settings-butto
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { BLOG_CATEGORIES } from "@/lib/content/editorial";
 
-export function MagFooter({ bookingHref }: { bookingHref: string }) {
+export function MagFooter({
+  bookingHref,
+  showBookCta = true,
+}: {
+  bookingHref: string;
+  showBookCta?: boolean;
+}) {
   const categories = BLOG_CATEGORIES.filter((item) => item !== "All");
 
   const footerSections = [
@@ -28,7 +34,9 @@ export function MagFooter({ bookingHref }: { bookingHref: string }) {
     },
     {
       links: [
-        ["Book a clean", bookingHref],
+        ...(showBookCta
+          ? ([["Book a clean", bookingHref]] as [string, string][])
+          : []),
         ["Home", "/"],
         ["For cleaners", "/for-cleaners"],
         ["How it works", "/how-it-works"],

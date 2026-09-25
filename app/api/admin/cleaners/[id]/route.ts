@@ -5,7 +5,15 @@ import { z } from "zod";
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 
 const schema = z.object({
-  action: z.enum(["approve", "reject", "suspend", "remove", "set_tier"]),
+  action: z.enum([
+    "approve",
+    "reject",
+    "suspend",
+    "remove",
+    "set_tier",
+    "complete_interview",
+    "fail_interview",
+  ]),
   reason: z.string().trim().min(3),
   tier: z.enum(["bronze", "silver", "gold", "rose_gold", "elite"]).optional(),
 });
@@ -28,10 +36,49 @@ export async function POST(
     );
   }
   const { action, reason, tier } = parsed.data;
+
+  const { data: current } = await auth.admin
+    .from("cleaner_profiles")
+    .select(
+      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,utr_number,dbs_document_url,id_document_url",
+    )
+    .eq("id", params.id)
+    .single();
+
+  if (action === "approve") {
+    if (current?.interview_status !== "completed") {
+      return NextResponse.json(
+        {
+          error:
+            "Mark the phone interview as completed before approving for live jobs.",
+        },
+        { status: 400 },
+      );
+    }
+    if (!current?.skills_exam_passed) {
+      return NextResponse.json(
+        { error: "Cleaner has not passed the skills exam." },
+        { status: 400 },
+      );
+    }
+    if (!current?.headshot_url) {
+      return NextResponse.json(
+        { error: "Cleaner has not uploaded a headshot." },
+        { status: 400 },
+      );
+    }
+    if (!current?.utr_number) {
+      return NextResponse.json(
+        { error: "Cleaner has not provided a UTR number." },
+        { status: 400 },
+      );
+    }
+  }
+
   const status =
     action === "approve"
       ? "certified"
-      : action === "reject"
+      : action === "reject" || action === "fail_interview"
         ? "in_training"
         : action === "suspend"
           ? "suspended"
@@ -40,11 +87,32 @@ export async function POST(
             : undefined;
   const updates: Record<string, unknown> = {};
   if (status) updates.status = status;
+
+  if (action === "complete_interview") {
+    updates.interview_status = "completed";
+    updates.interview_notes = reason;
+    updates.interview_completed_at = new Date().toISOString();
+    updates.interview_completed_by = auth.user.id;
+  }
+
+  if (action === "fail_interview") {
+    updates.interview_status = "failed";
+    updates.interview_notes = reason;
+    updates.interview_completed_at = new Date().toISOString();
+    updates.interview_completed_by = auth.user.id;
+    updates.certification_passed = false;
+    updates.certification_notes = reason;
+    updates.certification_assessed_by = auth.user.id;
+    updates.certification_assessed_at = new Date().toISOString();
+  }
+
   if (action === "approve") {
     updates.dbs_verified = true;
     updates.id_verified = true;
+    updates.utr_verified = true;
     updates.dbs_document_status = "verified";
     updates.id_document_status = "verified";
+    updates.headshot_status = "verified";
     updates.certification_passed = true;
     updates.certification_notes = reason;
     updates.certification_assessed_by = auth.user.id;
@@ -60,11 +128,6 @@ export async function POST(
   if (action === "set_tier") {
     if (!tier) return NextResponse.json({ error: "Tier required" }, { status: 400 });
     updates.tier = tier;
-    const { data: current } = await auth.admin
-      .from("cleaner_profiles")
-      .select("tier,performance_score,total_jobs")
-      .eq("id", params.id)
-      .single();
     await auth.admin.from("performance_history").insert({
       acceptance_score: 0,
       cancellation_score: 0,
@@ -105,31 +168,43 @@ export async function POST(
     metadata: tier ? { tier } : {},
     reason,
   });
+
+  const notificationBody =
+    action === "approve"
+      ? "You are approved and can now receive cleaning jobs."
+      : action === "reject"
+        ? "Your application is on hold. Mundoria will follow up if more is needed."
+        : action === "complete_interview"
+          ? "Your phone interview is complete. Mundoria will finish document review shortly."
+          : action === "fail_interview"
+            ? "Your phone interview did not pass. Mundoria will follow up with next steps."
+            : action === "suspend"
+              ? "Your cleaner account has been temporarily suspended."
+              : action === "remove"
+                ? "Your cleaner account has been removed from Mundoria."
+                : `Your cleaner account was updated: ${action}.`;
+
+  const notificationTitle =
+    action === "approve"
+      ? "You're approved"
+      : action === "reject"
+        ? "Application on hold"
+        : action === "complete_interview"
+          ? "Interview complete"
+          : action === "fail_interview"
+            ? "Interview update"
+            : "Account update";
+
   await auth.admin.from("notifications").insert({
-    body:
-      action === "approve"
-        ? "You are approved and can now receive cleaning jobs."
-        : action === "reject"
-          ? "Your application is on hold. Mundoria will follow up if more is needed."
-          : action === "suspend"
-            ? "Your cleaner account has been temporarily suspended."
-            : action === "remove"
-              ? "Your cleaner account has been removed from Mundoria."
-              : `Your cleaner account was updated: ${action}.`,
+    body: notificationBody,
     data: {},
-    title:
-      action === "approve"
-        ? "You're approved"
-        : action === "reject"
-          ? "Application on hold"
-          : "Account update",
+    title: notificationTitle,
     type: `cleaner_${action}`,
     user_id: params.id,
   });
 
   revalidatePath(`/admin/cleaners/${params.id}`);
   revalidatePath(`/admin/cleaner/${params.id}`);
-  revalidatePath("/admin/cleaners");
   revalidatePath("/admin/cleaners");
   revalidatePath("/admin/dashboard");
 
