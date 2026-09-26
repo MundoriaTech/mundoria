@@ -33,6 +33,44 @@ const TABS = [
   { value: "removed", label: "Banned" },
 ] as const;
 
+function digitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function areasLabel(areas: string[] | undefined) {
+  if (!areas?.length) return null;
+  const shown = areas.slice(0, 4).join(", ");
+  return areas.length > 4 ? `${shown} +${areas.length - 4}` : shown;
+}
+
+function matchesCleanerSearch(
+  cleaner: AdminCleaner,
+  areas: string[] | undefined,
+  raw: string,
+) {
+  const query = raw.trim().toLowerCase();
+  if (!query) return true;
+
+  const haystack = [
+    cleaner.full_name,
+    cleaner.email,
+    cleaner.phone ?? "",
+    ...(areas ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (haystack.includes(query)) return true;
+
+  const queryDigits = digitsOnly(query);
+  if (queryDigits.length >= 3) {
+    const phoneDigits = digitsOnly(cleaner.phone ?? "");
+    if (phoneDigits.includes(queryDigits)) return true;
+  }
+
+  return false;
+}
+
 export function CleanersTable({
   cleaners,
   workingAreas,
@@ -48,19 +86,15 @@ export function CleanersTable({
     () =>
       cleaners.filter((cleaner) => {
         const status = cleaner.cleaner_profiles?.status;
+        const areas = workingAreas[cleaner.id];
         return (
           (tab === "all" ||
             (tab === "pending" && status === "pending") ||
             status === tab) &&
-          (!search ||
-            `${cleaner.full_name} ${cleaner.email}`
-              .toLowerCase()
-              .includes(search.toLowerCase())) &&
+          matchesCleanerSearch(cleaner, areas, search) &&
           (!tier || cleaner.cleaner_profiles?.tier === tier) &&
           (!area ||
-            workingAreas[cleaner.id]?.some((prefix) =>
-              prefix.startsWith(area.toUpperCase()),
-            ))
+            areas?.some((prefix) => prefix.startsWith(area.toUpperCase())))
         );
       }),
     [area, cleaners, search, tab, tier, workingAreas],
@@ -95,7 +129,8 @@ export function CleanersTable({
           <Input
             className="pl-9"
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search cleaners"
+            placeholder="Search name, email, phone, or area"
+            value={search}
           />
         </label>
         <select
@@ -120,6 +155,7 @@ export function CleanersTable({
       <div className="mt-5 space-y-3 md:hidden">
         {pageItems.map((cleaner) => {
           const status = cleaner.cleaner_profiles?.status;
+          const areas = areasLabel(workingAreas[cleaner.id]);
           return (
             <Link
               className="block rounded-xl border border-border bg-card p-4 transition active:bg-muted/40"
@@ -146,6 +182,11 @@ export function CleanersTable({
                   <p className="mt-0.5 truncate text-sm text-muted-foreground">
                     {cleaner.email}
                   </p>
+                  {areas ? (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Areas: {areas}
+                    </p>
+                  ) : null}
                   <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span>
                       {STATUS_LABEL[status ?? ""] ??
@@ -177,10 +218,12 @@ export function CleanersTable({
       </div>
 
       <div className="mt-5 hidden overflow-x-auto rounded-xl border bg-card md:block">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="w-full min-w-[900px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="p-3">Name</th>
+              <th>Phone</th>
+              <th>Areas</th>
               <th>Tier</th>
               <th>Score</th>
               <th>Jobs</th>
@@ -190,61 +233,75 @@ export function CleanersTable({
             </tr>
           </thead>
           <tbody>
-            {pageItems.map((cleaner) => (
-              <tr className="border-t" key={cleaner.id}>
-                <td className="p-3">
-                  <div className="flex items-center gap-3">
-                    <UserAvatar
-                      name={cleaner.full_name}
-                      seed={cleaner.id}
-                      size="sm"
-                      url={cleaner.avatar_url}
-                    />
-                    <span>
-                      <b>{cleaner.full_name}</b>
-                      <small className="block text-muted-foreground">
-                        {cleaner.email}
-                      </small>
-                    </span>
-                  </div>
-                </td>
-                <td>
-                  {cleaner.cleaner_profiles ? (
-                    <TierBadge size="sm" tier={cleaner.cleaner_profiles.tier} />
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>{cleaner.cleaner_profiles?.medallion_score ?? 0}</td>
-                <td>{cleaner.cleaner_profiles?.total_jobs ?? 0}</td>
-                <td>
-                  {STATUS_LABEL[cleaner.cleaner_profiles?.status ?? ""] ??
-                    cleaner.cleaner_profiles?.status?.replaceAll("_", " ") ??
-                    "—"}
-                  {cleaner.cleaner_profiles?.onboarding_complete === false ? (
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      Onboarding incomplete
-                    </span>
-                  ) : null}
-                </td>
-                <td>
-                  {new Date(cleaner.created_at).toLocaleDateString("en-GB")}
-                </td>
-                <td>
-                  <Link
-                    className="font-medium text-primary"
-                    href={`/admin/cleaners/${cleaner.id}`}
-                  >
-                    Review
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {pageItems.map((cleaner) => {
+              const areas = areasLabel(workingAreas[cleaner.id]);
+              return (
+                <tr className="border-t" key={cleaner.id}>
+                  <td className="p-3">
+                    <div className="flex items-center gap-3">
+                      <UserAvatar
+                        name={cleaner.full_name}
+                        seed={cleaner.id}
+                        size="sm"
+                        url={cleaner.avatar_url}
+                      />
+                      <span>
+                        <b>{cleaner.full_name}</b>
+                        <small className="block text-muted-foreground">
+                          {cleaner.email}
+                        </small>
+                      </span>
+                    </div>
+                  </td>
+                  <td>{cleaner.phone || "—"}</td>
+                  <td className="max-w-[12rem]">
+                    {areas ? (
+                      <span className="line-clamp-2">{areas}</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td>
+                    {cleaner.cleaner_profiles ? (
+                      <TierBadge
+                        size="sm"
+                        tier={cleaner.cleaner_profiles.tier}
+                      />
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>{cleaner.cleaner_profiles?.medallion_score ?? 0}</td>
+                  <td>{cleaner.cleaner_profiles?.total_jobs ?? 0}</td>
+                  <td>
+                    {STATUS_LABEL[cleaner.cleaner_profiles?.status ?? ""] ??
+                      cleaner.cleaner_profiles?.status?.replaceAll("_", " ") ??
+                      "—"}
+                    {cleaner.cleaner_profiles?.onboarding_complete === false ? (
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        Onboarding incomplete
+                      </span>
+                    ) : null}
+                  </td>
+                  <td>
+                    {new Date(cleaner.created_at).toLocaleDateString("en-GB")}
+                  </td>
+                  <td>
+                    <Link
+                      className="font-medium text-primary"
+                      href={`/admin/cleaners/${cleaner.id}`}
+                    >
+                      Review
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
             {!filtered.length ? (
               <tr>
                 <td
                   className="p-8 text-center text-muted-foreground"
-                  colSpan={7}
+                  colSpan={9}
                 >
                   {cleaners.length
                     ? "No cleaners match these filters."

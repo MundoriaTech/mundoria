@@ -13,9 +13,11 @@ import { formatMoney } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
 
 export type AdminCustomerRow = {
+  addressLabel: string | null;
   avatar_url: string | null;
   created_at: string;
   email: string;
+  extraAddressCount: number;
   full_name: string;
   id: string;
   phone: string | null;
@@ -27,6 +29,54 @@ export type AdminCustomerRow = {
   };
 };
 
+function digitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function matchesCustomerSearch(customer: AdminCustomerRow, raw: string) {
+  const query = raw.trim().toLowerCase();
+  if (!query) return true;
+
+  const haystack = [
+    customer.full_name,
+    customer.email,
+    customer.phone ?? "",
+    customer.addressLabel ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (haystack.includes(query)) return true;
+
+  const queryDigits = digitsOnly(query);
+  if (queryDigits.length >= 3) {
+    const phoneDigits = digitsOnly(customer.phone ?? "");
+    if (phoneDigits.includes(queryDigits)) return true;
+  }
+
+  return false;
+}
+
+function AddressCell({
+  extraCount,
+  label,
+}: {
+  extraCount: number;
+  label: string | null;
+}) {
+  if (!label) return <span className="text-muted-foreground">—</span>;
+  return (
+    <span>
+      <span className="line-clamp-2">{label}</span>
+      {extraCount > 0 ? (
+        <small className="mt-0.5 block text-muted-foreground">
+          +{extraCount} more
+        </small>
+      ) : null}
+    </span>
+  );
+}
+
 export function CustomersTable({
   customers,
 }: {
@@ -35,13 +85,7 @@ export function CustomersTable({
   const [search, setSearch] = useState("");
   const filtered = useMemo(
     () =>
-      customers.filter(
-        (customer) =>
-          !search ||
-          `${customer.full_name} ${customer.email} ${customer.phone ?? ""}`
-            .toLowerCase()
-            .includes(search.toLowerCase()),
-      ),
+      customers.filter((customer) => matchesCustomerSearch(customer, search)),
     [customers, search],
   );
   const { page, pageItems, setPage, totalItems } = usePagedItems(
@@ -57,7 +101,7 @@ export function CustomersTable({
         <Input
           className="pl-9"
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search customers"
+          placeholder="Search name, email, phone, or address"
           value={search}
         />
       </label>
@@ -75,6 +119,14 @@ export function CustomersTable({
                 <p className="mt-0.5 truncate text-sm text-muted-foreground">
                   {customer.email}
                 </p>
+                {customer.addressLabel ? (
+                  <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                    {customer.addressLabel}
+                    {customer.extraAddressCount > 0
+                      ? ` · +${customer.extraAddressCount} more`
+                      : ""}
+                  </p>
+                ) : null}
                 <p className="mt-2 text-xs text-muted-foreground">
                   {customer.stats.bookings} bookings ·{" "}
                   {formatMoney(customer.stats.spent)}
@@ -96,11 +148,12 @@ export function CustomersTable({
       </div>
 
       <div className="hidden overflow-x-auto rounded-xl border bg-card md:block">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="w-full min-w-[880px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="p-3">Customer</th>
               <th>Phone</th>
+              <th>Address</th>
               <th>Bookings</th>
               <th>Completed</th>
               <th>Spend</th>
@@ -118,6 +171,12 @@ export function CustomersTable({
                   </small>
                 </td>
                 <td>{customer.phone || "—"}</td>
+                <td className="max-w-[14rem] py-3 pr-3">
+                  <AddressCell
+                    extraCount={customer.extraAddressCount}
+                    label={customer.addressLabel}
+                  />
+                </td>
                 <td>{customer.stats.bookings}</td>
                 <td>{customer.stats.completed}</td>
                 <td>{formatMoney(customer.stats.spent)}</td>
@@ -138,7 +197,7 @@ export function CustomersTable({
               <tr>
                 <td
                   className="p-8 text-center text-muted-foreground"
-                  colSpan={7}
+                  colSpan={8}
                 >
                   {customers.length
                     ? "No customers match this search."

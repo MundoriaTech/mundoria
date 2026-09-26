@@ -29,6 +29,48 @@ export type BookingFlowStepId =
   | "time"
   | "checkout";
 
+/** Canonical order used to remap when the active flow drops a step. */
+export const BOOKING_STEP_ORDER: BookingFlowStepId[] = [
+  "cleaner",
+  "category",
+  "service",
+  "address",
+  "rooms",
+  "standard",
+  "addons",
+  "pets",
+  "preferences",
+  "duration",
+  "date",
+  "frequency",
+  "time",
+  "checkout",
+];
+
+export function isBookingFlowStepId(value: string): value is BookingFlowStepId {
+  return (BOOKING_STEP_ORDER as string[]).includes(value);
+}
+
+/** Prefer the current id; otherwise the nearest earlier step still in the flow. */
+export function resolveFlowStepIndex(
+  flowSteps: BookingFlowStepId[],
+  desired: BookingFlowStepId | string | null | undefined,
+) {
+  if (!flowSteps.length) return 0;
+  if (desired && flowSteps.includes(desired as BookingFlowStepId)) {
+    return flowSteps.indexOf(desired as BookingFlowStepId);
+  }
+  if (desired && isBookingFlowStepId(desired)) {
+    const desiredOrder = BOOKING_STEP_ORDER.indexOf(desired);
+    for (let i = desiredOrder - 1; i >= 0; i -= 1) {
+      const candidate = BOOKING_STEP_ORDER[i]!;
+      const index = flowSteps.indexOf(candidate);
+      if (index >= 0) return index;
+    }
+  }
+  return 0;
+}
+
 export type FrequencyMode = "none" | "optional" | "required_recurring";
 
 export type PropertyQuestionMode = "home" | "commercial" | "moving" | "recovery";

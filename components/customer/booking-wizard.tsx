@@ -59,6 +59,9 @@ import {
   frequencyOptionsFor,
   getFlowSteps,
   guestAddressComplete,
+  isBookingFlowStepId,
+  resolveFlowStepIndex,
+  type BookingFlowStepId,
 } from "@/lib/customer/booking-flow";
 import { LazyImage } from "@/components/shared/lazy-image";
 import {
@@ -130,7 +133,7 @@ const blankDraft: BookingDraft = {
 };
 
 const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
-const BOOKING_STEP_KEY = "mundoria-booking-step-v2";
+const BOOKING_STEP_KEY = "mundoria-booking-step-v3";
 
 const STANDARD_ICONS: Record<
   CleaningStandard,
@@ -243,9 +246,10 @@ export function BookingWizard({
   const lastRecommendedDurationRef = useRef<number | null>(null);
   const skipHistoryRef = useRef(false);
   const historyReadyRef = useRef(false);
-  const lastSyncedStepRef = useRef(0);
-  /** How many wizard pushState entries sit above the funnel entry (0 after refresh). */
-  const wizardDepthRef = useRef(0);
+  const lastSyncedStepIdRef = useRef<BookingFlowStepId | null>(null);
+  /** Pushes above the funnel entry — only incremented on forward goNext. */
+  const funnelDepthRef = useRef(0);
+  const historyWriteModeRef = useRef<"push" | "replace" | null>(null);
   const exitBookingFlowRef = useRef<() => void>(() => undefined);
 
   const needsAuth = !userId;
@@ -336,10 +340,6 @@ export function BookingWizard({
     serviceType: draft.serviceType,
   });
   useEffect(() => {
-    const cleanerOffset = previousCleaner ? 1 : 0;
-    const addressStepIndex = 2 + cleanerOffset;
-    const serviceStepIndex = 1 + cleanerOffset;
-
     try {
       if (fresh) {
         window.localStorage.removeItem(BOOKING_DRAFT_KEY);
@@ -353,17 +353,41 @@ export function BookingWizard({
           rebookCleanerChoice: initialDraft?.rebookCleanerChoice ?? null,
         });
         if (previousCleaner) setStepIndex(0);
-        else if (initialDraft?.serviceType) setStepIndex(addressStepIndex);
-        else if (initialDraft?.serviceCategory) setStepIndex(serviceStepIndex);
-        else setStepIndex(0);
+        else if (initialDraft?.serviceType) {
+          setStepIndex(
+            resolveFlowStepIndex(
+              getFlowSteps(
+                {
+                  recurrencePattern: initialDraft.recurrencePattern ?? null,
+                  serviceCategory: initialDraft.serviceCategory ?? null,
+                  serviceType: initialDraft.serviceType,
+                },
+                { includeCleanerChoice: false },
+              ),
+              "address",
+            ),
+          );
+        } else if (initialDraft?.serviceCategory) {
+          setStepIndex(
+            resolveFlowStepIndex(
+              getFlowSteps(
+                {
+                  recurrencePattern: null,
+                  serviceCategory: initialDraft.serviceCategory,
+                  serviceType: null,
+                },
+                { includeCleanerChoice: Boolean(previousCleaner) },
+              ),
+              "service",
+            ),
+          );
+        } else setStepIndex(0);
         setHydrated(true);
         return;
       }
 
       const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
-      const storedStep = Number(
-        window.localStorage.getItem(BOOKING_STEP_KEY) ?? "",
-      );
+      const storedStepRaw = window.localStorage.getItem(BOOKING_STEP_KEY) ?? "";
       const parsed = stored
         ? (JSON.parse(stored) as BookingDraft)
         : null;
@@ -439,6 +463,21 @@ export function BookingWizard({
         });
       }
 
+      const restoredDraft: Pick<
+        BookingDraft,
+        "serviceCategory" | "serviceType" | "recurrencePattern"
+      > = {
+        recurrencePattern: sameService
+          ? (parsed?.recurrencePattern ?? null)
+          : (initialDraft?.recurrencePattern ?? null),
+        serviceCategory:
+          initialDraft?.serviceCategory ?? parsed?.serviceCategory ?? null,
+        serviceType: urlService ?? (sameService ? parsed?.serviceType : null) ?? null,
+      };
+      const restoredSteps = getFlowSteps(restoredDraft, {
+        includeCleanerChoice: Boolean(previousCleaner),
+      });
+
       if (previousCleaner && !sameService) {
         setStepIndex(0);
       } else if (
@@ -447,16 +486,19 @@ export function BookingWizard({
         !parsed?.rebookCleanerChoice
       ) {
         setStepIndex(0);
-      } else if (sameService && Number.isFinite(storedStep) && storedStep >= 0) {
-        setStepIndex(storedStep);
       } else if (urlService) {
-        // Category + service are pre-filled; start at address.
-        setStepIndex(addressStepIndex);
-      } else if (initialDraft?.serviceCategory) {
-        // Category seeded only; start at service picker.
-        setStepIndex(serviceStepIndex);
-      } else if (Number.isFinite(storedStep) && storedStep >= 0) {
-        setStepIndex(storedStep);
+        setStepIndex(resolveFlowStepIndex(restoredSteps, "address"));
+      } else if (initialDraft?.serviceCategory && !urlService) {
+        setStepIndex(resolveFlowStepIndex(restoredSteps, "service"));
+      } else if (isBookingFlowStepId(storedStepRaw)) {
+        setStepIndex(resolveFlowStepIndex(restoredSteps, storedStepRaw));
+      } else if (
+        Number.isFinite(Number(storedStepRaw)) &&
+        Number(storedStepRaw) >= 0
+      ) {
+        setStepIndex(
+          Math.min(Number(storedStepRaw), Math.max(0, restoredSteps.length - 1)),
+        );
       }
     } catch {
       window.localStorage.removeItem(BOOKING_DRAFT_KEY);
@@ -473,8 +515,8 @@ export function BookingWizard({
 
   useEffect(() => {
     if (!hydrated) return;
-    window.localStorage.setItem(BOOKING_STEP_KEY, String(stepIndex));
-  }, [hydrated, stepIndex]);
+    window.localStorage.setItem(BOOKING_STEP_KEY, stepId);
+  }, [hydrated, stepId]);
 
   useEffect(() => {
     setAddresses(initialAddresses);
@@ -487,80 +529,98 @@ export function BookingWizard({
     if (stepId !== "checkout") setAuthMode("ask");
   }, [stepId]);
 
+  // Keep the visible step id valid when the flow list changes.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (flowSteps.includes(stepId)) return;
+    historyWriteModeRef.current = "replace";
+    setStepIndex(resolveFlowStepIndex(flowSteps, stepId));
+  }, [flowSteps, hydrated, stepId]);
+
   // Sync wizard steps with browser history so mouse/trackpad Back matches in-app Back.
   useEffect(() => {
     if (!hydrated) return;
 
-    const writeStep = (mode: "push" | "replace", step: number) => {
+    const writeStep = (
+      mode: "push" | "replace",
+      id: BookingFlowStepId,
+    ) => {
       const url = new URL(window.location.href);
-      url.searchParams.set("step", String(step));
-      const state = { bookingStep: step };
+      url.searchParams.set("step", id);
+      const state = { bookingStepId: id };
       if (mode === "push") {
         window.history.pushState(state, "", url);
-        wizardDepthRef.current += 1;
+        funnelDepthRef.current += 1;
       } else {
         window.history.replaceState(state, "", url);
       }
-      lastSyncedStepRef.current = step;
+      lastSyncedStepIdRef.current = id;
     };
 
     if (!historyReadyRef.current) {
       historyReadyRef.current = true;
-      wizardDepthRef.current = 0;
-      writeStep("replace", stepIndex);
+      funnelDepthRef.current = 0;
+      historyWriteModeRef.current = null;
+      writeStep("replace", stepId);
       return;
     }
     if (skipHistoryRef.current) {
       skipHistoryRef.current = false;
-      lastSyncedStepRef.current = stepIndex;
-      wizardDepthRef.current = Math.max(0, stepIndex);
+      lastSyncedStepIdRef.current = stepId;
+      historyWriteModeRef.current = null;
       return;
     }
-    if (lastSyncedStepRef.current === stepIndex) return;
+    if (lastSyncedStepIdRef.current === stepId) {
+      historyWriteModeRef.current = null;
+      return;
+    }
 
-    if (stepIndex > lastSyncedStepRef.current) {
-      writeStep("push", stepIndex);
+    const mode = historyWriteModeRef.current ?? "replace";
+    historyWriteModeRef.current = null;
+    if (mode === "push") {
+      writeStep("push", stepId);
       return;
     }
-    // Jumps / clamps backward — replace current entry; reset depth to this step.
-    writeStep("replace", stepIndex);
-    wizardDepthRef.current = Math.max(0, stepIndex);
-  }, [hydrated, stepIndex]);
+    writeStep("replace", stepId);
+  }, [hydrated, stepId]);
 
   useEffect(() => {
     function onPopState(event: PopStateEvent) {
       if (checkoutBusy) {
         const url = new URL(window.location.href);
-        url.searchParams.set("step", String(stepIndex));
-        window.history.pushState({ bookingStep: stepIndex }, "", url);
-        lastSyncedStepRef.current = stepIndex;
-        wizardDepthRef.current += 1;
+        url.searchParams.set("step", stepId);
+        window.history.replaceState({ bookingStepId: stepId }, "", url);
+        lastSyncedStepIdRef.current = stepId;
         return;
       }
-      const step = event.state?.bookingStep;
-      if (typeof step === "number" && step >= 0) {
+
+      const raw =
+        typeof event.state?.bookingStepId === "string"
+          ? event.state.bookingStepId
+          : typeof event.state?.bookingStep === "number"
+            ? flowSteps[
+                Math.min(
+                  event.state.bookingStep,
+                  Math.max(0, flowSteps.length - 1),
+                )
+              ]
+            : null;
+
+      if (raw && (isBookingFlowStepId(raw) || flowSteps.includes(raw as BookingFlowStepId))) {
         skipHistoryRef.current = true;
-        wizardDepthRef.current = Math.max(0, step);
-        setStepIndex(Math.min(step, Math.max(0, flowSteps.length - 1)));
+        funnelDepthRef.current = Math.max(0, funnelDepthRef.current - 1);
+        setStepIndex(resolveFlowStepIndex(flowSteps, raw));
         return;
       }
-      wizardDepthRef.current = 0;
-      // Browser left the funnel. Only force a destination if we're still on
-      // the booking URL (e.g. history entry had no bookingStep state).
+
+      funnelDepthRef.current = 0;
       if (window.location.pathname.startsWith("/booking/new")) {
         exitBookingFlowRef.current();
       }
     }
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [checkoutBusy, flowSteps.length, stepIndex]);
-
-  // Keep step index valid when the flow shrinks (e.g. service selected).
-  useEffect(() => {
-    setStepIndex((current) =>
-      Math.min(current, Math.max(0, flowSteps.length - 1)),
-    );
-  }, [flowSteps.length]);
+  }, [checkoutBusy, flowSteps, stepId]);
 
   // Auto-apply fixed standards.
   useEffect(() => {
@@ -610,7 +670,7 @@ export function BookingWizard({
 
   function exitBookingFlow() {
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
-      router.push(returnTo);
+      router.replace(returnTo);
       return;
     }
     const categoryExit: Partial<Record<string, string>> = {
@@ -623,7 +683,7 @@ export function BookingWizard({
     const exitHref =
       (draft.serviceCategory && categoryExit[draft.serviceCategory]) ||
       "/cleaning";
-    router.push(exitHref);
+    router.replace(exitHref);
   }
   exitBookingFlowRef.current = exitBookingFlow;
 
@@ -641,12 +701,12 @@ export function BookingWizard({
       exitBookingFlow();
       return;
     }
-    // Pop a real history entry when we pushed one (keeps mouse Back aligned).
-    // After refresh there is no step stack — step down in state instead.
-    if (wizardDepthRef.current > 0) {
+    // Prefer popping a real history entry so mouse Back stays aligned.
+    if (funnelDepthRef.current > 0) {
       window.history.back();
       return;
     }
+    historyWriteModeRef.current = "replace";
     setStepIndex((current) => Math.max(0, current - 1));
   }
 
@@ -683,6 +743,7 @@ export function BookingWizard({
       continueFromStandard();
       return;
     }
+    historyWriteModeRef.current = "push";
     setStepIndex((current) => Math.min(flowSteps.length - 1, current + 1));
   }
 
@@ -797,6 +858,7 @@ export function BookingWizard({
         recommendedServiceType: null,
       }));
     }
+    historyWriteModeRef.current = "push";
     setStepIndex((current) => Math.min(flowSteps.length - 1, current + 1));
   }
 
@@ -913,6 +975,9 @@ export function BookingWizard({
     const index = flowSteps.indexOf(id);
     if (index >= 0) {
       setBasketOpen(false);
+      // Jumps reset funnel depth so Back steps in-state instead of leaving.
+      funnelDepthRef.current = 0;
+      historyWriteModeRef.current = "replace";
       setStepIndex(index);
     }
   }
@@ -966,6 +1031,7 @@ export function BookingWizard({
                 choice === "same" ? previousCleaner.id : null,
               rebookCleanerChoice: choice,
             }));
+            historyWriteModeRef.current = "push";
             setStepIndex((current) =>
               Math.min(flowSteps.length - 1, current + 1),
             );
