@@ -253,10 +253,14 @@ export function BookingWizard({
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const lastRecommendedDurationRef = useRef<number | null>(null);
   const applyingPopStateRef = useRef(false);
+  const pendingClearReplaceRef = useRef(false);
+  const pendingClearEntryIdRef = useRef<BookingFlowStepId | null>(null);
   const historyReadyRef = useRef(false);
   const lastSyncedStepIdRef = useRef<BookingFlowStepId | null>(null);
   /** Index of the current step within this session's history stack (0 = funnel entry). */
   const funnelDepthRef = useRef(0);
+  /** Bumped on Clear basket so stale history entries cannot revive the old draft. */
+  const bookingSessionRef = useRef(0);
   const historyWriteModeRef = useRef<"push" | "replace" | null>(null);
   const exitBookingFlowRef = useRef<() => void>(() => undefined);
   const flowStepsRef = useRef<BookingFlowStepId[]>([]);
@@ -560,7 +564,11 @@ export function BookingWizard({
         typeof window.history.state === "object" && window.history.state
           ? window.history.state
           : {};
-      return { ...prior, bookingStepId: id };
+      return {
+        ...prior,
+        bookingSession: bookingSessionRef.current,
+        bookingStepId: id,
+      };
     };
 
     const writeStep = (mode: "push" | "replace", id: BookingFlowStepId) => {
@@ -635,7 +643,38 @@ export function BookingWizard({
   }, [flowSteps, hydrated, stepId, stepIndex]);
 
   useEffect(() => {
+    function writeClearedEntry(entryId: BookingFlowStepId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("step", entryId);
+      const prior =
+        typeof window.history.state === "object" && window.history.state
+          ? window.history.state
+          : {};
+      window.history.replaceState(
+        {
+          ...prior,
+          bookingSession: bookingSessionRef.current,
+          bookingStepId: entryId,
+        },
+        "",
+        url,
+      );
+      lastSyncedStepIdRef.current = entryId;
+      funnelDepthRef.current = 0;
+    }
+
     function onPopState(event: PopStateEvent) {
+      if (pendingClearReplaceRef.current) {
+        pendingClearReplaceRef.current = false;
+        const entryId =
+          pendingClearEntryIdRef.current ??
+          flowStepsRef.current[0] ??
+          (previousCleaner ? "cleaner" : "category");
+        pendingClearEntryIdRef.current = null;
+        writeClearedEntry(entryId as BookingFlowStepId);
+        return;
+      }
+
       if (checkoutBusy) {
         const url = new URL(window.location.href);
         url.searchParams.set("step", stepIdRef.current);
@@ -644,11 +683,30 @@ export function BookingWizard({
             ? window.history.state
             : {};
         window.history.replaceState(
-          { ...prior, bookingStepId: stepIdRef.current },
+          {
+            ...prior,
+            bookingSession: bookingSessionRef.current,
+            bookingStepId: stepIdRef.current,
+          },
           "",
           url,
         );
         lastSyncedStepIdRef.current = stepIdRef.current;
+        return;
+      }
+
+      const stateSession =
+        typeof event.state?.bookingSession === "number"
+          ? event.state.bookingSession
+          : null;
+      if (
+        stateSession != null &&
+        stateSession !== bookingSessionRef.current
+      ) {
+        // Stale entry from before Clear basket — keep walking back.
+        if (window.location.pathname.startsWith("/booking/new")) {
+          window.history.back();
+        }
         return;
       }
 
@@ -679,7 +737,7 @@ export function BookingWizard({
     }
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [checkoutBusy]);
+  }, [checkoutBusy, previousCleaner]);
 
   // Auto-apply fixed standards.
   useEffect(() => {
@@ -1041,6 +1099,62 @@ export function BookingWizard({
     }
   }
 
+  function clearBasket() {
+    if (checkoutBusy) return;
+
+    bookingSessionRef.current += 1;
+    window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+    window.localStorage.removeItem(BOOKING_STEP_KEY);
+    bookingHistoryBootstrap = null;
+
+    const nextDraft: BookingDraft = { ...blankDraft };
+    const nextSteps = getFlowSteps(nextDraft, { includeCleanerChoice });
+    const entryId = nextSteps[0]!;
+    const depth = funnelDepthRef.current;
+
+    setBasketOpen(false);
+    setAuthMode("ask");
+    setPromoFeedback(null);
+    setPromoAmount(null);
+    setShowAddressForm(addresses.length === 0 && Boolean(userId));
+    lastRecommendedDurationRef.current = null;
+    setDraft(nextDraft);
+    setStepIndex(0);
+
+    historyReadyRef.current = true;
+    historyWriteModeRef.current = null;
+    funnelDepthRef.current = 0;
+    lastSyncedStepIdRef.current = entryId;
+
+    const writeClearedEntry = () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("step", entryId);
+      const prior =
+        typeof window.history.state === "object" && window.history.state
+          ? window.history.state
+          : {};
+      window.history.replaceState(
+        {
+          ...prior,
+          bookingSession: bookingSessionRef.current,
+          bookingStepId: entryId,
+        },
+        "",
+        url,
+      );
+      lastSyncedStepIdRef.current = entryId;
+      funnelDepthRef.current = 0;
+    };
+
+    if (depth > 0) {
+      pendingClearEntryIdRef.current = entryId;
+      pendingClearReplaceRef.current = true;
+      window.history.go(-depth);
+      return;
+    }
+    writeClearedEntry();
+  }
+
   const basketProps = {
     addOns: addOnLines,
     address: selectedAddress,
@@ -1055,6 +1169,7 @@ export function BookingWizard({
     durationHours: draft.estimatedDurationHours ?? duration?.hours ?? null,
     frequencyLabel,
     hasPets: draft.hasPets,
+    onClearBasket: clearBasket,
     onJumpAddress: () => jumpToStep("address"),
     onJumpSchedule: () => {
       if (flowSteps.includes("date")) jumpToStep("date");

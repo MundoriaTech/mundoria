@@ -20,6 +20,7 @@ type BasketProps = {
   durationHours: number | null;
   frequencyLabel: string | null;
   hasPets?: boolean | null;
+  onClearBasket?: () => void;
   onJumpAddress?: () => void;
   onJumpSchedule?: () => void;
   onJumpService?: () => void;
@@ -147,6 +148,7 @@ function BasketPanel({
   frequencyLabel,
   hasPets = null,
   headerTitle = "My basket",
+  onClearBasket,
   onJumpAddress,
   onJumpSchedule,
   onJumpService,
@@ -171,6 +173,17 @@ function BasketPanel({
       : scheduledDate
         ? [scheduledDate]
         : [];
+
+  const clearControl =
+    onClearBasket && hasAnything ? (
+      <button
+        className="text-xs font-medium text-[#8b8798] underline-offset-2 touch-manipulation hover:text-[#5a5470] hover:underline"
+        onClick={onClearBasket}
+        type="button"
+      >
+        Clear basket
+      </button>
+    ) : null;
 
   if (!hasAnything) {
     return (
@@ -234,9 +247,20 @@ function BasketPanel({
   return (
     <div className="overflow-hidden rounded-[1.25rem] bg-[#f3f3f5]">
       {showHeader ? (
-        <p className="border-b border-[#e8e8eb] px-5 py-4 text-center text-base font-bold text-[#1c133b]">
-          {headerTitle}
-        </p>
+        <div className="relative border-b border-[#e8e8eb] px-5 py-4">
+          <p className="text-center text-base font-bold text-[#1c133b]">
+            {headerTitle}
+          </p>
+          {clearControl ? (
+            <div className="absolute inset-y-0 right-3 flex items-center sm:right-4">
+              {clearControl}
+            </div>
+          ) : null}
+        </div>
+      ) : clearControl ? (
+        <div className="flex justify-end border-b border-[#e8e8eb] px-3 py-2">
+          {clearControl}
+        </div>
       ) : null}
 
       <BasketSection
