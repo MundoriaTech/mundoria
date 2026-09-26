@@ -74,9 +74,9 @@ export default async function AdminCustomersPage() {
     }
   }
 
-  for (const [customerId, entry] of primaryAddress) {
+  primaryAddress.forEach((entry, customerId) => {
     entry.extraCount = Math.max(0, (addressCounts.get(customerId) ?? 1) - 1);
-  }
+  });
 
   const customers = (profiles ?? []).map((customer) => {
     const address = primaryAddress.get(customer.id);
