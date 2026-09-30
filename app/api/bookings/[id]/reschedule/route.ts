@@ -74,18 +74,19 @@ export async function POST(
     );
   }
 
-  const hadCleaner = Boolean(booking.cleaner_id);
-  const nextStatus = hadCleaner ? "matched" : "pending_match";
+  const previousCleanerId = booking.cleaner_id as string | null;
 
   const { data: updated, error } = await admin
     .from("bookings")
     .update({
+      cleaner_id: null,
       confirmation_due_at: null,
       confirmation_gate: "none",
       confirmation_responded_at: null,
+      previous_cleaner_id: previousCleanerId,
       scheduled_date: parsed.data.scheduledDate,
       scheduled_start_time: time,
-      status: nextStatus,
+      status: "pending_match",
     })
     .eq("id", params.id)
     .select("id,scheduled_date,scheduled_start_time,status,cleaner_id")
@@ -109,23 +110,21 @@ export async function POST(
     .eq("booking_id", params.id)
     .in("status", ["reserve", "notified"]);
 
-  if (hadCleaner && booking.cleaner_id) {
+  if (previousCleanerId) {
     await createInAppNotification(
-      booking.cleaner_id,
+      previousCleanerId,
       "booking",
-      "Job rescheduled",
-      `A customer moved their clean to ${parsed.data.scheduledDate} at ${time}. Please confirm you can still attend.`,
+      "Job time changed",
+      `A customer moved a clean to ${parsed.data.scheduledDate} at ${time}. It will be offered again if you are still the best match.`,
       { booking_id: params.id },
     );
   }
 
-  if (!hadCleaner || updated.status === "pending_match") {
-    await runMatchingEngine(params.id);
-  }
+  await runMatchingEngine(params.id);
 
   return NextResponse.json({
     booking: updated,
-    cleanerMustAccept: hadCleaner,
+    cleanerMustAccept: true,
     success: true,
   });
 }

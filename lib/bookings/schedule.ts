@@ -1,7 +1,7 @@
 import {
   cancellationFeePence,
   hoursUntilBookingStart,
-} from "@/lib/bookings/recurring";
+} from "@/lib/bookings/fees";
 
 const SCHEDULE_CHANGE_STATUSES = [
   "pending_match",

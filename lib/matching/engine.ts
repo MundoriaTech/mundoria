@@ -115,14 +115,19 @@ export async function runMatchingEngine(
           Number(booking.address.longitude),
         ),
       );
-    const distance = distances.length ? Math.min(...distances) : postcodeMatch ? 0 : Infinity;
-    const inRadius =
-      distance <= Number(cleanerProfile.working_radius_km ?? 10) * 1000;
+    const distance = distances.length ? Math.min(...distances) : Infinity;
+    // Platform cap is 15 miles. A cleaner can work a smaller radius. A postcode
+    // prefix only qualifies when we have no coordinates to measure.
+    const FIFTEEN_MILES_METRES = 15 * 1609.344;
+    const cleanerRadiusMetres =
+      Number(cleanerProfile.working_radius_km ?? 24.14) * 1000;
+    const radiusLimit = Math.min(cleanerRadiusMetres, FIFTEEN_MILES_METRES);
+    const inRadius = Number.isFinite(distance) && distance <= radiusLimit;
     const eligible =
       !excluded.has(candidate.id) &&
       slotAvailable &&
       !conflict &&
-      (postcodeMatch || inRadius);
+      (distances.length ? inRadius : postcodeMatch);
     return [
       {
         cleanerId: candidate.id,
@@ -193,7 +198,9 @@ export async function runMatchingEngine(
     return { considered, matched: false as const };
   }
 
-  const previousCleanerId = booking.cleaner_id as string | null;
+  const previousCleanerId =
+    (booking.cleaner_id as string | null) ??
+    (booking.previous_cleaner_id as string | null);
   const { data: assigned } = await admin
     .from("bookings")
     .update({
