@@ -1,6 +1,8 @@
 export type SessionAudience = "customer" | "cleaner" | "admin";
 
-/** Session limits aligned with OWASP guidance for marketplace vs privileged admin. */
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Stay signed in for a full day of inactivity, and no longer than a day from sign-in. */
 export const SESSION_POLICY: Record<
   SessionAudience,
   {
@@ -14,20 +16,20 @@ export const SESSION_POLICY: Record<
   }
 > = {
   customer: {
-    idleMs: 30 * 60 * 1000,
-    absoluteMs: 12 * 60 * 60 * 1000,
+    idleMs: DAY_MS,
+    absoluteMs: DAY_MS,
     warnBeforeIdleMs: 60 * 1000,
     loginPath: "/login",
   },
   cleaner: {
-    idleMs: 30 * 60 * 1000,
-    absoluteMs: 12 * 60 * 60 * 1000,
+    idleMs: DAY_MS,
+    absoluteMs: DAY_MS,
     warnBeforeIdleMs: 60 * 1000,
     loginPath: "/login",
   },
   admin: {
-    idleMs: 15 * 60 * 1000,
-    absoluteMs: 8 * 60 * 60 * 1000,
+    idleMs: DAY_MS,
+    absoluteMs: DAY_MS,
     warnBeforeIdleMs: 60 * 1000,
     loginPath: "/admin/login",
   },

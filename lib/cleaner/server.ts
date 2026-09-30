@@ -105,6 +105,14 @@ export async function getCleanerJobs(cleanerId: string) {
 
 export async function getAvailableJobs(cleanerId: string) {
   const admin = createAdminClient();
+  try {
+    const { settleOutstandingOffers } = await import(
+      "@/lib/matching/expire-offers"
+    );
+    await settleOutstandingOffers({ cleanerId });
+  } catch {
+    // Offer repair must not hide the rest of the job feed.
+  }
   const [
     { data: cleaner },
     { data: services },

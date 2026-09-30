@@ -15,8 +15,10 @@ import type {
 
 export default async function CustomerBookingPage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams?: { series?: string };
 }) {
   const supabase = createServerClient();
   const {
@@ -85,6 +87,14 @@ export default async function CustomerBookingPage({
   }
 
   return (
+    <>
+      {searchParams?.series === "failed" ? (
+        <p className="mb-4 rounded-2xl bg-[#fff4e8] px-4 py-3 text-sm text-[#7a3e12]">
+          Your first visit is booked. The next visit in the series could not
+          be created. It will show in your bookings once it is added, or
+          contact support if it does not appear.
+        </p>
+      ) : null}
     <BookingDetail
       customerId={user!.id}
       checklistItems={(checklist ?? []) as BookingChecklistItem[]}
@@ -93,5 +103,6 @@ export default async function CustomerBookingPage({
       initialBooking={booking}
       offerExpiresAt={offerExpiresAt}
     />
+    </>
   );
 }

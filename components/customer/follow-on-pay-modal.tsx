@@ -53,6 +53,7 @@ function PayForm({
 
       const result = await stripe.confirmCardPayment(intentJson.client_secret, {
         payment_method: { card },
+        return_url: window.location.href,
       });
       if (result.error) {
         throw new Error(result.error.message ?? "Payment failed.");

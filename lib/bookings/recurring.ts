@@ -116,14 +116,18 @@ export async function createRecurringFollowOnBookings({
           return next ? [next] : [];
         })();
 
-  if (!dates.length) return;
+  if (!dates.length) return [];
 
   const rows = dates.map((scheduled_date) =>
     followOnRow(parent, scheduled_date, pattern),
   );
 
-  const { error } = await admin.from("bookings").insert(rows);
+  const { data, error } = await admin
+    .from("bookings")
+    .insert(rows)
+    .select("id");
   if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => row.id as string);
 }
 
 /**
@@ -189,32 +193,29 @@ export async function ensureUpcomingRecurringFollowOns(
     }
     if (!next) continue;
 
-    const { error: insertError } = await admin
+    const { data: inserted, error: insertError } = await admin
       .from("bookings")
-      .insert(followOnRow(parent, next, pattern));
-    if (!insertError) created += 1;
+      .insert(followOnRow(parent, next, pattern))
+      .select("id")
+      .single();
+    if (!insertError && inserted?.id) {
+      created += 1;
+      try {
+        const { runMatchingEngine } = await import("@/lib/matching/engine");
+        await runMatchingEngine(inserted.id);
+      } catch {
+        // The visit exists. Matching can be retried from admin.
+      }
+    }
   }
 
   return { created };
 }
 
-/** Soft cancellation fee window: free >48h, 50% within 48h, 100% within 24h. */
-export function cancellationFeePence({
-  amountTotal,
-  hoursUntilStart,
-}: {
-  amountTotal: number;
-  hoursUntilStart: number;
-}): number {
-  if (hoursUntilStart >= 48) return 0;
-  if (hoursUntilStart >= 24) return Math.round(amountTotal * 0.5);
-  return amountTotal;
-}
-
-export function hoursUntilBookingStart(date: string, time: string): number {
-  const start = new Date(`${date}T${time}:00`);
-  return (start.getTime() - Date.now()) / (1000 * 60 * 60);
-}
+export {
+  cancellationFeePence,
+  hoursUntilBookingStart,
+} from "@/lib/bookings/fees";
 
 export function addDaysIso(date: string, days: number): string {
   return format(addDays(parseISO(date), days), "yyyy-MM-dd");

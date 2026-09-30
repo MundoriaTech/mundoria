@@ -3078,6 +3078,7 @@ function CheckoutStep({
               },
             },
           },
+          return_url: window.location.href,
         });
       if (stripeError || !paymentIntent) {
         throw new Error(stripeError?.message ?? "Card payment failed.");
@@ -3101,6 +3102,7 @@ function CheckoutStep({
       const booking = (await bookingResponse.json()) as {
         bookingId?: string;
         error?: string;
+        recurringError?: string | null;
       };
       if (!bookingResponse.ok || !booking.bookingId) {
         throw new Error(booking.error ?? "Unable to create booking.");
@@ -3108,7 +3110,8 @@ function CheckoutStep({
 
       window.localStorage.removeItem(BOOKING_DRAFT_KEY);
       window.localStorage.removeItem(BOOKING_STEP_KEY);
-      router.replace(`/booking/${booking.bookingId}`);
+      const seriesNotice = booking.recurringError ? "?series=failed" : "";
+      router.replace(`/booking/${booking.bookingId}${seriesNotice}`);
       router.refresh();
     } catch (paymentError) {
       payingRef.current = false;

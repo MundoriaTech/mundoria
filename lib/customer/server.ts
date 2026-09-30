@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { isCleanerVisibleToCustomer } from "@/lib/customer/booking-visibility";
+import { settleOutstandingOffers } from "@/lib/matching/expire-offers";
 import type {
   Booking,
   CleanerPublicProfile,
@@ -11,6 +12,12 @@ export async function getCustomerBookings(
   customerId: string,
   options?: { ascending?: boolean; limit?: number },
 ) {
+  try {
+    await settleOutstandingOffers({ customerId });
+  } catch {
+    // A stuck-offer repair must not block the customer from seeing bookings.
+  }
+
   let query = supabase
     .from("bookings")
     .select("*, address:addresses(*)")

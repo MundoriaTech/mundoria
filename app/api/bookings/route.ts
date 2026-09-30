@@ -208,16 +208,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
+  let recurringError: string | null = null;
   if (parsed.data.isRecurring) {
     try {
-      await createRecurringFollowOnBookings({
+      const followOnIds = await createRecurringFollowOnBookings({
         admin,
         customDates: parsed.data.customRecurrenceDates ?? [],
         parent: booking,
         pattern: parsed.data.recurrencePattern,
       });
+      for (const followOnId of followOnIds) {
+        try {
+          await runMatchingEngine(followOnId);
+        } catch (matchError) {
+          Sentry.captureException(matchError);
+        }
+      }
     } catch (seriesError) {
       Sentry.captureException(seriesError);
+      recurringError =
+        seriesError instanceof Error
+          ? seriesError.message
+          : "The next visit in this series could not be created.";
+      await admin.from("notifications").insert({
+        body: "Your first visit is booked. The next visit in the series could not be created yet — contact support if it does not appear in your bookings.",
+        data: { booking_id: booking.id },
+        title: "Recurring visit needs attention",
+        type: "booking_created",
+        user_id: user.id,
+      });
     }
   }
 
@@ -333,5 +352,9 @@ export async function POST(request: Request) {
     Sentry.captureException(matchingError);
   }
 
-  return NextResponse.json({ bookingId: booking.id, matching });
+  return NextResponse.json({
+    bookingId: booking.id,
+    matching,
+    recurringError,
+  });
 }
