@@ -7,7 +7,6 @@ import {
 } from "@/lib/customer/services";
 import { frequencyModeFor } from "@/lib/customer/booking-flow";
 import {
-  recommendFromHistory,
   type HistoryRatingMood,
   type HistoryVisit,
 } from "@/lib/customer/history-recommendation";
