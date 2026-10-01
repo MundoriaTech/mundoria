@@ -40,7 +40,7 @@ export async function POST(
   const { data: booking } = await admin
     .from("bookings")
     .select(
-      "id,customer_id,cleaner_id,status,scheduled_date,scheduled_start_time,payment_status,estimated_duration_hours",
+      "id,customer_id,cleaner_id,status,scheduled_date,scheduled_start_time,payment_status,estimated_duration_hours,checkin_verified,actual_start_time",
     )
     .eq("id", params.id)
     .single();
@@ -51,6 +51,8 @@ export async function POST(
 
   if (
     !canCustomerReschedule({
+      actualStartTime: booking.actual_start_time,
+      checkinVerified: booking.checkin_verified,
       scheduledDate: booking.scheduled_date,
       scheduledStartTime: booking.scheduled_start_time,
       status: booking.status,

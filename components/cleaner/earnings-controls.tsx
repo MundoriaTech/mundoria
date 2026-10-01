@@ -38,8 +38,9 @@ export function EarningsControls({
     } catch (err) {
       setValue(preference);
       showError({
-        title: "Could not update schedule",
         description: err instanceof Error ? err.message : "Try again.",
+        onRetry: () => void change(next),
+        title: "Couldn’t update your payout schedule",
       });
     } finally {
       setSaving(false);
@@ -59,8 +60,10 @@ export function EarningsControls({
       window.location.assign(json.url);
     } catch (err) {
       showError({
-        title: "Could not open Stripe",
-        description: err instanceof Error ? err.message : "Try again later.",
+        description:
+          err instanceof Error ? err.message : "Try again in a moment.",
+        onRetry: () => void openDashboard(),
+        title: "Couldn’t open Stripe",
       });
     } finally {
       setOpening(false);

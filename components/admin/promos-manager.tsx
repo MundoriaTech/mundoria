@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatMoney } from "@/lib/customer/services";
@@ -61,9 +62,9 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
       <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Create promo code</h2>
         {error ? (
-          <p className="mt-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-            {error}
-          </p>
+          <div className="mt-3">
+            <ActionError message={error} title="Couldn’t save this promo" />
+          </div>
         ) : null}
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <Input

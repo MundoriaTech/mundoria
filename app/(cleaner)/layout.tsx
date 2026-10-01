@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { CleanerShell } from "@/components/cleaner/cleaner-shell";
 import { OnboardingWizard } from "@/components/cleaner/onboarding-wizard";
+import { listTakenInterviewSlots } from "@/lib/cleaner/interview-availability";
 import { getCleanerContext } from "@/lib/cleaner/server";
 import { buildPrivateMetadata } from "@/lib/seo/site";
 import { createServerClient } from "@/lib/supabase/server";
@@ -19,6 +20,9 @@ export default async function CleanerLayout({ children }: { children: React.Reac
   const context=await getCleanerContext(supabase,user.id);
   if(!context.profile || context.profile.role!=="cleaner") redirect("/");
   if(!context.cleanerProfile) redirect("/");
-  if(!context.cleanerProfile.onboarding_complete) return <OnboardingWizard cleaner={context.cleanerProfile} profile={context.profile as Profile} />;
+  if(!context.cleanerProfile.onboarding_complete) {
+    const takenSlots = await listTakenInterviewSlots(user.id);
+    return <OnboardingWizard cleaner={context.cleanerProfile} profile={context.profile as Profile} takenSlots={takenSlots} />;
+  }
   return <CleanerShell cleaner={context.cleanerProfile} profile={context.profile as Profile}>{children}</CleanerShell>;
 }

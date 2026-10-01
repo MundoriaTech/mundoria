@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import twilio from "twilio";
 
+import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import { calculateOfficeQuote } from "@/lib/customer/office-pricing";
 import {
@@ -23,6 +24,16 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid booking details" },
+      { status: 400 },
+    );
+  }
+
+  if (
+    !frequencyAllowsOneOff(parsed.data.serviceType) &&
+    !parsed.data.isRecurring
+  ) {
+    return NextResponse.json(
+      { error: "Commercial cleaning needs a repeat schedule." },
       { status: 400 },
     );
   }

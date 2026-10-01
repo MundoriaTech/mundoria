@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,10 +24,14 @@ export function AdminInvitationsManager({
 }: {
   initialInvitations: AdminInvitationRow[];
 }) {
-  const { confirm, error: showError, success } = useFeedback();
+  const { confirm, success } = useFeedback();
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [invitations, setInvitations] = useState(initialInvitations);
+  const [actionError, setActionError] = useState<{
+    message: string;
+    title: string;
+  } | null>(null);
   const [message, setMessage] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +44,7 @@ export function AdminInvitationsManager({
 
   async function inviteAdmin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setActionError(null);
     setMessage("");
     setInviteLink("");
     setIsSubmitting(true);
@@ -84,10 +90,9 @@ export function AdminInvitationsManager({
         inviteError instanceof Error
           ? inviteError.message
           : "Unable to send invitation.";
-      setMessage(errorMessage);
-      showError({
-        description: errorMessage,
-        title: "Couldn’t invite admin",
+      setActionError({
+        message: errorMessage,
+        title: "Couldn’t send this invitation",
       });
     } finally {
       setIsSubmitting(false);
@@ -103,6 +108,7 @@ export function AdminInvitationsManager({
     });
     if (!ok) return;
 
+    setActionError(null);
     setMessage("");
     const response = await fetch(`/api/admin/invitations/${id}/revoke`, {
       method: "POST",
@@ -110,11 +116,9 @@ export function AdminInvitationsManager({
     const result = (await response.json()) as { error?: string };
 
     if (!response.ok || result.error) {
-      const errorMessage = result.error ?? "Unable to revoke invitation.";
-      setMessage(errorMessage);
-      showError({
-        description: errorMessage,
-        title: "Couldn’t revoke invitation",
+      setActionError({
+        message: result.error ?? "Try again in a moment.",
+        title: "Couldn’t revoke this invitation",
       });
       return;
     }
@@ -171,6 +175,11 @@ export function AdminInvitationsManager({
         </Button>
       </form>
 
+      {actionError ? (
+        <div className="mt-4">
+          <ActionError message={actionError.message} title={actionError.title} />
+        </div>
+      ) : null}
       {message ? <p className="mt-4 text-sm">{message}</p> : null}
       {inviteLink ? (
         <div className="mt-3 rounded-xl border border-dashed bg-muted/40 p-3">

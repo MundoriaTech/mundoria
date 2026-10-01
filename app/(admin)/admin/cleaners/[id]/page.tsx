@@ -89,6 +89,9 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         currentTier={cleaner.tier as CleanerTier}
         hasHeadshot={Boolean(cleaner.headshot_url)}
         hasUtr={Boolean(cleaner.utr_number)}
+        interviewScheduledAt={
+          (cleaner.interview_scheduled_at as string | null) ?? null
+        }
         interviewStatus={
           (cleaner.interview_status as InterviewStatus | null) ?? "not_started"
         }
@@ -122,6 +125,17 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
             <dt className="text-muted-foreground">Interview</dt>
             <dd className="font-medium capitalize">
               {(cleaner.interview_status ?? "not_started").replaceAll("_", " ")}
+              {cleaner.interview_scheduled_at
+                ? ` · ${new Intl.DateTimeFormat("en-GB", {
+                    day: "numeric",
+                    hour: "2-digit",
+                    hourCycle: "h23",
+                    minute: "2-digit",
+                    month: "short",
+                    timeZone: "Europe/London",
+                    weekday: "short",
+                  }).format(new Date(cleaner.interview_scheduled_at as string))}`
+                : ""}
             </dd>
           </div>
           <div>

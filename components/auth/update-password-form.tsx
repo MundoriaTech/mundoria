@@ -61,7 +61,7 @@ export function UpdatePasswordForm() {
 
   return (
     <form className="space-y-5" onSubmit={onSubmit}>
-      <FormStatus message={formError} />
+      <FormStatus message={formError} title="Couldn’t update your password" />
       <FormField error={errors.password} htmlFor="password" label="New password">
         <PasswordInput
           autoComplete="new-password"

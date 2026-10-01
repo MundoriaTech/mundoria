@@ -30,6 +30,67 @@ export type OfficeSpaceSelection = {
   customLabel?: string;
 };
 
+export type OfficeSizePreset = "small" | "medium" | "large";
+
+/** One question on the booking step. Each choice is a fixed set of spaces for the time matrix. */
+export const OFFICE_SIZE_PRESETS: Array<{
+  description: string;
+  label: string;
+  spaces: OfficeSpaceSelection[];
+  value: OfficeSizePreset;
+}> = [
+  {
+    description: "A room or two",
+    label: "Small",
+    spaces: [
+      { quantity: 1, size: "small", spaceType: "office_work_area" },
+      { quantity: 1, size: "small", spaceType: "toilet" },
+    ],
+    value: "small",
+  },
+  {
+    description: "A few rooms",
+    label: "Medium",
+    spaces: [
+      { quantity: 1, size: "medium", spaceType: "office_work_area" },
+      { quantity: 1, size: "medium", spaceType: "meeting_room" },
+      { quantity: 1, size: "medium", spaceType: "toilet" },
+      { quantity: 1, size: "small", spaceType: "kitchen" },
+    ],
+    value: "medium",
+  },
+  {
+    description: "A whole floor",
+    label: "Large",
+    spaces: [
+      { quantity: 2, size: "large", spaceType: "office_work_area" },
+      { quantity: 1, size: "large", spaceType: "meeting_room" },
+      { quantity: 1, size: "medium", spaceType: "toilet" },
+      { quantity: 1, size: "medium", spaceType: "kitchen" },
+      { quantity: 1, size: "medium", spaceType: "reception" },
+    ],
+    value: "large",
+  },
+];
+
+export function officeSizePresetFor(
+  spaces: OfficeSpaceSelection[],
+): OfficeSizePreset | null {
+  const key = spaces
+    .filter((space) => space.quantity > 0)
+    .map((space) => `${space.spaceType}:${space.quantity}:${space.size}`)
+    .sort()
+    .join("|");
+  const match = OFFICE_SIZE_PRESETS.find((preset) => {
+    const presetKey = preset.spaces
+      .map((space) => `${space.spaceType}:${space.quantity}:${space.size}`)
+      .sort()
+      .join("|");
+    return presetKey === key;
+  });
+  return match?.value ?? null;
+}
+
 export const OFFICE_SPACE_OPTIONS: Array<{
   label: string;
   sizeBands: Record<Exclude<OfficeSpaceSize, "not_sure">, string>;

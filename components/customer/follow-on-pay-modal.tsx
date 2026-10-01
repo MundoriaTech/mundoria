@@ -4,6 +4,7 @@ import { CardElement, Elements, useElements, useStripe } from "@stripe/react-str
 import { loadStripe } from "@stripe/stripe-js";
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/customer/services";
 import { PAYMENT_HELP_HREF } from "@/lib/customer/payment-status";
@@ -108,7 +109,9 @@ function PayForm({
           }}
         />
       </div>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <ActionError message={error} title="Couldn’t take payment" />
+      ) : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button
           disabled={processing}

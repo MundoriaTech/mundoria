@@ -7,6 +7,8 @@ import {
   cancellationFeePence,
   hoursUntilBookingStart,
 } from "@/lib/bookings/recurring";
+import { canCustomerChangeSchedule } from "@/lib/bookings/schedule";
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -50,8 +52,13 @@ export async function POST(
     String(booking.scheduled_start_time).slice(0, 5),
   );
   if (
-    hoursLeft < 0 ||
-    !["pending_match", "matched", "confirmed"].includes(booking.status)
+    !canCustomerChangeSchedule({
+      actualStartTime: booking.actual_start_time,
+      checkinVerified: booking.checkin_verified,
+      scheduledDate: booking.scheduled_date,
+      scheduledStartTime: String(booking.scheduled_start_time).slice(0, 5),
+      status: booking.status,
+    })
   ) {
     return NextResponse.json(
       { error: "This booking can no longer be cancelled online." },
@@ -122,6 +129,39 @@ export async function POST(
     type: "booking_cancelled",
     user_id: user.id,
   });
+
+  if (booking.cleaner_id) {
+    const { data: cleaner } = await admin
+      .from("profiles")
+      .select("email,full_name,notification_preferences")
+      .eq("id", booking.cleaner_id)
+      .maybeSingle();
+    const preferences = cleaner?.notification_preferences as
+      | { email?: boolean }
+      | null;
+    await admin.from("notifications").insert({
+      body: "The customer cancelled this visit.",
+      data: { booking_id: params.id },
+      title: "Job cancelled",
+      type: "job_cancelled",
+      user_id: booking.cleaner_id,
+    });
+    if (cleaner?.email && preferences?.email !== false) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      await sendBrandedEmail({
+        data: {
+          appUrl,
+          bookingId: params.id,
+          jobUrl: `${appUrl}/cleaner/jobs`,
+          reason: parsed.data.reason,
+          scheduledDate: booking.scheduled_date,
+          scheduledTime: String(booking.scheduled_start_time).slice(0, 5),
+        },
+        template: "cleaner.job_cancelled",
+        to: cleaner.email,
+      });
+    }
+  }
 
   return NextResponse.json({
     cancellationFeePence: fee,

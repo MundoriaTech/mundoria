@@ -36,6 +36,7 @@ type SuccessOptions = {
 type ErrorOptions = {
   actionLabel?: string;
   description?: string;
+  onRetry?: () => void;
   title: string;
 };
 
@@ -108,18 +109,22 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
 
       {errorState ? (
         <AppModal
-          accent="destructive"
+          accent="peach"
           description={errorState.description}
           onClose={() => setErrorState(null)}
           title={errorState.title}
         >
           <div className="mt-6 flex justify-end">
             <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => setErrorState(null)}
-              variant="outline"
+              className="min-h-11 w-full bg-[#ffc79f] font-semibold text-[#221f50] hover:bg-[#ffd4b8] sm:w-auto"
+              onClick={() => {
+                const retry = errorState.onRetry;
+                setErrorState(null);
+                retry?.();
+              }}
             >
-              {errorState.actionLabel ?? "Close"}
+              {errorState.actionLabel ??
+                (errorState.onRetry ? "Try again" : "Close")}
             </Button>
           </div>
         </AppModal>

@@ -1,8 +1,11 @@
-import type { FieldError } from "react-hook-form";
+import type { FieldError as HookFieldError } from "react-hook-form";
+
+import { FieldError, invalidControlWrap } from "@/components/shared/action-error";
+import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
   children: React.ReactNode;
-  error?: FieldError;
+  error?: HookFieldError;
   htmlFor: string;
   label: string;
 }
@@ -21,12 +24,8 @@ export function FormField({
       >
         {label}
       </label>
-      {children}
-      {error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {error.message}
-        </p>
-      ) : null}
+      <div className={cn(error ? invalidControlWrap : undefined)}>{children}</div>
+      {error?.message ? <FieldError message={error.message} /> : null}
     </div>
   );
 }

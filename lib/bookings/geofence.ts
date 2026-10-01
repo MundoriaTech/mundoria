@@ -1,3 +1,4 @@
+import { checkInWindowMessage } from "@/lib/bookings/schedule";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
 import { alertAdmins } from "@/lib/notifications/admin";
@@ -51,6 +52,14 @@ export async function validateBookingGeofence({
     throw new Error(
       `${action === "checkin" ? "Check-in" : "Check-out"} is not available while this booking is ${booking.status}.`,
     );
+  }
+  if (action === "checkin") {
+    const windowMessage = checkInWindowMessage({
+      estimatedDurationHours: booking.estimated_duration_hours,
+      scheduledDate: booking.scheduled_date,
+      scheduledStartTime: String(booking.scheduled_start_time),
+    });
+    if (windowMessage) throw new Error(windowMessage);
   }
   if (booking.address.latitude == null || booking.address.longitude == null) {
     throw new Error("Booking address has no coordinates.");

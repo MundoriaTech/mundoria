@@ -4,6 +4,7 @@ import { CreditCard, LogOut, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ActionError, FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +33,9 @@ export function CleanerProfileForm({
   services: CleanerService[];
 }) {
   const router = useRouter();
-  const { error: showError, success } = useFeedback();
+  const { success } = useFeedback();
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [stripeError, setStripeError] = useState<string | null>(null);
   const [profile, setProfile] = useState(initialProfile);
   const [cleaner, setCleaner] = useState(initialCleaner);
   const [services, setServices] = useState(
@@ -42,10 +45,23 @@ export function CleanerProfileForm({
     initialAreas.map((area) => area.postcode_prefix ?? ""),
   );
   const [availability, setAvailability] = useState(initialAvailability);
+  const [radiusMiles, setRadiusMiles] = useState(() =>
+    Math.min(
+      15,
+      Math.max(1, Math.round(initialCleaner.working_radius_km / 1.609344)),
+    ),
+  );
   const [prefix, setPrefix] = useState("");
   const [status, setStatus] = useState<string | null>(null);
 
   async function save() {
+    const phone = profile.phone?.trim() ?? "";
+    if (phone.length < 7) {
+      setPhoneError("Enter a valid phone number.");
+      setStatus(null);
+      return;
+    }
+    setPhoneError(null);
     setStatus("Saving…");
     const supabase = createBrowserClient();
 
@@ -55,7 +71,7 @@ export function CleanerProfileForm({
         .update({
           avatar_url: profile.avatar_url,
           full_name: profile.full_name,
-          phone: profile.phone,
+          phone,
         })
         .eq("id", profile.id),
       supabase
@@ -63,7 +79,9 @@ export function CleanerProfileForm({
         .update({
           bio: cleaner.bio,
           payout_preference: cleaner.payout_preference,
-          working_radius_km: cleaner.working_radius_km,
+          working_radius_km: Math.round(
+            Math.min(15, Math.max(1, radiusMiles)) * 1.609344,
+          ),
           years_experience: cleaner.years_experience,
         })
         .eq("id", profile.id),
@@ -115,6 +133,7 @@ export function CleanerProfileForm({
   }
 
   async function connectStripe() {
+    setStripeError(null);
     setStatus("Opening Stripe…");
 
     try {
@@ -134,20 +153,13 @@ export function CleanerProfileForm({
         return;
       }
 
-      const errorMessage = result.error ?? "Unable to open Stripe.";
-      setStatus(errorMessage);
-      showError({
-        description: errorMessage,
-        title: "Stripe didn’t open",
-      });
+      setStripeError(result.error ?? "Try again in a moment.");
+      setStatus(null);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unable to open Stripe.";
-      setStatus(errorMessage);
-      showError({
-        description: errorMessage,
-        title: "Stripe didn’t open",
-      });
+      setStripeError(
+        error instanceof Error ? error.message : "Try again in a moment.",
+      );
+      setStatus(null);
     }
   }
 
@@ -161,6 +173,7 @@ export function CleanerProfileForm({
       <section className="rounded-xl border bg-background p-6">
         <AvatarUpload
           currentUrl={profile.avatar_url}
+          keepFiles={[cleaner.headshot_url]}
           onUpload={(url) => {
             setProfile((current) => ({ ...current, avatar_url: url }));
             success({
@@ -184,14 +197,18 @@ export function CleanerProfileForm({
               value={profile.full_name}
             />
           </Field>
-          <Field label="Phone">
+          <Field error={phoneError} label="Phone number">
             <Input
-              onChange={(event) =>
+              className={phoneError ? invalidControlClass : undefined}
+              onChange={(event) => {
+                setPhoneError(null);
                 setProfile((current) => ({
                   ...current,
                   phone: event.target.value,
-                }))
-              }
+                }));
+              }}
+              required
+              type="tel"
               value={profile.phone ?? ""}
             />
           </Field>
@@ -259,6 +276,22 @@ export function CleanerProfileForm({
         </Panel>
 
         <Panel title="Working areas">
+          <label className="mb-4 block text-sm">
+            Working radius (miles)
+            <Input
+              className="mt-2"
+              max={15}
+              min={1}
+              onChange={(event) =>
+                setRadiusMiles(Number(event.target.value) || 1)
+              }
+              type="number"
+              value={radiusMiles}
+            />
+            <span className="mt-1 block text-xs text-muted-foreground">
+              Jobs are offered inside this distance, and never beyond 15 miles.
+            </span>
+          </label>
           <div className="flex gap-2">
             <Input
               onChange={(event) => setPrefix(event.target.value.toUpperCase())}
@@ -348,6 +381,11 @@ export function CleanerProfileForm({
             <CreditCard className="mr-2 h-4 w-4" />
             {profile.stripe_account_id ? "Open Stripe Express" : "Connect Stripe Express"}
           </Button>
+          {stripeError ? (
+            <div className="mt-3">
+              <ActionError message={stripeError} title="Couldn’t open Stripe" />
+            </div>
+          ) : null}
         </Panel>
 
         {status ? <p className="text-sm">{status}</p> : null}
@@ -366,15 +404,18 @@ export function CleanerProfileForm({
 
 function Field({
   children,
+  error,
   label,
 }: {
   children: React.ReactNode;
+  error?: string | null;
   label: string;
 }) {
   return (
     <label className="block space-y-2 text-sm font-medium">
       <span>{label}</span>
       {children}
+      {error ? <FieldError message={error} /> : null}
     </label>
   );
 }

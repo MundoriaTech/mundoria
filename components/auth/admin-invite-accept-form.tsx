@@ -62,7 +62,7 @@ export function AdminInviteAcceptForm({
 
   return (
     <form className="space-y-5" onSubmit={acceptInvitation}>
-      <FormStatus message={error} />
+      <FormStatus message={error} title="Couldn’t accept this invitation" />
 
       <div className="rounded-xl border bg-muted/40 p-4 text-sm">
         <p className="font-medium">Admin invitation for</p>

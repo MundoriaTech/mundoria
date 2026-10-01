@@ -33,14 +33,14 @@ seconds.
 
 | Title | URL | Schedule | Purpose |
 | --- | --- | --- | --- |
-| Mundoria Admin Alerts | `https://mundoria.com/api/cron/admin-alerts` | `*/5 * * * *` | Sends queued admin alerts. |
-| Mundoria Check No-Shows | `https://mundoria.com/api/cron/check-no-shows` | `*/15 * * * *` | Detects no-show bookings and starts replacement matching. |
-| Mundoria Expire Job Offers | `https://mundoria.com/api/cron/expire-job-offers` | `*/5 * * * *` | Cascades expired cleaner offers onto the Emergency List. |
-| Mundoria Confirmation Gates | `https://mundoria.com/api/cron/confirmation-gates` | `*/10 * * * *` | Opens T−24/T−6/T−1 confirmations, prunes reserves, closes lists at start. |
-| Mundoria Apply Rating Holds | `https://mundoria.com/api/cron/apply-rating-holds` | `0 * * * *` | Applies held low ratings after the dispute window expires. |
-| Mundoria Weekly Payouts | `https://mundoria.com/api/cron/process-payouts` | `0 6 * * 1` | Processes weekly payout batches. |
-| Mundoria Monthly Scores | `https://mundoria.com/api/cron/calculate-scores` | `0 0 1 * *` | Recalculates cleaner performance scores monthly. |
-| Mundoria Recurring Payments | `https://mundoria.com/api/cron/recurring-payments` | `0 9 * * *` | Prepares PaymentIntents and reminds customers for unpaid series visits (T−7…T−2). |
+| Mundoria Admin Alerts | `https://www.mundoria.co.uk/api/cron/admin-alerts` | `*/5 * * * *` | Sends queued admin alerts. |
+| Mundoria Check No-Shows | `https://www.mundoria.co.uk/api/cron/check-no-shows` | `*/15 * * * *` | Detects no-show bookings and starts replacement matching. |
+| Mundoria Expire Job Offers | `https://www.mundoria.co.uk/api/cron/expire-job-offers` | `*/5 * * * *` | Cascades expired cleaner offers onto the Emergency List. |
+| Mundoria Confirmation Gates | `https://www.mundoria.co.uk/api/cron/confirmation-gates` | `*/10 * * * *` | Opens T−24/T−6/T−1 confirmations, prunes reserves, closes lists at start. |
+| Mundoria Apply Rating Holds | `https://www.mundoria.co.uk/api/cron/apply-rating-holds` | `0 * * * *` | Applies held low ratings after the dispute window expires. |
+| Mundoria Weekly Payouts | `https://www.mundoria.co.uk/api/cron/process-payouts` | `0 6 * * 1` | Processes weekly payout batches. |
+| Mundoria Monthly Scores | `https://www.mundoria.co.uk/api/cron/calculate-scores` | `0 0 1 * *` | Recalculates cleaner performance scores monthly. |
+| Mundoria Recurring Payments | `https://www.mundoria.co.uk/api/cron/recurring-payments` | `0 9 * * *` | Prepares PaymentIntents and reminds customers for unpaid series visits (T−7…T−2). |
 
 Use `Africa/Lagos` as the timezone for calendar-style schedules. For interval
 jobs such as every 5 or 15 minutes, either `Africa/Lagos` or `UTC` is fine.

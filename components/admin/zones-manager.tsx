@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,9 +51,9 @@ export function ZonesManager({ zones }: { zones: Zone[] }) {
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Add zone</h2>
           {error ? (
-            <p className="mt-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </p>
+            <div className="mt-3">
+              <ActionError message={error} title="Couldn’t save this zone" />
+            </div>
           ) : null}
           <Input
             className="mt-4"

@@ -16,6 +16,7 @@ import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
 import { RatingForm } from "@/components/customer/rating-form";
 import { RescheduleModal } from "@/components/customer/reschedule-modal";
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
+import { ActionError } from "@/components/shared/action-error";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
@@ -75,6 +76,8 @@ export function BookingDetail({
   const canCancel = useMemo(
     () =>
       canCustomerChangeSchedule({
+        actualStartTime: booking.actual_start_time,
+        checkinVerified: booking.checkin_verified,
         scheduledDate: booking.scheduled_date,
         scheduledStartTime: booking.scheduled_start_time,
         status: booking.status,
@@ -84,6 +87,8 @@ export function BookingDetail({
   const canReschedule = useMemo(
     () =>
       canCustomerReschedule({
+        actualStartTime: booking.actual_start_time,
+        checkinVerified: booking.checkin_verified,
         scheduledDate: booking.scheduled_date,
         scheduledStartTime: booking.scheduled_start_time,
         status: booking.status,
@@ -512,12 +517,17 @@ export function BookingDetail({
           title="Cancel this booking?"
         >
           <textarea
-            className="min-h-24 w-full rounded-md border p-3 text-sm"
+            autoFocus
+            className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] placeholder:text-[#8b8798] focus:ring-2"
             onChange={(event) => setReason(event.target.value)}
             placeholder="Cancellation reason"
             value={reason}
           />
-          {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
+          {error ? (
+            <div className="mt-2">
+              <ActionError message={error} title="Couldn’t cancel this booking" />
+            </div>
+          ) : null}
         </ConfirmModal>
       ) : null}
 

@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { estimatePrice } from "@/lib/customer/services";
@@ -15,6 +16,16 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid booking details" },
+      { status: 400 },
+    );
+  }
+
+  if (
+    !frequencyAllowsOneOff(parsed.data.serviceType) &&
+    !parsed.data.isRecurring
+  ) {
+    return NextResponse.json(
+      { error: "Commercial cleaning needs a repeat schedule." },
       { status: 400 },
     );
   }

@@ -18,6 +18,7 @@ export type BookingFlowStepId =
   | "category"
   | "service"
   | "address"
+  | "history"
   | "rooms"
   | "standard"
   | "addons"
@@ -31,10 +32,11 @@ export type BookingFlowStepId =
 
 /** Canonical order used to remap when the active flow drops a step. */
 export const BOOKING_STEP_ORDER: BookingFlowStepId[] = [
+  "address",
+  "history",
   "cleaner",
   "category",
   "service",
-  "address",
   "rooms",
   "standard",
   "addons",
@@ -80,6 +82,7 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   category: "Category",
   service: "Service",
   address: "Address",
+  history: "Suggestion",
   rooms: "Rooms",
   standard: "Session",
   addons: "Personalize",
@@ -174,6 +177,12 @@ export function propertyQuestionModeFor(
   return "home";
 }
 
+/** Commercial premises are booked on a repeat schedule, never as a one-off visit. */
+export function frequencyAllowsOneOff(serviceType: ServiceType | null) {
+  if (!serviceType) return true;
+  return serviceDefinition(serviceType).category !== "commercial";
+}
+
 export function frequencyOptionsFor(serviceType: ServiceType | null) {
   const mode = frequencyModeFor(serviceType);
   if (mode === "required_recurring") {
@@ -189,7 +198,7 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
     ];
   }
   if (mode === "optional") {
-    return [
+    const options = [
       { label: "One-off", popular: false, value: "one_off" as const },
       { label: "Once a week", popular: true, value: "weekly" as const },
       { label: "Once a fortnight", popular: false, value: "fortnightly" as const },
@@ -200,8 +209,64 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
         value: "custom" as const,
       },
     ];
+    if (!frequencyAllowsOneOff(serviceType)) {
+      return options.filter((option) => option.value !== "one_off");
+    }
+    return options;
   }
   return [];
+}
+
+/** Keep a real calendar day. Full timestamps are reduced to YYYY-MM-DD. */
+export function isoDateOrEmpty(value: string | null | undefined) {
+  if (!value) return "";
+  const match = /^(\d{4}-\d{2}-\d{2})/.exec(value.trim());
+  if (!match) return "";
+  const [year, month, day] = match[1].split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return "";
+  }
+  return match[1];
+}
+
+export function formatBookingDate(
+  value: string | null | undefined,
+  options: Intl.DateTimeFormatOptions,
+) {
+  const iso = isoDateOrEmpty(value);
+  if (!iso) return null;
+  return new Date(`${iso}T12:00:00`).toLocaleDateString("en-GB", options);
+}
+
+export function frequencyChoiceSatisfied(
+  draft: Pick<
+    BookingDraft,
+    | "customRecurrenceDates"
+    | "isRecurring"
+    | "recurrencePattern"
+    | "serviceType"
+  >,
+) {
+  const mode = frequencyModeFor(draft.serviceType);
+  if (mode === "none") return true;
+  const needsSchedule =
+    mode === "required_recurring" || !frequencyAllowsOneOff(draft.serviceType);
+  if (needsSchedule) {
+    if (draft.recurrencePattern === "custom") {
+      return draft.customRecurrenceDates.length >= 2;
+    }
+    return Boolean(draft.isRecurring && draft.recurrencePattern);
+  }
+  if (!draft.isRecurring) return true;
+  if (draft.recurrencePattern === "custom") {
+    return draft.customRecurrenceDates.length >= 2;
+  }
+  return Boolean(draft.recurrencePattern);
 }
 
 /** Steps for the current draft — skips category/service when already chosen. */
@@ -219,15 +284,16 @@ export function getFlowSteps(
     : draft.serviceCategory;
   const isCommercial = category === "commercial";
 
-  // Rebook: ask to keep the previous cleaner before the rest of the flow.
+  // Address is always the first question, before service choice.
+  steps.push("address");
+
+  // After the address, offer cleaners this customer has already finished a visit with.
   if (options?.includeCleanerChoice) {
     steps.push("cleaner");
   }
 
   // Always keep category + service in the flow so Back can revisit them.
   steps.push("category", "service");
-
-  steps.push("address");
 
   // Office: level first, then spaces (per commercial pricing logic).
   if (isOffice) {

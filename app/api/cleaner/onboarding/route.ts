@@ -4,6 +4,11 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { listTakenInterviewSlots } from "@/lib/cleaner/interview-availability";
+import {
+  formatInterviewSlot,
+  isBookableInterviewSlot,
+} from "@/lib/cleaner/interview-slots";
 import { scoreSkillsExam, SKILLS_EXAM_PASS_SCORE, SKILLS_EXAM_QUESTIONS } from "@/lib/cleaner/skills-exam";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -36,6 +41,12 @@ const schema = z.object({
   full_name: z.string().trim().min(2, "Full name is required"),
   headshot_url: requiredString("Profile headshot"),
   id_document_url: requiredString("Government-issued ID"),
+  interview_scheduled_at: z
+    .string()
+    .refine(
+      (value) => !Number.isNaN(Date.parse(value)),
+      "Choose a valid interview time.",
+    ),
   location_tracking_consent_accepted: z.literal(true, {
     errorMap: () => ({ message: "Location consent is required" }),
   }),
@@ -79,6 +90,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Cleaner account required" }, { status: 403 });
   }
 
+  const taken = await listTakenInterviewSlots(user.id);
+  if (!isBookableInterviewSlot(parsed.data.interview_scheduled_at, taken)) {
+    return NextResponse.json(
+      { error: "That interview time is no longer available. Choose another." },
+      { status: 409 },
+    );
+  }
+
   const exam = scoreSkillsExam(parsed.data.skills_exam_answers);
   if (!exam.passed) {
     return NextResponse.json(
@@ -105,6 +124,7 @@ export async function POST(request: Request) {
   }
 
   const value = parsed.data;
+  const interviewWhen = formatInterviewSlot(value.interview_scheduled_at);
   const now = new Date().toISOString();
   const { error } = await admin
     .from("cleaner_profiles")
@@ -116,6 +136,7 @@ export async function POST(request: Request) {
       headshot_url: value.headshot_url,
       id_document_status: "pending",
       id_document_url: value.id_document_url,
+      interview_scheduled_at: value.interview_scheduled_at,
       interview_status: "awaiting",
       location_tracking_consent_at: now,
       location_tracking_consent_version:
@@ -169,19 +190,24 @@ export async function POST(request: Request) {
     .from("profiles")
     .select("id")
     .eq("role", "admin");
-  if (admins?.length) {
-    await admin.from("notifications").insert(
-      admins.map((recipient) => ({
-        body: `${value.full_name} submitted onboarding — schedule a phone interview.`,
-        data: { cleaner_id: user.id },
-        title: "New cleaner application",
-        type: "cleaner_application",
-        user_id: recipient.id,
-      })),
-    );
-  }
+  await admin.from("notifications").insert([
+    ...(admins ?? []).map((recipient) => ({
+      body: `${value.full_name} booked a 30-minute online interview for ${interviewWhen}.`,
+      data: { cleaner_id: user.id },
+      title: "New cleaner application",
+      type: "cleaner_application",
+      user_id: recipient.id,
+    })),
+    {
+      body: `Your 30-minute online interview is booked for ${interviewWhen}.`,
+      data: { interview_scheduled_at: value.interview_scheduled_at },
+      title: "Interview booked",
+      type: "interview_booked",
+      user_id: user.id,
+    },
+  ]);
   await admin.from("admin_alert_queue").insert({
-    body: `${value.full_name} submitted onboarding — schedule a phone interview.`,
+    body: `${value.full_name} booked a 30-minute online interview for ${interviewWhen}.`,
     data: { cleaner_id: user.id },
     title: "New cleaner application",
     type: "cleaner_application",
@@ -194,6 +220,7 @@ export async function POST(request: Request) {
           appUrl: process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin,
           firstName: value.full_name.split(" ")[0],
           fullName: value.full_name,
+          interviewWhen,
           payoutPreference: value.payout_preference,
           workingAreas: value.working_areas.join(", "),
         },
@@ -211,6 +238,7 @@ export async function POST(request: Request) {
           cleanerEmail: profile.email,
           cleanerName: value.full_name,
           cleanerUrl: `${appUrl}/admin/cleaners/${user.id}`,
+          interviewWhen,
           yearsExperience: value.years_experience,
         },
         template: "admin.cleaner_application_submitted",

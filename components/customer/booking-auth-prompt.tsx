@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -83,10 +84,12 @@ export function BookingAuthPrompt({
         throw new Error(result.error ?? "Unable to create your account.");
       }
       if (result.requiresEmailConfirmation) {
-        setMessage(
-          "Check your inbox to confirm your email, then return here to finish.",
-        );
-        setBusy(false);
+        const params = new URLSearchParams({
+          email: email.trim(),
+          next: RETURN_PATH,
+          role: "customer",
+        });
+        router.replace(`/signup/check-email?${params.toString()}`);
         return;
       }
       router.refresh();
@@ -266,16 +269,20 @@ export function BookingAuthPrompt({
       ) : null}
 
       {message ? (
-        <p
-          className={
-            message.toLowerCase().includes("check your inbox")
-              ? "mt-4 text-sm text-muted-foreground"
-              : "mt-4 text-sm text-destructive"
-          }
-          role="alert"
-        >
-          {message}
-        </p>
+        message.toLowerCase().includes("already has an account") ? (
+          <p className="mt-4 text-sm text-muted-foreground">{message}</p>
+        ) : (
+          <div className="mt-4">
+            <ActionError
+              message={message}
+              title={
+                mode === "signin"
+                  ? "Couldn’t sign you in"
+                  : "Couldn’t continue"
+              }
+            />
+          </div>
+        )
       ) : null}
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -60,9 +61,9 @@ export function OAuthButton({
         {isLoading ? "Opening Google…" : label}
       </Button>
       {error ? (
-        <p className="mt-2 text-sm text-destructive" role="alert">
-          {error}
-        </p>
+        <div className="mt-3">
+          <ActionError message={error} title="Couldn’t continue with Google" />
+        </div>
       ) : null}
     </div>
   );

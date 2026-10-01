@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import type { MagPostAdminRow } from "@/lib/content/mag-admin";
 import { cn } from "@/lib/utils";
@@ -104,9 +105,9 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
       </div>
 
       {error ? (
-        <p className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
-        </p>
+        <div className="mt-4">
+          <ActionError message={error} title="Couldn’t update Mag" />
+        </div>
       ) : null}
 
       {posts.length === 0 ? (

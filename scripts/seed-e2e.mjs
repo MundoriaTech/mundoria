@@ -65,15 +65,6 @@ const MATCH_AREA = {
 };
 
 const MATCH_HOURS = { end_time: "23:00", start_time: "06:00" };
-const STATUSES = [
-  "pending_match",
-  "matched",
-  "confirmed",
-  "in_progress",
-  "completed",
-  "cancelled",
-];
-
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -353,14 +344,27 @@ async function seedBookings(customerIds, cleanerIds) {
   const rows = [];
   for (let i = 0; i < BOOKINGS; i += 1) {
     const address = addresses[i % addresses.length];
-    const status = STATUSES[i % STATUSES.length];
+    const scheduledDate = new Date(Date.now() + ((i % 60) - 20) * 86400000)
+      .toISOString()
+      .slice(0, 10);
+    const scheduledTime = ["09:00", "10:00", "11:00", "14:00", "16:00"][i % 5];
+    const startsAt = new Date(`${scheduledDate}T${scheduledTime}:00`).getTime();
+    const upcoming = startsAt > Date.now();
+    const status = upcoming
+      ? ["pending_match", "matched", "confirmed"][i % 3]
+      : ["completed", "cancelled", "awaiting_customer_confirmation", "in_progress"][
+          i % 4
+        ];
     const total = 4500 + (i % 40) * 250;
     const cleaner = Math.floor(total * 0.8);
     rows.push({
+      actual_start_time:
+        status === "in_progress" ? new Date(startsAt).toISOString() : null,
       address_id: address.id,
       amount_cleaner: cleaner,
       amount_platform: total - cleaner,
       amount_total: total,
+      checkin_verified: status === "in_progress",
       cleaner_id:
         status === "pending_match"
           ? null
@@ -369,15 +373,13 @@ async function seedBookings(customerIds, cleanerIds) {
       estimated_duration_hours: 2 + (i % 4),
       is_recurring: false,
       payment_status:
-        status === "completed"
+        status === "completed" || status === "awaiting_customer_confirmation"
           ? "released"
           : status === "cancelled"
             ? "refunded"
             : "held",
-      scheduled_date: new Date(Date.now() + ((i % 60) - 20) * 86400000)
-        .toISOString()
-        .slice(0, 10),
-      scheduled_start_time: ["09:00", "10:00", "11:00", "14:00", "16:00"][i % 5],
+      scheduled_date: scheduledDate,
+      scheduled_start_time: scheduledTime,
       service_type: SERVICES[i % SERVICES.length],
       special_instructions: `Seed booking #${i + 1}`,
       status,

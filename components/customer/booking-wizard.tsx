@@ -7,12 +7,13 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+
+import { ActionError } from "@/components/shared/action-error";
 import {
   ChevronDown,
   ChevronUp,
   CreditCard,
   MapPin,
-  Plus,
   ShieldCheck,
   Star,
 } from "lucide-react";
@@ -55,20 +56,30 @@ import {
   bookingCategoryImages,
   bookingServiceImages,
   durationSummary,
+  formatBookingDate,
+  frequencyAllowsOneOff,
+  frequencyChoiceSatisfied,
   frequencyModeFor,
   frequencyOptionsFor,
+  isoDateOrEmpty,
   getFlowSteps,
   guestAddressComplete,
   isBookingFlowStepId,
   resolveFlowStepIndex,
   type BookingFlowStepId,
 } from "@/lib/customer/booking-flow";
+import {
+  recommendFromHistory,
+  type HistoryRecommendation,
+  type HistoryVisit,
+} from "@/lib/customer/history-recommendation";
 import { LazyImage } from "@/components/shared/lazy-image";
 import {
   availableAddOns,
   allowedStandards,
   categoryDefinition,
   estimatePrice,
+  estimateDuration,
   formatMoney,
   formatServiceName,
   getSmartRecommendation,
@@ -76,13 +87,15 @@ import {
   normalizeStandard,
   recommendedStandardFor,
   selectedAddOnTotal,
+  serviceDefinition,
   SERVICES,
   SERVICE_CATEGORIES,
   servicesForCategory,
   standardLabel,
 } from "@/lib/customer/services";
 import {
-  OFFICE_SPACE_OPTIONS,
+  OFFICE_SIZE_PRESETS,
+  officeSizePresetFor,
 } from "@/lib/customer/office-pricing";
 import { cn } from "@/lib/utils";
 import type {
@@ -90,6 +103,7 @@ import type {
   BookingDraft,
   CleanerPublicProfile,
   CleaningStandard,
+  KnownCleaner,
   OfficeSpaceDraft,
   ServiceCategory,
   ServiceType,
@@ -133,7 +147,7 @@ const blankDraft: BookingDraft = {
 };
 
 const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
-const BOOKING_STEP_KEY = "mundoria-booking-step-v4";
+const BOOKING_STEP_KEY = "mundoria-booking-step-v5";
 
 /** Avoid double-building the history stack under React Strict Mode remounts. */
 let bookingHistoryBootstrap: {
@@ -218,20 +232,26 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
 };
 
 export function BookingWizard({
+  cleaningHistory = [],
   focusServices,
   fresh = false,
   initialAddresses,
   initialDraft,
+  knownCleaners = [],
   previousCleaner = null,
   returnTo = null,
+  suggestFromHistory = true,
   userId,
 }: {
+  cleaningHistory?: HistoryVisit[];
   focusServices?: ServiceType[];
   fresh?: boolean;
   initialAddresses: Address[];
   initialDraft?: Partial<BookingDraft>;
+  knownCleaners?: KnownCleaner[];
   previousCleaner?: CleanerPublicProfile | null;
   returnTo?: string | null;
+  suggestFromHistory?: boolean;
   userId: string | null;
 }) {
   const router = useRouter();
@@ -264,14 +284,24 @@ export function BookingWizard({
   const historyWriteModeRef = useRef<"push" | "replace" | null>(null);
   const exitBookingFlowRef = useRef<() => void>(() => undefined);
   const flowStepsRef = useRef<BookingFlowStepId[]>([]);
-  const stepIdRef = useRef<BookingFlowStepId>("category");
+  const stepIdRef = useRef<BookingFlowStepId>("address");
   const stepIndexRef = useRef(0);
 
   const needsAuth = !userId;
-  const includeCleanerChoice = Boolean(previousCleaner);
+  const includeCleanerChoice = knownCleaners.length > 0;
+  const historySuggestion = useMemo(() => {
+    if (!suggestFromHistory || !draft.addressId) return null;
+    return recommendFromHistory(
+      cleaningHistory.filter((visit) => visit.addressId === draft.addressId),
+    );
+  }, [cleaningHistory, draft.addressId, suggestFromHistory]);
   const flowSteps = useMemo(
-    () => getFlowSteps(draft, { includeCleanerChoice }),
-    [draft, includeCleanerChoice],
+    () =>
+      withHistoryStep(
+        getFlowSteps(draft, { includeCleanerChoice }),
+        Boolean(historySuggestion),
+      ),
+    [draft, historySuggestion, includeCleanerChoice],
   );
   const stepId = flowSteps[Math.min(stepIndex, flowSteps.length - 1)]!;
   flowStepsRef.current = flowSteps;
@@ -386,19 +416,7 @@ export function BookingWizard({
             ),
           );
         } else if (initialDraft?.serviceCategory) {
-          setStepIndex(
-            resolveFlowStepIndex(
-              getFlowSteps(
-                {
-                  recurrencePattern: null,
-                  serviceCategory: initialDraft.serviceCategory,
-                  serviceType: null,
-                },
-                { includeCleanerChoice: Boolean(previousCleaner) },
-              ),
-              "service",
-            ),
-          );
+          setStepIndex(0);
         } else setStepIndex(0);
         setHydrated(true);
         return;
@@ -412,6 +430,16 @@ export function BookingWizard({
       const urlService = initialDraft?.serviceType ?? null;
       const sameService =
         Boolean(urlService) && parsed?.serviceType === urlService;
+      // A category or service deep link starts that visit. Otherwise keep the
+      // date and service already saved, including after a trip to Account.
+      const urlCategoryOnly = Boolean(initialDraft?.serviceCategory) && !urlService;
+      const keepSaved = (!urlService && !urlCategoryOnly) || sameService;
+      const storedCleanerId = parsed?.preferredCleanerId ?? null;
+      const storedCleanerChoice = parsed?.rebookCleanerChoice ?? null;
+      const resumedKnownCleaner =
+        storedCleanerChoice === "same" &&
+        Boolean(storedCleanerId) &&
+        knownCleaners.some((cleaner) => cleaner.id === storedCleanerId);
 
       if (urlService || parsed) {
         setDraft({
@@ -427,55 +455,65 @@ export function BookingWizard({
             : {}),
           // Deep-link / category seed always wins over a stale draft service.
           ...(initialDraft ?? {}),
-          alternateTimes: sameService
+          alternateTimes: keepSaved
             ? (parsed?.alternateTimes ?? []).slice(0, 6)
             : [],
-          selectedAddOns: sameService ? (parsed?.selectedAddOns ?? []) : [],
-          scheduledDate: sameService ? (parsed?.scheduledDate ?? "") : "",
-          scheduledTime: sameService ? (parsed?.scheduledTime ?? "") : "",
-          estimatedDurationHours: sameService
+          selectedAddOns: keepSaved ? (parsed?.selectedAddOns ?? []) : [],
+          scheduledDate: isoDateOrEmpty(
+            keepSaved
+              ? (parsed?.scheduledDate || initialDraft?.scheduledDate)
+              : initialDraft?.scheduledDate,
+          ),
+          scheduledTime: keepSaved ? (parsed?.scheduledTime ?? "") : "",
+          estimatedDurationHours: keepSaved
             ? (parsed?.estimatedDurationHours ??
               initialDraft?.estimatedDurationHours ??
               null)
             : (initialDraft?.estimatedDurationHours ?? null),
-          numBedrooms: sameService
+          numBedrooms: keepSaved
             ? (parsed?.numBedrooms ?? initialDraft?.numBedrooms ?? null)
             : (initialDraft?.numBedrooms ?? null),
-          numBathrooms: sameService
+          numBathrooms: keepSaved
             ? (parsed?.numBathrooms ?? initialDraft?.numBathrooms ?? null)
             : (initialDraft?.numBathrooms ?? null),
-          officeSpaces: sameService
+          officeSpaces: keepSaved
             ? (parsed?.officeSpaces ?? initialDraft?.officeSpaces ?? [])
             : (initialDraft?.officeSpaces ?? []),
-          otherRoomTypes: sameService
+          otherRoomTypes: keepSaved
             ? (parsed?.otherRoomTypes ?? initialDraft?.otherRoomTypes ?? [])
             : (initialDraft?.otherRoomTypes ?? []),
-          customRecurrenceDates: sameService
+          customRecurrenceDates: keepSaved
             ? (parsed?.customRecurrenceDates ?? [])
+                .map((date) => isoDateOrEmpty(date))
+                .filter(Boolean)
             : [],
-          isRecurring: sameService
+          isRecurring: keepSaved
             ? Boolean(parsed?.isRecurring)
             : Boolean(initialDraft?.isRecurring),
-          recurrencePattern: sameService
+          recurrencePattern: keepSaved
             ? (parsed?.recurrencePattern ?? null)
             : (initialDraft?.recurrencePattern ?? null),
           preferSameCleaner: previousCleaner
             ? (sameService ? Boolean(parsed?.preferSameCleaner) : false)
-            : false,
+            : Boolean(resumedKnownCleaner),
           preferredCleanerId: previousCleaner
             ? sameService
               ? (parsed?.preferredCleanerId ?? null)
               : null
-            : null,
+            : resumedKnownCleaner
+              ? storedCleanerId
+              : null,
           rebookCleanerChoice: previousCleaner
             ? sameService
               ? (parsed?.rebookCleanerChoice ?? null)
               : null
-            : null,
-          guestAddress: sameService
+            : storedCleanerChoice === "new" || resumedKnownCleaner
+              ? storedCleanerChoice
+              : null,
+          guestAddress: keepSaved
             ? (parsed?.guestAddress ?? null)
             : (initialDraft?.guestAddress ?? null),
-          addressId: sameService
+          addressId: keepSaved
             ? (parsed?.addressId ?? initialDraft?.addressId ?? null)
             : (initialDraft?.addressId ?? null),
         });
@@ -485,15 +523,16 @@ export function BookingWizard({
         BookingDraft,
         "serviceCategory" | "serviceType" | "recurrencePattern"
       > = {
-        recurrencePattern: sameService
-          ? (parsed?.recurrencePattern ?? null)
+        recurrencePattern: keepSaved
+          ? (parsed?.recurrencePattern ?? initialDraft?.recurrencePattern ?? null)
           : (initialDraft?.recurrencePattern ?? null),
         serviceCategory:
           initialDraft?.serviceCategory ?? parsed?.serviceCategory ?? null,
-        serviceType: urlService ?? (sameService ? parsed?.serviceType : null) ?? null,
+        serviceType:
+          urlService ?? (keepSaved ? parsed?.serviceType ?? null : null),
       };
       const restoredSteps = getFlowSteps(restoredDraft, {
-        includeCleanerChoice: Boolean(previousCleaner),
+        includeCleanerChoice: knownCleaners.length > 0,
       });
 
       if (previousCleaner && !sameService) {
@@ -507,7 +546,7 @@ export function BookingWizard({
       } else if (urlService) {
         setStepIndex(resolveFlowStepIndex(restoredSteps, "address"));
       } else if (initialDraft?.serviceCategory && !urlService) {
-        setStepIndex(resolveFlowStepIndex(restoredSteps, "service"));
+        setStepIndex(0);
       } else if (isBookingFlowStepId(storedStepRaw)) {
         setStepIndex(resolveFlowStepIndex(restoredSteps, storedStepRaw));
       } else if (
@@ -669,7 +708,7 @@ export function BookingWizard({
         const entryId =
           pendingClearEntryIdRef.current ??
           flowStepsRef.current[0] ??
-          (previousCleaner ? "cleaner" : "category");
+          "address";
         pendingClearEntryIdRef.current = null;
         writeClearedEntry(entryId as BookingFlowStepId);
         return;
@@ -806,7 +845,7 @@ export function BookingWizard({
 
   function goBack() {
     if (checkoutBusy) return;
-    if (stepId === "address" && showAddressForm && addresses.length > 0) {
+    if (stepId === "address" && showAddressForm && draft.addressId) {
       setShowAddressForm(false);
       return;
     }
@@ -861,6 +900,10 @@ export function BookingWizard({
       continueFromStandard();
       return;
     }
+    if (stepId === "history" && historySuggestion) {
+      acceptHistorySuggestion(historySuggestion);
+      return;
+    }
     historyWriteModeRef.current = "push";
     setStepIndex((current) => Math.min(flowSteps.length - 1, current + 1));
   }
@@ -889,7 +932,10 @@ export function BookingWizard({
       cleaningStandard: null,
       hasPets: null,
       petTypes: [],
-      recommendationOutcome: "not_shown",
+      recommendationOutcome:
+        current.recommendationOutcome === "accepted"
+          ? "overridden"
+          : current.recommendationOutcome,
       recommendedCleaningStandard: null,
       recommendedServiceType: null,
       selectedAddOns: [],
@@ -908,11 +954,14 @@ export function BookingWizard({
       isRecurring: mode === "required_recurring",
       preferSameCleaner: current.rebookCleanerChoice === "same",
       preferredCleanerId:
-        current.rebookCleanerChoice === "same" && previousCleaner
-          ? previousCleaner.id
+        current.rebookCleanerChoice === "same"
+          ? current.preferredCleanerId
           : null,
       rebookCleanerChoice: current.rebookCleanerChoice,
-      recommendationOutcome: "not_shown",
+      recommendationOutcome:
+        current.recommendationOutcome === "accepted"
+          ? "overridden"
+          : current.recommendationOutcome,
       recommendedCleaningStandard: null,
       recommendedServiceType: null,
       recurrencePattern: mode === "required_recurring" ? "weekly" : null,
@@ -927,6 +976,66 @@ export function BookingWizard({
       hasPets: null,
       petTypes: [],
     }));
+  }
+
+  function draftFromHistory(suggestion: HistoryRecommendation): BookingDraft {
+    const category = serviceDefinition(suggestion.serviceType).category;
+    const duration =
+      suggestion.serviceType === "office" &&
+      !draft.officeSpaces.some((space) => space.quantity > 0)
+        ? null
+        : estimateDuration(
+            suggestion.serviceType,
+            suggestion.cleaningStandard,
+            suggestion.addOnIds,
+            { officeSpaces: draft.officeSpaces },
+          );
+    return {
+      ...draft,
+      cleaningStandard: suggestion.cleaningStandard,
+      customRecurrenceDates: [],
+      estimatedDurationHours: duration,
+      isRecurring: suggestion.isRecurring,
+      recommendationOutcome: "accepted",
+      recommendedCleaningStandard: suggestion.cleaningStandard,
+      recommendedServiceType: suggestion.serviceType,
+      recurrencePattern: suggestion.recurrencePattern,
+      selectedAddOns: suggestion.addOnIds,
+      serviceCategory: category,
+      serviceType: suggestion.serviceType,
+      specialAttentionAreas: suggestion.specialAttentionAreas,
+    };
+  }
+
+  function acceptHistorySuggestion(suggestion: HistoryRecommendation) {
+    const nextDraft = draftFromHistory(suggestion);
+    const steps = withHistoryStep(
+      getFlowSteps(nextDraft, { includeCleanerChoice }),
+      true,
+    );
+    const historyIndex = steps.indexOf("history");
+    let target = Math.min(steps.length - 1, historyIndex + 1);
+    for (let index = historyIndex + 1; index < steps.length; index += 1) {
+      if (!stepSatisfied(steps[index]!, nextDraft)) {
+        target = index;
+        break;
+      }
+    }
+    setDraft(nextDraft);
+    historyWriteModeRef.current = "push";
+    setStepIndex(target);
+  }
+
+  function declineHistorySuggestion(suggestion: HistoryRecommendation) {
+    setDraft((current) => ({
+      ...current,
+      recommendationOutcome: "overridden",
+      recommendedCleaningStandard: suggestion.cleaningStandard,
+      recommendedServiceType: suggestion.serviceType,
+    }));
+    const categoryIndex = flowSteps.indexOf("category");
+    historyWriteModeRef.current = "push";
+    setStepIndex(categoryIndex >= 0 ? categoryIndex : stepIndex + 1);
   }
 
   function applyRecommendation() {
@@ -990,6 +1099,8 @@ export function BookingWizard({
         return Boolean(draft.serviceType);
       case "address":
         return Boolean(draft.addressId || guestAddressComplete(draft.guestAddress));
+      case "history":
+        return Boolean(historySuggestion);
       case "rooms":
         if (draft.serviceType === "office") {
           return draft.officeSpaces.some((space) => space.quantity > 0);
@@ -997,23 +1108,8 @@ export function BookingWizard({
         return draft.numBedrooms != null && draft.numBathrooms != null;
       case "standard":
         return Boolean(draft.cleaningStandard);
-      case "frequency": {
-        const mode = frequencyModeFor(draft.serviceType);
-        if (mode === "required_recurring") {
-          if (draft.recurrencePattern === "custom") {
-            return draft.customRecurrenceDates.length >= 2;
-          }
-          return Boolean(draft.isRecurring && draft.recurrencePattern);
-        }
-        if (mode === "optional") {
-          if (!draft.isRecurring) return true;
-          if (draft.recurrencePattern === "custom") {
-            return draft.customRecurrenceDates.length >= 2;
-          }
-          return Boolean(draft.recurrencePattern);
-        }
-        return true;
-      }
+      case "frequency":
+        return frequencyChoiceSatisfied(draft);
       case "preferences":
         return draft.specialAttentionAreas.length > 0;
       case "pets":
@@ -1081,7 +1177,9 @@ export function BookingWizard({
     if (!draft.serviceType) return null;
     const mode = frequencyModeFor(draft.serviceType);
     if (mode === "none") return "Once";
-    if (!draft.isRecurring) return "Once";
+    if (!draft.isRecurring) {
+      return frequencyAllowsOneOff(draft.serviceType) ? "Once" : null;
+    }
     if (draft.recurrencePattern === "weekly") return "Once a week";
     if (draft.recurrencePattern === "fortnightly") return "Once a fortnight";
     if (draft.recurrencePattern === "monthly") return "Once a month";
@@ -1116,7 +1214,7 @@ export function BookingWizard({
     setAuthMode("ask");
     setPromoFeedback(null);
     setPromoAmount(null);
-    setShowAddressForm(addresses.length === 0 && Boolean(userId));
+    setShowAddressForm(false);
     lastRecommendedDurationRef.current = null;
     setDraft(nextDraft);
     setStepIndex(0);
@@ -1183,7 +1281,18 @@ export function BookingWizard({
     priceIsIndicative,
     scheduledDate: draft.scheduledDate,
     scheduledTime: draft.scheduledTime,
-    serviceLabel: service?.label ?? null,
+    serviceLabel: service
+      ? draft.serviceType === "office"
+        ? [
+            service.label,
+            OFFICE_SIZE_PRESETS.find(
+              (preset) => preset.value === officeSizePresetFor(draft.officeSpaces),
+            )?.label,
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        : service.label
+      : null,
     standardLabel: selectedStandard
       ? standardLabel(selectedStandard)
       : null,
@@ -1193,23 +1302,34 @@ export function BookingWizard({
 
   const stepBody = (
     <>
-      {stepId === "cleaner" && previousCleaner ? (
-        <CleanerChoiceStep
-          cleaner={previousCleaner}
-          selected={draft.rebookCleanerChoice}
-          onSelect={(choice) => {
+      {stepId === "cleaner" && knownCleaners.length > 0 ? (
+        <KnownCleanersStep
+          addressId={draft.addressId}
+          cleaners={knownCleaners}
+          selectedId={
+            draft.rebookCleanerChoice === "new"
+              ? null
+              : draft.preferredCleanerId
+          }
+          selectingNew={draft.rebookCleanerChoice === "new"}
+          onSelect={(cleanerId) => {
             setDraft((current) => ({
               ...current,
-              preferSameCleaner: choice === "same",
-              preferredCleanerId:
-                choice === "same" ? previousCleaner.id : null,
-              rebookCleanerChoice: choice,
+              preferSameCleaner: Boolean(cleanerId),
+              preferredCleanerId: cleanerId,
+              rebookCleanerChoice: cleanerId ? "same" : "new",
             }));
             historyWriteModeRef.current = "push";
             setStepIndex((current) =>
               Math.min(flowSteps.length - 1, current + 1),
             );
           }}
+        />
+      ) : null}
+      {stepId === "history" && historySuggestion ? (
+        <HistorySuggestionStep
+          onDecline={() => declineHistorySuggestion(historySuggestion)}
+          suggestion={historySuggestion}
         />
       ) : null}
       {stepId === "category" ? (
@@ -1232,23 +1352,10 @@ export function BookingWizard({
           guestAddress={draft.guestAddress}
           localOnly={!userId}
           selectedId={draft.addressId}
-          select={(id) => {
-            update("addressId", id);
-            update("guestAddress", null);
-            const chosen = addresses.find((item) => item.id === id);
-            if (chosen) {
-              if (draft.numBedrooms == null) {
-                update("numBedrooms", chosen.num_bedrooms ?? 1);
-              }
-              if (draft.numBathrooms == null) {
-                update("numBathrooms", chosen.num_bathrooms ?? 1);
-              }
-            }
-          }}
           setShowForm={setShowAddressForm}
           showForm={
             showAddressForm ||
-            (Boolean(userId) && addresses.length === 0) ||
+            (Boolean(userId) && !draft.addressId) ||
             (!userId && !guestAddressComplete(draft.guestAddress))
           }
           userId={userId}
@@ -1277,6 +1384,12 @@ export function BookingWizard({
             setAddresses((current) => [address, ...current]);
             update("addressId", address.id);
             update("guestAddress", null);
+            if (draft.numBedrooms == null) {
+              update("numBedrooms", address.num_bedrooms ?? 1);
+            }
+            if (draft.numBathrooms == null) {
+              update("numBathrooms", address.num_bathrooms ?? 1);
+            }
             setShowAddressForm(false);
           }}
         />
@@ -1286,7 +1399,6 @@ export function BookingWizard({
           <OfficeSpacesStep
             onChange={(value) => update("officeSpaces", value)}
             spaces={draft.officeSpaces}
-            standard={selectedStandard}
           />
         ) : (
           <RoomsStep
@@ -1503,80 +1615,95 @@ const MAIN_BOOKING_CATEGORIES = SERVICE_CATEGORIES.filter((category) =>
   ["residential", "commercial", "recovery"].includes(category.value),
 );
 
-function CleanerChoiceStep({
-  cleaner,
+function KnownCleanersStep({
+  addressId,
+  cleaners,
   onSelect,
-  selected,
+  selectedId,
+  selectingNew,
 }: {
-  cleaner: CleanerPublicProfile;
-  onSelect: (choice: "same" | "new") => void;
-  selected: "same" | "new" | null;
+  addressId: string | null;
+  cleaners: KnownCleaner[];
+  onSelect: (cleanerId: string | null) => void;
+  selectedId: string | null;
+  selectingNew: boolean;
 }) {
-  const firstName = cleaner.full_name.trim().split(/\s+/)[0] || "your cleaner";
+  const ordered = [...cleaners].sort((left, right) => {
+    const leftHere = addressId ? left.addressIds.includes(addressId) : false;
+    const rightHere = addressId ? right.addressIds.includes(addressId) : false;
+    if (leftHere !== rightHere) return leftHere ? -1 : 1;
+    return right.lastVisitDate.localeCompare(left.lastVisitDate);
+  });
 
   return (
     <div>
       <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        Would you like to continue with {firstName} or pick someone else?
+        Request a cleaner you already know?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        We’ll try to match {firstName} first when they’re available. If not,
-        we’ll find another Mundoria professional for you.
+        These cleaners have finished a visit for you. We’ll try your choice
+        first, and match someone else if they’re not free.
       </p>
-
-      <div className="mt-8 flex items-center gap-4 rounded-2xl border border-[#e8def8] bg-white p-4 sm:p-5">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3eef9] text-xl font-bold text-[#6a45b8]">
-          {cleaner.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              alt={cleaner.full_name}
-              className="h-full w-full object-cover"
-              src={cleaner.avatar_url}
-            />
-          ) : (
-            cleaner.full_name.charAt(0)
-          )}
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-lg font-semibold text-[#1c133b]">
-            {cleaner.full_name}
-          </p>
-          <p className="mt-0.5 text-sm text-[#5a5470]">
-            Your previous Mundoria cleaner
-            {cleaner.rating > 0
-              ? ` · ${cleaner.rating.toFixed(1)} rating`
-              : ""}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-3">
+      <div className="mt-8 grid gap-3">
+        {ordered.map((cleaner) => {
+          const firstName =
+            cleaner.fullName.trim().split(/\s+/)[0] || "this cleaner";
+          const here = Boolean(addressId && cleaner.addressIds.includes(addressId));
+          const when = formatBookingDate(cleaner.lastVisitDate, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+          return (
+            <button
+              className={cn(
+                "flex items-center gap-4 rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation",
+                selectedId === cleaner.id && "border-[#6a45b8] bg-white",
+              )}
+              key={cleaner.id}
+              onClick={() => onSelect(cleaner.id)}
+              type="button"
+            >
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3eef9] text-lg font-bold text-[#6a45b8]">
+                {cleaner.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt=""
+                    className="h-full w-full object-cover"
+                    src={cleaner.avatarUrl}
+                  />
+                ) : (
+                  cleaner.fullName.charAt(0)
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-[#1c133b]">
+                  Continue with {firstName}
+                </p>
+                <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+                  {cleaner.visitCount > 0
+                    ? `${cleaner.visitCount} completed visit${cleaner.visitCount === 1 ? "" : "s"}${when ? ` · last ${when}` : ""}`
+                    : `From the booking you’re repeating${when ? ` · ${when}` : ""}`}
+                  {here ? " · worked at this address" : ""}
+                  {cleaner.rating > 0
+                    ? ` · ${cleaner.rating.toFixed(1)} rating`
+                    : ""}
+                </p>
+              </div>
+            </button>
+          );
+        })}
         <button
           className={cn(
             "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-5 py-4 text-left transition hover:bg-[#ececef] touch-manipulation",
-            selected === "same" && "border-[#6a45b8] bg-white",
+            selectingNew && "border-[#6a45b8] bg-white",
           )}
-          onClick={() => onSelect("same")}
+          onClick={() => onSelect(null)}
           type="button"
         >
-          <p className="font-semibold text-[#1c133b]">
-            Continue with {firstName}
-          </p>
+          <p className="font-semibold text-[#1c133b]">Match someone new</p>
           <p className="mt-1 text-sm leading-5 text-[#5a5470]">
-            Prefer the cleaner you already know, when they’re free.
-          </p>
-        </button>
-        <button
-          className={cn(
-            "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-5 py-4 text-left transition hover:bg-[#ececef] touch-manipulation",
-            selected === "new" && "border-[#6a45b8] bg-white",
-          )}
-          onClick={() => onSelect("new")}
-          type="button"
-        >
-          <p className="font-semibold text-[#1c133b]">Pick someone else</p>
-          <p className="mt-1 text-sm leading-5 text-[#5a5470]">
-            Match any suitable Mundoria cleaner for this booking.
+            Find any suitable Mundoria cleaner for this booking.
           </p>
         </button>
       </div>
@@ -1597,7 +1724,7 @@ function CategoryStep({
         What do you need?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        Choose a category to start your booking.
+        Choose the kind of cleaning you need.
       </p>
       <div className="mt-8 grid gap-3">
         {MAIN_BOOKING_CATEGORIES.map((category) => {
@@ -1722,9 +1849,6 @@ function ServiceStep({
                 </span>
                 <div className={cn("min-w-0 flex-1", popular && "pr-16")}>
                   <p className="font-semibold text-[#1c133b]">{item.label}</p>
-                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#1c133b]">
-                    From {formatMoney(indicativeFromPrice(item.value))}
-                  </p>
                   {active ? (
                     <ul className="mt-2 space-y-1 text-sm text-[#5a5470]">
                       <li>· {item.description}</li>
@@ -1747,12 +1871,119 @@ function ServiceStep({
   );
 }
 
+function withHistoryStep(steps: BookingFlowStepId[], include: boolean) {
+  if (!include || steps.includes("history")) return steps;
+  const cleanerIndex = steps.indexOf("cleaner");
+  const addressIndex = steps.indexOf("address");
+  const insertAt = (cleanerIndex >= 0 ? cleanerIndex : addressIndex) + 1;
+  if (insertAt <= 0) return steps;
+  const next = [...steps];
+  next.splice(insertAt, 0, "history");
+  return next;
+}
+
+function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
+  switch (stepId) {
+    case "address":
+      return Boolean(draft.addressId || guestAddressComplete(draft.guestAddress));
+    case "history":
+    case "addons":
+      return true;
+    case "cleaner":
+      return (
+        draft.rebookCleanerChoice === "same" ||
+        draft.rebookCleanerChoice === "new"
+      );
+    case "category":
+      return Boolean(draft.serviceCategory);
+    case "service":
+      return Boolean(draft.serviceType);
+    case "rooms":
+      if (draft.serviceType === "office") {
+        return draft.officeSpaces.some((space) => space.quantity > 0);
+      }
+      return draft.numBedrooms != null && draft.numBathrooms != null;
+    case "standard":
+      return Boolean(draft.cleaningStandard);
+    case "frequency":
+      return frequencyChoiceSatisfied(draft);
+    case "preferences":
+      return draft.specialAttentionAreas.length > 0;
+    case "pets":
+      return draft.hasPets !== null;
+    case "duration":
+      return (
+        draft.estimatedDurationHours != null &&
+        draft.estimatedDurationHours >= 1
+      );
+    case "date":
+      return Boolean(draft.scheduledDate);
+    case "time":
+      return Boolean(draft.scheduledTime);
+    default:
+      return false;
+  }
+}
+
+function HistorySuggestionStep({
+  onDecline,
+  suggestion,
+}: {
+  onDecline: () => void;
+  suggestion: HistoryRecommendation;
+}) {
+  const service = serviceDefinition(suggestion.serviceType);
+  const addOns = availableAddOns(suggestion.serviceType).filter((item) =>
+    suggestion.addOnIds.includes(item.id),
+  );
+
+  return (
+    <div>
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        Based on your last clean here
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        {suggestion.message}
+      </p>
+      <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-5">
+        <p className="font-semibold text-[#1c133b]">{service.label}</p>
+        <p className="mt-1 text-sm text-[#5a5470]">
+          {standardLabel(suggestion.cleaningStandard)} standard
+          {suggestion.isRecurring && suggestion.recurrencePattern
+            ? ` · ${suggestion.recurrencePattern.replaceAll("_", " ")}`
+            : ""}
+        </p>
+        {addOns.length ? (
+          <p className="mt-3 text-sm text-[#5a5470]">
+            Usual extras: {addOns.map((item) => item.label).join(", ")}
+          </p>
+        ) : null}
+        {suggestion.specialAttentionAreas.length ? (
+          <p className="mt-2 text-sm text-[#5a5470]">
+            Special attention: {suggestion.specialAttentionAreas.join(", ")}
+          </p>
+        ) : null}
+      </div>
+      <button
+        className="mt-4 text-sm font-semibold text-[#5a38a3] underline-offset-2 hover:underline"
+        onClick={onDecline}
+        type="button"
+      >
+        Choose something else
+      </button>
+      <p className="mt-3 text-sm text-[#5a5470]">
+        Next uses this suggestion and skips to the first question it does not
+        answer.
+      </p>
+    </div>
+  );
+}
+
 function AddressStep({
   addresses,
   guestAddress,
   localOnly,
   onSaved,
-  select,
   selectedId,
   setShowForm,
   showForm,
@@ -1762,7 +1993,6 @@ function AddressStep({
   guestAddress: BookingDraft["guestAddress"];
   localOnly: boolean;
   onSaved: (address: Address) => void;
-  select: (id: string) => void;
   selectedId: string | null;
   setShowForm: (value: boolean) => void;
   showForm: boolean;
@@ -1789,6 +2019,10 @@ function AddressStep({
         updated_at: "",
       }
     : null;
+  const selected =
+    !localOnly && selectedId
+      ? (addresses.find((address) => address.id === selectedId) ?? null)
+      : null;
 
   return (
     <div>
@@ -1818,48 +2052,29 @@ function AddressStep({
         </div>
       ) : null}
 
-      {addresses.length ? (
-        <div className="mt-8 grid gap-3">
-          {addresses.map((address) => (
-            <button
-              className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left touch-manipulation",
-                selectedId === address.id && "border-[#6a45b8] bg-white",
-              )}
-              key={address.id}
-              onClick={() => select(address.id)}
-              type="button"
-            >
-              <div className="flex gap-3">
-                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
-                <div className="min-w-0">
-                  <p className="font-semibold text-[#1c133b]">
-                    {address.label ?? "Address"}
-                  </p>
-                  <p className="mt-1 break-words text-sm text-[#5a5470]">
-                    {address.address_line_1}, {address.city}, {address.postcode}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
+      {selected && !localOnly ? (
+        <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
+          <div className="flex gap-3">
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
+            <div className="min-w-0">
+              <p className="font-semibold text-[#1c133b]">
+                {selected.label ?? "Your address"}
+              </p>
+              <p className="mt-1 break-words text-sm text-[#5a5470]">
+                {selected.address_line_1}, {selected.city}, {selected.postcode}
+              </p>
+            </div>
+          </div>
         </div>
       ) : null}
 
-      {!localOnly ? (
+      {!localOnly && selected ? (
         <button
           className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#1c133b] bg-white px-4 text-sm font-semibold text-[#1c133b] touch-manipulation sm:w-auto"
           onClick={() => setShowForm(!showForm)}
           type="button"
         >
-          {showForm ? (
-            "Cancel new address"
-          ) : (
-            <>
-              <Plus className="h-4 w-4" />
-              {addresses.length ? "Add another address" : "Enter your address"}
-            </>
-          )}
+          {showForm ? "Cancel" : "Use a different address"}
         </button>
       ) : guestAsAddress ? (
         <button
@@ -1891,106 +2106,38 @@ const ROOM_COUNT_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const;
 function OfficeSpacesStep({
   onChange,
   spaces,
-  standard,
 }: {
   onChange: (value: OfficeSpaceDraft[]) => void;
   spaces: OfficeSpaceDraft[];
-  standard: CleaningStandard | null;
 }) {
-  function upsert(
-    spaceType: OfficeSpaceDraft["spaceType"],
-    patch: Partial<OfficeSpaceDraft>,
-  ) {
-    const existing = spaces.find((space) => space.spaceType === spaceType);
-    const next: OfficeSpaceDraft = {
-      quantity: existing?.quantity ?? 0,
-      size: existing?.size ?? "medium",
-      spaceType,
-      ...patch,
-    };
-    const others = spaces.filter((space) => space.spaceType !== spaceType);
-    if (next.quantity <= 0) {
-      onChange(others);
-      return;
-    }
-    onChange([...others, next]);
-  }
+  const selected = officeSizePresetFor(spaces);
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        Tell us about your office
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        How big is the office?
       </h2>
-      <p className="mt-2 text-sm text-[#5b5478]">
-        Choose spaces, how many you have, and their size. You never need to
-        calculate hours — Mundoria does that.
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        Mundoria works out the time from the size you choose.
       </p>
-      {!standard ? (
-        <p className="mt-4 rounded-2xl bg-[#f6f0ff] px-4 py-3 text-sm text-[#5b5478]">
-          Pick a cleaning level first so we can size each space accurately.
-        </p>
-      ) : null}
-
-      <div className="mt-5 grid gap-4">
-        {OFFICE_SPACE_OPTIONS.map((option) => {
-          const current = spaces.find(
-            (space) => space.spaceType === option.value,
-          );
-          const quantity = current?.quantity ?? 0;
-          const size = current?.size ?? "medium";
+      <div className="mt-8 grid gap-3">
+        {OFFICE_SIZE_PRESETS.map((preset) => {
+          const active = selected === preset.value;
           return (
-            <div
-              className="rounded-2xl border border-[#d9ccef] bg-white/80 p-4"
-              key={option.value}
+            <button
+              className={cn(
+                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                active && "border-[#6a45b8] bg-white",
+              )}
+              key={preset.value}
+              onClick={() => onChange(preset.spaces)}
+              type="button"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-[#1c133b]">
-                  {option.label}
-                </p>
-                <select
-                  className="h-10 rounded-xl border border-[#d9ccef] bg-white px-3 text-sm"
-                  onChange={(event) =>
-                    upsert(option.value, {
-                      quantity: Number(event.target.value),
-                    })
-                  }
-                  value={quantity}
-                >
-                  {ROOM_COUNT_OPTIONS.map((count) => (
-                    <option key={count} value={count}>
-                      {count === 0 ? "None" : count === 6 ? "6+" : count}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {quantity > 0 ? (
-                <div className="mt-3 grid gap-2 sm:grid-cols-4">
-                  {(
-                    [
-                      ["small", "Small", option.sizeBands.small],
-                      ["medium", "Medium", option.sizeBands.medium],
-                      ["large", "Large", option.sizeBands.large],
-                      ["not_sure", "Not sure", "We’ll estimate"],
-                    ] as const
-                  ).map(([value, label, band]) => (
-                    <button
-                      className={cn(
-                        "rounded-xl border px-3 py-2 text-left text-xs touch-manipulation",
-                        size === value
-                          ? "border-[#6a45b8] bg-[#efe6ff] text-[#1c133b]"
-                          : "border-[#e8dff8] bg-white text-[#5b5478]",
-                      )}
-                      key={value}
-                      onClick={() => upsert(option.value, { size: value })}
-                      type="button"
-                    >
-                      <span className="block font-semibold">{label}</span>
-                      <span className="mt-0.5 block opacity-80">{band}</span>
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+              <p className="font-semibold text-[#1c133b]">{preset.label}</p>
+              <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+                {preset.description}
+              </p>
+            </button>
           );
         })}
       </div>
@@ -2515,6 +2662,7 @@ function FrequencyStep({
   ) => void;
 }) {
   const mode = frequencyModeFor(draft.serviceType);
+  const allowsOneOff = frequencyAllowsOneOff(draft.serviceType);
   const options = frequencyOptionsFor(draft.serviceType);
   const minDate = new Date().toISOString().slice(0, 10);
 
@@ -2548,12 +2696,13 @@ function FrequencyStep({
 
   function onCustomDatesChange(dates: string[]) {
     update("customRecurrenceDates", dates);
-    if (dates[0]) update("scheduledDate", dates[0]);
+    const firstDate = isoDateOrEmpty(dates[0]);
+    if (firstDate) update("scheduledDate", firstDate);
   }
 
   const selectedValue = draft.isRecurring
     ? draft.recurrencePattern
-    : mode === "optional"
+    : mode === "optional" && allowsOneOff
       ? "one_off"
       : draft.recurrencePattern;
 
@@ -2563,7 +2712,7 @@ function FrequencyStep({
         How often do you want your session to happen?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        {mode === "required_recurring"
+        {mode === "required_recurring" || !allowsOneOff
           ? "Choose a rhythm, or build your own calendar of visits."
           : "One-off, a set cadence, or customize your own calendar."}
       </p>
@@ -2696,13 +2845,12 @@ function DateStep({
   ) => void;
 }) {
   const minDate = new Date().toISOString().slice(0, 10);
-  const selectedLabel = draft.scheduledDate
-    ? new Date(`${draft.scheduledDate}T12:00:00`).toLocaleDateString("en-GB", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-      })
-    : null;
+  const selectedDate = isoDateOrEmpty(draft.scheduledDate);
+  const selectedLabel = formatBookingDate(selectedDate, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <div>
@@ -2713,8 +2861,8 @@ function DateStep({
         className="mt-8"
         minDate={minDate}
         mode="single"
-        onChange={(dates) => update("scheduledDate", dates[0] ?? "")}
-        selectedDate={draft.scheduledDate}
+        onChange={(dates) => update("scheduledDate", isoDateOrEmpty(dates[0]))}
+        selectedDate={selectedDate}
       />
       {selectedLabel ? (
         <p className="mt-4 text-base font-semibold text-[#1c133b]">
@@ -2808,16 +2956,15 @@ function TimeStep({
   const customDates =
     draft.recurrencePattern === "custom" ? draft.customRecurrenceDates : [];
   const isSharedCustomDays = customDates.length > 1;
+  const appointmentDate = formatBookingDate(draft.scheduledDate, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
   const heading = isSharedCustomDays
     ? "What times work on these days?"
-    : draft.scheduledDate
-      ? `What is your availability on ${new Date(
-          `${draft.scheduledDate}T12:00:00`,
-        ).toLocaleDateString("en-GB", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}?`
+    : appointmentDate
+      ? `What is your availability on ${appointmentDate}?`
       : "When do you want your session?";
 
   return (
@@ -2830,11 +2977,11 @@ function TimeStep({
           {customDates.map((date) => (
             <li key={date}>
               ·{" "}
-              {new Date(`${date}T12:00:00`).toLocaleDateString("en-GB", {
+              {formatBookingDate(date, {
                 weekday: "short",
                 day: "numeric",
                 month: "short",
-              })}
+              }) ?? date}
             </li>
           ))}
         </ul>
@@ -2855,7 +3002,10 @@ function TimeStep({
       <TimeSlotPicker
         availability={allowedSlots}
         className="mt-8"
-        date={draft.scheduledDate || new Date().toISOString().slice(0, 10)}
+        date={
+          isoDateOrEmpty(draft.scheduledDate) ||
+          new Date().toISOString().slice(0, 10)
+        }
         onChange={toggleSlot}
         primaryValue={draft.scheduledTime || null}
         values={selectedSlots}
@@ -3043,7 +3193,11 @@ function CheckoutStep({
         ...draft,
         addressId: savedAddress.id,
         alternateTimes: draft.alternateTimes.slice(0, 6),
+        customRecurrenceDates: draft.customRecurrenceDates
+          .map((date) => isoDateOrEmpty(date))
+          .filter(Boolean),
         guestAddress: null,
+        scheduledDate: isoDateOrEmpty(draft.scheduledDate),
         specialInstructions: composeBookingNotes(draft),
       };
 
@@ -3332,9 +3486,9 @@ function CheckoutStep({
       ) : null}
 
       {error ? (
-        <p className="mt-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </p>
+        <div className="mt-4">
+          <ActionError message={error} title="Couldn’t take payment" />
+        </div>
       ) : null}
 
       <Button

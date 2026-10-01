@@ -31,7 +31,8 @@ export function ProcessPayoutsButton() {
 
     if (!response.ok) {
       showError({
-        description: result.error ?? "Batch failed.",
+        description: result.error ?? "Check Stripe, then run the batch again.",
+        onRetry: () => void process(),
         title: "Payouts didn’t go through",
       });
       return;

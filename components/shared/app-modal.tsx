@@ -34,15 +34,25 @@ export function AppModal({
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  const closeDisabledRef = useRef(closeDisabled);
+  onCloseRef.current = onClose;
+  closeDisabledRef.current = closeDisabled;
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
-    panelRef.current?.focus();
+    const panel = panelRef.current;
+    if (panel && !panel.contains(document.activeElement)) {
+      const field = panel.querySelector<HTMLElement>(
+        "textarea, input, select",
+      );
+      (field ?? panel).focus();
+    }
 
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape" && !closeDisabled) {
+      if (event.key === "Escape" && !closeDisabledRef.current) {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
       }
     }
 
@@ -55,7 +65,7 @@ export function AppModal({
       document.body.style.overflow = previousOverflow;
       previous?.focus?.();
     };
-  }, [closeDisabled, onClose]);
+  }, []);
 
   return (
     <div
@@ -76,7 +86,7 @@ export function AppModal({
       />
       <div
         className={cn(
-          "relative flex max-h-[min(92dvh,40rem)] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-border bg-card text-card-foreground shadow-xl outline-none sm:rounded-2xl",
+          "relative z-10 flex max-h-[min(92dvh,40rem)] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-border bg-card text-card-foreground shadow-xl outline-none sm:rounded-2xl",
           "animate-in fade-in zoom-in-95 duration-200",
           "pb-[env(safe-area-inset-bottom)] sm:pb-0",
           className,

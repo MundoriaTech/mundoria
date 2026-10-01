@@ -104,7 +104,7 @@ export function LoginForm({
       ) : null}
 
       <form className="space-y-5" onSubmit={onSubmit}>
-        <FormStatus message={formError} />
+        <FormStatus message={formError} title="Couldn’t sign you in" />
         <FormStatus message={initialMessage ?? null} tone="success" />
 
         <FormField error={errors.email} htmlFor="email" label="Email">

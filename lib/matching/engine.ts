@@ -32,7 +32,7 @@ export async function runMatchingEngine(
     admin
       .from("profiles")
       .select(
-        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!cleaner_profiles_id_fkey!inner(tier,status,dbs_verified,working_radius_km),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
+        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!cleaner_profiles_id_fkey!inner(tier,status,dbs_verified,working_radius_km,location_tracking_consent_at),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
       )
       .eq("role", "cleaner")
       .in("cleaner_profiles.status", ["certified", "active"])
@@ -123,10 +123,37 @@ export async function runMatchingEngine(
       Number(cleanerProfile.working_radius_km ?? 24.14) * 1000;
     const radiusLimit = Math.min(cleanerRadiusMetres, FIFTEEN_MILES_METRES);
     const inRadius = Number.isFinite(distance) && distance <= radiusLimit;
+    const tierOk =
+      tierRank[cleanerProfile.tier as keyof typeof tierRank] >=
+      tierRank[
+        (
+          {
+            airbnb_turnover: "silver",
+            bereavement_support: "silver",
+            communal_area: "silver",
+            deep_clean: "silver",
+            educational_facility: "silver",
+            end_of_tenancy: "gold",
+            holiday_let: "silver",
+            hospital_discharge: "gold",
+            illness_recovery: "gold",
+            move_in: "gold",
+            move_out: "gold",
+            post_construction: "gold",
+            post_injury: "gold",
+            postpartum: "gold",
+            pregnancy_support: "silver",
+            same_day: "silver",
+            serviced_accommodation: "silver",
+          } as Record<string, keyof typeof tierRank>
+        )[booking.service_type] ?? "bronze"
+      ];
+    const consentOk = Boolean(cleanerProfile.location_tracking_consent_at);
     const eligible =
       !excluded.has(candidate.id) &&
       slotAvailable &&
       !conflict &&
+      tierOk &&
       (distances.length ? inRadius : postcodeMatch);
     return [
       {
@@ -147,6 +174,8 @@ export async function runMatchingEngine(
           in_radius: inRadius,
           postcode_match: postcodeMatch,
           slot_available: slotAvailable,
+          tier_ok: tierOk,
+          location_consent: consentOk,
         },
         tier: cleanerProfile.tier as keyof typeof tierRank,
       },
@@ -184,7 +213,10 @@ export async function runMatchingEngine(
   if (!winner) {
     await admin
       .from("bookings")
-      .update({ cleaner_id: null, status: "pending_match" })
+      .update({
+        cleaner_id: null,
+        status: booking.status === "no_show" ? "no_show" : "pending_match",
+      })
       .eq("id", bookingId);
     await alertAdmins(
       "matching_failed",
@@ -250,6 +282,7 @@ export async function runMatchingEngine(
       cleaner_id: winner.cleanerId,
       expires_at: respondBy.toISOString(),
       offered_at: new Date().toISOString(),
+      responded_at: null,
       response: "expired",
     },
     { onConflict: "booking_id,cleaner_id" },

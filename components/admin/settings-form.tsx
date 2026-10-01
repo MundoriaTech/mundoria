@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +15,13 @@ interface Settings {
 }
 
 export function SettingsForm({ initial }: { initial: Settings }) {
-  const { error: showError, success } = useFeedback();
+  const { success } = useFeedback();
   const [settings, setSettings] = useState(initial);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function save() {
+    setSaveError(null);
     setSaving(true);
     const response = await fetch("/api/admin/settings", {
       body: JSON.stringify(settings),
@@ -29,10 +32,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
     setSaving(false);
 
     if (!response.ok) {
-      showError({
-        description: result.error ?? "Save failed.",
-        title: "Couldn’t save settings",
-      });
+      setSaveError(result.error ?? "Check the values and try again.");
       return;
     }
 
@@ -99,6 +99,11 @@ export function SettingsForm({ initial }: { initial: Settings }) {
           />
         </Field>
       </div>
+      {saveError ? (
+        <div className="mt-6">
+          <ActionError message={saveError} title="Couldn’t save settings" />
+        </div>
+      ) : null}
       <Button
         className="mt-6 w-full sm:w-auto"
         disabled={saving}

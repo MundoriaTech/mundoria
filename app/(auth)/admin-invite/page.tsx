@@ -2,6 +2,7 @@ import crypto from "crypto";
 import Link from "next/link";
 
 import { AdminInviteAcceptForm } from "@/components/auth/admin-invite-accept-form";
+import { ActionError } from "@/components/shared/action-error";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -34,10 +35,10 @@ export default async function AdminInvitePage({
       title="Admin invitation"
     >
       {!token || !invitation || isExpired ? (
-        <div className="rounded-xl border border-destructive/25 bg-destructive/10 p-4 text-sm text-destructive">
-          This invitation is invalid, expired, or has already been used. Ask an
-          existing admin to send a new invitation.
-        </div>
+        <ActionError
+          message="Ask an existing admin to send a new invitation."
+          title="This invitation can’t be used"
+        />
       ) : (
         <AdminInviteAcceptForm
           email={invitation.email}

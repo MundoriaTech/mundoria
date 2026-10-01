@@ -1,6 +1,7 @@
 import { addDays, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from "date-fns";
 
 import { maybeRewardReferrer } from "@/lib/customer/referrals";
+import { alertAdmins } from "@/lib/notifications/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
@@ -149,7 +150,17 @@ export async function captureBookingPayment(bookingId: string) {
     .from("bookings")
     .update({ payment_status: "released" })
     .eq("id", bookingId);
-  const payoutId = await scheduleCleanerPayout(bookingId);
+  let payoutId: string | null = null;
+  try {
+    payoutId = await scheduleCleanerPayout(bookingId);
+  } catch (error) {
+    await alertAdmins(
+      "payout_failed",
+      "Cleaner payout was not created",
+      error instanceof Error ? error.message : "Payout scheduling failed.",
+      { booking_id: bookingId },
+    );
+  }
   try {
     await maybeRewardReferrer(bookingId);
   } catch {

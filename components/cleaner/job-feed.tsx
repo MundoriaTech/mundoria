@@ -109,7 +109,9 @@ export function JobFeed({
             teamSlot && job.amount_cleaner && job.allocated_cleaners
               ? Math.floor(job.amount_cleaner / job.allocated_cleaners)
               : job.amount_cleaner;
-          const expires = new Date(job.created_at).getTime() + 30 * 60 * 1000;
+          const expires = job.offer_expires_at
+            ? new Date(job.offer_expires_at).getTime()
+            : new Date(job.created_at).getTime() + 30 * 60 * 1000;
           const remaining = Math.max(0, expires - now);
           const borough =
             job.address?.city ??
