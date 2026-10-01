@@ -62,7 +62,7 @@ export function CompleteProfileForm({
 
   return (
     <form className="space-y-5" onSubmit={onSubmit}>
-      <FormStatus message={formError} />
+      <FormStatus message={formError} title="Couldn’t save your profile" />
       <FormField error={errors.full_name} htmlFor="full_name" label="Full name">
         <Input
           autoComplete="name"

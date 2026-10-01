@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { RatingMood } from "@/types/cleaner";
@@ -142,7 +143,9 @@ export function RatingForm({
         value={comment}
       />
       {notice ? <p className="text-sm text-amber-700">{notice}</p> : null}
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <ActionError message={error} title="Couldn’t save this rating" />
+      ) : null}
       <Button
         className="w-full"
         disabled={submitting}

@@ -35,7 +35,6 @@ export function SignupForm({
 }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const nextPath =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
       ? redirectTo
@@ -75,7 +74,6 @@ export function SignupForm({
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
-    setSuccess(null);
 
     try {
       const response = await fetch("/api/auth/signup", {
@@ -90,11 +88,21 @@ export function SignupForm({
       }
 
       if (result.requiresEmailConfirmation) {
-        setSuccess(
-          result.referralPromoCode
-            ? `Account created. Check your inbox to confirm your email. Your welcome code is ${result.referralPromoCode}.`
-            : "Account created. Check your inbox to confirm your email, then sign in.",
-        );
+        if (result.referralPromoCode) {
+          window.sessionStorage.setItem(
+            "mundoria-welcome-promo",
+            result.referralPromoCode,
+          );
+        }
+        const params = new URLSearchParams({
+          email: values.email.trim(),
+          role,
+        });
+        if (result.referralPromoCode) {
+          params.set("code", result.referralPromoCode);
+        }
+        if (nextPath) params.set("next", nextPath);
+        router.replace(`/signup/check-email?${params.toString()}`);
         return;
       }
 
@@ -117,7 +125,6 @@ export function SignupForm({
       );
     }
   }, () => {
-    setSuccess(null);
     setFormError("Please check the highlighted fields and try again.");
   });
 
@@ -138,8 +145,7 @@ export function SignupForm({
       />
       <Divider />
       <form className="space-y-5" onSubmit={onSubmit}>
-        <FormStatus message={formError} />
-        <FormStatus message={success} tone="success" />
+        <FormStatus message={formError} title="Couldn’t create your account" />
 
         <FormField error={errors.full_name} htmlFor="full_name" label="Full name">
           <Input
@@ -163,12 +169,13 @@ export function SignupForm({
         <FormField
           error={errors.phone}
           htmlFor="phone"
-          label="Phone (optional)"
+          label={role === "cleaner" ? "Phone number" : "Phone (optional)"}
         >
           <Input
             autoComplete="tel"
             id="phone"
             placeholder="+44 7700 900000"
+            required={role === "cleaner"}
             type="tel"
             {...register("phone")}
           />

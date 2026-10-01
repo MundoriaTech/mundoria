@@ -35,6 +35,28 @@ export async function POST(
   const bookingId = params.id;
 
   if (parsed.data.response === "accepted") {
+    const { data: offer } = await admin
+      .from("cleaner_job_responses")
+      .select("expires_at, responded_at")
+      .eq("booking_id", bookingId)
+      .eq("cleaner_id", user.id)
+      .maybeSingle();
+    if (offer?.responded_at) {
+      return NextResponse.json(
+        { error: "You have already answered this offer." },
+        { status: 409 },
+      );
+    }
+    if (
+      offer?.expires_at &&
+      new Date(offer.expires_at).getTime() <= Date.now()
+    ) {
+      return NextResponse.json(
+        { error: "This offer has expired." },
+        { status: 409 },
+      );
+    }
+
     const { data: previous } = await admin
       .from("bookings")
       .select(
@@ -95,10 +117,11 @@ export async function POST(
           ? ((previousCleaner as { full_name?: string }).full_name ?? null)
           : null;
     }
-    if (
-      previous?.previous_cleaner_id ||
-      (previous?.cleaner_id && previous.cleaner_id !== user.id)
-    ) {
+    const cleanerChanged =
+      (previous?.previous_cleaner_id &&
+        previous.previous_cleaner_id !== user.id) ||
+      (previous?.cleaner_id && previous.cleaner_id !== user.id);
+    if (cleanerChanged) {
       await notifyCustomerCleanerChanged(
         bookingId,
         previousName,
@@ -106,6 +129,20 @@ export async function POST(
       );
     } else {
       await notifyCustomerSessionConfirmed(bookingId, booking, cleanerName);
+    }
+  }
+
+  if (parsed.data.response === "declined") {
+    const { data: current } = await admin
+      .from("bookings")
+      .select("checkin_verified,actual_start_time")
+      .eq("id", bookingId)
+      .maybeSingle();
+    if (current?.checkin_verified || current?.actual_start_time) {
+      return NextResponse.json(
+        { error: "This clean has already started." },
+        { status: 409 },
+      );
     }
   }
 
@@ -140,7 +177,7 @@ export async function POST(
 
     const wasAssigned =
       booking?.cleaner_id === user.id &&
-      ["matched", "confirmed"].includes(booking.status);
+      ["matched", "confirmed", "cleaner_en_route"].includes(booking.status);
 
     await admin
       .from("booking_emergency_list")

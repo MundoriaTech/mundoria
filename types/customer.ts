@@ -89,6 +89,17 @@ export interface CleanerPublicProfile {
   years_experience: number | null;
 }
 
+/** A cleaner this customer has finished at least one visit with. */
+export interface KnownCleaner {
+  addressIds: string[];
+  avatarUrl: string | null;
+  fullName: string;
+  id: string;
+  lastVisitDate: string;
+  rating: number;
+  visitCount: number;
+}
+
 export interface BookingAddOn {
   id: string;
   booking_id: string;

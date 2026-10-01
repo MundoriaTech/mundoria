@@ -15,6 +15,7 @@ import { TierBadge } from "@/components/cleaner/tier-badge";
 import { CLEANER_ACCOUNT_MENU } from "@/components/shared/account-menu";
 import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
+import { formatInterviewSlot } from "@/lib/cleaner/interview-slots";
 import type { Profile } from "@/types/auth";
 import type { CleanerProfile } from "@/types/cleaner";
 
@@ -75,7 +76,9 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
     const body = interviewFailed
       ? "Your phone interview didn’t pass this time. Mundoria will follow up with next steps. You can still update your profile and finish Stripe setup."
       : awaitingInterview
-        ? "Thanks for submitting. We’ll call you on the number in your profile for a short interview before you can take live jobs. Keep an eye on your phone."
+        ? cleaner.interview_scheduled_at
+          ? `Your 30-minute online interview is booked for ${formatInterviewSlot(cleaner.interview_scheduled_at)}. We’ll use the phone number on your profile.`
+          : "Thanks for submitting. We’ll call you on the number in your profile for a short interview before you can take live jobs. Keep an eye on your phone."
         : cleaner.status === "in_training"
           ? "Mundoria has put your application on hold. You can still update your profile and finish Stripe setup. Job offers appear after you’re approved."
           : "You can explore your dashboard, update your profile, and connect Stripe now. New job offers will appear after Mundoria approves your application.";

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import type { BookingChecklistItem } from "@/types/customer";
@@ -118,7 +119,11 @@ export function CompletionChecklistConfirmation({
           );
         })}
       </div>
-      {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <div className="mt-3">
+          <ActionError message={error} title="Couldn’t confirm this clean" />
+        </div>
+      ) : null}
       <Button
         className="mt-5 w-full"
         disabled={submitting || !items.length}

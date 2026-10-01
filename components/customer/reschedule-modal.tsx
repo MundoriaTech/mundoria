@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { BookingCalendar } from "@/components/customer/booking-calendar";
+import { ActionError } from "@/components/shared/action-error";
 import {
   TimeSlotPicker,
   slotsFinishingByWindowEnd,
@@ -90,7 +91,9 @@ export function RescheduleModal({
             />
           </div>
           {error ? (
-            <p className="mt-3 text-sm text-destructive">{error}</p>
+            <div className="mt-3">
+              <ActionError message={error} title="Couldn’t reschedule this visit" />
+            </div>
           ) : null}
         </div>
         <div className="flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end">

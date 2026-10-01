@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { isoDateOrEmpty } from "@/lib/customer/booking-flow";
 import { cn } from "@/lib/utils";
 
 function toIso(year: number, monthIndex: number, day: number) {
@@ -28,10 +29,9 @@ export function BookingCalendar({
 }) {
   const today = new Date().toISOString().slice(0, 10);
   const earliest = minDate ?? today;
-  const seed =
-    mode === "multi"
-      ? selectedDates?.[0]
-      : selectedDate;
+  const seed = isoDateOrEmpty(
+    mode === "multi" ? selectedDates?.[0] : selectedDate,
+  );
   const [viewMonth, setViewMonth] = useState(() =>
     seed ? new Date(`${seed}T12:00:00`) : new Date(),
   );

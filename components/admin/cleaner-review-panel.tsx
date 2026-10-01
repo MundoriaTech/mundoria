@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { formatInterviewSlot } from "@/lib/cleaner/interview-slots";
 import { cleanerTierLabel } from "@/lib/cleaner/tier";
 import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
 
@@ -41,6 +43,7 @@ export function CleanerReviewPanel({
   currentTier,
   hasHeadshot,
   hasUtr,
+  interviewScheduledAt = null,
   interviewStatus,
   medallionScore,
   skillsExamPassed,
@@ -54,6 +57,7 @@ export function CleanerReviewPanel({
   currentTier: CleanerTier;
   hasHeadshot: boolean;
   hasUtr: boolean;
+  interviewScheduledAt?: string | null;
   interviewStatus: InterviewStatus;
   medallionScore: number;
   skillsExamPassed: boolean;
@@ -62,7 +66,7 @@ export function CleanerReviewPanel({
   yearsExperience: number;
 }) {
   const router = useRouter();
-  const { confirm, error: showError, success } = useFeedback();
+  const { confirm, success } = useFeedback();
   const [reason, setReason] = useState("");
   const [status, setStatus] = useState(currentStatus);
   const [interview, setInterview] = useState(interviewStatus);
@@ -77,7 +81,7 @@ export function CleanerReviewPanel({
 
   async function act(action: string) {
     if (!reasonIsValid) {
-      setMessage("Add a short note first (why you’re doing this).");
+      setMessage("Add a short note first, saying why you’re doing this.");
       return;
     }
 
@@ -105,12 +109,7 @@ export function CleanerReviewPanel({
     const result = (await response.json()) as { error?: string };
     setBusy(false);
     if (!response.ok) {
-      const errorMessage = result.error ?? "Action failed.";
-      setMessage(errorMessage);
-      showError({
-        description: errorMessage,
-        title: "Couldn’t update cleaner",
-      });
+      setMessage(result.error ?? "Check the note and try again.");
       return;
     }
 
@@ -197,8 +196,9 @@ export function CleanerReviewPanel({
           <div>
             <h2 className="font-semibold">Decide</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Complete the phone interview, check documents, then approve for
-              live jobs — or hold / remove the account.
+              {interviewScheduledAt
+                ? `30-minute online interview booked for ${formatInterviewSlot(interviewScheduledAt)}. Mark it complete after the call, check documents, then approve for live jobs.`
+                : "Complete the phone interview, check documents, then approve for live jobs — or hold / remove the account."}
             </p>
           </div>
           <div className="flex gap-3 text-xs text-muted-foreground sm:shrink-0 sm:flex-col sm:text-right">
@@ -311,7 +311,9 @@ export function CleanerReviewPanel({
         </div>
 
         {message ? (
-          <p className="mt-3 text-sm text-muted-foreground">{message}</p>
+          <div className="mt-3">
+            <ActionError message={message} title="Couldn’t update this cleaner" />
+          </div>
         ) : null}
       </section>
     </div>

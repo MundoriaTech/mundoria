@@ -46,6 +46,7 @@ export interface CleanerProfile {
   utr_number: string | null;
   utr_verified: boolean;
   interview_status: InterviewStatus;
+  interview_scheduled_at: string | null;
   interview_notes: string | null;
   interview_completed_at: string | null;
   interview_completed_by: string | null;
@@ -97,6 +98,8 @@ export interface CleanerJob extends Booking {
     phone: string | null;
     avatar_url?: string | null;
   } | null;
+  /** When this cleaner must answer the current offer. */
+  offer_expires_at?: string | null;
 }
 
 export interface PerformanceHistory {

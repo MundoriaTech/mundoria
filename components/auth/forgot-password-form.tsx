@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -13,9 +14,9 @@ import {
   type ForgotPasswordValues,
 } from "@/lib/auth/schemas";
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ from }: { from?: "admin" }) {
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
@@ -27,7 +28,6 @@ export function ForgotPasswordForm() {
 
   const onSubmit = handleSubmit(async ({ email }) => {
     setFormError(null);
-    setSuccess(null);
 
     const response = await fetch("/api/auth/forgot-password", {
       body: JSON.stringify({ email }),
@@ -41,13 +41,14 @@ export function ForgotPasswordForm() {
       return;
     }
 
-    setSuccess("If an account exists for that email, a reset link is on its way.");
+    const params = new URLSearchParams({ email: email.trim() });
+    if (from === "admin") params.set("from", "admin");
+    router.replace(`/forgot-password/sent?${params.toString()}`);
   });
 
   return (
     <form className="space-y-5" onSubmit={onSubmit}>
-      <FormStatus message={formError} />
-      <FormStatus message={success} tone="success" />
+      <FormStatus message={formError} title="Couldn’t send the reset link" />
       <FormField error={errors.email} htmlFor="email" label="Email">
         <Input
           autoComplete="email"

@@ -68,13 +68,13 @@ interface TemplateContext {
   tone?: Tone;
 }
 
-const toneStyles: Record<Tone, { accent: string; badge: string; name: string }> = {
-  admin: { accent: "#221f50", badge: "#e7e4ff", name: "Admin" },
-  cleaner: { accent: "#5a51aa", badge: "#e7e4ff", name: "Cleaner" },
-  customer: { accent: "#5a51aa", badge: "#e7e4ff", name: "Customer" },
-  security: { accent: "#4f46e5", badge: "#e0e7ff", name: "Security" },
-  success: { accent: "#5a51aa", badge: "#e7e4ff", name: "Success" },
-  warning: { accent: "#b45309", badge: "#fff4ec", name: "Action needed" },
+const toneStyles: Record<Tone, { badgeBg: string; badgeText: string; name: string }> = {
+  admin: { badgeBg: "#f3eef8", badgeText: "#312c79", name: "Admin" },
+  cleaner: { badgeBg: "#f3eef8", badgeText: "#312c79", name: "Cleaner" },
+  customer: { badgeBg: "#fff1ea", badgeText: "#9a3412", name: "Customer" },
+  security: { badgeBg: "#f3eef8", badgeText: "#312c79", name: "Security" },
+  success: { badgeBg: "#f3eef8", badgeText: "#312c79", name: "Success" },
+  warning: { badgeBg: "#fff1ea", badgeText: "#9a3412", name: "Action needed" },
 };
 
 export function renderEmailTemplate(
@@ -363,6 +363,7 @@ function resolveTemplate(
         buttonHref: `${appUrl}/cleaner/dashboard`,
         buttonLabel: "View application status",
         cards: [
+          { label: "Interview", value: data.interviewWhen },
           { label: "Payout preference", value: data.payoutPreference },
           { label: "Working areas", value: data.workingAreas },
         ],
@@ -487,6 +488,7 @@ function resolveTemplate(
         cards: [
           { label: "Cleaner", value: data.cleanerName },
           { label: "Email", value: data.cleanerEmail },
+          { label: "Interview", value: data.interviewWhen },
           { label: "Experience", value: data.yearsExperience },
         ],
         preview: "A new cleaner application needs review.",
@@ -555,41 +557,89 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const tone = toneStyles[context.tone ?? "customer"];
   const cards = (context.cards ?? []).filter((card) => card.value !== undefined && card.value !== null && String(card.value).trim() !== "");
   const supportEmail = process.env.SUPPORT_EMAIL || "support@mundoriauk.local";
+  const logoUrl = publicEmailAssetUrl("/images/brand/mundoria-logo.png");
 
   const html = `<!doctype html>
-<html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <title>${escapeHtml(context.subject)}</title>
+    <style>
+      :root { color-scheme: light dark; supported-color-schemes: light dark; }
+      @media (prefers-color-scheme: dark) {
+        .email-page, .email-page > tbody > tr > td { background-color: #141226 !important; }
+        .email-card { background-color: #221f50 !important; }
+        .email-header { background-color: #312c79 !important; }
+        .email-logo-pad { background-color: #ffffff !important; }
+        .email-tagline { color: #ffc79f !important; }
+        .email-accent { background-color: #ffc79f !important; }
+        .email-kicker { background-color: #3a3470 !important; color: #ffc79f !important; }
+        .email-title, .email-row-value { color: #f7f5fb !important; }
+        .email-copy { color: #d9d3ea !important; }
+        .email-details { background-color: #2a265c !important; border-color: #3d366e !important; }
+        .email-row-label { background-color: #2a265c !important; color: #c4bdd8 !important; border-color: #3d366e !important; }
+        .email-row-value { border-color: #3d366e !important; }
+        .email-button { background-color: #ffc79f !important; color: #221f50 !important; }
+        .email-note { background-color: #3d2a22 !important; color: #ffd7c2 !important; }
+        .email-footer { background-color: #1a1738 !important; color: #c4bdd8 !important; border-color: #3d366e !important; }
+        .email-footer a { color: #ffc79f !important; }
+      }
+      [data-ogsc] .email-title, [data-ogsc] .email-row-value { color: #f7f5fb !important; }
+      [data-ogsc] .email-copy, [data-ogsc] .email-footer, [data-ogsc] .email-row-label { color: #d9d3ea !important; }
+      [data-ogsc] .email-tagline, [data-ogsc] .email-kicker, [data-ogsc] .email-footer a { color: #ffc79f !important; }
+      [data-ogsc] .email-button { color: #221f50 !important; }
+      [data-ogsb] .email-page, [data-ogsb].email-page { background-color: #141226 !important; }
+      [data-ogsb] .email-card, [data-ogsb].email-card { background-color: #221f50 !important; }
+      [data-ogsb] .email-header, [data-ogsb].email-header { background-color: #312c79 !important; }
+      [data-ogsb] .email-logo-pad, [data-ogsb].email-logo-pad { background-color: #ffffff !important; }
+      [data-ogsb] .email-details, [data-ogsb] .email-row-label { background-color: #2a265c !important; }
+      [data-ogsb] .email-footer, [data-ogsb].email-footer { background-color: #1a1738 !important; }
+      [data-ogsb] .email-button, [data-ogsb].email-button { background-color: #ffc79f !important; }
+      [data-ogsb] .email-kicker { background-color: #3a3470 !important; }
+      [data-ogsb] .email-note { background-color: #3d2a22 !important; }
+    </style>
   </head>
-  <body style="margin:0;background:#f7f5ff;font-family:Poppins,Inter,Arial,Helvetica,sans-serif;color:#221f50;">
+  <body class="email-page" style="margin:0;background:#f7f5fb;font-family:Arial,Helvetica,sans-serif;color:#1c133b;">
     <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0;">${escapeHtml(context.preview)}</div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f5ff;padding:32px 12px;">
+    <table role="presentation" class="email-page" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f7f5fb" style="background:#f7f5fb;padding:32px 12px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(90,81,170,0.14);">
+          <table role="presentation" class="email-card" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:600px;background:#ffffff;border:1px solid #e8e0f5;border-radius:24px;overflow:hidden;">
             <tr>
-              <td style="background:linear-gradient(135deg,#ffc79f 0%,#7669d1 48%,#221f50 100%);padding:30px 32px;color:#ffffff;">
-                <div style="font-size:25px;font-weight:900;letter-spacing:-0.06em;">Mundoria</div>
-                <div style="margin-top:5px;font-size:13px;color:rgba(255,255,255,0.76);">Trusted cleaning, clearly managed.</div>
+              <td class="email-header" bgcolor="#221f50" style="background:#221f50;padding:28px 32px 24px;">
+                <table role="presentation" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td class="email-logo-pad" bgcolor="#ffffff" style="background:#ffffff;border-radius:12px;padding:6px 8px;" valign="middle">
+                      <img alt="Mundoria" height="48" src="${escapeAttribute(logoUrl)}" style="display:block;border:0;outline:none;text-decoration:none;height:48px;width:34px;" width="34" />
+                    </td>
+                    <td style="padding-left:14px;" valign="middle">
+                      <div class="email-tagline" style="font-size:13px;line-height:1.4;color:#ffc79f;">Trusted cleaning, clearly managed.</div>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
+              <td class="email-accent" bgcolor="#ffc79f" height="4" style="height:4px;background:#ffc79f;font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+            <tr>
               <td style="padding:32px;">
-                <div style="display:inline-block;background:${tone.badge};color:${tone.accent};border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">${escapeHtml(tone.name)}</div>
-                <h1 style="margin:18px 0 10px;font-size:31px;line-height:1.12;color:#221f50;letter-spacing:-0.05em;">${escapeHtml(context.title)}</h1>
-                ${context.intro ? `<p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#4e486e;">${escapeHtml(context.intro)}</p>` : ""}
-                <p style="margin:0;font-size:16px;line-height:1.65;color:#4e486e;">${escapeHtml(context.body)}</p>
+                <div class="email-kicker" style="display:inline-block;background:${tone.badgeBg};color:${tone.badgeText};border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">${escapeHtml(tone.name)}</div>
+                <h1 class="email-title" style="margin:16px 0 12px;font-size:28px;line-height:1.15;color:#221f50;letter-spacing:-0.03em;">${escapeHtml(context.title)}</h1>
+                ${context.intro ? `<p class="email-copy" style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#1c133b;">${escapeHtml(context.intro)}</p>` : ""}
+                <p class="email-copy" style="margin:0;font-size:16px;line-height:1.6;color:#1c133b;">${escapeHtml(context.body)}</p>
                 ${cards.length ? renderCards(cards) : ""}
-                ${context.buttonHref ? renderButton(context.buttonHref, context.buttonLabel ?? "Open Mundoria", tone.accent) : ""}
+                ${context.buttonHref ? renderButton(context.buttonHref, context.buttonLabel ?? "Open Mundoria") : ""}
                 ${renderSecurityNote(data)}
               </td>
             </tr>
             <tr>
-              <td style="padding:24px 32px;background:#fbfaff;border-top:1px solid #dedbfd;color:#6c668d;font-size:12px;line-height:1.6;">
+              <td class="email-footer" bgcolor="#f7f5fb" style="padding:22px 32px;background:#f7f5fb;border-top:1px solid #e8e0f5;color:#6b6588;font-size:12px;line-height:1.6;">
                 <p style="margin:0 0 8px;">Mundoria sends service, account, and marketplace updates related to your account.</p>
-                <p style="margin:0;">Need help? Contact <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#5a51aa;font-weight:700;">${escapeHtml(supportEmail)}</a>.</p>
+                <p style="margin:0;">Need help? Contact <a class="email-footer-link" href="mailto:${escapeAttribute(supportEmail)}" style="color:#312c79;font-weight:700;text-decoration:underline;">${escapeHtml(supportEmail)}</a>.</p>
               </td>
             </tr>
           </table>
@@ -608,27 +658,31 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
 }
 
 function renderCards(cards: Array<{ label: string; value?: unknown }>) {
-  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;border:1px solid #dedbfd;border-radius:20px;overflow:hidden;">
+  return `<table role="presentation" class="email-details" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f7f5fb" style="margin-top:24px;background:#f7f5fb;border:1px solid #e8e0f5;border-radius:16px;">
     ${cards
       .map(
         (card) => `<tr>
-          <td style="padding:14px 16px;background:#fbfaff;border-bottom:1px solid #eeeafd;color:#6c668d;font-size:13px;width:38%;">${escapeHtml(card.label)}</td>
-          <td style="padding:14px 16px;border-bottom:1px solid #eeeafd;color:#221f50;font-size:14px;font-weight:800;">${escapeHtml(formatValue(card.value))}</td>
+          <td class="email-row-label" bgcolor="#f7f5fb" style="padding:14px 16px;background:#f7f5fb;border-bottom:1px solid #e8e0f5;color:#6b6588;font-size:13px;width:38%;">${escapeHtml(card.label)}</td>
+          <td class="email-row-value" style="padding:14px 16px;border-bottom:1px solid #e8e0f5;color:#221f50;font-size:14px;font-weight:700;">${escapeHtml(formatValue(card.value))}</td>
         </tr>`,
       )
       .join("")}
   </table>`;
 }
 
-function renderButton(href: string, label: string, color: string) {
-  return `<div style="margin-top:28px;">
-    <a href="${escapeAttribute(href)}" style="display:inline-block;background:${color};color:#ffffff;text-decoration:none;border-radius:999px;padding:14px 22px;font-weight:900;font-size:15px;box-shadow:0 12px 24px rgba(90,81,170,0.22);">${escapeHtml(label)}</a>
-  </div>`;
+function renderButton(href: string, label: string) {
+  return `<table role="presentation" cellspacing="0" cellpadding="0" style="margin-top:28px;">
+    <tr>
+      <td class="email-button" bgcolor="#312c79" style="background:#312c79;border-radius:999px;">
+        <a class="email-button" href="${escapeAttribute(href)}" style="display:inline-block;background:#312c79;color:#ffffff;text-decoration:none;border-radius:999px;padding:14px 22px;font-weight:700;font-size:15px;">${escapeHtml(label)}</a>
+      </td>
+    </tr>
+  </table>`;
 }
 
 function renderSecurityNote(data: Record<string, unknown>) {
   if (!data.securityNote) return "";
-  return `<p style="margin:22px 0 0;padding:14px 16px;border-radius:16px;background:#e7e4ff;color:#37306c;font-size:13px;line-height:1.55;">${escapeHtml(String(data.securityNote))}</p>`;
+  return `<p class="email-note" style="margin:22px 0 0;padding:14px 16px;border-radius:16px;background:#fff1ea;color:#9a3412;font-size:13px;line-height:1.55;">${escapeHtml(String(data.securityNote))}</p>`;
 }
 
 function renderText(context: TemplateContext, cards: Array<{ label: string; value?: unknown }>, supportEmail: string) {
@@ -705,6 +759,23 @@ function formatValue(value: unknown) {
 
 function string(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+const PRODUCTION_SITE_URL = "https://www.mundoria.com";
+
+function publicEmailAssetUrl(path: string) {
+  const configured = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
+  const host = configured.replace(/^https?:\/\//, "");
+  const isPublic =
+    configured.startsWith("https://") &&
+    !host.startsWith("localhost") &&
+    !host.startsWith("127.0.0.1");
+  const origin = !isPublic
+    ? PRODUCTION_SITE_URL
+    : configured === "https://mundoria.com"
+      ? PRODUCTION_SITE_URL
+      : configured;
+  return `${origin}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export function escapeHtml(value: string) {

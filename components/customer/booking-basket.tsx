@@ -5,6 +5,7 @@ import { Clock, MapPin, ShoppingCart } from "@phosphor-icons/react";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { formatBookingDate } from "@/lib/customer/booking-flow";
 import { formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
 import type { Address } from "@/types/customer";
@@ -42,8 +43,7 @@ function formatDuration(hours: number) {
 }
 
 function formatDay(date: string) {
-  const d = new Date(`${date}T12:00:00`);
-  return d.toLocaleDateString("en-GB", {
+  return formatBookingDate(date, {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -51,8 +51,8 @@ function formatDay(date: string) {
 }
 
 function formatWhen(date: string, time: string) {
-  if (!date) return null;
   const day = formatDay(date);
+  if (!day) return null;
   if (!time) return day;
   return `${day} at ${time.slice(0, 5)}`;
 }

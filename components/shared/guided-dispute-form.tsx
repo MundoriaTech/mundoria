@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { DISPUTE_OPTIONS, type DisputeOption } from "@/lib/disputes/options";
 
@@ -134,7 +135,9 @@ export function GuidedDisputeForm({
             }
             value={details}
           />
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {error ? (
+            <ActionError message={error} title="Couldn’t submit this dispute" />
+          ) : null}
           <Button className="w-full" disabled={submitting} onClick={() => void submit()}>
             {submitting ? "Submitting…" : "Submit to admin"}
           </Button>

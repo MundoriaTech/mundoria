@@ -20,7 +20,9 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
     return () => clearInterval(id);
   }, []);
 
-  const expires = new Date(job.created_at).getTime() + OFFER_WINDOW_MS;
+  const expires = job.offer_expires_at
+    ? new Date(job.offer_expires_at).getTime()
+    : new Date(job.created_at).getTime() + OFFER_WINDOW_MS;
   const remaining = Math.max(0, expires - now);
   const mins = Math.floor(remaining / 60000);
   const secs = Math.floor((remaining % 60000) / 1000);

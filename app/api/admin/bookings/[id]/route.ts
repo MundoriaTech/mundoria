@@ -40,7 +40,9 @@ export async function POST(
 
   const { data: booking } = await auth.admin
     .from("bookings")
-    .select("id,status,payment_status,cleaner_id,allocated_cleaners")
+    .select(
+      "id,status,payment_status,cleaner_id,allocated_cleaners,checkin_verified,actual_start_time",
+    )
     .eq("id", params.id)
     .maybeSingle();
 
@@ -124,6 +126,19 @@ export async function POST(
   } else {
     if (!status) {
       return NextResponse.json({ error: "Choose a status" }, { status: 400 });
+    }
+    if (
+      status === "in_progress" &&
+      !booking.checkin_verified &&
+      !booking.actual_start_time
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "A clean is in progress only after the cleaner checks in.",
+        },
+        { status: 400 },
+      );
     }
     updates = { status };
   }

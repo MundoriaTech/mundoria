@@ -129,12 +129,12 @@ export function LandingNavbar({
             </Link>
           )}
           {showBookCta ? (
-            <Link
+          <Link
               className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
-              href={customerHref}
-            >
-              Book a clean
-            </Link>
+            href={customerHref}
+          >
+            Book a clean
+          </Link>
           ) : null}
         </div>
 
@@ -412,44 +412,44 @@ function MobileNav({
               {landingNavLinks
                 .filter(([label]) => label !== "Services")
                 .map(([label, href]) =>
-                  href.startsWith("mailto:") ? (
-                    <a
+              href.startsWith("mailto:") ? (
+                <a
                       className="flex min-h-12 items-center border-b border-border px-5 py-3.5 text-sm font-medium text-[#1c133b] touch-manipulation"
-                      href={href}
-                      key={label}
+                  href={href}
+                  key={label}
                       onClick={() => onMobileOpenChange(false)}
-                    >
-                      {label}
-                    </a>
-                  ) : (
-                    <Link
-                      className="flex min-h-12 items-center border-b border-border px-5 py-3.5 text-sm font-medium text-[#1c133b] touch-manipulation"
-                      href={href}
-                      key={label}
-                      onClick={() => onMobileOpenChange(false)}
-                    >
-                      {label}
-                    </Link>
-                  ),
-                )}
-            </nav>
-            <div className="grid gap-2 bg-[#f6f0ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-              {viewer ? (
-                <Button
-                  asChild
-                  className="h-11 rounded-full text-sm font-semibold"
-                  variant="outline"
                 >
+                  {label}
+                </a>
+              ) : (
+                <Link
+                      className="flex min-h-12 items-center border-b border-border px-5 py-3.5 text-sm font-medium text-[#1c133b] touch-manipulation"
+                  href={href}
+                  key={label}
+                      onClick={() => onMobileOpenChange(false)}
+                >
+                  {label}
+                </Link>
+              ),
+            )}
+          </nav>
+            <div className="grid gap-2 bg-[#f6f0ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            {viewer ? (
+              <Button
+                asChild
+                className="h-11 rounded-full text-sm font-semibold"
+                variant="outline"
+              >
                   <Link
                     href={accountHref}
                     onClick={() => onMobileOpenChange(false)}
                   >
                     Dashboard
                   </Link>
-                </Button>
-              ) : (
-                <Button
-                  asChild
+              </Button>
+            ) : (
+              <Button
+                asChild
                   className="h-11 rounded-full text-sm font-semibold text-[#1c133b] hover:brightness-95"
                   style={{ backgroundColor: landingColors.peach }}
                 >
@@ -459,8 +459,8 @@ function MobileNav({
                   >
                     Log in
                   </Link>
-                </Button>
-              )}
+              </Button>
+            )}
             </div>
           </div>
         </div>

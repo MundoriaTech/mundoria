@@ -8,7 +8,7 @@ import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
-/** WeCasa-style booking chrome — Back · Logo · Sign in */
+/** Booking chrome — Back · Logo · Sign in for guests */
 export function BookingChrome({
   backDisabled = false,
   children,
@@ -23,11 +23,7 @@ export function BookingChrome({
   signedIn: boolean;
 }) {
   const configured = hasSupabasePublicConfig();
-  const authHref = configured
-    ? signedIn
-      ? "/bookings"
-      : "/login?next=/booking/new"
-    : "/setup";
+  const authHref = configured ? "/login?next=/booking/new" : "/setup";
 
   return (
     <div className={cn("flex min-h-screen flex-col bg-white", className)}>
@@ -46,12 +42,16 @@ export function BookingChrome({
             className="justify-self-center text-[1.25rem] sm:text-[1.4rem]"
             href="/"
           />
-          <Link
-            className="inline-flex h-9 items-center justify-center justify-self-end rounded-full border border-[#1c133b] px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f5fb] touch-manipulation"
-            href={authHref}
-          >
-            {signedIn ? "Account" : "Sign in"}
-          </Link>
+          {signedIn ? (
+            <span />
+          ) : (
+            <Link
+              className="inline-flex h-9 items-center justify-center justify-self-end rounded-full border border-[#1c133b] px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f5fb] touch-manipulation"
+              href={authHref}
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </header>
       <div className="flex flex-1 flex-col">{children}</div>

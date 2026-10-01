@@ -44,9 +44,14 @@ export async function POST(
     : booking.address;
 
   if (parsed.data.action === "en_route") {
-    if (!["matched", "confirmed"].includes(booking.status)) {
+    if (booking.status !== "confirmed") {
       return NextResponse.json(
-        { error: `This job cannot start from ${booking.status}.` },
+        {
+          error:
+            booking.status === "matched"
+              ? "Accept the job before you set off."
+              : `This job cannot start from ${booking.status}.`,
+        },
         { status: 409 },
       );
     }

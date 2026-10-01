@@ -3,6 +3,7 @@
 import { Check, UserRound } from "lucide-react";
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import {
   FileUpload,
   type FileUploadResult,
@@ -11,17 +12,21 @@ import {
   DEFAULT_AVATARS,
   isDefaultAvatarUrl,
 } from "@/lib/avatars/default-pack";
+import { ownStoragePath } from "@/lib/storage/own-object";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 export function AvatarUpload({
   className,
   currentUrl,
+  keepFiles = [],
   onUpload,
   userId,
 }: {
   className?: string;
   currentUrl: string | null;
+  /** Stored files that must stay, such as a submitted cleaner headshot. */
+  keepFiles?: Array<string | null | undefined>;
   onUpload: (url: string) => void | Promise<void>;
   userId: string;
 }) {
@@ -33,6 +38,7 @@ export function AvatarUpload({
   )?.id;
 
   async function persistAvatar(nextUrl: string) {
+    const previousUrl = url;
     const supabase = createBrowserClient();
     const {
       data: { user },
@@ -56,6 +62,15 @@ export function AvatarUpload({
 
     setUrl(data.avatar_url);
     await onUpload(data.avatar_url);
+    await discardReplacedUpload(previousUrl, data.avatar_url);
+  }
+
+  async function discardReplacedUpload(previous: string | null, next: string) {
+    if (!previous || previous === next) return;
+    if (keepFiles.some((file) => file && file === previous)) return;
+    const path = ownStoragePath("avatars", previous, userId);
+    if (!path) return;
+    await createBrowserClient().storage.from("avatars").remove([path]);
   }
 
   async function completeUpload(result: FileUploadResult) {
@@ -168,7 +183,9 @@ export function AvatarUpload({
           JPEG, PNG or WebP · max 5 MB
         </p>
         {error ? (
-          <p className="mt-2 text-sm text-destructive">{error}</p>
+          <div className="mt-2">
+            <ActionError message={error} title="Couldn’t update your photo" />
+          </div>
         ) : null}
       </div>
     </div>

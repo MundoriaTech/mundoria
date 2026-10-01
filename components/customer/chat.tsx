@@ -4,7 +4,9 @@ import { ImagePlus, Loader2, Send, Smile, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ChatEmojiPicker } from "@/components/customer/chat-emoji-picker";
+import { ActionError } from "@/components/shared/action-error";
 import { ChatMessage } from "@/components/shared/chat-message";
+import { ownStoragePath } from "@/lib/storage/own-object";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Message, MessageAttachment } from "@/types/customer";
@@ -178,6 +180,13 @@ export function Chat({
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  async function removePending(path: string) {
+    setPending((current) => current.filter((entry) => entry.id !== path));
+    const stored = ownStoragePath("message-media", path, currentUserId);
+    if (!stored) return;
+    await createBrowserClient().storage.from("message-media").remove([stored]);
+  }
+
   async function sendMessage(event?: React.FormEvent) {
     event?.preventDefault();
     const text = content.trim();
@@ -314,11 +323,7 @@ export function Chat({
                 <button
                   aria-label="Remove attachment"
                   className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
-                  onClick={() =>
-                    setPending((current) =>
-                      current.filter((entry) => entry.id !== item.id),
-                    )
-                  }
+                  onClick={() => void removePending(item.id)}
                   type="button"
                 >
                   <X className="h-3 w-3" />
@@ -329,9 +334,9 @@ export function Chat({
         ) : null}
 
         {error ? (
-          <p className="mb-2 text-sm text-destructive" role="alert">
-            {error}
-          </p>
+          <div className="mb-2">
+            <ActionError message={error} title="Couldn’t send that" />
+          </div>
         ) : null}
 
         <div className="flex items-end gap-1.5 sm:gap-2">

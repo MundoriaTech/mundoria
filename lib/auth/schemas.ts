@@ -22,6 +22,16 @@ export const signupSchema = z.object({
     }),
   role: z.enum(["customer", "cleaner"]),
   referral_code: z.string().trim().max(40).optional().or(z.literal("")),
+}).superRefine((value, ctx) => {
+  if (value.role !== "cleaner") return;
+  const phone = (value.phone ?? "").trim();
+  if (phone.length < 7) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Enter a valid phone number",
+      path: ["phone"],
+    });
+  }
 });
 
 export const loginSchema = z.object({

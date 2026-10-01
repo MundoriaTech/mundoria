@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { Button } from "@/components/ui/button";
+import { checkInWindowMessage } from "@/lib/bookings/schedule";
 import {
   formatMoney,
   formatServiceName,
@@ -20,6 +21,43 @@ import {
 } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { CleanerJob } from "@/types/cleaner";
+
+function CheckInAction({
+  durationHours,
+  onCheckIn,
+  scheduledDate,
+  scheduledStartTime,
+  working,
+}: {
+  durationHours: number | null;
+  onCheckIn: () => void;
+  scheduledDate: string;
+  scheduledStartTime: string;
+  working: boolean;
+}) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const windowMessage = checkInWindowMessage({
+    estimatedDurationHours: durationHours,
+    now,
+    scheduledDate,
+    scheduledStartTime,
+  });
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Button disabled={working || Boolean(windowMessage)} onClick={onCheckIn}>
+        <MapPin className="mr-2 h-4 w-4" />Check In
+      </Button>
+      {windowMessage ? (
+        <p className="text-sm text-muted-foreground">{windowMessage}</p>
+      ) : null}
+    </div>
+  );
+}
 
 export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
   const [job, setJob] = useState(initialJob);
@@ -49,6 +87,28 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     );
     return () => navigator.geolocation.clearWatch(id);
   }, [job.id, job.status]);
+
+  async function respond(response: "accepted" | "declined") {
+    setWorking(true);
+    setError(null);
+    const res = await fetch(`/api/cleaner/jobs/${job.id}/respond`, {
+      body: JSON.stringify({ response }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await res.json()) as { error?: string };
+    setWorking(false);
+    if (!res.ok) {
+      setError(result.error ?? "Unable to answer this offer.");
+      return;
+    }
+    if (response === "declined") {
+      router.push("/cleaner/jobs");
+      return;
+    }
+    setJob((current) => ({ ...current, status: "confirmed" }));
+    router.refresh();
+  }
 
   async function action(
     value: "en_route" | "checkin" | "checkout" | "override",
@@ -269,15 +329,51 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
       <section className="rounded-xl border bg-background p-5">
         <h2 className="font-semibold">Job actions</h2>
         <div className="mt-4 flex flex-wrap gap-3">
-          {["matched", "confirmed"].includes(job.status) ? (
-            <Button disabled={working} onClick={() => void action("en_route")}>
-              <Navigation className="mr-2 h-4 w-4" />I&apos;m On My Way
+          {job.status === "matched" ? (
+            <>
+              <Button disabled={working} onClick={() => void respond("accepted")}>
+                Accept job
+              </Button>
+              <Button
+                disabled={working}
+                onClick={() => void respond("declined")}
+                variant="outline"
+              >
+                Decline
+              </Button>
+            </>
+          ) : null}
+          {job.status === "confirmed" ? (
+            <>
+              <Button disabled={working} onClick={() => void action("en_route")}>
+                <Navigation className="mr-2 h-4 w-4" />I&apos;m On My Way
+              </Button>
+              <Button
+                disabled={working}
+                onClick={() => void respond("declined")}
+                variant="outline"
+              >
+                Release this job
+              </Button>
+            </>
+          ) : null}
+          {job.status === "cleaner_en_route" && !job.checkin_verified ? (
+            <Button
+              disabled={working}
+              onClick={() => void respond("declined")}
+              variant="outline"
+            >
+              Release this job
             </Button>
           ) : null}
           {job.status === "cleaner_en_route" ? (
-            <Button disabled={working} onClick={() => void action("checkin")}>
-              <MapPin className="mr-2 h-4 w-4" />Check In
-            </Button>
+            <CheckInAction
+              durationHours={job.estimated_duration_hours}
+              scheduledDate={job.scheduled_date}
+              scheduledStartTime={job.scheduled_start_time}
+              working={working}
+              onCheckIn={() => void action("checkin")}
+            />
           ) : null}
           {job.status === "in_progress" ? (
             <>

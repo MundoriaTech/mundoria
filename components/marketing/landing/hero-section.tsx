@@ -92,8 +92,8 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
       }}
     >
       {/* Textured layer — full hero */}
-      <div
-        aria-hidden
+          <div
+            aria-hidden
         className="pointer-events-none absolute inset-0 overflow-hidden"
       >
         <Image
@@ -109,7 +109,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] z-[1]"
-        style={{
+              style={{
           backgroundImage: `linear-gradient(to bottom, transparent 0%, ${LANDING_PURPLE} 100%)`,
         }}
       />
@@ -119,18 +119,18 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             Book Trusted Home
             <br />
             Cleaning Service in Minutes
-          </h1>
+            </h1>
           <p className="mt-5 max-w-[30rem] text-pretty text-[15px] font-normal leading-6 text-white/95 sm:mt-6 sm:text-[17px] sm:leading-7">
             Find cleaning jobs near you, choose when you work, and get paid for
             the services you provide.
-          </p>
-          <Link
+            </p>
+            <Link
             className="mt-8 inline-flex min-h-12 w-auto items-center justify-center rounded-full bg-[#ff5274] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#ff3d63] active:scale-[0.98] sm:mt-10 sm:min-h-[3.25rem] sm:px-9"
-            href={bookingHref}
-          >
-            Book a Service
-          </Link>
-        </div>
+              href={bookingHref}
+            >
+              Book a Service
+            </Link>
+          </div>
 
         <div className="relative mx-auto w-full max-w-[400px] lg:mx-0 lg:mb-2 lg:ml-auto lg:max-w-none lg:justify-self-end xl:max-w-[620px]">
           <HeroImageStack />

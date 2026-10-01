@@ -35,11 +35,11 @@ export async function AuthShell({
           <div className="relative pb-16 sm:pb-[9.5rem]">
             <div className="relative z-10 rounded-[1.5rem] border border-[#e8def8] bg-white px-5 py-6 shadow-[0_18px_40px_rgba(28,19,59,0.08)] sm:rounded-[2rem] sm:border-[#9a91b0] sm:bg-[#f3eef9] sm:px-9 sm:pb-9 sm:pt-8 sm:shadow-none">
               <h1 className="text-[1.65rem] font-bold tracking-[-0.04em] text-[#291845] sm:text-[2.15rem]">
-                {title}
-              </h1>
+              {title}
+            </h1>
               <p className="mt-2 text-sm font-normal leading-6 text-[#6b6680]">
-                {description}
-              </p>
+              {description}
+            </p>
               <div className="mt-6 sm:mt-7">{children}</div>
             </div>
 

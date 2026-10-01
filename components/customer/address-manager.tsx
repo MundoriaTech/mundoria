@@ -3,6 +3,7 @@
 import { Check, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,7 +99,8 @@ export function AddressManager({
     if (error) {
       showError({
         description: error.message,
-        title: "Couldn’t delete address",
+        onRetry: () => void removeAddress(address),
+        title: "Couldn’t delete this address",
       });
       return;
     }
@@ -398,9 +400,7 @@ export function AddressForm({
   return (
     <form className="space-y-4" onSubmit={submit}>
       {error ? (
-        <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </p>
+        <ActionError message={error} title="Couldn’t save this address" />
       ) : null}
 
       <div className="space-y-2">
@@ -470,22 +470,22 @@ export function AddressForm({
 
       {showAccountExtras ? (
         <>
-          <Field label="Label">
-            <Input
-              onChange={(event) => update("label", event.target.value)}
-              placeholder="Home"
-              value={values.label}
-            />
-          </Field>
-          <label className="flex items-center gap-3 text-sm">
-            <input
-              checked={values.is_default}
-              className="h-4 w-4 accent-emerald-700"
-              onChange={(event) => update("is_default", event.target.checked)}
-              type="checkbox"
-            />
-            Make this my default address
-          </label>
+        <Field label="Label">
+          <Input
+            onChange={(event) => update("label", event.target.value)}
+            placeholder="Home"
+            value={values.label}
+          />
+        </Field>
+      <label className="flex items-center gap-3 text-sm">
+        <input
+          checked={values.is_default}
+          className="h-4 w-4 accent-emerald-700"
+          onChange={(event) => update("is_default", event.target.checked)}
+          type="checkbox"
+        />
+        Make this my default address
+      </label>
           <Button disabled={saving} type="submit">
             {saving ? (
               "Saving…"
@@ -507,16 +507,16 @@ export function AddressForm({
       ) : null}
 
       {!localOnly && compact ? (
-        <Button disabled={saving} type="submit">
-          {saving ? (
-            "Saving…"
-          ) : (
-            <>
-              <Check className="mr-2 h-4 w-4" />
-              Save address
-            </>
-          )}
-        </Button>
+      <Button disabled={saving} type="submit">
+        {saving ? (
+          "Saving…"
+        ) : (
+          <>
+            <Check className="mr-2 h-4 w-4" />
+            Save address
+          </>
+        )}
+      </Button>
       ) : null}
     </form>
   );
@@ -624,31 +624,31 @@ function AddressAutocompleteInput({
               "Address";
             return (
               <li key={`${suggestion.properties.lat}-${suggestion.properties.lon}-${primary}`}>
-                <button
+            <button
                   className="block w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-[#efe6ff] touch-manipulation"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => {
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
                     if (blurTimer.current) clearTimeout(blurTimer.current);
                     const formatted =
                       suggestion.properties.formatted ||
                       suggestion.properties.address_line1 ||
                       value;
                     onQueryChange(formatted);
-                    onPlaceSelected(suggestion);
-                    setOpen(false);
+                onPlaceSelected(suggestion);
+                setOpen(false);
                     setSuggestions([]);
-                  }}
-                  type="button"
-                >
+              }}
+              type="button"
+            >
                   <span className="font-medium text-[#1c133b]">{primary}</span>
                   {suggestion.properties.city || suggestion.properties.postcode ? (
-                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                <span className="mt-0.5 block text-xs text-muted-foreground">
                       {[suggestion.properties.city, suggestion.properties.postcode]
                         .filter(Boolean)
                         .join(" · ")}
-                    </span>
-                  ) : null}
-                </button>
+                </span>
+              ) : null}
+            </button>
               </li>
             );
           })}

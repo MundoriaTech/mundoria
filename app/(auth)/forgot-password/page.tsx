@@ -20,7 +20,7 @@ export default function ForgotPasswordPage({
     ? "Enter your admin email and we’ll send you a secure reset link."
     : "Enter your email and we’ll send you a secure reset link.";
 
-  const form = <ForgotPasswordForm />;
+  const form = <ForgotPasswordForm from={isAdmin ? "admin" : undefined} />;
   const footer = (
     <Link className="font-medium text-primary hover:underline" href={backHref}>
       {backLabel}

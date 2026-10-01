@@ -6,6 +6,11 @@ import {
   SERVICE_CATEGORIES,
 } from "@/lib/customer/services";
 import { frequencyModeFor } from "@/lib/customer/booking-flow";
+import {
+  recommendFromHistory,
+  type HistoryRatingMood,
+  type HistoryVisit,
+} from "@/lib/customer/history-recommendation";
 import { buildPrivateMetadata } from "@/lib/seo/site";
 import { createServerClient } from "@/lib/supabase/server";
 import type {
@@ -13,6 +18,8 @@ import type {
   Booking,
   BookingDraft,
   CleanerPublicProfile,
+  CleaningStandard,
+  KnownCleaner,
   ServiceCategory,
   ServiceType,
 } from "@/types/customer";
@@ -91,6 +98,8 @@ export default async function NewBookingPage({
   } = await supabase.auth.getUser();
 
   let addresses: Address[] = [];
+  let cleaningHistory: HistoryVisit[] = [];
+  let knownCleaners: KnownCleaner[] = [];
   let initialDraft: Partial<BookingDraft> | undefined = draftFromSearchParams(
     searchParams,
   );
@@ -106,6 +115,8 @@ export default async function NewBookingPage({
       .eq("customer_id", user.id)
       .order("is_default", { ascending: false });
     addresses = (data ?? []) as Address[];
+    cleaningHistory = await loadCleaningHistory(supabase, user.id);
+    knownCleaners = await loadKnownCleaners(supabase, user.id);
 
     if (searchParams.rebook) {
       const { data: bookingData } = await supabase
@@ -117,6 +128,34 @@ export default async function NewBookingPage({
       const booking = bookingData as Booking | null;
 
       if (booking) {
+        if (
+          booking.cleaner_id &&
+          !knownCleaners.some((cleaner) => cleaner.id === booking.cleaner_id)
+        ) {
+          const { data: cleaner } = await supabase
+            .from("cleaner_public_profiles")
+            .select("id, full_name, avatar_url, rating")
+            .eq("id", booking.cleaner_id)
+            .maybeSingle();
+          const profile = cleaner as Pick<
+            CleanerPublicProfile,
+            "id" | "full_name" | "avatar_url" | "rating"
+          > | null;
+          if (profile) {
+            knownCleaners = [
+              {
+                addressIds: [booking.address_id],
+                avatarUrl: profile.avatar_url,
+                fullName: profile.full_name,
+                id: profile.id,
+                lastVisitDate: booking.scheduled_date,
+                rating: Number(profile.rating ?? 0),
+                visitCount: 0,
+              },
+              ...knownCleaners,
+            ];
+          }
+        }
         if (booking.cleaner_id) {
           const { data: cleaner } = await supabase
             .from("cleaner_public_profiles")
@@ -148,13 +187,169 @@ export default async function NewBookingPage({
 
   return (
     <BookingWizard
+      cleaningHistory={cleaningHistory}
       focusServices={focusServices}
       fresh={fresh}
       initialAddresses={addresses}
       initialDraft={initialDraft}
+      knownCleaners={knownCleaners}
       previousCleaner={previousCleaner}
       returnTo={returnTo}
+      suggestFromHistory={!searchParams.rebook}
       userId={user?.id ?? null}
     />
   );
+}
+
+async function loadKnownCleaners(
+  supabase: ReturnType<typeof createServerClient>,
+  customerId: string,
+) {
+  const { data } = await supabase
+    .from("bookings")
+    .select("address_id, cleaner_id, scheduled_date")
+    .eq("customer_id", customerId)
+    .eq("status", "completed")
+    .not("cleaner_id", "is", null)
+    .order("scheduled_date", { ascending: false })
+    .limit(80);
+
+  const grouped = new Map<
+    string,
+    { addressIds: Set<string>; lastVisitDate: string; visitCount: number }
+  >();
+  for (const row of (data ?? []) as Array<{
+    address_id: string;
+    cleaner_id: string | null;
+    scheduled_date: string;
+  }>) {
+    if (!row.cleaner_id) continue;
+    const current = grouped.get(row.cleaner_id);
+    if (!current) {
+      grouped.set(row.cleaner_id, {
+        addressIds: new Set([row.address_id]),
+        lastVisitDate: row.scheduled_date,
+        visitCount: 1,
+      });
+      continue;
+    }
+    current.visitCount += 1;
+    current.addressIds.add(row.address_id);
+    if (row.scheduled_date > current.lastVisitDate) {
+      current.lastVisitDate = row.scheduled_date;
+    }
+  }
+
+  const ids = Array.from(grouped.keys()).slice(0, 6);
+  if (!ids.length) return [];
+
+  const { data: profiles } = await supabase
+    .from("cleaner_public_profiles")
+    .select("id, full_name, avatar_url, rating")
+    .in("id", ids);
+
+  const byId = new Map(
+    (
+      (profiles ?? []) as Array<{
+        avatar_url: string | null;
+        full_name: string;
+        id: string;
+        rating: number | null;
+      }>
+    ).map((profile) => [profile.id, profile]),
+  );
+
+  return ids.flatMap((id) => {
+    const profile = byId.get(id);
+    const summary = grouped.get(id);
+    if (!profile || !summary) return [];
+    return [
+      {
+        addressIds: Array.from(summary.addressIds),
+        avatarUrl: profile.avatar_url,
+        fullName: profile.full_name,
+        id: profile.id,
+        lastVisitDate: summary.lastVisitDate,
+        rating: Number(profile.rating ?? 0),
+        visitCount: summary.visitCount,
+      } satisfies KnownCleaner,
+    ];
+  });
+}
+
+const HISTORY_MOODS = new Set<HistoryRatingMood>([
+  "awful",
+  "bad",
+  "excellent",
+  "fair",
+  "good",
+]);
+
+const HISTORY_STANDARDS = new Set<CleaningStandard>([
+  "comprehensive",
+  "enhanced",
+  "essential",
+]);
+
+const HISTORY_PATTERNS = new Set<HistoryVisit["recurrencePattern"]>([
+  "custom",
+  "fortnightly",
+  "monthly",
+  "weekly",
+]);
+
+async function loadCleaningHistory(
+  supabase: ReturnType<typeof createServerClient>,
+  customerId: string,
+) {
+  const { data } = await supabase
+    .from("bookings")
+    .select(
+      "address_id, service_type, cleaning_standard, scheduled_date, is_recurring, recurrence_pattern, special_attention_areas, booking_add_ons(add_on_id), ratings(mood)",
+    )
+    .eq("customer_id", customerId)
+    .eq("status", "completed")
+    .order("scheduled_date", { ascending: false })
+    .limit(40);
+
+  const rows = (data ?? []) as Array<{
+    address_id: string;
+    booking_add_ons: { add_on_id: string }[] | null;
+    cleaning_standard: string | null;
+    is_recurring: boolean | null;
+    ratings: { mood: string | null } | { mood: string | null }[] | null;
+    recurrence_pattern: string | null;
+    scheduled_date: string;
+    service_type: string;
+    special_attention_areas: string[] | null;
+  }>;
+
+  return rows.flatMap((row) => {
+    if (!serviceTypeSet.has(row.service_type as ServiceType)) return [];
+    if (!row.cleaning_standard || !HISTORY_STANDARDS.has(row.cleaning_standard as CleaningStandard)) {
+      return [];
+    }
+    const rating = Array.isArray(row.ratings) ? row.ratings[0] : row.ratings;
+    const mood = rating?.mood;
+    const pattern = HISTORY_PATTERNS.has(
+      row.recurrence_pattern as HistoryVisit["recurrencePattern"],
+    )
+      ? (row.recurrence_pattern as HistoryVisit["recurrencePattern"])
+      : null;
+    return [
+      {
+        addOnIds: (row.booking_add_ons ?? []).map((item) => item.add_on_id),
+        addressId: row.address_id,
+        cleaningStandard: row.cleaning_standard as CleaningStandard,
+        isRecurring: Boolean(row.is_recurring),
+        mood: mood && HISTORY_MOODS.has(mood as HistoryRatingMood)
+          ? (mood as HistoryRatingMood)
+          : null,
+        recurrencePattern: pattern,
+        scheduledDate: row.scheduled_date,
+        serviceType: row.service_type as ServiceType,
+        specialAttentionAreas: row.special_attention_areas ?? [],
+      } satisfies HistoryVisit,
+    ];
+  });
 }

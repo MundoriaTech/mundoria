@@ -56,8 +56,9 @@ export function DisputeActions({ disputeId }: { disputeId: string }) {
 
     if (!response.ok) {
       showError({
-        description: result.error ?? "Action failed.",
-        title: "Couldn’t resolve dispute",
+        description: result.error ?? "Check the notes and try again.",
+        onRetry: () => void act(action),
+        title: "Couldn’t resolve this dispute",
       });
       return;
     }

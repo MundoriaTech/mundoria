@@ -53,6 +53,7 @@ function normalizeCleanerProfile(
     interview_completed_at: row.interview_completed_at ?? null,
     interview_completed_by: row.interview_completed_by ?? null,
     interview_notes: row.interview_notes ?? null,
+    interview_scheduled_at: row.interview_scheduled_at ?? null,
     interview_status: row.interview_status ?? "not_started",
     skills_exam_completed_at: row.skills_exam_completed_at ?? null,
     skills_exam_passed: Boolean(row.skills_exam_passed),
@@ -232,7 +233,33 @@ export async function getAvailableJobs(cleanerId: string) {
     );
   }
 
-  const primaryOffers = ((pending ?? []) as CleanerJob[]).filter(eligible);
+  const nowIso = new Date().toISOString();
+  const { data: openOfferRows } = await admin
+    .from("cleaner_job_responses")
+    .select("expires_at, bookings(*, address:addresses(*))")
+    .eq("cleaner_id", cleanerId)
+    .eq("response", "expired")
+    .is("responded_at", null)
+    .gt("expires_at", nowIso);
+
+  const openOffers: CleanerJob[] = [];
+  for (const row of openOfferRows ?? []) {
+    const booking = (
+      Array.isArray(row.bookings) ? row.bookings[0] : row.bookings
+    ) as CleanerJob | null;
+    if (!booking) continue;
+    if (booking.cleaner_id !== cleanerId) continue;
+    if (!["matched", "pending_match"].includes(booking.status)) continue;
+    openOffers.push({
+      ...booking,
+      offer_expires_at: row.expires_at as string,
+    });
+  }
+  const offeredIds = new Set(openOffers.map((job) => job.id));
+
+  const primaryOffers = ((pending ?? []) as CleanerJob[])
+    .filter(eligible)
+    .filter((job) => !offeredIds.has(job.id));
 
   const teamOffers: CleanerJob[] = [];
   for (const booking of (teamJobs ?? []) as CleanerJob[]) {
@@ -248,5 +275,9 @@ export async function getAvailableJobs(cleanerId: string) {
     }
   }
 
-  return [...teamOffers, ...primaryOffers];
+  return [
+    ...openOffers,
+    ...teamOffers.filter((job) => !offeredIds.has(job.id)),
+    ...primaryOffers,
+  ];
 }

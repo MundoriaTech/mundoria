@@ -299,7 +299,8 @@ insert into public.bookings (
   scheduled_date, scheduled_start_time, estimated_duration_hours,
   is_recurring, recurrence_pattern,
   amount_total, amount_cleaner, amount_platform, payment_status,
-  special_instructions, allocated_cleaners
+  special_instructions, allocated_cleaners,
+  checkin_verified, actual_start_time
 )
 select
   c.customer_id,
@@ -310,10 +311,8 @@ select
   c.address_id,
   st.service_type,
   st.status,
-  (current_date + ((i % 60) - 20))::date,
-  (array['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'])[
-    1 + (i % 8)
-  ]::time,
+  st.scheduled_date,
+  st.scheduled_start_time,
   2 + (i % 4),
   (i % 11 = 0),
   case when i % 11 = 0 then 'weekly'::public.recurrence_pattern else null end,
@@ -322,7 +321,13 @@ select
   amount.platform,
   st.payment_status,
   format('Seed booking #%s for E2E flow testing', i),
-  case when st.service_type = 'office' then 1 + (i % 3) else 1 end
+  case when st.service_type = 'office' then 1 + (i % 3) else 1 end,
+  st.status = 'in_progress',
+  case
+    when st.status = 'in_progress'
+      then (st.scheduled_date + st.scheduled_start_time)
+    else null
+  end
 from series
 join customers c on c.rn = 1 + ((i - 1) % (select count(*) from customers))
 join cleaners cl on cl.rn = 1 + ((i - 1) % (select count(*) from cleaners))
@@ -332,13 +337,30 @@ cross join lateral (
       'regular','one_off','deep_clean','same_day','end_of_tenancy',
       'airbnb_turnover','office','move_in','illness_recovery'
     ])[1 + (i % 9)]::public.service_type as service_type,
-    (array[
-      'pending_match','matched','confirmed','cleaner_en_route',
-      'in_progress','awaiting_customer_confirmation','completed','cancelled'
-    ])[1 + (i % 8)]::public.booking_status as status,
-    (array['held','held','released','released','unpaid','refunded'])[
-      1 + (i % 6)
-    ]::public.payment_status as payment_status
+    (current_date + ((i % 60) - 20))::date as scheduled_date,
+    (array['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'])[
+      1 + (i % 8)
+    ]::time as scheduled_start_time
+) slot
+cross join lateral (
+  select
+    slot.service_type,
+    slot.scheduled_date,
+    slot.scheduled_start_time,
+    case
+      when (slot.scheduled_date + slot.scheduled_start_time) > now() then
+        (array['pending_match','matched','confirmed'])[1 + (i % 3)]
+      else
+        (array[
+          'completed','cancelled','awaiting_customer_confirmation','in_progress'
+        ])[1 + (i % 4)]
+    end::public.booking_status as status,
+    case
+      when (slot.scheduled_date + slot.scheduled_start_time) > now() then 'held'
+      when (i % 4) = 1 then 'refunded'
+      when (i % 4) = 3 then 'held'
+      else 'released'
+    end::public.payment_status as payment_status
 ) st
 cross join lateral (
   select

@@ -88,11 +88,11 @@ export function ServiceCategoriesSection({
           <div className="relative z-10 max-w-[516px] shrink-0">
             <div>
               <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-black min-[400px]:text-[12px] sm:tracking-[0.43em]">
-                Smart Service categories
-              </p>
+              Smart Service categories
+            </p>
               <h2 className="mt-3 text-balance text-[1.7rem] font-semibold leading-[1.08] tracking-[-0.03em] text-[#1c133b] min-[400px]:text-[1.85rem] sm:text-[2.5rem] lg:text-[40px] lg:leading-[41px]">
-                Every cleaning need, clearly organised.
-              </h2>
+              Every cleaning need, clearly organised.
+            </h2>
             </div>
             <p className="mt-3 max-w-[376px] text-pretty text-[13px] font-light leading-5 text-black sm:mt-4 sm:leading-[17px]">
               Choose a category to start. Mundoria guides you to the right
@@ -104,10 +104,10 @@ export function ServiceCategoriesSection({
         {/* 1-col until lg — avoids the awkward 2+1 orphan mid layout on phones/tablets */}
         <div className="mt-8 grid grid-cols-1 gap-3.5 sm:mt-10 sm:gap-5 lg:mx-auto lg:mt-[72px] lg:max-w-[921px] lg:grid-cols-3 lg:gap-6">
           {smartMainCategories.map((value) => (
-            <CategoryCard
+                <CategoryCard
               barColor={smartCategoryBarColors[value]}
-              bookingHref={bookingHref}
-              category={getCategory(value)}
+                  bookingHref={bookingHref}
+                  category={getCategory(value)}
               key={value}
               label={smartCategoryLabels[value]}
             />
@@ -143,7 +143,7 @@ function CategoryCard({
           ? "/cleaning/commercial"
           : category.value === "recovery"
             ? "/cleaning/recovery"
-            : `${bookingHref}?category=${category.value}`;
+      : `${bookingHref}?category=${category.value}`;
 
   const loop = landingCategoryLoops[category.value];
   const stillSrc =

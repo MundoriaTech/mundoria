@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 
 export function RematchButton({ bookingId }: { bookingId: string }) {
@@ -41,7 +42,9 @@ export function RematchButton({ bookingId }: { bookingId: string }) {
         {busy ? "Matching…" : "Find Replacement"}
       </Button>
       {error ? (
-        <p className="max-w-[14rem] text-right text-xs text-destructive">{error}</p>
+        <div className="mt-2 max-w-xs">
+          <ActionError message={error} title="Couldn’t find a replacement" />
+        </div>
       ) : null}
     </div>
   );
