@@ -3,6 +3,7 @@
 import {
   Banknote,
   BriefcaseBusiness,
+  CalendarDays,
   Clock3,
   Gauge,
   MessageCircle,
@@ -22,6 +23,7 @@ import type { CleanerProfile } from "@/types/cleaner";
 const nav = [
   { exact: true, href: "/cleaner/dashboard", icon: Gauge, label: "Dashboard" },
   { href: "/cleaner/jobs", icon: BriefcaseBusiness, label: "Jobs" },
+  { href: "/cleaner/diary", icon: CalendarDays, label: "Diary" },
   { href: "/cleaner/earnings", icon: Banknote, label: "Earnings" },
   { href: "/cleaner/messages", icon: MessageCircle, label: "Messages" },
   { href: "/cleaner/profile", icon: UserRound, label: "Profile" },

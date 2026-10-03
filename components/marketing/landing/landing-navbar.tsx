@@ -14,10 +14,16 @@ import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
+  landingCategoryNav,
   landingColors,
   landingNavLinks,
-  landingServicesMenu,
 } from "@/components/marketing/landing/constants";
+import {
+  AccountMenu,
+  CLEANER_ACCOUNT_MENU,
+  CUSTOMER_ACCOUNT_MENU,
+  type AccountMenuItem,
+} from "@/components/shared/account-menu";
 import { dashboardForRole } from "@/lib/auth/redirects";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
@@ -40,17 +46,20 @@ const NAV_LINK_CLASS =
   "whitespace-nowrap text-[12px] font-medium text-[#1c133b] transition hover:text-[#312c79] xl:text-[13px]";
 
 export function LandingNavbar({
+  accountMenuItems,
   customerHref,
+  headerExtra,
   viewer,
 }: {
+  accountMenuItems?: AccountMenuItem[];
   customerHref: string;
+  headerExtra?: React.ReactNode;
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
 }) {
   const configured = hasSupabasePublicConfig();
   const loginHref = configured ? "/login" : "/setup";
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
   const showBookCta = viewer?.role !== "cleaner";
-  const firstName = viewer?.full_name.trim().split(/\s+/)[0] ?? "";
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
 
@@ -84,10 +93,11 @@ export function LandingNavbar({
           aria-label="Primary navigation"
           className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex xl:gap-2"
         >
+          {landingCategoryNav.map((menu) => (
+            <CategoryNavDropdown key={menu.label} menu={menu} />
+          ))}
           {landingNavLinks.map(([label, href]) =>
-            label === "Services" ? (
-              <ServicesNavDropdown key={label} />
-            ) : href.startsWith("mailto:") ? (
+            href.startsWith("mailto:") ? (
               <a className={cn(NAV_LINK_CLASS, "px-2 py-1")} href={href} key={label}>
                 {label}
               </a>
@@ -104,21 +114,17 @@ export function LandingNavbar({
         </nav>
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
+          {headerExtra}
           {viewer ? (
-            <Link
-              className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 transition hover:bg-black/5"
-              href={accountHref}
-            >
-              <UserAvatar
-                name={viewer.full_name}
-                seed={viewer.id}
-                size="sm"
-                url={viewer.avatar_url}
-              />
-              <span className="max-w-[8rem] truncate text-sm font-semibold text-[#1c133b]">
-                {firstName}
-              </span>
-            </Link>
+            <AccountMenu
+              items={
+                accountMenuItems ??
+                (viewer.role === "cleaner"
+                  ? CLEANER_ACCOUNT_MENU
+                  : CUSTOMER_ACCOUNT_MENU)
+              }
+              profile={viewer}
+            />
           ) : (
             <Link
               className="inline-flex h-9 items-center justify-center rounded-full px-4 text-[12px] font-semibold text-[#1c133b] transition hover:brightness-95"
@@ -152,8 +158,11 @@ export function LandingNavbar({
   );
 }
 
-/** WeCasa-style hover panel for Services. */
-function ServicesNavDropdown() {
+function CategoryNavDropdown({
+  menu,
+}: {
+  menu: (typeof landingCategoryNav)[number];
+}) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuId = useId();
@@ -189,10 +198,10 @@ function ServicesNavDropdown() {
           "inline-flex items-center gap-1 rounded-full px-2.5 py-1.5",
           open && "bg-white/55 text-[#312c79]",
         )}
-        href="/cleaning"
+        href={menu.href}
         onFocus={openMenu}
       >
-        Services
+        {menu.label}
         <ChevronDown
           aria-hidden
           className={cn(
@@ -215,60 +224,21 @@ function ServicesNavDropdown() {
         onMouseLeave={scheduleClose}
         role="menu"
       >
-        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
-          <div className="grid gap-0 sm:grid-cols-[1.15fr_0.85fr]">
-            <div className="p-4 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
-                Categories
-              </p>
-              <ul className="mt-3 grid gap-1">
-                {landingServicesMenu.categories.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      className="group flex flex-col rounded-xl px-3 py-2.5 transition hover:bg-[#f6f0ff]"
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      role="menuitem"
-                    >
-                      <span className="text-[13px] font-semibold text-[#1c133b] group-hover:text-[#312c79]">
-                        {item.label}
-                      </span>
-                      <span className="text-[12px] font-normal text-[#1c133b]/60">
-                        {item.description}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="border-t border-[#1c133b]/06 bg-[#f8f4ff] p-4 sm:border-l sm:border-t-0 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
-                Popular
-              </p>
-              <ul className="mt-3 grid gap-0.5">
-                {landingServicesMenu.popular.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      className="block rounded-lg px-3 py-2 text-[13px] font-medium text-[#1c133b] transition hover:bg-white hover:text-[#312c79]"
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      role="menuitem"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                className="mt-4 inline-flex text-[12px] font-semibold text-[#312c79] underline-offset-2 hover:underline"
-                href="/cleaning"
-                onClick={() => setOpen(false)}
-              >
-                View all services
-              </Link>
-            </div>
-          </div>
+        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white p-3 shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
+          <ul className="grid gap-0.5">
+            {menu.items.map((item) => (
+              <li key={item.href}>
+                <Link
+                  className="block rounded-lg px-3 py-2 text-[13px] font-medium text-[#1c133b] transition hover:bg-[#f6f0ff] hover:text-[#312c79]"
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  role="menuitem"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
@@ -292,12 +262,12 @@ function MobileNav({
   onMobileOpenChange: (open: boolean) => void;
   showBookCta: boolean;
 }) {
-  const [servicesOpen, setServicesOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mobileOpen) {
-      setServicesOpen(false);
+      setOpenMenu(null);
       return;
     }
 
@@ -372,46 +342,43 @@ function MobileNav({
             tabIndex={-1}
           >
             <nav aria-label="Mobile navigation" className="grid">
-              <div className="border-b border-border">
-                <button
-                  aria-expanded={servicesOpen}
-                  className="flex min-h-12 w-full items-center justify-between px-5 py-3.5 text-left text-sm font-medium text-[#1c133b] touch-manipulation"
-                  onClick={() => setServicesOpen((value) => !value)}
-                  type="button"
-                >
-                  Services
-                  <ChevronDown
-                    className={cn(
-                      "size-4 transition",
-                      servicesOpen && "rotate-180",
-                    )}
-                  />
-                </button>
-                {servicesOpen ? (
-                  <div className="bg-[#f8f4ff] pb-2">
-                    {landingServicesMenu.categories.map((item) => (
-                      <Link
-                        className="block min-h-11 px-5 py-2.5 text-sm font-medium text-[#1c133b] touch-manipulation"
-                        href={item.href}
-                        key={item.href}
-                        onClick={() => onMobileOpenChange(false)}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                    <Link
-                      className="block min-h-11 px-5 py-2.5 text-sm font-semibold text-[#312c79] touch-manipulation"
-                      href="/cleaning"
-                      onClick={() => onMobileOpenChange(false)}
-                    >
-                      All services
-                    </Link>
-                  </div>
-                ) : null}
-              </div>
-              {landingNavLinks
-                .filter(([label]) => label !== "Services")
-                .map(([label, href]) =>
+              {landingCategoryNav.map((menu) => (
+                <div className="border-b border-border" key={menu.label}>
+                  <button
+                    aria-expanded={openMenu === menu.label}
+                    className="flex min-h-12 w-full items-center justify-between px-5 py-3.5 text-left text-sm font-medium text-[#1c133b] touch-manipulation"
+                    onClick={() =>
+                      setOpenMenu((current) =>
+                        current === menu.label ? null : menu.label,
+                      )
+                    }
+                    type="button"
+                  >
+                    {menu.label}
+                    <ChevronDown
+                      className={cn(
+                        "size-4 transition",
+                        openMenu === menu.label && "rotate-180",
+                      )}
+                    />
+                  </button>
+                  {openMenu === menu.label ? (
+                    <div className="bg-[#f8f4ff] pb-2">
+                      {menu.items.map((item) => (
+                        <Link
+                          className="block min-h-11 px-5 py-2.5 text-sm font-medium text-[#1c133b] touch-manipulation"
+                          href={item.href}
+                          key={item.href}
+                          onClick={() => onMobileOpenChange(false)}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+              {landingNavLinks.map(([label, href]) =>
               href.startsWith("mailto:") ? (
                 <a
                       className="flex min-h-12 items-center border-b border-border px-5 py-3.5 text-sm font-medium text-[#1c133b] touch-manipulation"

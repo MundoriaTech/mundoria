@@ -168,6 +168,14 @@ export interface Booking {
   cleaner_live_latitude: number | null;
   cleaner_live_longitude: number | null;
   cleaner_location_updated_at: string | null;
+  arrived_at?: string | null;
+  cleaner_start_confirmed_at?: string | null;
+  customer_start_confirmed_at?: string | null;
+  access_grace_ends_at?: string | null;
+  access_penalty_pence?: number | null;
+  tip_pence?: number | null;
+  pause_starts_on?: string | null;
+  pause_ends_on?: string | null;
   created_at: string;
   updated_at: string;
   address?: Address | null;
@@ -283,6 +291,8 @@ export interface BookingDraft {
   rebookCleanerChoice: "same" | "new" | null;
   /** Extra visit dates when recurrencePattern is custom. */
   customRecurrenceDates: string[];
+  /** How the cleaner gets in. Shown to the cleaner; the customer accepts the risk. */
+  keysPolicy: "with_cleaner" | "key_box" | null;
   /** Whether pets are present at the property (null = not answered). */
   hasPets: boolean | null;
   /** Optional pet types when hasPets is true (e.g. Dog, Cat, Other). */

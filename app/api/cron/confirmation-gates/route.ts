@@ -1,3 +1,4 @@
+import { addDays, format } from "date-fns";
 import { NextResponse } from "next/server";
 
 import { isAuthorizedCron } from "@/lib/cron/auth";
@@ -20,6 +21,9 @@ export async function GET(request: Request) {
 
   const admin = createAdminClient();
   const now = new Date();
+  const today = format(now, "yyyy-MM-dd");
+  // T−24 opens at most 25 hours ahead, which can fall on the day after tomorrow.
+  const horizon = format(addDays(now, 2), "yyyy-MM-dd");
 
   const { data: active } = await admin
     .from("bookings")
@@ -27,7 +31,8 @@ export async function GET(request: Request) {
       "id,cleaner_id,customer_id,scheduled_date,scheduled_start_time,status,confirmation_gate,confirmation_due_at,confirmation_responded_at,booking_protected",
     )
     .in("status", ["matched", "confirmed", "cleaner_en_route"])
-    .gte("scheduled_date", now.toISOString().slice(0, 10));
+    .gte("scheduled_date", today)
+    .lte("scheduled_date", horizon);
 
   const opened: string[] = [];
   const failed: string[] = [];

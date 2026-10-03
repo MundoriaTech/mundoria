@@ -177,9 +177,16 @@ export function propertyQuestionModeFor(
   return "home";
 }
 
-/** Commercial premises are booked on a repeat schedule, never as a one-off visit. */
+const TURNOVER_SERVICES: ServiceType[] = [
+  "airbnb_turnover",
+  "holiday_let",
+  "serviced_accommodation",
+];
+
+/** Commercial premises and host turnovers are booked on a repeat schedule. */
 export function frequencyAllowsOneOff(serviceType: ServiceType | null) {
   if (!serviceType) return true;
+  if (TURNOVER_SERVICES.includes(serviceType)) return false;
   return serviceDefinition(serviceType).category !== "commercial";
 }
 
@@ -269,13 +276,18 @@ export function frequencyChoiceSatisfied(
   return Boolean(draft.recurrencePattern);
 }
 
-/** Steps for the current draft — skips category/service when already chosen. */
+export type BookingEntryLock = "category" | "service" | null;
+
+/** Steps for the current draft. A category or service deep link does not ask that question again. */
 export function getFlowSteps(
   draft: Pick<
     BookingDraft,
     "serviceCategory" | "serviceType" | "recurrencePattern"
   >,
-  options?: { includeCleanerChoice?: boolean },
+  options?: {
+    entryLock?: BookingEntryLock;
+    includeCleanerChoice?: boolean;
+  },
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
   const isOffice = draft.serviceType === "office";
@@ -292,8 +304,11 @@ export function getFlowSteps(
     steps.push("cleaner");
   }
 
-  // Always keep category + service in the flow so Back can revisit them.
-  steps.push("category", "service");
+  // A link from a category or service page should not ask that question again.
+  if (options?.entryLock !== "service") {
+    if (options?.entryLock !== "category") steps.push("category");
+    steps.push("service");
+  }
 
   // Office: level first, then spaces (per commercial pricing logic).
   if (isOffice) {
@@ -381,10 +396,10 @@ export function durationSummary(args: {
       : "";
   const propertyHint =
     beds <= 1 && baths <= 1 && other === 0
-      ? "Recommended for a studio or 1-bed with 1 bathroom"
+      ? "Recommended for a studio or 1-bed with 1 toilet"
       : beds <= 2
-        ? `Recommended for about ${beds} bedroom${beds === 1 ? "" : "s"}, ${baths} bathroom${baths === 1 ? "" : "s"}${otherBit}`
-        : `Based on ${beds} bedrooms, ${baths} bathrooms${otherBit}`;
+        ? `Recommended for about ${beds} bedroom${beds === 1 ? "" : "s"}, ${baths} toilet${baths === 1 ? "" : "s"}${otherBit}`
+        : `Based on ${beds} bedrooms, ${baths} toilet${baths === 1 ? "" : "s"}${otherBit}`;
 
   return {
     hours,
@@ -400,6 +415,15 @@ export function composeBookingNotes(draft: BookingDraft) {
   const parts: string[] = [];
   if (draft.specialInstructions.trim()) {
     parts.push(draft.specialInstructions.trim());
+  }
+  if (draft.keysPolicy === "with_cleaner") {
+    parts.push(
+      "Keys: the customer will leave keys with the cleaner, at the customer's own risk.",
+    );
+  } else if (draft.keysPolicy === "key_box") {
+    parts.push(
+      "Keys: the customer will use a key box, at the customer's own risk.",
+    );
   }
   if (draft.hasPets === true) {
     const types = draft.petTypes.length

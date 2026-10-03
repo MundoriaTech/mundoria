@@ -5,6 +5,7 @@ import {
   SERVICES,
   SERVICE_CATEGORIES,
 } from "@/lib/customer/services";
+import type { BookingEntryLock } from "@/lib/customer/booking-flow";
 import { frequencyModeFor } from "@/lib/customer/booking-flow";
 import {
   type HistoryRatingMood,
@@ -31,15 +32,27 @@ const serviceCategorySet = new Set(
 );
 const serviceTypeSet = new Set(SERVICES.map((service) => service.value));
 
+function canonicalService(value?: string) {
+  if (value === "move_out") return "move_in";
+  if (value === "postpartum") return "pregnancy_support";
+  if (value === "post_injury") return "illness_recovery";
+  if (value === "same_day") return undefined;
+  return value;
+}
+
 function draftFromSearchParams(searchParams: {
   category?: string;
+  focus?: string;
   service?: string;
 }) {
+  const requested = canonicalService(
+    searchParams.focus === "move" ? "move_in" : searchParams.service,
+  );
   const category = serviceCategorySet.has(searchParams.category as ServiceCategory)
     ? (searchParams.category as ServiceCategory)
     : null;
-  const serviceType = serviceTypeSet.has(searchParams.service as ServiceType)
-    ? (searchParams.service as ServiceType)
+  const serviceType = serviceTypeSet.has(requested as ServiceType)
+    ? (requested as ServiceType)
     : null;
   const service = serviceType
     ? SERVICES.find((item) => item.value === serviceType)
@@ -68,11 +81,6 @@ function draftFromSearchParams(searchParams: {
   } satisfies Partial<BookingDraft>;
 }
 
-function focusServicesFromSearchParams(focus?: string): ServiceType[] | undefined {
-  if (focus === "move") return ["move_in", "move_out"];
-  return undefined;
-}
-
 function safeReturnTo(value?: string) {
   if (!value) return null;
   if (!value.startsWith("/") || value.startsWith("//")) return null;
@@ -86,6 +94,8 @@ export default async function NewBookingPage({
     category?: string;
     focus?: string;
     fresh?: string;
+    cleaner?: string;
+    keep?: string;
     rebook?: string;
     returnTo?: string;
     service?: string;
@@ -103,8 +113,12 @@ export default async function NewBookingPage({
     searchParams,
   );
   let previousCleaner: CleanerPublicProfile | null = null;
-  const focusServices = focusServicesFromSearchParams(searchParams.focus);
   const fresh = searchParams.fresh === "1" || searchParams.fresh === "true";
+  const entryLock: BookingEntryLock = initialDraft?.serviceType
+    ? "service"
+    : initialDraft?.serviceCategory
+      ? "category"
+      : null;
   const returnTo = safeReturnTo(searchParams.returnTo);
 
   if (user) {
@@ -180,6 +194,28 @@ export default async function NewBookingPage({
           specialAttentionAreas: booking.special_attention_areas,
           specialInstructions: booking.special_instructions ?? "",
         };
+        if (searchParams.keep === "1" && booking.cleaner_id) {
+          initialDraft = {
+            ...initialDraft,
+            preferSameCleaner: true,
+            preferredCleanerId: booking.cleaner_id,
+            rebookCleanerChoice: "same",
+          };
+        }
+      }
+    }
+
+    if (searchParams.cleaner && !searchParams.rebook) {
+      const match = knownCleaners.find(
+        (cleaner) => cleaner.id === searchParams.cleaner,
+      );
+      if (match) {
+        initialDraft = {
+          ...(initialDraft ?? {}),
+          preferSameCleaner: true,
+          preferredCleanerId: match.id,
+          rebookCleanerChoice: "same",
+        };
       }
     }
   }
@@ -187,7 +223,7 @@ export default async function NewBookingPage({
   return (
     <BookingWizard
       cleaningHistory={cleaningHistory}
-      focusServices={focusServices}
+      entryLock={searchParams.rebook ? null : entryLock}
       fresh={fresh}
       initialAddresses={addresses}
       initialDraft={initialDraft}

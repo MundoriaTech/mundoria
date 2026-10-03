@@ -52,21 +52,15 @@ const SERVICE_CARDS = [
     objectPosition: "object-center",
   },
   {
-    href: "/booking/new?category=residential&focus=move",
+    href: "/booking/new?service=move_in&category=residential",
     image: "/images/marketing/landing/moving-move-in.png",
-    label: "Move-In / Move-Out Cleaning",
+    label: "Move-in / move-out cleaning",
     objectPosition: "object-center",
   },
   {
     href: "/booking/new?service=one_off",
     image: "/images/marketing/landing/residential-one-off.png",
     label: "One-Off Cleaning",
-    objectPosition: "object-center",
-  },
-  {
-    href: "/booking/new?service=same_day",
-    image: "/images/marketing/landing/residential-deep.png",
-    label: "Same-Day Cleaning",
     objectPosition: "object-center",
   },
   {
@@ -86,7 +80,7 @@ const SERVICE_CARDS = [
 const FAQS = [
   {
     answer:
-      "Mundoria helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, same-day help, a move-in or move-out clean, a one-off refresh, an end of tenancy clean, or guest-ready Airbnb and shortlet turns, we make it easy to book trusted cleaners.",
+      "Mundoria helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, a move-in or move-out clean, a one-off refresh, an end of tenancy clean, or guest-ready Airbnb and shortlet turns, we make it easy to book trusted cleaners.",
     question: "What is Mundoria?",
     services: [
       {
@@ -100,10 +94,6 @@ const FAQS = [
       {
         description: "Ideal when you need a clean for a specific occasion.",
         name: "One-off cleaning",
-      },
-      {
-        description: "Book today when you need a cleaner as soon as possible.",
-        name: "Same-day cleaning",
       },
       {
         description: "Move-out cleaning designed for landlord and agent standards.",

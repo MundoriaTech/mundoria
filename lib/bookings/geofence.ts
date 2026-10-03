@@ -109,20 +109,25 @@ export async function validateBookingGeofence({
   }
 
   if (action === "checkin") {
+    const arrivedAt = new Date();
     await admin
       .from("bookings")
       .update({
-        actual_start_time: new Date().toISOString(),
+        access_grace_ends_at: new Date(
+          arrivedAt.getTime() + 5 * 60 * 1000,
+        ).toISOString(),
+        arrived_at: arrivedAt.toISOString(),
         checkin_latitude: latitude,
         checkin_longitude: longitude,
-        checkin_verified: true,
-        status: "in_progress",
+        cleaner_live_latitude: latitude,
+        cleaner_live_longitude: longitude,
+        cleaner_location_updated_at: arrivedAt.toISOString(),
       })
       .eq("id", bookingId);
     await sendPushNotification(
       booking.customer_id,
-      "Cleaner checked in",
-      "Your cleaner has arrived and started the job.",
+      "Your cleaner has arrived",
+      "They are outside. You have 5 minutes to let them in, then a £0.50 per minute waiting charge can apply. Confirm Start cleaning once they are in.",
       { booking_id: bookingId },
     );
     await sendCustomerGeofenceEmail("customer.cleaner_checked_in");

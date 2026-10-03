@@ -1,3 +1,5 @@
+import { MUNDORIA_WORDMARK_SRC } from "@/lib/brand";
+
 export type EmailTemplateId =
   | "admin.alert"
   | "admin.cleaner_application_submitted"
@@ -557,7 +559,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const tone = toneStyles[context.tone ?? "customer"];
   const cards = (context.cards ?? []).filter((card) => card.value !== undefined && card.value !== null && String(card.value).trim() !== "");
   const supportEmail = process.env.SUPPORT_EMAIL || "support@mundoriauk.local";
-  const logoUrl = publicEmailAssetUrl("/images/brand/mundoria-logo.png");
+  const logoUrl = publicEmailAssetUrl(MUNDORIA_WORDMARK_SRC);
 
   const html = `<!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -612,10 +614,12 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
               <td class="email-header" bgcolor="#221f50" style="background:#221f50;padding:28px 32px 24px;">
                 <table role="presentation" cellspacing="0" cellpadding="0">
                   <tr>
-                    <td class="email-logo-pad" bgcolor="#ffffff" style="background:#ffffff;border-radius:12px;padding:6px 8px;" valign="middle">
-                      <img alt="Mundoria" height="48" src="${escapeAttribute(logoUrl)}" style="display:block;border:0;outline:none;text-decoration:none;height:48px;width:34px;" width="34" />
+                    <td class="email-logo-pad" bgcolor="#ffffff" style="background:#ffffff;border-radius:12px;padding:8px 12px;" valign="middle">
+                      <img alt="Mundoria" height="36" src="${escapeAttribute(logoUrl)}" style="display:block;border:0;outline:none;text-decoration:none;height:36px;width:178px;" width="178" />
                     </td>
-                    <td style="padding-left:14px;" valign="middle">
+                  </tr>
+                  <tr>
+                    <td style="padding-top:12px;" valign="middle">
                       <div class="email-tagline" style="font-size:13px;line-height:1.4;color:#ffc79f;">Trusted cleaning, clearly managed.</div>
                     </td>
                   </tr>

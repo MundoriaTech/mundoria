@@ -468,15 +468,13 @@ export function AddressForm({
         )}
       </div>
 
+      <AddressTagField
+        onChange={(label) => update("label", label)}
+        value={values.label}
+      />
+
       {showAccountExtras ? (
         <>
-        <Field label="Label">
-          <Input
-            onChange={(event) => update("label", event.target.value)}
-            placeholder="Home"
-            value={values.label}
-          />
-        </Field>
       <label className="flex items-center gap-3 text-sm">
         <input
           checked={values.is_default}
@@ -653,6 +651,65 @@ function AddressAutocompleteInput({
             );
           })}
         </ul>
+      ) : null}
+    </div>
+  );
+}
+
+const ADDRESS_TAGS = ["Home", "Work", "Mum's home", "Dad's home"] as const;
+
+function AddressTagField({
+  onChange,
+  value,
+}: {
+  onChange: (label: string) => void;
+  value: string;
+}) {
+  const preset = ADDRESS_TAGS.includes(value as (typeof ADDRESS_TAGS)[number]);
+  const [custom, setCustom] = useState(!preset && value.length > 0);
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium">Address tag</p>
+      <div className="flex flex-wrap gap-2">
+        {ADDRESS_TAGS.map((tag) => (
+          <button
+            className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+              value === tag
+                ? "border-[#6a45b8] bg-[#6a45b8] text-white"
+                : "border-[#d9ccef] bg-white text-[#1c133b]"
+            }`}
+            key={tag}
+            onClick={() => {
+              setCustom(false);
+              onChange(tag);
+            }}
+            type="button"
+          >
+            {tag}
+          </button>
+        ))}
+        <button
+          className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+            custom
+              ? "border-[#6a45b8] bg-[#6a45b8] text-white"
+              : "border-[#d9ccef] bg-white text-[#1c133b]"
+          }`}
+          onClick={() => {
+            setCustom(true);
+            if (preset) onChange("");
+          }}
+          type="button"
+        >
+          Other
+        </button>
+      </div>
+      {custom ? (
+        <Input
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Dad's home"
+          value={value}
+        />
       ) : null}
     </div>
   );

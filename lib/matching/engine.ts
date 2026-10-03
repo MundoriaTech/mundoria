@@ -28,11 +28,12 @@ export async function runMatchingEngine(
   if (!booking?.address) throw new Error("Booking or address not found.");
 
   const day = new Date(`${booking.scheduled_date}T12:00:00`).getDay();
-  const [{ data: candidates }, { data: existingBookings }] = await Promise.all([
+  const [{ data: candidates }, { data: existingBookings }, { data: absences }] =
+    await Promise.all([
     admin
       .from("profiles")
       .select(
-        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!cleaner_profiles_id_fkey!inner(tier,status,dbs_verified,working_radius_km,location_tracking_consent_at),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
+        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!cleaner_profiles_id_fkey!inner(tier,status,dbs_verified,working_radius_km,location_tracking_consent_at,cancellation_count),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
       )
       .eq("role", "cleaner")
       .in("cleaner_profiles.status", ["certified", "active"])
@@ -49,7 +50,15 @@ export async function runMatchingEngine(
       .eq("scheduled_date", booking.scheduled_date)
       .not("cleaner_id", "is", null)
       .not("status", "in", '("cancelled","no_show")'),
+    admin
+      .from("cleaner_absences")
+      .select("cleaner_id")
+      .lte("starts_on", booking.scheduled_date)
+      .gte("ends_on", booking.scheduled_date),
   ]);
+  const absentCleaners = new Set(
+    (absences ?? []).map((absence) => absence.cleaner_id as string),
+  );
 
   const bookingStart = new Date(
     `${booking.scheduled_date}T${booking.scheduled_start_time}`,
@@ -149,11 +158,19 @@ export async function runMatchingEngine(
         )[booking.service_type] ?? "bronze"
       ];
     const consentOk = Boolean(cleanerProfile.location_tracking_consent_at);
+    const reliability = Math.max(
+      0,
+      100 - Number(cleanerProfile.cancellation_count ?? 0) * 10,
+    );
+    const reliabilityOk =
+      reliability >= 40 || booking.preferred_cleaner_id === candidate.id;
     const eligible =
       !excluded.has(candidate.id) &&
+      !absentCleaners.has(candidate.id) &&
       slotAvailable &&
       !conflict &&
       tierOk &&
+      reliabilityOk &&
       (distances.length ? inRadius : postcodeMatch);
     return [
       {
@@ -167,6 +184,7 @@ export async function runMatchingEngine(
         eligible,
         playerId: candidate.onesignal_player_id as string | null,
         preferred: booking.preferred_cleaner_id === candidate.id,
+        reliability,
         reasons: {
           conflict,
           distance_metres: Number.isFinite(distance) ? Math.round(distance) : null,
@@ -187,6 +205,7 @@ export async function runMatchingEngine(
     .sort(
       (left, right) =>
         Number(right.preferred) - Number(left.preferred) ||
+        right.reliability - left.reliability ||
         tierRank[right.tier] - tierRank[left.tier] ||
         left.distance - right.distance,
     );

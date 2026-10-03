@@ -73,7 +73,6 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
         bookable("regular", bookingHref),
         bookable("deep_clean", bookingHref),
         bookable("one_off", bookingHref),
-        bookable("same_day", bookingHref),
         ...pageOnly(bookingHref, [
           {
             description:
@@ -94,7 +93,6 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
           },
         ]),
         bookable("move_in", bookingHref),
-        bookable("move_out", bookingHref),
         bookable("end_of_tenancy", bookingHref),
         bookable(
           "airbnb_turnover",
@@ -134,7 +132,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
           {
             description:
               "Extra-care cleaning while recovering from illness, injury or limited mobility.",
-            label: "Illness and Injury Recovery Cleaning",
+            label: "Illness & injury recovery",
             seedService: "illness_recovery",
           },
         ]),
@@ -159,7 +157,7 @@ const POPULAR_VALUES: ServiceType[] = [
   "end_of_tenancy",
   "airbnb_turnover",
   "office",
-  "same_day",
+  "one_off",
 ];
 
 const POPULAR_TINTS = [
