@@ -64,6 +64,7 @@ import {
   isoDateOrEmpty,
   getFlowSteps,
   guestAddressComplete,
+  type BookingEntryLock,
   isBookingFlowStepId,
   resolveFlowStepIndex,
   type BookingFlowStepId,
@@ -93,10 +94,7 @@ import {
   servicesForCategory,
   standardLabel,
 } from "@/lib/customer/services";
-import {
-  OFFICE_SIZE_PRESETS,
-  officeSizePresetFor,
-} from "@/lib/customer/office-pricing";
+import type { OfficeSpaceSize } from "@/lib/customer/office-pricing";
 import { cn } from "@/lib/utils";
 import type {
   Address,
@@ -122,6 +120,7 @@ const blankDraft: BookingDraft = {
   guestAddress: null,
   hasPets: null,
   isRecurring: false,
+  keysPolicy: null,
   numBathrooms: null,
   numBedrooms: null,
   officeSpaces: [],
@@ -233,6 +232,7 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
 
 export function BookingWizard({
   cleaningHistory = [],
+  entryLock = null,
   focusServices,
   fresh = false,
   initialAddresses,
@@ -244,6 +244,8 @@ export function BookingWizard({
   userId,
 }: {
   cleaningHistory?: HistoryVisit[];
+  /** Skip the category and/or service step when the customer arrived from that page. */
+  entryLock?: BookingEntryLock;
   focusServices?: ServiceType[];
   fresh?: boolean;
   initialAddresses: Address[];
@@ -289,6 +291,10 @@ export function BookingWizard({
 
   const needsAuth = !userId;
   const includeCleanerChoice = knownCleaners.length > 0;
+  const flowOptions = useMemo(
+    () => ({ entryLock, includeCleanerChoice }),
+    [entryLock, includeCleanerChoice],
+  );
   const historySuggestion = useMemo(() => {
     if (!suggestFromHistory || !draft.addressId) return null;
     return recommendFromHistory(
@@ -298,10 +304,10 @@ export function BookingWizard({
   const flowSteps = useMemo(
     () =>
       withHistoryStep(
-        getFlowSteps(draft, { includeCleanerChoice }),
+        getFlowSteps(draft, flowOptions),
         Boolean(historySuggestion),
       ),
-    [draft, historySuggestion, includeCleanerChoice],
+    [draft, flowOptions, historySuggestion],
   );
   const stepId = flowSteps[Math.min(stepIndex, flowSteps.length - 1)]!;
   flowStepsRef.current = flowSteps;
@@ -410,7 +416,7 @@ export function BookingWizard({
                   serviceCategory: initialDraft.serviceCategory ?? null,
                   serviceType: initialDraft.serviceType,
                 },
-                { includeCleanerChoice: false },
+                { entryLock, includeCleanerChoice: false },
               ),
               "address",
             ),
@@ -532,6 +538,7 @@ export function BookingWizard({
           urlService ?? (keepSaved ? parsed?.serviceType ?? null : null),
       };
       const restoredSteps = getFlowSteps(restoredDraft, {
+        entryLock,
         includeCleanerChoice: knownCleaners.length > 0,
       });
 
@@ -569,6 +576,16 @@ export function BookingWizard({
     if (!hydrated) return;
     window.localStorage.setItem(BOOKING_DRAFT_KEY, JSON.stringify(draft));
   }, [draft, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || draft.addressId || addresses.length === 0) return;
+    const preferred =
+      addresses.find((address) => address.is_default) ?? addresses[0];
+    if (!preferred) return;
+    setDraft((current) =>
+      current.addressId ? current : { ...current, addressId: preferred.id },
+    );
+  }, [addresses, draft.addressId, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -1010,7 +1027,7 @@ export function BookingWizard({
   function acceptHistorySuggestion(suggestion: HistoryRecommendation) {
     const nextDraft = draftFromHistory(suggestion);
     const steps = withHistoryStep(
-      getFlowSteps(nextDraft, { includeCleanerChoice }),
+      getFlowSteps(nextDraft, flowOptions),
       true,
     );
     const historyIndex = steps.indexOf("history");
@@ -1206,7 +1223,7 @@ export function BookingWizard({
     bookingHistoryBootstrap = null;
 
     const nextDraft: BookingDraft = { ...blankDraft };
-    const nextSteps = getFlowSteps(nextDraft, { includeCleanerChoice });
+    const nextSteps = getFlowSteps(nextDraft, flowOptions);
     const entryId = nextSteps[0]!;
     const depth = funnelDepthRef.current;
 
@@ -1285,9 +1302,10 @@ export function BookingWizard({
       ? draft.serviceType === "office"
         ? [
             service.label,
-            OFFICE_SIZE_PRESETS.find(
-              (preset) => preset.value === officeSizePresetFor(draft.officeSpaces),
-            )?.label,
+            draft.officeSpaces
+              .filter((space) => space.quantity > 0)
+              .map((space) => `${space.quantity} ${space.spaceType.replaceAll("_", " ")}`)
+              .join(", "),
           ]
             .filter(Boolean)
             .join(" · ")
@@ -1351,6 +1369,11 @@ export function BookingWizard({
           addresses={userId ? addresses : []}
           guestAddress={draft.guestAddress}
           localOnly={!userId}
+          onSelect={(addressId) => {
+            update("addressId", addressId);
+            update("guestAddress", null);
+            setShowAddressForm(false);
+          }}
           selectedId={draft.addressId}
           setShowForm={setShowAddressForm}
           showForm={
@@ -1781,13 +1804,13 @@ function ServiceStep({
   const primaryResidential = new Set<ServiceType>([
     "regular",
     "move_in",
-    "move_out",
     "one_off",
-    "same_day",
     "end_of_tenancy",
     "airbnb_turnover",
   ]);
-  let services = category ? servicesForCategory(category) : SERVICES;
+  let services = (category ? servicesForCategory(category) : SERVICES).filter(
+    (item) => !item.hidden,
+  );
   if (focusServices?.length) {
     services = services.filter((item) => focusServices.includes(item.value));
   } else if (category === "residential") {
@@ -1802,20 +1825,12 @@ function ServiceStep({
   return (
     <div>
       <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        {focusServices?.length === 2 &&
-        focusServices.includes("move_in") &&
-        focusServices.includes("move_out")
-          ? "Move-in or move-out?"
-          : "Choose your cleaning session"}
+        Choose your cleaning session
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        {focusServices?.length === 2 &&
-        focusServices.includes("move_in") &&
-        focusServices.includes("move_out")
-          ? "Choose whether you need a move-in or move-out clean."
-          : category
-            ? `Pick a service within ${categoryDefinition(category).label}.`
-            : "Pick the service that fits."}
+        {category
+          ? `Pick a service within ${categoryDefinition(category).label}.`
+          : "Pick the service that fits."}
       </p>
       <div className="mt-8 grid gap-3">
         {services.map((item, index) => {
@@ -1984,6 +1999,7 @@ function AddressStep({
   guestAddress,
   localOnly,
   onSaved,
+  onSelect,
   selectedId,
   setShowForm,
   showForm,
@@ -1993,6 +2009,7 @@ function AddressStep({
   guestAddress: BookingDraft["guestAddress"];
   localOnly: boolean;
   onSaved: (address: Address) => void;
+  onSelect: (addressId: string) => void;
   selectedId: string | null;
   setShowForm: (value: boolean) => void;
   showForm: boolean;
@@ -2052,7 +2069,38 @@ function AddressStep({
         </div>
       ) : null}
 
-      {selected && !localOnly ? (
+      {!localOnly && addresses.length > 0 ? (
+        <div className="mt-8 grid gap-3">
+          {addresses.map((address) => {
+            const active = selectedId === address.id;
+            return (
+              <button
+                className={cn(
+                  "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef]",
+                  active && "border-[#6a45b8] bg-white",
+                )}
+                key={address.id}
+                onClick={() => onSelect(address.id)}
+                type="button"
+              >
+                <p className="font-semibold text-[#1c133b]">
+                  {address.label ?? "Saved address"}
+                  {address.is_default ? (
+                    <span className="ml-2 text-xs font-medium text-[#6a45b8]">
+                      Default
+                    </span>
+                  ) : null}
+                </p>
+                <p className="mt-1 break-words text-sm text-[#5a5470]">
+                  {address.address_line_1}, {address.city}, {address.postcode}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {selected && !localOnly && addresses.length === 0 ? (
         <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
           <div className="flex gap-3">
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
@@ -2103,6 +2151,33 @@ function AddressStep({
 
 const ROOM_COUNT_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const;
 
+const OFFICE_SIZE_GUIDE: Array<{
+  hint: string;
+  label: string;
+  value: Exclude<OfficeSpaceSize, "not_sure">;
+}> = [
+  { hint: "Up to 25 m²", label: "Small", value: "small" },
+  { hint: "26–60 m²", label: "Medium", value: "medium" },
+  { hint: "61–100 m²", label: "Large", value: "large" },
+];
+
+const OFFICE_EXTRA_ROOMS: Array<{
+  label: string;
+  value: OfficeSpaceDraft["spaceType"];
+}> = [
+  { label: "Meeting room", value: "meeting_room" },
+  { label: "Kitchen", value: "kitchen" },
+  { label: "Reception", value: "reception" },
+  { label: "Corridor", value: "corridor" },
+];
+
+function quantityOf(
+  spaces: OfficeSpaceDraft[],
+  spaceType: OfficeSpaceDraft["spaceType"],
+) {
+  return spaces.find((space) => space.spaceType === spaceType)?.quantity ?? 0;
+}
+
 function OfficeSpacesStep({
   onChange,
   spaces,
@@ -2110,7 +2185,46 @@ function OfficeSpacesStep({
   onChange: (value: OfficeSpaceDraft[]) => void;
   spaces: OfficeSpaceDraft[];
 }) {
-  const selected = officeSizePresetFor(spaces);
+  const rooms = quantityOf(spaces, "office_work_area");
+  const toilets = quantityOf(spaces, "toilet");
+  const size =
+    spaces.find((space) => space.spaceType === "office_work_area")?.size ??
+    "medium";
+  const workSize: Exclude<OfficeSpaceSize, "not_sure"> =
+    size === "not_sure" ? "medium" : size;
+  const [addingRoom, setAddingRoom] = useState(false);
+
+  function write(next: OfficeSpaceDraft[]) {
+    onChange(next.filter((space) => space.quantity > 0));
+  }
+
+  function setCore(
+    nextRooms: number,
+    nextToilets: number,
+    nextSize: Exclude<OfficeSpaceSize, "not_sure">,
+  ) {
+    const extras = spaces.filter(
+      (space) =>
+        space.spaceType !== "office_work_area" && space.spaceType !== "toilet",
+    );
+    write([
+      {
+        quantity: nextRooms,
+        size: nextSize,
+        spaceType: "office_work_area",
+      },
+      { quantity: nextToilets, size: "small", spaceType: "toilet" },
+      ...extras,
+    ]);
+  }
+
+  function setExtra(spaceType: OfficeSpaceDraft["spaceType"], quantity: number) {
+    const rest = spaces.filter((space) => space.spaceType !== spaceType);
+    write([
+      ...rest,
+      { quantity, size: "medium", spaceType },
+    ]);
+  }
 
   return (
     <div>
@@ -2118,30 +2232,96 @@ function OfficeSpacesStep({
         How big is the office?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        Mundoria works out the time from the size you choose.
+        Tell us how many rooms and toilets there are, and roughly how big the
+        work area is. Mundoria uses that to work out the time.
       </p>
-      <div className="mt-8 grid gap-3">
-        {OFFICE_SIZE_PRESETS.map((preset) => {
-          const active = selected === preset.value;
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <CountField
+          label="Rooms"
+          onChange={(value) => setCore(value, toilets, workSize)}
+          value={rooms}
+        />
+        <CountField
+          label="Toilets"
+          onChange={(value) => setCore(rooms, value, workSize)}
+          value={toilets}
+        />
+      </div>
+
+      <p className="mt-6 text-sm font-semibold text-[#1c133b]">
+        Size of the work area
+      </p>
+      <p className="mt-1 text-sm text-[#5a5470]">
+        Size guide: small is up to 25 m², medium is 26–60 m², large is 61–100 m².
+      </p>
+      <div className="mt-3 grid gap-2">
+        {OFFICE_SIZE_GUIDE.map((option) => {
+          const active = workSize === option.value && rooms > 0;
           return (
             <button
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-4 py-3 text-left",
                 active && "border-[#6a45b8] bg-white",
               )}
-              key={preset.value}
-              onClick={() => onChange(preset.spaces)}
+              key={option.value}
+              onClick={() => setCore(Math.max(rooms, 1), toilets, option.value)}
               type="button"
             >
-              <p className="font-semibold text-[#1c133b]">{preset.label}</p>
-              <p className="mt-1 text-sm leading-5 text-[#5a5470]">
-                {preset.description}
-              </p>
+              <span className="font-semibold text-[#1c133b]">{option.label}</span>
+              <span className="ml-2 text-sm text-[#5a5470]">{option.hint}</span>
             </button>
           );
         })}
       </div>
+
+      <button
+        className="mt-6 text-sm font-semibold text-[#5a38a3] underline-offset-2 hover:underline"
+        onClick={() => setAddingRoom((current) => !current)}
+        type="button"
+      >
+        Any other room?
+      </button>
+      {addingRoom ? (
+        <div className="mt-3 grid gap-3">
+          {OFFICE_EXTRA_ROOMS.map((room) => (
+            <CountField
+              key={room.value}
+              label={room.label}
+              onChange={(value) => setExtra(room.value, value)}
+              value={quantityOf(spaces, room.value)}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function CountField({
+  label,
+  onChange,
+  value,
+}: {
+  label: string;
+  onChange: (value: number) => void;
+  value: number;
+}) {
+  return (
+    <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
+      <span>{label}</span>
+      <select
+        className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#f3f3f5] px-4 text-sm"
+        onChange={(event) => onChange(Number(event.target.value))}
+        value={value}
+      >
+        {ROOM_COUNT_OPTIONS.map((count) => (
+          <option key={count} value={count}>
+            {count === 6 ? "6+" : count}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -2184,7 +2364,7 @@ function RoomsStep({
           </select>
         </label>
         <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
-          <span>Bathrooms</span>
+          <span>Toilets</span>
           <select
             className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#f3f3f5] px-4 text-sm"
             onChange={(event) => onBathrooms(Number(event.target.value))}
@@ -2558,7 +2738,7 @@ function RecoveryPreferencesStep({
 }) {
   const priorityAreas = [
     "Kitchen",
-    "Bathrooms",
+    "Toilets",
     "Bedrooms",
     "Living areas",
     "Hallways / access",
@@ -2607,14 +2787,18 @@ function RecoveryPreferencesStep({
       </div>
 
       <p className="mt-6 text-sm font-semibold text-[#1c133b]">
-        Access / mobility notes
+        Getting into the home
+      </p>
+      <p className="mt-1 text-sm text-[#5b5478]">
+        Tell us if the cleaner needs to take extra care moving around, or if
+        this first visit needs more time.
       </p>
       <div className="mt-3 grid gap-2">
         {(
           [
-            ["maintained", "Standard access"],
-            ["extra_attention", "Extra care needed around the home"],
-            ["neglected", "Needs a more thorough first visit"],
+            ["maintained", "Easy to get in and move around"],
+            ["extra_attention", "Please take extra care moving around"],
+            ["neglected", "The home needs a bigger first clean"],
           ] as const
         ).map(([value, label]) => {
           const active = draft.propertyCondition === value;
@@ -2855,7 +3039,7 @@ function DateStep({
   return (
     <div>
       <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        Date of your appointment
+        Date of your first appointment
       </h2>
       <BookingCalendar
         className="mt-8"
@@ -2866,7 +3050,7 @@ function DateStep({
       />
       {selectedLabel ? (
         <p className="mt-4 text-base font-semibold text-[#1c133b]">
-          Your appointment is on {selectedLabel}
+          Your first appointment is on {selectedLabel}
         </p>
       ) : null}
     </div>
@@ -3304,6 +3488,36 @@ function CheckoutStep({
           {formatMoney(amount)}
           </p>
         </div>
+
+      <fieldset className="mt-5">
+        <legend className="font-semibold text-[#1c133b]">Keys</legend>
+        <p className="mt-1 text-sm leading-6 text-[#5a5470]">
+          Leave keys with the cleaner, or use a key box. Either way, this is at
+          your own risk.
+        </p>
+        <div className="mt-3 grid gap-2">
+          {(
+            [
+              ["with_cleaner", "Leave keys with the cleaner"],
+              ["key_box", "Use a key box"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              className={cn(
+                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
+                draft.keysPolicy === value && "border-[#6a45b8] bg-white",
+              )}
+              key={value}
+              onClick={() =>
+                update("keysPolicy", draft.keysPolicy === value ? null : value)
+              }
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </fieldset>
 
       <label className="mt-5 block">
         <span className="sr-only">Special requirements</span>

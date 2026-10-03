@@ -42,6 +42,8 @@ export interface ServiceDefinition {
   description: string;
   duration: number;
   fixedStandard?: CleaningStandard;
+  /** Kept for older bookings, hidden from new booking and marketing pickers. */
+  hidden?: boolean;
   icon: LucideIcon;
   label: string;
   recommendedStandard: CleaningStandard;
@@ -90,7 +92,7 @@ export const CLEANING_STANDARDS: Array<{
 export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
   {
     description:
-      "Regular, same-day, one-off, move-in/out and end of tenancy cleans for the home.",
+      "Regular, one-off, move-in/out and end of tenancy cleans for the home.",
     icon: Home,
     label: "Residential Cleaning",
     value: "residential",
@@ -115,7 +117,7 @@ export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
   },
   {
     description:
-      "Pregnancy, postpartum, illness, injury, hospital discharge and bereavement support cleans.",
+      "Pregnancy and postpartum, illness, injury, hospital discharge and bereavement support cleans.",
     icon: HeartHandshake,
     label: "Mundoria Recovery",
     value: "recovery",
@@ -136,11 +138,12 @@ export const SERVICES: ServiceDefinition[] = [
   {
     basePrice: 11500,
     category: "residential",
-    description: "A full reset before settling into a new home.",
+    description:
+      "A full reset when you are moving in or moving out, including handovers.",
     duration: 5,
     fixedStandard: "comprehensive",
     icon: MoveRight,
-    label: "Move-In Cleaning",
+    label: "Move-in / move-out cleaning",
     recommendedStandard: "comprehensive",
     value: "move_in",
   },
@@ -150,6 +153,7 @@ export const SERVICES: ServiceDefinition[] = [
     description: "A move-out clean for handovers and deposit confidence.",
     duration: 5,
     fixedStandard: "comprehensive",
+    hidden: true,
     icon: MoveRight,
     label: "Move-Out Cleaning",
     recommendedStandard: "comprehensive",
@@ -170,6 +174,7 @@ export const SERVICES: ServiceDefinition[] = [
     category: "residential",
     description: "Need it today? Book a cleaner for as soon as capacity allows.",
     duration: 2.5,
+    hidden: true,
     icon: Zap,
     label: "Same-Day Cleaning",
     recommendedStandard: "enhanced",
@@ -269,10 +274,11 @@ export const SERVICES: ServiceDefinition[] = [
   {
     basePrice: 7600,
     category: "recovery",
-    description: "Supportive home cleaning during pregnancy.",
+    description:
+      "Supportive home cleaning during pregnancy and in the weeks after birth.",
     duration: 3,
     icon: Baby,
-    label: "Pregnancy Support Cleaning",
+    label: "Pregnancy & postpartum cleaning",
     recommendedStandard: "enhanced",
     value: "pregnancy_support",
   },
@@ -282,6 +288,7 @@ export const SERVICES: ServiceDefinition[] = [
     description: "Comprehensive support cleaning after birth.",
     duration: 4.5,
     fixedStandard: "comprehensive",
+    hidden: true,
     icon: Baby,
     label: "Postpartum Cleaning",
     recommendedStandard: "comprehensive",
@@ -290,10 +297,11 @@ export const SERVICES: ServiceDefinition[] = [
   {
     basePrice: 10500,
     category: "recovery",
-    description: "Extra-care cleaning while recovering from illness.",
+    description:
+      "Extra-care cleaning while recovering from illness, injury, or limited mobility.",
     duration: 4.5,
     icon: HeartHandshake,
-    label: "Illness Recovery Cleaning",
+    label: "Illness & injury recovery",
     recommendedStandard: "comprehensive",
     value: "illness_recovery",
   },
@@ -302,6 +310,7 @@ export const SERVICES: ServiceDefinition[] = [
     category: "recovery",
     description: "Supportive cleaning after injury or limited mobility.",
     duration: 4.5,
+    hidden: true,
     icon: Shirt,
     label: "Injury Recovery Cleaning",
     recommendedStandard: "comprehensive",
@@ -484,8 +493,18 @@ export function categoryDefinition(category: ServiceCategory) {
   throw new Error(`Unknown service category: ${category}`);
 }
 
+export function isOfferedService(service: ServiceDefinition) {
+  return service.hidden !== true;
+}
+
+export function offeredServices() {
+  return SERVICES.filter(isOfferedService);
+}
+
 export function servicesForCategory(category: ServiceCategory) {
-  return SERVICES.filter((service) => service.category === category);
+  return SERVICES.filter(
+    (service) => service.category === category && isOfferedService(service),
+  );
 }
 
 export function standardLabel(standard: CleaningStandard) {

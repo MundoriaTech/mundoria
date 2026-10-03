@@ -16,6 +16,8 @@ export type ParentBooking = {
   customer_id: string;
   estimated_duration_hours: number | null;
   id: string;
+  pause_ends_on?: string | null;
+  pause_starts_on?: string | null;
   prefer_same_cleaner: boolean | null;
   preferred_cleaner_id?: string | null;
   property_condition: string | null;
@@ -144,7 +146,7 @@ export async function ensureUpcomingRecurringFollowOns(
   const { data: parents, error } = await admin
     .from("bookings")
     .select(
-      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,commercial_spaces,customer_id,estimated_duration_hours,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions",
+      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,commercial_spaces,customer_id,estimated_duration_hours,pause_ends_on,pause_starts_on,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions",
     )
     .eq("is_recurring", true)
     .is("parent_booking_id", null)
@@ -182,8 +184,14 @@ export async function ensureUpcomingRecurringFollowOns(
     for (let i = 0; i < 52; i += 1) {
       const candidate = nextDateAfter(cursor, pattern, []);
       if (!candidate) break;
+      const paused =
+        parent.pause_starts_on &&
+        parent.pause_ends_on &&
+        candidate >= parent.pause_starts_on &&
+        candidate <= parent.pause_ends_on;
       if (
         candidate > today &&
+        !paused &&
         !upcoming.some((child) => child.scheduled_date === candidate)
       ) {
         next = candidate;

@@ -15,11 +15,46 @@ export const landingColors = {
 } as const;
 
 export const landingNavLinks = [
-  ["Services", "/cleaning"],
-  ["How it works", "/how-it-works"],
-  ["Help", "/help"],
   ["Mag", "/blog"],
   ["For cleaners", "/for-cleaners"],
+] as const;
+
+/** The three main categories, each with its own menu. */
+export const landingCategoryNav = [
+  {
+    href: "/cleaning/residential",
+    items: [
+      { href: "/booking/new?service=regular&category=residential", label: "Regular cleaning" },
+      { href: "/booking/new?service=move_in&category=residential", label: "Move-in / move-out" },
+      { href: "/booking/new?service=one_off&category=residential", label: "One-off cleaning" },
+      { href: "/booking/new?service=end_of_tenancy&category=residential", label: "End of tenancy" },
+      { href: "/booking/new?service=airbnb_turnover&category=residential", label: "Airbnb / short let" },
+      { href: "/cleaning/residential", label: "All residential" },
+    ],
+    label: "Residential",
+  },
+  {
+    href: "/cleaning/commercial",
+    items: [
+      { href: "/booking/new?service=office&category=commercial", label: "Office cleaning" },
+      { href: "/booking/new?service=retail_hospitality&category=commercial", label: "Retail & hospitality" },
+      { href: "/booking/new?service=educational_facility&category=commercial", label: "Education" },
+      { href: "/booking/new?service=communal_area&category=commercial", label: "Communal areas" },
+      { href: "/cleaning/commercial", label: "All commercial" },
+    ],
+    label: "Commercial",
+  },
+  {
+    href: "/cleaning/recovery",
+    items: [
+      { href: "/booking/new?service=pregnancy_support&category=recovery", label: "Pregnancy & postpartum" },
+      { href: "/booking/new?service=illness_recovery&category=recovery", label: "Illness & injury" },
+      { href: "/booking/new?service=hospital_discharge&category=recovery", label: "Hospital discharge" },
+      { href: "/booking/new?service=bereavement_support&category=recovery", label: "Bereavement support" },
+      { href: "/cleaning/recovery", label: "All recovery" },
+    ],
+    label: "Recovery",
+  },
 ] as const;
 
 /** Hover mega-panel items for Services (WeCasa-style). */
@@ -54,7 +89,7 @@ export const landingServicesMenu = {
   popular: [
     { href: "/booking/new?service=regular", label: "Regular cleaning" },
     { href: "/booking/new?service=one_off", label: "One-off clean" },
-    { href: "/booking/new?service=same_day", label: "Same-day clean" },
+    { href: "/booking/new?service=move_in", label: "Move-in / move-out" },
     { href: "/booking/new?service=end_of_tenancy", label: "End of tenancy" },
     { href: "/booking/new?service=deep_clean", label: "Deep clean" },
     { href: "/booking/new?service=airbnb_turnover", label: "Airbnb/Shortlet" },

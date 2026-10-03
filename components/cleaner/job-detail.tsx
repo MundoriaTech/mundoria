@@ -50,7 +50,7 @@ function CheckInAction({
   return (
     <div className="flex flex-col gap-2">
       <Button disabled={working || Boolean(windowMessage)} onClick={onCheckIn}>
-        <MapPin className="mr-2 h-4 w-4" />Check In
+        <MapPin className="mr-2 h-4 w-4" />I have arrived
       </Button>
       {windowMessage ? (
         <p className="text-sm text-muted-foreground">{windowMessage}</p>
@@ -179,16 +179,61 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     }
     setJob((current) => ({
       ...current,
-      checkin_verified: value === "checkin" || current.checkin_verified,
+      arrived_at:
+        value === "checkin" ? new Date().toISOString() : current.arrived_at,
+      checkin_verified: current.checkin_verified,
       checkout_verified: value === "checkout",
       status:
-        value === "en_route"
+        value === "en_route" || value === "checkin"
           ? "cleaner_en_route"
-          : value === "checkin"
-            ? "in_progress"
-            : "completed",
+          : "completed",
     }));
     router.refresh();
+  }
+
+  async function startCleaning() {
+    setWorking(true);
+    setError(null);
+    const response = await fetch(`/api/bookings/${job.id}/start`, {
+      body: JSON.stringify({ role: "cleaner" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as {
+      error?: string;
+      started?: boolean;
+    };
+    setWorking(false);
+    if (!response.ok) {
+      setError(result.error ?? "Unable to start the clean.");
+      return;
+    }
+    if (result.started) {
+      setJob((current) => ({
+        ...current,
+        checkin_verified: true,
+        status: "in_progress",
+      }));
+    } else {
+      setError("Waiting for the customer to confirm they have let you in.");
+    }
+  }
+
+  async function sendSos() {
+    setWorking(true);
+    setError(null);
+    const response = await fetch(`/api/bookings/${job.id}/sos`, {
+      body: JSON.stringify({}),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as { error?: string };
+    setWorking(false);
+    setError(
+      response.ok
+        ? "Emergency alert sent to Mundoria."
+        : (result.error ?? "Unable to send the alert."),
+    );
   }
 
   async function confirmGate(confirmed: boolean) {
@@ -366,7 +411,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
               Release this job
             </Button>
           ) : null}
-          {job.status === "cleaner_en_route" ? (
+          {job.status === "cleaner_en_route" && !job.arrived_at ? (
             <CheckInAction
               durationHours={job.estimated_duration_hours}
               scheduledDate={job.scheduled_date}
@@ -374,6 +419,21 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
               working={working}
               onCheckIn={() => void action("checkin")}
             />
+          ) : null}
+          {job.status === "cleaner_en_route" && job.arrived_at ? (
+            <Button disabled={working} onClick={() => void startCleaning()}>
+              Start cleaning
+            </Button>
+          ) : null}
+          {["confirmed", "cleaner_en_route", "in_progress"].includes(job.status) ? (
+            <Button
+              disabled={working}
+              onClick={() => void sendSos()}
+              variant="destructive"
+            >
+              <ShieldAlert className="mr-2 h-4 w-4" />
+              Emergency
+            </Button>
           ) : null}
           {job.status === "in_progress" ? (
             <>

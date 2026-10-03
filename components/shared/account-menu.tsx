@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   ChevronDown,
+  CreditCard,
   LogOut,
   MapPin,
   UserRound,
@@ -140,6 +141,7 @@ export const CUSTOMER_ACCOUNT_MENU: AccountMenuItem[] = [
   { href: "/profile", icon: UserRound, label: "Profile" },
   { href: "/bookings", icon: CalendarDays, label: "Sessions" },
   { href: "/addresses", icon: MapPin, label: "Addresses" },
+  { href: "/payments", icon: CreditCard, label: "Payments" },
 ];
 
 export const CLEANER_ACCOUNT_MENU: AccountMenuItem[] = [

@@ -78,7 +78,7 @@ export default async function CleanerPerformancePage() {
           }
         />
         <Metric
-          label="Cancellation reliability · 15%"
+          label="Reliability · cancelling often means fewer new offers"
           value={hasCompletedJobs ? cancellationReliability : null}
         />
       </div>

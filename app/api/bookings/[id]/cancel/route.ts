@@ -9,12 +9,14 @@ import {
 } from "@/lib/bookings/recurring";
 import { canCustomerChangeSchedule } from "@/lib/bookings/schedule";
 import { sendBrandedEmail } from "@/lib/email/send-email";
+import { changePro, cancelSeriesVisits } from "@/lib/bookings/series-actions";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
 const schema = z.object({
   reason: z.string().trim().min(3).max(500),
+  scope: z.enum(["visit", "series"]).default("visit"),
 });
 
 export async function POST(
@@ -45,6 +47,34 @@ export async function POST(
     .single();
   if (!booking) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  }
+
+  if (/another pro|different pro|change pro/i.test(parsed.data.reason)) {
+    try {
+      await changePro({ bookingId: params.id, customerId: user.id });
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Unable to change pro." },
+        { status: 400 },
+      );
+    }
+    return NextResponse.json({ changedPro: true, success: true });
+  }
+
+  if (parsed.data.scope === "series" && booking.is_recurring) {
+    try {
+      const result = await cancelSeriesVisits({
+        bookingId: params.id,
+        customerId: user.id,
+        reason: parsed.data.reason,
+      });
+      return NextResponse.json({ ...result, success: true });
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Unable to cancel the series." },
+        { status: 400 },
+      );
+    }
   }
 
   const hoursLeft = hoursUntilBookingStart(

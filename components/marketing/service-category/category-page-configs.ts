@@ -18,12 +18,9 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
           name: "End of tenancy cleaning",
         },
         {
-          description: "A full reset before settling into a new home.",
-          name: "Move-in cleaning",
-        },
-        {
-          description: "A move-out clean for handovers and deposit confidence.",
-          name: "Move-out cleaning",
+          description:
+            "A full reset when you are moving in or moving out, including handovers.",
+          name: "Move-in / move-out cleaning",
         },
       ],
       servicesHeading: "What moving home cleaning services does Mundoria offer?",
@@ -65,14 +62,9 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
       label: "End of Tenancy Cleaning",
     },
     {
-      href: "/booking/new?service=move_in",
+      href: "/booking/new?service=move_in&category=moving_home",
       image: "/images/marketing/landing/moving-move-in.png",
-      label: "Move-In Cleaning",
-    },
-    {
-      href: "/booking/new?service=move_out",
-      image: "/images/marketing/landing/moving-move-out.png",
-      label: "Move-Out Cleaning",
+      label: "Move-in / move-out cleaning",
     },
   ],
   servicesTitle: "Choose your moving home cleaning service",
@@ -84,7 +76,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
   bookCta: "Book short-let cleaning",
   bullets: [
     "Guest-ready turnovers built for hosts",
-    "One-off or recurring schedules",
+    "Recurring host schedules",
     "Reliable, vetted cleaners you can trust",
   ],
   faqs: [
@@ -172,7 +164,7 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
         {
           description:
             "Extra-care cleaning while recovering from illness, injury or limited mobility.",
-          name: "Illness and Injury Recovery Cleaning",
+          name: "Illness & injury recovery",
         },
         {
           description: "A comprehensive clean before or after hospital discharge.",
@@ -224,7 +216,7 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
     {
       href: "/booking/new?service=illness_recovery",
       image: "/images/marketing/landing/recovery-illness.png",
-      label: "Illness and Injury Recovery Cleaning",
+      label: "Illness & injury recovery",
     },
     {
       href: "/booking/new?service=hospital_discharge",

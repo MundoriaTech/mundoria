@@ -76,6 +76,7 @@ export const bookingDraftSchema = z.object({
   recommendedCleaningStandard: cleaningStandard.nullable().default(null),
   recommendedServiceType: serviceType.nullable().default(null),
   recentlyMoved: z.boolean().nullable().default(null),
+  keysPolicy: z.enum(["with_cleaner", "key_box"]).nullable().default(null),
   hasPets: z.boolean().nullable().default(null),
   petTypes: z
     .array(z.string().trim().min(1))

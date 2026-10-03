@@ -76,7 +76,11 @@ export function AppDashboardShell({
   return (
     <div className="min-h-screen bg-[#faf8ff] text-[#1c133b]">
       {desktop ? (
-        <LandingNavbar customerHref={bookingHref} viewer={viewer} />
+        <LandingNavbar
+          accountMenuItems={accountMenuItems}
+          customerHref={bookingHref}
+          viewer={viewer}
+        />
       ) : null}
 
       {!desktop ? (

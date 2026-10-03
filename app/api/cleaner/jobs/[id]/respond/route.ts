@@ -191,6 +191,17 @@ export async function POST(
       .in("status", ["reserve", "notified"]);
 
     if (wasAssigned) {
+      const { data: reliability } = await admin
+        .from("cleaner_profiles")
+        .select("cancellation_count")
+        .eq("id", user.id)
+        .single();
+      await admin
+        .from("cleaner_profiles")
+        .update({
+          cancellation_count: Number(reliability?.cancellation_count ?? 0) + 1,
+        })
+        .eq("id", user.id);
       await activateEmergencyList(bookingId, {
         excludeCleanerIds: [user.id],
       });

@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     !parsed.data.isRecurring
   ) {
     return NextResponse.json(
-      { error: "Commercial cleaning needs a repeat schedule." },
+      { error: "This service needs a repeat schedule." },
       { status: 400 },
     );
   }

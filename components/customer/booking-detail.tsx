@@ -13,6 +13,7 @@ import { BookingSummaryCard } from "@/components/customer/booking-basket";
 import { CleanerMap } from "@/components/customer/cleaner-map";
 import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
 import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
+import { TipPanel } from "@/components/customer/tip-panel";
 import { RatingForm } from "@/components/customer/rating-form";
 import { RescheduleModal } from "@/components/customer/reschedule-modal";
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
@@ -72,6 +73,10 @@ export function BookingDetail({
     booking.status === "completed" && !hasRating,
   );
   const [reason, setReason] = useState("");
+  const [cancelScope, setCancelScope] = useState<"visit" | "series">("visit");
+  const [pauseStart, setPauseStart] = useState("");
+  const [pauseEnd, setPauseEnd] = useState("");
+  const [showPause, setShowPause] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canCancel = useMemo(
     () =>
@@ -105,7 +110,23 @@ export function BookingDetail({
     [booking],
   );
   const needsPayment =
-    booking.payment_status === "unpaid" && booking.status !== "cancelled";
+    booking.service_type !== "regular" &&
+    booking.payment_status === "unpaid" &&
+    booking.status !== "cancelled";
+  const canChangePro =
+    canCancel &&
+    Boolean(booking.cleaner_id) &&
+    (!booking.is_recurring || Boolean(booking.parent_booking_id));
+  const tipOpen = useMemo(() => {
+    if (Number(booking.tip_pence ?? 0) > 0) return false;
+    if (!["completed", "awaiting_customer_confirmation"].includes(booking.status)) {
+      return false;
+    }
+    const finished = new Date(
+      booking.actual_end_time ?? booking.updated_at,
+    ).getTime();
+    return Date.now() - finished < 24 * 60 * 60 * 1000;
+  }, [booking]);
 
   const waitingForCleaner = isWaitingForCleanerAcceptance(booking.status);
   const cleanerVisible = isCleanerVisibleToCustomer(booking.status);
@@ -182,7 +203,7 @@ export function BookingDetail({
   async function cancelBooking() {
     setError(null);
     const response = await fetch(`/api/bookings/${booking.id}/cancel`, {
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ reason, scope: cancelScope }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
@@ -200,6 +221,93 @@ export function BookingDetail({
       note: "Any eligible refund will be returned to your original payment method.",
     });
     router.refresh();
+  }
+
+  async function changePro() {
+    setError(null);
+    const response = await fetch(`/api/bookings/${booking.id}/change-pro`, {
+      method: "POST",
+    });
+    const result = (await response.json()) as { error?: string };
+    if (!response.ok) {
+      setError(result.error ?? "Unable to change pro.");
+      return;
+    }
+    success({
+      kind: "sent",
+      title: "Looking for another pro",
+      note: booking.is_recurring
+        ? "The remaining visits are cancelled and we are searching again."
+        : "We have started a new search.",
+    });
+    router.refresh();
+  }
+
+  async function pauseSeries() {
+    setError(null);
+    const response = await fetch(`/api/bookings/${booking.id}/pause`, {
+      body: JSON.stringify({ endsOn: pauseEnd, startsOn: pauseStart }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as { error?: string };
+    if (!response.ok) {
+      setError(result.error ?? "Unable to pause this regular clean.");
+      return;
+    }
+    setShowPause(false);
+    success({
+      kind: "done",
+      title: "Regular clean paused",
+      note: "Visits in those dates are skipped. They resume on their own after the pause.",
+    });
+    router.refresh();
+  }
+
+  async function confirmStart() {
+    setError(null);
+    const response = await fetch(`/api/bookings/${booking.id}/start`, {
+      body: JSON.stringify({ role: "customer" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as {
+      error?: string;
+      penaltyPence?: number;
+      started?: boolean;
+    };
+    if (!response.ok) {
+      setError(result.error ?? "Unable to confirm the start.");
+      return;
+    }
+    success({
+      kind: "done",
+      title: result.started ? "Cleaning has started" : "Waiting for your cleaner",
+      note: result.started
+        ? result.penaltyPence
+          ? `A waiting charge of £${(result.penaltyPence / 100).toFixed(2)} applies after the 5-minute grace.`
+          : "You both confirmed, so the clean has started."
+        : "Your cleaner still needs to tap Start cleaning.",
+    });
+    router.refresh();
+  }
+
+  async function sendSos() {
+    const response = await fetch(`/api/bookings/${booking.id}/sos`, {
+      body: JSON.stringify({}),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json()) as { error?: string };
+    if (!response.ok) {
+      setError(result.error ?? "Unable to send the alert.");
+      return;
+    }
+    success({
+      kind: "sent",
+      title: "Emergency alert sent",
+      note: "Mundoria has been told.",
+    });
   }
 
   const confirmByLabel = offerExpiresAt
@@ -261,6 +369,41 @@ export function BookingDetail({
               </Link>
             </Button>
           ) : null}
+          {canChangePro ? (
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => void changePro()}
+              variant="outline"
+            >
+              Change pro
+            </Button>
+          ) : null}
+          {booking.is_recurring && canCancel ? (
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => setShowPause(true)}
+              variant="outline"
+            >
+              Pause for a holiday
+            </Button>
+          ) : null}
+          {booking.arrived_at && !booking.customer_start_confirmed_at ? (
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => void confirmStart()}
+            >
+              Start cleaning
+            </Button>
+          ) : null}
+          {["confirmed", "cleaner_en_route", "in_progress"].includes(booking.status) ? (
+            <Button
+              className="min-h-11 w-full sm:w-auto"
+              onClick={() => void sendSos()}
+              variant="destructive"
+            >
+              Emergency
+            </Button>
+          ) : null}
           {canCancel ? (
             <Button
               className="min-h-11 w-full sm:w-auto"
@@ -272,6 +415,10 @@ export function BookingDetail({
           ) : null}
         </div>
       </div>
+
+      {error && !showCancel && !showPause ? (
+        <ActionError message={error} title="Something went wrong" />
+      ) : null}
 
       {booking.status === "cancelled" ? (
         <div className="rounded-xl bg-muted p-4 text-sm text-foreground">
@@ -392,7 +539,7 @@ export function BookingDetail({
               <div className="mt-3">
                 <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
                   <Link href={`/booking/${booking.id}/receipt`}>
-                    View receipt / invoice
+                    Download invoice
                   </Link>
                 </Button>
               </div>
@@ -434,6 +581,13 @@ export function BookingDetail({
                   </span>
                 </div>
               </div>
+              {booking.cleaner_id ? (
+                <Button asChild className="mt-4" size="sm" variant="outline">
+                  <Link href={`/booking/new?rebook=${booking.id}&keep=1`}>
+                    Book this cleaner again
+                  </Link>
+                </Button>
+              ) : null}
             </div>
           ) : waitingForCleaner ? (
             <p className="mt-4 text-sm text-[#5a5470]">
@@ -501,6 +655,47 @@ export function BookingDetail({
         </section>
       ) : null}
 
+      {tipOpen ? (
+        <TipPanel bookingId={booking.id} onTipped={() => router.refresh()} />
+      ) : null}
+
+      {showPause ? (
+        <ConfirmModal
+          action="Pause visits"
+          confirmDisabled={!pauseStart || !pauseEnd || pauseEnd < pauseStart}
+          description="Pick the first and last day you will be away. Visits in between are skipped, then the regular clean carries on by itself."
+          onCancel={() => setShowPause(false)}
+          onConfirm={() => void pauseSeries()}
+          title="Pause this regular clean"
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="text-sm font-medium">
+              Start
+              <input
+                className="mt-1 h-11 w-full rounded-xl border px-3"
+                onChange={(event) => setPauseStart(event.target.value)}
+                type="date"
+                value={pauseStart}
+              />
+            </label>
+            <label className="text-sm font-medium">
+              End
+              <input
+                className="mt-1 h-11 w-full rounded-xl border px-3"
+                onChange={(event) => setPauseEnd(event.target.value)}
+                type="date"
+                value={pauseEnd}
+              />
+            </label>
+          </div>
+          {error ? (
+            <div className="mt-2">
+              <ActionError message={error} title="Couldn’t pause this clean" />
+            </div>
+          ) : null}
+        </ConfirmModal>
+      ) : null}
+
       {showCancel ? (
         <ConfirmModal
           action="Confirm cancellation"
@@ -516,11 +711,33 @@ export function BookingDetail({
           onConfirm={cancelBooking}
           title="Cancel this booking?"
         >
+          {booking.is_recurring ? (
+            <div className="mb-3 grid gap-2 text-sm">
+              <label className="flex items-center gap-2">
+                <input
+                  checked={cancelScope === "visit"}
+                  name="cancel-scope"
+                  onChange={() => setCancelScope("visit")}
+                  type="radio"
+                />
+                This visit only
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  checked={cancelScope === "series"}
+                  name="cancel-scope"
+                  onChange={() => setCancelScope("series")}
+                  type="radio"
+                />
+                This visit and all future visits
+              </label>
+            </div>
+          ) : null}
           <textarea
             autoFocus
             className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] placeholder:text-[#8b8798] focus:ring-2"
             onChange={(event) => setReason(event.target.value)}
-            placeholder="Cancellation reason"
+            placeholder="Cancellation reason. Write “I want another pro” to search again instead of cancelling a one-off."
             value={reason}
           />
           {error ? (
