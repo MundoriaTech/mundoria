@@ -27,6 +27,7 @@ import {
   LAUNCH_CITY,
   birminghamAreaBySlug,
   popularMarketingServices,
+  servicePlacePath,
 } from "@/lib/seo/marketing";
 import {
   BIRMINGHAM_LOCATION_CLEANERS,
@@ -172,9 +173,9 @@ export default function BirminghamAreaPage({ params }: PageProps) {
             {popular.map((service) => (
               <BrandedCardLink
                 description={service.description}
-                href={`/cleaning/${service.slug}`}
+                href={servicePlacePath(service.slug, area.slug)}
                 key={service.slug}
-                label={service.label}
+                label={`${service.label} in ${area.name}`}
                 meta={service.categoryLabel}
               />
             ))}

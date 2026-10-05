@@ -66,6 +66,42 @@ export function marketingServiceBySlug(slug: string) {
   return MARKETING_SERVICES.find((service) => service.slug === slug) ?? null;
 }
 
+export function isPublicMarketingService(service: MarketingService) {
+  return SERVICES.find((item) => item.value === service.value)?.hidden !== true;
+}
+
+/** Services customers can book. Hidden catalogue leftovers stay off location URLs. */
+export function publicMarketingServices() {
+  return MARKETING_SERVICES.filter(isPublicMarketingService);
+}
+
+/** `/cleaning/{service}/birmingham` or `/cleaning/{service}/birmingham/{area}`. */
+export function servicePlacePath(serviceSlug: string, areaSlug?: string) {
+  const city = `/cleaning/${serviceSlug}/${LAUNCH_CITY.slug}`;
+  return areaSlug ? `${city}/${areaSlug}` : city;
+}
+
+export function servicePlaceFaqs(service: MarketingService, place: string) {
+  return [
+    {
+      answer: `${service.label} in ${place} starts from ${service.fromPrice}. The price you pay depends on property size, cleaning standard, schedule and any add-ons. Mundoria shows the estimate before you pay.`,
+      question: `How much does ${service.label.toLowerCase()} cost in ${place}?`,
+    },
+    {
+      answer: `Choose ${service.label}, enter your address in ${place}, pick a date and time, and pay securely. Mundoria matches a vetted cleaner and keeps the visit status up to date until the clean is finished.`,
+      question: `How do I book ${service.label.toLowerCase()} in ${place}?`,
+    },
+    {
+      answer: service.description,
+      question: `What does ${service.label.toLowerCase()} cover in ${place}?`,
+    },
+    {
+      answer: `${service.label} is available across Birmingham, including the Jewellery Quarter, Edgbaston, Harborne, Moseley, Kings Heath and Selly Oak, when a cleaner covers that address.`,
+      question: `Where in Birmingham can I book ${service.label.toLowerCase()}?`,
+    },
+  ];
+}
+
 export function marketingServicesByCategory(category: ServiceCategory) {
   return MARKETING_SERVICES.filter((service) => service.category === category);
 }
