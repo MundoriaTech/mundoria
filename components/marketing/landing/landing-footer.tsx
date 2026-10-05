@@ -4,8 +4,10 @@ import { CookieSettingsLink } from "@/components/analytics/cookie-settings-butto
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import {
+  BIRMINGHAM_AREAS,
   LAUNCH_CITY,
   popularMarketingServices,
+  servicePlacePath,
 } from "@/lib/seo/marketing";
 
 export function LandingFooter({
@@ -35,7 +37,10 @@ export function LandingFooter({
         ["All services", "/cleaning"],
         ...popularSeoServices.map(
           (service) =>
-            [service.label, `/cleaning/${service.slug}`] as [string, string],
+            [
+              `${service.label} in Birmingham`,
+              servicePlacePath(service.slug),
+            ] as [string, string],
         ),
       ],
       title: "Services",
@@ -46,6 +51,13 @@ export function LandingFooter({
         ["Become a cleaner", cleanerHref],
         ["Cleaner login", loginHref],
         ["Birmingham coverage", `/cleaners/${LAUNCH_CITY.slug}`],
+        ...BIRMINGHAM_AREAS.map(
+          (area) =>
+            [
+              area.name,
+              `/cleaners/${LAUNCH_CITY.slug}/${area.slug}`,
+            ] as [string, string],
+        ),
       ],
       title: "Cleaners",
     },

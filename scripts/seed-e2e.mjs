@@ -14,6 +14,12 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+import {
+  CLEANER_NAME_OFFSET,
+  demoPerson,
+  districtForId,
+} from "./demo-names.mjs";
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CUSTOMERS = Number(process.env.SEED_CUSTOMERS ?? 2500);
@@ -69,12 +75,17 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function createUser({ email, fullName, role, phone }) {
+async function createUser({ email, fullName, gender, role, phone }) {
   const { data, error } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
     password: PASSWORD,
-    user_metadata: { full_name: fullName, phone, role },
+    user_metadata: {
+      full_name: fullName,
+      ...(gender ? { gender } : {}),
+      phone,
+      role,
+    },
   });
   if (!error && data.user) return data.user;
 
@@ -100,13 +111,14 @@ async function ensureDemoUsers() {
     },
     {
       email: "demo.customer@seed.mundoria.local",
-      fullName: "Demo Customer",
+      fullName: "Sophie Bennett",
       role: "customer",
       phone: "+447700900001",
     },
     {
       email: "demo.cleaner@seed.mundoria.local",
-      fullName: "Demo Cleaner",
+      fullName: "Hannah Adeyemi",
+      gender: "woman",
       role: "cleaner",
       phone: "+447711900001",
     },
@@ -130,10 +142,14 @@ async function createBatch(role, count, offset) {
   for (let i = 0; i < count; i += 1) {
     const n = offset + i + 1;
     const email = `${role}${String(n).padStart(4, "0")}@seed.mundoria.local`;
+    const person = demoPerson(
+      role === "cleaner" ? n + CLEANER_NAME_OFFSET : n,
+    );
     try {
       const user = await createUser({
         email,
-        fullName: `${role === "customer" ? "Customer" : "Cleaner"} ${n}`,
+        fullName: person.fullName,
+        gender: role === "cleaner" ? person.gender : undefined,
         phone: `+4477${role === "customer" ? "0" : "1"}${String(n).padStart(7, "0")}`.slice(
           0,
           13,
@@ -174,7 +190,6 @@ async function makeCleanersMatchReady(cleanerIds) {
   await admin
     .from("cleaner_profiles")
     .update({
-      bio: "Seeded Birmingham cleaner — available across Mundoria demo bookings.",
       dbs_verified: true,
       id_verified: true,
       onboarding_complete: true,
@@ -183,6 +198,18 @@ async function makeCleanersMatchReady(cleanerIds) {
       working_radius_km: 80,
     })
     .in("id", cleanerIds);
+
+  await Promise.all(
+    cleanerIds.map((cleaner_id) => {
+      const district = districtForId(cleaner_id);
+      return admin
+        .from("cleaner_profiles")
+        .update({
+          bio: `Independent cleaner covering ${district.area}. Regular, deep and one-off cleans, with a checklist you can follow in the app.`,
+        })
+        .eq("id", cleaner_id);
+    }),
+  );
 
   for (const service_type of SERVICES) {
     const services = cleanerIds.map((cleaner_id) => ({
@@ -202,10 +229,18 @@ async function makeCleanersMatchReady(cleanerIds) {
   // Replace areas with a single Birmingham-wide prefix so any B* postcode matches.
   await admin.from("cleaner_working_areas").delete().in("cleaner_id", cleanerIds);
   await admin.from("cleaner_working_areas").insert(
-    cleanerIds.map((cleaner_id) => ({
-      cleaner_id,
-      ...MATCH_AREA,
-    })),
+    cleanerIds.flatMap((cleaner_id) => {
+      const district = districtForId(cleaner_id);
+      return [
+        { cleaner_id, ...MATCH_AREA },
+        {
+          cleaner_id,
+          latitude: 52.47,
+          longitude: -1.89,
+          postcode_prefix: district.prefix,
+        },
+      ];
+    }),
   );
 
   // One wide slot every day covers morning / afternoon / evening bookings.

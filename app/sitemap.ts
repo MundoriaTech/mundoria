@@ -7,12 +7,15 @@ import {
 } from "@/lib/content/editorial";
 import {
   BIRMINGHAM_AREAS,
+  BIRMINGHAM_POSTCODES,
   LAUNCH_CITY,
   MARKETING_CATEGORY_PATHS,
   MARKETING_SERVICES,
+  postcodePath,
   publicMarketingServices,
   servicePlacePath,
 } from "@/lib/seo/marketing";
+import { SERVICE_GUIDE_TOPICS, serviceGuidePath } from "@/lib/seo/service-guides";
 import { absoluteUrl } from "@/lib/seo/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -68,6 +71,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ]);
 
+  const guideRoutes = publicMarketingServices().flatMap((service) =>
+    SERVICE_GUIDE_TOPICS.map((topic) => ({
+      changeFrequency: "monthly" as const,
+      lastModified: now,
+      priority: 0.55,
+      url: absoluteUrl(serviceGuidePath(service.slug, topic)),
+    })),
+  );
+
+  const postcodeRoutes = BIRMINGHAM_POSTCODES.map((item) => ({
+    changeFrequency: "weekly" as const,
+    lastModified: now,
+    priority: 0.55,
+    url: absoluteUrl(postcodePath(item.prefix)),
+  }));
+
   const areaRoutes = BIRMINGHAM_AREAS.map((area) => ({
     changeFrequency: "weekly" as const,
     lastModified: now,
@@ -109,6 +128,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...categoryRoutes,
     ...serviceRoutes,
     ...servicePlaceRoutes,
+    ...guideRoutes,
+    ...postcodeRoutes,
     ...areaRoutes,
     ...blogRoutes,
     ...helpCollectionRoutes,

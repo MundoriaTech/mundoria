@@ -272,6 +272,36 @@ export function birminghamAreaBySlug(slug: string) {
   return BIRMINGHAM_AREAS.find((area) => area.slug === slug) ?? null;
 }
 
+/** Districts with seeded cleaner coverage. Empty postcodes stay unpublished. */
+export const BIRMINGHAM_POSTCODES = [
+  { areaSlug: "jewellery-quarter", prefix: "B1" },
+  { areaSlug: "jewellery-quarter", prefix: "B3" },
+  { areaSlug: "moseley", prefix: "B13" },
+  { areaSlug: "kings-heath", prefix: "B14" },
+  { areaSlug: "edgbaston", prefix: "B15" },
+  { areaSlug: "edgbaston", prefix: "B16" },
+  { areaSlug: "harborne", prefix: "B17" },
+  { areaSlug: "selly-oak", prefix: "B29" },
+] as const;
+
+export function birminghamPostcode(prefix: string) {
+  return (
+    BIRMINGHAM_POSTCODES.find(
+      (item) => item.prefix.toLowerCase() === prefix.toLowerCase(),
+    ) ?? null
+  );
+}
+
+export function postcodePath(prefix: string) {
+  return `/cleaners/${LAUNCH_CITY.slug}/${prefix.toLowerCase()}`;
+}
+
+export function prefixesForArea(areaSlug: string) {
+  return BIRMINGHAM_POSTCODES.filter((item) => item.areaSlug === areaSlug).map(
+    (item) => item.prefix,
+  );
+}
+
 export const MARKETING_CATEGORY_PATHS = [
   "/cleaning/residential",
   "/cleaning/moving-home",

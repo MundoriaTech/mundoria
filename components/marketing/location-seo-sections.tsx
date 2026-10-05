@@ -210,7 +210,13 @@ export function LocationFeaturedCleaners({
   cleaners,
   place,
 }: {
-  cleaners: Array<{ areas: string; name: string; rating: number }>;
+  cleaners: Array<{
+    areas: string;
+    avatarUrl?: string | null;
+    href?: string;
+    name: string;
+    rating: number;
+  }>;
   place: string;
 }) {
   if (!cleaners.length) return null;
@@ -224,30 +230,49 @@ export function LocationFeaturedCleaners({
         receiving jobs. Availability varies by day and service.
       </p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cleaners.map((cleaner) => (
-          <article
-            className="rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)]"
-            key={cleaner.name}
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#efe6ff] text-sm font-bold text-[#6a45b8]">
-              {cleaner.name
-                .split(" ")
-                .map((part) => part[0])
-                .join("")
-                .slice(0, 2)}
-            </div>
-            <h3 className="mt-4 text-base font-semibold text-[#1c133b]">
-              {cleaner.name}
-            </h3>
-            <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-[#823fb2]">
-              Domestic cleaner
-            </p>
-            <p className="mt-2 text-sm text-[#5a5470]">{cleaner.areas}</p>
-            <p className="mt-3 text-sm font-semibold text-[#1c133b]">
-              {cleaner.rating.toFixed(1)} / 5
-            </p>
-          </article>
-        ))}
+        {cleaners.map((cleaner) => {
+          const card = (
+            <>
+              {cleaner.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt=""
+                  className="h-14 w-14 rounded-full object-cover object-top"
+                  src={cleaner.avatarUrl}
+                />
+              ) : (
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#efe6ff] text-sm font-bold text-[#6a45b8]">
+                  {cleaner.name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .join("")
+                    .slice(0, 2)}
+                </div>
+              )}
+              <h3 className="mt-4 text-base font-semibold text-[#1c133b]">
+                {cleaner.name}
+              </h3>
+              <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-[#823fb2]">
+                Domestic cleaner
+              </p>
+              <p className="mt-2 text-sm text-[#5a5470]">{cleaner.areas}</p>
+              <p className="mt-3 text-sm font-semibold text-[#1c133b]">
+                {cleaner.rating.toFixed(1)} / 5
+              </p>
+            </>
+          );
+          const className =
+            "rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)]";
+          return cleaner.href ? (
+            <Link className={`${className} block transition hover:-translate-y-0.5`} href={cleaner.href} key={cleaner.href}>
+              {card}
+            </Link>
+          ) : (
+            <article className={className} key={cleaner.name}>
+              {card}
+            </article>
+          );
+        })}
       </div>
     </BrandedSection>
   );

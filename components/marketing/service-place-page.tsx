@@ -11,7 +11,15 @@ import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
-import { LocationReviews } from "@/components/marketing/location-seo-sections";
+import {
+  LocationFeaturedCleaners,
+  LocationReviews,
+} from "@/components/marketing/location-seo-sections";
+import {
+  loadDirectoryCleaners,
+  loadDirectoryReviews,
+  reviewsOrFallback,
+} from "@/lib/seo/birmingham-directory";
 import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
@@ -21,11 +29,15 @@ import {
   servicePlaceFaqs,
   servicePlacePath,
 } from "@/lib/seo/marketing";
-import { BIRMINGHAM_LOCATION_REVIEWS } from "@/lib/seo/location-social-proof";
+import {
+  SERVICE_GUIDE_TOPICS,
+  serviceGuide,
+  serviceGuidePath,
+} from "@/lib/seo/service-guides";
 import { absoluteUrl } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
-export function ServicePlacePage({
+export async function ServicePlacePage({
   area,
   service,
 }: {
@@ -44,6 +56,17 @@ export function ServicePlacePage({
   const otherAreas = area
     ? BIRMINGHAM_AREAS.filter((item) => item.slug !== area.slug)
     : BIRMINGHAM_AREAS;
+  const cleaners = await loadDirectoryCleaners({
+    areaSlug: area?.slug,
+    limit: 6,
+    serviceType: service.value,
+  });
+  const reviews = reviewsOrFallback(
+    await loadDirectoryReviews({
+      areaSlug: area?.slug,
+      limit: 4,
+    }),
+  );
 
   return (
     <MarketingShell>
@@ -152,6 +175,29 @@ export function ServicePlacePage({
           </Link>
         </BrandedSection>
 
+        {cleaners?.length ? (
+          <LocationFeaturedCleaners cleaners={cleaners} place={place} />
+        ) : null}
+
+        <BrandedSection tone="cream">
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            Guides for {service.label.toLowerCase()} in Birmingham
+          </h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {SERVICE_GUIDE_TOPICS.map((topic) => {
+              const guide = serviceGuide(service, topic);
+              return (
+                <BrandedCardLink
+                  description={guide.description}
+                  href={serviceGuidePath(service.slug, topic)}
+                  key={topic}
+                  label={guide.title}
+                />
+              );
+            })}
+          </div>
+        </BrandedSection>
+
         {siblings.length ? (
           <BrandedSection tone="cream">
             <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
@@ -199,10 +245,7 @@ export function ServicePlacePage({
           </ul>
         </BrandedSection>
 
-        <LocationReviews
-          place={place}
-          reviews={[...BIRMINGHAM_LOCATION_REVIEWS]}
-        />
+        <LocationReviews place={place} reviews={reviews} />
 
         <BrandedSection>
           {faqs.map((item) => (
