@@ -8,11 +8,15 @@ import {
   BrandedPageWash,
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
+import { LocationReviews } from "@/components/marketing/location-seo-sections";
 import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
-import { loadDirectoryCleaner } from "@/lib/seo/birmingham-directory";
+import {
+  loadDirectoryCleaner,
+  loadDirectoryReviews,
+} from "@/lib/seo/birmingham-directory";
 import { LAUNCH_CITY, birminghamAreaBySlug } from "@/lib/seo/marketing";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
@@ -44,6 +48,10 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
 
   const cleaner = await loadDirectoryCleaner(shortId, area.slug);
   if (!cleaner) notFound();
+  const reviews = await loadDirectoryReviews({
+    cleanerId: cleaner.id,
+    limit: 6,
+  });
 
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
@@ -77,15 +85,16 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
           ],
         }}
       />
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description={cleaner.bio}
           eyebrow={`${area.name} · Birmingham`}
           primaryHref={bookingHref}
-          primaryLabel="Book this area"
+          primaryLabel="Book a clean"
           secondaryHref={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
           secondaryLabel={`More cleaners in ${area.name}`}
           title={cleaner.name}
+          underNav
         />
         <BrandedSection>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
@@ -97,13 +106,21 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                 src={cleaner.avatarUrl}
               />
             ) : null}
-            <dl className="grid flex-1 gap-4 sm:grid-cols-3">
+            <dl className="grid flex-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <dt className="text-xs font-medium uppercase tracking-[0.16em] text-[#c79c66]">
                   Rating
                 </dt>
                 <dd className="mt-1 text-lg font-semibold text-[#1c133b]">
                   {cleaner.rating > 0 ? `${cleaner.rating.toFixed(1)} / 5` : "New"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-[0.16em] text-[#c79c66]">
+                  Reviews
+                </dt>
+                <dd className="mt-1 text-lg font-semibold text-[#1c133b]">
+                  {cleaner.reviewCount}
                 </dd>
               </div>
               <div>
@@ -138,6 +155,13 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
             </Link>
           </p>
         </BrandedSection>
+        {reviews?.length ? (
+          <LocationReviews
+            heading={`Reviews for ${cleaner.name}`}
+            place={area.name}
+            reviews={reviews}
+          />
+        ) : null}
         <BrandedCtaBand
           body="Choose a service and time. Mundoria matches a cleaner who covers your postcode."
           href={bookingHref}

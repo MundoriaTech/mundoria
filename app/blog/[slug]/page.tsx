@@ -7,31 +7,40 @@ import {
   BrandedPageWash,
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
+import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { EditorialBody } from "@/components/marketing/editorial-body";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { MagEngageBand } from "@/components/marketing/mag-engage";
 import {
   getBlogPostBySlug,
+  listPublishedBlogPosts,
   listRelatedBlogPosts,
   renderEditorialBlocks,
 } from "@/lib/content/editorial";
 import { magThemeFor } from "@/lib/content/mag-theme";
-import { buildPageMetadata } from "@/lib/seo/site";
+import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
 type PageProps = { params: { slug: string } };
 
 export const revalidate = 60;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const posts = await listPublishedBlogPosts();
+  return posts.map((post) => ({ slug: post.slug }));
+}
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const post = await getBlogPostBySlug(params.slug);
-  if (!post) return {};
+  const headline = post?.title?.trim() || "Mundoria Mag";
   return buildPageMetadata({
-    description: post.excerpt ?? post.title,
-    path: `/blog/${post.slug}`,
-    title: `${post.title} | Mundoria Mag`,
+    description: post?.excerpt?.trim() || headline,
+    path: `/blog/${post?.slug ?? params.slug}`,
+    title: `${headline} | Mundoria Mag`,
   });
 }
 
@@ -55,9 +64,32 @@ export default async function BlogPostPage({ params }: PageProps) {
   const theme = magThemeFor(post.category);
 
   return (
-    <BrandedPageWash>
+    <BrandedPageWash underNav>
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            author: {
+              "@type": "Person",
+              name: post.author_name || "Mundoria",
+            },
+            datePublished: post.published_at ?? post.created_at,
+            description: post.excerpt ?? post.title,
+            headline: post.title,
+            image: post.cover_url ? [post.cover_url] : undefined,
+            mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
+            publisher: {
+              "@type": "Organization",
+              name: "Mundoria",
+              url: absoluteUrl("/"),
+            },
+          }}
+        />
         {/* Editorial hero: cover first, title below — real-blog rhythm */}
-        <section className="relative px-4 pt-10 sm:px-8 sm:pt-12 lg:px-12">
+        <section
+          className="relative px-4 sm:px-8 lg:px-12"
+          style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2.5rem)` }}
+        >
           <div className="mx-auto max-w-4xl">
             <Link
               className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"

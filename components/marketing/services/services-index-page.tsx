@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
+import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { LazyImage } from "@/components/shared/lazy-image";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { bookingServiceImages } from "@/lib/customer/booking-flow";
@@ -183,7 +184,10 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
   });
 
   return (
-    <div className="relative overflow-hidden bg-[#faf8ff]">
+    <div
+      className="relative overflow-hidden bg-[#faf8ff]"
+      style={{ marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` }}
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] sm:h-[30rem]"
@@ -193,7 +197,10 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
         }}
       />
 
-      <section className="relative px-4 pb-6 pt-10 sm:px-8 sm:pb-8 sm:pt-14 lg:px-12">
+      <section
+        className="relative px-4 pb-6 sm:px-8 sm:pb-8 lg:px-12"
+        style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 3.5rem)` }}
+      >
         <div className="mx-auto max-w-6xl">
           <h1 className="max-w-2xl text-balance text-[2.35rem] font-semibold leading-[1.05] tracking-[-0.04em] text-[#1c133b] sm:text-5xl lg:text-[3.35rem]">
             Cleaning services, clearly laid out.

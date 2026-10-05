@@ -292,8 +292,35 @@ export function birminghamPostcode(prefix: string) {
   );
 }
 
+/** `/cleaners/birmingham/harborne-b17` — place name in the path, postcode at the end. */
 export function postcodePath(prefix: string) {
-  return `/cleaners/${LAUNCH_CITY.slug}/${prefix.toLowerCase()}`;
+  const district = birminghamPostcode(prefix);
+  const slug = district
+    ? `${district.areaSlug}-${district.prefix.toLowerCase()}`
+    : prefix.toLowerCase();
+  return `/cleaners/${LAUNCH_CITY.slug}/${slug}`;
+}
+
+/** `harborne-b17` or a legacy bare `b17`. */
+export function districtFromAreaParam(param: string) {
+  const bare = birminghamPostcode(param);
+  if (bare) return { district: bare, legacy: true as const };
+
+  const match = param.match(/^(.+)-(b\d+[a-z]?)$/i);
+  if (!match) return null;
+  const district = birminghamPostcode(match[2] ?? "");
+  const slug = (match[1] ?? "").toLowerCase();
+  if (!district || district.areaSlug !== slug) return null;
+  return { district, legacy: false as const };
+}
+
+export function districtLinkLabel(prefix: string) {
+  const district = birminghamPostcode(prefix);
+  if (!district) return prefix.toUpperCase();
+  const area = birminghamAreaBySlug(district.areaSlug);
+  const siblings = prefixesForArea(district.areaSlug);
+  if (!area) return district.prefix;
+  return siblings.length > 1 ? `${area.name}, ${district.prefix}` : area.name;
 }
 
 export function prefixesForArea(areaSlug: string) {

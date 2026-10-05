@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
+import { HideForCleaners } from "@/components/marketing/hide-for-cleaners";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { BLOG_CATEGORIES } from "@/lib/content/editorial";
 
@@ -79,16 +80,25 @@ export function MagFooter({
                 {section.title}
               </h3>
               <ul className="mt-4 space-y-3 sm:mt-5">
-                {section.links.map(([label, href]) => (
-                  <li key={`${section.title}-${label}`}>
+                {section.links.map(([label, href]) => {
+                  const link = (
                     <Link
                       className="text-sm font-medium text-muted-foreground transition hover:text-[#312c79]"
                       href={href}
                     >
                       {label}
                     </Link>
-                  </li>
-                ))}
+                  );
+                  return (
+                    <li key={`${section.title}-${label}`}>
+                      {label === "Book a clean" ? (
+                        <HideForCleaners>{link}</HideForCleaners>
+                      ) : (
+                        link
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

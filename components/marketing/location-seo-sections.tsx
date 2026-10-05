@@ -214,8 +214,10 @@ export function LocationFeaturedCleaners({
     areas: string;
     avatarUrl?: string | null;
     href?: string;
+    jobs?: number;
     name: string;
     rating: number;
+    reviewCount?: number;
   }>;
   place: string;
 }) {
@@ -257,7 +259,11 @@ export function LocationFeaturedCleaners({
               </p>
               <p className="mt-2 text-sm text-[#5a5470]">{cleaner.areas}</p>
               <p className="mt-3 text-sm font-semibold text-[#1c133b]">
-                {cleaner.rating.toFixed(1)} / 5
+                {cleaner.rating > 0 ? `${cleaner.rating.toFixed(1)} / 5` : "New"}
+                {cleaner.reviewCount
+                  ? ` · ${cleaner.reviewCount} review${cleaner.reviewCount === 1 ? "" : "s"}`
+                  : ""}
+                {cleaner.jobs ? ` · ${cleaner.jobs} jobs` : ""}
               </p>
             </>
           );
@@ -279,27 +285,41 @@ export function LocationFeaturedCleaners({
 }
 
 export function LocationReviews({
+  heading,
   place,
   reviews,
 }: {
+  heading?: string;
   place: string;
-  reviews: Array<{ author: string; body: string; service: string }>;
+  reviews: Array<{
+    author: string;
+    body: string;
+    score?: number | null;
+    service: string;
+    when?: string | null;
+  }>;
 }) {
   if (!reviews.length) return null;
   return (
     <BrandedSection>
       <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-        Cleaning reviews in {place}
+        {heading ?? `Cleaning reviews in ${place}`}
       </h2>
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         {reviews.map((review) => (
           <blockquote
             className="rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)]"
-            key={`${review.author}-${review.service}`}
+            key={`${review.author}-${review.service}-${review.body.slice(0, 24)}`}
           >
             <p className="text-sm leading-7 text-[#5a5470]">“{review.body}”</p>
             <footer className="mt-4 text-sm font-semibold text-[#1c133b]">
-              {review.author}
+              {review.score != null ? (
+                <span className="mr-2 text-[#823fb2]">{review.score.toFixed(1)} / 5</span>
+              ) : null}
+              {review.when ? (
+                <span className="font-medium text-[#5a5470]">{review.when}</span>
+              ) : null}
+              <span className="mt-1 block">{review.author}</span>
               <span className="mt-1 block text-xs font-medium text-[#823fb2]">
                 {review.service}
               </span>

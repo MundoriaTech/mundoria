@@ -10,6 +10,7 @@ import {
   LANDING_NAV_TOP,
 } from "@/components/marketing/landing/nav-metrics";
 import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-scroll-hide";
+import { HideForCleaners } from "@/components/marketing/hide-for-cleaners";
 import { magThemeFor } from "@/lib/content/mag-theme";
 import { cn } from "@/lib/utils";
 
@@ -258,12 +259,14 @@ export function MagNavbar({
             Home
           </Link>
           {showBookCta ? (
-            <Link
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 sm:px-4"
-              href={bookingHref}
-            >
-              Book a clean
-            </Link>
+            <HideForCleaners>
+              <Link
+                className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 sm:px-4"
+                href={bookingHref}
+              >
+                Book a clean
+              </Link>
+            </HideForCleaners>
           ) : null}
           <button
             aria-expanded={mobileOpen}

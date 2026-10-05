@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { JsonLd } from "@/components/marketing/json-ld";
 import {
@@ -33,7 +33,8 @@ import {
   BIRMINGHAM_POSTCODES,
   LAUNCH_CITY,
   birminghamAreaBySlug,
-  birminghamPostcode,
+  districtFromAreaParam,
+  districtLinkLabel,
   popularMarketingServices,
   postcodePath,
   servicePlacePath,
@@ -49,18 +50,20 @@ type PageProps = {
 export function generateStaticParams() {
   return [
     ...BIRMINGHAM_AREAS.map((area) => ({ area: area.slug })),
-    ...BIRMINGHAM_POSTCODES.map((item) => ({ area: item.prefix.toLowerCase() })),
+    ...BIRMINGHAM_POSTCODES.map((item) => ({
+      area: `${item.areaSlug}-${item.prefix.toLowerCase()}`,
+    })),
   ];
 }
 
 export function generateMetadata({ params }: PageProps): Metadata {
-  const district = birminghamPostcode(params.area);
-  if (district) {
-    const area = birminghamAreaBySlug(district.areaSlug);
+  const parsed = districtFromAreaParam(params.area);
+  if (parsed) {
+    const label = districtLinkLabel(parsed.district.prefix);
     return buildPageMetadata({
-      description: `Cleaners covering ${district.prefix} in ${area?.name ?? "Birmingham"}. Book with a clear estimate before you pay.`,
-      path: postcodePath(district.prefix),
-      title: `Cleaners covering ${district.prefix}, Birmingham`,
+      description: `Cleaners in ${label}, Birmingham. Book with a clear estimate before you pay.`,
+      path: postcodePath(parsed.district.prefix),
+      title: `Cleaners in ${label}, Birmingham`,
     });
   }
   const area = birminghamAreaBySlug(params.area);
@@ -73,8 +76,9 @@ export function generateMetadata({ params }: PageProps): Metadata {
 }
 
 export default async function BirminghamAreaPage({ params }: PageProps) {
-  const district = birminghamPostcode(params.area);
-  if (district) return <PostcodeDistrictPage prefix={district.prefix} />;
+  const parsed = districtFromAreaParam(params.area);
+  if (parsed?.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
+  if (parsed) return <PostcodeDistrictPage prefix={parsed.district.prefix} />;
 
   const area = birminghamAreaBySlug(params.area);
   if (!area) notFound();
@@ -163,7 +167,7 @@ export default async function BirminghamAreaPage({ params }: PageProps) {
         ]}
       />
 
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description={area.seoIntro}
           eyebrow={`${area.name} · Birmingham`}
@@ -172,6 +176,7 @@ export default async function BirminghamAreaPage({ params }: PageProps) {
           secondaryHref={`/cleaners/${LAUNCH_CITY.slug}`}
           secondaryLabel="All Birmingham areas"
           title={`Cleaners in ${area.name}`}
+          underNav
         />
 
         <LocationTrustStrip />
@@ -200,7 +205,7 @@ export default async function BirminghamAreaPage({ params }: PageProps) {
         {districtCodes.length ? (
           <BrandedSection>
             <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-              Postcodes in {area.name}
+              Districts in {area.name}
             </h2>
             <ul className="mt-6 flex flex-wrap gap-3">
               {districtCodes.map((item) => (
@@ -209,7 +214,7 @@ export default async function BirminghamAreaPage({ params }: PageProps) {
                     className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
                     href={postcodePath(item.prefix)}
                   >
-                    Cleaners covering {item.prefix}
+                    {districtLinkLabel(item.prefix)}
                   </Link>
                 </li>
               ))}

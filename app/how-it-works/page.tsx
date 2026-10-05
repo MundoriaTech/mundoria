@@ -26,7 +26,7 @@ export default function HowItWorksPage() {
 
   return (
     <MarketingShell>
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description="Mundoria is designed so customers never feel like they’re filling in an insurance form — tell us what you need, see a clear estimate, then book."
           eyebrow="Product"
@@ -35,6 +35,7 @@ export default function HowItWorksPage() {
           secondaryHref="/faq"
           secondaryLabel="Read FAQ"
           title="How Mundoria works"
+          underNav
         />
 
         <BrandedSection>

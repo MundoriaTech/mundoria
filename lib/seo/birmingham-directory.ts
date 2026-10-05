@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { formatDistanceToNow } from "date-fns";
 
 import { SERVICES } from "@/lib/customer/services";
 import {
@@ -19,6 +20,7 @@ export type DirectoryCleaner = {
   name: string;
   prefixes: string[];
   rating: number;
+  reviewCount: number;
   services: string[];
   years: number | null;
 };
@@ -26,7 +28,9 @@ export type DirectoryCleaner = {
 export type DirectoryReview = {
   author: string;
   body: string;
+  score: number | null;
   service: string;
+  when: string | null;
 };
 
 type CleanerRow = {
@@ -43,10 +47,20 @@ type CleanerRow = {
 
 type ReviewRow = {
   author_first_name: string | null;
+  cleaner_id?: string | null;
   comment: string | null;
+  created_at?: string | null;
+  overall_score?: number | null;
   postcode_prefix: string | null;
   service_type: string | null;
 };
+
+export function publicCleanerName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const first = parts[0] ?? fullName;
+  const last = parts.length > 1 ? parts[parts.length - 1] : "";
+  return last ? `${first} ${last.slice(0, 1).toUpperCase()}.` : first;
+}
 
 function directoryClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -107,9 +121,10 @@ function toCleaner(row: CleanerRow): DirectoryCleaner {
     href: cleanerPublicPath(row.full_name, row.id, areaSlug),
     id: row.id,
     jobs: row.total_jobs ?? 0,
-    name: row.full_name,
+    name: publicCleanerName(row.full_name),
     prefixes,
     rating: Number(row.rating ?? 0),
+    reviewCount: 0,
     services: (row.service_types ?? []).slice(0, 4).map(serviceLabel),
     years: row.years_experience,
   };
@@ -119,10 +134,22 @@ function toReview(row: ReviewRow): DirectoryReview | null {
   if (!row.comment) return null;
   const area = row.postcode_prefix ? areaNameForPrefix(row.postcode_prefix) : null;
   const first = row.author_first_name?.trim() || "Customer";
+  const prefix = row.postcode_prefix?.toUpperCase() ?? "";
+  const place = area
+    ? prefix
+      ? `${area}, ${prefix}`
+      : area
+    : prefix || "Birmingham";
+  const created = row.created_at ? new Date(row.created_at) : null;
   return {
-    author: area ? `${first} (${area})` : first,
+    author: `${first} (${place})`,
     body: row.comment,
+    score: row.overall_score == null ? null : Number(row.overall_score),
     service: row.service_type ? serviceLabel(row.service_type) : "Cleaning",
+    when:
+      created && !Number.isNaN(created.getTime())
+        ? formatDistanceToNow(created, { addSuffix: true })
+        : null,
   };
 }
 
@@ -161,7 +188,30 @@ export async function loadDirectoryCleaners(options?: {
   const cleaners = (data as CleanerRow[]).map(toCleaner);
   const unique = new Map<string, DirectoryCleaner>();
   for (const cleaner of cleaners) unique.set(cleaner.id, cleaner);
-  return Array.from(unique.values()).slice(0, limit);
+  return attachReviewCounts(Array.from(unique.values()).slice(0, limit));
+}
+
+async function attachReviewCounts(cleaners: DirectoryCleaner[]) {
+  const client = directoryClient();
+  if (!client || !cleaners.length) return cleaners;
+  const { data } = await client
+    .from("marketing_reviews")
+    .select("cleaner_id")
+    .in(
+      "cleaner_id",
+      cleaners.map((cleaner) => cleaner.id),
+    )
+    .limit(2000);
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const id = (row as { cleaner_id?: string }).cleaner_id;
+    if (!id) continue;
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return cleaners.map((cleaner) => ({
+    ...cleaner,
+    reviewCount: counts.get(cleaner.id) ?? 0,
+  }));
 }
 
 export async function loadDirectoryCleaner(shortId: string, areaSlug: string) {
@@ -177,6 +227,7 @@ export async function loadDirectoryCleaner(shortId: string, areaSlug: string) {
 
 export async function loadDirectoryReviews(options?: {
   areaSlug?: string;
+  cleanerId?: string;
   limit?: number;
   prefix?: string;
 }) {
@@ -187,14 +238,25 @@ export async function loadDirectoryReviews(options?: {
     ? [options.prefix.toUpperCase()]
     : options?.areaSlug
       ? prefixesForArea(options.areaSlug)
-      : BIRMINGHAM_POSTCODES.map((item) => item.prefix);
+      : options?.cleanerId
+        ? null
+        : BIRMINGHAM_POSTCODES.map((item) => item.prefix);
 
-  const { data, error } = await client
+  let query = client
     .from("marketing_reviews")
-    .select("author_first_name, comment, postcode_prefix, service_type")
-    .in("postcode_prefix", prefixes)
+    .select(
+      "author_first_name, cleaner_id, comment, created_at, overall_score, postcode_prefix, service_type",
+    )
     .order("created_at", { ascending: false })
     .limit(options?.limit ?? 6);
+
+  if (options?.cleanerId) {
+    query = query.eq("cleaner_id", options.cleanerId);
+  } else if (prefixes) {
+    query = query.in("postcode_prefix", prefixes);
+  }
+
+  const { data, error } = await query;
 
   if (error || !data) return null;
   return (data as ReviewRow[])
@@ -210,6 +272,12 @@ export function reviewsOrFallback(
   if (seeded.length >= 3) return seeded.slice(0, limit);
   const extras = BIRMINGHAM_LOCATION_REVIEWS.filter(
     (review) => !seeded.some((item) => item.body === review.body),
-  );
+  ).map((review) => ({
+    author: review.author,
+    body: review.body,
+    score: null,
+    service: review.service,
+    when: null,
+  }));
   return [...seeded, ...extras].slice(0, limit);
 }

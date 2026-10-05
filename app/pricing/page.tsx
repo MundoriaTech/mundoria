@@ -31,7 +31,7 @@ export default function PricingPage() {
 
   return (
     <MarketingShell>
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description="Estimates are shown before checkout. Final price depends on service, cleaning standard, property size, schedule and add-ons — never a surprise fee after you book."
           eyebrow="Pricing"
@@ -40,6 +40,7 @@ export default function PricingPage() {
           secondaryHref="/cleaning"
           secondaryLabel="Browse services"
           title="Clear cleaning prices"
+          underNav
         />
 
         <BrandedSection>

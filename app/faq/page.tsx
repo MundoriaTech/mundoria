@@ -42,7 +42,7 @@ export default function FaqPage() {
           })),
         }}
       />
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description="Straight answers about booking, pricing, Birmingham coverage and becoming a cleaner."
           eyebrow="Help"
@@ -51,6 +51,7 @@ export default function FaqPage() {
           secondaryHref="/contact"
           secondaryLabel="Contact us"
           title="Frequently asked questions"
+          underNav
         />
 
         <BrandedSection>

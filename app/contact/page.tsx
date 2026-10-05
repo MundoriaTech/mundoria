@@ -31,7 +31,7 @@ export default function ContactPage() {
 
   return (
     <MarketingShell>
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description="Whether you’re booking a clean, joining as a cleaner, or writing about Mundoria — here’s how to reach us."
           eyebrow="Contact"
@@ -40,6 +40,7 @@ export default function ContactPage() {
           secondaryHref="/help"
           secondaryLabel="Help Centre"
           title="Contact us"
+          underNav
         />
 
         <BrandedSection>

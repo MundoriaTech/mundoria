@@ -87,7 +87,7 @@ export default function ServiceGuidePage({ params }: PageProps) {
           ],
         }}
       />
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description={guide.description}
           eyebrow={`${service.label} · Birmingham`}
@@ -96,6 +96,7 @@ export default function ServiceGuidePage({ params }: PageProps) {
           secondaryHref={servicePlacePath(service.slug)}
           secondaryLabel={`${service.label} in Birmingham`}
           title={guide.title}
+          underNav
         />
         <BrandedSection>
           {guide.paragraphs.map((paragraph) => (

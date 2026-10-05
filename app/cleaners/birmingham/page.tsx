@@ -30,6 +30,7 @@ import {
   BIRMINGHAM_AREAS,
   BIRMINGHAM_POSTCODES,
   LAUNCH_CITY,
+  districtLinkLabel,
   popularMarketingServices,
   postcodePath,
   servicePlacePath,
@@ -95,7 +96,7 @@ export default async function BirminghamCleanersPage() {
         ]}
       />
 
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description="One-off or regular house cleaning with tried & vetted cleaners in your area — clear estimates from booking to checklist."
           eyebrow="Birmingham · From clear online estimates"
@@ -104,6 +105,7 @@ export default async function BirminghamCleanersPage() {
           secondaryHref="/cleaning"
           secondaryLabel="Browse services"
           title="Domestic cleaners in Birmingham"
+          underNav
         />
 
         <LocationTrustStrip />
@@ -112,11 +114,11 @@ export default async function BirminghamCleanersPage() {
 
         <BrandedSection>
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-            Postcode districts with cleaners
+            Places with cleaners
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-            These Birmingham districts already have active cleaners. Other
-            postcodes open when someone covers them.
+            These Birmingham places already have active cleaners. A postcode
+            page opens when cleaners cover that district.
           </p>
           <ul className="mt-6 flex flex-wrap gap-3">
             {BIRMINGHAM_POSTCODES.map((item) => (
@@ -125,7 +127,7 @@ export default async function BirminghamCleanersPage() {
                   className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
                   href={postcodePath(item.prefix)}
                 >
-                  {item.prefix}
+                  {districtLinkLabel(item.prefix)}
                 </Link>
               </li>
             ))}

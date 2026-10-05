@@ -4,6 +4,7 @@ import {
   BrandedPageWash,
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
+import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 
 export interface LegalSection {
@@ -27,8 +28,11 @@ export async function LegalPage({
 }) {
   return (
     <MarketingShell>
-      <BrandedPageWash>
-        <section className="relative px-4 pb-6 pt-14 sm:px-8 sm:pb-8 sm:pt-16 lg:px-12">
+      <BrandedPageWash underNav>
+        <section
+          className="relative px-4 pb-6 sm:px-8 sm:pb-8 lg:px-12"
+          style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 3.5rem)` }}
+        >
           <div className="mx-auto max-w-4xl overflow-hidden rounded-[1.75rem] bg-[#1c133b] px-6 py-10 text-white shadow-[0_20px_50px_rgba(28,19,59,0.28)] sm:px-10 sm:py-12">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#f0a888]">
               Last updated {lastUpdated}

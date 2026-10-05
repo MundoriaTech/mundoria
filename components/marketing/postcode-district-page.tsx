@@ -24,6 +24,7 @@ import {
   LAUNCH_CITY,
   birminghamAreaBySlug,
   birminghamPostcode,
+  districtLinkLabel,
   postcodePath,
 } from "@/lib/seo/marketing";
 import { absoluteUrl } from "@/lib/seo/site";
@@ -45,6 +46,7 @@ export async function PostcodeDistrictPage({ prefix }: { prefix: string }) {
     await loadDirectoryReviews({ limit: 4, prefix: district.prefix }),
   );
   const path = postcodePath(district.prefix);
+  const label = districtLinkLabel(district.prefix);
 
   return (
     <MarketingShell>
@@ -69,28 +71,29 @@ export async function PostcodeDistrictPage({ prefix }: { prefix: string }) {
             {
               "@type": "ListItem",
               item: absoluteUrl(path),
-              name: district.prefix,
+              name: label,
               position: 4,
             },
           ],
         }}
       />
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
-          description={`Active Mundoria cleaners whose coverage includes ${district.prefix} in ${area.name}.`}
-          eyebrow={`${district.prefix} · ${area.name}`}
+          description={`Active Mundoria cleaners in ${label}, Birmingham (${district.prefix}).`}
+          eyebrow={`${area.name} · ${district.prefix}`}
           primaryHref={bookingHref}
           primaryLabel="Book a cleaner"
           secondaryHref={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
           secondaryLabel={`All of ${area.name}`}
-          title={`Cleaners covering ${district.prefix}`}
+          title={`Cleaners in ${label}`}
+          underNav
         />
         {cleaners?.length ? (
-          <LocationFeaturedCleaners cleaners={cleaners} place={district.prefix} />
+          <LocationFeaturedCleaners cleaners={cleaners} place={label} />
         ) : (
           <BrandedSection>
             <p className="max-w-2xl text-sm leading-7 text-[#5a5470]">
-              Cleaners for {district.prefix} are listed with the rest of {area.name}.{" "}
+              Cleaners for {label} are listed with the rest of {area.name}.{" "}
               <Link
                 className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
                 href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
@@ -101,12 +104,12 @@ export async function PostcodeDistrictPage({ prefix }: { prefix: string }) {
             </p>
           </BrandedSection>
         )}
-        <LocationReviews place={district.prefix} reviews={reviews} />
+        <LocationReviews place={label} reviews={reviews} />
         <BrandedCtaBand
           body={`Enter a ${district.prefix} postcode and see the estimate before you confirm.`}
           href={bookingHref}
           label="Book in Birmingham"
-          title={`Book a cleaner in ${district.prefix}`}
+          title={`Book a cleaner in ${label}`}
         />
       </BrandedPageWash>
     </MarketingShell>

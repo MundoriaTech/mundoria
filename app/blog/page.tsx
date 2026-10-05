@@ -5,6 +5,7 @@ import {
   BrandedCtaBand,
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { MagCategoryIcon } from "@/components/marketing/mag-category-icon";
 import { MagEngageBand } from "@/components/marketing/mag-engage";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
@@ -22,7 +23,7 @@ import {
   slicePage,
   totalPages,
 } from "@/lib/pagination";
-import { buildPageMetadata } from "@/lib/seo/site";
+import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
@@ -240,6 +241,21 @@ export default async function BlogIndexPage({
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          description:
+            "Mundoria Mag — cleaning tips, home care, host guides, Birmingham life and cleaner stories.",
+          name: "Mundoria Mag",
+          publisher: {
+            "@type": "Organization",
+            name: "Mundoria",
+            url: absoluteUrl("/"),
+          },
+          url: absoluteUrl("/blog"),
+        }}
+      />
       <div
         className="relative overflow-hidden bg-[#faf8ff]"
         style={{ marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` }}
