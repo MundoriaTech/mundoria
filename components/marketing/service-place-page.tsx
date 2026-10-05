@@ -143,7 +143,7 @@ export async function ServicePlacePage({
         ]}
       />
 
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description={`${service.description} Book ${service.label.toLowerCase()} in ${placeLabel} from ${service.fromPrice}, with a clear estimate before you pay.`}
           eyebrow={area ? `${area.name} · Birmingham` : "Birmingham"}
@@ -156,6 +156,7 @@ export async function ServicePlacePage({
           }
           secondaryLabel={area ? `Cleaners in ${area.name}` : "Cleaners in Birmingham"}
           title={`${service.label} in ${place}`}
+          underNav
         />
 
         <BrandedSection>

@@ -16,6 +16,9 @@ export default function GlobalError({
 
   return (
     <html lang="en">
+      <head>
+        <title>Mundoria</title>
+      </head>
       <body className="flex min-h-screen items-center justify-center p-6">
         <div className="text-center">
           <h1 className="text-2xl font-semibold">Something went wrong</h1>

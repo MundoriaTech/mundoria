@@ -44,7 +44,7 @@ export default function ForCleanersPage() {
 
   return (
     <MarketingShell>
-      <BrandedPageWash>
+      <BrandedPageWash underNav>
         <MarketingHero
           description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."
           eyebrow="Cleaners"
@@ -53,6 +53,7 @@ export default function ForCleanersPage() {
           secondaryHref="/how-it-works"
           secondaryLabel="See the customer journey"
           title="Work with Mundoria"
+          underNav
         />
 
         <BrandedSection>
