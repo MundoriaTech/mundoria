@@ -1,6 +1,5 @@
+import { getRequestUser } from "@/lib/supabase/request-client";
 import * as Sentry from "@sentry/nextjs";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -8,6 +7,7 @@ import { listTakenInterviewSlots } from "@/lib/cleaner/interview-availability";
 import {
   formatInterviewSlot,
   isBookableInterviewSlot,
+  upcomingInterviewDays,
 } from "@/lib/cleaner/interview-slots";
 import { scoreSkillsExam, SKILLS_EXAM_PASS_SCORE, SKILLS_EXAM_QUESTIONS } from "@/lib/cleaner/skills-exam";
 import { sendBrandedEmail } from "@/lib/email/send-email";
@@ -66,6 +66,21 @@ const schema = z.object({
   years_experience: z.number().int().min(0).max(60),
 });
 
+export async function GET(request: Request) {
+  const { user } = await getRequestUser(request);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const taken = await listTakenInterviewSlots(user.id);
+  const days = upcomingInterviewDays(new Date(), taken, 8);
+  return NextResponse.json({
+    slots: days.flatMap((day) =>
+      day.slots.map((slot) => ({
+        label: `${day.label} · ${slot.label}`,
+        startsAt: slot.startsAt,
+      })),
+    ),
+  });
+}
+
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success) {
@@ -74,10 +89,7 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const supabase = createRouteHandlerClient({ cookies });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getRequestUser(request);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const admin = createAdminClient();

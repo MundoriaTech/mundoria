@@ -1,6 +1,5 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { getRequestUser } from "@/lib/supabase/request-client";
 import { addHours } from "date-fns";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -32,10 +31,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const session = createRouteHandlerClient({ cookies });
-  const {
-    data: { user },
-  } = await session.auth.getUser();
+  const { user } = await getRequestUser(request);
 
   if (!user) {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 });
