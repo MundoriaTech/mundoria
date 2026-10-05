@@ -19,39 +19,91 @@ export const landingNavLinks = [
   ["For cleaners", "/for-cleaners"],
 ] as const;
 
-/** The three main categories, each with its own menu. */
+/** The three main categories, each with its own two-column menu. */
 export const landingCategoryNav = [
   {
+    description: "Homes, flats and family spaces",
     href: "/cleaning/residential",
     items: [
-      { href: "/booking/new?service=regular&category=residential", label: "Regular cleaning" },
-      { href: "/booking/new?service=move_in&category=residential", label: "Move-in / move-out" },
-      { href: "/booking/new?service=one_off&category=residential", label: "One-off cleaning" },
-      { href: "/booking/new?service=end_of_tenancy&category=residential", label: "End of tenancy" },
-      { href: "/booking/new?service=airbnb_turnover&category=residential", label: "Airbnb / short let" },
-      { href: "/cleaning/residential", label: "All residential" },
+      {
+        description: "A repeating clean on your schedule",
+        href: "/booking/new?service=regular&category=residential",
+        label: "Regular cleaning",
+      },
+      {
+        description: "Ready to leave, or ready to arrive",
+        href: "/booking/new?service=move_in&category=residential",
+        label: "Move-in / move-out",
+      },
+      {
+        description: "A single visit when you need it",
+        href: "/booking/new?service=one_off&category=residential",
+        label: "One-off cleaning",
+      },
+      {
+        description: "For the checkout inspection",
+        href: "/booking/new?service=end_of_tenancy&category=residential",
+        label: "End of tenancy",
+      },
+      {
+        description: "Turnovers between guests",
+        href: "/booking/new?service=airbnb_turnover&category=residential",
+        label: "Airbnb / short let",
+      },
     ],
     label: "Residential",
   },
   {
+    description: "Offices, retail and workplaces",
     href: "/cleaning/commercial",
     items: [
-      { href: "/booking/new?service=office&category=commercial", label: "Office cleaning" },
-      { href: "/booking/new?service=retail_hospitality&category=commercial", label: "Retail & hospitality" },
-      { href: "/booking/new?service=educational_facility&category=commercial", label: "Education" },
-      { href: "/booking/new?service=communal_area&category=commercial", label: "Communal areas" },
-      { href: "/cleaning/commercial", label: "All commercial" },
+      {
+        description: "Desks, toilets and shared rooms",
+        href: "/booking/new?service=office&category=commercial",
+        label: "Office cleaning",
+      },
+      {
+        description: "Shops, cafés and guest areas",
+        href: "/booking/new?service=retail_hospitality&category=commercial",
+        label: "Retail & hospitality",
+      },
+      {
+        description: "Schools and learning spaces",
+        href: "/booking/new?service=educational_facility&category=commercial",
+        label: "Education",
+      },
+      {
+        description: "Halls, stairs and shared blocks",
+        href: "/booking/new?service=communal_area&category=commercial",
+        label: "Communal areas",
+      },
     ],
     label: "Commercial",
   },
   {
+    description: "Support when life needs care",
     href: "/cleaning/recovery",
     items: [
-      { href: "/booking/new?service=pregnancy_support&category=recovery", label: "Pregnancy & postpartum" },
-      { href: "/booking/new?service=illness_recovery&category=recovery", label: "Illness & injury" },
-      { href: "/booking/new?service=hospital_discharge&category=recovery", label: "Hospital discharge" },
-      { href: "/booking/new?service=bereavement_support&category=recovery", label: "Bereavement support" },
-      { href: "/cleaning/recovery", label: "All recovery" },
+      {
+        description: "Extra help around the house",
+        href: "/booking/new?service=pregnancy_support&category=recovery",
+        label: "Pregnancy & postpartum",
+      },
+      {
+        description: "Support while you recover",
+        href: "/booking/new?service=illness_recovery&category=recovery",
+        label: "Illness & injury",
+      },
+      {
+        description: "A home ready for coming back",
+        href: "/booking/new?service=hospital_discharge&category=recovery",
+        label: "Hospital discharge",
+      },
+      {
+        description: "Practical help at a hard time",
+        href: "/booking/new?service=bereavement_support&category=recovery",
+        label: "Bereavement support",
+      },
     ],
     label: "Recovery",
   },
