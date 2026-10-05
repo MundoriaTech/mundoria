@@ -10,6 +10,8 @@ import {
   LAUNCH_CITY,
   MARKETING_CATEGORY_PATHS,
   MARKETING_SERVICES,
+  publicMarketingServices,
+  servicePlacePath,
 } from "@/lib/seo/marketing";
 import { absoluteUrl } from "@/lib/seo/site";
 
@@ -51,6 +53,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: absoluteUrl(`/cleaning/${service.slug}`),
   }));
 
+  const servicePlaceRoutes = publicMarketingServices().flatMap((service) => [
+    {
+      changeFrequency: "weekly" as const,
+      lastModified: now,
+      priority: 0.65,
+      url: absoluteUrl(servicePlacePath(service.slug)),
+    },
+    ...BIRMINGHAM_AREAS.map((area) => ({
+      changeFrequency: "weekly" as const,
+      lastModified: now,
+      priority: 0.6,
+      url: absoluteUrl(servicePlacePath(service.slug, area.slug)),
+    })),
+  ]);
+
   const areaRoutes = BIRMINGHAM_AREAS.map((area) => ({
     changeFrequency: "weekly" as const,
     lastModified: now,
@@ -91,6 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...categoryRoutes,
     ...serviceRoutes,
+    ...servicePlaceRoutes,
     ...areaRoutes,
     ...blogRoutes,
     ...helpCollectionRoutes,

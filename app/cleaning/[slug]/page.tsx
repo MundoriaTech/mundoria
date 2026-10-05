@@ -14,9 +14,13 @@ import {
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
 import {
+  BIRMINGHAM_AREAS,
+  LAUNCH_CITY,
   MARKETING_SERVICES,
+  isPublicMarketingService,
   marketingServiceBySlug,
   marketingServicesByCategory,
+  servicePlacePath,
 } from "@/lib/seo/marketing";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
@@ -172,6 +176,31 @@ export default function CleaningServicePage({ params }: PageProps) {
             </aside>
           </div>
         </BrandedSection>
+
+        {isPublicMarketingService(service) ? (
+        <BrandedSection tone="lavender">
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            {service.label} in Birmingham
+          </h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <BrandedCardLink
+              description="Across the city and nearby neighbourhoods"
+              href={servicePlacePath(service.slug)}
+              label={`${service.label} in Birmingham`}
+              meta={LAUNCH_CITY.name}
+            />
+            {BIRMINGHAM_AREAS.map((area) => (
+              <BrandedCardLink
+                description={area.description}
+                href={servicePlacePath(service.slug, area.slug)}
+                key={area.slug}
+                label={`${service.label} in ${area.name}`}
+                meta="Birmingham"
+              />
+            ))}
+          </div>
+        </BrandedSection>
+        ) : null}
 
         {related.length ? (
           <BrandedSection tone="cream">
