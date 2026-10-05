@@ -22,6 +22,11 @@ import {
   marketingServicesByCategory,
   servicePlacePath,
 } from "@/lib/seo/marketing";
+import {
+  SERVICE_GUIDE_TOPICS,
+  serviceGuide,
+  serviceGuidePath,
+} from "@/lib/seo/service-guides";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -182,6 +187,15 @@ export default function CleaningServicePage({ params }: PageProps) {
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
             {service.label} in Birmingham
           </h2>
+          <ul className="mt-4 flex flex-col gap-2 text-sm font-semibold text-[#6a45b8]">
+            {SERVICE_GUIDE_TOPICS.map((topic) => (
+              <li key={topic}>
+                <Link className="underline-offset-2 hover:underline" href={serviceGuidePath(service.slug, topic)}>
+                  {serviceGuide(service, topic).title}
+                </Link>
+              </li>
+            ))}
+          </ul>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <BrandedCardLink
               description="Across the city and nearby neighbourhoods"

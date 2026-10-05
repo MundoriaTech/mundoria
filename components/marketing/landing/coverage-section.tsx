@@ -3,7 +3,12 @@ import Link from "next/link";
 import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SERVICE_CATEGORIES } from "@/lib/customer/services";
-import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
+import {
+  BIRMINGHAM_AREAS,
+  LAUNCH_CITY,
+  popularMarketingServices,
+  servicePlacePath,
+} from "@/lib/seo/marketing";
 
 export function CoverageSection() {
   return (
@@ -45,6 +50,22 @@ export function CoverageSection() {
             </div>
           ))}
         </div>
+
+        <h3 className="mt-10 text-[15px] font-semibold leading-snug text-white">
+          Book a service in Birmingham
+        </h3>
+        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+          {popularMarketingServices(4).map((service) => (
+            <li key={service.slug}>
+              <Link
+                className="text-[13px] font-normal leading-[1.45] text-white/90 transition hover:text-[#c79c66]"
+                href={servicePlacePath(service.slug)}
+              >
+                {service.label} in Birmingham
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </ScrollReveal>
   );

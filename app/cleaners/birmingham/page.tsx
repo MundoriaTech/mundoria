@@ -22,15 +22,19 @@ import {
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
 import {
+  loadDirectoryCleaners,
+  loadDirectoryReviews,
+  reviewsOrFallback,
+} from "@/lib/seo/birmingham-directory";
+import {
   BIRMINGHAM_AREAS,
+  BIRMINGHAM_POSTCODES,
   LAUNCH_CITY,
   popularMarketingServices,
+  postcodePath,
   servicePlacePath,
 } from "@/lib/seo/marketing";
-import {
-  BIRMINGHAM_LOCATION_CLEANERS,
-  BIRMINGHAM_LOCATION_REVIEWS,
-} from "@/lib/seo/location-social-proof";
+import { BIRMINGHAM_LOCATION_CLEANERS } from "@/lib/seo/location-social-proof";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -40,10 +44,15 @@ export const metadata: Metadata = buildPageMetadata({
   title: "Cleaners in Birmingham | Mundoria",
 });
 
-export default function BirminghamCleanersPage() {
+export default async function BirminghamCleanersPage() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
   const popular = popularMarketingServices();
+  const liveCleaners = await loadDirectoryCleaners({ limit: 6 });
+  const featured = liveCleaners?.length
+    ? liveCleaners
+    : [...BIRMINGHAM_LOCATION_CLEANERS];
+  const reviews = reviewsOrFallback(await loadDirectoryReviews({ limit: 6 }));
 
   return (
     <MarketingShell>
@@ -99,10 +108,29 @@ export default function BirminghamCleanersPage() {
 
         <LocationTrustStrip />
 
-        <LocationFeaturedCleaners
-          cleaners={[...BIRMINGHAM_LOCATION_CLEANERS]}
-          place="Birmingham"
-        />
+        <LocationFeaturedCleaners cleaners={featured} place="Birmingham" />
+
+        <BrandedSection>
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            Postcode districts with cleaners
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+            These Birmingham districts already have active cleaners. Other
+            postcodes open when someone covers them.
+          </p>
+          <ul className="mt-6 flex flex-wrap gap-3">
+            {BIRMINGHAM_POSTCODES.map((item) => (
+              <li key={item.prefix}>
+                <Link
+                  className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
+                  href={postcodePath(item.prefix)}
+                >
+                  {item.prefix}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </BrandedSection>
 
         <BrandedSection>
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
@@ -142,10 +170,7 @@ export default function BirminghamCleanersPage() {
           </div>
         </BrandedSection>
 
-        <LocationReviews
-          place="Birmingham"
-          reviews={[...BIRMINGHAM_LOCATION_REVIEWS]}
-        />
+        <LocationReviews place="Birmingham" reviews={reviews} />
 
         <LocationServicesExplainer place="Birmingham" />
         <LocationWhatsCovered place="Birmingham" />

@@ -47,7 +47,7 @@ insert into auth.users (
   crypt('SeedPass123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}'::jsonb,
-  '{"full_name":"Demo Customer","role":"customer"}'::jsonb,
+  '{"full_name":"Sophie Bennett","role":"customer"}'::jsonb,
   now(), now(), '', '', '', ''
 ),
 (
@@ -58,7 +58,7 @@ insert into auth.users (
   crypt('SeedPass123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}'::jsonb,
-  '{"full_name":"Demo Cleaner","role":"cleaner"}'::jsonb,
+  '{"full_name":"Hannah Adeyemi","role":"cleaner","gender":"woman"}'::jsonb,
   now(), now(), '', '', '', ''
 );
 
@@ -78,7 +78,7 @@ select
   now() - ((i % 120) || ' days')::interval,
   '{"provider":"email","providers":["email"]}'::jsonb,
   jsonb_build_object(
-    'full_name', format('Customer %s', i),
+    'full_name', public.demo_person_name(i),
     'role', 'customer',
     'phone', format('+4477009%s', lpad(i::text, 5, '0'))
   ),
@@ -103,8 +103,9 @@ select
   now() - ((i % 90) || ' days')::interval,
   '{"provider":"email","providers":["email"]}'::jsonb,
   jsonb_build_object(
-    'full_name', format('Cleaner %s', i),
+    'full_name', public.demo_person_name(i + 240),
     'role', 'cleaner',
+    'gender', public.demo_person_gender(i + 240),
     'phone', format('+4477119%s', lpad(i::text, 5, '0'))
   ),
   now() - ((i % 90) || ' days')::interval,
@@ -221,23 +222,57 @@ where cp.status = 'active'
   )
 on conflict do nothing;
 
--- Birmingham working areas
+-- Birmingham-wide prefix plus one district so each neighbourhood has cleaners.
 insert into public.cleaner_working_areas (
   cleaner_id, postcode_prefix, latitude, longitude
 )
 select
   cp.id,
-  (array['B1','B2','B3','B4','B5','B12','B13','B15','B16','B29','B30'])[
-    1 + (abs(hashtext(cp.id::text)) % 11)
-  ],
-  52.470000 + ((abs(hashtext(cp.id::text || 'lat')) % 200) / 10000.0),
-  -1.920000 - ((abs(hashtext(cp.id::text || 'lng')) % 200) / 10000.0)
+  prefix,
+  52.470000 + ((abs(hashtext(cp.id::text || prefix)) % 200) / 10000.0),
+  -1.920000 - ((abs(hashtext(cp.id::text || prefix || 'lng')) % 200) / 10000.0)
 from public.cleaner_profiles cp
+cross join lateral (
+  select unnest(array[
+    'B',
+    (array['B1','B3','B13','B14','B15','B16','B17','B29'])[
+      1 + (abs(hashtext(cp.id::text)) % 8)
+    ]
+  ]) as prefix
+) districts
 where cp.status = 'active'
   and exists (
     select 1 from public.profiles p
     where p.id = cp.id and p.email like '%@seed.mundoria.local'
   );
+
+update public.cleaner_profiles cp
+set bio = format(
+  'Independent cleaner covering %s. Regular, deep and one-off cleans, with a checklist you can follow in the app.',
+  case district.prefix
+    when 'B1' then 'the Jewellery Quarter'
+    when 'B3' then 'the Jewellery Quarter'
+    when 'B13' then 'Moseley'
+    when 'B14' then 'Kings Heath'
+    when 'B15' then 'Edgbaston'
+    when 'B16' then 'Edgbaston'
+    when 'B17' then 'Harborne'
+    when 'B29' then 'Selly Oak'
+    else 'Birmingham'
+  end
+)
+from public.profiles p
+join lateral (
+  select wa.postcode_prefix as prefix
+  from public.cleaner_working_areas wa
+  where wa.cleaner_id = p.id
+    and wa.postcode_prefix ~ '^B[0-9]'
+  order by wa.postcode_prefix
+  limit 1
+) district on true
+where p.id = cp.id
+  and p.email like '%@seed.mundoria.local'
+  and (cp.bio is null or btrim(cp.bio) = '');
 
 -- ---------------------------------------------------------------------------
 -- Customer addresses (~2 per customer ≈ 5k)
@@ -380,7 +415,16 @@ select
   b.cleaner_id,
   round((3.5 + (abs(hashtext(b.id::text)) % 15) / 10.0)::numeric, 2),
   '{"kitchen":5,"bathroom":4}'::jsonb,
-  'Seeded review for load testing.'
+  (array[
+    'Kitchen and bathrooms looked genuinely finished — not a rushed wipe.',
+    'Clear updates throughout and the checklist matched what we asked for.',
+    'Punctual, careful and professional. Would book again.',
+    'End-of-tenancy photos made the agent handover much easier.',
+    'Guest-ready every time for our short-let. Status stayed in the app.',
+    'Prefer same cleaner worked for us. Communication stayed clear.',
+    'Empty-property clean left it ready for the new keys.',
+    'Special-attention notes were actually followed. Thorough finish.'
+  ])[1 + (abs(hashtext(b.id::text)) % 8)]
 from public.bookings b
 join public.profiles p on p.id = b.customer_id
 where b.status = 'completed'
