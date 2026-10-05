@@ -158,7 +158,7 @@ export default async function CustomerDashboardPage() {
                     return (
                       <li key={booking.id}>
                         <Link
-                          className="group flex items-center gap-3 rounded-[1.35rem] border border-[#e8e0d6] bg-white px-4 py-3 shadow-[0_10px_28px_rgba(28,19,59,0.05)] transition hover:bg-[#f6f3ee]"
+                          className="group flex items-center gap-3 rounded-[1.35rem] border border-[#e5e7eb] bg-white px-4 py-3 shadow-[0_10px_28px_rgba(28,19,59,0.05)] transition hover:bg-[#f3f4f6]"
                           href={`/booking/${booking.id}`}
                         >
                           <div className="flex w-12 shrink-0 flex-col items-center leading-none">
