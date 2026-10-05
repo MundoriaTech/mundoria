@@ -202,7 +202,7 @@ export default async function BirminghamAreaPage({ params }: PageProps) {
 
         <LocationFeaturedCleaners cleaners={[...featured]} place={area.name} />
 
-        {districtCodes.length ? (
+        {districtCodes.length > 1 ? (
           <BrandedSection>
             <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
               Districts in {area.name}
@@ -214,7 +214,7 @@ export default async function BirminghamAreaPage({ params }: PageProps) {
                     className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
                     href={postcodePath(item.prefix)}
                   >
-                    {districtLinkLabel(item.prefix)}
+                    {area.name}, {item.prefix}
                   </Link>
                 </li>
               ))}
