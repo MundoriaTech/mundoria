@@ -17,7 +17,6 @@ import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
   MARKETING_SERVICES,
-  isPublicMarketingService,
   marketingServiceBySlug,
   marketingServicesByCategory,
   servicePlacePath,
@@ -182,7 +181,6 @@ export default function CleaningServicePage({ params }: PageProps) {
           </div>
         </BrandedSection>
 
-        {isPublicMarketingService(service) ? (
         <BrandedSection tone="lavender">
           <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
             {service.label} in Birmingham
@@ -214,7 +212,6 @@ export default function CleaningServicePage({ params }: PageProps) {
             ))}
           </div>
         </BrandedSection>
-        ) : null}
 
         {related.length ? (
           <BrandedSection tone="cream">

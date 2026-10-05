@@ -3,9 +3,8 @@ import { notFound } from "next/navigation";
 
 import { ServicePlacePage } from "@/components/marketing/service-place-page";
 import {
-  isPublicMarketingService,
+  MARKETING_SERVICES,
   marketingServiceBySlug,
-  publicMarketingServices,
   servicePlacePath,
 } from "@/lib/seo/marketing";
 import { buildPageMetadata } from "@/lib/seo/site";
@@ -17,12 +16,12 @@ type PageProps = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return publicMarketingServices().map((service) => ({ slug: service.slug }));
+  return MARKETING_SERVICES.map((service) => ({ slug: service.slug }));
 }
 
 export function generateMetadata({ params }: PageProps): Metadata {
   const service = marketingServiceBySlug(params.slug);
-  if (!service || !isPublicMarketingService(service)) return {};
+  if (!service) return {};
   return buildPageMetadata({
     description: `${service.description} Book ${service.label.toLowerCase()} in Birmingham from ${service.fromPrice}.`,
     path: servicePlacePath(service.slug),
@@ -32,6 +31,6 @@ export function generateMetadata({ params }: PageProps): Metadata {
 
 export default function ServiceBirminghamPage({ params }: PageProps) {
   const service = marketingServiceBySlug(params.slug);
-  if (!service || !isPublicMarketingService(service)) notFound();
+  if (!service) notFound();
   return <ServicePlacePage area={null} service={service} />;
 }

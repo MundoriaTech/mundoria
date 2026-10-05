@@ -36,7 +36,7 @@ function canonicalService(value?: string) {
   if (value === "move_out") return "move_in";
   if (value === "postpartum") return "pregnancy_support";
   if (value === "post_injury") return "illness_recovery";
-  if (value === "same_day") return undefined;
+  if (value === "same_day") return "one_off";
   return value;
 }
 
@@ -45,9 +45,9 @@ function draftFromSearchParams(searchParams: {
   focus?: string;
   service?: string;
 }) {
-  const requested = canonicalService(
-    searchParams.focus === "move" ? "move_in" : searchParams.service,
-  );
+  const rawService =
+    searchParams.focus === "move" ? "move_in" : searchParams.service;
+  const requested = canonicalService(rawService);
   const category = serviceCategorySet.has(searchParams.category as ServiceCategory)
     ? (searchParams.category as ServiceCategory)
     : null;
@@ -73,7 +73,7 @@ function draftFromSearchParams(searchParams: {
     rebookCleanerChoice: null,
     recurrencePattern: mode === "required_recurring" ? "weekly" : null,
     scheduledDate:
-      serviceTypeValue === "same_day"
+      rawService === "same_day"
         ? new Date().toISOString().slice(0, 10)
         : undefined,
     serviceCategory: service?.category ?? category,

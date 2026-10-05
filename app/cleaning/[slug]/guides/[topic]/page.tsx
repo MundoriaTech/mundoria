@@ -13,9 +13,8 @@ import {
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
 import {
-  isPublicMarketingService,
+  MARKETING_SERVICES,
   marketingServiceBySlug,
-  publicMarketingServices,
   servicePlacePath,
 } from "@/lib/seo/marketing";
 import {
@@ -34,14 +33,14 @@ type PageProps = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return publicMarketingServices().flatMap((service) =>
+  return MARKETING_SERVICES.flatMap((service) =>
     SERVICE_GUIDE_TOPICS.map((topic) => ({ slug: service.slug, topic })),
   );
 }
 
 export function generateMetadata({ params }: PageProps): Metadata {
   const service = marketingServiceBySlug(params.slug);
-  if (!service || !isPublicMarketingService(service) || !isServiceGuideTopic(params.topic)) {
+  if (!service || !isServiceGuideTopic(params.topic)) {
     return {};
   }
   const guide = serviceGuide(service, params.topic);
@@ -54,7 +53,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
 
 export default function ServiceGuidePage({ params }: PageProps) {
   const service = marketingServiceBySlug(params.slug);
-  if (!service || !isPublicMarketingService(service) || !isServiceGuideTopic(params.topic)) {
+  if (!service || !isServiceGuideTopic(params.topic)) {
     notFound();
   }
 
