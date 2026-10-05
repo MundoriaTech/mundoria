@@ -158,7 +158,7 @@ export default async function CustomerDashboardPage() {
                     return (
                       <li key={booking.id}>
                         <Link
-                          className="group flex items-center gap-3 rounded-[1.35rem] border border-[#e6e0f2] bg-white px-4 py-3 shadow-[0_10px_28px_rgba(28,19,59,0.05)] transition hover:bg-[#faf8ff]"
+                          className="group flex items-center gap-3 rounded-[1.35rem] border border-[#e8e0d6] bg-white px-4 py-3 shadow-[0_10px_28px_rgba(28,19,59,0.05)] transition hover:bg-[#f6f3ee]"
                           href={`/booking/${booking.id}`}
                         >
                           <div className="flex w-12 shrink-0 flex-col items-center leading-none">
@@ -207,7 +207,7 @@ export default async function CustomerDashboardPage() {
         <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
           Halloween
         </h2>
-        <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(15rem,0.7fr)]">
+        <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-2">
           <Link
             className="group relative isolate flex min-h-[18rem] flex-col overflow-hidden rounded-[1.75rem] shadow-[0_16px_40px_rgba(28,19,59,0.12)]"
             href="/booking/new?fresh=1&service=one_off&returnTo=/dashboard"
@@ -242,9 +242,9 @@ export default async function CustomerDashboardPage() {
           >
             <Image
               alt=""
-              className="object-cover transition duration-500 group-hover:scale-[1.03]"
+              className="object-cover object-[70%_40%] transition duration-500 group-hover:scale-[1.03]"
               fill
-              sizes="(max-width: 1024px) 100vw, 360px"
+              sizes="(max-width: 1024px) 100vw, 560px"
               src="/images/promos/halloween-deep-clean.jpg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#1c133b]/88 via-[#1c133b]/20 to-transparent" />
@@ -252,10 +252,10 @@ export default async function CustomerDashboardPage() {
               <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#ffc79f]">
                 Before the 31st
               </p>
-              <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-white">
+              <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
                 Deep clean
               </h3>
-              <p className="mt-2 text-sm font-light leading-6 text-white/85">
+              <p className="mt-2 max-w-sm text-sm font-light leading-6 text-white/85">
                 A thorough clean before guests arrive.
               </p>
               <span className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-[#1c133b] transition group-hover:bg-[#fff4ee]">

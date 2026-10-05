@@ -92,10 +92,7 @@ export default async function CleanerDashboardPage() {
       <section>
         <div className="grid grid-cols-[minmax(0,1fr)_8.25rem] items-end gap-x-2 sm:grid-cols-[minmax(0,1fr)_16rem] sm:items-center sm:gap-x-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
           <div className="min-w-0 pb-1">
-            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#c79c66] sm:text-[11px]">
-              Mundoria Pro
-            </p>
-            <h1 className="mt-2 text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
+            <h1 className="text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
               Welcome back,{" "}
               <span className="font-normal text-[#d4694a]">{firstName}</span>.
             </h1>
