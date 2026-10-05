@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
@@ -116,44 +116,54 @@ export function AddressManager({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-8 pb-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            Places
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
             Saved addresses
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            Keep property details ready for faster booking.
+          <p className="mt-2 max-w-md text-sm font-light leading-6 text-[#5c5670]">
+            Keep a home, office, or family address ready for the next booking.
           </p>
         </div>
-        <Button
-          className="min-h-11 w-full sm:w-auto"
+        <button
+          className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
           onClick={() => {
             setEditing(null);
             setShowForm(true);
           }}
+          type="button"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add address
-        </Button>
+        </button>
       </div>
 
-      {(showForm || editing) && (
-        <div className="rounded-xl border bg-background p-5 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              {editing ? "Edit address" : "New address"}
-            </h2>
-            <Button
+      {showForm || editing ? (
+        <div className="rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_16px_40px_rgba(28,19,59,0.06)] sm:p-6">
+          <div className="mb-5 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+                {editing ? "Edit" : "New"}
+              </p>
+              <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+                {editing ? (editing.label ?? "Address") : "Add a place"}
+              </h2>
+            </div>
+            <button
+              aria-label="Close address form"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#5c5670] transition hover:bg-[#f7f3ff] hover:text-[#1c133b]"
               onClick={() => {
                 setEditing(null);
                 setShowForm(false);
               }}
-              size="icon"
-              variant="ghost"
+              type="button"
             >
               <X className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
           <AddressForm
             address={editing}
@@ -161,85 +171,106 @@ export function AddressManager({
             userId={userId}
           />
         </div>
-      )}
+      ) : null}
 
       {addresses.length ? (
         <div className="grid gap-4 md:grid-cols-2">
           {addresses.map((address) => (
             <article
-              className="rounded-xl border bg-card p-5 shadow-sm"
+              className="flex flex-col overflow-hidden rounded-[1.75rem] border border-[#e6e0f2] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]"
               key={address.id}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex gap-3">
-                  <span className="rounded-full bg-emerald-100 p-2 text-primary">
-                    <MapPin className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-semibold">
-                        {address.label ?? "Address"}
-                      </h2>
-                      {address.is_default ? (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                          Default
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {address.address_line_1}
-                      {address.address_line_2
-                        ? `, ${address.address_line_2}`
-                        : ""}
-                      <br />
-                      {address.city}, {address.postcode}
-                    </p>
-                    <p className="mt-3 text-xs capitalize text-muted-foreground">
-                      {address.property_type ?? "Property"} ·{" "}
-                      {address.num_bedrooms ?? 0} bed ·{" "}
-                      {address.num_bathrooms ?? 0} bath
-                      {(address.num_other_rooms ?? 0) > 0
-                        ? ` · ${address.num_other_rooms} other`
-                        : ""}
-                    </p>
-                  </div>
+              <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+                    {address.is_default ? "Default" : "Saved place"}
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+                    {address.label ?? "Address"}
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-[#5c5670]">
+                    {address.address_line_1}
+                    {address.address_line_2 ? `, ${address.address_line_2}` : ""}
+                    <br />
+                    {address.city}, {address.postcode}
+                  </p>
                 </div>
-                <div className="flex">
-                  <Button
+                <div className="flex shrink-0">
+                  <button
                     aria-label="Edit address"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#312c79] transition hover:bg-[#f7f3ff]"
                     onClick={() => {
                       setEditing(address);
                       setShowForm(false);
                     }}
-                    size="icon"
-                    variant="ghost"
+                    type="button"
                   >
                     <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     aria-label="Delete address"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#9a3412] transition hover:bg-[#fff4ee]"
                     onClick={() => void removeAddress(address)}
-                    size="icon"
-                    variant="ghost"
+                    type="button"
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
+              <dl className="mt-5 grid grid-cols-3 gap-px border-t border-[#efe6ff] bg-[#efe6ff]">
+                <AddressFact label="Type" value={propertyLabel(address.property_type)} />
+                <AddressFact label="Beds" value={String(address.num_bedrooms ?? 0)} />
+                <AddressFact label="Baths" value={String(address.num_bathrooms ?? 0)} />
+              </dl>
+              {(address.num_other_rooms ?? 0) > 0 || address.special_requirements ? (
+                <p className="px-5 py-4 text-sm leading-6 text-[#5c5670] sm:px-6">
+                  {(address.num_other_rooms ?? 0) > 0
+                    ? `${address.num_other_rooms} other room${address.num_other_rooms === 1 ? "" : "s"}.`
+                    : ""}
+                  {address.special_requirements
+                    ? `${(address.num_other_rooms ?? 0) > 0 ? " " : ""}${address.special_requirements}`
+                    : ""}
+                </p>
+              ) : null}
             </article>
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed bg-background p-10 text-center">
-          <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
-          <p className="mt-3 font-medium">No saved addresses</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add your first property to get booking.
+        <div className="rounded-[1.75rem] bg-[#f3efe6] px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            Places
+          </p>
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+            No saved addresses
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-6 text-[#3d3a48]">
+            Add a home or office and it will be ready the next time you book.
           </p>
         </div>
       )}
     </div>
   );
+}
+
+function AddressFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-white px-4 py-3.5 sm:px-5">
+      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+        {label}
+      </dt>
+      <dd className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function propertyLabel(type: Address["property_type"]) {
+  if (type === "house") return "House";
+  if (type === "flat") return "Flat";
+  if (type === "office") return "Office";
+  if (type === "other") return "Other";
+  return "Property";
 }
 
 export function AddressForm({
@@ -475,16 +506,16 @@ export function AddressForm({
 
       {showAccountExtras ? (
         <>
-      <label className="flex items-center gap-3 text-sm">
+      <label className="flex items-center gap-3 text-sm text-[#1c133b]">
         <input
           checked={values.is_default}
-          className="h-4 w-4 accent-emerald-700"
+          className="h-4 w-4 accent-[#312c79]"
           onChange={(event) => update("is_default", event.target.checked)}
           type="checkbox"
         />
         Make this my default address
       </label>
-          <Button disabled={saving} type="submit">
+          <Button className="h-11 rounded-full bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]" disabled={saving} type="submit">
             {saving ? (
               "Saving…"
             ) : (

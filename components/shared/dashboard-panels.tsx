@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { FEMALE_AVATAR_SRC } from "@/lib/avatars/default-pack";
 import { cn } from "@/lib/utils";
 
 export { DashboardStatTiles } from "@/components/shared/dashboard-stat-tiles";
@@ -9,46 +10,67 @@ export type { DashboardStatIcon } from "@/components/shared/dashboard-stat-tiles
 
 export function DashboardWelcomeBanner({
   actions,
-  eyebrow,
+  eyebrow = "Mundoria",
+  figureSrc = FEMALE_AVATAR_SRC,
   firstName,
+  stats,
   subtitle,
 }: {
   actions?: ReactNode;
   eyebrow?: string;
+  figureSrc?: string;
   firstName: string;
+  stats?: Array<{ label: string; value: string }>;
   subtitle: string;
 }) {
   return (
-    <section className="relative isolate overflow-hidden rounded-[1.35rem] bg-[#1c133b] text-white sm:rounded-[2rem]">
-      <div className="relative z-10 px-4 py-5 pr-[6.5rem] sm:max-w-[58%] sm:px-8 sm:py-9 sm:pr-8 lg:max-w-[52%]">
-        {eyebrow ? (
-          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#c79c66] sm:text-[11px] sm:tracking-[0.28em]">
-            {eyebrow}
+    <section>
+      <div className="grid grid-cols-[minmax(0,1fr)_8.25rem] items-end gap-x-2 sm:grid-cols-[minmax(0,1fr)_16rem] sm:items-center sm:gap-x-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <div className="min-w-0 pb-1">
+          {eyebrow ? (
+            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#c79c66] sm:text-[11px]">
+              {eyebrow}
+            </p>
+          ) : null}
+          <h1 className="mt-2 text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
+            Welcome back,{" "}
+            <span className="font-normal text-[#d4694a]">{firstName}</span>.
+          </h1>
+          <p className="mt-2 max-w-md text-[13px] font-light leading-5 text-[#5c5670] sm:text-[15px] sm:leading-7">
+            {subtitle}
           </p>
-        ) : null}
-        <h1 className="whitespace-nowrap text-[1.35rem] font-semibold leading-[1.15] tracking-[-0.03em] sm:text-[2.35rem] sm:leading-[1.1]">
-          Welcome back,{" "}
-          <span className="font-normal text-[#e8bcac]">{firstName}</span>.
-        </h1>
-        <p className="mt-2 max-w-[16rem] text-[13px] font-light leading-5 text-white/80 sm:mt-2.5 sm:max-w-md sm:text-[15px] sm:leading-7">
-          {subtitle}
-        </p>
-        {actions ? (
-          <div className="mt-3.5 flex flex-wrap items-center gap-2 sm:mt-6 sm:gap-2.5">
-            {actions}
-          </div>
-        ) : null}
+          {actions ? (
+            <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-6">
+              {actions}
+            </div>
+          ) : null}
+        </div>
+        <div className="relative h-[15.5rem] sm:h-[19rem] lg:h-[21rem]">
+          <Image
+            alt=""
+            aria-hidden
+            className="object-contain object-bottom select-none"
+            fill
+            priority
+            sizes="(max-width: 640px) 140px, 320px"
+            src={figureSrc}
+          />
+        </div>
       </div>
-
-      <Image
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 right-0 z-[1] h-auto w-[7.5rem] select-none sm:right-2 sm:w-[11.5rem] lg:right-4 lg:w-[13.5rem]"
-        height={201}
-        priority
-        src="/images/marketing/landing/dashboard-welcome-avatar.png"
-        width={293}
-      />
+      {stats?.length ? (
+        <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 sm:mt-8 sm:grid-cols-4 sm:gap-6">
+          {stats.map((stat) => (
+            <div className="min-w-0" key={stat.label}>
+              <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#c79c66]">
+                {stat.label}
+              </dt>
+              <dd className="mt-1 truncate text-base font-semibold tracking-tight text-[#1c133b] sm:text-lg">
+                {stat.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
     </section>
   );
 }

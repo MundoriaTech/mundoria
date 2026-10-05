@@ -34,6 +34,7 @@ const cleaner: CleanerProfile = {
   dbs_document_status: "missing",
   dbs_document_url: null,
   dbs_verified: false,
+  gender: null,
   headshot_status: "missing",
   headshot_url: null,
   id: "preview-cleaner",

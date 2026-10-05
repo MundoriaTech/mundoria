@@ -35,6 +35,7 @@ export interface CleanerProfile {
   on_time_rate: number;
   cancellation_count: number;
   no_show_count: number;
+  gender: "woman" | "man" | null;
   dbs_verified: boolean;
   dbs_document_url: string | null;
   dbs_document_status: DocumentReviewStatus;

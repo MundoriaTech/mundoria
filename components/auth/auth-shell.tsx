@@ -3,9 +3,8 @@ import Image from "next/image";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { getMarketingViewer } from "@/components/marketing/marketing-shell";
+import { FEMALE_AVATAR_SRC } from "@/lib/avatars/default-pack";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
-
-const LOGIN_MASCOT = "/images/marketing/landing/login-avatar.png";
 
 interface AuthShellProps {
   children: React.ReactNode;
@@ -48,7 +47,7 @@ export async function AuthShell({
               aria-hidden
               className="pointer-events-none absolute bottom-0 right-1 z-20 h-auto w-[7.25rem] select-none sm:right-0 sm:w-[13.5rem] sm:translate-x-[45%] md:w-[14.5rem] md:translate-x-[55%]"
               height={519}
-              src={LOGIN_MASCOT}
+              src={FEMALE_AVATAR_SRC}
               width={455}
             />
           </div>

@@ -15,11 +15,18 @@ export default async function CleanerProfilePage() {
   if (!context.cleanerProfile || !context.profile) redirect("/");
 
   return (
-    <div>
-      <h1 className="text-3xl font-semibold">Profile</h1>
-      <p className="mt-2 mb-7 text-muted-foreground">
-        Manage your services, areas, documents, and payout preferences.
-      </p>
+    <div className="space-y-8 pb-4">
+      <div>
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+          Account
+        </p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+          Your profile
+        </h1>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c5670]">
+          How customers see you, the work you take, and how you get paid.
+        </p>
+      </div>
       <CleanerProfileForm
         areas={context.areas}
         availability={context.availability}

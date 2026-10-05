@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
+import { oauthCallbackUrl, writeOAuthIntent } from "@/lib/auth/oauth-intent";
+import type { AvatarCharacter } from "@/lib/avatars/default-pack";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/auth";
@@ -11,12 +13,14 @@ import type { UserRole } from "@/types/auth";
 interface OAuthButtonProps {
   className?: string;
   label?: string;
+  gender?: AvatarCharacter | null;
   next?: string;
   role?: Extract<UserRole, "customer" | "cleaner">;
 }
 
 export function OAuthButton({
   className,
+  gender,
   label = "Continue with Google",
   next = "/dashboard",
   role,
@@ -25,19 +29,20 @@ export function OAuthButton({
   const [isLoading, setIsLoading] = useState(false);
 
   async function signInWithGoogle() {
+    if (role === "cleaner" && gender !== "woman" && gender !== "man") {
+      setError("Choose woman or man first.");
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
 
-    const callback = new URL("/auth/callback", window.location.origin);
-    callback.searchParams.set("next", next);
-    if (role) {
-      callback.searchParams.set("role", role);
-    }
+    writeOAuthIntent(role, next, gender);
     const { error: oauthError } = await createBrowserClient().auth.signInWithOAuth(
       {
         provider: "google",
         options: {
-          redirectTo: callback.toString(),
+          redirectTo: oauthCallbackUrl(window.location.origin),
         },
       },
     );

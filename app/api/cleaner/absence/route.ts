@@ -87,3 +87,27 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ cancelled, success: true });
 }
+
+export async function DELETE(request: Request) {
+  const id = new URL(request.url).searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "Choose which time off to remove." }, { status: 400 });
+  }
+  const supabase = createRouteHandlerClient({ cookies });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("cleaner_absences")
+    .delete()
+    .eq("id", id)
+    .eq("cleaner_id", user.id);
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+  return NextResponse.json({ success: true });
+}

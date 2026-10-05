@@ -21,6 +21,7 @@ export const signupSchema = z.object({
       message: "Enter a valid phone number",
     }),
   role: z.enum(["customer", "cleaner"]),
+  gender: z.enum(["woman", "man"]).optional(),
   referral_code: z.string().trim().max(40).optional().or(z.literal("")),
 }).superRefine((value, ctx) => {
   if (value.role !== "cleaner") return;
@@ -30,6 +31,13 @@ export const signupSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: "Enter a valid phone number",
       path: ["phone"],
+    });
+  }
+  if (value.gender !== "woman" && value.gender !== "man") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Choose woman or man",
+      path: ["gender"],
     });
   }
 });

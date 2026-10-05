@@ -9,6 +9,7 @@ import {
 import { loadStripe } from "@stripe/stripe-js";
 
 import { ActionError } from "@/components/shared/action-error";
+import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import {
   ChevronDown,
   ChevronUp,
@@ -1692,8 +1693,10 @@ function KnownCleanersStep({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     alt=""
-                    className="h-full w-full object-cover"
-                    src={cleaner.avatarUrl}
+                    className={avatarImageClass(
+                      resolveAvatarUrl(cleaner.avatarUrl, cleaner.id),
+                    )}
+                    src={resolveAvatarUrl(cleaner.avatarUrl, cleaner.id)}
                   />
                 ) : (
                   cleaner.fullName.charAt(0)
