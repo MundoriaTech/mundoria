@@ -12,7 +12,6 @@ import {
   MARKETING_CATEGORY_PATHS,
   MARKETING_SERVICES,
   postcodePath,
-  publicMarketingServices,
   servicePlacePath,
 } from "@/lib/seo/marketing";
 import { SERVICE_GUIDE_TOPICS, serviceGuidePath } from "@/lib/seo/service-guides";
@@ -56,7 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: absoluteUrl(`/cleaning/${service.slug}`),
   }));
 
-  const servicePlaceRoutes = publicMarketingServices().flatMap((service) => [
+  const servicePlaceRoutes = MARKETING_SERVICES.flatMap((service) => [
     {
       changeFrequency: "weekly" as const,
       lastModified: now,
@@ -71,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ]);
 
-  const guideRoutes = publicMarketingServices().flatMap((service) =>
+  const guideRoutes = MARKETING_SERVICES.flatMap((service) =>
     SERVICE_GUIDE_TOPICS.map((topic) => ({
       changeFrequency: "monthly" as const,
       lastModified: now,
