@@ -7,8 +7,12 @@ declare global {
   }
 }
 
+const DEFAULT_GTM_ID = "GTM-WB99DT5R";
+
 export function getGtmId() {
-  return process.env.NEXT_PUBLIC_GTM_ID?.trim() || "";
+  const configured = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+  if (configured && /^GTM-[A-Z0-9]+$/.test(configured)) return configured;
+  return DEFAULT_GTM_ID;
 }
 
 export function getGaMeasurementId() {
