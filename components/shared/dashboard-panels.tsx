@@ -10,7 +10,7 @@ export type { DashboardStatIcon } from "@/components/shared/dashboard-stat-tiles
 
 export function DashboardWelcomeBanner({
   actions,
-  eyebrow = "Mundoria",
+  eyebrow,
   figureSrc = FEMALE_AVATAR_SRC,
   firstName,
   stats,
@@ -32,7 +32,7 @@ export function DashboardWelcomeBanner({
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="mt-2 text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
+          <h1 className={cn("text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]", eyebrow && "mt-2")}>
             Welcome back,{" "}
             <span className="font-normal text-[#d4694a]">{firstName}</span>.
           </h1>
