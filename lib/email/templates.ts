@@ -1,4 +1,4 @@
-import { MUNDORIA_WORDMARK_SRC } from "@/lib/brand";
+import { MUNDORIA_WORDMARK_ON_DARK_SRC } from "@/lib/brand";
 
 export type EmailTemplateId =
   | "admin.alert"
@@ -559,7 +559,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const tone = toneStyles[context.tone ?? "customer"];
   const cards = (context.cards ?? []).filter((card) => card.value !== undefined && card.value !== null && String(card.value).trim() !== "");
   const supportEmail = process.env.SUPPORT_EMAIL || "support@mundoriauk.local";
-  const logoUrl = publicEmailAssetUrl(MUNDORIA_WORDMARK_SRC);
+  const logoUrl = publicEmailAssetUrl(MUNDORIA_WORDMARK_ON_DARK_SRC);
 
   const html = `<!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -574,8 +574,8 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
       @media (prefers-color-scheme: dark) {
         .email-page, .email-page > tbody > tr > td { background-color: #141226 !important; }
         .email-card { background-color: #221f50 !important; }
-        .email-header { background-color: #312c79 !important; }
-        .email-logo-pad { background-color: #ffffff !important; }
+        .email-header, .email-logo { background-color: #221f50 !important; }
+        .email-logo { filter: none !important; -webkit-filter: none !important; }
         .email-tagline { color: #ffc79f !important; }
         .email-accent { background-color: #ffc79f !important; }
         .email-kicker { background-color: #3a3470 !important; color: #ffc79f !important; }
@@ -589,14 +589,13 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
         .email-footer { background-color: #1a1738 !important; color: #c4bdd8 !important; border-color: #3d366e !important; }
         .email-footer a { color: #ffc79f !important; }
       }
-      [data-ogsc] .email-title, [data-ogsc] .email-row-value { color: #f7f5fb !important; }
-      [data-ogsc] .email-copy, [data-ogsc] .email-footer, [data-ogsc] .email-row-label { color: #d9d3ea !important; }
-      [data-ogsc] .email-tagline, [data-ogsc] .email-kicker, [data-ogsc] .email-footer a { color: #ffc79f !important; }
-      [data-ogsc] .email-button { color: #221f50 !important; }
+      [data-ogsc] .email-title, [data-ogsc].email-title, [data-ogsc] .email-row-value, [data-ogsc].email-row-value { color: #f7f5fb !important; }
+      [data-ogsc] .email-copy, [data-ogsc].email-copy, [data-ogsc] .email-footer, [data-ogsc].email-footer, [data-ogsc] .email-row-label, [data-ogsc].email-row-label { color: #d9d3ea !important; }
+      [data-ogsc] .email-tagline, [data-ogsc].email-tagline, [data-ogsc] .email-kicker, [data-ogsc].email-kicker, [data-ogsc] .email-footer a, [data-ogsc].email-footer-link { color: #ffc79f !important; }
+      [data-ogsc] .email-button, [data-ogsc].email-button { color: #221f50 !important; }
       [data-ogsb] .email-page, [data-ogsb].email-page { background-color: #141226 !important; }
       [data-ogsb] .email-card, [data-ogsb].email-card { background-color: #221f50 !important; }
-      [data-ogsb] .email-header, [data-ogsb].email-header { background-color: #312c79 !important; }
-      [data-ogsb] .email-logo-pad, [data-ogsb].email-logo-pad { background-color: #ffffff !important; }
+      [data-ogsb] .email-header, [data-ogsb].email-header, [data-ogsb] .email-logo, [data-ogsb].email-logo { background-color: #221f50 !important; }
       [data-ogsb] .email-details, [data-ogsb] .email-row-label { background-color: #2a265c !important; }
       [data-ogsb] .email-footer, [data-ogsb].email-footer { background-color: #1a1738 !important; }
       [data-ogsb] .email-button, [data-ogsb].email-button { background-color: #ffc79f !important; }
@@ -612,18 +611,8 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
           <table role="presentation" class="email-card" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:600px;background:#ffffff;border:1px solid #e8e0f5;border-radius:24px;overflow:hidden;">
             <tr>
               <td class="email-header" bgcolor="#221f50" style="background:#221f50;padding:28px 32px 24px;">
-                <table role="presentation" cellspacing="0" cellpadding="0">
-                  <tr>
-                    <td class="email-logo-pad" bgcolor="#ffffff" style="background:#ffffff;border-radius:12px;padding:8px 12px;" valign="middle">
-                      <img alt="Mundoria" height="36" src="${escapeAttribute(logoUrl)}" style="display:block;border:0;outline:none;text-decoration:none;height:36px;width:178px;" width="178" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding-top:12px;" valign="middle">
-                      <div class="email-tagline" style="font-size:13px;line-height:1.4;color:#ffc79f;">Trusted cleaning, clearly managed.</div>
-                    </td>
-                  </tr>
-                </table>
+                <img class="email-logo" alt="Mundoria" height="36" src="${escapeAttribute(logoUrl)}" style="display:block;border:0;outline:none;text-decoration:none;height:36px;width:178px;background:#221f50;" width="178" />
+                <div class="email-tagline" style="margin-top:12px;font-size:13px;line-height:1.4;color:#ffc79f;">Trusted cleaning, clearly managed.</div>
               </td>
             </tr>
             <tr>

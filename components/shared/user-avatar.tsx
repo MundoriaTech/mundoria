@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveAvatarUrl } from "@/lib/avatars/default-pack";
+import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import { cn } from "@/lib/utils";
 
 export function UserAvatar({
@@ -30,7 +30,7 @@ export function UserAvatar({
       )}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="" className="h-full w-full object-cover" src={resolved} />
+      <img alt="" className={avatarImageClass(resolved)} src={resolved} />
     </span>
   );
 }

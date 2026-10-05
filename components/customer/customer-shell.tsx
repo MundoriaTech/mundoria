@@ -7,17 +7,14 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { NotificationBell } from "@/components/customer/notification-bell";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
 import { CUSTOMER_ACCOUNT_MENU } from "@/components/shared/account-menu";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
 import type { Profile } from "@/types/auth";
-import type { Notification } from "@/types/customer";
 
 interface CustomerShellProps {
   children: React.ReactNode;
-  initialNotifications: Notification[];
   profile: Profile;
 }
 
@@ -30,7 +27,6 @@ const navItems = [
 
 export function CustomerShell({
   children,
-  initialNotifications,
   profile,
 }: CustomerShellProps) {
   return (
@@ -40,12 +36,6 @@ export function CustomerShell({
       <AppDashboardShell
         accountMenuItems={CUSTOMER_ACCOUNT_MENU}
         brandHref="/dashboard"
-        headerExtra={
-          <NotificationBell
-            initialNotifications={initialNotifications}
-            userId={profile.id}
-          />
-        }
         navItems={navItems}
         profile={profile}
         roleLabel="Customer"

@@ -48,6 +48,7 @@ function normalizeCleanerProfile(
   if (!row) return null;
   return {
     ...row,
+    gender: row.gender === "woman" || row.gender === "man" ? row.gender : null,
     headshot_status: row.headshot_status ?? "missing",
     headshot_url: row.headshot_url ?? null,
     interview_completed_at: row.interview_completed_at ?? null,

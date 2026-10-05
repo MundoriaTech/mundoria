@@ -11,6 +11,7 @@ import {
   LANDING_NAV_TOP,
 } from "@/components/marketing/landing/nav-metrics";
 import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-scroll-hide";
+import { NotificationBell } from "@/components/shared/notification-bell";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,6 +116,7 @@ export function LandingNavbar({
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
           {headerExtra}
+          {viewer ? <NotificationBell userId={viewer.id} /> : null}
           {viewer ? (
             <AccountMenu
               items={
@@ -320,6 +322,7 @@ function MobileNav({
 
   return (
     <div className="flex items-center gap-1.5 lg:hidden">
+      {viewer ? <NotificationBell userId={viewer.id} /> : null}
       {viewer ? (
         <Link
           aria-label={`Open account for ${viewer.full_name}`}

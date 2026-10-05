@@ -10,7 +10,10 @@ import {
 } from "@/components/shared/file-upload";
 import {
   DEFAULT_AVATARS,
+  avatarImageClass,
   isDefaultAvatarUrl,
+  mundoriaCharacter,
+  resolveAvatarUrl,
 } from "@/lib/avatars/default-pack";
 import { ownStoragePath } from "@/lib/storage/own-object";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -33,9 +36,7 @@ export function AvatarUpload({
   const [url, setUrl] = useState(currentUrl);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const selectedDefaultId = DEFAULT_AVATARS.find(
-    (avatar) => url === avatar.src || (url?.endsWith(avatar.src) ?? false),
-  )?.id;
+  const selectedDefaultId = mundoriaCharacter(url);
 
   async function persistAvatar(nextUrl: string) {
     const previousUrl = url;
@@ -103,8 +104,8 @@ export function AvatarUpload({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               alt="Profile avatar"
-              className="h-full w-full object-cover"
-              src={url}
+              className={avatarImageClass(resolveAvatarUrl(url, userId))}
+              src={resolveAvatarUrl(url, userId)}
             />
           ) : (
             <UserRound className="h-8 w-8" />
@@ -113,14 +114,14 @@ export function AvatarUpload({
         <div className="min-w-0">
           <p className="font-medium text-foreground">Profile photo</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pick a Mundoria look, or upload your own.
+            Choose the woman or the man, or upload your own photo.
           </p>
         </div>
       </div>
 
       <div>
         <p className="text-sm font-medium text-foreground">Mundoria looks</p>
-        <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-6">
+        <div className="mt-3 flex gap-4">
           {DEFAULT_AVATARS.map((avatar) => {
             const selected = selectedDefaultId === avatar.id;
             return (
@@ -138,7 +139,7 @@ export function AvatarUpload({
               >
                 <span
                   className={cn(
-                    "relative aspect-square w-full overflow-hidden rounded-full ring-2 transition",
+                    "relative h-16 w-16 overflow-hidden rounded-full ring-2 transition",
                     selected
                       ? "ring-[#221f50] ring-offset-2 ring-offset-background"
                       : "ring-transparent group-hover:ring-border",
@@ -148,7 +149,7 @@ export function AvatarUpload({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     alt=""
-                    className="h-full w-full object-cover"
+                    className={avatarImageClass(avatar.src)}
                     src={avatar.src}
                   />
                   {selected ? (

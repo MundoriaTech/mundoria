@@ -2,6 +2,15 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import {
+  OAUTH_GENDER_COOKIE,
+  OAUTH_NEXT_COOKIE,
+  OAUTH_ROLE_COOKIE,
+  parseOAuthGender,
+  parseOAuthNext,
+  parseOAuthRole,
+} from "@/lib/auth/oauth-intent";
+import { profileAvatarFor } from "@/lib/avatars/default-pack";
 import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -12,8 +21,14 @@ type SelfRegisterableRole = Extract<UserRole, "customer" | "cleaner">;
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const requestedNext = requestUrl.searchParams.get("next");
-  const requestedRole = selfRegisterableRole(requestUrl.searchParams.get("role"));
+  const jar = cookies();
+  const requestedNext =
+    requestUrl.searchParams.get("next") ??
+    parseOAuthNext(jar.get(OAUTH_NEXT_COOKIE)?.value);
+  const requestedRole =
+    parseOAuthRole(requestUrl.searchParams.get("role")) ??
+    parseOAuthRole(jar.get(OAUTH_ROLE_COOKIE)?.value);
+  const requestedGender = parseOAuthGender(jar.get(OAUTH_GENDER_COOKIE)?.value);
 
   if (code) {
     const supabase = createRouteHandlerClient({ cookies });
@@ -26,6 +41,7 @@ export async function GET(request: Request) {
       const profile = user
         ? await bootstrapOAuthProfile({
             appUrl: requestUrl.origin,
+            requestedGender,
             requestedRole,
             user,
           })
@@ -48,30 +64,37 @@ export async function GET(request: Request) {
         const completionUrl = new URL("/complete-profile", requestUrl.origin);
         completionUrl.searchParams.set("next", next);
 
-        return NextResponse.redirect(completionUrl);
+        return clearOAuthIntent(NextResponse.redirect(completionUrl));
       }
 
-      return NextResponse.redirect(
-        new URL(next, requestUrl.origin),
+      return clearOAuthIntent(
+        NextResponse.redirect(new URL(next, requestUrl.origin)),
       );
     }
   }
 
-  return NextResponse.redirect(
-    new URL("/login?error=Unable%20to%20complete%20sign-in", requestUrl.origin),
+  return clearOAuthIntent(
+    NextResponse.redirect(
+      new URL("/login?error=Unable%20to%20complete%20sign-in", requestUrl.origin),
+    ),
   );
 }
 
-function selfRegisterableRole(value: string | null): SelfRegisterableRole | null {
-  return value === "customer" || value === "cleaner" ? value : null;
+function clearOAuthIntent(response: NextResponse) {
+  response.cookies.set(OAUTH_ROLE_COOKIE, "", { maxAge: 0, path: "/" });
+  response.cookies.set(OAUTH_NEXT_COOKIE, "", { maxAge: 0, path: "/" });
+  response.cookies.set(OAUTH_GENDER_COOKIE, "", { maxAge: 0, path: "/" });
+  return response;
 }
 
 async function bootstrapOAuthProfile({
   appUrl,
+  requestedGender,
   requestedRole,
   user,
 }: {
   appUrl: string;
+  requestedGender: ReturnType<typeof parseOAuthGender>;
   requestedRole: SelfRegisterableRole | null;
   user: {
     email?: string;
@@ -94,8 +117,14 @@ async function bootstrapOAuthProfile({
     existing?.full_name ||
     email.split("@")[0] ||
     "Mundoria user";
+  const googlePicture = string(metadata.picture);
+  const savedAvatar = existing?.avatar_url || string(metadata.avatar_url) || googlePicture;
   const avatarUrl =
-    existing?.avatar_url || string(metadata.avatar_url) || string(metadata.picture);
+    roleWillBeCleaner(existing?.role, requestedRole) &&
+    requestedGender &&
+    shouldUseMundoriaAvatar(savedAvatar, googlePicture)
+      ? profileAvatarFor(requestedGender)
+      : savedAvatar;
   const existingRole = isUserRole(existing?.role) ? existing.role : null;
   const role = resolveOAuthRole(existingRole, requestedRole);
   const phone = existing?.phone ?? user.phone ?? null;
@@ -117,7 +146,10 @@ async function bootstrapOAuthProfile({
     .single();
 
   if (role === "cleaner") {
-    await admin.from("cleaner_profiles").upsert({ id: user.id }, { onConflict: "id" });
+    await admin.from("cleaner_profiles").upsert(
+      requestedGender ? { gender: requestedGender, id: user.id } : { id: user.id },
+      { onConflict: "id" },
+    );
   }
 
   if (!existing && process.env.RESEND_API_KEY) {
@@ -140,6 +172,19 @@ async function bootstrapOAuthProfile({
   }
 
   return profile;
+}
+
+function roleWillBeCleaner(
+  existingRole: string | null | undefined,
+  requestedRole: SelfRegisterableRole | null,
+) {
+  return existingRole === "cleaner" || requestedRole === "cleaner";
+}
+
+function shouldUseMundoriaAvatar(savedAvatar: string, googlePicture: string) {
+  if (!savedAvatar) return true;
+  if (googlePicture && savedAvatar === googlePicture) return true;
+  return savedAvatar.includes("googleusercontent.com");
 }
 
 function resolveOAuthRole(

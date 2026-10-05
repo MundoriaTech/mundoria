@@ -18,6 +18,7 @@ import { RatingForm } from "@/components/customer/rating-form";
 import { RescheduleModal } from "@/components/customer/reschedule-modal";
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
 import { ActionError } from "@/components/shared/action-error";
+import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
@@ -561,8 +562,13 @@ export function BookingDetail({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     alt={booking.cleaner.full_name}
-                    className="h-full w-full object-cover"
-                    src={booking.cleaner.avatar_url}
+                    className={avatarImageClass(
+                      resolveAvatarUrl(booking.cleaner.avatar_url, booking.cleaner.id),
+                    )}
+                    src={resolveAvatarUrl(
+                      booking.cleaner.avatar_url,
+                      booking.cleaner.id,
+                    )}
                   />
                 ) : (
                   booking.cleaner.full_name.charAt(0)

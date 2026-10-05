@@ -12,6 +12,7 @@ import {
   AccountMenu,
   type AccountMenuItem,
 } from "@/components/shared/account-menu";
+import { NotificationBell } from "@/components/shared/notification-bell";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/auth";
@@ -95,6 +96,7 @@ export function AppDashboardShell({
               ) : null}
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              <NotificationBell userId={profile.id} />
               {headerExtra}
               <AccountMenu items={accountMenuItems} profile={profile} />
             </div>

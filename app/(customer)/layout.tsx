@@ -5,7 +5,6 @@ import { CustomerShell } from "@/components/customer/customer-shell";
 import { buildPrivateMetadata } from "@/lib/seo/site";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
-import type { Notification } from "@/types/customer";
 
 export const dynamic = "force-dynamic";
 
@@ -25,25 +24,18 @@ export default async function CustomerLayout({
     redirect("/login");
   }
 
-  const [{ data: profile }, { data: notifications }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(10),
-  ]);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
   if (!profile || profile.role !== "customer") {
     redirect(profile?.role === "cleaner" ? "/cleaner/dashboard" : "/");
   }
 
   return (
-    <CustomerShell
-      initialNotifications={(notifications ?? []) as Notification[]}
-      profile={profile as Profile}
-    >
+    <CustomerShell profile={profile as Profile}>
       {children}
     </CustomerShell>
   );
