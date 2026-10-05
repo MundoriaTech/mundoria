@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -19,10 +18,7 @@ export async function handleGeofenceRequest(
   if (!parsed.success) {
     return NextResponse.json({ error: "Valid coordinates required" }, { status: 400 });
   }
-  const session = createRouteHandlerClient({ cookies });
-  const {
-    data: { user },
-  } = await session.auth.getUser();
+  const { user } = await getRequestUser(request);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const result = await validateBookingGeofence({

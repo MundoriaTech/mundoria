@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -15,10 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Valid playerId required" }, { status: 400 });
   }
 
-  const supabase = createRouteHandlerClient({ cookies });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getRequestUser(request);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

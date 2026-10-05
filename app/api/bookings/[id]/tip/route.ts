@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -18,10 +17,7 @@ export async function POST(
   if (!parsed.success) {
     return NextResponse.json({ error: "Choose a tip amount." }, { status: 400 });
   }
-  const supabase = createRouteHandlerClient({ cookies });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getRequestUser(request);
   if (!user) {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   }

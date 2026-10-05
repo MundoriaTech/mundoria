@@ -1,16 +1,12 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { getRequestUser } from "@/lib/supabase/request-client";
 import * as Sentry from "@sentry/nextjs";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getRequestUser(request);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const admin = createAdminClient();
   const { data: profile } = await admin

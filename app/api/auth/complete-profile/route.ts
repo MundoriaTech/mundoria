@@ -1,15 +1,11 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 
 import { completeProfileSchema } from "@/lib/auth/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getRequestUser(request);
 
   if (!user) {
     return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
