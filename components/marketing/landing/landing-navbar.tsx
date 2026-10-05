@@ -224,21 +224,49 @@ function CategoryNavDropdown({
         onMouseLeave={scheduleClose}
         role="menu"
       >
-        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white p-3 shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
-          <ul className="grid gap-0.5">
-            {menu.items.map((item) => (
-              <li key={item.href}>
-                <Link
-                  className="block rounded-lg px-3 py-2 text-[13px] font-medium text-[#1c133b] transition hover:bg-[#f6f0ff] hover:text-[#312c79]"
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  role="menuitem"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
+          <div className="grid sm:grid-cols-[1.15fr_0.85fr]">
+            <div className="p-4 sm:p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
+                Services
+              </p>
+              <ul className="mt-3 grid gap-1">
+                {menu.items.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      className="group flex flex-col rounded-xl px-3 py-2.5 transition hover:bg-[#f6f0ff]"
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      role="menuitem"
+                    >
+                      <span className="text-[13px] font-semibold text-[#1c133b] group-hover:text-[#312c79]">
+                        {item.label}
+                      </span>
+                      <span className="text-[12px] font-normal text-[#1c133b]/60">
+                        {item.description}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-col border-t border-[#1c133b]/06 bg-[#f8f4ff] p-4 sm:border-l sm:border-t-0 sm:p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
+                {menu.label}
+              </p>
+              <p className="mt-3 text-[13px] leading-5 text-[#1c133b]/75">
+                {menu.description}
+              </p>
+              <Link
+                className="mt-auto inline-flex pt-4 text-[12px] font-semibold text-[#312c79] underline-offset-2 hover:underline"
+                href={menu.href}
+                onClick={() => setOpen(false)}
+              >
+                View all {menu.label.toLowerCase()}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -366,14 +394,26 @@ function MobileNav({
                     <div className="bg-[#f8f4ff] pb-2">
                       {menu.items.map((item) => (
                         <Link
-                          className="block min-h-11 px-5 py-2.5 text-sm font-medium text-[#1c133b] touch-manipulation"
+                          className="block min-h-11 px-5 py-2.5 touch-manipulation"
                           href={item.href}
                           key={item.href}
                           onClick={() => onMobileOpenChange(false)}
                         >
-                          {item.label}
+                          <span className="block text-sm font-medium text-[#1c133b]">
+                            {item.label}
+                          </span>
+                          <span className="block text-xs font-normal text-[#1c133b]/60">
+                            {item.description}
+                          </span>
                         </Link>
                       ))}
+                      <Link
+                        className="block min-h-11 px-5 py-2.5 text-sm font-semibold text-[#312c79] touch-manipulation"
+                        href={menu.href}
+                        onClick={() => onMobileOpenChange(false)}
+                      >
+                        View all {menu.label.toLowerCase()}
+                      </Link>
                     </div>
                   ) : null}
                 </div>
