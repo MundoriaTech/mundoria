@@ -38,8 +38,36 @@ export function AccountMenu({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [canHover, setCanHover] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstName = profile.full_name.trim().split(/\s+/)[0] || "Account";
+
+  useEffect(() => {
+    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sync = () => setCanHover(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  function openFromHover() {
+    if (!canHover) return;
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+  }
+
+  function scheduleClose() {
+    if (!canHover) return;
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), 140);
+  }
 
   useEffect(() => {
     setOpen(false);
@@ -73,12 +101,24 @@ export function AccountMenu({
   }
 
   return (
-    <div className="relative" ref={rootRef}>
+    <div
+      className="relative"
+      onMouseEnter={openFromHover}
+      onMouseLeave={scheduleClose}
+      ref={rootRef}
+    >
       <button
         aria-expanded={open}
         aria-haspopup="menu"
         className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-1.5 transition hover:bg-[#f3eef8] dark:hover:bg-muted sm:pr-2.5"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (canHover) {
+            if (closeTimer.current) clearTimeout(closeTimer.current);
+            setOpen(true);
+            return;
+          }
+          setOpen((current) => !current);
+        }}
         type="button"
       >
         <UserAvatar
@@ -99,10 +139,11 @@ export function AccountMenu({
       </button>
 
       {open ? (
-        <div
-          className="absolute right-0 top-[calc(100%+0.4rem)] z-50 w-56 overflow-hidden rounded-2xl border border-[#e8e0f4] bg-white py-1.5 shadow-[0_18px_40px_rgba(28,19,59,0.16)] dark:border-border dark:bg-card"
-          role="menu"
-        >
+        <div className="absolute right-0 top-full z-50 pt-1.5">
+          <div
+            className="w-56 overflow-hidden rounded-2xl border border-[#e8e0f4] bg-white py-1.5 shadow-[0_18px_40px_rgba(28,19,59,0.16)] dark:border-border dark:bg-card"
+            role="menu"
+          >
           <div className="border-b border-[#efe8f8] px-3.5 py-2.5 dark:border-border">
             <p className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground">
               {profile.full_name}
@@ -131,6 +172,7 @@ export function AccountMenu({
             <LogOut className="h-4 w-4" />
             {signingOut ? "Signing out…" : "Log out"}
           </button>
+          </div>
         </div>
       ) : null}
     </div>
