@@ -714,18 +714,3 @@ function AddressTagField({
     </div>
   );
 }
-
-function Field({
-  children,
-  label,
-}: {
-  children: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <label className="block space-y-2 text-sm font-medium">
-      <span>{label}</span>
-      {children}
-    </label>
-  );
-}
