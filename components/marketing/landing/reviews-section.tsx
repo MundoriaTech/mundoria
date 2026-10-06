@@ -396,7 +396,7 @@ export function ReviewsSection({
           <h2 className="max-w-[20rem] text-balance text-[1.5rem] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-[36px] sm:leading-[1.08]">
             What our customers say
           </h2>
-          <GoogleReviewsButton className="mt-3" reviews={reviews} />
+          <GoogleReviewsButton className="mt-3" />
         </ScrollReveal>
 
         <div className="mt-8 md:mt-14">
