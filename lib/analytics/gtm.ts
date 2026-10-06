@@ -7,12 +7,11 @@ declare global {
   }
 }
 
-const DEFAULT_GTM_ID = "GTM-WB99DT5R";
+/** Container installed for the SEO account. Do not let an older env value replace it. */
+const GTM_ID = "GTM-WB99DT5R";
 
 export function getGtmId() {
-  const configured = process.env.NEXT_PUBLIC_GTM_ID?.trim();
-  if (configured && /^GTM-[A-Z0-9]+$/.test(configured)) return configured;
-  return DEFAULT_GTM_ID;
+  return GTM_ID;
 }
 
 export function getGaMeasurementId() {
