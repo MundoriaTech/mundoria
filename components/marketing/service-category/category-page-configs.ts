@@ -57,12 +57,12 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
   heroImage: "/images/marketing/landing/category-moving-home.png",
   serviceCards: [
     {
-      href: "/booking/new?service=end_of_tenancy",
+      href: "/cleaning/end-of-tenancy-cleaning",
       image: "/images/marketing/landing/moving-end-of-tenancy.png",
       label: "End of Tenancy Cleaning",
     },
     {
-      href: "/booking/new?service=move_in&category=moving_home",
+      href: "/cleaning/move-in-move-out-cleaning",
       image: "/images/marketing/landing/moving-move-in.png",
       label: "Move-in / move-out cleaning",
     },
@@ -128,12 +128,12 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
   heroImage: "/images/marketing/landing/category-str.png",
   serviceCards: [
     {
-      href: "/booking/new?service=airbnb_turnover",
+      href: "/cleaning/airbnb-shortlet-cleaning",
       image: "/images/marketing/landing/str-airbnb.png",
       label: "Airbnb/Shortlet Cleaning",
     },
     {
-      href: "/booking/new?service=serviced_accommodation",
+      href: "/cleaning/serviced-accommodation-cleaning",
       image: "/images/marketing/landing/str-serviced.png",
       label: "Serviced Accommodation Cleaning",
     },
@@ -209,22 +209,22 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   heroImage: "/images/marketing/landing/recovery-hero-section.png",
   serviceCards: [
     {
-      href: "/booking/new?service=pregnancy_support",
+      href: "/cleaning/pregnancy-and-postpartum-cleaning",
       image: "/images/marketing/landing/recovery-pregnancy.png",
       label: "Pregnancy and Postpartum Cleaning",
     },
     {
-      href: "/booking/new?service=illness_recovery",
+      href: "/cleaning/illness-and-injury-recovery",
       image: "/images/marketing/landing/recovery-illness.png",
       label: "Illness & injury recovery",
     },
     {
-      href: "/booking/new?service=hospital_discharge",
+      href: "/cleaning/hospital-discharge-home-cleaning",
       image: "/images/marketing/landing/recovery-hospital.png",
       label: "Hospital Discharge Home Cleaning",
     },
     {
-      href: "/booking/new?service=bereavement_support",
+      href: "/cleaning/bereavement-support-cleaning",
       image: "/images/marketing/landing/recovery-bereavement.png",
       label: "Bereavement Support Cleaning",
     },
