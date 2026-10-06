@@ -303,7 +303,7 @@ export function LocationReviews({
   if (!reviews.length) return null;
   return (
     <BrandedSection>
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
           {heading ?? `Cleaning reviews in ${place}`}
         </h2>
