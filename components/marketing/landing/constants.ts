@@ -27,27 +27,27 @@ export const landingCategoryNav = [
     items: [
       {
         description: "A repeating clean on your schedule",
-        href: "/booking/new?service=regular&category=residential",
+        href: "/cleaning/regular-cleaning",
         label: "Regular cleaning",
       },
       {
         description: "Ready to leave, or ready to arrive",
-        href: "/booking/new?service=move_in&category=residential",
+        href: "/cleaning/move-in-move-out-cleaning",
         label: "Move-in / move-out",
       },
       {
         description: "A single visit when you need it",
-        href: "/booking/new?service=one_off&category=residential",
+        href: "/cleaning/one-off-cleaning",
         label: "One-off cleaning",
       },
       {
         description: "For the checkout inspection",
-        href: "/booking/new?service=end_of_tenancy&category=residential",
+        href: "/cleaning/end-of-tenancy-cleaning",
         label: "End of tenancy",
       },
       {
         description: "Turnovers between guests",
-        href: "/booking/new?service=airbnb_turnover&category=residential",
+        href: "/cleaning/airbnb-shortlet-cleaning",
         label: "Airbnb / short let",
       },
     ],
@@ -59,22 +59,22 @@ export const landingCategoryNav = [
     items: [
       {
         description: "Desks, toilets and shared rooms",
-        href: "/booking/new?service=office&category=commercial",
+        href: "/cleaning/office-cleaning",
         label: "Office cleaning",
       },
       {
         description: "Shops, cafés and guest areas",
-        href: "/booking/new?service=retail_hospitality&category=commercial",
+        href: "/cleaning/retail-and-hospitality-cleaning",
         label: "Retail & hospitality",
       },
       {
         description: "Schools and learning spaces",
-        href: "/booking/new?service=educational_facility&category=commercial",
+        href: "/cleaning/educational-facility-cleaning",
         label: "Education",
       },
       {
         description: "Halls, stairs and shared blocks",
-        href: "/booking/new?service=communal_area&category=commercial",
+        href: "/cleaning/communal-area-cleaning",
         label: "Communal areas",
       },
     ],
@@ -86,22 +86,22 @@ export const landingCategoryNav = [
     items: [
       {
         description: "Extra help around the house",
-        href: "/booking/new?service=pregnancy_support&category=recovery",
+        href: "/cleaning/pregnancy-and-postpartum-cleaning",
         label: "Pregnancy & postpartum",
       },
       {
         description: "Support while you recover",
-        href: "/booking/new?service=illness_recovery&category=recovery",
+        href: "/cleaning/illness-and-injury-recovery",
         label: "Illness & injury",
       },
       {
         description: "A home ready for coming back",
-        href: "/booking/new?service=hospital_discharge&category=recovery",
+        href: "/cleaning/hospital-discharge-home-cleaning",
         label: "Hospital discharge",
       },
       {
         description: "Practical help at a hard time",
-        href: "/booking/new?service=bereavement_support&category=recovery",
+        href: "/cleaning/bereavement-support-cleaning",
         label: "Bereavement support",
       },
     ],
@@ -139,12 +139,12 @@ export const landingServicesMenu = {
     },
   ],
   popular: [
-    { href: "/booking/new?service=regular", label: "Regular cleaning" },
-    { href: "/booking/new?service=one_off", label: "One-off clean" },
-    { href: "/booking/new?service=move_in", label: "Move-in / move-out" },
-    { href: "/booking/new?service=end_of_tenancy", label: "End of tenancy" },
-    { href: "/booking/new?service=deep_clean", label: "Deep clean" },
-    { href: "/booking/new?service=airbnb_turnover", label: "Airbnb/Shortlet" },
+    { href: "/cleaning/regular-cleaning", label: "Regular cleaning" },
+    { href: "/cleaning/one-off-cleaning", label: "One-off clean" },
+    { href: "/cleaning/move-in-move-out-cleaning", label: "Move-in / move-out" },
+    { href: "/cleaning/end-of-tenancy-cleaning", label: "End of tenancy" },
+    { href: "/cleaning/deep-cleaning", label: "Deep clean" },
+    { href: "/cleaning/airbnb-shortlet-cleaning", label: "Airbnb/Shortlet" },
   ],
 } as const;
 

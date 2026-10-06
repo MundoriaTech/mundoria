@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { GoogleReviewsButton } from "@/components/marketing/google-reviews-drawer";
 import { BrandedSection } from "@/components/marketing/branded-page-sections";
 import { popularMarketingServices } from "@/lib/seo/marketing";
 
@@ -302,9 +303,12 @@ export function LocationReviews({
   if (!reviews.length) return null;
   return (
     <BrandedSection>
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-        {heading ?? `Cleaning reviews in ${place}`}
-      </h2>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          {heading ?? `Cleaning reviews in ${place}`}
+        </h2>
+        <GoogleReviewsButton />
+      </div>
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         {reviews.map((review) => (
           <blockquote

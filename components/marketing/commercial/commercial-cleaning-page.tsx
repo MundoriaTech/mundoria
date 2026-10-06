@@ -44,25 +44,25 @@ const FEATURES = [
 
 const SERVICE_CARDS = [
   {
-    href: "/booking/new?service=office",
+    href: "/cleaning/office-cleaning",
     image: "/images/marketing/landing/commercial-office.png",
     label: "Office Cleaning",
     objectPosition: "object-center",
   },
   {
-    href: "/booking/new?service=retail_hospitality",
+    href: "/cleaning/retail-and-hospitality-cleaning",
     image: "/images/marketing/landing/commercial-retail.png",
     label: "Retail & Hospitality Cleaning",
     objectPosition: "object-center",
   },
   {
-    href: "/booking/new?service=educational_facility",
+    href: "/cleaning/educational-facility-cleaning",
     image: "/images/marketing/landing/commercial-education.png",
     label: "Educational Facility Cleaning",
     objectPosition: "object-center",
   },
   {
-    href: "/booking/new?service=communal_area",
+    href: "/cleaning/communal-area-cleaning",
     image: "/images/marketing/landing/commercial-communal.png",
     label: "Communal Area Cleaning",
     objectPosition: "object-center",
