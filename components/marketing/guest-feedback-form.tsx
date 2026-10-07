@@ -71,12 +71,17 @@ export function GuestFeedbackForm() {
       }}
     >
       <label className="block" htmlFor="reviewer-name">
-        <span className="text-sm font-semibold text-[#1c133b]">Your name</span>
+        <span className="text-sm font-semibold text-[#1c133b]">
+          Your name
+          <span className="text-[#d14343]"> *</span>
+        </span>
         <input
+          aria-required="true"
           className="mt-2 h-12 w-full rounded-2xl border border-[#eadfce] bg-[#fbf8f4] px-4 text-base text-[#1c133b] outline-none transition placeholder:text-[#a398b0] focus:border-[#6a45b8] focus:ring-4 focus:ring-[#6a45b8]/10"
           id="reviewer-name"
           maxLength={80}
           onChange={(event) => setName(event.target.value)}
+          required
           value={name}
         />
       </label>
@@ -114,12 +119,17 @@ export function GuestFeedbackForm() {
       </fieldset>
 
       <label className="mt-2 block" htmlFor="feedback">
-        <span className="text-sm font-semibold text-[#1c133b]">Your review</span>
+        <span className="text-sm font-semibold text-[#1c133b]">
+          Your review
+          <span className="text-[#d14343]"> *</span>
+        </span>
         <textarea
+          aria-required="true"
           className="mt-2 min-h-40 w-full resize-y rounded-2xl border border-[#eadfce] bg-[#fbf8f4] px-4 py-3 text-base leading-7 text-[#1c133b] outline-none transition placeholder:text-[#a398b0] focus:border-[#6a45b8] focus:ring-4 focus:ring-[#6a45b8]/10"
           id="feedback"
           maxLength={2000}
           onChange={(event) => setComment(event.target.value)}
+          required
           value={comment}
         />
       </label>
