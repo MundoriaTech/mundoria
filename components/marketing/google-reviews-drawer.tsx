@@ -68,11 +68,47 @@ function Stars({
   );
 }
 
+let reviewsRequest: Promise<GooglePlaceReviews | null> | null = null;
+
+function loadGoogleReviews() {
+  if (!reviewsRequest) {
+    reviewsRequest = fetch("/api/google-reviews")
+      .then((response) => (response.ok ? response.json() : null))
+      .then(
+        (payload: { reviews?: GooglePlaceReviews | null } | null) =>
+          payload?.reviews ?? null,
+      )
+      .catch(() => null);
+  }
+  return reviewsRequest;
+}
+
+function useGoogleReviews() {
+  const [data, setData] = useState<GooglePlaceReviews | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadGoogleReviews().then((reviews) => {
+      if (cancelled) return;
+      setData(reviews);
+      setLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { data, loaded };
+}
+
 function ReviewsPanel({
   data,
+  loaded,
   onClose,
 }: {
-  data: GooglePlaceReviews;
+  data: GooglePlaceReviews | null;
+  loaded: boolean;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -113,23 +149,22 @@ function ReviewsPanel({
             <div className="flex items-center gap-2">
               <GoogleMark className="h-5 w-5 shrink-0" />
               <p className="truncate text-sm font-semibold text-[#3c4043]">
-                {data.name}
+                {data?.name ?? "Mundoria"}
               </p>
             </div>
-            <div className="mt-2 flex items-center gap-2">
-              <p className="text-2xl font-semibold tracking-[-0.03em] text-[#202124]">
-                {data.rating.toFixed(1)}
-              </p>
-              <Stars rating={data.rating} />
-            </div>
-            <a
-              className="mt-1 inline-block text-xs font-medium text-[#1a73e8]"
-              href={data.listingUrl}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              {data.reviewCount.toLocaleString("en-GB")} Google reviews
-            </a>
+            {data ? (
+              <>
+                <div className="mt-2 flex items-center gap-2">
+                  <p className="text-2xl font-semibold tracking-[-0.03em] text-[#202124]">
+                    {data.rating.toFixed(1)}
+                  </p>
+                  <Stars rating={data.rating} />
+                </div>
+                <p className="mt-1 text-xs font-medium text-[#5f6368]">
+                  {data.reviewCount.toLocaleString("en-GB")} Google reviews
+                </p>
+              </>
+            ) : null}
           </div>
           <button
             aria-label="Close"
@@ -141,7 +176,15 @@ function ReviewsPanel({
           </button>
         </div>
         <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-          {data.reviews.map((review) => (
+          {!loaded ? (
+            <p className="px-1 text-sm text-[#5f6368]">Loading reviews…</p>
+          ) : null}
+          {loaded && !data ? (
+            <p className="px-1 text-sm leading-6 text-[#5f6368]">
+              Google reviews aren’t available just now.
+            </p>
+          ) : null}
+          {data?.reviews.map((review) => (
             <article
               className="rounded-2xl border border-black/5 bg-white p-4"
               key={review.id}
@@ -200,48 +243,43 @@ function ReviewsPanel({
 }
 
 export function GoogleReviewsButton({ className }: { className?: string }) {
-  const [data, setData] = useState<GooglePlaceReviews | null>(null);
+  const { data, loaded } = useGoogleReviews();
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/google-reviews")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload: { reviews?: GooglePlaceReviews | null } | null) => {
-        if (!cancelled) setData(payload?.reviews ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setData(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (!data) return null;
 
   return (
     <>
       <button
-        aria-label={`Google reviews, ${data.rating.toFixed(1)} out of 5 from ${data.reviewCount} reviews`}
+        aria-label={
+          data
+            ? `Google reviews, ${data.rating.toFixed(1)} out of 5 from ${data.reviewCount} reviews`
+            : "Google reviews"
+        }
         className={cn(
-          "inline-flex items-center gap-2.5 rounded-full border border-[#e4e4e4] bg-white px-3 py-2 text-left shadow-[0_8px_20px_rgba(32,33,36,0.08)] transition hover:bg-[#f8f9fa]",
+          "inline-flex items-center gap-3 rounded-full border border-[#e8eaed] bg-white px-3.5 py-2 text-left shadow-[0_1px_2px_rgba(60,64,67,0.08),0_8px_24px_rgba(60,64,67,0.08)] transition hover:bg-[#f8f9fa]",
           className,
         )}
         onClick={() => setOpen(true)}
         type="button"
       >
-        <GoogleMark className="h-5 w-5 shrink-0" />
+        <GoogleMark className="h-6 w-6 shrink-0" />
         <span className="flex flex-col">
-          <Stars rating={data.rating} />
-          <span className="mt-0.5 text-[11px] font-medium leading-4 text-[#5f6368]">
-            {data.rating.toFixed(1)} · {data.reviewCount.toLocaleString("en-GB")}{" "}
-            Google reviews
+          {data ? (
+            <span className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold tracking-[-0.02em] text-[#202124]">
+                {data.rating.toFixed(1)}
+              </span>
+              <Stars rating={data.rating} />
+            </span>
+          ) : null}
+          <span className="text-[11px] font-medium leading-4 text-[#5f6368]">
+            {data
+              ? `${data.reviewCount.toLocaleString("en-GB")} Google reviews`
+              : "Google reviews"}
           </span>
         </span>
       </button>
-      {open ? <ReviewsPanel data={data} onClose={close} /> : null}
+      {open ? <ReviewsPanel data={data} loaded={loaded} onClose={close} /> : null}
     </>
   );
 }
