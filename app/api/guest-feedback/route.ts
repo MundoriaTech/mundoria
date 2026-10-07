@@ -2,74 +2,41 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { sendBrandedEmail } from "@/lib/email/send-email";
-import {
-  formatGuestFeedbackDate,
-  guestFeedbackMoodLabel,
-  guestFeedbackTokenHash,
-  isGuestFeedbackMood,
-  readGuestFeedbackInvite,
-} from "@/lib/guest-feedback";
+import { guestFeedbackMoodLabel, isGuestFeedbackMood } from "@/lib/guest-feedback";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
-  comment: z.string().trim().max(2000).optional(),
+  comment: z.string().trim().min(2).max(2000),
   mood: z.string(),
-  token: z.string().min(20).max(500),
+  name: z.string().trim().min(1).max(80),
 });
 
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success || !isGuestFeedbackMood(parsed.data.mood)) {
     return NextResponse.json(
-      { error: "Choose how the clean felt." },
+      { error: "Add your name, how the clean felt, and a short review." },
       { status: 400 },
     );
   }
 
-  const invite = readGuestFeedbackInvite(parsed.data.token);
-  if (!invite) {
-    return NextResponse.json({ error: "This link isn’t valid." }, { status: 404 });
-  }
-
   const admin = createAdminClient();
-  const tokenHash = guestFeedbackTokenHash(parsed.data.token);
-  const { data: existing } = await admin
-    .from("guest_feedback")
-    .select("id")
-    .eq("token_hash", tokenHash)
-    .maybeSingle();
-
-  if (existing) {
-    return NextResponse.json({ ok: true });
-  }
-
-  const comment = parsed.data.comment?.trim() || null;
+  const { comment, mood, name } = parsed.data;
   const { error } = await admin.from("guest_feedback").insert({
-    client_name: invite.clientName,
+    client_name: name,
     comment,
-    invoice_number: invite.invoiceNumber || null,
-    mood: parsed.data.mood,
-    service_date: invite.serviceDate,
-    service_label: invite.serviceLabel,
-    token_hash: tokenHash,
+    mood,
   });
 
   if (error) {
-    if (error.code === "23505") {
-      return NextResponse.json({ ok: true });
-    }
     return NextResponse.json(
       { error: "We couldn’t save that just now. Please try again." },
       { status: 500 },
     );
   }
 
-  const when = formatGuestFeedbackDate(invite.serviceDate);
-  const moodLabel = guestFeedbackMoodLabel(parsed.data.mood);
-  const summary = comment
-    ? `${invite.clientName} rated the ${invite.serviceLabel} on ${when} as ${moodLabel}. ${comment}`
-    : `${invite.clientName} rated the ${invite.serviceLabel} on ${when} as ${moodLabel}.`;
-
+  const moodLabel = guestFeedbackMoodLabel(mood);
+  const summary = `${name} rated the clean as ${moodLabel}. ${comment}`;
   const { data: admins } = await admin
     .from("profiles")
     .select("id,email,notification_preferences")
@@ -79,8 +46,8 @@ export async function POST(request: Request) {
     await admin.from("notifications").insert(
       admins.map((adminProfile) => ({
         body: summary.slice(0, 180),
-        data: { invoice_number: invite.invoiceNumber },
-        title: "New client feedback",
+        data: {},
+        title: "New client review",
         type: "guest_feedback",
         user_id: adminProfile.id,
       })),
@@ -96,17 +63,16 @@ export async function POST(request: Request) {
       if (!adminProfile.email || preferences?.email === false) return;
       await sendBrandedEmail({
         data: {
-          actionLabel: "Read feedback",
+          actionLabel: "Read review",
           actionUrl: `${appUrl}/admin/feedback`,
           body: summary,
-          comment: comment ?? "No written comment",
-          invoice: invite.invoiceNumber,
+          comment,
           mood: moodLabel,
-          preview: `${invite.clientName} left feedback.`,
-          subject: `Feedback from ${invite.clientName}`,
-          title: "New client feedback",
+          preview: `${name} left a review.`,
+          subject: `Review from ${name}`,
+          title: "New client review",
         },
-        subject: `Feedback from ${invite.clientName}`,
+        subject: `Review from ${name}`,
         template: "system.generic",
         to: adminProfile.email,
       });

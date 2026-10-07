@@ -11,9 +11,9 @@ type GuestFeedbackRow = {
   created_at: string;
   id: string;
   invoice_number: string | null;
-  mood: string;
-  service_date: string;
-  service_label: string;
+  mood: string | null;
+  service_date: string | null;
+  service_label: string | null;
 };
 
 export default async function AdminFeedbackPage() {
@@ -29,8 +29,8 @@ export default async function AdminFeedbackPage() {
   return (
     <div className="min-w-0">
       <AdminPageIntro>
-        Replies from clients who were sent a private feedback link. These do
-        not appear on the website and do not change a cleaner’s score.
+        Written reviews from the public page. These do not appear on the
+        website and do not change a cleaner’s score.
       </AdminPageIntro>
       {error ? (
         <p className="text-sm text-[#9a3412]">
@@ -47,12 +47,22 @@ export default async function AdminFeedbackPage() {
               key={row.id}
             >
               <p className="text-sm font-semibold text-[#312c79]">
-                {row.client_name} · {guestFeedbackMoodLabel(row.mood)}
+                {row.client_name}
+                {row.mood ? ` · ${guestFeedbackMoodLabel(row.mood)}` : ""}
               </p>
-              <p className="mt-1 text-sm text-[#5a5470]">
-                {row.service_label} on {formatGuestFeedbackDate(row.service_date)}
-                {row.invoice_number ? ` · ${row.invoice_number}` : ""}
-              </p>
+              {row.service_label || row.service_date || row.invoice_number ? (
+                <p className="mt-1 text-sm text-[#5a5470]">
+                  {[
+                    row.service_label,
+                    row.service_date
+                      ? `on ${formatGuestFeedbackDate(row.service_date)}`
+                      : null,
+                    row.invoice_number,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              ) : null}
               {row.comment ? (
                 <p className="mt-3 text-sm leading-6 text-[#1c133b]">{row.comment}</p>
               ) : (
