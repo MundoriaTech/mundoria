@@ -49,6 +49,10 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
+# app_links 6.4+ reads Flutter's Android Gradle extension, which Flutter 3.24 does not provide.
+dependency_overrides:
+  app_links: 6.3.3
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
