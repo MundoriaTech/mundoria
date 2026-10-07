@@ -47,8 +47,12 @@ export default async function AdminFeedbackPage() {
               key={row.id}
             >
               <p className="text-sm font-semibold text-[#312c79]">
-                {row.client_name}
-                {row.mood ? ` · ${guestFeedbackMoodLabel(row.mood)}` : ""}
+                {[
+                  row.client_name.trim(),
+                  row.mood ? guestFeedbackMoodLabel(row.mood) : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
               {row.service_label || row.service_date || row.invoice_number ? (
                 <p className="mt-1 text-sm text-[#5a5470]">

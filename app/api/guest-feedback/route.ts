@@ -8,14 +8,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const schema = z.object({
   comment: z.string().trim().min(2).max(2000),
   mood: z.string(),
-  name: z.string().trim().min(1).max(80),
+  name: z.string().trim().max(80).optional().default(""),
 });
 
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success || !isGuestFeedbackMood(parsed.data.mood)) {
     return NextResponse.json(
-      { error: "Add your name, how the clean felt, and a short review." },
+      { error: "Choose how the clean felt, and write a short review." },
       { status: 400 },
     );
   }
@@ -36,7 +36,9 @@ export async function POST(request: Request) {
   }
 
   const moodLabel = guestFeedbackMoodLabel(mood);
-  const summary = `${name} rated the clean as ${moodLabel}. ${comment}`;
+  const reviewer = name || "A client";
+  const subjectName = name || "a client";
+  const summary = `${reviewer} rated the clean as ${moodLabel}. ${comment}`;
   const { data: admins } = await admin
     .from("profiles")
     .select("id,email,notification_preferences")
@@ -68,11 +70,11 @@ export async function POST(request: Request) {
           body: summary,
           comment,
           mood: moodLabel,
-          preview: `${name} left a review.`,
-          subject: `Review from ${name}`,
+          preview: `${reviewer} left a review.`,
+          subject: `Review from ${subjectName}`,
           title: "New client review",
         },
-        subject: `Review from ${name}`,
+        subject: `Review from ${subjectName}`,
         template: "system.generic",
         to: adminProfile.email,
       });
