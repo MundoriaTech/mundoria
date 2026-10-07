@@ -23,6 +23,8 @@ const PRIVATE_PREFIXES = [
   "/complete-profile",
   "/update-password",
   "/forgot-password",
+  "/review",
+  "/review/",
   "/admin-invite",
   "/login",
   "/login/",

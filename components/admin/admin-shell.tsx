@@ -8,6 +8,7 @@ import {
   LogOut,
   MapPinned,
   Menu,
+  MessageSquare,
   Newspaper,
   Percent,
   Settings,
@@ -47,6 +48,7 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
       { href: "/admin/dashboard", icon: Gauge, label: "Dashboard" },
       { href: "/admin/bookings", icon: BookOpenCheck, label: "Bookings" },
       { href: "/admin/disputes", icon: AlertTriangle, label: "Disputes" },
+      { href: "/admin/feedback", icon: MessageSquare, label: "Feedback" },
     ],
   },
   {
