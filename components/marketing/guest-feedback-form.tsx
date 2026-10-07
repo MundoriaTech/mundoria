@@ -5,13 +5,8 @@ import { useState } from "react";
 import { GUEST_FEEDBACK_MOODS, type GuestFeedbackMood } from "@/lib/guest-feedback";
 import { cn } from "@/lib/utils";
 
-export function GuestFeedbackForm({
-  clientName,
-  token,
-}: {
-  clientName: string;
-  token: string;
-}) {
+export function GuestFeedbackForm() {
+  const [name, setName] = useState("");
   const [mood, setMood] = useState<GuestFeedbackMood | null>(null);
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +14,16 @@ export function GuestFeedbackForm({
   const [submitting, setSubmitting] = useState(false);
 
   async function submit() {
+    if (!name.trim()) {
+      setError("Add your name.");
+      return;
+    }
     if (!mood) {
       setError("Choose the option that best describes the clean.");
+      return;
+    }
+    if (comment.trim().length < 2) {
+      setError("Write a short review.");
       return;
     }
 
@@ -28,9 +31,9 @@ export function GuestFeedbackForm({
     setError(null);
     const response = await fetch("/api/guest-feedback", {
       body: JSON.stringify({
-        comment: comment.trim() || undefined,
+        comment: comment.trim(),
         mood,
-        token,
+        name: name.trim(),
       }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
@@ -50,10 +53,10 @@ export function GuestFeedbackForm({
     return (
       <div className="rounded-3xl border border-[#eadfce] bg-white p-6 sm:p-8">
         <h2 className="text-2xl font-black tracking-[-0.04em] text-[#1c133b]">
-          Thank you, {clientName}.
+          Thank you, {name.trim()}.
         </h2>
         <p className="mt-3 text-base leading-7 text-[#5a5470]">
-          We’ve received your feedback. It stays with the Mundoria team.
+          We’ve received your review. It stays with the Mundoria team.
         </p>
       </div>
     );
@@ -67,7 +70,18 @@ export function GuestFeedbackForm({
         void submit();
       }}
     >
-      <fieldset>
+      <label className="block text-sm font-semibold text-[#1c133b]" htmlFor="reviewer-name">
+        Your name
+        <input
+          className="mt-2 h-12 w-full rounded-2xl border border-[#eadfce] bg-[#f7f2ea] px-4 text-base font-normal text-[#1c133b] outline-none focus:border-[#6a45b8]"
+          id="reviewer-name"
+          maxLength={80}
+          onChange={(event) => setName(event.target.value)}
+          value={name}
+        />
+      </label>
+
+      <fieldset className="mt-6">
         <legend className="text-sm font-semibold text-[#1c133b]">
           How did the clean feel?
         </legend>
@@ -96,13 +110,12 @@ export function GuestFeedbackForm({
       </fieldset>
 
       <label className="mt-6 block text-sm font-semibold text-[#1c133b]" htmlFor="feedback">
-        Anything you would like us to know?
+        Your review
         <textarea
-          className="mt-2 min-h-28 w-full rounded-2xl border border-[#eadfce] bg-[#f7f2ea] px-4 py-3 text-base font-normal text-[#1c133b] outline-none focus:border-[#6a45b8]"
+          className="mt-2 min-h-36 w-full rounded-2xl border border-[#eadfce] bg-[#f7f2ea] px-4 py-3 text-base font-normal text-[#1c133b] outline-none focus:border-[#6a45b8]"
           id="feedback"
           maxLength={2000}
           onChange={(event) => setComment(event.target.value)}
-          placeholder="Optional"
           value={comment}
         />
       </label>
@@ -114,7 +127,7 @@ export function GuestFeedbackForm({
         disabled={submitting}
         type="submit"
       >
-        {submitting ? "Sending…" : "Send feedback"}
+        {submitting ? "Sending…" : "Send review"}
       </button>
     </form>
   );
