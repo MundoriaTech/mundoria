@@ -1,6 +1,8 @@
 const LISTING_QUERY = "Mundoria Uk 32 High Street Bromsgrove";
-const LISTING_URL =
-  "https://www.google.com/maps/place/Mundoria+Uk/@52.3339842,-2.0614516,17z/data=!4m6!3m5!1s0x4870eba9a6e602c7:0xfdaf7049e604835c!8m2!3d52.3339842!4d-2.0614516!16s%2Fg%2F11zxk800xs";
+/** Opens the Mundoria Google listing, where the full review list is shown. */
+export const GOOGLE_REVIEWS_LISTING_URL = "https://g.page/r/CVyDBOZJcK_9EBM";
+
+const LISTING_URL = GOOGLE_REVIEWS_LISTING_URL;
 
 export type GooglePlaceReview = {
   author: string;
