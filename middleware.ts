@@ -98,7 +98,7 @@ export async function middleware(request: NextRequest) {
       `${request.nextUrl.pathname}${request.nextUrl.search}`,
       "https://www.mundoria.co.uk",
     );
-    return NextResponse.redirect(destination, 308);
+    return NextResponse.redirect(destination, 301);
   }
 
   const { pathname } = request.nextUrl;
