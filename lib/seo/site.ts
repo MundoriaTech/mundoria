@@ -8,22 +8,50 @@ export const SUPPORT_EMAIL = "support@mundoriauk.com";
 export const DEFAULT_OG_IMAGE =
   "/images/marketing/landing/category-residential.png";
 
-/** Canonical public host — apex redirects to www in production. */
-const CANONICAL_SITE_URL = "https://www.mundoria.com";
+/** Canonical public host. Apex mundoria.co.uk redirects to www. */
+const CANONICAL_SITE_URL = "https://www.mundoria.co.uk";
+
+const RETIRED_HOSTS = new Set([
+  "cleanscapeuk.com",
+  "www.cleanscapeuk.com",
+  "mundoria.com",
+  "www.mundoria.com",
+]);
+
+function configuredHost(url: string) {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+export function isRetiredPublicHost(hostname: string) {
+  return RETIRED_HOSTS.has(hostname.toLowerCase());
+}
 
 export function getSiteUrl() {
   const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
   if (configured) {
-    // Keep sitemap/canonicals on www even if env is set to the apex domain.
+    const host = configuredHost(configured);
     if (
-      configured === "https://mundoria.com" ||
-      configured === "http://mundoria.com"
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".vercel.app")
+    ) {
+      return configured;
+    }
+    if (
+      host === "mundoria.co.uk" ||
+      host === "www.mundoria.co.uk" ||
+      isRetiredPublicHost(host)
     ) {
       return CANONICAL_SITE_URL;
     }
-    return configured;
   }
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
   return CANONICAL_SITE_URL;
 }
 

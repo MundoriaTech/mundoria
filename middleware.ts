@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { isCustomerBookingPath, safeRedirectPath } from "@/lib/auth/redirects";
+import { isRetiredPublicHost } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/middleware";
 import { ROLE_DASHBOARDS, type UserRole } from "@/types/auth";
@@ -91,6 +92,15 @@ function redirectWithSession(url: URL, response: NextResponse) {
 }
 
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
+  if (isRetiredPublicHost(host)) {
+    const destination = new URL(
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+      "https://www.mundoria.co.uk",
+    );
+    return NextResponse.redirect(destination, 308);
+  }
+
   const { pathname } = request.nextUrl;
   if (!hasSupabasePublicConfig()) {
     if (pathname.startsWith("/api/")) {

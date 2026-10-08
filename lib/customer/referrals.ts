@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import { formatMoney } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
+import { getSiteUrl } from "@/lib/seo/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const REFERRAL_REWARD_PENCE = 1000;
@@ -208,7 +209,7 @@ export async function resolvePromoForCheckout({
   }
 
   await applyReferralAtSignup({
-    appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "https://mundoria.com",
+    appUrl: getSiteUrl(),
     refereeId: customerId,
     referralCode: normalized,
   });
@@ -307,7 +308,7 @@ export async function maybeRewardReferrer(bookingId: string) {
     const preferences = referrer?.notification_preferences as
       | { email?: boolean }
       | undefined;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mundoria.com";
+    const appUrl = getSiteUrl();
     if (referrer?.email && preferences?.email !== false) {
       await sendBrandedEmail({
         data: {

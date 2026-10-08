@@ -126,6 +126,7 @@ export default async function NewBookingPage({
       .from("addresses")
       .select("*")
       .eq("customer_id", user.id)
+      .is("archived_at", null)
       .order("is_default", { ascending: false });
     addresses = (data ?? []) as Address[];
     cleaningHistory = await loadCleaningHistory(supabase, user.id);
@@ -176,6 +177,18 @@ export default async function NewBookingPage({
             .eq("id", booking.cleaner_id)
             .maybeSingle();
           previousCleaner = (cleaner as CleanerPublicProfile | null) ?? null;
+        }
+
+        if (!addresses.some((address) => address.id === booking.address_id)) {
+          const { data: bookedAddress } = await supabase
+            .from("addresses")
+            .select("*")
+            .eq("id", booking.address_id)
+            .eq("customer_id", user.id)
+            .maybeSingle();
+          if (bookedAddress) {
+            addresses = [bookedAddress as Address, ...addresses];
+          }
         }
 
         initialDraft = {

@@ -29,6 +29,7 @@ export default async function AdminCustomerPage({
         .from("addresses")
         .select("*")
         .eq("customer_id", params.id)
+        .is("archived_at", null)
         .order("is_default", { ascending: false }),
     ]);
 

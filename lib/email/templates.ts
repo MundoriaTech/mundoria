@@ -754,18 +754,25 @@ function string(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-const PRODUCTION_SITE_URL = "https://www.mundoria.com";
+const PRODUCTION_SITE_URL = "https://www.mundoria.co.uk";
 
 function publicEmailAssetUrl(path: string) {
   const configured = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
-  const host = configured.replace(/^https?:\/\//, "");
+  const host = configured.replace(/^https?:\/\//, "").split("/")[0] ?? "";
+  const hostname = host.split(":")[0]?.toLowerCase() ?? "";
+  const isRetired =
+    hostname === "cleanscapeuk.com" ||
+    hostname === "www.cleanscapeuk.com" ||
+    hostname === "mundoria.com" ||
+    hostname === "www.mundoria.com";
   const isPublic =
     configured.startsWith("https://") &&
-    !host.startsWith("localhost") &&
-    !host.startsWith("127.0.0.1");
+    !hostname.startsWith("localhost") &&
+    !hostname.startsWith("127.0.0.1") &&
+    !isRetired;
   const origin = !isPublic
     ? PRODUCTION_SITE_URL
-    : configured === "https://mundoria.com"
+    : hostname === "mundoria.co.uk"
       ? PRODUCTION_SITE_URL
       : configured;
   return `${origin}${path.startsWith("/") ? path : `/${path}`}`;

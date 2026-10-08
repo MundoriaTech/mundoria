@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import {
   Bed,
-  Broom,
   CookingPot,
   Door,
   Drop,
@@ -29,7 +28,6 @@ import {
   PawPrint,
   Plant,
   ShirtFolded,
-  Sparkle,
   SprayBottle,
   Square,
   type Icon,
@@ -78,22 +76,19 @@ import {
 import { LazyImage } from "@/components/shared/lazy-image";
 import {
   availableAddOns,
-  allowedStandards,
   categoryDefinition,
   estimatePrice,
   estimateDuration,
   formatMoney,
   formatServiceName,
-  getSmartRecommendation,
   indicativeFromPrice,
   normalizeStandard,
-  recommendedStandardFor,
+  pricingStandardFor,
   selectedAddOnTotal,
   serviceDefinition,
   SERVICES,
   SERVICE_CATEGORIES,
   servicesForCategory,
-  standardLabel,
 } from "@/lib/customer/services";
 import type { OfficeSpaceSize } from "@/lib/customer/office-pricing";
 import { cn } from "@/lib/utils";
@@ -156,27 +151,6 @@ let bookingHistoryBootstrap: {
   path: string;
   stepId: string;
 } | null = null;
-
-const STANDARD_ICONS: Record<
-  CleaningStandard,
-  { Icon: Icon; className: string }
-> = {
-  essential: {
-    Icon: Broom,
-    className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
-  },
-  enhanced: {
-    Icon: Drop,
-    className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
-  },
-  comprehensive: {
-    Icon: Sparkle,
-    className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffe566] [&_path:last-child]:!fill-[#d4694a]",
-  },
-};
 
 const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
   balcony_patio: {
@@ -379,12 +353,6 @@ export function BookingWizard({
   const priceIsIndicative = Boolean(
     draft.serviceType && estimatedAmount > 0 && !hasPropertySizing,
   );
-  const recommendation = getSmartRecommendation({
-    propertyCondition: draft.propertyCondition,
-    recentlyMoved: draft.recentlyMoved,
-    selectedStandard,
-    serviceType: draft.serviceType,
-  });
   const duration = durationSummary({
     bathrooms: draft.numBathrooms ?? roomsAddress?.num_bathrooms,
     bedrooms: draft.numBedrooms ?? roomsAddress?.num_bedrooms,
@@ -796,20 +764,28 @@ export function BookingWizard({
     return () => window.removeEventListener("popstate", onPopState);
   }, [checkoutBusy, previousCleaner]);
 
-  // Auto-apply fixed standards.
+  // Keep the stored standard in sync with the service so price stays correct
+  // without asking the customer to pick Essential or Enhanced.
   useEffect(() => {
     if (!draft.serviceType) return;
-    const fixed = SERVICES.find((item) => item.value === draft.serviceType)
-      ?.fixedStandard;
-    if (fixed && draft.cleaningStandard !== fixed) {
-      setDraft((current) => ({
-        ...current,
-        cleaningStandard: fixed,
-        recommendationOutcome: "auto_applied",
-        recommendedCleaningStandard: fixed,
-      }));
-    }
-  }, [draft.cleaningStandard, draft.serviceType]);
+    const next = pricingStandardFor({
+      current: draft.cleaningStandard,
+      propertyCondition: draft.propertyCondition,
+      recentlyMoved: draft.recentlyMoved,
+      serviceType: draft.serviceType,
+    });
+    if (next === draft.cleaningStandard) return;
+    setDraft((current) =>
+      current.serviceType && current.cleaningStandard !== next
+        ? { ...current, cleaningStandard: next }
+        : current,
+    );
+  }, [
+    draft.cleaningStandard,
+    draft.propertyCondition,
+    draft.recentlyMoved,
+    draft.serviceType,
+  ]);
 
   // Seed / refresh recommended duration when service inputs change.
   useEffect(() => {
@@ -914,10 +890,6 @@ export function BookingWizard({
         return current;
       });
     }
-    if (stepId === "standard") {
-      continueFromStandard();
-      return;
-    }
     if (stepId === "history" && historySuggestion) {
       acceptHistorySuggestion(historySuggestion);
       return;
@@ -963,12 +935,16 @@ export function BookingWizard({
   }
 
   function selectService(serviceType: ServiceType) {
-    const standard = recommendedStandardFor(serviceType);
     const mode = frequencyModeFor(serviceType);
     const today = new Date().toISOString().slice(0, 10);
     setDraft((current) => ({
       ...current,
-      cleaningStandard: normalizeStandard(serviceType, standard),
+      cleaningStandard: pricingStandardFor({
+        current: null,
+        propertyCondition: current.propertyCondition,
+        recentlyMoved: current.recentlyMoved,
+        serviceType,
+      }),
       isRecurring: mode === "required_recurring",
       preferSameCleaner: current.rebookCleanerChoice === "same",
       preferredCleanerId:
@@ -1054,57 +1030,6 @@ export function BookingWizard({
     const categoryIndex = flowSteps.indexOf("category");
     historyWriteModeRef.current = "push";
     setStepIndex(categoryIndex >= 0 ? categoryIndex : stepIndex + 1);
-  }
-
-  function applyRecommendation() {
-    if (!recommendation) return;
-    const nextService = SERVICES.find(
-      (item) => item.value === recommendation.recommendedServiceType,
-    );
-    setDraft((current) => ({
-      ...current,
-      cleaningStandard: recommendation.recommendedStandard,
-      recommendationOutcome: recommendation.autoApplied
-        ? "auto_applied"
-        : "accepted",
-      recommendedCleaningStandard: recommendation.recommendedStandard,
-      recommendedServiceType: recommendation.recommendedServiceType,
-      selectedAddOns:
-        current.serviceType === recommendation.recommendedServiceType
-          ? current.selectedAddOns
-          : [],
-      serviceCategory: nextService?.category ?? current.serviceCategory,
-      serviceType: recommendation.recommendedServiceType,
-    }));
-  }
-
-  function continueFromStandard() {
-    if (recommendation?.autoApplied) {
-      applyRecommendation();
-    } else if (recommendation?.shouldShow) {
-      setDraft((current) => ({
-        ...current,
-        recommendationOutcome:
-          current.recommendationOutcome === "not_shown"
-            ? "overridden"
-            : current.recommendationOutcome,
-        recommendedCleaningStandard:
-          current.recommendedCleaningStandard ??
-          recommendation.recommendedStandard,
-        recommendedServiceType:
-          current.recommendedServiceType ??
-          recommendation.recommendedServiceType,
-      }));
-    } else {
-      setDraft((current) => ({
-        ...current,
-        recommendationOutcome: "not_shown",
-        recommendedCleaningStandard: null,
-        recommendedServiceType: null,
-      }));
-    }
-    historyWriteModeRef.current = "push";
-    setStepIndex((current) => Math.min(flowSteps.length - 1, current + 1));
   }
 
   function canContinue() {
@@ -1312,9 +1237,7 @@ export function BookingWizard({
             .join(" · ")
         : service.label
       : null,
-    standardLabel: selectedStandard
-      ? standardLabel(selectedStandard)
-      : null,
+    standardLabel: null,
   };
 
   const basket = <BookingBasket {...basketProps} />;
@@ -1432,19 +1355,6 @@ export function BookingWizard({
             onBedrooms={(value) => update("numBedrooms", value)}
           />
         )
-      ) : null}
-      {stepId === "standard" && draft.serviceType ? (
-        <StandardStep
-          draft={draft}
-          recommendation={recommendation}
-          selected={selectedStandard}
-          select={(value) => {
-            update("cleaningStandard", value);
-            update("recommendationOutcome", "not_shown");
-          }}
-          serviceType={draft.serviceType}
-          update={update}
-        />
       ) : null}
       {stepId === "addons" ? (
         <AddOnsStep draft={draft} update={update} />
@@ -1965,12 +1875,11 @@ function HistorySuggestionStep({
       </p>
       <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-5">
         <p className="font-semibold text-[#1c133b]">{service.label}</p>
-        <p className="mt-1 text-sm text-[#5a5470]">
-          {standardLabel(suggestion.cleaningStandard)} standard
-          {suggestion.isRecurring && suggestion.recurrencePattern
-            ? ` · ${suggestion.recurrencePattern.replaceAll("_", " ")}`
-            : ""}
-        </p>
+        {suggestion.isRecurring && suggestion.recurrencePattern ? (
+          <p className="mt-1 text-sm capitalize text-[#5a5470]">
+            {suggestion.recurrencePattern.replaceAll("_", " ")}
+          </p>
+        ) : null}
         {addOns.length ? (
           <p className="mt-3 text-sm text-[#5a5470]">
             Usual extras: {addOns.map((item) => item.label).join(", ")}
@@ -2388,177 +2297,6 @@ function RoomsStep({
   );
 }
 
-function StandardStep({
-  draft,
-  recommendation,
-  select,
-  selected,
-  serviceType,
-  update,
-}: {
-  draft: BookingDraft;
-  recommendation: ReturnType<typeof getSmartRecommendation>;
-  select: (standard: CleaningStandard) => void;
-  selected: CleaningStandard | null;
-  serviceType: ServiceType;
-  update: <K extends keyof BookingDraft>(
-    key: K,
-    value: BookingDraft[K],
-  ) => void;
-}) {
-  const service = SERVICES.find((item) => item.value === serviceType)!;
-  const standards = allowedStandards(serviceType);
-  const sameServiceSuggestion =
-    recommendation?.shouldShow &&
-    !recommendation.autoApplied &&
-    recommendation.recommendedServiceType === serviceType;
-
-  function priceFor(standard: CleaningStandard) {
-    const stub: Address = {
-      address_line_1: "",
-      address_line_2: null,
-      city: "",
-      created_at: "",
-      customer_id: "",
-      id: "standard-price",
-      is_default: false,
-      label: null,
-      latitude: null,
-      longitude: null,
-      num_bathrooms: draft.numBathrooms ?? 1,
-      num_bedrooms: draft.numBedrooms ?? 1,
-      num_other_rooms: draft.otherRoomTypes.length,
-      postcode: "",
-      property_type: "flat",
-      special_requirements: null,
-      updated_at: "",
-    };
-    return estimatePrice(serviceType, stub, standard, draft.selectedAddOns);
-  }
-
-  const recommended = service.recommendedStandard;
-  const canUpgradeToEnhanced = standards.some(
-    (item) => item.value === "enhanced",
-  );
-  const canUpgradeToComprehensive = standards.some(
-    (item) => item.value === "comprehensive",
-  );
-  const intensityBlurb = (() => {
-    if (service.fixedStandard) {
-      return `This clean runs at the ${standardLabel(service.fixedStandard)} level so quality stays consistent.`;
-    }
-    if (recommended === "essential" && canUpgradeToEnhanced) {
-      return "Essential is the right pick for what you’ve chosen — upgrade to Enhanced if you want a wider cleaning scope.";
-    }
-    if (recommended === "enhanced" && canUpgradeToComprehensive) {
-      return "Enhanced is the right pick for what you’ve chosen — step up to Comprehensive if you need a fuller reset.";
-    }
-    if (recommended === "enhanced" && canUpgradeToEnhanced) {
-      return "Enhanced is the right pick for what you’ve chosen — Essential is still available if you want a lighter visit.";
-    }
-    if (recommended === "comprehensive") {
-      return "Comprehensive is the right pick for what you’ve chosen — it’s built for a deeper, handover-ready clean.";
-    }
-    return "Start with the recommended intensity — you can step up if you need more covered in the visit.";
-  })();
-
-  return (
-    <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        Pick a Cleaning Session
-      </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">{intensityBlurb}</p>
-
-      <div className="mt-8 grid gap-3">
-        {standards.map((standard) => {
-          const active = selected === standard.value;
-          const { Icon, className: iconClass } = STANDARD_ICONS[standard.value];
-          const isServiceRecommended =
-            service.recommendedStandard === standard.value;
-          const isSmartSuggested =
-            sameServiceSuggestion &&
-            recommendation.recommendedStandard === standard.value &&
-            selected !== standard.value;
-          const showRecommended = !isSmartSuggested && isServiceRecommended;
-
-          return (
-            <button
-              className={cn(
-                "relative rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
-                active && "border-[#6a45b8] bg-white",
-                isSmartSuggested && !active && "border-[#c79c66]/80",
-              )}
-              key={standard.value}
-              onClick={() => select(standard.value)}
-              type="button"
-            >
-              {showRecommended ? (
-                <span className="absolute right-3 top-3 z-10 rounded bg-[#c79c66] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c133b]">
-                  Recommended
-                </span>
-              ) : null}
-              {isSmartSuggested ? (
-                <span className="absolute right-3 top-3 z-10 rounded bg-[#e8d2b8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6b4a28]">
-                  Better fit
-                </span>
-              ) : null}
-              <div
-                className={cn(
-                  "flex items-start gap-3",
-                  (showRecommended || isSmartSuggested) && "pr-14",
-                )}
-              >
-                <Icon
-                  aria-hidden
-                  className={cn("mt-0.5 h-6 w-6 shrink-0", iconClass)}
-                  weight="duotone"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-[#1c133b]">
-                    {standard.label}
-                  </p>
-                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#1c133b]">
-                    From {formatMoney(priceFor(standard.value))}
-                  </p>
-                  <p className="mt-1 text-sm leading-5 text-[#5a5470]">
-                    {standard.description}
-                  </p>
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {sameServiceSuggestion ? (
-        <div className="mt-4 rounded-2xl bg-[#f3f3f5] px-4 py-4 sm:px-5">
-          <p className="text-sm font-semibold text-[#1c133b]">Mundoria tip</p>
-          <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">
-            {recommendation.message}
-          </p>
-          <button
-            className="mt-3 inline-flex min-h-10 items-center rounded-full bg-[#6a45b8] px-4 text-sm font-semibold text-white transition hover:bg-[#5a38a3] touch-manipulation"
-            onClick={() => {
-              select(recommendation.recommendedStandard);
-              update("recommendationOutcome", "accepted");
-              update(
-                "recommendedCleaningStandard",
-                recommendation.recommendedStandard,
-              );
-              update(
-                "recommendedServiceType",
-                recommendation.recommendedServiceType,
-              );
-            }}
-            type="button"
-          >
-            Use {standardLabel(recommendation.recommendedStandard)}
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 function AddOnsStep({
   draft,
@@ -3476,8 +3214,7 @@ function CheckoutStep({
         <p>
           <span className="font-semibold text-[#1c133b]">
             {formatServiceName(draft.serviceType)}
-          </span>{" "}
-          · {standardLabel(draft.cleaningStandard)}
+          </span>
         </p>
         <p className="mt-1">
           {resolvedAddress.address_line_1}, {resolvedAddress.city},{" "}

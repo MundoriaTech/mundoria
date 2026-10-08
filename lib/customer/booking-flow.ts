@@ -290,7 +290,6 @@ export function getFlowSteps(
   },
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
-  const isOffice = draft.serviceType === "office";
   const category = draft.serviceType
     ? serviceDefinition(draft.serviceType).category
     : draft.serviceCategory;
@@ -310,18 +309,9 @@ export function getFlowSteps(
     steps.push("service");
   }
 
-  // Office: level first, then spaces (per commercial pricing logic).
-  if (isOffice) {
-    steps.push("standard", "rooms");
-  } else {
-    steps.push("rooms");
-    if (draft.serviceType) {
-      const fixed = serviceDefinition(draft.serviceType).fixedStandard;
-      if (!fixed) steps.push("standard");
-    } else {
-      steps.push("standard");
-    }
-  }
+  // Essential / Enhanced / Comprehensive stay on the booking as a price input.
+  // The customer does not pick them.
+  steps.push("rooms");
 
   // Home-style personalisation — not for commercial premises.
   if (!isCommercial) {
