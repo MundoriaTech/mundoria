@@ -32,6 +32,7 @@ export default async function AdminCustomersPage() {
         .select(
           "customer_id,address_line_1,city,postcode,is_default,created_at",
         )
+        .is("archived_at", null)
         .order("is_default", { ascending: false })
         .order("created_at", { ascending: true }),
     ]);

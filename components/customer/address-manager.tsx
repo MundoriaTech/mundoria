@@ -97,8 +97,12 @@ export function AddressManager({
       .eq("id", address.id);
 
     if (error) {
+      const stillBooked =
+        error.code === "23503" || /foreign key constraint/i.test(error.message);
       showError({
-        description: error.message,
+        description: stillBooked
+          ? "This place is still on a booking. Refresh the page and delete it again."
+          : error.message,
         onRetry: () => void removeAddress(address),
         title: "Couldn’t delete this address",
       });

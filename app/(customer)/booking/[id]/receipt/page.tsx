@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   formatMoney,
   formatServiceName,
-  standardLabel,
 } from "@/lib/customer/services";
 import { paymentStatusLabel } from "@/lib/customer/payment-status";
 import { buildReceiptLines } from "@/lib/customer/receipt";
@@ -134,7 +133,6 @@ function ReceiptDocument({
             {formatServiceName(booking.service_type)}
           </p>
           <p className="text-sm text-muted-foreground">
-            {standardLabel(booking.cleaning_standard ?? "enhanced")} ·{" "}
             {booking.scheduled_date} at {booking.scheduled_start_time.slice(0, 5)}
           </p>
         </div>
@@ -162,8 +160,7 @@ function ReceiptDocument({
           <tbody className="divide-y">
             <tr>
               <td className="py-3">
-                {formatServiceName(booking.service_type)} (
-                {standardLabel(booking.cleaning_standard ?? "enhanced")})
+                {formatServiceName(booking.service_type)}
               </td>
               <td className="py-3 text-right">{formatMoney(lines.serviceAmount)}</td>
             </tr>

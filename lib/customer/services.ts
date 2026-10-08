@@ -542,6 +542,39 @@ export function recommendedStandardFor(serviceType: ServiceType) {
   return serviceDefinition(serviceType).recommendedStandard;
 }
 
+/** Standard used for price and duration. Not shown in the booking flow. */
+export function pricingStandardFor({
+  current,
+  propertyCondition,
+  recentlyMoved,
+  serviceType,
+}: {
+  current?: CleaningStandard | null;
+  propertyCondition: PropertyCondition | null;
+  recentlyMoved: boolean | null;
+  serviceType: ServiceType;
+}) {
+  const fixed = serviceDefinition(serviceType).fixedStandard;
+  if (fixed) return fixed;
+
+  const baseline = current ?? serviceDefinition(serviceType).recommendedStandard;
+  const recommendation = getSmartRecommendation({
+    propertyCondition,
+    recentlyMoved,
+    selectedStandard: baseline,
+    serviceType,
+  });
+  if (
+    recommendation &&
+    recommendation.recommendedServiceType === serviceType &&
+    recommendation.recommendedStandard !== baseline
+  ) {
+    return normalizeStandard(serviceType, recommendation.recommendedStandard);
+  }
+
+  return normalizeStandard(serviceType, baseline);
+}
+
 export function compatibleServiceTypes(serviceType: ServiceType) {
   return [serviceType, ...(serviceAliases[serviceType] ?? [])];
 }

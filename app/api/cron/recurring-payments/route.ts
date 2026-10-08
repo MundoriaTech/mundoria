@@ -11,6 +11,7 @@ import {
 import { createManualPaymentIntent } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatServiceName } from "@/lib/customer/services";
+import { getSiteUrl } from "@/lib/seo/site";
 
 /**
  * Rolls forward the next unpaid recurring visit when needed, then reminds
@@ -85,7 +86,7 @@ export async function GET(request: Request) {
 
       const serviceLabel = formatServiceName(booking.service_type);
       const when = `${booking.scheduled_date} at ${String(booking.scheduled_start_time).slice(0, 5)}`;
-      const payHref = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.mundoria.com"}/booking/${booking.id}`;
+      const payHref = `${getSiteUrl()}/booking/${booking.id}`;
 
       await createInAppNotification(
         booking.customer_id,

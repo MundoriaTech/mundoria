@@ -13,6 +13,7 @@ export default async function CustomerAddressesPage() {
     .from("addresses")
     .select("*")
     .eq("customer_id", user!.id)
+    .is("archived_at", null)
     .order("is_default", { ascending: false })
     .order("created_at", { ascending: false });
 

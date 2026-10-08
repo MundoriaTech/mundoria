@@ -31,7 +31,6 @@ import {
 import {
   formatMoney,
   formatServiceName,
-  standardLabel,
 } from "@/lib/customer/services";
 import {
   PAYMENT_HELP_HREF,
@@ -523,7 +522,7 @@ export function BookingDetail({
             scheduledDate={booking.scheduled_date}
             scheduledTime={booking.scheduled_start_time}
             serviceLabel={formatServiceName(booking.service_type)}
-            standardLabel={standardLabel(booking.cleaning_standard ?? "enhanced")}
+            standardLabel={null}
             title="Booking details"
           />
 
