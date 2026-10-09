@@ -95,7 +95,11 @@ export function LandingNavbar({
           className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex xl:gap-2"
         >
           {landingCategoryNav.map((menu) => (
-            <CategoryNavDropdown key={menu.label} menu={menu} />
+            <CategoryNavDropdown
+              customerHref={customerHref}
+              key={menu.label}
+              menu={menu}
+            />
           ))}
           {landingNavLinks.map(([label, href]) =>
             href.startsWith("mailto:") ? (
@@ -160,9 +164,16 @@ export function LandingNavbar({
   );
 }
 
+function categoryBookHref(customerHref: string, category: string) {
+  if (!customerHref.startsWith("/booking")) return customerHref;
+  return `/booking/new?category=${category}`;
+}
+
 function CategoryNavDropdown({
+  customerHref,
   menu,
 }: {
+  customerHref: string;
   menu: (typeof landingCategoryNav)[number];
 }) {
   const [open, setOpen] = useState(false);
@@ -257,16 +268,41 @@ function CategoryNavDropdown({
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
                 {menu.label}
               </p>
-              <p className="mt-3 text-[13px] leading-5 text-[#1c133b]/75">
+              <p className="mt-2 text-[15px] font-semibold leading-snug text-[#1c133b]">
                 {menu.description}
               </p>
-              <Link
-                className="mt-auto inline-flex pt-4 text-[12px] font-semibold text-[#312c79] underline-offset-2 hover:underline"
-                href={menu.href}
-                onClick={() => setOpen(false)}
-              >
-                View all {menu.label.toLowerCase()}
-              </Link>
+              <ul className="mt-4 space-y-2.5">
+                {menu.notes.map((note) => (
+                  <li
+                    className="flex gap-2 text-[13px] leading-5 text-[#1c133b]/80"
+                    key={note}
+                  >
+                    <span
+                      aria-hidden
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#823fb2]"
+                    />
+                    <span>{note}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-auto flex flex-col gap-2 border-t border-[#e4d8f5] pt-4">
+                <Link
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-[#312c79] px-3 text-center text-[13px] font-semibold text-white transition hover:bg-[#241f5c]"
+                  href={categoryBookHref(customerHref, menu.bookCategory)}
+                  onClick={() => setOpen(false)}
+                  role="menuitem"
+                >
+                  {menu.bookLabel}
+                </Link>
+                <Link
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-white px-3 text-center text-[13px] font-semibold text-[#312c79] transition hover:bg-[#f3efe6]"
+                  href={menu.href}
+                  onClick={() => setOpen(false)}
+                  role="menuitem"
+                >
+                  {menu.pageLabel}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -410,13 +446,22 @@ function MobileNav({
                           </span>
                         </Link>
                       ))}
-                      <Link
-                        className="block min-h-11 px-5 py-2.5 text-sm font-semibold text-[#312c79] touch-manipulation"
-                        href={menu.href}
-                        onClick={() => onMobileOpenChange(false)}
-                      >
-                        View all {menu.label.toLowerCase()}
-                      </Link>
+                      <div className="grid gap-2 px-4 pb-3 pt-1">
+                        <Link
+                          className="inline-flex h-11 items-center justify-center rounded-full bg-[#312c79] px-3 text-sm font-semibold text-white touch-manipulation"
+                          href={categoryBookHref(customerHref, menu.bookCategory)}
+                          onClick={() => onMobileOpenChange(false)}
+                        >
+                          {menu.bookLabel}
+                        </Link>
+                        <Link
+                          className="inline-flex h-11 items-center justify-center rounded-full bg-white px-3 text-sm font-semibold text-[#312c79] touch-manipulation"
+                          href={menu.href}
+                          onClick={() => onMobileOpenChange(false)}
+                        >
+                          {menu.pageLabel}
+                        </Link>
+                      </div>
                     </div>
                   ) : null}
                 </div>

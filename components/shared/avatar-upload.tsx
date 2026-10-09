@@ -114,7 +114,7 @@ export function AvatarUpload({
         <div className="min-w-0">
           <p className="font-medium text-foreground">Profile photo</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Choose the woman or the man, or upload your own photo.
+            Choose a Mundoria look, or upload your own photo.
           </p>
         </div>
       </div>
@@ -122,14 +122,14 @@ export function AvatarUpload({
       <div>
         <p className="text-sm font-medium text-foreground">Mundoria looks</p>
         <div className="mt-3 flex gap-4">
-          {DEFAULT_AVATARS.map((avatar) => {
+          {DEFAULT_AVATARS.map((avatar, index) => {
             const selected = selectedDefaultId === avatar.id;
             return (
               <button
-                aria-label={`Use ${avatar.label} avatar`}
+                aria-label={`Use Mundoria look ${index + 1}`}
                 aria-pressed={selected}
                 className={cn(
-                  "group flex flex-col items-center gap-1.5 rounded-xl p-1 transition",
+                  "rounded-xl p-1 transition",
                   saving && "pointer-events-none opacity-70",
                 )}
                 disabled={saving}
@@ -139,10 +139,10 @@ export function AvatarUpload({
               >
                 <span
                   className={cn(
-                    "relative h-16 w-16 overflow-hidden rounded-full ring-2 transition",
+                    "relative block h-16 w-16 overflow-hidden rounded-full ring-2 transition",
                     selected
                       ? "ring-[#221f50] ring-offset-2 ring-offset-background"
-                      : "ring-transparent group-hover:ring-border",
+                      : "ring-transparent hover:ring-border",
                   )}
                   style={{ backgroundColor: avatar.tint }}
                 >
@@ -157,14 +157,6 @@ export function AvatarUpload({
                       <Check className="h-5 w-5 text-white" strokeWidth={3} />
                     </span>
                   ) : null}
-                </span>
-                <span
-                  className={cn(
-                    "text-center text-[11px] font-medium leading-tight sm:text-xs",
-                    selected ? "text-foreground" : "text-muted-foreground",
-                  )}
-                >
-                  {avatar.label}
                 </span>
               </button>
             );

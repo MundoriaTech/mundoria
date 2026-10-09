@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { LandingFooter } from "@/components/marketing/landing/landing-footer";
-import { WhatsAppButton } from "@/components/marketing/whatsapp-button";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
@@ -63,7 +62,6 @@ export async function MarketingShell({
       <LandingNavbar customerHref={bookingHref} viewer={viewer} />
       {children}
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
-      <WhatsAppButton />
       <ZohoSalesIqWidget />
     </main>
   );

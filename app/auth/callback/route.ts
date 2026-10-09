@@ -6,11 +6,10 @@ import {
   OAUTH_GENDER_COOKIE,
   OAUTH_NEXT_COOKIE,
   OAUTH_ROLE_COOKIE,
-  parseOAuthGender,
   parseOAuthNext,
   parseOAuthRole,
 } from "@/lib/auth/oauth-intent";
-import { profileAvatarFor } from "@/lib/avatars/default-pack";
+import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -28,8 +27,6 @@ export async function GET(request: Request) {
   const requestedRole =
     parseOAuthRole(requestUrl.searchParams.get("role")) ??
     parseOAuthRole(jar.get(OAUTH_ROLE_COOKIE)?.value);
-  const requestedGender = parseOAuthGender(jar.get(OAUTH_GENDER_COOKIE)?.value);
-
   if (code) {
     const supabase = createRouteHandlerClient({ cookies });
     const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -41,7 +38,6 @@ export async function GET(request: Request) {
       const profile = user
         ? await bootstrapOAuthProfile({
             appUrl: requestUrl.origin,
-            requestedGender,
             requestedRole,
             user,
           })
@@ -89,12 +85,10 @@ function clearOAuthIntent(response: NextResponse) {
 
 async function bootstrapOAuthProfile({
   appUrl,
-  requestedGender,
   requestedRole,
   user,
 }: {
   appUrl: string;
-  requestedGender: ReturnType<typeof parseOAuthGender>;
   requestedRole: SelfRegisterableRole | null;
   user: {
     email?: string;
@@ -121,9 +115,8 @@ async function bootstrapOAuthProfile({
   const savedAvatar = existing?.avatar_url || string(metadata.avatar_url) || googlePicture;
   const avatarUrl =
     roleWillBeCleaner(existing?.role, requestedRole) &&
-    requestedGender &&
     shouldUseMundoriaAvatar(savedAvatar, googlePicture)
-      ? profileAvatarFor(requestedGender)
+      ? pickDefaultAvatar(user.id).src
       : savedAvatar;
   const existingRole = isUserRole(existing?.role) ? existing.role : null;
   const role = resolveOAuthRole(existingRole, requestedRole);
@@ -147,7 +140,7 @@ async function bootstrapOAuthProfile({
 
   if (role === "cleaner") {
     await admin.from("cleaner_profiles").upsert(
-      requestedGender ? { gender: requestedGender, id: user.id } : { id: user.id },
+      { id: user.id },
       { onConflict: "id" },
     );
   }

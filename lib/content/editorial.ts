@@ -39,10 +39,19 @@ export const BLOG_CATEGORIES = [
   "Cleaning Tips",
   "Home Care",
   "Host Tips",
-  "Birmingham Life",
+  "Local Life",
   "Cleaner Stories",
   "Company News",
 ] as const;
+
+/** Older Mag posts used this name before the section became Local Life. */
+export function canonicalBlogCategory(category: string) {
+  return category === "Birmingham Life" ? "Local Life" : category;
+}
+
+function withCanonicalCategory<T extends { category: string }>(post: T): T {
+  return { ...post, category: canonicalBlogCategory(post.category) };
+}
 
 export async function listPublishedBlogPosts(): Promise<BlogPost[]> {
   const supabase = createPublicSupabaseClient();
@@ -55,7 +64,7 @@ export async function listPublishedBlogPosts(): Promise<BlogPost[]> {
       )
       .eq("published", true)
       .order("published_at", { ascending: false });
-    return (data as BlogPost[]) ?? [];
+    return ((data as BlogPost[]) ?? []).map(withCanonicalCategory);
   } catch {
     return [];
   }
@@ -73,7 +82,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
       .eq("slug", slug)
       .eq("published", true)
       .maybeSingle();
-    return (data as BlogPost) ?? null;
+    return data ? withCanonicalCategory(data as BlogPost) : null;
   } catch {
     return null;
   }
@@ -93,11 +102,14 @@ export async function listRelatedBlogPosts(
         "id,title,slug,excerpt,content,category,cover_url,author_name,published_at,created_at",
       )
       .eq("published", true)
-      .eq("category", category)
+      .in(
+        "category",
+        category === "Local Life" ? ["Local Life", "Birmingham Life"] : [category],
+      )
       .neq("slug", excludeSlug)
       .order("published_at", { ascending: false })
       .limit(limit);
-    return (data as BlogPost[]) ?? [];
+    return ((data as BlogPost[]) ?? []).map(withCanonicalCategory);
   } catch {
     return [];
   }

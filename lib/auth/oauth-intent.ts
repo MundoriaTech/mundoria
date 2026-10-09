@@ -1,4 +1,3 @@
-import { parseAvatarCharacter, type AvatarCharacter } from "@/lib/avatars/default-pack";
 import type { UserRole } from "@/types/auth";
 
 export const OAUTH_ROLE_COOKIE = "mundoria_oauth_role";
@@ -31,7 +30,6 @@ export function parseOAuthNext(value: string | null | undefined) {
 export function writeOAuthIntent(
   role: SelfRegisterableRole | undefined,
   next: string,
-  gender?: AvatarCharacter | null,
 ) {
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   const keep = `; Path=/; Max-Age=600; SameSite=Lax${secure}`;
@@ -41,11 +39,5 @@ export function writeOAuthIntent(
     ? `${OAUTH_ROLE_COOKIE}=${role}${keep}`
     : `${OAUTH_ROLE_COOKIE}=${clear}`;
   document.cookie = `${OAUTH_NEXT_COOKIE}=${encodeURIComponent(next)}${keep}`;
-  document.cookie = gender
-    ? `${OAUTH_GENDER_COOKIE}=${gender}${keep}`
-    : `${OAUTH_GENDER_COOKIE}=${clear}`;
-}
-
-export function parseOAuthGender(value: string | null | undefined) {
-  return parseAvatarCharacter(value);
+  document.cookie = `${OAUTH_GENDER_COOKIE}=${clear}`;
 }

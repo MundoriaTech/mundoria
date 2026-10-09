@@ -205,10 +205,12 @@ export default async function BlogIndexPage({
   const bookingHref = configured ? "/booking/new" : "/setup";
   const posts = await listPublishedBlogPosts();
   const rawCategory = searchParams?.category ?? "All";
-  const category =
+  const decodedCategory =
     rawCategory === "All"
       ? "All"
       : decodeURIComponent(rawCategory.replace(/\+/g, " ")).trim();
+  const category =
+    decodedCategory === "Birmingham Life" ? "Local Life" : decodedCategory;
   const knownCategory =
     category === "All" ||
     BLOG_CATEGORIES.includes(category as (typeof BLOG_CATEGORIES)[number]);
@@ -352,7 +354,7 @@ export default async function BlogIndexPage({
                       "Cleaning Tips": "bg-[#efe6ff]",
                       "Home Care": "bg-[#f0e4ec]",
                       "Host Tips": "bg-[#e8f7f5]",
-                      "Birmingham Life": "bg-[#e8f2ff]",
+                      "Local Life": "bg-[#e8f2ff]",
                       "Cleaner Stories": "bg-[#eeecff]",
                       "Company News": "bg-[#ececef]",
                     };

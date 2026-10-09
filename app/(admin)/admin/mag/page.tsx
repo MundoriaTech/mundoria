@@ -1,4 +1,5 @@
 import { MagPostsManager } from "@/components/admin/mag-posts-manager";
+import { canonicalBlogCategory } from "@/lib/content/editorial";
 import type { MagPostAdminRow } from "@/lib/content/mag-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -18,7 +19,12 @@ export default async function AdminMagPage() {
   return (
     <div className="min-w-0">
       <h1 className="sr-only">Mundoria Mag</h1>
-      <MagPostsManager posts={(data as MagPostAdminRow[]) ?? []} />
+      <MagPostsManager
+        posts={((data as MagPostAdminRow[]) ?? []).map((post) => ({
+          ...post,
+          category: canonicalBlogCategory(post.category),
+        }))}
+      />
     </div>
   );
 }

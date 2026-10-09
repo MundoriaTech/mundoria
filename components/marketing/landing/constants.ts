@@ -19,11 +19,14 @@ export const landingNavLinks = [
   ["For cleaners", "/for-cleaners"],
 ] as const;
 
-/** The three main categories, each with its own two-column menu. */
+/** The three main categories, each with its own menu. */
 export const landingCategoryNav = [
   {
+    bookCategory: "residential",
+    bookLabel: "Book a home clean",
     description: "Homes, flats and family spaces",
     href: "/cleaning/residential",
+    pageLabel: "See residential services",
     items: [
       {
         description: "A repeating clean on your schedule",
@@ -52,10 +55,18 @@ export const landingCategoryNav = [
       },
     ],
     label: "Residential",
+    notes: [
+      "Clear estimates before you book",
+      "One visit, or a regular schedule",
+      "Vetted cleaners matched to your home",
+    ],
   },
   {
-    description: "Offices, retail and workplaces",
+    bookCategory: "commercial",
+    bookLabel: "Book a workplace clean",
+    description: "Offices, shops and shared workplaces",
     href: "/cleaning/commercial",
+    pageLabel: "See commercial services",
     items: [
       {
         description: "Desks, toilets and shared rooms",
@@ -79,10 +90,18 @@ export const landingCategoryNav = [
       },
     ],
     label: "Commercial",
+    notes: [
+      "Visits planned around opening hours",
+      "A clear estimate before you confirm",
+      "Vetted cleaners for the workplace",
+    ],
   },
   {
-    description: "Support when life needs care",
+    bookCategory: "recovery",
+    bookLabel: "Book recovery cleaning",
+    description: "Cleaning support when life changes",
     href: "/cleaning/recovery",
+    pageLabel: "See recovery services",
     items: [
       {
         description: "Extra help around the house",
@@ -106,6 +125,11 @@ export const landingCategoryNav = [
       },
     ],
     label: "Recovery",
+    notes: [
+      "Cleaning support, not healthcare",
+      "Share what to use, avoid, or prioritise",
+      "The cleaner arrives already briefed",
+    ],
   },
 ] as const;
 

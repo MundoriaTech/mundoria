@@ -3,7 +3,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { profileAvatarFor } from "@/lib/avatars/default-pack";
+import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { signupSchema } from "@/lib/auth/schemas";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { sendBrandedEmail } from "@/lib/email/send-email";
@@ -18,11 +18,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { full_name, email, password, phone, role, referral_code, gender } = parsed.data;
-  const avatarUrl =
-    role === "cleaner" && (gender === "woman" || gender === "man")
-      ? profileAvatarFor(gender)
-      : undefined;
+  const { full_name, email, password, phone, role, referral_code } = parsed.data;
+  const avatarUrl = role === "cleaner" ? pickDefaultAvatar(email).src : undefined;
   const supabase = createRouteHandlerClient({ cookies });
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
@@ -34,7 +31,6 @@ export async function POST(request: Request) {
         data: {
         avatar_url: avatarUrl,
         full_name,
-        gender,
         phone,
         role,
       },

@@ -44,7 +44,6 @@ export function SignupForm({
     handleSubmit,
     register,
     setValue,
-    watch,
   } = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -72,8 +71,6 @@ export function SignupForm({
       });
     }
   }, [role, setValue]);
-
-  const gender = watch("gender");
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
@@ -133,11 +130,7 @@ export function SignupForm({
 
   return (
     <div className="space-y-6">
-      {role === "cleaner" ? (
-        <GenderChoice error={errors.gender?.message} register={register} value={gender} />
-      ) : null}
       <OAuthButton
-        gender={role === "cleaner" ? gender : null}
         label={
           role === "cleaner"
             ? "Continue with Google as a cleaner"
@@ -242,41 +235,6 @@ async function parseSignupResponse(response: Response) {
   }
 
   return {};
-}
-
-function GenderChoice({
-  error,
-  register,
-  value,
-}: {
-  error?: string;
-  register: ReturnType<typeof useForm<SignupValues>>["register"];
-  value?: SignupValues["gender"];
-}) {
-  return (
-    <fieldset>
-      <legend className="text-sm font-medium text-[#1c133b]">Gender</legend>
-      <p className="mt-1 text-xs leading-5 text-[#5c5670]">
-        This chooses the Mundoria look on your profile and dashboard.
-      </p>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        {(["woman", "man"] as const).map((option) => (
-          <label
-            className={`flex h-11 cursor-pointer items-center justify-center rounded-full border text-sm font-semibold ${
-              value === option
-                ? "border-[#312c79] bg-[#f7f3ff] text-[#312c79]"
-                : "border-[#e6e0f2] bg-white text-[#5c5670]"
-            }`}
-            key={option}
-          >
-            <input className="sr-only" type="radio" value={option} {...register("gender")} />
-            {option === "woman" ? "Woman" : "Man"}
-          </label>
-        ))}
-      </div>
-      {error ? <p className="mt-2 text-sm text-[#7a3b28]">{error}</p> : null}
-    </fieldset>
-  );
 }
 
 function Divider() {

@@ -12,7 +12,7 @@ import {
   ReliableIcon,
   SimpleIcon,
 } from "@/components/marketing/residential/feature-icons";
-import { LazyImage } from "@/components/shared/lazy-image";
+import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
 import { cn } from "@/lib/utils";
 
 const HERO_IMAGE = "/images/marketing/landing/residential-hero.png";
@@ -272,29 +272,15 @@ export function ResidentialCleaningPage({
             ref={carouselRef}
           >
             {SERVICE_CARDS.map((service) => (
-              <Link
-                className="group flex w-[min(78vw,17.5rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[19rem] lg:w-auto"
-                href={bookingHref === "/setup" ? "/setup" : service.href}
+              <CategoryServiceCard
+                bookingHref={bookingHref}
+                href={service.href}
+                image={service.image}
                 key={service.label}
-              >
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f4ebfe]">
-                  <LazyImage
-                    alt={service.label}
-                    className={cn(
-                      "object-cover transition duration-500 group-hover:scale-[1.03]",
-                      service.objectPosition,
-                    )}
-                    fill
-                    sizes="(min-width: 1024px) 33vw, 300px"
-                    src={service.image}
-                  />
-                </div>
-                <div className="flex min-h-[2.75rem] items-center bg-[#e8def8] px-4 py-2.5">
-                  <p className="text-[14px] font-semibold leading-snug text-[#312c79]">
-                    {service.label}
-                  </p>
-                </div>
-              </Link>
+                label={service.label}
+                objectPosition={service.objectPosition}
+                sizes="(min-width: 1024px) 33vw, 300px"
+              />
             ))}
           </div>
         </div>

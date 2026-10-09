@@ -451,7 +451,7 @@ Clear bin instructions, Wi-Fi notes and a short “how to leave the flat” list
   },
   {
     author_name: "Hannah R.",
-    category: "Birmingham Life",
+    category: "Local Life",
     content: `Busy households in Harborne and nearby south-west Birmingham often want the same thing: a home that feels reset without midweek disruption. A Saturday morning clean has become a quiet local ritual.
 
 ## What’s the Harborne Pattern?
@@ -634,7 +634,7 @@ Keep homes fresh without heavy scent — especially when someone in the househol
   },
   {
     author_name: "Mundoria Team",
-    category: "Birmingham Life",
+    category: "Local Life",
     content: `Spilled cooking oil, last-minute guests, a chaotic week — Birmingham same-day cleans are for urgent resets, not your weekly rhythm.
 
 ## When Does Same-Day Make Sense?
@@ -810,7 +810,7 @@ If you’re considering the switch, the Help Centre’s “Become a Mundoria cle
   },
   {
     author_name: "Mundoria Team",
-    category: "Birmingham Life",
+    category: "Local Life",
     content: `A fortnightly clean costs less stress than a panicked deep clean before every birthday party. Birmingham households that settle into a rhythm notice the difference in kitchens first.
 
 ## Why Does Recurring Beat Last-Minute Scrambles?
