@@ -35,7 +35,7 @@ export function summariseMatchingDecisions(
     const current = latest.get(key);
     if (!current || compareDecisions(row, current) > 0) latest.set(key, row);
   }
-  const people = [...latest.values()];
+  const people = Array.from(latest.values());
   const offered = people.find((row) =>
     ["selected", "offer_accepted", "emergency_list_promoted", "admin_override_assignment"].includes(
       row.decision,
@@ -57,7 +57,7 @@ export function summariseMatchingDecisions(
 
   return {
     detail,
-    groups: [...groups.entries()]
+    groups: Array.from(groups.entries())
       .map(([label, count]) => ({ count, label }))
       .sort((left, right) => right.count - left.count),
     headline,

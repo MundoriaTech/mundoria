@@ -41,8 +41,8 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       .limit(10),
   ]);
   if (!booking) notFound();
-  const namedCleanerIds = [
-    ...new Set(
+  const namedCleanerIds = Array.from(
+    new Set(
       [
         ...(matching ?? [])
           .filter((item) =>
@@ -57,7 +57,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         ...(reserves ?? []).map((item) => item.cleaner_id),
       ].filter((id): id is string => Boolean(id)),
     ),
-  ].slice(0, 30);
+  ).slice(0, 30);
   const { data: namedCleaners } = namedCleanerIds.length
     ? await admin.from("profiles").select("id,full_name").in("id", namedCleanerIds)
     : { data: [] };
