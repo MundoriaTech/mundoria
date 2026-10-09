@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
 import { MatchingDecisionLog } from "@/components/admin/matching-decision-log";
+import { MATCHING_LIST_LIMIT } from "@/lib/matching/emergency-list";
 import { formatMoney, formatServiceName, standardLabel } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -38,7 +39,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       .eq("booking_id", params.id)
       .in("status", ["reserve", "notified", "promoted"])
       .order("rank")
-      .limit(10),
+      .limit(MATCHING_LIST_LIMIT),
   ]);
   if (!booking) notFound();
   const namedCleanerIds = Array.from(
@@ -57,7 +58,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         ...(reserves ?? []).map((item) => item.cleaner_id),
       ].filter((id): id is string => Boolean(id)),
     ),
-  ).slice(0, 30);
+  ).slice(0, 40);
   const { data: namedCleaners } = namedCleanerIds.length
     ? await admin.from("profiles").select("id,full_name").in("id", namedCleanerIds)
     : { data: [] };
