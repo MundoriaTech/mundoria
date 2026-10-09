@@ -102,6 +102,15 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  // Google returns a one-time code. If Supabase sends that code to the site
+  // home page instead of /auth/callback, finish the signup there.
+  if (pathname === "/" && request.nextUrl.searchParams.has("code")) {
+    const callback = new URL("/auth/callback", request.url);
+    callback.search = request.nextUrl.search;
+    return NextResponse.redirect(callback);
+  }
+
   if (!hasSupabasePublicConfig()) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
@@ -177,7 +186,7 @@ export async function middleware(request: NextRequest) {
 
   if (user && protectedRole && role !== protectedRole) {
     return redirectWithSession(
-      new URL(role ? ROLE_DASHBOARDS[role] : "/", request.url),
+      new URL(role ? ROLE_DASHBOARDS[role] : "/complete-profile", request.url),
       response,
     );
   }
