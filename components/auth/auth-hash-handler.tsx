@@ -58,6 +58,12 @@ export function AuthHashHandler() {
         return;
       }
 
+      const roleMatch = document.cookie.match(
+        /(?:^|; )mundoria_oauth_role=(cleaner|customer)/,
+      );
+      router.replace(
+        roleMatch?.[1] === "cleaner" ? "/cleaner/dashboard" : "/dashboard",
+      );
       router.refresh();
     })();
 

@@ -44,10 +44,12 @@ export async function GET(request: Request) {
         : null;
       const fallback = isUserRole(profile?.role)
         ? dashboardForRole(profile.role)
-        : "/";
+        : requestedRole
+          ? dashboardForRole(requestedRole)
+          : "/login?error=Unable%20to%20finish%20sign-up";
       const next = isUserRole(profile?.role)
         ? redirectForRole(profile.role, requestedNext, fallback)
-        : redirectForRole("customer", requestedNext, fallback);
+        : redirectForRole(requestedRole ?? "customer", requestedNext, fallback);
       const isPasswordReset = next === "/update-password";
 
       if (
