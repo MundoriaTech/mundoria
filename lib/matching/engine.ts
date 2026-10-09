@@ -413,7 +413,7 @@ function dedupeCandidates<T extends { cleanerId: string; distance: number; eligi
       byCleaner.set(candidate.cleanerId, candidate);
     }
   }
-  return [...byCleaner.values()];
+  return Array.from(byCleaner.values());
 }
 
 function boroughOnly(city?: string | null, postcode?: string | null) {
