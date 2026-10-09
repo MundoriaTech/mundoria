@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
+import { MatchingDecisionLog } from "@/components/admin/matching-decision-log";
 import { formatMoney, formatServiceName, standardLabel } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -15,6 +16,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     { data: cleaners },
     { data: addOns },
     { data: team },
+    { data: offers },
   ] = await Promise.all([
     admin.from("bookings").select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone)").eq("id", params.id).single(),
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
@@ -23,8 +25,41 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     admin.from("profiles").select("id,full_name,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
     admin.from("booking_add_ons").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("booking_team_members").select("cleaner_id").eq("booking_id", params.id),
+    admin
+      .from("cleaner_job_responses")
+      .select("cleaner_id,expires_at,responded_at,response")
+      .eq("booking_id", params.id)
+      .order("offered_at", { ascending: false })
+      .limit(5),
   ]);
   if (!booking) notFound();
+  const namedCleanerIds = [
+    ...new Set(
+      (matching ?? [])
+        .filter((item) =>
+          [
+            "admin_override_assignment",
+            "emergency_list_promoted",
+            "offer_accepted",
+            "selected",
+          ].includes(item.decision),
+        )
+        .map((item) => item.cleaner_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ].slice(0, 20);
+  const { data: namedCleaners } = namedCleanerIds.length
+    ? await admin.from("profiles").select("id,full_name").in("id", namedCleanerIds)
+    : { data: [] };
+  const decisionNames = Object.fromEntries(
+    (namedCleaners ?? []).map((cleaner) => [cleaner.id, cleaner.full_name]),
+  );
+  const openOffer = (offers ?? []).find(
+    (offer) =>
+      !offer.responded_at &&
+      offer.expires_at &&
+      new Date(offer.expires_at).getTime() > Date.now(),
+  );
   let payment: { id: string; status: string; amount: number; amount_capturable: number } | null = null;
   if (booking.stripe_payment_intent_id && process.env.STRIPE_SECRET_KEY) {
     const intent = await getStripe().paymentIntents.retrieve(booking.stripe_payment_intent_id);
@@ -85,7 +120,23 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           <p className="mt-3 text-sm text-muted-foreground">No payment intent.</p>
         )}
       </section>
-      <SimpleTable title="Matching decision log" rows={(matching ?? []).map((item) => [item.created_at, item.decision, JSON.stringify(item.reasons)])} />
+      <MatchingDecisionLog
+        cleanerName={booking.cleaner?.full_name ?? null}
+        customerName={booking.customer?.full_name ?? null}
+        decisions={(matching ?? []).map((item) => ({
+          cleaner_id: item.cleaner_id,
+          created_at: item.created_at,
+          decision: item.decision,
+          reasons:
+            item.reasons && typeof item.reasons === "object"
+              ? (item.reasons as Record<string, unknown>)
+              : null,
+        }))}
+        names={decisionNames}
+        offerExpiresAt={openOffer?.expires_at ?? null}
+        offerOpen={Boolean(openOffer)}
+        status={booking.status}
+      />
       <SimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "—"])} />
       <SimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [item.created_at, item.sender?.full_name ?? "Unknown", item.content])} />
     </div>

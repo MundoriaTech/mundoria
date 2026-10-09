@@ -14,7 +14,7 @@ import {
   type ForgotPasswordValues,
 } from "@/lib/auth/schemas";
 
-export function ForgotPasswordForm({ from }: { from?: "admin" }) {
+export function ForgotPasswordForm({ from }: { from?: "admin" | "cleaner" }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -42,7 +42,7 @@ export function ForgotPasswordForm({ from }: { from?: "admin" }) {
     }
 
     const params = new URLSearchParams({ email: email.trim() });
-    if (from === "admin") params.set("from", "admin");
+    if (from === "admin" || from === "cleaner") params.set("from", from);
     router.replace(`/forgot-password/sent?${params.toString()}`);
   });
 

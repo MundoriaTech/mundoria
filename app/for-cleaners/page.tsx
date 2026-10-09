@@ -43,7 +43,7 @@ export default function ForCleanersPage() {
   const signupHref = configured ? "/signup/cleaner" : "/setup";
 
   return (
-    <MarketingShell>
+    <MarketingShell loginHref={configured ? "/login/cleaner" : "/setup"}>
       <BrandedPageWash underNav>
         <MarketingHero
           description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."

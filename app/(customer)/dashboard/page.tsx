@@ -9,6 +9,7 @@ import {
 } from "@/components/shared/dashboard-panels";
 import { Button } from "@/components/ui/button";
 import {
+  customerWaitingLabel,
   isCleanerVisibleToCustomer,
   isWaitingForCleanerAcceptance,
 } from "@/lib/customer/booking-visibility";
@@ -175,7 +176,9 @@ export default async function CustomerDashboardPage() {
                             </p>
                             <p className="mt-0.5 truncate text-xs text-[#5c5670]">
                               {weekday} · {time}
-                              {waiting ? " · looking for cleaner" : ""}
+                              {waiting
+                                ? ` · ${(customerWaitingLabel(booking.status) ?? "Looking for a cleaner").toLowerCase()}`
+                                : ""}
                             </p>
                           </div>
                           <ChevronRight className="h-4 w-4 shrink-0 text-[#c4bfd4] transition group-hover:text-[#6a45b8]" />
@@ -311,7 +314,9 @@ function NextCleanCard({ booking }: { booking: Booking }) {
       <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
         <div className="min-w-0">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            {waiting ? "Looking for cleaner" : "Confirmed"}
+            {waiting
+              ? customerWaitingLabel(booking.status)
+              : "Confirmed"}
           </p>
           <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
             {formatServiceName(booking.service_type)}
@@ -357,8 +362,11 @@ function NextCleanCard({ booking }: { booking: Booking }) {
 }
 
 function personLine(booking: Booking) {
-  if (isWaitingForCleanerAcceptance(booking.status)) {
+  if (booking.status === "pending_match") {
     return "We’re looking for your cleaner";
+  }
+  if (booking.status === "matched") {
+    return "A cleaner has been offered this job and needs to confirm";
   }
   if (
     isCleanerVisibleToCustomer(booking.status) &&

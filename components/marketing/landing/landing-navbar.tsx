@@ -50,15 +50,17 @@ export function LandingNavbar({
   accountMenuItems,
   customerHref,
   headerExtra,
+  loginHref: loginHrefProp,
   viewer,
 }: {
   accountMenuItems?: AccountMenuItem[];
   customerHref: string;
   headerExtra?: React.ReactNode;
+  loginHref?: string;
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
 }) {
   const configured = hasSupabasePublicConfig();
-  const loginHref = configured ? "/login" : "/setup";
+  const loginHref = loginHrefProp ?? (configured ? "/login" : "/setup");
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
   const showBookCta = viewer?.role !== "cleaner";
   const [mobileOpen, setMobileOpen] = useState(false);

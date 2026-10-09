@@ -52,7 +52,11 @@ export function UpdatePasswordForm() {
     await supabase.auth.signOut();
 
     const loginPath =
-      profile?.role === "admin" ? "/admin/login" : "/login";
+      profile?.role === "admin"
+        ? "/admin/login"
+        : profile?.role === "cleaner"
+          ? "/login/cleaner"
+          : "/login";
     router.replace(
       `${loginPath}?message=${encodeURIComponent("Password updated. You can sign in.")}`,
     );

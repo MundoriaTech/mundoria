@@ -43,6 +43,7 @@ export function CleanerReviewPanel({
   currentTier,
   hasHeadshot,
   hasUtr,
+  onboardingComplete = true,
   interviewScheduledAt = null,
   interviewStatus,
   medallionScore,
@@ -57,6 +58,7 @@ export function CleanerReviewPanel({
   currentTier: CleanerTier;
   hasHeadshot: boolean;
   hasUtr: boolean;
+  onboardingComplete?: boolean;
   interviewScheduledAt?: string | null;
   interviewStatus: InterviewStatus;
   medallionScore: number;
@@ -142,12 +144,18 @@ export function CleanerReviewPanel({
 
   const isCertified = status === "certified" || status === "active";
   const statusLabel = STATUS_LABEL[status] ?? status.replaceAll("_", " ");
-  const canApprove =
-    interview === "completed" &&
-    skillsExamPassed &&
-    hasHeadshot &&
-    hasUtr &&
-    !isCertified;
+  const approvalBlockers = [
+    !onboardingComplete
+      ? "The application has not been submitted, so documents and answers are not on this page yet."
+      : null,
+    interview !== "completed"
+      ? "Mark the interview complete after the call."
+      : null,
+    !skillsExamPassed ? "Skills exam has not been passed." : null,
+    !hasHeadshot ? "Profile photo has not been uploaded." : null,
+    !hasUtr ? "UTR has not been provided." : null,
+  ].filter((item): item is string => Boolean(item));
+  const canApprove = approvalBlockers.length === 0 && !isCertified;
 
   return (
     <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1fr_.65fr]">
@@ -247,12 +255,20 @@ export function CleanerReviewPanel({
             disabled={!reasonIsValid || busy || !canApprove}
             onClick={() => void act("approve")}
           >
-            {isCertified
-              ? "Already approved"
-              : canApprove
-                ? "Approve for live jobs"
-                : "Approve (interview + checks required)"}
+            {isCertified ? "Already approved" : "Approve for live jobs"}
           </Button>
+          {!isCertified && approvalBlockers.length > 0 ? (
+            <div className="rounded-lg bg-muted px-3 py-3 text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">
+                Approve stays off until these are done:
+              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {approvalBlockers.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <Button
             className="min-h-11"
             disabled={!reasonIsValid || busy}

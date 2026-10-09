@@ -89,6 +89,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         currentTier={cleaner.tier as CleanerTier}
         hasHeadshot={Boolean(cleaner.headshot_url)}
         hasUtr={Boolean(cleaner.utr_number)}
+        onboardingComplete={Boolean(cleaner.onboarding_complete)}
         interviewScheduledAt={
           (cleaner.interview_scheduled_at as string | null) ?? null
         }

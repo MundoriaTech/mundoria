@@ -30,7 +30,8 @@ export default function CheckEmailPage({
   if (email) loginParams.set("email", email);
   if (next) loginParams.set("redirectTo", next);
   const loginQuery = loginParams.toString();
-  const actionHref = loginQuery ? `/login?${loginQuery}` : "/login";
+  const loginPath = role === "cleaner" ? "/login/cleaner" : "/login";
+  const actionHref = loginQuery ? `${loginPath}?${loginQuery}` : loginPath;
   const againHref = returningToBooking
     ? "/booking/new"
     : role === "cleaner"

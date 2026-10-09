@@ -19,6 +19,7 @@ export function LandingFooter({
 }) {
   const bookingHref = configured ? "/booking/new" : "/setup";
   const loginHref = configured ? "/login" : "/setup";
+  const cleanerLoginHref = configured ? "/login/cleaner" : "/setup";
   const popularSeoServices = popularMarketingServices(4);
 
   const footerSections = [
@@ -49,7 +50,7 @@ export function LandingFooter({
       links: [
         ["For cleaners", "/for-cleaners"],
         ["Become a cleaner", cleanerHref],
-        ["Cleaner login", loginHref],
+        ["Cleaner login", cleanerLoginHref],
         ["Birmingham coverage", `/cleaners/${LAUNCH_CITY.slug}`],
         ...BIRMINGHAM_AREAS.map(
           (area) =>

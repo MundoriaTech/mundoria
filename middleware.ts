@@ -143,7 +143,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (protectedRole && !user) {
-    const loginPath = protectedRole === "admin" ? "/admin/login" : "/login";
+    const loginPath =
+      protectedRole === "admin"
+        ? "/admin/login"
+        : protectedRole === "cleaner"
+          ? "/login/cleaner"
+          : "/login";
     const loginUrl = new URL(loginPath, request.url);
     const redirectTo = `${pathname}${request.nextUrl.search}`;
     loginUrl.searchParams.set("redirectTo", redirectTo);
@@ -152,7 +157,9 @@ export async function middleware(request: NextRequest) {
 
   if (
     user &&
-    (AUTH_ROUTES.includes(pathname) || pathname.startsWith("/signup"))
+    (AUTH_ROUTES.includes(pathname) ||
+      pathname.startsWith("/signup") ||
+      pathname.startsWith("/login/"))
   ) {
     const redirectTo = request.nextUrl.searchParams.get("redirectTo");
     const destination = safeRedirectPath(

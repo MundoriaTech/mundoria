@@ -29,7 +29,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
       description={
         returningFromBooking
           ? "Looks like you already have a Mundoria customer account. Sign in to finish your booking."
-          : "Welcome back. Sign in to your customer or cleaner account."
+          : "Welcome back. Sign in to book and manage your cleans."
       }
       footer={
         <>
@@ -38,17 +38,24 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
             className="font-semibold text-[#291845] hover:underline"
             href={signupHref}
           >
-            Create an account
+            Create a customer account
           </Link>
+          <span className="mt-2 block text-sm text-muted-foreground">
+            Are you a cleaner?{" "}
+            <Link className="font-semibold text-[#291845] hover:underline" href="/login/cleaner">
+              Cleaner sign in
+            </Link>
+          </span>
         </>
       }
-      title="Sign in"
+      title="Customer sign in"
     >
       <LoginForm
         initialEmail={searchParams.email}
         initialError={searchParams.error}
         initialMessage={searchParams.message}
         redirectTo={searchParams.redirectTo}
+        requiredRole="customer"
       />
     </AuthShell>
   );
