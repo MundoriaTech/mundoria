@@ -1,10 +1,12 @@
 /**
  * Dynamic Emergency List — booking engine helpers.
  *
- * Rule: one primary holds the booking. Everyone else who was eligible stays
+ * Rule: one primary holds the booking. The next 10 eligible cleaners stay
  * in reserve until unavailable or cleaning starts. List size ≠ push size —
- * notify in rank order.
+ * notify in rank order, three at a time.
  */
+
+export const MATCHING_LIST_LIMIT = 10;
 
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 
@@ -64,9 +66,9 @@ export async function formEmergencyList(
   rankedEligibleCleanerIds: string[],
 ) {
   const admin = createAdminClient();
-  const reserves = rankedEligibleCleanerIds.filter(
-    (id) => id !== primaryCleanerId,
-  );
+  const reserves = rankedEligibleCleanerIds
+    .filter((id) => id !== primaryCleanerId)
+    .slice(0, MATCHING_LIST_LIMIT);
 
   await admin
     .from("booking_emergency_list")

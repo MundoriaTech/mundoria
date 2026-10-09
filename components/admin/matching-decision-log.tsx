@@ -1,9 +1,16 @@
 import { summariseMatchingDecisions } from "@/lib/matching/decision-summary";
 
+const STATUS_LABEL: Record<string, string> = {
+  notified: "Offer sent",
+  promoted: "Accepted",
+  reserve: "Waiting",
+};
+
 export function MatchingDecisionLog({
   cleanerName,
   customerName,
   decisions,
+  matchingList,
   names,
   offerExpiresAt,
   offerOpen,
@@ -17,6 +24,7 @@ export function MatchingDecisionLog({
     decision: string;
     reasons: Record<string, unknown> | null;
   }[];
+  matchingList: { name: string; rank: number; status: string }[];
   names: Record<string, string>;
   offerExpiresAt: string | null;
   offerOpen: boolean;
@@ -83,24 +91,41 @@ export function MatchingDecisionLog({
           ) : null}
           <li>
             If the offer is declined or the reply time passes, the next
-            suitable cleaner is offered the job and {customer} is told we are
-            arranging another professional.
+            cleaner on this list is offered the job and {customer} is told we
+            are arranging another professional.
           </li>
         </ul>
       </div>
 
-      {summary.groups.length ? (
-        <div className="mt-5">
-          <h3 className="text-sm font-semibold">Other cleaners</h3>
-          <ul className="mt-2 space-y-1.5 text-sm leading-6 text-muted-foreground">
-            {summary.groups.map((group) => (
-              <li key={group.label}>
-                {`${group.count} ${group.count === 1 ? "cleaner" : "cleaners"}: ${group.label.charAt(0).toLowerCase()}${group.label.slice(1)}.`}
+      <div className="mt-5">
+        <h3 className="text-sm font-semibold">Matching list</h3>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+          The next 10 cleaners who can take this job, in order. Only the first
+          three are contacted if the current offer is not accepted.
+        </p>
+        {matchingList.length ? (
+          <ol className="mt-3 divide-y divide-border">
+            {matchingList.map((cleaner) => (
+              <li
+                className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                key={`${cleaner.rank}-${cleaner.name}`}
+              >
+                <span>
+                  <span className="mr-2 text-muted-foreground">{cleaner.rank}.</span>
+                  {cleaner.name}
+                </span>
+                <span className="text-muted-foreground">
+                  {STATUS_LABEL[cleaner.status] ?? cleaner.status}
+                </span>
               </li>
             ))}
-          </ul>
-        </div>
-      ) : null}
+          </ol>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground">
+            No backup cleaners are on this list yet.
+          </p>
+        )}
+      </div>
     </section>
   );
 }
