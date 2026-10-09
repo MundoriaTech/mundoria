@@ -34,7 +34,7 @@ const BY_CATEGORY: Record<
     iconClass:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#2f6f6a]",
   },
-  "Birmingham Life": {
+  "Local Life": {
     Icon: MapPinArea,
     iconClass:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#b7d0ea] [&_path:last-child]:!fill-[#4a7ab5]",

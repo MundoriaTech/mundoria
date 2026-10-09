@@ -8,12 +8,12 @@ import { Check, Star } from "lucide-react";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
+import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
 import {
   FlexibleIcon,
   ReliableIcon,
   SimpleIcon,
 } from "@/components/marketing/residential/feature-icons";
-import { LazyImage } from "@/components/shared/lazy-image";
 import { cn } from "@/lib/utils";
 
 const FEATURE_ICONS = {
@@ -311,29 +311,15 @@ function CategoryServicesSection({
           ref={carouselRef}
         >
           {services.map((service) => (
-            <Link
-              className="group flex w-[min(78vw,17.5rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[19rem] lg:w-auto"
-              href={bookingHref === "/setup" ? "/setup" : service.href}
+            <CategoryServiceCard
+              bookingHref={bookingHref}
+              href={service.href}
+              image={service.image}
               key={service.label}
-            >
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f4ebfe]">
-                <LazyImage
-                  alt={service.label}
-                  className={cn(
-                    "object-cover transition duration-500 group-hover:scale-[1.03]",
-                    service.objectPosition ?? "object-center",
-                  )}
-                  fill
-                  sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 300px"
-                  src={service.image}
-                />
-              </div>
-              <div className="flex min-h-[2.75rem] items-center bg-[#e8def8] px-4 py-2.5">
-                <p className="text-[14px] font-semibold leading-snug text-[#312c79]">
-                  {service.label}
-                </p>
-              </div>
-            </Link>
+              label={service.label}
+              objectPosition={service.objectPosition}
+              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 300px"
+            />
           ))}
         </div>
       </div>

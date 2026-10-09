@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { MagPostEditor } from "@/components/admin/mag-post-editor";
+import { canonicalBlogCategory } from "@/lib/content/editorial";
 import type { MagPostAdminRow } from "@/lib/content/mag-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -22,5 +23,10 @@ export default async function AdminMagEditPage({ params }: PageProps) {
 
   if (!data) notFound();
 
-  return <MagPostEditor post={data as MagPostAdminRow} />;
+  const post = data as MagPostAdminRow;
+  return (
+    <MagPostEditor
+      post={{ ...post, category: canonicalBlogCategory(post.category) }}
+    />
+  );
 }

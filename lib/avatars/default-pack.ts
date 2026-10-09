@@ -6,7 +6,6 @@ export type AvatarCharacter = "woman" | "man";
 
 export type DefaultAvatar = {
   id: AvatarCharacter;
-  label: string;
   src: string;
   tint: string;
 };
@@ -19,13 +18,11 @@ export const MALE_PROFILE_SRC = "/images/avatars/mundoria-man-profile.png";
 export const DEFAULT_AVATARS: DefaultAvatar[] = [
   {
     id: "woman",
-    label: "Woman",
     src: FEMALE_PROFILE_SRC,
     tint: "#f4ebfe",
   },
   {
     id: "man",
-    label: "Man",
     src: MALE_PROFILE_SRC,
     tint: "#efe8ff",
   },

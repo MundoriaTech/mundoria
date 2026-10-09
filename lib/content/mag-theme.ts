@@ -32,7 +32,7 @@ export const MAG_CATEGORY_THEME: Record<
     label: "text-[#2f6f6a]",
     soft: "bg-gradient-to-br from-[#e8f7f5] via-[#faf8ff] to-[#efe6ff]",
   },
-  "Birmingham Life": {
+  "Local Life": {
     accent: "#4a7ab5",
     chip: "border-[#b7d0ea] bg-[#e8f2ff] text-[#2f557f]",
     chipActive: "border-transparent bg-[#4a7ab5] text-white shadow-[0_6px_16px_rgba(74,122,181,0.35)]",
