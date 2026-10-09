@@ -372,7 +372,9 @@ export function OnboardingWizard({
     setSubmitting(true);
 
     try {
-      const { payout_confirmed: _payoutConfirmed, ...payload } = normalized;
+      const payload = Object.fromEntries(
+        Object.entries(normalized).filter(([key]) => key !== "payout_confirmed"),
+      );
       const response = await fetch("/api/cleaner/onboarding", {
         body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },
