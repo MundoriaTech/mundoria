@@ -17,6 +17,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     { data: addOns },
     { data: team },
     { data: offers },
+    { data: reserves },
   ] = await Promise.all([
     admin.from("bookings").select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone)").eq("id", params.id).single(),
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
@@ -31,23 +32,32 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       .eq("booking_id", params.id)
       .order("offered_at", { ascending: false })
       .limit(5),
+    admin
+      .from("booking_emergency_list")
+      .select("cleaner_id,rank,status")
+      .eq("booking_id", params.id)
+      .in("status", ["reserve", "notified", "promoted"])
+      .order("rank")
+      .limit(10),
   ]);
   if (!booking) notFound();
   const namedCleanerIds = [
     ...new Set(
-      (matching ?? [])
-        .filter((item) =>
-          [
-            "admin_override_assignment",
-            "emergency_list_promoted",
-            "offer_accepted",
-            "selected",
-          ].includes(item.decision),
-        )
-        .map((item) => item.cleaner_id)
-        .filter((id): id is string => Boolean(id)),
+      [
+        ...(matching ?? [])
+          .filter((item) =>
+            [
+              "admin_override_assignment",
+              "emergency_list_promoted",
+              "offer_accepted",
+              "selected",
+            ].includes(item.decision),
+          )
+          .map((item) => item.cleaner_id),
+        ...(reserves ?? []).map((item) => item.cleaner_id),
+      ].filter((id): id is string => Boolean(id)),
     ),
-  ].slice(0, 20);
+  ].slice(0, 30);
   const { data: namedCleaners } = namedCleanerIds.length
     ? await admin.from("profiles").select("id,full_name").in("id", namedCleanerIds)
     : { data: [] };
@@ -131,6 +141,11 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             item.reasons && typeof item.reasons === "object"
               ? (item.reasons as Record<string, unknown>)
               : null,
+        }))}
+        matchingList={(reserves ?? []).map((item) => ({
+          name: decisionNames[item.cleaner_id] ?? "Cleaner",
+          rank: item.rank,
+          status: item.status,
         }))}
         names={decisionNames}
         offerExpiresAt={openOffer?.expires_at ?? null}
