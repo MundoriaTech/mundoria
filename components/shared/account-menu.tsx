@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ChevronDown,
   CreditCard,
+  LayoutDashboard,
   LogOut,
   MapPin,
   UserRound,
@@ -185,6 +186,7 @@ export function AccountMenu({
 }
 
 export const CUSTOMER_ACCOUNT_MENU: AccountMenuItem[] = [
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/profile", icon: UserRound, label: "Profile" },
   { href: "/bookings", icon: CalendarDays, label: "Sessions" },
   { href: "/addresses", icon: MapPin, label: "Addresses" },
@@ -192,5 +194,6 @@ export const CUSTOMER_ACCOUNT_MENU: AccountMenuItem[] = [
 ];
 
 export const CLEANER_ACCOUNT_MENU: AccountMenuItem[] = [
+  { href: "/cleaner/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/cleaner/profile", icon: UserRound, label: "Profile" },
 ];

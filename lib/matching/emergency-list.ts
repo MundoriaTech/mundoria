@@ -1,12 +1,12 @@
 /**
  * Dynamic Emergency List — booking engine helpers.
  *
- * Rule: one primary holds the booking. The next 10 eligible cleaners stay
+ * Rule: one primary holds the booking. The next 20 eligible cleaners stay
  * in reserve until unavailable or cleaning starts. List size ≠ push size —
  * notify in rank order, three at a time.
  */
 
-export const MATCHING_LIST_LIMIT = 10;
+export const MATCHING_LIST_LIMIT = 20;
 
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 

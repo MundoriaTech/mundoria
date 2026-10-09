@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Hourglass,
+  Check,
   MessageCircle,
   X,
 } from "lucide-react";
@@ -838,29 +838,66 @@ function LookingForCleanerCard({
 }: {
   confirmByLabel: string | null;
 }) {
+  const steps = [
+    { label: "Booked", state: "done" as const },
+    { label: "Finding a cleaner", state: "current" as const },
+    { label: "Confirmed", state: "next" as const },
+  ];
+
   return (
-    <section className="overflow-hidden rounded-2xl border border-[#e8e0f5] bg-gradient-to-b from-[#f6f2ff] to-white">
-      <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-6">
-        <div className="min-w-0 flex-1">
-          <span className="inline-flex items-center rounded-full bg-[#312c79]/10 px-2.5 py-1 text-xs font-semibold text-[#312c79]">
-            In progress
-          </span>
-          <h2 className="mt-3 text-xl font-semibold tracking-tight text-[#312c79] sm:text-2xl">
+    <section className="overflow-hidden rounded-2xl border border-[#e6e8ee] bg-white">
+      <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 text-sm font-semibold text-[#d4694a]">
+            <span className="h-2 w-2 rounded-full bg-[#d4694a]" />
+            Finding your cleaner
+          </p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#1c133b] sm:text-2xl">
             We are looking for your cleaner
           </h2>
-          <p className="mt-2 text-sm leading-6 text-[#4a4468] sm:text-base">
-            {confirmByLabel
-              ? `Your session will be confirmed no later than ${confirmByLabel}.`
-              : "Your session will be confirmed shortly — we’ll email you as soon as a cleaner accepts."}
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c6570]">
+            Their name stays hidden until they accept. You’ll get an email when
+            the session is confirmed.
           </p>
         </div>
-        <div
-          aria-hidden
-          className="mx-auto flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_0_0_6px_rgba(255,255,255,0.9),0_12px_28px_rgba(49,44,121,0.12)] sm:mx-0 sm:h-32 sm:w-32"
-        >
-          <Hourglass className="h-12 w-12 text-[#d4694a] sm:h-14 sm:w-14" strokeWidth={1.5} />
+        <div className="rounded-2xl bg-[#f7f4fb] px-4 py-3.5 sm:px-5 lg:min-w-[17rem] lg:text-right">
+          <p className="text-xs font-medium text-[#8b8798]">
+            {confirmByLabel ? "Confirmed no later than" : "Confirmation"}
+          </p>
+          <p className="mt-1 text-base font-semibold leading-6 text-[#312c79] sm:text-lg">
+            {confirmByLabel ?? "We’ll email you as soon as a cleaner accepts."}
+          </p>
         </div>
       </div>
+      <ol className="grid grid-cols-3 border-t border-[#eef0f4]">
+        {steps.map((step) => (
+          <li className="px-2 py-3.5 text-center sm:py-4" key={step.label}>
+            <span
+              className={cn(
+                "mx-auto flex h-6 w-6 items-center justify-center rounded-full",
+                step.state === "done" && "bg-[#312c79] text-white",
+                step.state === "current" &&
+                  "bg-[#fff1ea] text-[#d4694a] ring-2 ring-[#d4694a]",
+                step.state === "next" && "bg-[#f3f4f6] text-[#9aa1ab]",
+              )}
+            >
+              {step.state === "done" ? (
+                <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+              ) : (
+                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              )}
+            </span>
+            <span
+              className={cn(
+                "mt-2 block text-[11px] font-medium leading-4 sm:text-xs",
+                step.state === "next" ? "text-[#9aa1ab]" : "text-[#1c133b]",
+              )}
+            >
+              {step.label}
+            </span>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

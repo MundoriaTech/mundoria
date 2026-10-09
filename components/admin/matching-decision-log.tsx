@@ -100,7 +100,7 @@ export function MatchingDecisionLog({
       <div className="mt-5">
         <h3 className="text-sm font-semibold">Matching list</h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          The next 10 cleaners who can take this job, in order. Only the first
+          The next 20 cleaners who can take this job, in order. Only the first
           three are contacted if the current offer is not accepted.
         </p>
         {matchingList.length ? (
