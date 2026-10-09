@@ -5,6 +5,13 @@ export function isWaitingForCleanerAcceptance(status: BookingStatus): boolean {
   return status === "pending_match" || status === "matched";
 }
 
+/** What the customer should read before a cleaner has accepted. */
+export function customerWaitingLabel(status: BookingStatus): string | null {
+  if (status === "pending_match") return "Looking for a cleaner";
+  if (status === "matched") return "Waiting for confirmation";
+  return null;
+}
+
 /** Cleaner identity / messaging is only shown after acceptance. */
 export function isCleanerVisibleToCustomer(status: BookingStatus): boolean {
   return (

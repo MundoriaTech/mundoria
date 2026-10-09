@@ -24,14 +24,27 @@ export default function PasswordEmailSentPage({
 }) {
   const email = displayEmail(searchParams.email);
   const isAdmin = searchParams.from === "admin";
-  const actionHref = isAdmin ? "/admin/login" : "/login";
+  const isCleaner = searchParams.from === "cleaner";
+  const actionHref = isAdmin
+    ? "/admin/login"
+    : isCleaner
+      ? "/login/cleaner"
+      : "/login";
   const againHref = isAdmin
     ? "/forgot-password?from=admin"
-    : "/forgot-password";
+    : isCleaner
+      ? "/forgot-password?from=cleaner"
+      : "/forgot-password";
   const panel = (
     <EmailSentPanel
       actionHref={actionHref}
-      actionLabel={isAdmin ? "Back to admin sign in" : "Back to sign in"}
+      actionLabel={
+        isAdmin
+          ? "Back to admin sign in"
+          : isCleaner
+            ? "Back to cleaner sign in"
+            : "Back to sign in"
+      }
       email={email}
       steps={STEPS}
     />

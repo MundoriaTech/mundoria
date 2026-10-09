@@ -31,9 +31,12 @@ export function writeOAuthIntent(
   role: SelfRegisterableRole | undefined,
   next: string,
 ) {
-  const secure = window.location.protocol === "https:" ? "; Secure" : "";
-  const keep = `; Path=/; Max-Age=600; SameSite=Lax${secure}`;
-  const clear = `; Path=/; Max-Age=0; SameSite=Lax${secure}`;
+  const secure = window.location.protocol === "https:";
+  // None is required so the cookie is still there when Google sends the browser back.
+  const sameSite = secure ? "None" : "Lax";
+  const secureAttr = secure ? "; Secure" : "";
+  const keep = `; Path=/; Max-Age=600; SameSite=${sameSite}${secureAttr}`;
+  const clear = `; Path=/; Max-Age=0; SameSite=${sameSite}${secureAttr}`;
 
   document.cookie = role
     ? `${OAUTH_ROLE_COOKIE}=${role}${keep}`

@@ -14,13 +14,20 @@ export default function ForgotPasswordPage({
   searchParams: { from?: string };
 }) {
   const isAdmin = searchParams.from === "admin";
-  const backHref = isAdmin ? "/admin/login" : "/login";
-  const backLabel = isAdmin ? "Back to admin sign in" : "Back to sign in";
+  const isCleaner = searchParams.from === "cleaner";
+  const backHref = isAdmin ? "/admin/login" : isCleaner ? "/login/cleaner" : "/login";
+  const backLabel = isAdmin
+    ? "Back to admin sign in"
+    : isCleaner
+      ? "Back to cleaner sign in"
+      : "Back to sign in";
   const description = isAdmin
     ? "Enter your admin email and we’ll send you a secure reset link."
     : "Enter your email and we’ll send you a secure reset link.";
 
-  const form = <ForgotPasswordForm from={isAdmin ? "admin" : undefined} />;
+  const form = (
+    <ForgotPasswordForm from={isAdmin ? "admin" : isCleaner ? "cleaner" : undefined} />
+  );
   const footer = (
     <Link className="font-medium text-primary hover:underline" href={backHref}>
       {backLabel}

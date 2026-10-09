@@ -14,7 +14,7 @@ export default function CleanerSignupPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link className="font-semibold text-[#291845] hover:underline" href="/login">
+          <Link className="font-semibold text-[#291845] hover:underline" href="/login/cleaner">
             Sign in
           </Link>
           <span className="mt-2 block text-sm text-muted-foreground">

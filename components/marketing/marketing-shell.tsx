@@ -48,9 +48,11 @@ export async function getMarketingViewer() {
 export async function MarketingShell({
   children,
   className,
+  loginHref,
 }: {
   children: ReactNode;
   className?: string;
+  loginHref?: string;
 }) {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
@@ -59,7 +61,11 @@ export async function MarketingShell({
 
   return (
     <main className={cn("min-h-screen bg-background text-foreground", className)}>
-      <LandingNavbar customerHref={bookingHref} viewer={viewer} />
+      <LandingNavbar
+        customerHref={bookingHref}
+        loginHref={loginHref}
+        viewer={viewer}
+      />
       {children}
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
       <ZohoSalesIqWidget />

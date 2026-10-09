@@ -62,11 +62,15 @@ export async function GET(request: Request) {
         const completionUrl = new URL("/complete-profile", requestUrl.origin);
         completionUrl.searchParams.set("next", next);
 
-        return clearOAuthIntent(NextResponse.redirect(completionUrl));
+        return clearOAuthIntent(
+          NextResponse.redirect(completionUrl),
+          requestUrl.protocol === "https:",
+        );
       }
 
       return clearOAuthIntent(
         NextResponse.redirect(new URL(next, requestUrl.origin)),
+        requestUrl.protocol === "https:",
       );
     }
   }
@@ -75,13 +79,20 @@ export async function GET(request: Request) {
     NextResponse.redirect(
       new URL("/login?error=Unable%20to%20complete%20sign-in", requestUrl.origin),
     ),
+    requestUrl.protocol === "https:",
   );
 }
 
-function clearOAuthIntent(response: NextResponse) {
-  response.cookies.set(OAUTH_ROLE_COOKIE, "", { maxAge: 0, path: "/" });
-  response.cookies.set(OAUTH_NEXT_COOKIE, "", { maxAge: 0, path: "/" });
-  response.cookies.set(OAUTH_GENDER_COOKIE, "", { maxAge: 0, path: "/" });
+function clearOAuthIntent(response: NextResponse, secure: boolean) {
+  const cookie = {
+    maxAge: 0,
+    path: "/",
+    sameSite: secure ? ("none" as const) : ("lax" as const),
+    secure,
+  };
+  response.cookies.set(OAUTH_ROLE_COOKIE, "", cookie);
+  response.cookies.set(OAUTH_NEXT_COOKIE, "", cookie);
+  response.cookies.set(OAUTH_GENDER_COOKIE, "", cookie);
   return response;
 }
 

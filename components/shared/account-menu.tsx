@@ -96,7 +96,12 @@ export function AccountMenu({
   async function logout() {
     setSigningOut(true);
     await createBrowserClient().auth.signOut();
-    router.replace("/login");
+    const loginPath = pathname.startsWith("/cleaner")
+      ? "/login/cleaner"
+      : pathname.startsWith("/admin")
+        ? "/admin/login"
+        : "/login";
+    router.replace(loginPath);
     router.refresh();
   }
 

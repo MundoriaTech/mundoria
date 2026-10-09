@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { isWaitingForCleanerAcceptance } from "@/lib/customer/booking-visibility";
+import { customerWaitingLabel } from "@/lib/customer/booking-visibility";
 import type { BookingStatus } from "@/types/customer";
 
 const statusStyles: Record<BookingStatus, string> = {
@@ -16,8 +16,8 @@ const statusStyles: Record<BookingStatus, string> = {
 };
 
 const statusLabels: Record<BookingStatus, string> = {
-  pending_match: "Looking for cleaner",
-  matched: "Looking for cleaner",
+  pending_match: "Looking for a cleaner",
+  matched: "Waiting for confirmation",
   confirmed: "Confirmed",
   cleaner_en_route: "En route",
   in_progress: "In progress",
@@ -35,9 +35,7 @@ export function BookingStatusBadge({
   className?: string;
   status: BookingStatus;
 }) {
-  const label = isWaitingForCleanerAcceptance(status)
-    ? "Looking for cleaner"
-    : statusLabels[status];
+  const label = customerWaitingLabel(status) ?? statusLabels[status];
 
   return (
     <span

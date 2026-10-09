@@ -25,7 +25,7 @@ export const SESSION_POLICY: Record<
     idleMs: DAY_MS,
     absoluteMs: DAY_MS,
     warnBeforeIdleMs: 60 * 1000,
-    loginPath: "/login",
+    loginPath: "/login/cleaner",
   },
   admin: {
     idleMs: DAY_MS,

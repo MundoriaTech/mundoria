@@ -25,7 +25,7 @@ interface LoginFormProps {
   initialEmail?: string;
   initialError?: string;
   initialMessage?: string;
-  requiredRole?: "admin";
+  requiredRole?: "admin" | "cleaner" | "customer";
   redirectTo?: string;
   showOAuth?: boolean;
 }
@@ -78,7 +78,13 @@ export function LoginForm({
 
     if (requiredRole && profile.role !== requiredRole) {
       await supabase.auth.signOut();
-      setFormError("This sign-in page is only for Mundoria administrators.");
+      setFormError(
+        requiredRole === "admin"
+          ? "This sign-in page is only for Mundoria administrators."
+          : requiredRole === "cleaner"
+            ? "This email is a customer account. Use customer sign-in."
+            : "This email is a cleaner account. Use cleaner sign-in.",
+      );
       return;
     }
 
@@ -93,7 +99,17 @@ export function LoginForm({
         <>
           <OAuthButton
             className="h-12 rounded-xl border-[#ddd6eb] bg-white text-[#414141] hover:bg-white/90"
-            next={redirectForRole("customer", redirectTo ?? null, "/dashboard")}
+            label={
+              requiredRole === "cleaner"
+                ? "Continue with Google as a cleaner"
+                : "Continue with Google"
+            }
+            next={
+              requiredRole === "cleaner"
+                ? "/cleaner/dashboard"
+                : redirectForRole("customer", redirectTo ?? null, "/dashboard")
+            }
+            role={requiredRole === "cleaner" ? "cleaner" : "customer"}
           />
           <div className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#9a93ad]">
             <span className="h-px flex-1 bg-[#ddd6eb]" />
@@ -133,7 +149,9 @@ export function LoginForm({
             href={
               requiredRole === "admin"
                 ? "/forgot-password?from=admin"
-                : "/forgot-password"
+                : requiredRole === "cleaner"
+                  ? "/forgot-password?from=cleaner"
+                  : "/forgot-password"
             }
           >
             Forgot Password?

@@ -91,6 +91,7 @@ type OnboardingData = {
   id_document_url: string;
   location_tracking_consent_accepted: boolean;
   location_tracking_consent_version: string;
+  payout_confirmed: boolean;
   payout_preference: "weekly" | "monthly";
   phone: string;
   services: string[];
@@ -127,18 +128,19 @@ export function OnboardingWizard({
     availability: days.map((_, day_of_week) => ({
       day_of_week,
       end_time: "18:00",
-      is_available: day_of_week > 0 && day_of_week < 6,
+      is_available: false,
       start_time: "08:00",
     })),
     bio: cleaner.bio ?? "",
     dbs_document_url: cleaner.dbs_document_url ?? "",
     full_name: profile.full_name,
-    headshot_url: cleaner.headshot_url ?? profile.avatar_url ?? "",
+    headshot_url: cleaner.headshot_url ?? "",
     id_document_url: cleaner.id_document_url ?? "",
     location_tracking_consent_accepted: Boolean(
       cleaner.location_tracking_consent_at,
     ),
     location_tracking_consent_version: "cleaner-location-consent-v1",
+    payout_confirmed: false,
     payout_preference: cleaner.payout_preference,
     phone: profile.phone ?? "",
     services: [] as string[],
@@ -149,8 +151,11 @@ export function OnboardingWizard({
   });
   const [prefix, setPrefix] = useState("");
 
+  const draftKey = `mundoria-cleaner-onboarding:${profile.id}`;
+
   useEffect(() => {
-    const saved = window.localStorage.getItem("mundoria-cleaner-onboarding");
+    window.localStorage.removeItem("mundoria-cleaner-onboarding");
+    const saved = window.localStorage.getItem(draftKey);
     if (saved) {
       try {
         setData((current) =>
@@ -160,17 +165,14 @@ export function OnboardingWizard({
           }),
         );
       } catch {
-        window.localStorage.removeItem("mundoria-cleaner-onboarding");
+        window.localStorage.removeItem(draftKey);
       }
     }
-  }, []);
+  }, [draftKey]);
 
   useEffect(() => {
-    window.localStorage.setItem(
-      "mundoria-cleaner-onboarding",
-      JSON.stringify(data),
-    );
-  }, [data]);
+    window.localStorage.setItem(draftKey, JSON.stringify(data));
+  }, [data, draftKey]);
 
   function update<Key extends keyof OnboardingData>(
     key: Key,
@@ -370,7 +372,7 @@ export function OnboardingWizard({
     setSubmitting(true);
 
     try {
-      const payload = normalized;
+      const { payout_confirmed: _payoutConfirmed, ...payload } = normalized;
       const response = await fetch("/api/cleaner/onboarding", {
         body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },
@@ -388,6 +390,7 @@ export function OnboardingWizard({
       }
 
       window.localStorage.removeItem("mundoria-cleaner-onboarding");
+      window.localStorage.removeItem(draftKey);
       router.refresh();
     } catch (submitError) {
       setFieldIssue(null);
@@ -411,7 +414,7 @@ export function OnboardingWizard({
 
   async function logout() {
     await createBrowserClient().auth.signOut();
-    router.replace("/login");
+    router.replace("/login/cleaner");
     router.refresh();
   }
 
@@ -948,12 +951,15 @@ function StepBody({
         {(["weekly", "monthly"] as const).map((value) => (
           <button
             className={`rounded-2xl border p-5 text-left transition ${
-              data.payout_preference === value
+              data.payout_confirmed && data.payout_preference === value
                 ? "border-primary bg-primary/15"
                 : "border-border hover:border-primary/50"
             }`}
             key={value}
-            onClick={() => onUpdate("payout_preference", value)}
+            onClick={() => {
+              onUpdate("payout_preference", value);
+              onUpdate("payout_confirmed", true);
+            }}
             type="button"
           >
             <b className="capitalize">{value}</b>
@@ -977,6 +983,11 @@ function StepBody({
         Optional for now. You can connect Stripe later from your profile before
         receiving payouts.
       </p>
+      {issueFor("payout") ? (
+        <div className="mt-4">
+          <FieldError message={issueFor("payout")!} />
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1205,6 +1216,9 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
       value.location_tracking_consent_version ??
         "cleaner-location-consent-v1",
     ).trim(),
+    payout_confirmed: Boolean(value.payout_confirmed),
+    payout_preference:
+      value.payout_preference === "monthly" ? "monthly" : "weekly",
     phone: String(value.phone ?? "").trim(),
     services: (value.services ?? [])
       .map((service) => service.trim())
@@ -1305,6 +1319,10 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
 
   if (stepId === "consent" && !data.location_tracking_consent_accepted) {
     return issue("consent", "Accept location consent before submitting.");
+  }
+
+  if (stepId === "payout" && !data.payout_confirmed) {
+    return issue("payout", "Choose weekly or monthly payouts.");
   }
 
   return null;

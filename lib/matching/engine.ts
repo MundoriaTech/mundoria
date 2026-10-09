@@ -186,11 +186,13 @@ export async function runMatchingEngine(
         preferred: booking.preferred_cleaner_id === candidate.id,
         reliability,
         reasons: {
+          absent: absentCleaners.has(candidate.id),
           conflict,
           distance_metres: Number.isFinite(distance) ? Math.round(distance) : null,
           excluded: excluded.has(candidate.id),
           in_radius: inRadius,
           postcode_match: postcodeMatch,
+          reliability_ok: reliabilityOk,
           slot_available: slotAvailable,
           tier_ok: tierOk,
           location_consent: consentOk,
@@ -200,7 +202,8 @@ export async function runMatchingEngine(
     ];
   });
 
-  const ranked = considered
+  const consideredOnce = dedupeCandidates(considered);
+  const ranked = consideredOnce
     .filter((candidate) => candidate.eligible)
     .sort(
       (left, right) =>
@@ -212,7 +215,7 @@ export async function runMatchingEngine(
   const winner = ranked[0];
 
   await admin.from("matching_decisions").insert(
-    considered.map((candidate) => ({
+    consideredOnce.map((candidate) => ({
       booking_id: bookingId,
       cleaner_id: candidate.cleanerId,
       decision:
@@ -390,6 +393,27 @@ export async function runMatchingEngine(
       to: customer.email,
     });
   }
+}
+
+function dedupeCandidates<T extends { cleanerId: string; distance: number; eligible: boolean }>(
+  candidates: T[],
+) {
+  const byCleaner = new Map<string, T>();
+  for (const candidate of candidates) {
+    const current = byCleaner.get(candidate.cleanerId);
+    if (!current) {
+      byCleaner.set(candidate.cleanerId, candidate);
+      continue;
+    }
+    if (candidate.eligible !== current.eligible) {
+      if (candidate.eligible) byCleaner.set(candidate.cleanerId, candidate);
+      continue;
+    }
+    if (candidate.distance < current.distance) {
+      byCleaner.set(candidate.cleanerId, candidate);
+    }
+  }
+  return [...byCleaner.values()];
 }
 
 function boroughOnly(city?: string | null, postcode?: string | null) {
