@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CheckCircle,
   Smiley,
   SmileyAngry,
   SmileyMeh,
@@ -68,21 +69,40 @@ export function GuestFeedbackForm() {
   }
 
   if (done) {
+    const reviewer = name.trim();
     return (
-      <div className="rounded-[28px] border border-white/80 bg-white px-6 py-10 shadow-[0_20px_50px_-28px_rgba(49,44,121,0.45)] sm:px-8">
-        <h2 className="text-3xl font-black tracking-[-0.04em] text-[#1c133b]">
-          {name.trim() ? `Thank you, ${name.trim()}.` : "Thank you."}
-        </h2>
-        <p className="mt-3 text-base leading-7 text-[#5a5470]">
-          We’ve received your review. It stays with the Mundoria team.
+      <div className="rounded-[28px] border border-white/80 bg-white px-6 py-10 text-center shadow-[0_20px_50px_-28px_rgba(49,44,121,0.45)] sm:px-10 sm:py-14">
+        <CheckCircle
+          aria-hidden
+          className={cn(
+            "mx-auto h-16 w-16",
+            ICON_STICKER,
+            "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+          )}
+          weight="duotone"
+        />
+        <h1 className="mt-6 text-[2rem] font-black leading-[1.15] tracking-[-0.05em] text-[#1c133b] sm:text-5xl">
+          We’ve received your review
+        </h1>
+        <p className="mx-auto mt-3 max-w-md text-base leading-7 text-[#5a5470]">
+          {reviewer
+            ? `Thank you, ${reviewer}. The Mundoria team has it.`
+            : "Thank you. The Mundoria team has it."}
         </p>
       </div>
     );
   }
 
   return (
-    <form
-      className="rounded-[28px] border border-white/80 bg-white p-5 shadow-[0_20px_50px_-28px_rgba(49,44,121,0.45)] sm:p-7"
+    <>
+      <h1 className="text-[2rem] font-black leading-[1.15] tracking-[-0.05em] text-[#1c133b] sm:text-5xl">
+        How was your clean?
+      </h1>
+      <p className="mt-3 max-w-md text-base leading-7 text-[#5a5470]">
+        Tell us in your own words.
+      </p>
+      <form
+        className="mt-8 rounded-[28px] border border-white/80 bg-white p-5 shadow-[0_20px_50px_-28px_rgba(49,44,121,0.45)] sm:p-7"
       onSubmit={(event) => {
         event.preventDefault();
         void submit();
@@ -188,5 +208,6 @@ export function GuestFeedbackForm() {
         {submitting ? "Sending…" : "Send review"}
       </button>
     </form>
+    </>
   );
 }
