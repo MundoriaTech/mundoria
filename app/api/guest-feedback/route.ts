@@ -35,6 +35,20 @@ export async function POST(request: Request) {
     );
   }
 
+  void notifyAdmins(admin, { comment, mood, name, origin: new URL(request.url).origin });
+
+  return NextResponse.json({ ok: true });
+}
+
+async function notifyAdmins(
+  admin: ReturnType<typeof createAdminClient>,
+  {
+    comment,
+    mood,
+    name,
+    origin,
+  }: { comment: string; mood: string; name: string; origin: string },
+) {
   const moodLabel = guestFeedbackMoodLabel(mood);
   const reviewer = name || "A client";
   const subjectName = name || "a client";
@@ -56,7 +70,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? origin;
   await Promise.all(
     (admins ?? []).map(async (adminProfile) => {
       const preferences = adminProfile.notification_preferences as
@@ -80,6 +94,4 @@ export async function POST(request: Request) {
       });
     }),
   );
-
-  return NextResponse.json({ ok: true });
 }
