@@ -142,7 +142,7 @@ export function ServiceCategoriesSection({
               <button
                 aria-selected={selected}
                 className={cn(
-                  "relative flex min-h-11 items-end justify-center px-1 pb-3 text-center text-[10px] font-semibold uppercase leading-tight tracking-[0.08em] transition min-[380px]:text-[11px] sm:text-[12px] sm:tracking-[0.14em]",
+                  "relative flex min-h-11 items-end justify-center px-1 pb-3 text-center text-[13px] font-semibold leading-tight tracking-[-0.02em] transition sm:text-[12px] sm:uppercase sm:tracking-[0.14em]",
                   selected ? "text-[#1c133b]" : "text-[#b7a48a] hover:text-[#1c133b]",
                 )}
                 key={group.id}
@@ -164,10 +164,10 @@ export function ServiceCategoriesSection({
         <div className="mt-5 grid items-start gap-5 sm:mt-8 sm:gap-8 md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] md:gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-12">
           <div
             className={cn(
-              "relative overflow-hidden rounded-[1rem] bg-[#efe6d8] lg:rounded-[1.15rem]",
+              "relative w-full overflow-hidden rounded-[1rem] bg-[#efe6d8] aspect-[3/2] lg:rounded-[1.15rem]",
               active.id === "home"
-                ? "mx-auto aspect-[4/5] w-full max-w-[17.5rem] md:mx-0 md:max-w-none md:aspect-[3/4] lg:aspect-[4/5]"
-                : "aspect-[4/3] md:aspect-[5/4] lg:aspect-square",
+                ? "md:aspect-[3/4] lg:aspect-[4/5]"
+                : "md:aspect-[5/4] lg:aspect-square",
             )}
           >
             <Image
@@ -175,7 +175,7 @@ export function ServiceCategoriesSection({
               className={cn("object-cover", active.imageClassName)}
               fill
               key={active.id}
-              sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 280px"
+              sizes="(min-width: 1024px) 380px, (min-width: 768px) 40vw, 100vw"
               src={active.image}
             />
           </div>
@@ -225,13 +225,13 @@ export function ServiceCategoriesSection({
                     {open ? (
                       <div className="flex flex-wrap gap-2 pb-4" id={panelId}>
                         <Link
-                          className="inline-flex h-9 items-center justify-center rounded-full border border-[#2a2158] px-4 text-[13px] font-semibold text-[#2a2158] transition hover:bg-[#2a2158] hover:text-white"
+                          className="inline-flex h-11 items-center justify-center rounded-full border border-[#2a2158] px-5 text-sm font-semibold text-[#2a2158] transition hover:bg-[#2a2158] hover:text-white touch-manipulation sm:h-9 sm:px-4 sm:text-[13px]"
                           href={item.href}
                         >
                           Read more
                         </Link>
                         <Link
-                          className="inline-flex h-9 items-center justify-center rounded-full bg-[#2a2158] px-4 text-[13px] font-semibold text-white transition hover:bg-[#3d3470]"
+                          className="inline-flex h-11 items-center justify-center rounded-full bg-[#2a2158] px-5 text-sm font-semibold text-white transition hover:bg-[#3d3470] touch-manipulation sm:h-9 sm:px-4 sm:text-[13px]"
                           href={bookHref}
                         >
                           Book now
