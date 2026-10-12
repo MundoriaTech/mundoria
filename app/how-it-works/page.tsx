@@ -66,15 +66,15 @@ export default function HowItWorksPage() {
             in an insurance form — tell us what you need, see a clear estimate,
             then book.
           </p>
-          <div className="mt-8 flex flex-wrap gap-2">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#733fb2] px-4 text-[13px] font-semibold text-white"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-[#733fb2] px-5 text-sm font-semibold text-white touch-manipulation"
               href={bookingHref}
             >
               Book a Service
             </Link>
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-full border border-[#504477]/70 px-4 text-[13px] font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white"
+              className="inline-flex h-11 items-center justify-center rounded-full border border-[#504477]/70 px-5 text-sm font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white touch-manipulation"
               href={cleanerHref}
             >
               Become a cleaner
@@ -123,7 +123,7 @@ export default function HowItWorksPage() {
       </section>
 
       <section
-        className="relative isolate overflow-hidden px-4 py-16 sm:px-8 sm:py-24"
+        className="relative isolate overflow-hidden py-16 pl-9 pr-4 sm:px-8 sm:py-24"
         style={{ backgroundColor: LANDING_PURPLE }}
       >
         <Image

@@ -90,7 +90,7 @@ export function LandingNavbar({
           paddingBottom: "0.5rem",
         }}
       >
-        <LandingLogo className="h-6 sm:h-8" href="/" priority />
+        <LandingLogo className="h-5 min-[380px]:h-6 sm:h-8" href="/" priority />
 
         <nav
           aria-label="Primary navigation"
@@ -377,7 +377,7 @@ function MobileNav({
       ) : null}
       {showBookCta ? (
         <Link
-          className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation"
+          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#1c133b] px-2.5 text-[11px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation min-[380px]:px-3.5 min-[380px]:text-[12px]"
           href={customerHref}
         >
           Book a clean
