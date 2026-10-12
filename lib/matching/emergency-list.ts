@@ -1,12 +1,10 @@
 /**
  * Dynamic Emergency List — booking engine helpers.
  *
- * Rule: one primary holds the booking. The next 20 eligible cleaners stay
+ * Rule: one primary holds the booking. Every other eligible cleaner stays
  * in reserve until unavailable or cleaning starts. List size ≠ push size —
  * notify in rank order, three at a time.
  */
-
-export const MATCHING_LIST_LIMIT = 20;
 
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 
@@ -66,9 +64,8 @@ export async function formEmergencyList(
   rankedEligibleCleanerIds: string[],
 ) {
   const admin = createAdminClient();
-  const reserves = rankedEligibleCleanerIds
-    .filter((id) => id !== primaryCleanerId)
-    .slice(0, MATCHING_LIST_LIMIT);
+  const reserves = rankedEligibleCleanerIds.filter((id) => id !== primaryCleanerId);
+  const updatedAt = new Date().toISOString();
 
   await admin
     .from("booking_emergency_list")
@@ -76,18 +73,18 @@ export async function formEmergencyList(
     .eq("booking_id", bookingId)
     .neq("status", "promoted");
 
-  if (reserves.length) {
+  await inChunks(reserves, 200, async (chunk, offset) => {
     await admin.from("booking_emergency_list").upsert(
-      reserves.map((cleanerId, index) => ({
+      chunk.map((cleanerId, index) => ({
         booking_id: bookingId,
         cleaner_id: cleanerId,
-        rank: index + 1,
+        rank: offset + index + 1,
         status: "reserve" as const,
-        updated_at: new Date().toISOString(),
+        updated_at: updatedAt,
       })),
       { onConflict: "booking_id,cleaner_id" },
     );
-  }
+  });
 
   await admin
     .from("bookings")
@@ -144,7 +141,41 @@ async function logDemandSignals(
     })),
   ];
 
-  await admin.from("marketplace_demand_signals").insert(rows);
+  await inChunks(rows, 200, async (chunk) => {
+    await admin.from("marketplace_demand_signals").insert(chunk);
+  });
+}
+
+/** Every reserve, notified, and promoted cleaner, in rank order. */
+export async function loadMatchingList(bookingId: string) {
+  const admin = createAdminClient();
+  const pageSize = 1000;
+  const rows: { cleaner_id: string; rank: number; status: string }[] = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await admin
+      .from("booking_emergency_list")
+      .select("cleaner_id,rank,status")
+      .eq("booking_id", bookingId)
+      .in("status", ["reserve", "notified", "promoted"])
+      .order("rank")
+      .range(from, from + pageSize - 1);
+    if (error || !data?.length) break;
+    rows.push(...data);
+    if (data.length < pageSize) break;
+  }
+
+  return rows;
+}
+
+async function inChunks<T>(
+  items: T[],
+  size: number,
+  run: (chunk: T[], offset: number) => Promise<void>,
+) {
+  for (let offset = 0; offset < items.length; offset += size) {
+    await run(items.slice(offset, offset + size), offset);
+  }
 }
 
 /** Drop reserves who accepted a clashing confirmed job. No reliability penalty. */

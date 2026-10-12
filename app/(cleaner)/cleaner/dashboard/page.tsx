@@ -11,6 +11,8 @@ import {
   DashboardSection,
   SessionHighlightCard,
 } from "@/components/shared/dashboard-panels";
+import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
+import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import {
   getAvailableJobs,
   getCleanerContext,
@@ -89,6 +91,10 @@ export default async function CleanerDashboardPage() {
 
   return (
     <div className="space-y-8 pb-4">
+      <LiveDashboardRefresh
+        scope={`cleaner-dashboard-${user.id}`}
+        watches={bookingWatchesFor("cleaner")}
+      />
       <section>
         <div className="grid grid-cols-[minmax(0,1fr)_8.25rem] items-end gap-x-2 sm:grid-cols-[minmax(0,1fr)_16rem] sm:items-center sm:gap-x-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
           <div className="min-w-0 pb-1">

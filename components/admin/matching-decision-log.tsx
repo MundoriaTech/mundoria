@@ -1,4 +1,11 @@
+"use client";
+
 import { summariseMatchingDecisions } from "@/lib/matching/decision-summary";
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
+import { PAGE_SIZES } from "@/lib/pagination";
 
 const STATUS_LABEL: Record<string, string> = {
   notified: "Offer sent",
@@ -100,33 +107,59 @@ export function MatchingDecisionLog({
       <div className="mt-5">
         <h3 className="text-sm font-semibold">Matching list</h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          The next 20 cleaners who can take this job, in order. Only the first
+          Every cleaner who can take this job, in rank order. Only the first
           three are contacted if the current offer is not accepted.
         </p>
-        {matchingList.length ? (
-          <ol className="mt-3 divide-y divide-border">
-            {matchingList.map((cleaner) => (
-              <li
-                className="flex items-center justify-between gap-3 py-2.5 text-sm"
-                key={`${cleaner.rank}-${cleaner.name}`}
-              >
-                <span>
-                  <span className="mr-2 text-muted-foreground">{cleaner.rank}.</span>
-                  {cleaner.name}
-                </span>
-                <span className="text-muted-foreground">
-                  {STATUS_LABEL[cleaner.status] ?? cleaner.status}
-                </span>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="mt-3 text-sm text-muted-foreground">
-            No backup cleaners are on this list yet.
-          </p>
-        )}
+        <MatchingList matchingList={matchingList} />
       </div>
     </section>
+  );
+}
+
+function MatchingList({
+  matchingList,
+}: {
+  matchingList: { name: string; rank: number; status: string }[];
+}) {
+  const { page, pageItems, setPage, totalItems } = usePagedItems(
+    matchingList,
+    PAGE_SIZES.admin,
+  );
+
+  if (!matchingList.length) {
+    return (
+      <p className="mt-3 text-sm text-muted-foreground">
+        No backup cleaners are on this list yet.
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      <ol className="mt-3 divide-y divide-border">
+        {pageItems.map((cleaner) => (
+          <li
+            className="flex items-center justify-between gap-3 py-2.5 text-sm"
+            key={cleaner.rank}
+          >
+            <span>
+              <span className="mr-2 text-muted-foreground">{cleaner.rank}.</span>
+              {cleaner.name}
+            </span>
+            <span className="text-muted-foreground">
+              {STATUS_LABEL[cleaner.status] ?? cleaner.status}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <ClientPagination
+        className="mt-4"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
+    </div>
   );
 }
 

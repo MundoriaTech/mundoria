@@ -7,6 +7,8 @@ import {
   DashboardSection,
   DashboardWelcomeBanner,
 } from "@/components/shared/dashboard-panels";
+import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
+import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import { Button } from "@/components/ui/button";
 import {
   customerWaitingLabel,
@@ -70,6 +72,10 @@ export default async function CustomerDashboardPage() {
 
   return (
     <div className="space-y-8 pb-4">
+      <LiveDashboardRefresh
+        scope={`customer-dashboard-${user!.id}`}
+        watches={bookingWatchesFor("customer")}
+      />
       <DashboardWelcomeBanner
         actions={
           <>

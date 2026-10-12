@@ -5,8 +5,8 @@ import { NextResponse } from "next/server";
 
 import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { signupSchema } from "@/lib/auth/schemas";
+import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
-import { sendBrandedEmail } from "@/lib/email/send-email";
 
 export async function POST(request: Request) {
   const parsed = signupSchema.safeParse(await request.json());
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         phone,
         role,
       },
-      emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+      emailRedirectTo: `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(nextPath)}`,
     },
   });
 
@@ -91,19 +91,17 @@ export async function POST(request: Request) {
     }
   }
 
-  if (process.env.RESEND_API_KEY) {
+  if (data.user && data.session) {
     try {
-      welcomeEmailSent = await sendBrandedEmail({
-        data: {
-          actionUrl: `${appUrl}${nextPath}`,
-          appUrl,
-          email,
-          firstName: full_name.split(" ")[0],
-          fullName: full_name,
-          role,
-        },
-        template: role === "cleaner" ? "cleaner.welcome" : "customer.welcome",
-        to: email,
+      welcomeEmailSent = await sendAccountWelcomeIfNeeded({
+        appUrl,
+        email,
+        emailConfirmedAt: data.user.email_confirmed_at,
+        fullName: full_name,
+        metadata: data.user.user_metadata,
+        profileExisted: true,
+        role,
+        userId: data.user.id,
       });
     } catch (emailError) {
       Sentry.captureException(emailError);

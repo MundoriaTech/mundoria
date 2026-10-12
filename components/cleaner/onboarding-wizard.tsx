@@ -18,10 +18,14 @@ import {
   formatInterviewSlot,
   upcomingInterviewDays,
 } from "@/lib/cleaner/interview-slots";
+import { TrainingSurvey } from "@/components/cleaner/training-survey";
 import {
+  CHARTER_AGREEMENTS,
   SKILLS_EXAM_PASS_SCORE,
   SKILLS_EXAM_QUESTIONS,
+  answerIsComplete,
   scoreSkillsExam,
+  type SkillsExamAnswer,
 } from "@/lib/cleaner/skills-exam";
 import { SERVICES } from "@/lib/customer/services";
 import { LONDON_CENTER } from "@/lib/maps/geoapify";
@@ -45,7 +49,7 @@ const STEPS = [
   { id: "services", label: "Your services" },
   { id: "hours", label: "Your hours" },
   { id: "coverage", label: "Your coverage area" },
-  { id: "quiz", label: "Finish my quiz" },
+  { id: "quiz", label: "Online training" },
   { id: "utr", label: "Your UTR" },
   { id: "identity", label: "Your identity document" },
   { id: "dbs", label: "Your DBS certificate" },
@@ -95,7 +99,8 @@ type OnboardingData = {
   payout_preference: "weekly" | "monthly";
   phone: string;
   services: string[];
-  skills_exam_answers: Record<string, number>;
+  skills_exam_answers: Record<string, SkillsExamAnswer>;
+  training_agreements: boolean[];
   utr_number: string;
   working_areas: string[];
   years_experience: number;
@@ -145,6 +150,7 @@ export function OnboardingWizard({
     phone: profile.phone ?? "",
     services: [] as string[],
     skills_exam_answers: {},
+    training_agreements: CHARTER_AGREEMENTS.map(() => false),
     utr_number: cleaner.utr_number ?? "",
     working_areas: [] as string[],
     years_experience: cleaner.years_experience ?? 0,
@@ -761,47 +767,13 @@ function StepBody({
 
   if (stepId === "quiz") {
     return (
-      <div className="space-y-5">
-        <p className="text-sm text-muted-foreground">
-          {SKILLS_EXAM_QUESTIONS.length} short questions. Pass mark:{" "}
-          {SKILLS_EXAM_PASS_SCORE}/{SKILLS_EXAM_QUESTIONS.length}.
-        </p>
-        {SKILLS_EXAM_QUESTIONS.map((question, index) => (
-          <fieldset
-            className="rounded-2xl border border-border p-4"
-            key={question.id}
-          >
-            <legend className="px-1 text-sm font-medium">
-              {index + 1}. {question.prompt}
-            </legend>
-            <div className="mt-3 space-y-2">
-              {question.options.map((option, optionIndex) => (
-                <label
-                  className="flex cursor-pointer gap-3 rounded-xl bg-background p-3 text-sm"
-                  key={option}
-                >
-                  <input
-                    checked={
-                      data.skills_exam_answers[question.id] === optionIndex
-                    }
-                    className="mt-0.5"
-                    name={question.id}
-                    onChange={() =>
-                      onUpdate("skills_exam_answers", {
-                        ...data.skills_exam_answers,
-                        [question.id]: optionIndex,
-                      })
-                    }
-                    type="radio"
-                  />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        ))}
-        {issueFor("quiz") ? <FieldError message={issueFor("quiz")!} /> : null}
-      </div>
+      <TrainingSurvey
+        agreements={data.training_agreements}
+        answers={data.skills_exam_answers}
+        error={issueFor("quiz")}
+        onAgreements={(next) => onUpdate("training_agreements", next)}
+        onAnswers={(next) => onUpdate("skills_exam_answers", next)}
+      />
     );
   }
 
@@ -1196,6 +1168,25 @@ function toIso(value: string | null | undefined) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+function sanitizeExamAnswers(
+  value: OnboardingData["skills_exam_answers"] | undefined,
+) {
+  const next: Record<string, SkillsExamAnswer> = {};
+  if (!value || typeof value !== "object") return next;
+  for (const [key, answer] of Object.entries(value)) {
+    if (typeof answer === "number" && Number.isInteger(answer) && answer >= 0 && answer <= 3) {
+      next[key] = answer;
+    } else if (Array.isArray(answer)) {
+      const indexes = answer.filter(
+        (item): item is number =>
+          typeof item === "number" && Number.isInteger(item) && item >= 0 && item <= 3,
+      );
+      if (indexes.length > 0) next[key] = indexes;
+    }
+  }
+  return next;
+}
+
 function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
   return {
     ...value,
@@ -1225,7 +1216,10 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     services: (value.services ?? [])
       .map((service) => service.trim())
       .filter(Boolean),
-    skills_exam_answers: value.skills_exam_answers ?? {},
+    skills_exam_answers: sanitizeExamAnswers(value.skills_exam_answers),
+    training_agreements: CHARTER_AGREEMENTS.map(
+      (_, index) => Boolean(value.training_agreements?.[index]),
+    ),
     utr_number: String(value.utr_number ?? "")
       .replace(/\D/g, "")
       .slice(0, 10),
@@ -1278,9 +1272,12 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
 
   if (stepId === "quiz") {
     for (const question of SKILLS_EXAM_QUESTIONS) {
-      if (data.skills_exam_answers[question.id] === undefined) {
-        return issue("quiz", "Answer every skills check question.");
+      if (!answerIsComplete(question, data.skills_exam_answers[question.id])) {
+        return issue("quiz", "Answer every question in the online training.");
       }
+    }
+    if (!data.training_agreements.every(Boolean)) {
+      return issue("quiz", "Tick every agreement on the Mundoria Pro charter.");
     }
     const exam = scoreSkillsExam(data.skills_exam_answers);
     if (!exam.passed) {

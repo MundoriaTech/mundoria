@@ -8,6 +8,8 @@ import { OperationsMap } from "@/components/admin/operations-map";
 import { RematchButton } from "@/components/admin/rematch-button";
 import { RevenueChart } from "@/components/admin/revenue-chart";
 import { DashboardStatTiles } from "@/components/shared/dashboard-stat-tiles";
+import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
+import { OPS_REFRESH_MS } from "@/lib/dashboard/live-refresh";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminBooking, RevenuePoint } from "@/types/admin";
@@ -78,6 +80,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-7">
+      <LiveDashboardRefresh intervalMs={OPS_REFRESH_MS} scope="admin-dashboard" />
       <section className="relative overflow-hidden rounded-[1.75rem] bg-[#1c133b] px-5 py-6 text-white shadow-[0_20px_48px_rgba(28,19,59,0.18)] sm:px-7 sm:py-8">
         <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#f0a888]/25 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-16 left-10 h-44 w-44 rounded-full bg-[#823fb2]/45 blur-3xl" />

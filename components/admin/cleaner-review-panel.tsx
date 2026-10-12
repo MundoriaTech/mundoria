@@ -192,7 +192,7 @@ export function CleanerReviewPanel({
             Skills exam:{" "}
             <span className="font-medium text-foreground">
               {skillsExamPassed
-                ? `Passed${skillsExamScore != null ? ` (${skillsExamScore}/8)` : ""}`
+                ? `Passed${skillsExamScore != null ? ` (${skillsExamScore})` : ""}`
                 : "Not passed"}
             </span>
           </li>

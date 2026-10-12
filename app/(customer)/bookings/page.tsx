@@ -1,4 +1,6 @@
 import { BookingsList } from "@/components/customer/bookings-list";
+import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
+import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import { getCustomerBookings } from "@/lib/customer/server";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -21,6 +23,10 @@ export default async function CustomerBookingsPage({
 
   return (
     <div className="pb-4">
+      <LiveDashboardRefresh
+        scope={`customer-bookings-${user!.id}`}
+        watches={bookingWatchesFor("customer")}
+      />
       <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
         Your cleans
       </p>

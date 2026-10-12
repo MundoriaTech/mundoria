@@ -9,7 +9,12 @@ import {
   isBookableInterviewSlot,
   upcomingInterviewDays,
 } from "@/lib/cleaner/interview-slots";
-import { scoreSkillsExam, SKILLS_EXAM_PASS_SCORE, SKILLS_EXAM_QUESTIONS } from "@/lib/cleaner/skills-exam";
+import {
+  CHARTER_AGREEMENTS,
+  scoreSkillsExam,
+  SKILLS_EXAM_PASS_SCORE,
+  SKILLS_EXAM_QUESTIONS,
+} from "@/lib/cleaner/skills-exam";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -57,7 +62,16 @@ const schema = z.object({
   payout_preference: z.enum(["weekly", "monthly"]),
   phone: z.string().trim().min(7, "Enter a valid phone number"),
   services: requiredStringList("Select at least one service"),
-  skills_exam_answers: z.record(z.string(), z.number().int().min(0).max(3)),
+  skills_exam_answers: z.record(
+    z.string(),
+    z.union([
+      z.number().int().min(0).max(3),
+      z.array(z.number().int().min(0).max(3)).min(1).max(4),
+    ]),
+  ),
+  training_agreements: z
+    .array(z.literal(true))
+    .length(CHARTER_AGREEMENTS.length),
   utr_number: z
     .string()
     .trim()

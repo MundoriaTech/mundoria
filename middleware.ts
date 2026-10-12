@@ -157,6 +157,7 @@ export async function middleware(request: NextRequest) {
 
   if (
     user &&
+    pathname !== "/signup/confirmed" &&
     (AUTH_ROUTES.includes(pathname) ||
       pathname.startsWith("/signup") ||
       pathname.startsWith("/login/"))

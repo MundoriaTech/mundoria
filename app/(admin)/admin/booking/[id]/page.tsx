@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
 import { MatchingDecisionLog } from "@/components/admin/matching-decision-log";
-import { MATCHING_LIST_LIMIT } from "@/lib/matching/emergency-list";
+import { loadMatchingList } from "@/lib/matching/emergency-list";
 import { formatMoney, formatServiceName, standardLabel } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -18,7 +18,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     { data: addOns },
     { data: team },
     { data: offers },
-    { data: reserves },
+    reserves,
   ] = await Promise.all([
     admin.from("bookings").select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone)").eq("id", params.id).single(),
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
@@ -33,13 +33,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       .eq("booking_id", params.id)
       .order("offered_at", { ascending: false })
       .limit(5),
-    admin
-      .from("booking_emergency_list")
-      .select("cleaner_id,rank,status")
-      .eq("booking_id", params.id)
-      .in("status", ["reserve", "notified", "promoted"])
-      .order("rank")
-      .limit(MATCHING_LIST_LIMIT),
+    loadMatchingList(params.id),
   ]);
   if (!booking) notFound();
   const namedCleanerIds = Array.from(
@@ -55,16 +49,11 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             ].includes(item.decision),
           )
           .map((item) => item.cleaner_id),
-        ...(reserves ?? []).map((item) => item.cleaner_id),
+        ...reserves.map((item) => item.cleaner_id),
       ].filter((id): id is string => Boolean(id)),
     ),
-  ).slice(0, 40);
-  const { data: namedCleaners } = namedCleanerIds.length
-    ? await admin.from("profiles").select("id,full_name").in("id", namedCleanerIds)
-    : { data: [] };
-  const decisionNames = Object.fromEntries(
-    (namedCleaners ?? []).map((cleaner) => [cleaner.id, cleaner.full_name]),
   );
+  const decisionNames = await loadCleanerNames(admin, namedCleanerIds);
   const openOffer = (offers ?? []).find(
     (offer) =>
       !offer.responded_at &&
@@ -143,7 +132,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
               ? (item.reasons as Record<string, unknown>)
               : null,
         }))}
-        matchingList={(reserves ?? []).map((item) => ({
+        matchingList={reserves.map((item) => ({
           name: decisionNames[item.cleaner_id] ?? "Cleaner",
           rank: item.rank,
           status: item.status,
@@ -157,6 +146,23 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       <SimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [item.created_at, item.sender?.full_name ?? "Unknown", item.content])} />
     </div>
   );
+}
+
+async function loadCleanerNames(
+  admin: ReturnType<typeof createAdminClient>,
+  ids: string[],
+) {
+  const names: Record<string, string> = {};
+  for (let offset = 0; offset < ids.length; offset += 80) {
+    const { data } = await admin
+      .from("profiles")
+      .select("id,full_name")
+      .in("id", ids.slice(offset, offset + 80));
+    for (const cleaner of data ?? []) {
+      if (cleaner.full_name) names[cleaner.id] = cleaner.full_name;
+    }
+  }
+  return names;
 }
 
 function SimpleTable({ rows, title }: { rows: string[][]; title: string }) {
