@@ -86,7 +86,7 @@ export function AdminInviteAcceptForm({
           id="password"
           minLength={8}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="At least 8 characters"
+          placeholder="8+ characters, a capital, a number, and a symbol"
           required
           value={password}
         />

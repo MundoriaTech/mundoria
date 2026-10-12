@@ -42,7 +42,7 @@ export function sessionPhotoForService(serviceType: ServiceType): string {
     case "deep_clean":
     case "same_day":
     case "post_construction":
-      return `${base}/residential-deep.png`;
+      return `${base}/residential-deep.jpg`;
     case "one_off":
       return `${base}/residential-one-off.png`;
     case "move_in":

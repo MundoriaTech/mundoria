@@ -32,7 +32,6 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
     const { error } = await createBrowserClient()
       .from("profiles")
       .update({
-        full_name: profile.full_name.trim(),
         notification_preferences: profile.notification_preferences,
         phone: profile.phone?.trim() || null,
       })
@@ -91,15 +90,7 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
         <div className="mt-7 space-y-4">
           <label className="block space-y-2 text-sm font-medium">
             <span>Full name</span>
-            <Input
-              onChange={(event) =>
-                setProfile((current) => ({
-                  ...current,
-                  full_name: event.target.value,
-                }))
-              }
-              value={profile.full_name}
-            />
+            <Input disabled readOnly value={profile.full_name} />
           </label>
           <label className="block space-y-2 text-sm font-medium">
             <span>Email</span>

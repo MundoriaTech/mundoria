@@ -62,7 +62,6 @@ class _ProfileEditorPageState extends State<ProfileEditorPage> {
     });
     try {
       await widget.session.client.from('profiles').update({
-        'full_name': _name.text.trim(),
         'phone': _phone.text.trim(),
         'notification_preferences': {
           'email': _email,
@@ -127,6 +126,7 @@ class _ProfileEditorPageState extends State<ProfileEditorPage> {
           TextField(
             controller: _name,
             decoration: const InputDecoration(labelText: 'Full name'),
+            readOnly: true,
           ),
           const SizedBox(height: 12),
           TextField(

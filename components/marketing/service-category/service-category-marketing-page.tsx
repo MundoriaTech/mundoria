@@ -268,13 +268,7 @@ function CategoryServicesSection({
   services: CategoryServiceCard[];
   title: string;
 }) {
-  const count = services.length;
-  const defaultGrid =
-    count <= 3
-      ? "lg:grid-cols-3"
-      : count === 4
-        ? "lg:grid-cols-2 xl:grid-cols-4"
-        : "lg:grid-cols-2 xl:grid-cols-3";
+  const defaultGrid = "lg:grid-cols-2 xl:flex xl:flex-wrap xl:justify-center";
 
   return (
     <section className="px-4 py-10 sm:px-8 sm:py-14">
@@ -318,7 +312,7 @@ function CategoryServicesSection({
               key={service.label}
               label={service.label}
               objectPosition={service.objectPosition}
-              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 300px"
+              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 50vw, 300px"
             />
           ))}
         </div>

@@ -28,7 +28,6 @@ export function AdminProfileForm({
     const { error } = await createBrowserClient()
       .from("profiles")
       .update({
-        full_name: profile.full_name.trim(),
         phone: profile.phone?.trim() || null,
       })
       .eq("id", profile.id);
@@ -52,7 +51,7 @@ export function AdminProfileForm({
     >
       <h2 className="font-semibold">Your profile</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Name, phone, and photo shown to other admins on the team page.
+        Phone and photo shown to other admins on the team page.
       </p>
 
       <div className="mt-5">
@@ -74,16 +73,7 @@ export function AdminProfileForm({
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className="block space-y-2 text-sm font-medium">
           <span>Full name</span>
-          <Input
-            onChange={(event) =>
-              setProfile((current) => ({
-                ...current,
-                full_name: event.target.value,
-              }))
-            }
-            required
-            value={profile.full_name}
-          />
+          <Input disabled readOnly value={profile.full_name} />
         </label>
         <label className="block space-y-2 text-sm font-medium">
           <span>Phone</span>

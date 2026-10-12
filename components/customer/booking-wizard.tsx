@@ -25,14 +25,12 @@ import {
   Drop,
   Fire,
   Heart,
-  PawPrint,
   Plant,
-  ShirtFolded,
-  SprayBottle,
   Square,
   type Icon,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
@@ -152,16 +150,16 @@ let bookingHistoryBootstrap: {
   stepId: string;
 } | null = null;
 
+const ADD_ON_IMAGES: Record<string, string> = {
+  cleaning_products: "/images/marketing/icons/cleaning-products.png",
+  ironing: "/images/marketing/icons/ironing.png",
+};
+
 const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
   balcony_patio: {
     Icon: Plant,
     className:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#b8d4c8] [&_path:last-child]:!fill-[#312c79]",
-  },
-  cleaning_products: {
-    Icon: SprayBottle,
-    className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#8ec5e8] [&_path:last-child]:!fill-[#312c79]",
   },
   extra_bathroom_detail: {
     Icon: Drop,
@@ -187,11 +185,6 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
     Icon: Square,
     className:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#312c79]",
-  },
-  ironing: {
-    Icon: ShirtFolded,
-    className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
   },
   linen_change: {
     Icon: Bed,
@@ -2334,7 +2327,7 @@ function AddOnsStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left touch-manipulation",
+                  "flex h-full items-start rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left touch-manipulation",
                   selected && "border-[#6a45b8] bg-white",
                 )}
                 key={addOn.id}
@@ -2342,7 +2335,15 @@ function AddOnsStep({
                 type="button"
               >
                 <div className="flex items-start gap-3">
-                  {AddOnIcon ? (
+                  {ADD_ON_IMAGES[addOn.id] ? (
+                    <Image
+                      alt=""
+                      className="h-11 w-11 shrink-0 rounded-full object-cover"
+                      height={512}
+                      src={ADD_ON_IMAGES[addOn.id]}
+                      width={512}
+                    />
+                  ) : AddOnIcon ? (
                     <AddOnIcon
                       aria-hidden
                       className={cn(
@@ -2399,16 +2400,12 @@ function PetsStep({
     value: BookingDraft[K],
   ) => void;
 }) {
-  const pawIconClass =
-    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]";
   const presenceOptions = [
     {
-      crossed: false,
       label: "Yes, furry or scaly housemates",
       value: true,
     },
     {
-      crossed: true,
       label: "Nope, pet-free zone",
       value: false,
     },
@@ -2442,19 +2439,17 @@ function PetsStep({
               type="button"
             >
               <div className="flex items-center gap-3">
-                <span className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center">
-                  <PawPrint
-                    aria-hidden
-                    className={cn("h-6 w-6", pawIconClass)}
-                    weight="duotone"
-                  />
-                  {option.crossed ? (
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-1/2 h-[2px] w-[130%] -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-full bg-[#312c79]"
-                    />
-                  ) : null}
-                </span>
+                <Image
+                  alt=""
+                  className="h-11 w-11 shrink-0 rounded-full object-cover"
+                  height={512}
+                  src={
+                    option.value
+                      ? "/images/marketing/icons/pets.png"
+                      : "/images/marketing/icons/no-pets.png"
+                  }
+                  width={512}
+                />
                 <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
                   {option.label}
                 </p>

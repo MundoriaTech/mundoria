@@ -3,11 +3,12 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { passwordSchema } from "@/lib/auth/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const acceptSchema = z.object({
   full_name: z.string().trim().min(2, "Enter your full name."),
-  password: z.string().min(8, "Password must contain at least 8 characters."),
+  password: passwordSchema,
   token: z.string().min(24, "Invitation token is missing."),
 });
 

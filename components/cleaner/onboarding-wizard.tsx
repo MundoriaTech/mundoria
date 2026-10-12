@@ -563,7 +563,11 @@ export function OnboardingWizard({
             </p>
           ) : null}
           <div className="mt-8 flex justify-end border-t border-[#e8e0f5] pt-5">
-            <Button disabled={submitting} onClick={() => void submit()} size="lg">
+            <Button
+              disabled={submitting || completedCount < STEPS.length}
+              onClick={() => void submit()}
+              size="lg"
+            >
               {submitting ? "Submitting…" : "Submit application"}
             </Button>
           </div>
