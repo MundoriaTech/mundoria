@@ -58,6 +58,13 @@ export function AuthHashHandler() {
         return;
       }
 
+      if (type === "signup" || type === "email") {
+        await fetch("/api/auth/welcome", { method: "POST" });
+        router.replace("/signup/confirmed");
+        router.refresh();
+        return;
+      }
+
       const roleMatch = document.cookie.match(
         /(?:^|; )mundoria_oauth_role=(cleaner|customer)/,
       );

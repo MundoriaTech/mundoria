@@ -11,7 +11,7 @@ import {
 } from "@/lib/auth/oauth-intent";
 import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
-import { sendBrandedEmail } from "@/lib/email/send-email";
+import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isUserRole, type UserRole } from "@/types/auth";
 
@@ -35,13 +35,13 @@ export async function GET(request: Request) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const profile = user
+      const boot = user
         ? await bootstrapOAuthProfile({
-            appUrl: requestUrl.origin,
             requestedRole,
             user,
           })
         : null;
+      const profile = boot?.profile ?? null;
       const fallback = isUserRole(profile?.role)
         ? dashboardForRole(profile.role)
         : requestedRole
@@ -52,6 +52,23 @@ export async function GET(request: Request) {
         : redirectForRole(requestedRole ?? "customer", requestedNext, fallback);
       const isPasswordReset = next === "/update-password";
 
+      if (user && profile && isUserRole(profile.role) && !isPasswordReset) {
+        try {
+          await sendAccountWelcomeIfNeeded({
+            appUrl: requestUrl.origin,
+            email: profile.email ?? user.email ?? "",
+            emailConfirmedAt: user.email_confirmed_at,
+            fullName: profile.full_name,
+            metadata: user.user_metadata,
+            profileExisted: boot?.profileExisted ?? true,
+            role: profile.role,
+            userId: user.id,
+          });
+        } catch {
+          // Email should never block sign-in.
+        }
+      }
+
       if (
         user &&
         isUserRole(profile?.role) &&
@@ -61,16 +78,17 @@ export async function GET(request: Request) {
       ) {
         const completionUrl = new URL("/complete-profile", requestUrl.origin);
         completionUrl.searchParams.set("next", next);
-
-        return clearOAuthIntent(
-          NextResponse.redirect(completionUrl),
-          requestUrl.protocol === "https:",
+        return finishAuthRedirect(
+          requestUrl,
+          completionUrl,
+          requestUrl.searchParams.get("type") === "signup",
         );
       }
 
-      return clearOAuthIntent(
-        NextResponse.redirect(new URL(next, requestUrl.origin)),
-        requestUrl.protocol === "https:",
+      return finishAuthRedirect(
+        requestUrl,
+        new URL(next, requestUrl.origin),
+        requestUrl.searchParams.get("type") === "signup" && !isPasswordReset,
       );
     }
   }
@@ -81,6 +99,22 @@ export async function GET(request: Request) {
     ),
     requestUrl.protocol === "https:",
   );
+}
+
+function finishAuthRedirect(requestUrl: URL, destination: URL, emailConfirmed: boolean) {
+  const target = emailConfirmed
+    ? confirmedEmailUrl(requestUrl.origin, `${destination.pathname}${destination.search}`)
+    : destination;
+  return clearOAuthIntent(
+    NextResponse.redirect(target),
+    requestUrl.protocol === "https:",
+  );
+}
+
+function confirmedEmailUrl(origin: string, next: string) {
+  const url = new URL("/signup/confirmed", origin);
+  url.searchParams.set("next", next);
+  return url;
 }
 
 function clearOAuthIntent(response: NextResponse, secure: boolean) {
@@ -97,11 +131,9 @@ function clearOAuthIntent(response: NextResponse, secure: boolean) {
 }
 
 async function bootstrapOAuthProfile({
-  appUrl,
   requestedRole,
   user,
 }: {
-  appUrl: string;
   requestedRole: SelfRegisterableRole | null;
   user: {
     email?: string;
@@ -158,26 +190,7 @@ async function bootstrapOAuthProfile({
     );
   }
 
-  if (!existing && process.env.RESEND_API_KEY) {
-    try {
-      await sendBrandedEmail({
-        data: {
-          actionUrl: `${appUrl}${dashboardForRole(role)}`,
-          appUrl,
-          email,
-          firstName: fullName.split(" ")[0],
-          fullName,
-          role,
-        },
-        template: role === "cleaner" ? "cleaner.welcome" : "customer.welcome",
-        to: email,
-      });
-    } catch {
-      // Email should never block OAuth sign-in.
-    }
-  }
-
-  return profile;
+  return { profile, profileExisted: Boolean(existing) };
 }
 
 function roleWillBeCleaner(

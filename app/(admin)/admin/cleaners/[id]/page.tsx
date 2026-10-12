@@ -118,7 +118,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
             <dt className="text-muted-foreground">Skills exam</dt>
             <dd className="font-medium">
               {cleaner.skills_exam_passed
-                ? `Passed (${cleaner.skills_exam_score ?? "—"}/8)`
+                ? `Passed (${cleaner.skills_exam_score ?? "—"})`
                 : "Not passed"}
             </dd>
           </div>
