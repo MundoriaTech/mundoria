@@ -185,7 +185,7 @@ export function SignupForm({
           <PasswordInput
             autoComplete="new-password"
             id="password"
-            placeholder="At least 8 characters"
+            placeholder="8+ characters, a capital, a number, and a symbol"
             {...register("password")}
           />
         </FormField>

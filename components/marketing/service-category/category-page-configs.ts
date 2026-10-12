@@ -229,7 +229,7 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
       label: "Bereavement Support Cleaning",
     },
   ],
-  servicesGridClassName: "lg:grid-cols-2",
+  servicesGridClassName: "lg:grid-cols-2 xl:flex xl:flex-wrap xl:justify-center",
   servicesTitle: "Choose your Mundoria Recovery service",
   subtitle: "Cleaning that adapts when life does — with a little more consideration",
   title: "Mundoria Recovery",

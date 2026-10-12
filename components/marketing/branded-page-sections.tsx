@@ -97,31 +97,63 @@ export function BrandedCtaBand({
   href,
   label,
   title,
+  tone = "gradient",
 }: {
   body: string;
   href: string;
   label: string;
   title: string;
+  tone?: "gradient" | "white";
 }) {
+  const onWhite = tone === "white";
+
   return (
-    <section className="relative overflow-hidden px-4 py-14 sm:px-8 sm:py-16">
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(115deg, #1c133b 0%, #312c79 48%, #823fb2 100%)",
-        }}
-      />
+    <section
+      className={cn(
+        "relative overflow-hidden px-4 py-14 sm:px-8 sm:py-16",
+        onWhite && "bg-white",
+      )}
+    >
+      {onWhite ? null : (
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(115deg, #1c133b 0%, #312c79 48%, #823fb2 100%)",
+          }}
+        />
+      )}
       <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
         <div className="max-w-xl">
-          <h2 className="text-[1.6rem] font-semibold tracking-[-0.03em] text-white sm:text-2xl">
+          <h2
+            className={cn(
+              "font-semibold tracking-[-0.03em]",
+              onWhite
+                ? "text-[1.9rem] text-[#1c133b] sm:text-[2.25rem]"
+                : "text-[1.6rem] text-white sm:text-2xl",
+            )}
+          >
             {title}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-white/75">{body}</p>
+          <p
+            className={cn(
+              "mt-3",
+              onWhite
+                ? "text-base leading-7 text-[#5c5670] sm:text-[17px]"
+                : "text-sm leading-6 text-white/75",
+            )}
+          >
+            {body}
+          </p>
         </div>
         <Link
-          className="inline-flex h-12 items-center justify-center rounded-full bg-white px-7 text-sm font-semibold text-[#1c133b] transition hover:bg-[#e8e0f9]"
+          className={cn(
+            "inline-flex items-center justify-center rounded-full font-semibold transition",
+            onWhite
+              ? "h-[3.25rem] bg-[#ff5274] px-8 text-base text-white hover:bg-[#ff3d63]"
+              : "h-12 bg-white px-7 text-sm text-[#1c133b] hover:bg-[#e8e0f9]",
+          )}
           href={href}
         >
           {label}

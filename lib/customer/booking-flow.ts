@@ -98,9 +98,9 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
 /** Sub-service imagery for booking cards (matches category-page service cards). */
 export const bookingServiceImages: Record<ServiceType, string> = {
   regular: "/images/marketing/landing/residential-regular.png",
-  deep_clean: "/images/marketing/landing/residential-deep.png",
+  deep_clean: "/images/marketing/landing/residential-deep.jpg",
   one_off: "/images/marketing/landing/residential-one-off.png",
-  same_day: "/images/marketing/landing/residential-deep.png",
+  same_day: "/images/marketing/landing/residential-deep.jpg",
   end_of_tenancy: "/images/marketing/landing/moving-end-of-tenancy.png",
   move_in: "/images/marketing/landing/moving-move-in.png",
   move_out: "/images/marketing/landing/moving-move-out.png",

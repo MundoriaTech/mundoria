@@ -12,6 +12,7 @@ const overlayLinkClass =
 
 export function CategoryServiceCard({
   bookingHref,
+  className,
   href,
   image,
   label,
@@ -19,6 +20,7 @@ export function CategoryServiceCard({
   sizes,
 }: {
   bookingHref: string;
+  className?: string;
   href: string;
   image: string;
   label: string;
@@ -33,7 +35,10 @@ export function CategoryServiceCard({
 
   return (
     <article
-      className="group flex w-[min(78vw,17.5rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[19rem] lg:w-auto"
+      className={cn(
+        "group flex w-[min(78vw,17.5rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[19rem] lg:w-auto xl:w-[calc((100%-3.75rem)/4)]",
+        className,
+      )}
       onClick={(event) => {
         if (window.matchMedia("(hover: hover)").matches) return;
         if ((event.target as HTMLElement).closest("a")) return;
@@ -97,8 +102,8 @@ export function CategoryServiceCard({
           </Link>
         </div>
       </div>
-      <div className="flex min-h-[2.75rem] items-center bg-[#e8def8] px-4 py-2.5">
-        <p className="text-[14px] font-semibold leading-snug text-[#312c79]">
+      <div className="flex h-[4.25rem] items-center bg-[#e8def8] px-4">
+        <p className="line-clamp-2 text-[14px] font-semibold leading-snug text-[#312c79]">
           {label}
         </p>
       </div>

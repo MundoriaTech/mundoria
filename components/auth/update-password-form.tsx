@@ -70,6 +70,7 @@ export function UpdatePasswordForm() {
         <PasswordInput
           autoComplete="new-password"
           id="password"
+          placeholder="8+ characters, a capital, a number, and a symbol"
           {...register("password")}
         />
       </FormField>

@@ -16,7 +16,7 @@ const SERVICE_IMAGE: Partial<Record<ServiceType, string>> = {
   airbnb_turnover: "/images/marketing/landing/str-airbnb.png",
   bereavement_support: "/images/marketing/landing/recovery-bereavement.png",
   communal_area: "/images/marketing/landing/commercial-communal.png",
-  deep_clean: "/images/marketing/landing/residential-deep.png",
+  deep_clean: "/images/marketing/landing/residential-deep.jpg",
   educational_facility: "/images/marketing/landing/commercial-education.png",
   end_of_tenancy: "/images/marketing/landing/moving-end-of-tenancy.png",
   holiday_let: "/images/marketing/landing/str-holiday.png",

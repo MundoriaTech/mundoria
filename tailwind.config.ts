@@ -19,7 +19,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          "var(--font-poppins)",
+          "var(--font-sora)",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",

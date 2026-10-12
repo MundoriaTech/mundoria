@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 
-import {
-  BrandedCtaBand,
-  BrandedPageWash,
-  BrandedSection,
-} from "@/components/marketing/branded-page-sections";
-import {
-  MarketingHero,
-  MarketingShell,
-} from "@/components/marketing/marketing-shell";
-import { HOW_IT_WORKS_STEPS } from "@/lib/seo/marketing";
+import { HowItWorksCluster } from "@/components/marketing/how-it-works-cluster";
+import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
+import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
+import { BIRMINGHAM_AREAS, HOW_IT_WORKS_STEPS, LAUNCH_CITY } from "@/lib/seo/marketing";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -20,52 +17,200 @@ export const metadata: Metadata = buildPageMetadata({
   title: "How Mundoria Works | Mundoria",
 });
 
+const CITY_COLUMNS = [
+  "Residential",
+  "Commercial",
+  "Short lets",
+  "Moving home",
+  "Recovery",
+] as const;
+
 export default function HowItWorksPage() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
+  const cleanerHref = configured ? "/signup/cleaner" : "/setup";
 
   return (
     <MarketingShell>
-      <BrandedPageWash underNav>
-        <MarketingHero
-          description="Mundoria is designed so customers never feel like they’re filling in an insurance form — tell us what you need, see a clear estimate, then book."
-          eyebrow="Product"
-          primaryHref={bookingHref}
-          primaryLabel="Start booking"
-          secondaryHref="/faq"
-          secondaryLabel="Read FAQ"
-          title="How Mundoria works"
-          underNav
+      <section
+        className="relative isolate overflow-hidden"
+        style={{
+          backgroundColor: "#d7ceeb",
+          backgroundImage:
+            "radial-gradient(78% 88% at 0% 0%, #9a84d0 0%, rgba(164,143,212,0.72) 34%, rgba(164,143,212,0) 64%), linear-gradient(180deg, #c8b9e4 0%, #ddd4ef 100%)",
+          marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})`,
+        }}
+      >
+        <Image
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-left mix-blend-overlay opacity-60"
+          fill
+          sizes="100vw"
+          src="/images/marketing/landing/how-hero-texture.png"
         />
 
-        <BrandedSection>
-          <div className="grid gap-4 md:grid-cols-2">
-            {HOW_IT_WORKS_STEPS.map((step, index) => (
-              <article
-                className="rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)] sm:p-7"
-                key={step.title}
-              >
-                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#823fb2]">
-                  Step {index + 1}
-                </p>
-                <h2 className="mt-3 text-xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-                  {step.title}
-                </h2>
-                <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-                  {step.body}
-                </p>
-              </article>
-            ))}
+        <div
+          className="relative mx-auto w-full max-w-[1320px] px-4 pb-16 sm:px-6 lg:hidden"
+          style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2.5rem)` }}
+        >
+          <h1 className="max-w-sm text-[2.65rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[#504477]">
+            How
+            <br />
+            Mundoria
+            <br />
+            works
+          </h1>
+          <p className="mt-4 max-w-[17rem] text-sm leading-6 text-[#1a191d]">
+            Mundoria is designed so customers never feel like they’re filling
+            in an insurance form — tell us what you need, see a clear estimate,
+            then book.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-2">
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#733fb2] px-4 text-[13px] font-semibold text-white"
+              href={bookingHref}
+            >
+              Book a Service
+            </Link>
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full border border-[#504477]/70 px-4 text-[13px] font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white"
+              href={cleanerHref}
+            >
+              Become a cleaner
+            </Link>
           </div>
-        </BrandedSection>
+          <div className="relative mx-auto mt-8 aspect-[364/324] w-full max-w-[28rem]">
+            <HowItWorksCluster />
+          </div>
+        </div>
 
-        <BrandedCtaBand
-          body="After payment, your booking enters matching. Once a cleaner accepts, you see confirmation and live status through arrival and completion."
-          href={bookingHref}
-          label="Book a clean"
-          title="From booking to cleaner confirmed"
+        <div className="relative z-10 mx-auto hidden aspect-[1920/1003] w-full max-w-[1920px] lg:block">
+          <div className="absolute inset-y-0 left-1/2 w-full max-w-[1320px] -translate-x-1/2">
+          <div className="absolute left-8 top-[11%] flex h-[82%] w-[26rem] flex-col justify-center xl:left-10">
+          <h1 className="font-semibold leading-none tracking-[-0.04em] text-[#504477] [font-size:clamp(2.4rem,3.95vw,4.75rem)]">
+            How
+            <br />
+            Mundoria
+            <br />
+            works
+          </h1>
+          <p className="mt-5 leading-[1.45] text-[#1a191d] [font-size:clamp(0.85rem,1.02vw,1.22rem)]">
+            Mundoria is designed so customers never feel like they’re filling
+            in an insurance form — tell us what you need, see a clear estimate,
+            then book.
+          </p>
+          <div className="mt-8 flex items-center gap-[0.65vw]">
+            <Link
+              className="inline-flex h-[2.5vw] items-center justify-center rounded-full bg-[#733fb2] px-[1.15vw] text-[0.78vw] font-semibold text-white transition hover:bg-[#6434a0]"
+              href={bookingHref}
+            >
+              Book a Service
+            </Link>
+            <Link
+              className="inline-flex h-[2.5vw] items-center justify-center rounded-full border border-[#504477]/70 px-[1.15vw] text-[0.78vw] font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white"
+              href={cleanerHref}
+            >
+              Become a cleaner
+            </Link>
+          </div>
+          </div>
+          <div className="absolute right-8 top-[15%] aspect-[784/699] h-[74%] translate-x-[7.1%] xl:right-10">
+            <HowItWorksCluster />
+          </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="relative isolate overflow-hidden px-4 py-16 sm:px-8 sm:py-24"
+        style={{ backgroundColor: LANDING_PURPLE }}
+      >
+        <Image
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center mix-blend-soft-light"
+          fill
+          sizes="100vw"
+          src="/images/marketing/landing/hero-purple-texture.png"
         />
-      </BrandedPageWash>
+        <div className="relative z-10 mx-auto grid max-w-5xl gap-8 md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+          {HOW_IT_WORKS_STEPS.map((step, index) => (
+            <article
+              className="relative flex min-h-[13.5rem] min-w-0 flex-col items-center px-8 pb-8 pt-8 text-center sm:px-10"
+              key={step.title}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-[1.75rem] border border-white/45"
+                style={{
+                  clipPath:
+                    "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 calc(50% + 22px), 4px calc(50% + 22px), 4px calc(50% - 22px), 0 calc(50% - 22px))",
+                }}
+              />
+              <p className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[1.75rem] font-semibold leading-none tracking-[0.06em] text-[#c79c66]">
+                {String(index + 1).padStart(2, "0")}
+              </p>
+              <h2 className="mt-3 text-[1.3rem] font-semibold tracking-[-0.02em] text-[#c79c66] sm:text-[1.4rem]">
+                {step.title}
+              </h2>
+              <p className="mt-3 max-w-md text-[15px] leading-7 text-white/80">
+                {step.body}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-[#f4f0f8] px-4 py-16 sm:px-8 sm:py-20">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex flex-col items-start justify-between gap-6 border-b border-[#2c2458]/15 pb-10 sm:flex-row sm:items-center">
+            <div className="max-w-sm">
+              <h2 className="text-[1.9rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-[2.15rem]">
+                From booking to cleaner confirmed
+              </h2>
+              <p className="mt-3 text-base leading-7 text-[#5c5670]">
+                After payment, your booking enters matching. Once a cleaner
+                accepts, you see confirmation and live status through arrival
+                and completion.
+              </p>
+            </div>
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-full bg-[#6a45b8] px-5 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+              href={bookingHref}
+            >
+              Book a Service
+            </Link>
+          </div>
+
+          <div className="pt-12">
+            <h2 className="max-w-xs text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-[1.85rem]">
+              Mundoria services in our top cities
+            </h2>
+            <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+              {CITY_COLUMNS.map((column) => (
+                <div key={column}>
+                  <h3 className="text-sm font-semibold text-[#1c133b]">
+                    {column}
+                  </h3>
+                  <ul className="mt-3 space-y-2">
+                    {BIRMINGHAM_AREAS.map((area) => (
+                      <li key={`${column}-${area.slug}`}>
+                        <Link
+                          className="text-[13px] leading-5 text-[#5c5670] transition hover:text-[#312c79]"
+                          href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
+                        >
+                          {column} cleaning in {area.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </MarketingShell>
   );
 }

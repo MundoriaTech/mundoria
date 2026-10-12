@@ -12,6 +12,22 @@ import { Input } from "@/components/ui/input";
 import { completeProfileSchema, type CompleteProfileValues } from "@/lib/auth/schemas";
 import { safeRedirectPath } from "@/lib/auth/redirects";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+
+const UK_DIAL_CODE = "+44";
+
+/** Drop a leading +44 / 0044, and a trunk 0, so the field holds the local number. */
+function nationalFromPhone(phone: string) {
+  const trimmed = phone.trim();
+  const prefixed = trimmed.match(/^(?:\+|00)44[\s-]*(.*)$/);
+  const local = prefixed ? prefixed[1] : trimmed;
+  return local.replace(/^0/, "").trim();
+}
+
+function storedPhone(national: string) {
+  const local = national.replace(/[^\d\s]/g, "").replace(/\s+/g, " ").trim();
+  return local ? `${UK_DIAL_CODE} ${local.replace(/^0+/, "")}` : "";
+}
 
 export function CompleteProfileForm({
   defaultFullName,
@@ -24,17 +40,30 @@ export function CompleteProfileForm({
 }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const [nationalNumber, setNationalNumber] = useState(() =>
+    nationalFromPhone(defaultPhone),
+  );
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
+    setValue,
   } = useForm<CompleteProfileValues>({
     defaultValues: {
       full_name: defaultFullName,
-      phone: defaultPhone,
+      phone: storedPhone(nationalFromPhone(defaultPhone)),
     },
     resolver: zodResolver(completeProfileSchema),
   });
+
+  function updateNationalNumber(value: string) {
+    const national = nationalFromPhone(value)
+      .replace(/[^\d\s]/g, "")
+      .replace(/^\s+/, "")
+      .replace(/\s{2,}/g, " ");
+    setNationalNumber(national);
+    setValue("phone", storedPhone(national), { shouldDirty: true });
+  }
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
@@ -72,13 +101,27 @@ export function CompleteProfileForm({
         />
       </FormField>
       <FormField error={errors.phone} htmlFor="phone" label="Phone number">
-        <Input
-          autoComplete="tel"
-          id="phone"
-          placeholder="+44 7700 900000"
-          type="tel"
-          {...register("phone")}
-        />
+        <div className="flex gap-2">
+          <span
+            className={cn(
+              "inline-flex h-11 w-[4.5rem] shrink-0 items-center justify-center rounded-md border border-[#e8e8eb] bg-[#f7f6f8] text-sm font-semibold text-[#1c133b]",
+              errors.phone && "border-[#d4694a]",
+            )}
+          >
+            {UK_DIAL_CODE}
+          </span>
+          <Input
+            autoComplete="tel-national"
+            className="min-w-0 flex-1"
+            id="phone"
+            inputMode="tel"
+            onChange={(event) => updateNationalNumber(event.target.value)}
+            placeholder="7700 900000"
+            type="tel"
+            value={nationalNumber}
+          />
+        </div>
+        <input type="hidden" {...register("phone")} />
       </FormField>
       <p className="text-sm leading-6 text-muted-foreground">
         We use your phone number for booking updates, cleaner arrival notices,

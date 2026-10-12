@@ -72,7 +72,10 @@ class _SignUpPageState extends State<SignUpPage> {
           TextField(
             controller: _password,
             obscureText: true,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(
+              labelText: 'Password',
+              helperText: '8+ characters, a capital, a number, and a symbol',
+            ),
           ),
           const SizedBox(height: 12),
           TextField(controller: _phone, decoration: const InputDecoration(labelText: 'Phone')),

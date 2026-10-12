@@ -11,7 +11,7 @@ import {
 import { FeedbackProvider } from "@/components/shared/feedback-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
-import { poppins } from "@/lib/fonts";
+import { sora } from "@/lib/fonts";
 import {
   DEFAULT_OG_IMAGE,
   SITE_NAME,
@@ -58,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={poppins.variable} lang="en" suppressHydrationWarning>
+    <html className={sora.variable} lang="en" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light" />
         <script

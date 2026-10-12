@@ -7,39 +7,24 @@ import { Check, Star } from "lucide-react";
 
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
-import {
-  FlexibleIcon,
-  ReliableIcon,
-  SimpleIcon,
-} from "@/components/marketing/residential/feature-icons";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
-import { cn } from "@/lib/utils";
 
 const HERO_IMAGE = "/images/marketing/landing/residential-hero.png";
 
 const FEATURES = [
   {
     body: "No more wondering who's coming to clean. Connect with trusted cleaning professionals who are ready to take care of your space.",
-    icon: ReliableIcon,
-    // Orange soft fill + purple linework
-    iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+    icon: "/images/marketing/icons/reliable.png",
     title: "We're reliable",
   },
   {
     body: "Need a one-off clean or someone to come regularly? Choose a cleaning schedule that works for your home, routine, and budget.",
-    icon: FlexibleIcon,
-    // Purple soft fill + orange linework
-    iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#d4694a]",
+    icon: "/images/marketing/icons/flexible.png",
     title: "We're flexible",
   },
   {
     body: "Pick a cleaner, choose the service you need and book with ease. Mundoria makes getting your home cleaned simple from start to finish.",
-    icon: SimpleIcon,
-    // White fill + purple lines
-    iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#5b3d9e]",
+    icon: "/images/marketing/icons/simple.png",
     title: "We're simple",
   },
 ] as const;
@@ -215,7 +200,7 @@ export function ResidentialCleaningPage({
             Cleaning that works around you
           </h2>
           <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
-            {FEATURES.map(({ body, icon: Icon, iconClass, title }) => (
+            {FEATURES.map(({ body, icon, title }) => (
               <div
                 className="relative min-h-[9.5rem] overflow-hidden rounded-[1.75rem] bg-[#f3efe6] px-5 pb-14 pt-5 sm:min-h-[10.5rem] sm:px-6 sm:pb-16 sm:pt-6"
                 key={title}
@@ -226,14 +211,12 @@ export function ResidentialCleaningPage({
                 <p className="mt-2 max-w-[15.5rem] text-[13px] font-normal leading-[1.45] text-[#3d3a48] sm:text-[14px] sm:leading-[1.5]">
                   {body}
                 </p>
-                <Icon
-                  className={cn(
-                    "pointer-events-none absolute bottom-3 right-3 h-14 w-14 sm:bottom-4 sm:right-4 sm:h-16 sm:w-16",
-                    // White die-cut sticker edge + soft lift
-                    "[filter:drop-shadow(0_0_0.65px_#fff)_drop-shadow(0_0_0.65px_#fff)_drop-shadow(1.25px_0_0_#fff)_drop-shadow(-1.25px_0_0_#fff)_drop-shadow(0_1.25px_0_#fff)_drop-shadow(0_-1.25px_0_#fff)_drop-shadow(1px_1px_0_#fff)_drop-shadow(-1px_1px_0_#fff)_drop-shadow(1px_-1px_0_#fff)_drop-shadow(-1px_-1px_0_#fff)_drop-shadow(0_2px_3px_rgba(28,19,59,0.18))]",
-                    iconClass,
-                  )}
-                  weight="duotone"
+                <Image
+                  alt=""
+                  className="pointer-events-none absolute bottom-3 right-3 h-14 w-14 rounded-full object-cover sm:bottom-4 sm:right-4 sm:h-16 sm:w-16"
+                  height={512}
+                  src={icon}
+                  width={512}
                 />
               </div>
             ))}
@@ -268,7 +251,7 @@ export function ResidentialCleaningPage({
           </div>
 
           <div
-            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:overflow-visible lg:pb-0"
+            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0 xl:flex xl:flex-wrap xl:justify-center"
             ref={carouselRef}
           >
             {SERVICE_CARDS.map((service) => (
@@ -279,7 +262,7 @@ export function ResidentialCleaningPage({
                 key={service.label}
                 label={service.label}
                 objectPosition={service.objectPosition}
-                sizes="(min-width: 1024px) 33vw, 300px"
+                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 50vw, 300px"
               />
             ))}
           </div>

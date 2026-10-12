@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+/** New passwords: length, plus one capital letter, one number, and one symbol. */
+export const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(72, "Password is too long")
+  .refine((value) => /[A-Z]/.test(value), {
+    message: "Password must include a capital letter",
+  })
+  .refine((value) => /\d/.test(value), {
+    message: "Password must include a number",
+  })
+  .refine((value) => /[^A-Za-z0-9]/.test(value), {
+    message: "Password must include a symbol",
+  });
+
 export const signupSchema = z.object({
   full_name: z
     .string()
@@ -7,10 +22,7 @@ export const signupSchema = z.object({
     .min(2, "Enter your full name")
     .max(100, "Name is too long"),
   email: z.string().trim().email("Enter a valid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(72, "Password is too long"),
+  password: passwordSchema,
   phone: z
     .string()
     .trim()
@@ -58,10 +70,7 @@ export const completeProfileSchema = z.object({
 
 export const updatePasswordSchema = z
   .object({
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(72, "Password is too long"),
+    password: passwordSchema,
     confirmPassword: z.string(),
   })
   .refine((values) => values.password === values.confirmPassword, {

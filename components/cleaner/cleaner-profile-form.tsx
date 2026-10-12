@@ -72,7 +72,6 @@ export function CleanerProfileForm({
         .from("profiles")
         .update({
           avatar_url: profile.avatar_url,
-          full_name: profile.full_name,
           phone,
         })
         .eq("id", profile.id),
@@ -208,12 +207,8 @@ export function CleanerProfileForm({
           <Field label="Full name">
             <Input
               className={fieldClass}
-              onChange={(event) =>
-                setProfile((current) => ({
-                  ...current,
-                  full_name: event.target.value,
-                }))
-              }
+              disabled
+              readOnly
               value={profile.full_name}
             />
           </Field>

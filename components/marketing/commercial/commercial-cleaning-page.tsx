@@ -254,7 +254,7 @@ export function CommercialCleaningPage({
           </div>
 
           <div
-            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0 xl:grid-cols-4"
+            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0 xl:flex xl:flex-wrap xl:justify-center"
             ref={carouselRef}
           >
             {SERVICE_CARDS.map((service) => (

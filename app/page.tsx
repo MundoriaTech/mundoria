@@ -65,7 +65,7 @@ export default async function HomePage() {
     <MarketingShell>
       <JsonLd data={homePageStructuredData()} />
       <LandingPurpleField>
-        <HeroSection bookingHref={bookingHref} />
+        <HeroSection />
         <ServiceCategoriesSection bookingHref={bookingHref} />
         <PopularServicesSection bookingBaseHref={bookingHref} />
       </LandingPurpleField>
