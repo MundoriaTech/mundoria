@@ -36,7 +36,7 @@ export function CategoryServiceCard({
   return (
     <article
       className={cn(
-        "group flex w-[min(72vw,15rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.25rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[15.5rem] md:w-[16.25rem] lg:w-auto xl:w-[calc((100%-3.75rem)/4)]",
+        "group flex w-[min(72vw,15rem)] max-w-[16.25rem] shrink-0 snap-start flex-col overflow-hidden rounded-[1.25rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[15.5rem] md:w-[16.25rem] xl:max-w-none xl:w-[calc((100%-3.75rem)/4)]",
         className,
       )}
       onClick={(event) => {

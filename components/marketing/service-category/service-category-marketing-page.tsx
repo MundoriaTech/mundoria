@@ -229,7 +229,7 @@ function CategoryServicesSection({
   services: CategoryServiceCard[];
   title: string;
 }) {
-  const defaultGrid = "lg:grid-cols-2 xl:flex xl:flex-wrap xl:justify-center";
+  const defaultGrid = "lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible";
 
   return (
     <section className="px-4 py-10 sm:px-8 sm:py-14">
@@ -260,7 +260,7 @@ function CategoryServicesSection({
 
         <div
           className={cn(
-            "mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:overflow-visible lg:pb-0",
+            "mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:overflow-visible lg:pb-0",
             gridClassName ?? defaultGrid,
           )}
           ref={carouselRef}
@@ -273,7 +273,7 @@ function CategoryServicesSection({
               key={service.label}
               label={service.label}
               objectPosition={service.objectPosition}
-              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 50vw, 300px"
+              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
             />
           ))}
         </div>
