@@ -36,7 +36,7 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
       question: "Where is this available?",
     },
   ],
-  heroImage: "/images/marketing/landing/category-moving-home.png",
+  heroImage: "/images/marketing/landing/category-moving-home.jpg",
   serviceCards: [
     {
       href: "/cleaning/end-of-tenancy-cleaning",
@@ -89,7 +89,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
       question: "Can I book recurring turnovers?",
     },
   ],
-  heroImage: "/images/marketing/landing/category-str.png",
+  heroImage: "/images/marketing/landing/category-str.jpg",
   serviceCards: [
     {
       href: "/cleaning/airbnb-shortlet-cleaning",

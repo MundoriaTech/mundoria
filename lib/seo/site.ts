@@ -7,7 +7,7 @@ export const SUPPORT_EMAIL =
   process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
 /** Prefer a wide landscape asset for social shares when available. */
 export const DEFAULT_OG_IMAGE =
-  "/images/marketing/landing/category-residential.png";
+  "/images/marketing/landing/category-residential.jpg";
 
 /** Canonical public host. Apex mundoria.co.uk redirects to www. */
 const CANONICAL_SITE_URL = "https://www.mundoria.co.uk";

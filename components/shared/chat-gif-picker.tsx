@@ -47,12 +47,9 @@ type GifItem = {
 const CURATED_GIFS: GifItem[] = [
   { id: "thumbs-up", label: "Thumbs up", url: "/images/chat/gifs/thumbs-up.gif" },
   { id: "clap", label: "Clap", url: "/images/chat/gifs/clap.gif" },
-  { id: "heart", label: "Heart", url: "/images/chat/gifs/heart.gif" },
   { id: "thanks", label: "Thank you", url: "/images/chat/gifs/thanks.gif" },
   { id: "wave", label: "Wave", url: "/images/chat/gifs/wave.gif" },
   { id: "laugh", label: "Laugh", url: "/images/chat/gifs/laugh.gif" },
-  { id: "celebrate", label: "Celebrate", url: "/images/chat/gifs/celebrate.gif" },
-  { id: "yes", label: "Yes", url: "/images/chat/gifs/yes.gif" },
   { id: "thinking", label: "Thinking", url: "/images/chat/gifs/thinking.gif" },
   { id: "high-five", label: "High five", url: "/images/chat/gifs/high-five.gif" },
 ];

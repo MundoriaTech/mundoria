@@ -9,6 +9,7 @@ import {
 import {
   MARKETING_SERVICES,
   marketingServiceBySlug,
+  servicePlacePath,
   servicePlaceZonePath,
 } from "@/lib/seo/marketing";
 import { bookingHrefForFocus } from "@/lib/seo/place-page-focus";

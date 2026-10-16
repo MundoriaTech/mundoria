@@ -6,6 +6,17 @@ type LazyImageProps = Omit<ImageProps, "loading" | "priority"> & {
 };
 
 /** Next.js Image with explicit lazy-loading defaults for below-the-fold media. */
-export function LazyImage({ priority = false, ...props }: LazyImageProps) {
-  return <Image loading={priority ? undefined : "lazy"} priority={priority} {...props} />;
+export function LazyImage({
+  alt = "",
+  priority = false,
+  ...props
+}: LazyImageProps) {
+  return (
+    <Image
+      alt={alt}
+      loading={priority ? undefined : "lazy"}
+      priority={priority}
+      {...props}
+    />
+  );
 }
