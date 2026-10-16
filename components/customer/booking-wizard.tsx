@@ -154,10 +154,48 @@ const BOOKING_STEP_KEY = "mundoria-booking-step-v5";
 /** Stops draft/step writes after abandon, checkout, or leave — reset on mount. */
 let allowBookingPersist = true;
 
-function clearBookingStorage() {
+function readStoredAddressFields(): Pick<
+  BookingDraft,
+  "addressId" | "guestAddress"
+> {
+  try {
+    const raw = window.localStorage.getItem(BOOKING_DRAFT_KEY);
+    if (!raw) return { addressId: null, guestAddress: null };
+    const parsed = JSON.parse(raw) as Partial<BookingDraft>;
+    return {
+      addressId: parsed.addressId ?? null,
+      guestAddress: parsed.guestAddress ?? null,
+    };
+  } catch {
+    return { addressId: null, guestAddress: null };
+  }
+}
+
+/** Clears the booking draft/step but keeps the chosen address for next time. */
+function clearBookingStorage(keep?: Partial<
+  Pick<BookingDraft, "addressId" | "guestAddress">
+>) {
   allowBookingPersist = false;
   try {
-    window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+    const stored = readStoredAddressFields();
+    const addressId =
+      keep && "addressId" in keep ? (keep.addressId ?? null) : stored.addressId;
+    const guestAddress =
+      keep && "guestAddress" in keep
+        ? (keep.guestAddress ?? null)
+        : stored.guestAddress;
+    if (addressId || guestAddress) {
+      window.localStorage.setItem(
+        BOOKING_DRAFT_KEY,
+        JSON.stringify({
+          ...blankDraft,
+          addressId,
+          guestAddress,
+        }),
+      );
+    } else {
+      window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+    }
     window.localStorage.removeItem(BOOKING_STEP_KEY);
   } catch {
     // Ignore storage failures (private mode, quota, etc.).
@@ -428,12 +466,17 @@ export function BookingWizard({
     persistBookingRef.current = true;
     try {
       if (fresh) {
-        clearBookingStorage();
+        const keptAddress = readStoredAddressFields();
+        clearBookingStorage(keptAddress);
         allowBookingPersist = true;
         persistBookingRef.current = true;
         setDraft({
           ...blankDraft,
           ...initialDraft,
+          addressId:
+            initialDraft?.addressId ?? keptAddress.addressId ?? null,
+          guestAddress:
+            initialDraft?.guestAddress ?? keptAddress.guestAddress ?? null,
           alternateTimes: initialDraft?.alternateTimes ?? [],
           preferSameCleaner: initialDraft?.preferSameCleaner ?? false,
           preferredCleanerId: initialDraft?.preferredCleanerId ?? null,
@@ -855,7 +898,10 @@ export function BookingWizard({
   }, [draft.recentlyMoved, draft.serviceType]);
 
   function abandonBookingStorage() {
-    clearBookingStorage();
+    clearBookingStorage({
+      addressId: draft.addressId,
+      guestAddress: draft.guestAddress,
+    });
     persistBookingRef.current = false;
   }
 
@@ -1490,7 +1536,7 @@ export function BookingWizard({
       </div>
 
       {stepId !== "checkout" || needsAuth ? (
-        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#eeeef1] bg-white px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5 xl:px-0">
+        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8d9a8]/80 bg-[#f6e9c3] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5 xl:px-0">
           <div className="mx-auto flex w-full max-w-[1140px] flex-col items-center lg:items-stretch">
             {/* Mobile: WeCasa row — total | ↑/↓ | Next */}
             <div className="relative flex w-full items-center lg:hidden">
@@ -3371,7 +3417,10 @@ function CheckoutStep({
         throw new Error(booking.error ?? "Unable to create booking.");
       }
 
-      clearBookingStorage();
+      clearBookingStorage({
+        addressId: draft.addressId,
+        guestAddress: draft.guestAddress,
+      });
       const seriesNotice = booking.recurringError ? "?series=failed" : "";
       router.replace(`/booking/${booking.bookingId}${seriesNotice}`);
       router.refresh();
