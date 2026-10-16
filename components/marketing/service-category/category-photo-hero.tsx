@@ -43,7 +43,7 @@ export function placePhotoHero(
         "Clear estimates before you book",
         "Reliable, vetted cleaners you can trust",
       ],
-      image: "/images/marketing/landing/commercial-hero.png",
+      image: "/images/marketing/landing/commercial-hero.jpg",
       overlay: "wash",
       subtitle:
         "Offices, retail, education and communal spaces — cleaned without the chase",
@@ -55,7 +55,7 @@ export function placePhotoHero(
     return {
       bookCta: "Book residential cleaning",
       bullets: [
-        "Cleaning from £15.90/h",
+        "Cleaning from £22/h",
         "Book once or schedule regularly",
         "Reliable, vetted cleaners you can trust",
       ],

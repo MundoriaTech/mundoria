@@ -100,12 +100,12 @@ export function BirminghamPlaceFaqList({
     ),
     [entries[9]!.question]: (
       <>
-        Use your own products or add{" "}
+        Use your own products and equipment, or add{" "}
         <Link className={linkClass} href={`${bookingHref}?step=addons`}>
           cleaning products
         </Link>{" "}
-        in booking when your cleaner can bring basics. Share fragrance-free or
-        allergy notes in the booking instructions.
+        and cleaning equipment in booking. Share fragrance-free or allergy notes
+        in the booking instructions.
       </>
     ),
     [entries[10]!.question]: (

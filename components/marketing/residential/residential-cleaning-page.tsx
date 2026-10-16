@@ -69,7 +69,7 @@ export function ResidentialCleaningPage({
           <Image
             alt=""
             aria-hidden
-            className="object-cover object-center"
+            className="object-cover object-[center_35%]"
             fill
             priority
             sizes="100vw"
@@ -110,7 +110,7 @@ export function ResidentialCleaningPage({
               </p>
               <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">
                 {[
-                  "Cleaning from £15.90/h",
+                  "Cleaning from £22/h",
                   "Book once or schedule regularly",
                   "Reliable, vetted cleaners you can trust",
                 ].map((item) => (

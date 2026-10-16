@@ -75,6 +75,7 @@ import {
 } from "@/lib/customer/history-recommendation";
 import { LazyImage } from "@/components/shared/lazy-image";
 import {
+  addOnAmountPence,
   availableAddOns,
   categoryDefinition,
   estimatePrice,
@@ -90,7 +91,10 @@ import {
   SERVICE_CATEGORIES,
   servicesForCategory,
 } from "@/lib/customer/services";
-import type { OfficeSpaceSize } from "@/lib/customer/office-pricing";
+import {
+  calculateOfficeQuote,
+  type OfficeSpaceSize,
+} from "@/lib/customer/office-pricing";
 import { cn } from "@/lib/utils";
 import type {
   Address,
@@ -154,6 +158,7 @@ let bookingHistoryBootstrap: {
 
 const ADD_ON_IMAGES: Record<string, string> = {
   cleaning_products: "/images/marketing/icons/cleaning-products.png",
+  cleaning_equipment: "/images/marketing/icons/tools.png",
   ironing: "/images/marketing/icons/ironing.png",
 };
 
@@ -331,6 +336,32 @@ export function BookingWizard({
     (draft.serviceType === "office"
       ? draft.officeSpaces.some((space) => space.quantity > 0)
       : draft.numBedrooms != null && draft.numBathrooms != null);
+  const addOnPriceContext =
+    draft.serviceType && selectedStandard
+      ? {
+          durationHours:
+            draft.serviceType === "office" &&
+            draft.officeSpaces.some((space) => space.quantity > 0)
+              ? calculateOfficeQuote(
+                  draft.officeSpaces,
+                  selectedStandard,
+                ).cleanerHours
+              : estimateDuration(
+                  draft.serviceType,
+                  selectedStandard,
+                  draft.selectedAddOns,
+                  {
+                    bathrooms: draft.numBathrooms ?? roomsAddress?.num_bathrooms,
+                    bedrooms: draft.numBedrooms ?? roomsAddress?.num_bedrooms,
+                    officeSpaces: draft.officeSpaces,
+                    otherRooms: draft.otherRoomTypes.length,
+                    propertyType: roomsAddress?.property_type,
+                  },
+                ),
+          serviceType: draft.serviceType,
+          standard: selectedStandard,
+        }
+      : undefined;
   const estimatedAmount =
     draft.serviceType && selectedStandard
       ? hasPropertySizing && roomsAddress
@@ -346,7 +377,7 @@ export function BookingWizard({
             { officeSpaces: draft.officeSpaces },
           )
         : indicativeFromPrice(draft.serviceType) +
-          selectedAddOnTotal(draft.selectedAddOns)
+          selectedAddOnTotal(draft.selectedAddOns, addOnPriceContext)
       : 0;
   const priceIsIndicative = Boolean(
     draft.serviceType && estimatedAmount > 0 && !hasPropertySizing,
@@ -2323,6 +2354,31 @@ function AddOnsStep({
   ) => void;
 }) {
   const addOns = draft.serviceType ? availableAddOns(draft.serviceType) : [];
+  const standard = draft.serviceType
+    ? normalizeStandard(draft.serviceType, draft.cleaningStandard)
+    : null;
+  const addOnPriceContext =
+    draft.serviceType && standard
+      ? {
+          durationHours:
+            draft.serviceType === "office" &&
+            draft.officeSpaces.some((space) => space.quantity > 0)
+              ? calculateOfficeQuote(draft.officeSpaces, standard).cleanerHours
+              : estimateDuration(
+                  draft.serviceType,
+                  standard,
+                  draft.selectedAddOns,
+                  {
+                    bathrooms: draft.numBathrooms,
+                    bedrooms: draft.numBedrooms,
+                    officeSpaces: draft.officeSpaces,
+                    otherRooms: draft.otherRoomTypes.length,
+                  },
+                ),
+          serviceType: draft.serviceType,
+          standard,
+        }
+      : undefined;
 
   function toggleAddOn(id: string) {
     const selected = new Set(draft.selectedAddOns);
@@ -2384,7 +2440,15 @@ function AddOnsStep({
                       </p>
                     </div>
                     <p className="shrink-0 text-sm font-bold text-[#1c133b]">
-                      +{formatMoney(addOn.amount)}
+                      +
+                      {formatMoney(
+                        addOnAmountPence(addOn, addOnPriceContext),
+                      )}
+                      {addOn.hourly ? (
+                        <span className="block text-[11px] font-semibold text-[#5a5470]">
+                          hourly
+                        </span>
+                      ) : null}
                     </p>
                   </div>
                 </div>
@@ -2397,62 +2461,66 @@ function AddOnsStep({
           No extras for this service.
         </p>
       )}
-      <h3 className="mt-10 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-        Do you have any pets?
-      </h3>
-      <p className="mt-2 text-sm leading-6 text-[#5a5470]">
-        Some cleaners have allergies or prefer not to work around animals — this
-        helps us match you well.
-      </p>
-      <div className="mt-4 grid gap-3">
-        {(
-          [
-            ["Yes, furry or scaly housemates", true],
-            ["Nope, pet-free zone", false],
-          ] as const
-        ).map(([label, value]) => {
-          const active = draft.hasPets === value;
-          return (
-            <button
-              className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
-                active && "border-[#6a45b8] bg-white",
-              )}
-              key={label}
-              onClick={() => {
-                update("hasPets", value);
-                if (!value) update("petTypes", []);
-              }}
-              type="button"
-            >
-              <div className="flex items-center gap-3">
-                <Image
-                  alt=""
-                  className="h-11 w-11 shrink-0 rounded-full object-cover"
-                  height={512}
-                  src={
-                    value
-                      ? "/images/marketing/icons/pets.png"
-                      : "/images/marketing/icons/no-pets.png"
-                  }
-                  width={512}
-                />
-                <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
-                  {label}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      {draft.serviceType &&
+      serviceDefinition(draft.serviceType).category !== "commercial" ? (
+        <>
+          <h3 className="mt-10 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            Do you have any pets?
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+            Some cleaners have allergies or prefer not to work around animals —
+            this helps us match you well.
+          </p>
+          <div className="mt-4 grid gap-3">
+            {(
+              [
+                ["Yes, furry or scaly housemates", true],
+                ["Nope, pet-free zone", false],
+              ] as const
+            ).map(([label, value]) => {
+              const active = draft.hasPets === value;
+              return (
+                <button
+                  className={cn(
+                    "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                    active && "border-[#6a45b8] bg-white",
+                  )}
+                  key={label}
+                  onClick={() => {
+                    update("hasPets", value);
+                    if (!value) update("petTypes", []);
+                  }}
+                  type="button"
+                >
+                  <div className="flex items-center gap-3">
+                    <Image
+                      alt=""
+                      className="h-11 w-11 shrink-0 rounded-full object-cover"
+                      height={512}
+                      src={
+                        value
+                          ? "/images/marketing/icons/pets.png"
+                          : "/images/marketing/icons/no-pets.png"
+                      }
+                      width={512}
+                    />
+                    <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
+                      {label}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
       <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
         <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
           i
         </span>
         <p>
-          Included: your estimate covers the selected session. Equipment
-          (vacuum, mop, sponges) should be available at the property unless
-          arranged otherwise.
+          Your estimate covers labour for the session. Add cleaning products or
+          equipment if you want the cleaner to bring the Mundoria kit.
         </p>
       </div>
     </div>

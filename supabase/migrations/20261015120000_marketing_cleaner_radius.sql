@@ -1,5 +1,8 @@
 -- Expose each cleaner's working radius on public marketing cards.
-create or replace view public.marketing_cleaners
+-- DROP + CREATE required: CREATE OR REPLACE cannot insert a column mid-list.
+drop view if exists public.marketing_cleaners;
+
+create view public.marketing_cleaners
 with (security_barrier = true, security_invoker = false) as
 select
   p.id,
@@ -9,9 +12,9 @@ select
   cp.rating,
   cp.total_jobs,
   cp.years_experience,
-  cp.working_radius_km,
   coalesce(areas.prefixes, '{}'::text[]) as postcode_prefixes,
-  coalesce(services.service_types, '{}'::text[]) as service_types
+  coalesce(services.service_types, '{}'::text[]) as service_types,
+  cp.working_radius_km
 from public.profiles p
 join public.cleaner_profiles cp
   on cp.id = p.id

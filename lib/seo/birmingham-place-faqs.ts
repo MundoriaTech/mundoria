@@ -96,12 +96,12 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
     {
       question: `What do most cleaners charge per hour in ${place}?`,
       schemaAnswer:
-        "Independent cleaners in Birmingham and the West Midlands often charge roughly £12–15 per hour, while company rates are commonly £16–20 per hour depending on location and scope. Mundoria shows a clear estimate for your home size and service before you confirm — not an open-ended hourly quote after the visit.",
+        "Local cleaner rates vary by experience and whether you book an independent or a company. Mundoria pricing starts from £22 per hour for Essential regular cleans (and from £23 per hour for recovery support), with a clear estimate for your home size and service before you confirm — not an open-ended hourly quote after the visit.",
     },
     {
       question: `How much does Mundoria cleaning cost in ${place}?`,
       schemaAnswer:
-        "Price depends on service, property size, cleaning standard, schedule and add-ons. Mundoria displays the estimate at checkout so you know the cost before the clean starts.",
+        "Price is based on cleaner-hours at Mundoria’s published rates, then property size, cleaning level, schedule and optional product or equipment supply. Mundoria displays the estimate at checkout so you know the cost before the clean starts.",
     },
     {
       question: `Can I book a deep cleaning service in ${place}?`,
@@ -110,7 +110,7 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
     {
       question: "Do I need to provide cleaning supplies?",
       schemaAnswer:
-        "You can use your own products or add cleaning products in booking when your cleaner can bring basics. Share fragrance-free or allergy notes in the booking instructions.",
+        "You can use your own products and equipment, or add Mundoria cleaning products (£2/h home) and cleaning equipment (£3/h, or £5/h for deep cleaning) when you book. Share fragrance-free or allergy notes in the booking instructions.",
     },
     {
       question: "What is the Mundoria cancellation policy?",
