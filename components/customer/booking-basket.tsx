@@ -72,6 +72,7 @@ function formatBasketAddress(address: Address) {
 
 function BasketSection({
   children,
+  filled = true,
   icon,
   open,
   onEdit,
@@ -80,6 +81,8 @@ function BasketSection({
   title,
 }: {
   children?: ReactNode;
+  /** When false, show a quiet placeholder row (no Edit / chevron). */
+  filled?: boolean;
   icon: ReactNode;
   open: boolean;
   onEdit?: () => void;
@@ -88,47 +91,65 @@ function BasketSection({
   title: string;
 }) {
   return (
-    <div className="border-b border-[#e8e8eb] last:border-b-0">
+    <div className="border-b border-[#e4daf5] last:border-b-0">
       <div className="flex w-full items-center gap-1 px-2 py-2 sm:px-3">
-        <button
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 text-left touch-manipulation hover:bg-white/60"
-          onClick={onToggle}
-          type="button"
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[#6a45b8]">
-            {icon}
-          </span>
-          <span className="min-w-0 flex-1 text-sm font-bold text-[#1c133b]">
-            {title}
-          </span>
-          {right ? (
-            <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#5a5470]">
-              {right}
-            </span>
-          ) : null}
-        </button>
-        {onEdit ? (
+        {filled ? (
           <button
-            className="shrink-0 rounded-full px-2.5 py-1.5 text-xs font-semibold text-[#6a45b8] touch-manipulation hover:bg-white/60"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 text-left touch-manipulation hover:bg-white/50"
+            onClick={onToggle}
+            type="button"
+          >
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[#6a45b8]">
+              {icon}
+            </span>
+            <span className="min-w-0 flex-1 text-sm font-bold text-[#1c133b]">
+              {title}
+            </span>
+            {right ? (
+              <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#5a5470]">
+                {right}
+              </span>
+            ) : null}
+          </button>
+        ) : (
+          <div className="flex min-w-0 flex-1 items-center gap-3 px-2 py-1.5">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[#b0a9bc]">
+              {icon}
+            </span>
+            <span className="min-w-0 flex-1 text-sm font-semibold text-[#8a8498]">
+              {title}
+            </span>
+            {right ? (
+              <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#8a8498]">
+                {right}
+              </span>
+            ) : null}
+          </div>
+        )}
+        {filled && onEdit ? (
+          <button
+            className="shrink-0 rounded-full px-2.5 py-1.5 text-xs font-semibold text-[#6a45b8] touch-manipulation hover:bg-white/50"
             onClick={onEdit}
             type="button"
           >
             Edit
           </button>
         ) : null}
-        <button
-          aria-expanded={open}
-          aria-label={open ? "Hide details" : "Show details"}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8b8798] touch-manipulation hover:bg-white/60"
-          onClick={onToggle}
-          type="button"
-        >
-          <ChevronDown
-            className={cn("h-4 w-4 transition", open && "rotate-180")}
-          />
-        </button>
+        {filled ? (
+          <button
+            aria-expanded={open}
+            aria-label={open ? "Hide details" : "Show details"}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8b8798] touch-manipulation hover:bg-white/50"
+            onClick={onToggle}
+            type="button"
+          >
+            <ChevronDown
+              className={cn("h-4 w-4 transition", open && "rotate-180")}
+            />
+          </button>
+        ) : null}
       </div>
-      {open && children ? (
+      {filled && open && children ? (
         <div className="px-4 pb-4 pl-[3.25rem] text-sm font-bold text-[#1c133b]">
           {children}
         </div>
@@ -177,7 +198,7 @@ function BasketPanel({
 
   if (!hasAnything) {
     return (
-      <div className="overflow-hidden rounded-[1.25rem] bg-[#f3f3f5]">
+      <div className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
         {showHeader ? (
           <p className="px-5 pt-5 text-center text-base font-bold text-[#1c133b]">
             {headerTitle}
@@ -268,10 +289,14 @@ function BasketPanel({
     ...alternateTimes.filter((slot) => slot !== scheduledTime),
   ].filter(Boolean);
 
+  const addressFilled = Boolean(address);
+  const serviceFilled = Boolean(serviceLabel);
+  const scheduleFilled = scheduleDates.length > 0 || times.length > 0;
+
   return (
-    <div className="overflow-hidden rounded-[1.25rem] bg-[#f3f3f5]">
+    <div className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
       {showHeader ? (
-        <div className="border-b border-[#e8e8eb] px-5 py-4">
+        <div className="border-b border-[#e4daf5] px-5 py-4">
           <p className="text-center text-base font-bold text-[#1c133b]">
             {headerTitle}
           </p>
@@ -279,20 +304,20 @@ function BasketPanel({
       ) : null}
 
       <BasketSection
+        filled={addressFilled}
         icon={<MapPin className="h-5 w-5" weight="fill" />}
-        onEdit={onJumpAddress}
+        onEdit={addressFilled ? onJumpAddress : undefined}
         onToggle={() => setOpen((c) => ({ ...c, address: !c.address }))}
         open={open.address}
         title={address ? formatBasketAddress(address) : "Add your address"}
       >
-        {!address ? (
-          <p>Enter where the clean will take place.</p>
-        ) : null}
+        {null}
       </BasketSection>
 
       <BasketSection
+        filled={serviceFilled || hourlyRatePence != null}
         icon={<ShoppingCart className="h-5 w-5" weight="fill" />}
-        onEdit={onJumpService}
+        onEdit={serviceFilled ? onJumpService : undefined}
         onToggle={() => setOpen((c) => ({ ...c, service: !c.service }))}
         open={open.service}
         right={rateLabel ?? undefined}
@@ -314,11 +339,22 @@ function BasketPanel({
               </li>
             ))}
           </ul>
+        ) : rateLabel ? (
+          <div className="flex items-center justify-between gap-3 text-[#1c133b]">
+            <span className="font-bold">
+              {priceIsIndicative ? "From" : "Rate"}
+            </span>
+            <span className="text-[11px] font-normal tabular-nums text-[#5a5470]">
+              {rateValue}
+            </span>
+          </div>
         ) : (
-          <p>Choose your cleaning session.</p>
+          <p className="font-semibold text-[#8a8498]">
+            Choose your cleaning session.
+          </p>
         )}
-        {rateLabel ? (
-          <div className="mt-3 border-t border-[#e8e8eb] pt-3">
+        {rateLabel && serviceLines.length ? (
+          <div className="mt-3 border-t border-[#e4daf5] pt-3">
             <div className="flex items-center justify-between gap-3 text-[#1c133b]">
               <span className="font-bold">
                 {priceIsIndicative ? "From" : "Rate"}
@@ -337,8 +373,9 @@ function BasketPanel({
       </BasketSection>
 
       <BasketSection
+        filled={scheduleFilled}
         icon={<Clock className="h-5 w-5" weight="fill" />}
-        onEdit={onJumpSchedule}
+        onEdit={scheduleFilled ? onJumpSchedule : undefined}
         onToggle={() => setOpen((c) => ({ ...c, schedule: !c.schedule }))}
         open={open.schedule}
         title={scheduleTitle}

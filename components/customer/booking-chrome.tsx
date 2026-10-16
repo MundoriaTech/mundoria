@@ -16,6 +16,7 @@ export function BookingChrome({
   onBack,
   onHome,
   progress = null,
+  progressLabel = null,
   signedIn,
 }: {
   backDisabled?: boolean;
@@ -26,6 +27,8 @@ export function BookingChrome({
   onHome?: () => void;
   /** 0–1 progress through the booking funnel; omit to hide the bar. */
   progress?: number | null;
+  /** e.g. "Step 2 of 8" shown above the bar. */
+  progressLabel?: string | null;
   signedIn: boolean;
 }) {
   const configured = hasSupabasePublicConfig();
@@ -69,7 +72,7 @@ export function BookingChrome({
             <span />
           ) : (
             <Link
-              className="inline-flex h-9 items-center justify-center justify-self-end rounded-full border border-[#1c133b] px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f5fb] touch-manipulation"
+              className="inline-flex h-9 items-center justify-center justify-self-end rounded-full border border-[#1c133b] px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-white/70 touch-manipulation"
               href={authHref}
             >
               Sign in
@@ -77,18 +80,29 @@ export function BookingChrome({
           )}
         </div>
         {progressPct != null ? (
-          <div
-            aria-label={`Booking progress: ${progressPct}%`}
-            aria-valuemax={100}
-            aria-valuemin={0}
-            aria-valuenow={progressPct}
-            className="h-1 w-full bg-[#e8e0d0]"
-            role="progressbar"
-          >
+          <div>
+            {progressLabel ? (
+              <p className="mx-auto w-full max-w-[1140px] px-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8a8498] md:px-5">
+                {progressLabel}
+              </p>
+            ) : null}
             <div
-              className="h-full bg-[#6a45b8] transition-[width] duration-300 ease-out"
-              style={{ width: `${progressPct}%` }}
-            />
+              aria-label={
+                progressLabel
+                  ? progressLabel
+                  : `Booking progress: ${progressPct}%`
+              }
+              aria-valuemax={100}
+              aria-valuemin={0}
+              aria-valuenow={progressPct}
+              className="h-1.5 w-full bg-[#e8e0d0]"
+              role="progressbar"
+            >
+              <div
+                className="h-full bg-[#6a45b8] transition-[width] duration-300 ease-out"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
           </div>
         ) : null}
       </header>
