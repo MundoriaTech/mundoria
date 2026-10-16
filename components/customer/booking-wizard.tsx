@@ -462,14 +462,14 @@ export function BookingWizard({
           includeCleanerChoice: knownCleaners.length > 0,
         },
       );
-      const durationIndex = previewSteps.indexOf("duration");
+      const dateIndex = previewSteps.indexOf("date");
       const savedIndex = isBookingFlowStepId(storedStepRaw)
-        ? previewSteps.indexOf(storedStepRaw)
+        ? resolveFlowStepIndex(previewSteps, storedStepRaw)
         : Number.isFinite(Number(storedStepRaw))
           ? Number(storedStepRaw)
           : -1;
       const keepDuration =
-        keepSaved && durationIndex >= 0 && savedIndex >= durationIndex;
+        keepSaved && dateIndex >= 0 && savedIndex >= dateIndex;
 
       if (urlService || parsed) {
         setDraft({
@@ -1085,12 +1085,12 @@ export function BookingWizard({
       case "pets":
         return draft.hasPets !== null;
       case "duration":
+      case "date":
         return (
+          Boolean(draft.scheduledDate) &&
           draft.estimatedDurationHours != null &&
           draft.estimatedDurationHours >= 1
         );
-      case "date":
-        return Boolean(draft.scheduledDate);
       case "time":
         return Boolean(draft.scheduledTime);
       default:
@@ -1334,15 +1334,12 @@ export function BookingWizard({
       {stepId === "preferences" ? (
         <RecoveryPreferencesStep draft={draft} update={update} />
       ) : null}
-      {stepId === "duration" && duration ? (
-        <DurationStep
-          duration={duration}
-          hours={draft.estimatedDurationHours}
-          onChange={(value) => update("estimatedDurationHours", value)}
-        />
-      ) : null}
       {stepId === "date" ? (
-        <DateStep draft={draft} update={update} />
+        <DateStep
+          draft={draft}
+          duration={duration}
+          update={update}
+        />
       ) : null}
       {stepId === "frequency" ? (
         <FrequencyStep draft={draft} update={update} />
@@ -1858,12 +1855,12 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
     case "pets":
       return draft.hasPets !== null;
     case "duration":
+    case "date":
       return (
+        Boolean(draft.scheduledDate) &&
         draft.estimatedDurationHours != null &&
         draft.estimatedDurationHours >= 1
       );
-    case "date":
-      return Boolean(draft.scheduledDate);
     case "time":
       return Boolean(draft.scheduledTime);
     default:
@@ -2396,7 +2393,7 @@ function AddOnsStep({
         Optional extras for this clean — skip if you don’t need any.
       </p>
       {addOns.length ? (
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid gap-3">
           {addOns.map((addOn) => {
             const selected = draft.selectedAddOns.includes(addOn.id);
             const icon = ADD_ON_ICONS[addOn.id];
@@ -2404,14 +2401,14 @@ function AddOnsStep({
             return (
               <button
                 className={cn(
-                  "flex h-full items-start rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left touch-manipulation",
+                  "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
                   selected && "border-[#6a45b8] bg-white",
                 )}
                 key={addOn.id}
                 onClick={() => toggleAddOn(addOn.id)}
                 type="button"
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-center gap-3">
                   {ADD_ON_IMAGES[addOn.id] ? (
                     <Image
                       alt=""
@@ -2421,36 +2418,28 @@ function AddOnsStep({
                       width={512}
                     />
                   ) : AddOnIcon ? (
-                    <AddOnIcon
-                      aria-hidden
-                      className={cn(
-                        "mt-0.5 h-6 w-6 shrink-0",
-                        icon?.className,
-                      )}
-                      weight="duotone"
-                    />
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#e8def8]">
+                      <AddOnIcon
+                        aria-hidden
+                        className={cn("h-6 w-6", icon?.className)}
+                        weight="duotone"
+                      />
+                    </span>
                   ) : null}
-                  <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold text-[#1c133b]">
-                        {addOn.label}
-                      </p>
-                      <p className="mt-1 text-sm text-[#5a5470]">
-                        {addOn.description}
-                      </p>
-                    </div>
-                    <p className="shrink-0 text-sm font-bold text-[#1c133b]">
-                      +
-                      {formatMoney(
-                        addOnAmountPence(addOn, addOnPriceContext),
-                      )}
-                      {addOn.hourly ? (
-                        <span className="block text-[11px] font-semibold text-[#5a5470]">
-                          hourly
-                        </span>
-                      ) : null}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-[#1c133b]">{addOn.label}</p>
+                    <p className="mt-0.5 text-sm leading-5 text-[#5a5470]">
+                      {addOn.description}
                     </p>
                   </div>
+                  <p className="shrink-0 text-right text-sm font-bold text-[#1c133b]">
+                    +{formatMoney(addOnAmountPence(addOn, addOnPriceContext))}
+                    {addOn.hourly ? (
+                      <span className="mt-0.5 block text-[11px] font-semibold text-[#5a5470]">
+                        hourly
+                      </span>
+                    ) : null}
+                  </p>
                 </div>
               </button>
             );
@@ -2815,9 +2804,11 @@ function DurationStep({
 
 function DateStep({
   draft,
+  duration,
   update,
 }: {
   draft: BookingDraft;
+  duration: ReturnType<typeof durationSummary>;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -2830,23 +2821,61 @@ function DateStep({
     day: "numeric",
     month: "long",
   });
+  const [dateExpanded, setDateExpanded] = useState(!selectedDate);
+
+  useEffect(() => {
+    if (!selectedDate) setDateExpanded(true);
+  }, [selectedDate]);
+
+  const showDuration = Boolean(selectedDate) && !dateExpanded && duration;
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        Date of your first appointment
-      </h2>
-      <BookingCalendar
-        className="mt-8"
-        minDate={minDate}
-        mode="single"
-        onChange={(dates) => update("scheduledDate", isoDateOrEmpty(dates[0]))}
-        selectedDate={selectedDate}
-      />
-      {selectedLabel ? (
-        <p className="mt-4 text-base font-semibold text-[#1c133b]">
-          Your first appointment is on {selectedLabel}
-        </p>
+      {dateExpanded ? (
+        <>
+          <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+            Date of your first appointment
+          </h2>
+          <BookingCalendar
+            className="mt-8"
+            minDate={minDate}
+            mode="single"
+            onChange={(dates) => {
+              const next = isoDateOrEmpty(dates[0]);
+              update("scheduledDate", next);
+              if (next) setDateExpanded(false);
+            }}
+            selectedDate={selectedDate}
+          />
+        </>
+      ) : (
+        <button
+          className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[#e4daf5] bg-[#f8f5ff] px-4 py-3.5 text-left transition touch-manipulation hover:border-[#6a45b8]/40"
+          onClick={() => setDateExpanded(true)}
+          type="button"
+        >
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-[#6a45b8]">
+              Appointment date
+            </p>
+            <p className="mt-0.5 truncate text-base font-semibold text-[#1c133b]">
+              {selectedLabel}
+            </p>
+          </div>
+          <span className="shrink-0 text-sm font-semibold text-[#6a45b8]">
+            Change
+          </span>
+        </button>
+      )}
+
+      {showDuration && duration ? (
+        <div className="mt-8">
+          <DurationStep
+            duration={duration}
+            hours={draft.estimatedDurationHours}
+            onChange={(value) => update("estimatedDurationHours", value)}
+          />
+        </div>
       ) : null}
     </div>
   );

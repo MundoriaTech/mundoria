@@ -63,6 +63,10 @@ export function resolveFlowStepIndex(
   if (desired && flowSteps.includes(desired as BookingFlowStepId)) {
     return flowSteps.indexOf(desired as BookingFlowStepId);
   }
+  // Duration folded into the date step; resume old drafts on date.
+  if (desired === "duration" && flowSteps.includes("date")) {
+    return flowSteps.indexOf("date");
+  }
   if (desired && isBookingFlowStepId(desired)) {
     const desiredOrder = BOOKING_STEP_ORDER.indexOf(desired);
     for (let i = desiredOrder - 1; i >= 0; i -= 1) {
@@ -91,7 +95,7 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   preferences: "Preferences",
   frequency: "Frequency",
   duration: "Duration",
-  date: "Date",
+  date: "Schedule",
   time: "Time",
   checkout: "Book",
 };
@@ -326,7 +330,6 @@ export function getFlowSteps(
     steps.push("preferences");
   }
 
-  steps.push("duration");
   steps.push("date");
 
   if (frequencyModeFor(draft.serviceType) !== "none") {
