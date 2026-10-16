@@ -27,7 +27,6 @@ type BasketProps = {
   onJumpSchedule?: () => void;
   onJumpService?: () => void;
   priorityAreas?: string[];
-  priceIsIndicative?: boolean;
   scheduledDate: string;
   scheduledTime: string;
   serviceLabel: string | null;
@@ -175,7 +174,6 @@ function BasketPanel({
   onJumpSchedule,
   onJumpService,
   priorityAreas = [],
-  priceIsIndicative = false,
   scheduledDate,
   scheduledTime,
   serviceLabel,
@@ -274,10 +272,7 @@ function BasketPanel({
       : amount != null
         ? formatMoney(amount)
         : null;
-  const rateLabel =
-    rateValue != null
-      ? `${priceIsIndicative ? "From " : ""}${rateValue}`
-      : null;
+  const rateLabel = rateValue;
 
   const scheduleTitle =
     scheduleDates.length > 1
