@@ -339,37 +339,11 @@ function BasketPanel({
               </li>
             ))}
           </ul>
-        ) : rateLabel ? (
-          <div className="flex items-center justify-between gap-3 text-[#1c133b]">
-            <span className="font-bold">
-              {priceIsIndicative ? "From" : "Rate"}
-            </span>
-            <span className="text-[11px] font-normal tabular-nums text-[#5a5470]">
-              {rateValue}
-            </span>
-          </div>
         ) : (
           <p className="font-semibold text-[#8a8498]">
             Choose your cleaning session.
           </p>
         )}
-        {rateLabel && serviceLines.length ? (
-          <div className="mt-3 border-t border-[#e4daf5] pt-3">
-            <div className="flex items-center justify-between gap-3 text-[#1c133b]">
-              <span className="font-bold">
-                {priceIsIndicative ? "From" : "Rate"}
-              </span>
-              <span className="text-[11px] font-normal tabular-nums text-[#5a5470]">
-                {rateValue}
-              </span>
-            </div>
-            <p className="mt-1 text-xs font-normal text-[#8b8798]">
-              {priceIsIndicative
-                ? "Hourly rate — total updates with length and extras"
-                : "Charged per hour for the session length you choose"}
-            </p>
-          </div>
-        ) : null}
       </BasketSection>
 
       <BasketSection

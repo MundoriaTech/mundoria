@@ -150,47 +150,83 @@ const blankDraft: BookingDraft = {
 
 const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
 const BOOKING_STEP_KEY = "mundoria-booking-step-v5";
+/** Address alone — never cleared when the basket/draft is wiped. */
+const BOOKING_ADDRESS_KEY = "mundoria-booking-address-v1";
 
 /** Stops draft/step writes after abandon, checkout, or leave — reset on mount. */
 let allowBookingPersist = true;
 
-function readStoredAddressFields(): Pick<
-  BookingDraft,
-  "addressId" | "guestAddress"
-> {
+type StoredAddressFields = Pick<BookingDraft, "addressId" | "guestAddress">;
+
+function writeStoredAddressFields(fields: StoredAddressFields) {
+  if (!fields.addressId && !fields.guestAddress) return;
+  try {
+    window.localStorage.setItem(
+      BOOKING_ADDRESS_KEY,
+      JSON.stringify({
+        addressId: fields.addressId,
+        guestAddress: fields.guestAddress,
+      }),
+    );
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.).
+  }
+}
+
+function readStoredAddressFields(): StoredAddressFields {
+  try {
+    const dedicated = window.localStorage.getItem(BOOKING_ADDRESS_KEY);
+    if (dedicated) {
+      const parsed = JSON.parse(dedicated) as Partial<StoredAddressFields>;
+      if (parsed.addressId || parsed.guestAddress) {
+        return {
+          addressId: parsed.addressId ?? null,
+          guestAddress: parsed.guestAddress ?? null,
+        };
+      }
+    }
+  } catch {
+    // fall through to draft blob
+  }
   try {
     const raw = window.localStorage.getItem(BOOKING_DRAFT_KEY);
     if (!raw) return { addressId: null, guestAddress: null };
     const parsed = JSON.parse(raw) as Partial<BookingDraft>;
-    return {
+    const fields = {
       addressId: parsed.addressId ?? null,
       guestAddress: parsed.guestAddress ?? null,
     };
+    // Migrate into the dedicated key so later clears cannot lose it.
+    writeStoredAddressFields(fields);
+    return fields;
   } catch {
     return { addressId: null, guestAddress: null };
   }
 }
 
-/** Clears the booking draft/step but keeps the chosen address for next time. */
-function clearBookingStorage(keep?: Partial<
-  Pick<BookingDraft, "addressId" | "guestAddress">
->) {
+function resolveAddressToKeep(keep?: Partial<StoredAddressFields>) {
+  const stored = readStoredAddressFields();
+  if (keep && (keep.addressId || keep.guestAddress)) {
+    return {
+      addressId: keep.addressId ?? null,
+      guestAddress: keep.guestAddress ?? null,
+    };
+  }
+  return stored;
+}
+
+/** Clears the booking draft/step. Address is always kept in its own key. */
+function clearBookingStorage(keep?: Partial<StoredAddressFields>) {
   allowBookingPersist = false;
   try {
-    const stored = readStoredAddressFields();
-    const addressId =
-      keep && "addressId" in keep ? (keep.addressId ?? null) : stored.addressId;
-    const guestAddress =
-      keep && "guestAddress" in keep
-        ? (keep.guestAddress ?? null)
-        : stored.guestAddress;
-    if (addressId || guestAddress) {
+    const address = resolveAddressToKeep(keep);
+    if (address.addressId || address.guestAddress) {
+      writeStoredAddressFields(address);
       window.localStorage.setItem(
         BOOKING_DRAFT_KEY,
         JSON.stringify({
           ...blankDraft,
-          addressId,
-          guestAddress,
+          ...address,
         }),
       );
     } else {
@@ -336,6 +372,14 @@ export function BookingWizard({
   const stepIdRef = useRef<BookingFlowStepId>("address");
   const stepIndexRef = useRef(0);
   const persistBookingRef = useRef(true);
+  const addressPersistRef = useRef<StoredAddressFields>({
+    addressId: null,
+    guestAddress: null,
+  });
+  addressPersistRef.current = {
+    addressId: draft.addressId,
+    guestAddress: draft.guestAddress,
+  };
 
   const needsAuth = !userId;
   const includeCleanerChoice = knownCleaners.length > 0;
@@ -504,6 +548,7 @@ export function BookingWizard({
         return;
       }
 
+      const keptAddress = readStoredAddressFields();
       const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
       const storedStepRaw = window.localStorage.getItem(BOOKING_STEP_KEY) ?? "";
       const parsed = stored
@@ -618,12 +663,29 @@ export function BookingWizard({
             : storedCleanerChoice === "new" || resumedKnownCleaner
               ? storedCleanerChoice
               : null,
-          guestAddress: keepSaved
-            ? (parsed?.guestAddress ?? null)
-            : (initialDraft?.guestAddress ?? null),
-          addressId: keepSaved
-            ? (parsed?.addressId ?? initialDraft?.addressId ?? null)
-            : (initialDraft?.addressId ?? null),
+          // Address always comes back from dedicated storage, even when the
+          // rest of the draft is discarded for a deep link / fresh service.
+          guestAddress:
+            initialDraft?.guestAddress ??
+            keptAddress.guestAddress ??
+            parsed?.guestAddress ??
+            null,
+          addressId:
+            initialDraft?.addressId ??
+            keptAddress.addressId ??
+            parsed?.addressId ??
+            null,
+        });
+      } else {
+        // No draft blob — still restore address from dedicated storage.
+        setDraft({
+          ...blankDraft,
+          ...initialDraft,
+          alternateTimes: initialDraft?.alternateTimes ?? [],
+          addressId:
+            initialDraft?.addressId ?? keptAddress.addressId ?? null,
+          guestAddress:
+            initialDraft?.guestAddress ?? keptAddress.guestAddress ?? null,
         });
       }
 
@@ -667,7 +729,18 @@ export function BookingWizard({
         );
       }
     } catch {
-      clearBookingStorage();
+      const keptAddress = readStoredAddressFields();
+      clearBookingStorage(keptAddress);
+      allowBookingPersist = true;
+      persistBookingRef.current = true;
+      setDraft({
+        ...blankDraft,
+        ...initialDraft,
+        alternateTimes: initialDraft?.alternateTimes ?? [],
+        addressId: initialDraft?.addressId ?? keptAddress.addressId ?? null,
+        guestAddress:
+          initialDraft?.guestAddress ?? keptAddress.guestAddress ?? null,
+      });
     }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -677,6 +750,15 @@ export function BookingWizard({
     if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
     window.localStorage.setItem(BOOKING_DRAFT_KEY, JSON.stringify(draft));
   }, [draft, hydrated]);
+
+  // Address is always persisted separately so basket clears cannot wipe it.
+  useEffect(() => {
+    if (!hydrated) return;
+    writeStoredAddressFields({
+      addressId: draft.addressId,
+      guestAddress: draft.guestAddress,
+    });
+  }, [draft.addressId, draft.guestAddress, hydrated]);
 
   useEffect(() => {
     if (!hydrated || draft.addressId || addresses.length === 0) return;
@@ -694,14 +776,14 @@ export function BookingWizard({
   }, [hydrated, stepId]);
 
   // Leaving the booking flow (browser back, logo, other nav) clears the basket,
-  // except auth round-trips that return to /booking/new.
+  // except auth round-trips that return to /booking/new. Address is always kept.
   useEffect(() => {
     return () => {
       if (!persistBookingRef.current || !allowBookingPersist) return;
       const { pathname, search } = window.location;
       if (pathname.startsWith("/booking/new")) return;
       if (isBookingAuthReturnPath(pathname, search)) return;
-      clearBookingStorage();
+      clearBookingStorage(addressPersistRef.current);
       persistBookingRef.current = false;
     };
   }, []);
@@ -1501,7 +1583,7 @@ export function BookingWizard({
             />
           </Elements>
         ) : (
-          <p className="rounded-2xl bg-[#ebe3f8] p-4 text-sm text-[#5a5470]">
+          <p className="rounded-2xl bg-white p-4 text-sm text-[#5a5470]">
             Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure payment.
           </p>
         )
@@ -1736,7 +1818,7 @@ function KnownCleanersStep({
           return (
             <button
               className={cn(
-                "flex items-center gap-4 rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation",
+                "flex items-center gap-4 rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
                 selectedId === cleaner.id && "border-[#6a45b8] bg-white",
               )}
               key={cleaner.id}
@@ -1776,7 +1858,7 @@ function KnownCleanersStep({
         })}
         <button
           className={cn(
-            "rounded-2xl border-2 border-transparent bg-[#ebe3f8] px-5 py-4 text-left transition hover:bg-[#e4daf5] touch-manipulation",
+            "rounded-2xl border border-[#e4daf5] bg-white px-5 py-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
             selectingNew && "border-[#6a45b8] bg-white",
           )}
           onClick={() => onSelect(null)}
@@ -1814,7 +1896,7 @@ function CategoryStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-3 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:p-4",
+                "rounded-2xl border border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={category.value}
@@ -1898,7 +1980,7 @@ function ServiceStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-3 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:p-4",
+                "relative rounded-2xl border border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={item.value}
@@ -2366,7 +2448,7 @@ function OfficeSpacesStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#ebe3f8] px-4 py-3 text-left",
+                "rounded-2xl border border-[#e4daf5] bg-white px-4 py-3 text-left",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -2418,7 +2500,7 @@ function CountField({
     <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
       <span>{label}</span>
       <select
-        className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#ebe3f8] px-4 text-sm"
+        className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
         onChange={(event) => onChange(Number(event.target.value))}
         value={value}
       >
@@ -2456,7 +2538,7 @@ function RoomsStep({
         <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
           <span>Bedrooms</span>
           <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#ebe3f8] px-4 text-sm"
+            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
             onChange={(event) => onBedrooms(Number(event.target.value))}
             value={bedrooms ?? ""}
           >
@@ -2473,7 +2555,7 @@ function RoomsStep({
         <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
           <span>Toilets</span>
           <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#ebe3f8] px-4 text-sm"
+            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
             onChange={(event) => onBathrooms(Number(event.target.value))}
             value={bathrooms ?? ""}
           >
@@ -2556,7 +2638,7 @@ function AddOnsStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:px-5 sm:py-4",
+                  "rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                   selected && "border-[#6a45b8] bg-white",
                 )}
                 key={addOn.id}
@@ -2631,7 +2713,7 @@ function AddOnsStep({
               return (
                 <button
                   className={cn(
-                    "rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:px-5 sm:py-4",
+                    "rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                     active && "border-[#6a45b8] bg-white",
                   )}
                   key={label}
@@ -2725,7 +2807,7 @@ function RecoveryPreferencesStep({
                 "rounded-full border px-3.5 py-2 text-sm font-semibold touch-manipulation",
                 active
                   ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                  : "border-[#d9ccef] bg-[#ebe3f8] text-[#1c133b]",
+                  : "border-[#d9ccef] bg-white text-[#1c133b]",
               )}
               key={area}
               onClick={() => toggleArea(area)}
@@ -2759,7 +2841,7 @@ function RecoveryPreferencesStep({
                 "rounded-2xl border px-4 py-3 text-left text-sm font-semibold touch-manipulation",
                 active
                   ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                  : "border-[#d9ccef] bg-[#ebe3f8] text-[#1c133b]",
+                  : "border-[#d9ccef] bg-white text-[#1c133b]",
               )}
               key={value}
               onClick={() => update("propertyCondition", value)}
@@ -2863,7 +2945,7 @@ function FrequencyStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:px-5 sm:py-4",
+                "relative rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -2952,7 +3034,7 @@ function DurationStep({
           return (
             <button
               className={cn(
-                "relative inline-flex h-12 items-center justify-center rounded-xl bg-[#ebe3f8] text-sm font-semibold text-[#1c133b] transition touch-manipulation",
+                "relative inline-flex h-12 items-center justify-center rounded-xl border border-[#e4daf5] bg-white text-sm font-semibold text-[#1c133b] transition touch-manipulation",
                 active && "border-2 border-[#6a45b8] bg-white",
                 !active && isRecommended && "ring-1 ring-[#c9b8ef]",
               )}
@@ -3031,7 +3113,7 @@ function DateStep({
         </>
       ) : (
         <button
-          className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[#e4daf5] bg-[#f8f5ff] px-4 py-3.5 text-left transition touch-manipulation hover:border-[#6a45b8]/40"
+          className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[#e4daf5] bg-white px-4 py-3.5 text-left transition touch-manipulation hover:border-[#6a45b8]/40"
           onClick={() => setDateExpanded(true)}
           type="button"
         >
@@ -3234,7 +3316,7 @@ function TimeStep({
           >
             <button
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ebe3f8] text-[#1c133b] touch-manipulation"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#1c133b] touch-manipulation"
               onClick={dismissFlexPrompt}
               type="button"
             >
@@ -3510,7 +3592,7 @@ function CheckoutStep({
           ).map(([value, label]) => (
             <button
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#ebe3f8] px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
+                "rounded-2xl border border-[#e4daf5] bg-white px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
                 draft.keysPolicy === value && "border-[#6a45b8] bg-white",
               )}
               key={value}
@@ -3569,7 +3651,7 @@ function CheckoutStep({
       <div className="mt-6">
         <p className="font-semibold text-[#1c133b]">Add your payment method</p>
         <button
-          className="mt-3 flex w-full items-center justify-between rounded-2xl border border-[#d9ccef] bg-[#ebe3f8] px-4 py-3 text-left"
+          className="mt-3 flex w-full items-center justify-between rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-left"
           onClick={() => setShowCard((value) => !value)}
           type="button"
         >
