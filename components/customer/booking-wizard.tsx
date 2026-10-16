@@ -1814,7 +1814,7 @@ function KnownCleanersStep({
           return (
             <button
               className={cn(
-                "flex items-center gap-4 rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
+                "flex items-center gap-4 rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
                 selectedId === cleaner.id && "border-[#6a45b8] bg-white",
               )}
               key={cleaner.id}
@@ -1854,7 +1854,7 @@ function KnownCleanersStep({
         })}
         <button
           className={cn(
-            "rounded-2xl border border-[#e4daf5] bg-white px-5 py-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
+            "rounded-2xl border-2 border-[#e4daf5] bg-white px-5 py-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
             selectingNew && "border-[#6a45b8] bg-white",
           )}
           onClick={() => onSelect(null)}
@@ -1892,7 +1892,7 @@ function CategoryStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
+                "rounded-2xl border-2 border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={category.value}
@@ -1976,7 +1976,7 @@ function ServiceStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
+                "relative rounded-2xl border-2 border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={item.value}
@@ -2232,7 +2232,7 @@ function AddressStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border border-[#e4daf5] bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:border-[#d4c8f0] hover:bg-[#f8f5ff]",
+                  "rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:border-[#d4c8f0] hover:bg-[#f8f5ff]",
                   active && "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
                 )}
                 key={address.id}
@@ -2291,7 +2291,7 @@ function AddressStep({
       ) : null}
 
       {showForm || (localOnly && !guestAsAddress) ? (
-        <div className="relative z-20 mt-4 overflow-visible rounded-2xl border border-[#e4daf5] bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:mt-5 sm:p-5">
+        <div className="relative z-20 mt-4 overflow-visible rounded-2xl border-2 border-[#e4daf5] bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:mt-5 sm:p-5">
           <AddressForm
             address={localOnly ? guestAsAddress : null}
             compact
@@ -2444,7 +2444,7 @@ function OfficeSpacesStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border border-[#e4daf5] bg-white px-4 py-3 text-left",
+                "rounded-2xl border-2 border-[#e4daf5] bg-white px-4 py-3 text-left",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -2634,7 +2634,7 @@ function AddOnsStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                  "rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                   selected && "border-[#6a45b8] bg-white",
                 )}
                 key={addOn.id}
@@ -2709,7 +2709,7 @@ function AddOnsStep({
               return (
                 <button
                   className={cn(
-                    "rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                    "rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                     active && "border-[#6a45b8] bg-white",
                   )}
                   key={label}
@@ -2941,7 +2941,7 @@ function FrequencyStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                "relative rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -3030,7 +3030,7 @@ function DurationStep({
           return (
             <button
               className={cn(
-                "relative inline-flex h-12 items-center justify-center rounded-xl border border-[#e4daf5] bg-white text-sm font-semibold text-[#1c133b] transition touch-manipulation",
+                "relative inline-flex h-12 items-center justify-center rounded-xl border-2 border-[#e4daf5] bg-white text-sm font-semibold text-[#1c133b] transition touch-manipulation",
                 active && "border-2 border-[#6a45b8] bg-white",
                 !active && isRecommended && "ring-1 ring-[#c9b8ef]",
               )}
@@ -3109,7 +3109,7 @@ function DateStep({
         </>
       ) : (
         <button
-          className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[#e4daf5] bg-white px-4 py-3.5 text-left transition touch-manipulation hover:border-[#6a45b8]/40"
+          className="flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-[#e4daf5] bg-white px-4 py-3.5 text-left transition touch-manipulation hover:border-[#6a45b8]/40"
           onClick={() => setDateExpanded(true)}
           type="button"
         >
@@ -3588,7 +3588,7 @@ function CheckoutStep({
           ).map(([value, label]) => (
             <button
               className={cn(
-                "rounded-2xl border border-[#e4daf5] bg-white px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
+                "rounded-2xl border-2 border-[#e4daf5] bg-white px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
                 draft.keysPolicy === value && "border-[#6a45b8] bg-white",
               )}
               key={value}
@@ -3733,7 +3733,7 @@ function CheckoutStep({
       ) : null}
 
       {processing ? (
-        <ol className="mt-5 space-y-2 rounded-2xl border border-[#e4daf5] bg-white/80 p-4 text-sm">
+        <ol className="mt-5 space-y-2 rounded-2xl border-2 border-[#e4daf5] bg-white/80 p-4 text-sm">
           {(
             [
               { id: "saving", label: "Saving your address" },
