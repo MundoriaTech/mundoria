@@ -356,6 +356,49 @@ export const MARKETING_CATEGORY_PATHS = [
   "/cleaning/recovery",
 ] as const;
 
+export const FOR_CLEANERS_FAQS: Array<{ answer: string; question: string }> = [
+  {
+    answer:
+      "Create a cleaner account, complete the onboarding wizard, upload your documents, connect Stripe Express for payouts, then wait for admin review before jobs appear in your feed.",
+    question: "How do I become a Mundoria cleaner?",
+  },
+  {
+    answer:
+      "Photo ID (passport or driving licence), a clear DBS check, a profile headshot, and right-to-work evidence if you are not a British or Irish national. Independent cleaners should be registered as self-employed with HMRC — Mundoria may ask for your UTR before you accept paid jobs.",
+    question: "What documents do I need?",
+  },
+  {
+    answer:
+      "No. Mundoria cleaners are independent contractors, not employees. You choose the jobs you take, set your availability and working areas, and manage your own tax status with HMRC.",
+    question: "Am I an employee of Mundoria?",
+  },
+  {
+    answer:
+      "Mundoria is launching with a Birmingham-first footprint. You set the neighbourhoods you want to work in, and eligible jobs in those areas appear in your feed.",
+    question: "Where can I take jobs?",
+  },
+  {
+    answer:
+      "Eligible jobs appear in your feed for your working areas. Accept work that fits your schedule and keep a clear calendar — there is no private off-platform negotiation.",
+    question: "Can I choose which jobs I accept?",
+  },
+  {
+    answer:
+      "Connect Stripe Express, choose a weekly or monthly payout preference and track earnings in your cleaner dashboard. Payouts are handled through Stripe Connect after jobs are completed.",
+    question: "How do payouts work?",
+  },
+  {
+    answer:
+      "After you create a cleaner account and finish onboarding, an admin reviews your profile. Once approved, matching jobs start appearing in your cleaner feed.",
+    question: "What happens after I apply?",
+  },
+  {
+    answer:
+      "Visit the Become a Mundoria cleaner Help Centre, or use Contact us on the site to chat with the Mundoria team. For an active job, use in-app messaging so the right people see the full context.",
+    question: "How do I get support as a cleaner?",
+  },
+];
+
 export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   {
     answer:

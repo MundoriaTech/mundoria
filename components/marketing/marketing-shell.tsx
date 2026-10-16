@@ -57,14 +57,16 @@ export async function MarketingShell({
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
   const cleanerHref = configured ? "/signup/cleaner" : "/setup";
-  const viewer = await getMarketingViewer();
 
+  // Intentionally skip server auth here. Reading cookies() would force every
+  // SEO location page dynamic and stall static generation (~4500 routes).
+  // LandingNavbar resolves the viewer on the client instead.
   return (
     <main className={cn("min-h-screen bg-background text-foreground", className)}>
       <LandingNavbar
         customerHref={bookingHref}
         loginHref={loginHref}
-        viewer={viewer}
+        viewer={null}
       />
       {children}
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />

@@ -26,9 +26,15 @@ import {
   type AccountMenuItem,
 } from "@/components/shared/account-menu";
 import { dashboardForRole } from "@/lib/auth/redirects";
+import { createBrowserClient } from "@/lib/supabase/client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
-import type { Profile } from "@/types/auth";
+import { isUserRole, type Profile } from "@/types/auth";
+
+type MarketingViewer = Pick<
+  Profile,
+  "id" | "full_name" | "avatar_url" | "role"
+> | null;
 
 /**
  * Measured from Frame 105 (1024×92 export):
@@ -51,19 +57,67 @@ export function LandingNavbar({
   customerHref,
   headerExtra,
   loginHref: loginHrefProp,
-  viewer,
+  viewer: initialViewer = null,
 }: {
   accountMenuItems?: AccountMenuItem[];
   customerHref: string;
   headerExtra?: React.ReactNode;
   loginHref?: string;
-  viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
+  viewer?: MarketingViewer;
 }) {
   const configured = hasSupabasePublicConfig();
   const loginHref = loginHrefProp ?? (configured ? "/login" : "/setup");
+  const [viewer, setViewer] = useState<MarketingViewer>(initialViewer);
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
+
+  useEffect(() => {
+    setViewer(initialViewer);
+  }, [initialViewer]);
+
+  useEffect(() => {
+    if (!configured) return;
+
+    let cancelled = false;
+
+    async function loadViewer() {
+      try {
+        const supabase = createBrowserClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          if (!cancelled) setViewer(null);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id,full_name,avatar_url,role")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (cancelled) return;
+
+        if (profile && isUserRole(profile.role)) {
+          setViewer(
+            profile as Pick<Profile, "id" | "full_name" | "avatar_url" | "role">,
+          );
+          return;
+        }
+
+        setViewer(null);
+      } catch {
+        if (!cancelled) setViewer(null);
+      }
+    }
+
+    void loadViewer();
+    return () => {
+      cancelled = true;
+    };
+  }, [configured]);
 
   return (
     <header
