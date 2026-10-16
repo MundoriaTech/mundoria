@@ -16,7 +16,6 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
   landingCategoryNav,
-  landingColors,
   landingNavLinks,
 } from "@/components/marketing/landing/constants";
 import {
@@ -187,21 +186,21 @@ export function LandingNavbar({
               }
               profile={viewer}
             />
-          ) : (
-            <Link
-              className="inline-flex h-9 items-center justify-center rounded-full px-4 text-[12px] font-semibold text-[#1c133b] transition hover:brightness-95"
-              href={loginHref}
-              style={{ backgroundColor: landingColors.peach }}
-            >
-              Log in
-            </Link>
-          )}
+          ) : null}
           {showForCleanersCta ? (
             <Link
               className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
               href="/for-cleaners"
             >
               For cleaners
+            </Link>
+          ) : null}
+          {!viewer ? (
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#c79c66] px-4 text-[12px] font-semibold text-[#1c133b] transition hover:bg-[#c79c66]/90"
+              href={loginHref}
+            >
+              Log in
             </Link>
           ) : null}
         </div>
@@ -429,12 +428,12 @@ function MobileNav({
           />
         </Link>
       ) : null}
-      {showForCleanersCta ? (
+      {!viewer ? (
         <Link
-          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#1c133b] px-2.5 text-[11px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation min-[380px]:px-3.5 min-[380px]:text-[12px]"
-          href="/for-cleaners"
+          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#c79c66] px-2.5 text-[11px] font-semibold text-[#1c133b] transition hover:bg-[#c79c66]/90 touch-manipulation min-[380px]:px-3.5 min-[380px]:text-[12px]"
+          href={loginHref}
         >
-          For cleaners
+          Log in
         </Link>
       ) : null}
       <button
@@ -545,33 +544,33 @@ function MobileNav({
             )}
           </nav>
             <div className="grid gap-2 bg-[#f6f0ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            {viewer ? (
-              <Button
-                asChild
-                className="h-11 rounded-full text-sm font-semibold"
-                variant="outline"
-              >
+              {viewer ? (
+                <Button
+                  asChild
+                  className="h-11 rounded-full text-sm font-semibold"
+                  variant="outline"
+                >
                   <Link
                     href={accountHref}
                     onClick={() => onMobileOpenChange(false)}
                   >
                     Dashboard
                   </Link>
-              </Button>
-            ) : (
-              <Button
-                asChild
-                  className="h-11 rounded-full text-sm font-semibold text-[#1c133b] hover:brightness-95"
-                  style={{ backgroundColor: landingColors.peach }}
+                </Button>
+              ) : null}
+              {showForCleanersCta ? (
+                <Button
+                  asChild
+                  className="h-11 rounded-full bg-[#1c133b] text-sm font-semibold text-white hover:bg-[#1c133b]/90"
                 >
                   <Link
-                    href={loginHref}
+                    href="/for-cleaners"
                     onClick={() => onMobileOpenChange(false)}
                   >
-                    Log in
+                    For cleaners
                   </Link>
-              </Button>
-            )}
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>
