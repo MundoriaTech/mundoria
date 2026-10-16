@@ -141,7 +141,7 @@ export async function CityLocationPage({
           title={title}
         />
       )}
-      <PlaceFeatureBand focus={focus} />
+      <PlaceFeatureBand />
       <BrandedPageWash>
         <LaunchCityHubSections
           bookingHref={bookingHref}
