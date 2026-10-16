@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 
 import {
   BrandedCtaBand,
   BrandedPageWash,
 } from "@/components/marketing/branded-page-sections";
 import { ForCleanersHero } from "@/components/marketing/for-cleaners-hero";
+import { JsonLd } from "@/components/marketing/json-ld";
+import { MarketingFaqColumnsSection } from "@/components/marketing/marketing-faq-columns-section";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { FOR_CLEANERS_FAQS } from "@/lib/seo/marketing";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -46,6 +50,17 @@ export default function ForCleanersPage() {
 
   return (
     <MarketingShell loginHref={configured ? "/login/cleaner" : "/setup"}>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FOR_CLEANERS_FAQS.map((item) => ({
+            "@type": "Question",
+            acceptedAnswer: { "@type": "Answer", text: item.answer },
+            name: item.question,
+          })),
+        }}
+      />
       <BrandedPageWash underNav>
         <ForCleanersHero
           description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."
@@ -84,6 +99,34 @@ export default function ForCleanersPage() {
             ))}
           </div>
         </section>
+
+        <MarketingFaqColumnsSection
+          footer={
+            <div className="flex flex-col items-center gap-4 text-center">
+              <p>
+                More in our{" "}
+                <Link
+                  className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                  href="/help/become-a-cleaner"
+                >
+                  Become a Mundoria cleaner
+                </Link>{" "}
+                Help Centre.
+              </p>
+              <Link
+                className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90"
+                href={signupHref}
+              >
+                Apply as a cleaner
+              </Link>
+            </div>
+          }
+          items={FOR_CLEANERS_FAQS.map((faq) => ({
+            answer: <p>{faq.answer}</p>,
+            question: faq.question,
+          }))}
+          title="Let's answer your questions"
+        />
 
         <BrandedCtaBand
           body="Create a cleaner account, complete onboarding and wait for admin approval before jobs appear in your feed."
