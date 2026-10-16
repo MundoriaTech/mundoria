@@ -173,11 +173,10 @@ export const landingServicesMenu = {
 } as const;
 
 export const landingCategoryImages: Record<string, string> = {
-  commercial: "/images/marketing/landing/category-commercial.png",
+  commercial: "/images/marketing/landing/commercial-hero.png",
   moving_home: "/images/marketing/landing/category-moving-home.png",
-  recovery:
-    "/images/marketing/landing/young-woman-rubber-gloves-holding-cleaning-spray-rag-cleaning-table-looking-confident-light-living-room 1.png",
-  residential: "/images/marketing/landing/category-residential.png",
+  recovery: "/images/marketing/landing/recovery-hero.jpg",
+  residential: "/images/marketing/landing/residential-hero.jpg",
   short_term_rental: "/images/marketing/landing/category-str.png",
 };
 
@@ -187,15 +186,15 @@ export const landingCategoryLoops: Record<
   { poster: string; video?: string }
 > = {
   commercial: {
-    poster: "/images/marketing/landing/category-loop-commercial-poster.png",
+    poster: "/images/marketing/landing/commercial-hero.png",
     video: "/images/marketing/landing/category-loop-commercial.mp4",
   },
   recovery: {
-    poster: "/images/marketing/landing/category-loop-recovery-poster.png",
+    poster: "/images/marketing/landing/recovery-hero.jpg",
     video: "/images/marketing/landing/category-loop-recovery.mp4",
   },
   residential: {
-    poster: "/images/marketing/landing/category-loop-residential-poster.png",
+    poster: "/images/marketing/landing/residential-hero.jpg",
     video: "/images/marketing/landing/category-loop-residential.mp4",
   },
 };

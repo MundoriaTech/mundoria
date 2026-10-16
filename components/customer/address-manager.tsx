@@ -279,11 +279,14 @@ function propertyLabel(type: Address["property_type"]) {
 
 export function AddressForm({
   address,
+  bare = false,
   compact = false,
   localOnly = false,
   onSaved,
 }: {
   address?: Address | null;
+  /** Address field only, for the named-cleaner arrival screen. */
+  bare?: boolean;
   compact?: boolean;
   /** Collect address in-memory (no sign-in / API). Used in guest booking. */
   localOnly?: boolean;
@@ -439,9 +442,11 @@ export function AddressForm({
       ) : null}
 
       <div className="space-y-2">
-        <p className="text-sm font-medium">
-          {compact ? "Search address" : "Where will your cleaning take place"}
-        </p>
+        {bare ? null : (
+          <p className="text-sm font-medium">
+            {compact ? "Search address" : "Where will your cleaning take place"}
+          </p>
+        )}
         {mapsKey ? (
           <AddressAutocompleteInput
             apiKey={mapsKey}
@@ -492,21 +497,23 @@ export function AddressForm({
         ) : (
           addressInput
         )}
-        {values.city && values.postcode ? (
+        {bare ? null : values.city && values.postcode ? (
           <p className="text-xs text-muted-foreground">
             {values.city} · {values.postcode.toUpperCase()}
           </p>
-        ) : (
+        ) : bare ? null : (
           <p className="text-xs text-muted-foreground">
             Choose a suggestion so city and postcode fill in automatically.
           </p>
         )}
       </div>
 
-      <AddressTagField
-        onChange={(label) => update("label", label)}
-        value={values.label}
-      />
+      {bare ? null : (
+        <AddressTagField
+          onChange={(label) => update("label", label)}
+          value={values.label}
+        />
+      )}
 
       {showAccountExtras ? (
         <>

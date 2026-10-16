@@ -81,6 +81,21 @@ function draftFromSearchParams(searchParams: {
   } satisfies Partial<BookingDraft>;
 }
 
+function requestedProCoverage(value?: string) {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((part) => part.trim().toUpperCase())
+    .filter((part) => /^[A-Z]{1,2}\d[A-Z\d]?$/.test(part))
+    .slice(0, 24);
+}
+
+function requestedProName(value?: string) {
+  const name = value?.trim().slice(0, 40) ?? "";
+  if (!/^[A-Za-z][A-Za-z'’. -]{0,39}$/.test(name)) return null;
+  return name;
+}
+
 function safeReturnTo(value?: string) {
   if (!value) return null;
   if (!value.startsWith("/") || value.startsWith("//")) return null;
@@ -96,6 +111,8 @@ export default async function NewBookingPage({
     fresh?: string;
     cleaner?: string;
     keep?: string;
+    cover?: string;
+    pro?: string;
     rebook?: string;
     returnTo?: string;
     service?: string;
@@ -242,6 +259,8 @@ export default async function NewBookingPage({
       initialDraft={initialDraft}
       knownCleaners={knownCleaners}
       previousCleaner={previousCleaner}
+      requestedPro={requestedProName(searchParams.pro)}
+      requestedProCoverage={requestedProCoverage(searchParams.cover)}
       returnTo={returnTo}
       suggestFromHistory={!searchParams.rebook}
       userId={user?.id ?? null}

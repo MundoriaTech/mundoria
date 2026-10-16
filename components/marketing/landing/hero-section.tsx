@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
@@ -12,7 +13,7 @@ const HERO_VIDEO = "/images/marketing/landing/hero-living-room.mp4";
 const HERO_POSTER = "/images/marketing/landing/hero-living-room-poster.jpg";
 
 /** Full-bleed living-room film, with the booking line set on the left. */
-export function HeroSection() {
+export function HeroSection({ bookingHref }: { bookingHref: string }) {
   const navBlock = `calc(${LANDING_NAV_TOP} + ${LANDING_NAV_PILL_H})`;
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -88,6 +89,12 @@ export function HeroSection() {
             <br />
             Service in Minutes
           </h1>
+          <Link
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:brightness-95 touch-manipulation sm:mt-8 sm:h-12 sm:px-8 sm:text-[15px]"
+            href={bookingHref}
+          >
+            Book now
+          </Link>
         </div>
       </div>
     </section>

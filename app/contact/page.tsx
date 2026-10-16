@@ -1,123 +1,96 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import {
-  BrandedCtaBand,
-  BrandedPageWash,
-  BrandedSection,
-} from "@/components/marketing/branded-page-sections";
-import {
-  MarketingHero,
-  MarketingShell,
-} from "@/components/marketing/marketing-shell";
+import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Contact Mundoria — join as a cleaner, press enquiries, or reach the support team.",
+    "Contact Mundoria — apply as a cleaner, reach the team for press, or open chat for help with booking and your account.",
   path: "/contact",
   title: "Contact us | Mundoria",
 });
 
-const cardCtaClass =
-  "mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#6a45b8] px-5 text-sm font-semibold text-white transition hover:bg-[#5a38a3]";
-
 export default function ContactPage() {
   const configured = hasSupabasePublicConfig();
-  const bookingHref = configured ? "/booking/new" : "/setup";
-  const cleanerHref = configured ? "/signup/cleaner" : "/setup";
+  const applyHref = configured ? "/signup/cleaner" : "/setup";
 
   return (
     <MarketingShell>
-      <BrandedPageWash underNav>
-        <MarketingHero
-          description="Whether you’re booking a clean, joining as a cleaner, or writing about Mundoria — here’s how to reach us."
-          eyebrow="Contact"
-          primaryHref={bookingHref}
-          primaryLabel="Book a clean"
-          secondaryHref="/help"
-          secondaryLabel="Help Centre"
-          title="Contact us"
-          underNav
-        />
+      <section className="bg-white px-4 pb-16 pt-10 sm:px-8 sm:pb-20 sm:pt-14">
+        <div className="mx-auto max-w-2xl text-center">
+          <h1 className="text-[2.75rem] font-semibold leading-none tracking-[-0.04em] text-[#c79c66] sm:text-[3.5rem]">
+            Contact us
+          </h1>
 
-        <BrandedSection>
-          <div className="grid gap-4 md:grid-cols-3">
-            <article className="flex h-full flex-col rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)]">
-              <h2 className="text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-                Want to become a Mundoria cleaner?
-              </h2>
-              <p className="mt-3 flex-1 text-sm leading-6 text-[#5a5470]">
-                Independent cleaners who want flexible jobs, clear checklists
-                and visible payouts can apply to join Mundoria.
+          <div className="mt-12 space-y-12 sm:mt-16 sm:space-y-14">
+            <div>
+              <p className="text-pretty text-base leading-7 text-[#1c133b] sm:text-[1.05rem] sm:leading-8">
+                Are you a{" "}
+                <span className="font-semibold">
+                  cleaner or independent cleaning professional
+                </span>{" "}
+                and you want to work with Mundoria?
               </p>
-              <Link className={cardCtaClass} href={cleanerHref}>
-                Apply as a cleaner
-              </Link>
-            </article>
-
-            <article className="flex h-full flex-col rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)]">
-              <h2 className="text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-                Are you a journalist or blogger?
-              </h2>
-              <p className="mt-3 flex-1 text-sm leading-6 text-[#5a5470]">
-                We can share how Mundoria helps customers book cleaning with
-                clearer next steps, and how partners earn on the platform.
-              </p>
-              <ContactSupportButton
-                className={cardCtaClass}
-                label="Contact us"
-              />
-            </article>
-
-            <article className="flex h-full flex-col rounded-[1.5rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)]">
-              <h2 className="text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-                Simply want to get in touch?
-              </h2>
-              <p className="mt-3 flex-1 text-sm leading-6 text-[#5a5470]">
-                Questions about a booking, a partnership idea, or something
-                else? Reach the Mundoria team and we’ll point you to the right
-                place.
-              </p>
-              <ContactSupportButton
-                className={cardCtaClass}
-                label="Contact us"
-              />
-            </article>
-          </div>
-
-          <div className="mt-10 rounded-[1.5rem] bg-[#efe6ff] px-6 py-7 sm:px-8">
-            <h2 className="text-lg font-semibold text-[#1c133b]">
-              For active bookings
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-              The fastest help is in your Mundoria account — open the booking and
-              use in-app messaging so the right team can see the full context.
-              Prefer self-serve guides? Visit the{" "}
               <Link
-                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-                href="/help"
+                className="mt-6 inline-flex h-12 min-w-[10.5rem] items-center justify-center rounded-full bg-[#1c133b] px-8 text-sm font-semibold text-white transition hover:bg-[#15102e]"
+                href={applyHref}
               >
-                Help Centre
+                Apply here
               </Link>
-              .
-            </p>
-            <p className="mt-4 text-sm text-[#5a5470]">
-              We don’t take bookings by phone. Book online for a clear estimate
-              and live status.
-            </p>
-          </div>
-        </BrandedSection>
+            </div>
 
-        <BrandedCtaBand
-          body="Tell us about your space and we’ll show clear next steps before you confirm."
-          href={bookingHref}
-          label="Book a clean"
-          title="Ready when you are."
-        />
-      </BrandedPageWash>
+            <div>
+              <p className="text-pretty text-base leading-7 text-[#1c133b] sm:text-[1.05rem] sm:leading-8">
+                Are you a{" "}
+                <span className="font-semibold">journalist</span> or{" "}
+                <span className="font-semibold">blogger</span>? We can help you
+                understand how Mundoria supports customers and cleaners across
+                the booking journey.
+              </p>
+              <p className="mt-5 text-pretty text-base leading-7 text-[#1c133b] sm:text-[1.05rem] sm:leading-8">
+                Or you simply want to contact us to discuss or exchange ideas?
+              </p>
+              <ContactSupportButton
+                className="mt-6 inline-flex h-12 min-w-[10.5rem] items-center justify-center rounded-full border border-[#1c133b] bg-white px-8 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f5fb]"
+                label="Contact us"
+                tab="home"
+              />
+            </div>
+
+            <div>
+              <p className="text-pretty text-base leading-7 text-[#5a5470] sm:text-[1.05rem] sm:leading-8">
+                Looking for answers about booking, cleaners or your account?
+                Visit the{" "}
+                <Link
+                  className="font-semibold text-[#1c133b] underline underline-offset-2 transition hover:text-[#c79c66]"
+                  href="/help"
+                >
+                  Help Centre
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <nav
+        aria-label="Breadcrumb"
+        className="border-t border-[#ebe6f2] bg-white px-4 py-5 sm:px-8"
+      >
+        <ol className="mx-auto flex max-w-6xl items-center gap-2 text-sm text-[#8b8798]">
+          <li>
+            <Link className="transition hover:text-[#1c133b]" href="/">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden>›</li>
+          <li className="text-[#1c133b]">Contact us</li>
+        </ol>
+      </nav>
     </MarketingShell>
   );
 }

@@ -12,6 +12,8 @@ export function RecoveryCleaningPage({
     <ServiceCategoryMarketingPage
       bookingHref={bookingHref}
       config={RECOVERY_PAGE}
+      showFaqs={false}
+      showReviews={false}
     />
   );
 }

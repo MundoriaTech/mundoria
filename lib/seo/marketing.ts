@@ -81,6 +81,25 @@ export function servicePlacePath(serviceSlug: string, areaSlug?: string) {
   return areaSlug ? `${city}/${areaSlug}` : city;
 }
 
+/** `/cleaning/{service}/birmingham/wider/{zone}`. */
+export function servicePlaceZonePath(serviceSlug: string, zoneId: string) {
+  return `${servicePlacePath(serviceSlug)}/wider/${zoneId}`;
+}
+
+export type ServiceCardLocation =
+  | { kind: "city" }
+  | { kind: "zone"; id: string }
+  | { kind: "place"; slug: string };
+
+export function serviceCardHref(
+  serviceSlug: string,
+  location?: ServiceCardLocation,
+) {
+  if (!location || location.kind === "city") return servicePlacePath(serviceSlug);
+  if (location.kind === "zone") return servicePlaceZonePath(serviceSlug, location.id);
+  return servicePlacePath(serviceSlug, location.slug);
+}
+
 export function servicePlaceFaqs(service: MarketingService, place: string) {
   return [
     {
@@ -375,7 +394,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Use Contact us to open chat with the Mundoria team, or visit the Help Centre. For an active booking, use in-app messaging so the right people see the full context.",
+      "Visit the Help Centre, or use Contact us on the site to open chat with the Mundoria team. For an active booking, use in-app messaging so the right people see the full context.",
     question: "How do I contact support?",
   },
 ];

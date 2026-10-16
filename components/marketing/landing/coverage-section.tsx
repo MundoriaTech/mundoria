@@ -2,13 +2,8 @@ import Link from "next/link";
 
 import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
-import { SERVICE_CATEGORIES } from "@/lib/customer/services";
-import {
-  BIRMINGHAM_AREAS,
-  LAUNCH_CITY,
-  popularMarketingServices,
-  servicePlacePath,
-} from "@/lib/seo/marketing";
+import { LAUNCH_CITY_COVERAGE_GROUPS } from "@/lib/seo/launch-city-coverage-links";
+import { LAUNCH_CITY } from "@/lib/seo/marketing";
 
 export function CoverageSection() {
   return (
@@ -28,21 +23,19 @@ export function CoverageSection() {
         </p>
 
         <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {SERVICE_CATEGORIES.filter((category) =>
-            ["residential", "commercial", "recovery"].includes(category.value),
-          ).map((category) => (
-            <div className="min-w-0" key={category.value}>
+          {LAUNCH_CITY_COVERAGE_GROUPS.map((group) => (
+            <div className="min-w-0" key={group.id}>
               <h3 className="text-[15px] font-semibold leading-snug text-white">
-                {category.label.replace(" Cleaning", "")}
+                {group.heading}
               </h3>
               <ul className="mt-3 list-disc space-y-1.5 pl-[15px] marker:text-white/70">
-                {BIRMINGHAM_AREAS.map((area) => (
-                  <li key={`${category.value}-${area.slug}`}>
+                {group.links.map((item) => (
+                  <li key={item.href}>
                     <Link
                       className="break-words text-[13px] font-normal leading-[1.45] text-white/90 transition hover:text-[#c79c66]"
-                      href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
+                      href={item.href}
                     >
-                      {category.label} in {area.name}
+                      {item.label}
                     </Link>
                   </li>
                 ))}
@@ -50,22 +43,6 @@ export function CoverageSection() {
             </div>
           ))}
         </div>
-
-        <h3 className="mt-10 text-[15px] font-semibold leading-snug text-white">
-          Book a service in Birmingham
-        </h3>
-        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
-          {popularMarketingServices(4).map((service) => (
-            <li key={service.slug}>
-              <Link
-                className="text-[13px] font-normal leading-[1.45] text-white/90 transition hover:text-[#c79c66]"
-                href={servicePlacePath(service.slug)}
-              >
-                {service.label} in Birmingham
-              </Link>
-            </li>
-          ))}
-        </ul>
       </div>
     </ScrollReveal>
   );

@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 
+import { JsonLd } from "@/components/marketing/json-ld";
+import {
+  LaunchCityHubSections,
+  launchCityFaqJsonLd,
+} from "@/components/marketing/launch-city-hub-sections";
+import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
 import { CommercialCleaningPage } from "@/components/marketing/commercial/commercial-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
-import { JsonLd } from "@/components/marketing/json-ld";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -13,7 +18,7 @@ export const metadata: Metadata = buildPageMetadata({
   title: "Commercial Cleaning | Mundoria",
 });
 
-export default function CommercialCleaningRoute() {
+export default async function CommercialCleaningRoute() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured
     ? "/booking/new?category=commercial&returnTo=/cleaning/commercial"
@@ -22,25 +27,35 @@ export default function CommercialCleaningRoute() {
   return (
     <MarketingShell>
       <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Service",
-          areaServed: {
-            "@type": "City",
-            name: "Birmingham",
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Service",
+            areaServed: {
+              "@type": "City",
+              name: "Birmingham",
+            },
+            description:
+              "Commercial cleaning for offices, retail, education and communal spaces.",
+            name: "Commercial Cleaning",
+            provider: {
+              "@type": "Organization",
+              name: "Mundoria",
+              url: absoluteUrl("/"),
+            },
+            url: absoluteUrl("/cleaning/commercial"),
           },
-          description:
-            "Commercial cleaning for offices, retail, education and communal spaces.",
-          name: "Commercial Cleaning",
-          provider: {
-            "@type": "Organization",
-            name: "Mundoria",
-            url: absoluteUrl("/"),
-          },
-          url: absoluteUrl("/cleaning/commercial"),
-        }}
+          launchCityFaqJsonLd(),
+        ]}
       />
       <CommercialCleaningPage bookingHref={bookingHref} />
+      <BrandedPageWash>
+        <LaunchCityHubSections
+          bookingHref={bookingHref}
+          categoryFocus="commercial"
+          showAreaCards={false}
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }

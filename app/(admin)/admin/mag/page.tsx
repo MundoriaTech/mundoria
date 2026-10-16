@@ -12,7 +12,7 @@ export default async function AdminMagPage() {
   const { data } = await createAdminClient()
     .from("blog_posts")
     .select(
-      "id,title,slug,excerpt,content,category,cover_url,author_name,published,published_at,created_at,updated_at",
+      "id,title,slug,excerpt,content,category,cover_url,author_name,published,published_at,created_at,updated_at,related_services",
     )
     .order("updated_at", { ascending: false });
 
@@ -23,6 +23,9 @@ export default async function AdminMagPage() {
         posts={((data as MagPostAdminRow[]) ?? []).map((post) => ({
           ...post,
           category: canonicalBlogCategory(post.category),
+          related_services: Array.isArray(post.related_services)
+            ? post.related_services
+            : [],
         }))}
       />
     </div>

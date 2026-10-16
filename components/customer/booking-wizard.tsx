@@ -17,6 +17,7 @@ import {
   MapPin,
   ShieldCheck,
   Star,
+  X,
 } from "lucide-react";
 import {
   Bed,
@@ -34,6 +35,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
+import { addressOutsideCoverage } from "@/lib/seo/cleaner-coverage";
 import {
   BookingBasket,
   BookingBasketSheet,
@@ -207,6 +209,8 @@ export function BookingWizard({
   initialDraft,
   knownCleaners = [],
   previousCleaner = null,
+  requestedPro = null,
+  requestedProCoverage = [],
   returnTo = null,
   suggestFromHistory = true,
   userId,
@@ -220,6 +224,10 @@ export function BookingWizard({
   initialDraft?: Partial<BookingDraft>;
   knownCleaners?: KnownCleaner[];
   previousCleaner?: CleanerPublicProfile | null;
+  /** First name when the customer started from a cleaner profile. */
+  requestedPro?: string | null;
+  /** Postcode districts that cleaner travels to. */
+  requestedProCoverage?: string[];
   returnTo?: string | null;
   suggestFromHistory?: boolean;
   userId: string | null;
@@ -241,16 +249,13 @@ export function BookingWizard({
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
-  const lastRecommendedDurationRef = useRef<number | null>(null);
+  const [tooFarOpen, setTooFarOpen] = useState(false);
+  const dismissedFarPostcodeRef = useRef<string | null>(null);
   const applyingPopStateRef = useRef(false);
-  const pendingClearReplaceRef = useRef(false);
-  const pendingClearEntryIdRef = useRef<BookingFlowStepId | null>(null);
   const historyReadyRef = useRef(false);
   const lastSyncedStepIdRef = useRef<BookingFlowStepId | null>(null);
   /** Index of the current step within this session's history stack (0 = funnel entry). */
   const funnelDepthRef = useRef(0);
-  /** Bumped on Clear basket so stale history entries cannot revive the old draft. */
-  const bookingSessionRef = useRef(0);
   const historyWriteModeRef = useRef<"push" | "replace" | null>(null);
   const exitBookingFlowRef = useRef<() => void>(() => undefined);
   const flowStepsRef = useRef<BookingFlowStepId[]>([]);
@@ -409,6 +414,32 @@ export function BookingWizard({
         Boolean(storedCleanerId) &&
         knownCleaners.some((cleaner) => cleaner.id === storedCleanerId);
 
+      const previewSteps = getFlowSteps(
+        {
+          recurrencePattern: keepSaved
+            ? (parsed?.recurrencePattern ??
+              initialDraft?.recurrencePattern ??
+              null)
+            : (initialDraft?.recurrencePattern ?? null),
+          serviceCategory:
+            initialDraft?.serviceCategory ?? parsed?.serviceCategory ?? null,
+          serviceType:
+            urlService ?? (keepSaved ? (parsed?.serviceType ?? null) : null),
+        },
+        {
+          entryLock,
+          includeCleanerChoice: knownCleaners.length > 0,
+        },
+      );
+      const durationIndex = previewSteps.indexOf("duration");
+      const savedIndex = isBookingFlowStepId(storedStepRaw)
+        ? previewSteps.indexOf(storedStepRaw)
+        : Number.isFinite(Number(storedStepRaw))
+          ? Number(storedStepRaw)
+          : -1;
+      const keepDuration =
+        keepSaved && durationIndex >= 0 && savedIndex >= durationIndex;
+
       if (urlService || parsed) {
         setDraft({
           ...blankDraft,
@@ -433,11 +464,11 @@ export function BookingWizard({
               : initialDraft?.scheduledDate,
           ),
           scheduledTime: keepSaved ? (parsed?.scheduledTime ?? "") : "",
-          estimatedDurationHours: keepSaved
+          estimatedDurationHours: keepDuration
             ? (parsed?.estimatedDurationHours ??
               initialDraft?.estimatedDurationHours ??
               null)
-            : (initialDraft?.estimatedDurationHours ?? null),
+            : null,
           numBedrooms: keepSaved
             ? (parsed?.numBedrooms ?? initialDraft?.numBedrooms ?? null)
             : (initialDraft?.numBedrooms ?? null),
@@ -584,7 +615,6 @@ export function BookingWizard({
           : {};
       return {
         ...prior,
-        bookingSession: bookingSessionRef.current,
         bookingStepId: id,
       };
     };
@@ -661,38 +691,7 @@ export function BookingWizard({
   }, [flowSteps, hydrated, stepId, stepIndex]);
 
   useEffect(() => {
-    function writeClearedEntry(entryId: BookingFlowStepId) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("step", entryId);
-      const prior =
-        typeof window.history.state === "object" && window.history.state
-          ? window.history.state
-          : {};
-      window.history.replaceState(
-        {
-          ...prior,
-          bookingSession: bookingSessionRef.current,
-          bookingStepId: entryId,
-        },
-        "",
-        url,
-      );
-      lastSyncedStepIdRef.current = entryId;
-      funnelDepthRef.current = 0;
-    }
-
     function onPopState(event: PopStateEvent) {
-      if (pendingClearReplaceRef.current) {
-        pendingClearReplaceRef.current = false;
-        const entryId =
-          pendingClearEntryIdRef.current ??
-          flowStepsRef.current[0] ??
-          "address";
-        pendingClearEntryIdRef.current = null;
-        writeClearedEntry(entryId as BookingFlowStepId);
-        return;
-      }
-
       if (checkoutBusy) {
         const url = new URL(window.location.href);
         url.searchParams.set("step", stepIdRef.current);
@@ -703,28 +702,12 @@ export function BookingWizard({
         window.history.replaceState(
           {
             ...prior,
-            bookingSession: bookingSessionRef.current,
             bookingStepId: stepIdRef.current,
           },
           "",
           url,
         );
         lastSyncedStepIdRef.current = stepIdRef.current;
-        return;
-      }
-
-      const stateSession =
-        typeof event.state?.bookingSession === "number"
-          ? event.state.bookingSession
-          : null;
-      if (
-        stateSession != null &&
-        stateSession !== bookingSessionRef.current
-      ) {
-        // Stale entry from before Clear basket — keep walking back.
-        if (window.location.pathname.startsWith("/booking/new")) {
-          window.history.back();
-        }
         return;
       }
 
@@ -779,24 +762,6 @@ export function BookingWizard({
     draft.recentlyMoved,
     draft.serviceType,
   ]);
-
-  // Seed / refresh recommended duration when service inputs change.
-  useEffect(() => {
-    if (!duration) return;
-    const recommended = duration.hours;
-    if (lastRecommendedDurationRef.current === recommended) return;
-    const previousRecommended = lastRecommendedDurationRef.current;
-    lastRecommendedDurationRef.current = recommended;
-    setDraft((current) => {
-      if (current.estimatedDurationHours == null) {
-        return { ...current, estimatedDurationHours: recommended };
-      }
-      if (previousRecommended != null && previousRecommended !== recommended) {
-        return { ...current, estimatedDurationHours: recommended };
-      }
-      return current;
-    });
-  }, [duration]);
 
   // Move / tenancy services default recentlyMoved for recommendation heuristics.
   useEffect(() => {
@@ -854,7 +819,41 @@ export function BookingWizard({
     window.history.back();
   }
 
+  const addressPostcode = selectedAddress?.postcode ?? "";
+  const proCoverageKey = requestedProCoverage.join(",");
+  const addressTooFar =
+    stepId === "address" &&
+    Boolean(requestedPro) &&
+    addressOutsideCoverage(addressPostcode, requestedProCoverage);
+
+  useEffect(() => {
+    if (!addressTooFar) {
+      setTooFarOpen(false);
+      return;
+    }
+    if (dismissedFarPostcodeRef.current === addressPostcode) return;
+    setTooFarOpen(true);
+  }, [addressPostcode, addressTooFar, proCoverageKey]);
+
+  useEffect(() => {
+    if (!tooFarOpen) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      dismissedFarPostcodeRef.current = addressPostcode;
+      setTooFarOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [addressPostcode, tooFarOpen]);
+
   function goNext() {
+    if (
+      addressTooFar &&
+      dismissedFarPostcodeRef.current !== addressPostcode
+    ) {
+      setTooFarOpen(true);
+      return;
+    }
     if (stepId === "rooms") {
       setDraft((current) => {
         if (!current.guestAddress) return current;
@@ -924,6 +923,7 @@ export function BookingWizard({
       selectedAddOns: [],
       serviceCategory: category,
       serviceType: null,
+      estimatedDurationHours: null,
     }));
   }
 
@@ -960,6 +960,7 @@ export function BookingWizard({
         SERVICES.find((item) => item.value === serviceType)?.category ??
         current.serviceCategory,
       serviceType,
+      estimatedDurationHours: null,
       hasPets: null,
       petTypes: [],
     }));
@@ -1044,6 +1045,8 @@ export function BookingWizard({
         return draft.numBedrooms != null && draft.numBathrooms != null;
       case "standard":
         return Boolean(draft.cleaningStandard);
+      case "addons":
+        return draft.hasPets !== null;
       case "frequency":
         return frequencyChoiceSatisfied(draft);
       case "preferences":
@@ -1133,62 +1136,6 @@ export function BookingWizard({
     }
   }
 
-  function clearBasket() {
-    if (checkoutBusy) return;
-
-    bookingSessionRef.current += 1;
-    window.localStorage.removeItem(BOOKING_DRAFT_KEY);
-    window.localStorage.removeItem(BOOKING_STEP_KEY);
-    bookingHistoryBootstrap = null;
-
-    const nextDraft: BookingDraft = { ...blankDraft };
-    const nextSteps = getFlowSteps(nextDraft, flowOptions);
-    const entryId = nextSteps[0]!;
-    const depth = funnelDepthRef.current;
-
-    setBasketOpen(false);
-    setAuthMode("ask");
-    setPromoFeedback(null);
-    setPromoAmount(null);
-    setShowAddressForm(false);
-    lastRecommendedDurationRef.current = null;
-    setDraft(nextDraft);
-    setStepIndex(0);
-
-    historyReadyRef.current = true;
-    historyWriteModeRef.current = null;
-    funnelDepthRef.current = 0;
-    lastSyncedStepIdRef.current = entryId;
-
-    const writeClearedEntry = () => {
-      const url = new URL(window.location.href);
-      url.searchParams.set("step", entryId);
-      const prior =
-        typeof window.history.state === "object" && window.history.state
-          ? window.history.state
-          : {};
-      window.history.replaceState(
-        {
-          ...prior,
-          bookingSession: bookingSessionRef.current,
-          bookingStepId: entryId,
-        },
-        "",
-        url,
-      );
-      lastSyncedStepIdRef.current = entryId;
-      funnelDepthRef.current = 0;
-    };
-
-    if (depth > 0) {
-      pendingClearEntryIdRef.current = entryId;
-      pendingClearReplaceRef.current = true;
-      window.history.go(-depth);
-      return;
-    }
-    writeClearedEntry();
-  }
-
   const basketProps = {
     addOns: addOnLines,
     address: selectedAddress,
@@ -1200,10 +1147,9 @@ export function BookingWizard({
       draft.recurrencePattern === "custom"
         ? draft.customRecurrenceDates
         : [],
-    durationHours: draft.estimatedDurationHours ?? duration?.hours ?? null,
+    durationHours: draft.estimatedDurationHours,
     frequencyLabel,
     hasPets: draft.hasPets,
-    onClearBasket: clearBasket,
     onJumpAddress: () => jumpToStep("address"),
     onJumpSchedule: () => {
       if (flowSteps.includes("date")) jumpToStep("date");
@@ -1234,6 +1180,7 @@ export function BookingWizard({
   };
 
   const basket = <BookingBasket {...basketProps} />;
+  const hideBasket = stepId === "checkout" && needsAuth;
 
   const stepBody = (
     <>
@@ -1291,6 +1238,7 @@ export function BookingWizard({
             update("guestAddress", null);
             setShowAddressForm(false);
           }}
+          proName={requestedPro}
           selectedId={draft.addressId}
           setShowForm={setShowAddressForm}
           showForm={
@@ -1352,16 +1300,13 @@ export function BookingWizard({
       {stepId === "addons" ? (
         <AddOnsStep draft={draft} update={update} />
       ) : null}
-      {stepId === "pets" ? (
-        <PetsStep draft={draft} update={update} />
-      ) : null}
       {stepId === "preferences" ? (
         <RecoveryPreferencesStep draft={draft} update={update} />
       ) : null}
       {stepId === "duration" && duration ? (
         <DurationStep
           duration={duration}
-          hours={draft.estimatedDurationHours ?? duration.hours}
+          hours={draft.estimatedDurationHours}
           onChange={(value) => update("estimatedDurationHours", value)}
         />
       ) : null}
@@ -1434,10 +1379,14 @@ export function BookingWizard({
         )}
       >
         <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:gap-0">
-          <div className="min-w-0 w-full lg:w-[49.13%]">{stepBody}</div>
-          <div className="hidden lg:ml-[8.77%] lg:flex lg:w-[42.1%] lg:shrink-0">
-            {basket}
+          <div className={cn("min-w-0 w-full", !hideBasket && "lg:w-[49.13%]")}>
+            {stepBody}
           </div>
+          {hideBasket ? null : (
+            <div className="hidden lg:ml-[8.77%] lg:flex lg:w-[42.1%] lg:shrink-0">
+              {basket}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1492,10 +1441,54 @@ export function BookingWizard({
         </div>
       ) : null}
 
+      {tooFarOpen && requestedPro ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#1c133b]/40 px-4">
+          <div
+            aria-labelledby="too-far-title"
+            aria-modal="true"
+            className="relative w-full max-w-md rounded-[1.75rem] bg-white px-6 py-8 text-center shadow-[0_24px_60px_rgba(28,19,59,0.18)]"
+            role="dialog"
+          >
+            <button
+              aria-label="Close"
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e6ea] text-[#1c133b]"
+              onClick={() => {
+                dismissedFarPostcodeRef.current = addressPostcode;
+                setTooFarOpen(false);
+              }}
+              type="button"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <h2
+              className="text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c133b]"
+              id="too-far-title"
+            >
+              {requestedPro} doesn’t cover this address
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-[#5a5470]">
+              This address is outside {requestedPro}’s area. You can still
+              book, and Mundoria will match another cleaner who covers it.
+            </p>
+            <button
+              className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3]"
+              onClick={() => {
+                dismissedFarPostcodeRef.current = addressPostcode;
+                setTooFarOpen(false);
+                goNext();
+              }}
+              type="button"
+            >
+              Continue booking
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <BookingBasketSheet
         {...basketProps}
         onClose={() => setBasketOpen(false)}
-        open={basketOpen}
+        open={basketOpen && !hideBasket}
       />
     </BookingChrome>
   );
@@ -1808,8 +1801,9 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
     case "address":
       return Boolean(draft.addressId || guestAddressComplete(draft.guestAddress));
     case "history":
-    case "addons":
       return true;
+    case "addons":
+      return draft.hasPets !== null;
     case "cleaner":
       return (
         draft.rebookCleanerChoice === "same" ||
@@ -1905,6 +1899,7 @@ function AddressStep({
   localOnly,
   onSaved,
   onSelect,
+  proName,
   selectedId,
   setShowForm,
   showForm,
@@ -1915,6 +1910,7 @@ function AddressStep({
   localOnly: boolean;
   onSaved: (address: Address) => void;
   onSelect: (addressId: string) => void;
+  proName?: string | null;
   selectedId: string | null;
   setShowForm: (value: boolean) => void;
   showForm: boolean;
@@ -1949,7 +1945,9 @@ function AddressStep({
   return (
     <div>
       <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        Where will your cleaning take place?
+        {proName
+          ? `Where should ${proName} clean?`
+          : "Where will your cleaning take place?"}
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
         🕵️ To find your address easily, enter it as:{" "}
@@ -2048,6 +2046,29 @@ function AddressStep({
             onSaved={onSaved}
             userId={userId ?? undefined}
           />
+        </div>
+      ) : null}
+
+      {proName ? (
+        <div className="mt-10 border-t border-[#eeeef1] pt-8">
+          <h3 className="text-lg font-bold tracking-[-0.02em] text-[#1c133b]">
+            Is this your first time booking?
+          </h3>
+          <ol className="mt-4 space-y-4 text-sm leading-6 text-[#5a5470]">
+            <li>
+              <span className="font-semibold text-[#1c133b]">1. </span>
+              Choose the service and a time that suits you.
+            </li>
+            <li>
+              <span className="font-semibold text-[#1c133b]">2. </span>
+              {proName} receives the request. The visit is confirmed when{" "}
+              {proName} accepts.
+            </li>
+            <li>
+              <span className="font-semibold text-[#1c133b]">3. </span>
+              {proName} arrives with what they need for the clean.
+            </li>
+          </ol>
         </div>
       ) : null}
     </div>
@@ -2373,9 +2394,57 @@ function AddOnsStep({
         </div>
       ) : (
         <p className="mt-8 text-sm text-[#5a5470]">
-          No add-ons for this service — continue to the next step.
+          No extras for this service.
         </p>
       )}
+      <h3 className="mt-10 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+        Do you have any pets?
+      </h3>
+      <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+        Some cleaners have allergies or prefer not to work around animals — this
+        helps us match you well.
+      </p>
+      <div className="mt-4 grid gap-3">
+        {(
+          [
+            ["Yes, furry or scaly housemates", true],
+            ["Nope, pet-free zone", false],
+          ] as const
+        ).map(([label, value]) => {
+          const active = draft.hasPets === value;
+          return (
+            <button
+              className={cn(
+                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                active && "border-[#6a45b8] bg-white",
+              )}
+              key={label}
+              onClick={() => {
+                update("hasPets", value);
+                if (!value) update("petTypes", []);
+              }}
+              type="button"
+            >
+              <div className="flex items-center gap-3">
+                <Image
+                  alt=""
+                  className="h-11 w-11 shrink-0 rounded-full object-cover"
+                  height={512}
+                  src={
+                    value
+                      ? "/images/marketing/icons/pets.png"
+                      : "/images/marketing/icons/no-pets.png"
+                  }
+                  width={512}
+                />
+                <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
+                  {label}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
       <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
         <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
           i
@@ -2385,78 +2454,6 @@ function AddOnsStep({
           (vacuum, mop, sponges) should be available at the property unless
           arranged otherwise.
         </p>
-      </div>
-    </div>
-  );
-}
-
-function PetsStep({
-  draft,
-  update,
-}: {
-  draft: BookingDraft;
-  update: <K extends keyof BookingDraft>(
-    key: K,
-    value: BookingDraft[K],
-  ) => void;
-}) {
-  const presenceOptions = [
-    {
-      label: "Yes, furry or scaly housemates",
-      value: true,
-    },
-    {
-      label: "Nope, pet-free zone",
-      value: false,
-    },
-  ] as const;
-
-  function selectHasPets(value: boolean) {
-    update("hasPets", value);
-    if (!value) update("petTypes", []);
-  }
-
-  return (
-    <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        Do you have any pets?
-      </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        Some cleaners have allergies or prefer not to work around animals — this
-        helps us match you well.
-      </p>
-      <div className="mt-8 grid gap-3">
-        {presenceOptions.map((option) => {
-          const active = draft.hasPets === option.value;
-          return (
-            <button
-              className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
-                active && "border-[#6a45b8] bg-white",
-              )}
-              key={option.label}
-              onClick={() => selectHasPets(option.value)}
-              type="button"
-            >
-              <div className="flex items-center gap-3">
-                <Image
-                  alt=""
-                  className="h-11 w-11 shrink-0 rounded-full object-cover"
-                  height={512}
-                  src={
-                    option.value
-                      ? "/images/marketing/icons/pets.png"
-                      : "/images/marketing/icons/no-pets.png"
-                  }
-                  width={512}
-                />
-                <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
-                  {option.label}
-                </p>
-              </div>
-            </button>
-          );
-        })}
       </div>
     </div>
   );
@@ -2697,7 +2694,7 @@ function DurationStep({
   onChange,
 }: {
   duration: NonNullable<ReturnType<typeof durationSummary>>;
-  hours: number;
+  hours: number | null;
   onChange: (hours: number) => void;
 }) {
   const options = [
@@ -2713,12 +2710,6 @@ function DurationStep({
     return `${h}h${String(m).padStart(2, "0")}`;
   }
 
-  const nearest =
-    options.find((option) => Math.abs(option - hours) < 0.01) ??
-    options.reduce((best, option) =>
-      Math.abs(option - hours) < Math.abs(best - hours) ? option : best,
-    );
-
   return (
     <div>
       <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
@@ -2726,7 +2717,7 @@ function DurationStep({
       </h2>
       <div className="mt-8 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
         {options.map((option) => {
-          const active = option === nearest;
+          const active = hours != null && Math.abs(option - hours) < 0.01;
           return (
             <button
               className={cn(

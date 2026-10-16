@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 export const SITE_NAME = "Mundoria";
 export const SITE_TAGLINE =
   "Book trusted UK cleaning professionals for homes, workplaces and short-term rentals.";
-export const SUPPORT_EMAIL = "support@mundoriauk.com";
+export const SUPPORT_EMAIL =
+  process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
 /** Prefer a wide landscape asset for social shares when available. */
 export const DEFAULT_OG_IMAGE =
   "/images/marketing/landing/category-residential.png";

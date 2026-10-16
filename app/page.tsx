@@ -40,12 +40,6 @@ const CoverageSection = nextDynamic(() =>
   ),
 );
 
-const WelcomeSection = nextDynamic(() =>
-  import("@/components/marketing/landing/welcome-section").then(
-    (module) => ({ default: module.WelcomeSection }),
-  ),
-);
-
 export const metadata: Metadata = buildPageMetadata({
   description:
     "Book certified UK cleaning professionals for homes, workplaces, short lets, moving home and recovery support with Mundoria.",
@@ -65,7 +59,7 @@ export default async function HomePage() {
     <MarketingShell>
       <JsonLd data={homePageStructuredData()} />
       <LandingPurpleField>
-        <HeroSection />
+        <HeroSection bookingHref={bookingHref} />
         <ServiceCategoriesSection bookingHref={bookingHref} />
         <PopularServicesSection bookingBaseHref={bookingHref} />
       </LandingPurpleField>
@@ -73,7 +67,6 @@ export default async function HomePage() {
       <ReviewsSection />
       <AboutSection cleanerHref={cleanerHref} customerHref={customerHref} />
       <CoverageSection />
-      <WelcomeSection customerHref={customerHref} />
     </MarketingShell>
   );
 }

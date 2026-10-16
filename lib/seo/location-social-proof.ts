@@ -1,13 +1,13 @@
 /** Curated social proof for Birmingham location SEO pages (seed until live ratings scale). */
 export const BIRMINGHAM_LOCATION_CLEANERS = [
-  { areas: "Jewellery Quarter · City centre", name: "Amara O.", rating: 4.9 },
-  { areas: "Edgbaston · Harborne", name: "James K.", rating: 4.8 },
-  { areas: "Moseley · Kings Heath", name: "Priya S.", rating: 4.9 },
-  { areas: "Selly Oak · Harborne", name: "Daniel R.", rating: 4.7 },
-  { areas: "Jewellery Quarter · Edgbaston", name: "Fatima H.", rating: 4.9 },
-  { areas: "Kings Heath · Moseley", name: "Olivia T.", rating: 4.8 },
-  { areas: "Bournville · Selly Oak", name: "Noah P.", rating: 4.8 },
-  { areas: "Digbeth · City centre", name: "Elena M.", rating: 4.9 },
+  { areas: "Jewellery Quarter · City centre", name: "Amara O.", radiusMiles: 7, rating: 4.9 },
+  { areas: "Edgbaston · Harborne", name: "James K.", radiusMiles: 5, rating: 4.8 },
+  { areas: "Moseley · Kings Heath", name: "Priya S.", radiusMiles: 8, rating: 4.9 },
+  { areas: "Selly Oak · Harborne", name: "Daniel R.", radiusMiles: 6, rating: 4.7 },
+  { areas: "Jewellery Quarter · Edgbaston", name: "Fatima H.", radiusMiles: 10, rating: 4.9 },
+  { areas: "Kings Heath · Moseley", name: "Olivia T.", radiusMiles: 7, rating: 4.8 },
+  { areas: "Bournville · Selly Oak", name: "Noah P.", radiusMiles: 4, rating: 4.8 },
+  { areas: "Digbeth · City centre", name: "Elena M.", radiusMiles: 9, rating: 4.9 },
 ] as const;
 
 export const BIRMINGHAM_LOCATION_REVIEWS = [

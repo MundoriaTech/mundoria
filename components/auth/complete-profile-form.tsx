@@ -12,22 +12,12 @@ import { Input } from "@/components/ui/input";
 import { completeProfileSchema, type CompleteProfileValues } from "@/lib/auth/schemas";
 import { safeRedirectPath } from "@/lib/auth/redirects";
 import { createBrowserClient } from "@/lib/supabase/client";
+import {
+  nationalFromPhone,
+  storedPhone,
+  UK_DIAL_CODE,
+} from "@/lib/auth/uk-phone";
 import { cn } from "@/lib/utils";
-
-const UK_DIAL_CODE = "+44";
-
-/** Drop a leading +44 / 0044, and a trunk 0, so the field holds the local number. */
-function nationalFromPhone(phone: string) {
-  const trimmed = phone.trim();
-  const prefixed = trimmed.match(/^(?:\+|00)44[\s-]*(.*)$/);
-  const local = prefixed ? prefixed[1] : trimmed;
-  return local.replace(/^0/, "").trim();
-}
-
-function storedPhone(national: string) {
-  const local = national.replace(/[^\d\s]/g, "").replace(/\s+/g, " ").trim();
-  return local ? `${UK_DIAL_CODE} ${local.replace(/^0+/, "")}` : "";
-}
 
 export function CompleteProfileForm({
   defaultFullName,

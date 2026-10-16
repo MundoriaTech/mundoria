@@ -1,41 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { JsonLd } from "@/components/marketing/json-ld";
 import {
-  BrandedCardLink,
   BrandedCtaBand,
   BrandedPageWash,
-  BrandedSection,
 } from "@/components/marketing/branded-page-sections";
-import {
-  LocationFaqBlock,
-  LocationFeaturedCleaners,
-  LocationHowToBook,
-  LocationReviews,
-  LocationServicesExplainer,
-  LocationTrustStrip,
-  LocationWhatsCovered,
-} from "@/components/marketing/location-seo-sections";
-import {
-  MarketingHero,
-  MarketingShell,
-} from "@/components/marketing/marketing-shell";
-import {
-  loadDirectoryCleaners,
-  loadDirectoryReviews,
-  reviewsOrFallback,
-} from "@/lib/seo/birmingham-directory";
-import {
-  BIRMINGHAM_AREAS,
-  BIRMINGHAM_POSTCODES,
-  LAUNCH_CITY,
-  districtLinkLabel,
-  popularMarketingServices,
-  postcodePath,
-  servicePlacePath,
-} from "@/lib/seo/marketing";
-import { BIRMINGHAM_LOCATION_CLEANERS } from "@/lib/seo/location-social-proof";
+import { LaunchCityHubSections } from "@/components/marketing/launch-city-hub-sections";
+import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { PlaceMapHero } from "@/components/marketing/place-map-hero";
+import { birminghamPlaceFaqSchemaAnswers } from "@/lib/seo/birmingham-place-faqs";
+import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -48,12 +22,6 @@ export const metadata: Metadata = buildPageMetadata({
 export default async function BirminghamCleanersPage() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
-  const popular = popularMarketingServices();
-  const liveCleaners = await loadDirectoryCleaners({ limit: 6 });
-  const featured = liveCleaners?.length
-    ? liveCleaners
-    : [...BIRMINGHAM_LOCATION_CLEANERS];
-  const reviews = reviewsOrFallback(await loadDirectoryReviews({ limit: 6 }));
 
   return (
     <MarketingShell>
@@ -93,107 +61,40 @@ export default async function BirminghamCleanersPage() {
             name: "Mundoria Birmingham",
             url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
           },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: birminghamPlaceFaqSchemaAnswers("Birmingham").map(
+              (item) => ({
+                "@type": "Question",
+                acceptedAnswer: { "@type": "Answer", text: item.answer },
+                name: item.question,
+              }),
+            ),
+          },
         ]}
       />
 
-      <BrandedPageWash underNav>
-        <MarketingHero
-          description="One-off or regular house cleaning with tried & vetted cleaners in your area — clear estimates from booking to checklist."
-          eyebrow="Birmingham · From clear online estimates"
-          primaryHref={bookingHref}
-          primaryLabel="Book in Birmingham"
-          secondaryHref="/cleaning"
-          secondaryLabel="Browse services"
-          title="Domestic cleaners in Birmingham"
-          underNav
+      <PlaceMapHero
+        bullets={[
+          "One-off or regular house cleaning",
+          "Clear estimates before you book",
+          "Reliable, vetted cleaners you can trust",
+        ]}
+        description="One-off or regular house cleaning with tried & vetted cleaners in your area — clear estimates from booking to checklist."
+        primaryHref={bookingHref}
+        primaryLabel="Book in Birmingham"
+        showReviews
+        title="Domestic cleaners in Birmingham"
+      />
+
+      <BrandedPageWash>
+        <LaunchCityHubSections
+          bookingHref={bookingHref}
+          categoryFocus="residential"
+          cleanerLimit={18}
+          showAreaCards={false}
         />
-
-        <LocationTrustStrip />
-
-        <LocationFeaturedCleaners cleaners={featured} place="Birmingham" />
-
-        <BrandedSection>
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-            Places with cleaners
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-            These Birmingham places already have active cleaners. A postcode
-            page opens when cleaners cover that district.
-          </p>
-          <ul className="mt-6 flex flex-wrap gap-3">
-            {BIRMINGHAM_POSTCODES.map((item) => (
-              <li key={item.prefix}>
-                <Link
-                  className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
-                  href={postcodePath(item.prefix)}
-                >
-                  {districtLinkLabel(item.prefix)}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </BrandedSection>
-
-        <BrandedSection>
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-            Neighbourhoods we prioritise
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-            Mundoria cleaners are available in these Birmingham areas and their
-            surroundings:
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {BIRMINGHAM_AREAS.map((area) => (
-              <BrandedCardLink
-                description={area.description}
-                href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
-                key={area.slug}
-                label={area.name}
-                meta="Birmingham"
-              />
-            ))}
-          </div>
-        </BrandedSection>
-
-        <BrandedSection tone="lavender">
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-            Looking for something different in cleaning?
-          </h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {popular.map((service) => (
-              <BrandedCardLink
-                description={`From ${service.fromPrice}`}
-                href={servicePlacePath(service.slug)}
-                key={service.slug}
-                label={`${service.label} in Birmingham`}
-                meta={service.categoryLabel}
-              />
-            ))}
-          </div>
-        </BrandedSection>
-
-        <LocationReviews place="Birmingham" reviews={reviews} />
-
-        <LocationServicesExplainer place="Birmingham" />
-        <LocationWhatsCovered place="Birmingham" />
-        <LocationHowToBook place="Birmingham" />
-        <LocationFaqBlock place="Birmingham" />
-
-        <BrandedSection tone="cream">
-          <h2 className="text-[1.35rem] font-semibold text-[#1c133b]">
-            From the Mundoria Mag
-          </h2>
-          <p className="mt-2 text-sm text-[#5a5470]">
-            Tips for hosts, households and cleaners —{" "}
-            <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-              href="/blog"
-            >
-              read the blog
-            </Link>
-            .
-          </p>
-        </BrandedSection>
 
         <BrandedCtaBand
           body="Enter your Birmingham postcode and service — we’ll show a clear estimate before you book."

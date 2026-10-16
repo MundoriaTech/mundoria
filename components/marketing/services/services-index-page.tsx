@@ -29,6 +29,10 @@ function marketingByValue(value: ServiceType) {
   return MARKETING_SERVICES.find((service) => service.value === value)!;
 }
 
+function pageHref(path: string, bookingHref: string) {
+  return bookingHref === "/setup" ? "/setup" : path;
+}
+
 function bookable(
   value: ServiceType,
   bookingHref: string,
@@ -37,7 +41,7 @@ function bookable(
   const service = marketingByValue(value);
   return {
     description: service.description,
-    href: bookingHref === "/setup" ? "/setup" : service.bookingHref,
+    href: pageHref(`/cleaning/${service.slug}`, bookingHref),
     image: bookingServiceImages[value],
     label: labelOverride ?? service.label,
   };
@@ -47,15 +51,15 @@ function pageOnly(
   bookingHref: string,
   items: Array<{
     description: string;
+    href: string;
     label: string;
     seedService: ServiceType;
   }>,
 ): ServiceLink[] {
   return items.map((item) => {
-    const seed = marketingByValue(item.seedService);
     return {
       description: item.description,
-      href: bookingHref === "/setup" ? "/setup" : seed.bookingHref,
+      href: pageHref(item.href, bookingHref),
       image: bookingServiceImages[item.seedService],
       label: item.label,
     };
@@ -78,19 +82,22 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
           {
             description:
               "Routine domestic cleaning for kitchens, living areas and bathrooms.",
+            href: "/cleaning/regular-cleaning",
             label: "Domestic Cleaning",
             seedService: "regular",
           },
           {
             description:
               "Ongoing housekeeping support to keep your home consistently tidy.",
+            href: "/cleaning/regular-cleaning",
             label: "Housekeeping",
             seedService: "regular",
           },
           {
             description: "A thorough seasonal refresh for the whole home.",
+            href: "/cleaning/deep-cleaning",
             label: "Spring Cleaning",
-            seedService: "regular",
+            seedService: "deep_clean",
           },
         ]),
         bookable("move_in", bookingHref),
@@ -120,19 +127,21 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
       description:
         "Cleaning that adapts when life does — with more personal consideration.",
       href: "/cleaning/recovery",
-      label: "Mundoria Recovery",
+      label: "Recovery cleaning",
       soft: "#f0e4f8",
       services: [
         ...pageOnly(bookingHref, [
           {
             description:
               "Supportive home cleaning during pregnancy and after birth.",
+            href: "/cleaning/pregnancy-and-postpartum-cleaning",
             label: "Pregnancy and Postpartum Cleaning",
             seedService: "pregnancy_support",
           },
           {
             description:
               "Extra-care cleaning while recovering from illness, injury or limited mobility.",
+            href: "/cleaning/illness-and-injury-recovery",
             label: "Illness & injury recovery",
             seedService: "illness_recovery",
           },
@@ -176,7 +185,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
     const service = marketingByValue(value);
     return {
       description: service.description,
-      href: bookingHref === "/setup" ? "/setup" : service.bookingHref,
+      href: pageHref(`/cleaning/${service.slug}`, bookingHref),
       image: bookingServiceImages[value],
       label: service.label,
       tint: POPULAR_TINTS[index % POPULAR_TINTS.length],
@@ -206,8 +215,8 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
             Cleaning services, clearly laid out.
           </h1>
           <p className="mt-4 max-w-lg text-pretty text-[15px] font-normal leading-6 text-[#5a5470] sm:text-base sm:leading-7">
-            Jump straight into a service, or browse by category below. Same calm
-            booking flow either way — with a clear estimate before you confirm.
+            Jump straight into a service, or browse by category below. Each one
+            opens its own page, with a clear estimate before you book.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link

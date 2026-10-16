@@ -16,7 +16,7 @@ export default async function AdminMagEditPage({ params }: PageProps) {
   const { data } = await createAdminClient()
     .from("blog_posts")
     .select(
-      "id,title,slug,excerpt,content,category,cover_url,author_name,published,published_at,created_at,updated_at",
+      "id,title,slug,excerpt,content,category,cover_url,author_name,published,published_at,created_at,updated_at,related_services",
     )
     .eq("id", params.id)
     .maybeSingle();
@@ -26,7 +26,13 @@ export default async function AdminMagEditPage({ params }: PageProps) {
   const post = data as MagPostAdminRow;
   return (
     <MagPostEditor
-      post={{ ...post, category: canonicalBlogCategory(post.category) }}
+      post={{
+        ...post,
+        category: canonicalBlogCategory(post.category),
+        related_services: Array.isArray(post.related_services)
+          ? post.related_services
+          : [],
+      }}
     />
   );
 }

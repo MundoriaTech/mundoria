@@ -10,9 +10,25 @@ export type BlogPost = {
   excerpt: string | null;
   id: string;
   published_at: string | null;
+  /** Marketing service slugs this Mag post supports (e.g. regular-cleaning). */
+  related_services: string[];
   slug: string;
   title: string;
 };
+
+const BLOG_POST_SELECT =
+  "id,title,slug,excerpt,content,category,cover_url,author_name,published_at,created_at,related_services";
+
+function withBlogDefaults<T extends { category: string; related_services?: string[] | null }>(
+  post: T,
+): T & { related_services: string[] } {
+  return {
+    ...withCanonicalCategory(post),
+    related_services: Array.isArray(post.related_services)
+      ? post.related_services
+      : [],
+  };
+}
 
 export type HelpCollection = {
   audience: string;
@@ -59,12 +75,10 @@ export async function listPublishedBlogPosts(): Promise<BlogPost[]> {
   try {
     const { data } = await supabase
       .from("blog_posts")
-      .select(
-        "id,title,slug,excerpt,content,category,cover_url,author_name,published_at,created_at",
-      )
+      .select(BLOG_POST_SELECT)
       .eq("published", true)
       .order("published_at", { ascending: false });
-    return ((data as BlogPost[]) ?? []).map(withCanonicalCategory);
+    return ((data as BlogPost[]) ?? []).map(withBlogDefaults);
   } catch {
     return [];
   }
@@ -76,13 +90,11 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
   try {
     const { data } = await supabase
       .from("blog_posts")
-      .select(
-        "id,title,slug,excerpt,content,category,cover_url,author_name,published_at,created_at",
-      )
+      .select(BLOG_POST_SELECT)
       .eq("slug", slug)
       .eq("published", true)
       .maybeSingle();
-    return data ? withCanonicalCategory(data as BlogPost) : null;
+    return data ? withBlogDefaults(data as BlogPost) : null;
   } catch {
     return null;
   }
@@ -98,9 +110,7 @@ export async function listRelatedBlogPosts(
   try {
     const { data } = await supabase
       .from("blog_posts")
-      .select(
-        "id,title,slug,excerpt,content,category,cover_url,author_name,published_at,created_at",
-      )
+      .select(BLOG_POST_SELECT)
       .eq("published", true)
       .in(
         "category",
@@ -109,7 +119,7 @@ export async function listRelatedBlogPosts(
       .neq("slug", excludeSlug)
       .order("published_at", { ascending: false })
       .limit(limit);
-    return ((data as BlogPost[]) ?? []).map(withCanonicalCategory);
+    return ((data as BlogPost[]) ?? []).map(withBlogDefaults);
   } catch {
     return [];
   }

@@ -5,6 +5,8 @@ import {
   renderEmailTemplate,
 } from "@/lib/email/templates";
 
+const DEFAULT_FROM = "Mundoria <hello@mundoria.co.uk>";
+
 export interface SendBrandedEmailInput {
   data?: Record<string, unknown>;
   from?: string;
@@ -26,9 +28,9 @@ export async function sendBrandedEmail({
 
   const rendered = renderEmailTemplate(template, data);
   const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
-    from: from ?? defaultFrom(template),
+    from: from ?? defaultFrom(),
     html: rendered.html,
-    replyTo,
+    replyTo: replyTo ?? defaultReplyTo(),
     subject: subject ?? rendered.subject,
     text: rendered.text,
     to,
@@ -37,12 +39,10 @@ export async function sendBrandedEmail({
   return !error;
 }
 
-function defaultFrom(template: EmailTemplateId) {
-  const fallback = template.startsWith("admin.")
-    ? "Mundoria Alerts <alerts@resend.dev>"
-    : template.startsWith("auth.")
-      ? "Mundoria Security <security@resend.dev>"
-      : "Mundoria <notifications@resend.dev>";
+function defaultFrom() {
+  return process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_FROM;
+}
 
-  return process.env.RESEND_FROM_EMAIL ?? fallback;
+function defaultReplyTo() {
+  return process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
 }

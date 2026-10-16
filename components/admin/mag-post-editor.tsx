@@ -15,6 +15,10 @@ import {
   type MagPostAdminRow,
   slugifyMagTitle,
 } from "@/lib/content/mag-admin";
+import {
+  magMoneyPageCtaMarkdown,
+  magServiceOptions,
+} from "@/lib/content/mag-service-links";
 import { magThemeFor } from "@/lib/content/mag-theme";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +29,7 @@ type MagForm = {
   cover_url: string;
   excerpt: string;
   published: boolean;
+  related_services: string[];
   slug: string;
   title: string;
 };
@@ -52,6 +57,7 @@ function blankForm(): MagForm {
     cover_url: "",
     excerpt: "",
     published: false,
+    related_services: [],
     slug: "",
     title: "",
   };
@@ -65,6 +71,9 @@ function fromPost(post: MagPostAdminRow): MagForm {
     cover_url: post.cover_url || "",
     excerpt: post.excerpt || "",
     published: post.published,
+    related_services: Array.isArray(post.related_services)
+      ? post.related_services
+      : [],
     slug: post.slug,
     title: post.title,
   };
@@ -137,6 +146,7 @@ export function MagPostEditor({
           excerpt: form.excerpt.trim() || null,
           id: post?.id,
           published: publish,
+          related_services: form.related_services,
           slug,
           title: form.title.trim(),
         }),
@@ -160,6 +170,28 @@ export function MagPostEditor({
 
   const theme = magThemeFor(form.category);
   const previewBlocks = renderEditorialBlocks(form.content);
+  const serviceOptions = magServiceOptions();
+
+  function toggleRelatedService(slug: string) {
+    setForm((current) => {
+      const has = current.related_services.includes(slug);
+      return {
+        ...current,
+        related_services: has
+          ? current.related_services.filter((item) => item !== slug)
+          : [...current.related_services, slug],
+      };
+    });
+  }
+
+  function insertMoneyCta() {
+    const primary =
+      serviceOptions.find((item) =>
+        form.related_services.includes(item.slug),
+      ) ?? serviceOptions[0];
+    if (!primary) return;
+    insertHint(magMoneyPageCtaMarkdown(primary.slug, primary.label));
+  }
 
   return (
     <div className="min-h-[calc(100vh-6rem)] bg-[#f7f4fb]">
@@ -274,6 +306,13 @@ export function MagPostEditor({
                       {hint.label}
                     </button>
                   ))}
+                  <button
+                    className="rounded-full border border-[#c79c66]/50 bg-[#fff8ef] px-2.5 py-1 text-[11px] font-semibold text-[#1c133b] hover:border-[#c79c66]"
+                    onClick={insertMoneyCta}
+                    type="button"
+                  >
+                    Money-page CTA
+                  </button>
                 </div>
                 <textarea
                   className="min-h-[26rem] w-full resize-y rounded-xl border border-[#e8e0f4] bg-[#fcfbfe] px-4 py-3 font-mono text-sm leading-6 text-[#1c133b] outline-none focus:border-[#6a45b8]/50"
@@ -348,6 +387,43 @@ export function MagPostEditor({
                 </option>
               ))}
             </select>
+
+            <label className="mt-4 block text-sm font-semibold text-[#1c133b]">
+              Related services
+            </label>
+            <p className="mt-1 text-xs leading-5 text-[#5a5470]">
+              Tag money pages this guide supports. Tagged posts rank first on
+              those service and service+city Mag modules.
+            </p>
+            <div className="mt-3 max-h-48 space-y-1.5 overflow-y-auto pr-1">
+              {serviceOptions.map((service) => {
+                const checked = form.related_services.includes(service.slug);
+                return (
+                  <label
+                    className="flex cursor-pointer items-start gap-2 rounded-lg px-1.5 py-1 text-sm text-[#1c133b] hover:bg-[#f7f2fc]"
+                    key={service.slug}
+                  >
+                    <input
+                      checked={checked}
+                      className="mt-0.5"
+                      onChange={() => toggleRelatedService(service.slug)}
+                      type="checkbox"
+                    />
+                    <span>
+                      <span className="font-medium">{service.label}</span>
+                      <span className="mt-0.5 block text-[11px] text-[#8b849c]">
+                        {service.category}
+                      </span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            {form.related_services.length === 0 ? (
+              <p className="mt-2 text-xs font-medium text-amber-800">
+                Add at least one related service before publishing when you can.
+              </p>
+            ) : null}
 
             <label className="mt-4 block text-sm font-semibold text-[#1c133b]">
               Author

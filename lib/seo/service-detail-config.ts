@@ -1,14 +1,18 @@
 import type { ServiceCategoryMarketingConfig } from "@/components/marketing/service-category/service-category-marketing-page";
 import type { MarketingService } from "@/lib/seo/marketing";
 import { publicMarketingServices } from "@/lib/seo/marketing";
+import {
+  serviceDetailFaqs,
+  serviceFaqsTitle,
+} from "@/lib/seo/service-detail-faqs";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
 const CATEGORY_HERO: Record<ServiceCategory, string> = {
   commercial: "/images/marketing/landing/commercial-hero.png",
   exterior: "/images/marketing/landing/category-exterior.png",
   moving_home: "/images/marketing/landing/category-moving-home.png",
-  recovery: "/images/marketing/landing/recovery-hero-section.png",
-  residential: "/images/marketing/landing/residential-hero.png",
+  recovery: "/images/marketing/landing/recovery-hero.jpg",
+  residential: "/images/marketing/landing/residential-hero.jpg",
   short_term_rental: "/images/marketing/landing/category-str.png",
 };
 
@@ -42,14 +46,12 @@ const CATEGORY_PAGE: Partial<Record<ServiceCategory, string>> = {
   short_term_rental: "/cleaning/short-lets",
 };
 
-const FEATURES_TITLE: Partial<Record<ServiceCategory, string>> = {
-  commercial: "Cleaning that works around your workplace",
-  recovery: "Cleaning that works around life’s changes",
-  residential: "Cleaning that works around you",
-};
-
 function imageFor(service: MarketingService) {
   return SERVICE_IMAGE[service.value] ?? CATEGORY_HERO[service.category];
+}
+
+export function marketingServiceCardImage(service: MarketingService) {
+  return imageFor(service);
 }
 
 export function serviceDetailConfig(
@@ -80,40 +82,9 @@ export function serviceDetailConfig(
       "Book once or schedule regularly",
       "Reliable, vetted cleaners you can trust",
     ],
-    faqs: [
-      {
-        answer: `${service.description} Mundoria shows the price before you pay and matches a vetted cleaner for the visit.`,
-        question: `What is ${service.label.toLowerCase()}?`,
-      },
-      {
-        answer: `Choose ${service.label.toLowerCase()}, tell us about the space, pick a time and pay securely. You can follow the visit from booking to finish.`,
-        question: `How do I book ${service.label.toLowerCase()}?`,
-      },
-      {
-        answer:
-          "Enter your address when you book. Mundoria is launching in Birmingham, including Edgbaston, Harborne, Moseley, Kings Heath, Selly Oak and the Jewellery Quarter.",
-        question: "Where is this available?",
-      },
-    ],
-    features: [
-      {
-        body: `A ${service.label.toLowerCase()} visit is matched with a vetted cleaner, with live status so you know what is happening.`,
-        icon: "reliable",
-        title: "We're reliable",
-      },
-      {
-        body: "Book a single visit or a repeating schedule. The time and the notes stay with the booking.",
-        icon: "flexible",
-        title: "We're flexible",
-      },
-      {
-        body: `Choose ${service.label.toLowerCase()}, share the property details and see a clear estimate before you confirm.`,
-        icon: "simple",
-        title: "We're simple",
-      },
-    ],
-    featuresTitle:
-      FEATURES_TITLE[service.category] ?? "Cleaning that works around you",
+    faqs: serviceDetailFaqs(service),
+    faqsTitle: serviceFaqsTitle(service),
+    faqVariant: "service",
     heroImage: imageFor(service),
     serviceCards: cards,
     servicesTitle: `More ${service.categoryLabel.toLowerCase()}`,

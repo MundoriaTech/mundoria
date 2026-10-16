@@ -134,8 +134,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       _message = null;
     });
     try {
-      await widget.session.client.auth.resetPasswordForEmail(_email.text.trim());
-      setState(() => _message = 'If that email has an account, a reset link is on its way.');
+      await MundoriaApi(widget.session).forgotPassword(
+        email: _email.text.trim(),
+      );
+      setState(
+        () => _message =
+            'If that email has an account, a Mundoria reset link is on its way.',
+      );
     } catch (error) {
       setState(() => _message = '$error');
     } finally {

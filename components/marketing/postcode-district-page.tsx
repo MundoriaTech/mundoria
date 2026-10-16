@@ -89,7 +89,11 @@ export async function PostcodeDistrictPage({ prefix }: { prefix: string }) {
           underNav
         />
         {cleaners?.length ? (
-          <LocationFeaturedCleaners cleaners={cleaners} place={label} />
+          <LocationFeaturedCleaners
+            bookingHref={bookingHref}
+            cleaners={cleaners}
+            place={label}
+          />
         ) : (
           <BrandedSection>
             <p className="max-w-2xl text-sm leading-7 text-[#5a5470]">

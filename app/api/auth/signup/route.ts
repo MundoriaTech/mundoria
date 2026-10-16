@@ -1,12 +1,14 @@
 import * as Sentry from "@sentry/nextjs";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { signupSchema } from "@/lib/auth/schemas";
-import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
+import {
+  resolveAppUrl,
+  sendAuthLinkEmail,
+} from "@/lib/auth/send-auth-link-email";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
   const parsed = signupSchema.safeParse(await request.json());
@@ -20,21 +22,20 @@ export async function POST(request: Request) {
 
   const { full_name, email, password, phone, role, referral_code } = parsed.data;
   const avatarUrl = role === "cleaner" ? pickDefaultAvatar(email).src : undefined;
-  const supabase = createRouteHandlerClient({ cookies });
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+  const admin = createAdminClient();
+  const appUrl = resolveAppUrl(request);
   const nextPath = role === "cleaner" ? "/cleaner/dashboard" : "/dashboard";
-  const { data, error } = await supabase.auth.signUp({
+  const emailRedirectTo = `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(nextPath)}`;
+
+  const { data: created, error } = await admin.auth.admin.createUser({
     email,
+    email_confirm: false,
     password,
-    options: {
-        data: {
-        avatar_url: avatarUrl,
-        full_name,
-        phone,
-        role,
-      },
-      emailRedirectTo: `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(nextPath)}`,
+    user_metadata: {
+      avatar_url: avatarUrl,
+      full_name,
+      phone: phone?.trim() || null,
+      role,
     },
   });
 
@@ -51,34 +52,32 @@ export async function POST(request: Request) {
     );
   }
 
-  // Supabase may return a user with no identities when the email is already registered.
-  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+  const user = created.user;
+  if (!user) {
     return NextResponse.json(
-      {
-        code: "email_taken",
-        error: "An account already exists for this email.",
-      },
+      { code: "signup_failed", error: "Unable to create your account." },
       { status: 400 },
     );
   }
 
-  let welcomeEmailSent = false;
   let referralPromoCode: string | null = null;
 
-  if (
-    role === "customer" &&
-    data.user?.id &&
-    referral_code?.trim()
-  ) {
+  if (role === "customer" && referral_code?.trim()) {
     try {
       const referral = await applyReferralAtSignup({
         appUrl,
-        refereeId: data.user.id,
+        refereeId: user.id,
         referralCode: referral_code,
       });
       referralPromoCode = referral?.promoCode ?? null;
     } catch (referralError) {
       Sentry.captureException(referralError);
+      // Roll back the auth user if referral code is invalid so signup can retry cleanly.
+      try {
+        await admin.auth.admin.deleteUser(user.id);
+      } catch (deleteError) {
+        Sentry.captureException(deleteError);
+      }
       return NextResponse.json(
         {
           error:
@@ -91,28 +90,31 @@ export async function POST(request: Request) {
     }
   }
 
-  if (data.user && data.session) {
-    try {
-      welcomeEmailSent = await sendAccountWelcomeIfNeeded({
-        appUrl,
-        email,
-        emailConfirmedAt: data.user.email_confirmed_at,
-        fullName: full_name,
-        metadata: data.user.user_metadata,
-        profileExisted: true,
-        role,
-        userId: data.user.id,
-      });
-    } catch (emailError) {
-      Sentry.captureException(emailError);
-    }
+  try {
+    await sendAuthLinkEmail({
+      appUrl,
+      email,
+      firstName: full_name.split(/\s+/)[0],
+      redirectTo: emailRedirectTo,
+      type: "signup",
+    });
+  } catch (emailError) {
+    Sentry.captureException(emailError);
+    return NextResponse.json(
+      {
+        code: "signup_email_failed",
+        error:
+          "Your account was created, but we could not send the confirmation email. Try again in a moment, or use Forgot password after confirming with support.",
+      },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({
-    role,
-    hasSession: Boolean(data.session),
+    hasSession: false,
     referralPromoCode,
-    requiresEmailConfirmation: Boolean(data.user && !data.session),
-    welcomeEmailSent,
+    requiresEmailConfirmation: true,
+    role,
+    welcomeEmailSent: false,
   });
 }

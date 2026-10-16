@@ -2,40 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import { Check, Star } from "lucide-react";
 
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
+import { MarketingFaqColumnsSection } from "@/components/marketing/marketing-faq-columns-section";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
-import {
-  FlexibleIcon,
-  ReliableIcon,
-  SimpleIcon,
-} from "@/components/marketing/residential/feature-icons";
+import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
 import { cn } from "@/lib/utils";
-
-const FEATURE_ICONS = {
-  flexible: FlexibleIcon,
-  reliable: ReliableIcon,
-  simple: SimpleIcon,
-} as const;
-
-const FEATURE_ICON_CLASSES = {
-  flexible:
-    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#d4694a]",
-  reliable:
-    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
-  simple:
-    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#5b3d9e]",
-} as const;
-
-export type CategoryFeature = {
-  body: string;
-  icon: keyof typeof FEATURE_ICONS;
-  title: string;
-};
 
 export type CategoryServiceCard = {
   href: string;
@@ -45,9 +21,11 @@ export type CategoryServiceCard = {
 };
 
 export type CategoryFaq = {
-  answer: string;
+  answer: ReactNode;
+  /** Rendered after the optional services checklist. */
+  answerAfter?: ReactNode;
   question: string;
-  services?: Array<{ description: string; name: string }>;
+  services?: Array<{ description: ReactNode; name: string }>;
   servicesHeading?: string;
 };
 
@@ -55,8 +33,8 @@ export type ServiceCategoryMarketingConfig = {
   bookCta: string;
   bullets: [string, string, string];
   faqs: CategoryFaq[];
-  features: [CategoryFeature, CategoryFeature, CategoryFeature];
-  featuresTitle: string;
+  faqsTitle?: string;
+  faqVariant?: "brand" | "service";
   heroImage: string;
   serviceCards: CategoryServiceCard[];
   servicesGridClassName?: string;
@@ -68,17 +46,23 @@ export type ServiceCategoryMarketingConfig = {
 export function ServiceCategoryMarketingPage({
   bookingHref,
   config,
+  showFaqs = true,
+  showReviews = true,
 }: {
   bookingHref: string;
   config: ServiceCategoryMarketingConfig;
+  /** Set false when a parent route adds Birmingham hub FAQs. */
+  showFaqs?: boolean;
+  /** Set false when a parent route adds location reviews (e.g. Birmingham hub). */
+  showReviews?: boolean;
 }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const {
     bookCta,
     bullets,
     faqs,
-    features,
-    featuresTitle,
+    faqsTitle = "Mundoria FAQ",
+    faqVariant = "brand",
     heroImage,
     servicesGridClassName,
     servicesTitle,
@@ -113,12 +97,12 @@ export function ServiceCategoryMarketingPage({
         </div>
 
         <div
-          className="relative mx-auto flex min-h-[22rem] w-full max-w-[1400px] flex-col justify-between px-4 pb-8 sm:min-h-[26rem] sm:px-8 sm:pb-10 lg:min-h-[28rem] lg:px-12 lg:pb-12"
-          style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 1.25rem)` }}
+          className="relative mx-auto flex min-h-[22rem] w-full max-w-[1400px] flex-col justify-end px-4 pb-8 sm:min-h-[26rem] sm:px-8 sm:pb-10 lg:min-h-[28rem] lg:px-12 lg:pb-12"
+          style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2rem)` }}
         >
-          <div className="flex justify-end">
+          <div className="relative">
             <a
-              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-white/95 transition hover:text-white sm:text-[13px]"
+              className="absolute right-0 top-0 z-10 inline-flex items-center gap-1.5 text-[12px] font-medium text-white/95 transition hover:text-white sm:text-[13px]"
               href="#reviews"
             >
               <span className="inline-flex text-[#c79c66]" aria-hidden>
@@ -135,68 +119,36 @@ export function ServiceCategoryMarketingPage({
                 <span className="underline underline-offset-2">Check reviews</span>
               </span>
             </a>
-          </div>
 
-          <div className="max-w-xl pb-2 sm:pb-4">
-            <h1 className="text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl lg:text-[3.25rem]">
-              {title}
-            </h1>
-            <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
-              {subtitle}
-            </p>
-            <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">
-              {bullets.map((item) => (
-                <li className="flex items-start gap-2.5" key={item}>
-                  <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
-                    <Check className="h-3 w-3" strokeWidth={3} />
-                  </span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 sm:mt-8"
-              href={bookingHref}
-            >
-              {bookCta}
-            </Link>
+            <div className="max-w-xl pb-2 sm:pb-4">
+              <h1 className="text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl lg:text-[3.25rem]">
+                {title}
+              </h1>
+              <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
+                {subtitle}
+              </p>
+              <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">
+                {bullets.map((item) => (
+                  <li className="flex items-start gap-2.5" key={item}>
+                    <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
+                      <Check className="h-3 w-3" strokeWidth={3} />
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 sm:mt-8"
+                href={bookingHref}
+              >
+                {bookCta}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-[#f7f2fc] px-4 py-10 sm:px-8 sm:py-12">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-left text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-[1.75rem] lg:text-[2rem]">
-            {featuresTitle}
-          </h2>
-          <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
-            {features.map(({ body, icon, title: featureTitle }) => {
-              const Icon = FEATURE_ICONS[icon];
-              return (
-                <div
-                  className="relative min-h-[9.5rem] overflow-hidden rounded-[1.75rem] bg-[#f3efe6] px-5 pb-14 pt-5 sm:min-h-[10.5rem] sm:px-6 sm:pb-16 sm:pt-6"
-                  key={featureTitle}
-                >
-                  <h3 className="pr-14 text-[1.05rem] font-bold leading-tight text-[#1c133b] sm:text-[1.15rem]">
-                    {featureTitle}
-                  </h3>
-                  <p className="mt-2 max-w-[15.5rem] text-[13px] font-normal leading-[1.45] text-[#3d3a48] sm:text-[14px] sm:leading-[1.5]">
-                    {body}
-                  </p>
-                  <Icon
-                    className={cn(
-                      "pointer-events-none absolute bottom-3 right-3 h-14 w-14 sm:bottom-4 sm:right-4 sm:h-16 sm:w-16",
-                      "[filter:drop-shadow(0_0_0.65px_#fff)_drop-shadow(0_0_0.65px_#fff)_drop-shadow(1.25px_0_0_#fff)_drop-shadow(-1.25px_0_0_#fff)_drop-shadow(0_1.25px_0_#fff)_drop-shadow(0_-1.25px_0_#fff)_drop-shadow(1px_1px_0_#fff)_drop-shadow(-1px_1px_0_#fff)_drop-shadow(1px_-1px_0_#fff)_drop-shadow(-1px_-1px_0_#fff)_drop-shadow(0_2px_3px_rgba(28,19,59,0.18))]",
-                      FEATURE_ICON_CLASSES[icon],
-                    )}
-                    weight="duotone"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <PhotoFeatureBand />
 
       <CategoryServicesSection
         bookingHref={bookingHref}
@@ -207,48 +159,57 @@ export function ServiceCategoryMarketingPage({
         title={servicesTitle}
       />
 
-      <ReviewsSection />
+      {showReviews ? <ReviewsSection /> : null}
 
-      <section className="bg-[#f3eef8] px-4 py-12 sm:px-8 sm:py-16">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#c45c3a] sm:text-3xl">
-            Mundoria FAQ
-          </h2>
-          <div className="mt-8 columns-1 gap-4 sm:columns-2 sm:gap-5">
-            {faqs.map((faq) => (
-              <article
-                className="mb-4 break-inside-avoid rounded-[1.35rem] border border-[#d8d4e0] bg-[#f7f6f8] px-5 py-5 sm:mb-5 sm:rounded-[1.5rem] sm:px-6 sm:py-6"
-                key={faq.question}
+      {showFaqs ? (
+        <MarketingFaqColumnsSection
+          footer={
+            <div className="flex justify-center">
+              <Link
+                className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90"
+                href={bookingHref}
               >
-                <h3 className="text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
-                  {faq.question}
-                </h3>
-                <p className="mt-2.5 text-sm font-normal leading-6 text-[#414141]">
-                  {faq.answer}
-                </p>
+                Book a clean
+              </Link>
+            </div>
+          }
+          items={faqs.map((faq) => ({
+            answer: (
+              <>
+                {typeof faq.answer === "string" ? <p>{faq.answer}</p> : faq.answer}
                 {faq.services ? (
                   <>
-                    <h4 className="mt-4 text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
-                      {faq.servicesHeading}
-                    </h4>
-                    <ul className="mt-2.5 list-disc space-y-1.5 pl-5 text-sm font-normal leading-6 text-[#414141]">
+                    {faq.servicesHeading ? (
+                      <h4 className="mt-4 text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
+                        {faq.servicesHeading}
+                      </h4>
+                    ) : null}
+                    <ul className="mt-2.5 list-disc space-y-1.5 pl-5">
                       {faq.services.map((service) => (
                         <li key={service.name}>
                           <span className="font-semibold text-[#1c133b]">
                             {service.name}
                           </span>
-                          {" — "}
-                          {service.description}
+                          {service.description ? (
+                            <>
+                              {": "}
+                              {service.description}
+                            </>
+                          ) : null}
                         </li>
                       ))}
                     </ul>
                   </>
                 ) : null}
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+                {faq.answerAfter}
+              </>
+            ),
+            question: faq.question,
+          }))}
+          title={faqsTitle}
+          variant={faqVariant}
+        />
+      ) : null}
     </>
   );
 }

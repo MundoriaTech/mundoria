@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { CategoryMagLinks } from "@/components/marketing/category-mag-links";
 import { MovingHomeCleaningPage } from "@/components/marketing/moving-home/moving-home-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -38,6 +39,7 @@ export default function MovingHomeCleaningRoute() {
         }}
       />
       <MovingHomeCleaningPage bookingHref={bookingHref} />
+      <CategoryMagLinks category="moving_home" />
     </MarketingShell>
   );
 }

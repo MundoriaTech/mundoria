@@ -122,11 +122,11 @@ export const bookingServiceImages: Record<ServiceType, string> = {
 };
 
 export const bookingCategoryImages: Record<ServiceCategory, string> = {
-  residential: "/images/booking/categories/residential.jpg",
+  residential: "/images/marketing/landing/residential-hero.jpg",
   moving_home: "/images/marketing/landing/category-moving-home.png",
   short_term_rental: "/images/marketing/landing/category-str.png",
-  commercial: "/images/booking/categories/commercial.jpg?v=5",
-  recovery: "/images/booking/categories/recovery.jpg",
+  commercial: "/images/marketing/landing/commercial-hero.png",
+  recovery: "/images/marketing/landing/recovery-hero.jpg",
   exterior: "/images/marketing/landing/category-exterior.png",
 };
 
@@ -316,7 +316,6 @@ export function getFlowSteps(
   // Home-style personalisation — not for commercial premises.
   if (!isCommercial) {
     steps.push("addons");
-    steps.push("pets");
   }
 
   if (propertyQuestionModeFor(draft.serviceType) === "recovery") {

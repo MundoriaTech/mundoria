@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FormField } from "@/components/auth/form-field";
+import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { FormStatus } from "@/components/auth/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,17 +81,20 @@ export function AdminInviteAcceptForm({
         />
       </FormField>
 
-      <FormField htmlFor="password" label="Create password">
-        <PasswordInput
-          autoComplete="new-password"
-          id="password"
-          minLength={8}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="8+ characters, a capital, a number, and a symbol"
-          required
-          value={password}
-        />
-      </FormField>
+      <div className="space-y-2">
+        <FormField htmlFor="password" label="Create password">
+          <PasswordInput
+            autoComplete="new-password"
+            id="password"
+            minLength={8}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Create a password"
+            required
+            value={password}
+          />
+        </FormField>
+        <PasswordRequirementsList password={password} />
+      </div>
 
       <Button className="w-full" disabled={isSubmitting} type="submit">
         {isSubmitting ? "Creating admin account…" : "Accept invitation"}

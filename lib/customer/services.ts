@@ -119,7 +119,7 @@ export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
     description:
       "Pregnancy and postpartum, illness, injury, hospital discharge and bereavement support cleans.",
     icon: HeartHandshake,
-    label: "Mundoria Recovery",
+    label: "Recovery cleaning",
     value: "recovery",
   },
 ];

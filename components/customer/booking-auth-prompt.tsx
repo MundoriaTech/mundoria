@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { signupPendingLoginPath, rememberSignupEmail } from "@/lib/auth/signup-email-pending";
 import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,12 +86,12 @@ export function BookingAuthPrompt({
         throw new Error(result.error ?? "Unable to create your account.");
       }
       if (result.requiresEmailConfirmation) {
-        const params = new URLSearchParams({
-          email: email.trim(),
-          next: RETURN_PATH,
-          role: "customer",
-        });
-        router.replace(`/signup/check-email?${params.toString()}`);
+        rememberSignupEmail(email.trim());
+        router.replace(
+          signupPendingLoginPath("customer", {
+            next: RETURN_PATH,
+          }),
+        );
         return;
       }
       router.refresh();
@@ -207,9 +209,10 @@ export function BookingAuthPrompt({
             autoComplete="new-password"
             className="h-11"
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="Password"
+            placeholder="Create a password"
             value={password}
           />
+          <PasswordRequirementsList password={password} />
           <Button className="h-11 w-full" disabled={busy} type="submit">
             {busy ? "Saving…" : "Continue booking"}
           </Button>

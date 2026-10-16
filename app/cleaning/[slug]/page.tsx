@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import {
+  CategoryMagLinks,
+  magCategoryFor,
+} from "@/components/marketing/category-mag-links";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { ServiceCityCoverage } from "@/components/marketing/service-city-coverage";
 import { ServiceCategoryMarketingPage } from "@/components/marketing/service-category/service-category-marketing-page";
 import {
   MARKETING_SERVICES,
@@ -36,6 +41,7 @@ export default function CleaningServicePage({ params }: PageProps) {
 
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? service.bookingHref : "/setup";
+  const magCategory = magCategoryFor(service.category);
 
   return (
     <MarketingShell>
@@ -57,6 +63,10 @@ export default function CleaningServicePage({ params }: PageProps) {
         bookingHref={bookingHref}
         config={serviceDetailConfig(service)}
       />
+      <ServiceCityCoverage service={service} />
+      {magCategory ? (
+        <CategoryMagLinks category={magCategory} serviceSlug={service.slug} />
+      ) : null}
     </MarketingShell>
   );
 }

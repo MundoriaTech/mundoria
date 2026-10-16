@@ -5,6 +5,7 @@ import {
   Banknote,
   BookOpenCheck,
   Gauge,
+  Inbox,
   LogOut,
   MapPinned,
   Menu,
@@ -47,6 +48,13 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
     items: [
       { href: "/admin/dashboard", icon: Gauge, label: "Dashboard" },
       { href: "/admin/bookings", icon: BookOpenCheck, label: "Bookings" },
+      {
+        href: "/admin/inbox",
+        icon: Inbox,
+        label: "Inbox",
+        match: (pathname) =>
+          pathname === "/admin/inbox" || pathname.startsWith("/admin/inbox/"),
+      },
       { href: "/admin/disputes", icon: AlertTriangle, label: "Disputes" },
       { href: "/admin/feedback", icon: MessageSquare, label: "Feedback" },
     ],
@@ -121,6 +129,9 @@ function pageTitle(pathname: string) {
       pathname !== "/admin/disputes"
     ) {
       return "Dispute";
+    }
+    if (match.href === "/admin/inbox" && pathname !== "/admin/inbox") {
+      return "Conversation";
     }
     return match.label;
   }

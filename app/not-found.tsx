@@ -88,14 +88,8 @@ export default async function NotFoundPage() {
             >
               Help
             </Link>
-            ,{" "}
-            <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-              href="/contact"
-            >
-              Contact
-            </Link>
-            , or{" "}
+            {" "}
+            or{" "}
             <Link
               className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
               href="/cleaning"

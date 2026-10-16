@@ -16,6 +16,7 @@ export type MagPostAdminRow = {
   id: string;
   published: boolean;
   published_at: string | null;
+  related_services: string[];
   slug: string;
   title: string;
   updated_at: string;
