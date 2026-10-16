@@ -170,7 +170,7 @@ export const landingServicesMenu = {
 } as const;
 
 export const landingCategoryImages: Record<string, string> = {
-  commercial: "/images/marketing/landing/commercial-hero.png",
+  commercial: "/images/marketing/landing/commercial-hero.jpg",
   moving_home: "/images/marketing/landing/category-moving-home.jpg",
   recovery: "/images/marketing/landing/recovery-hero.jpg",
   residential: "/images/marketing/landing/residential-hero.jpg",
@@ -183,15 +183,15 @@ export const landingCategoryLoops: Record<
   { poster: string; video?: string }
 > = {
   commercial: {
-    poster: "/images/marketing/landing/commercial-hero.png",
+    poster: "/images/marketing/landing/category-commercial.jpg",
     video: "/images/marketing/landing/category-loop-commercial.mp4",
   },
   recovery: {
-    poster: "/images/marketing/landing/recovery-hero.jpg",
+    poster: "/images/marketing/landing/category-recovery.jpg",
     video: "/images/marketing/landing/category-loop-recovery.mp4",
   },
   residential: {
-    poster: "/images/marketing/landing/residential-hero.jpg",
+    poster: "/images/marketing/landing/category-residential.jpg",
     video: "/images/marketing/landing/category-loop-residential.mp4",
   },
 };

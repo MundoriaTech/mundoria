@@ -87,7 +87,7 @@ export function ServiceCategoryMarketingPage({
           <Image
             alt=""
             aria-hidden
-            className="object-cover object-center"
+            className="object-cover object-[center_30%]"
             fill
             priority
             sizes="100vw"

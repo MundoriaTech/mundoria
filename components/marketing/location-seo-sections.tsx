@@ -42,7 +42,7 @@ const LOCATION_FAQS = (place: string) =>
     },
     {
       answer:
-        "You can use your own products or ask the cleaner to bring basics where available as an add-on. Share fragrance-free or Recovery preferences in the booking notes.",
+        "You can use your own products and equipment, or add Mundoria product and equipment supply in booking. Share fragrance-free or Recovery preferences in the booking notes.",
       question: "Do I need to provide cleaning supplies?",
     },
     {

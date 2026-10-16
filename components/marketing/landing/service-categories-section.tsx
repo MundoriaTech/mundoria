@@ -12,8 +12,8 @@ const GROUPS = [
   {
     id: "home",
     image: "/images/marketing/landing/residential-hero.jpg",
-    imageAlt: "Residential cleaning in a home",
-    imageClassName: "object-center",
+    imageAlt: "Purple-gloved hands spraying cleaner onto a cloth for a home clean",
+    imageClassName: "object-[center_35%]",
     intro: "Scheduled upkeep, a one-off visit, a move, or a home ready for guests.",
     label: "Residential",
     items: [
@@ -46,9 +46,9 @@ const GROUPS = [
   },
   {
     id: "workplace",
-    image: "/images/marketing/landing/commercial-hero.png",
-    imageAlt: "A Mundoria cleaner steam-cleaning an office chair",
-    imageClassName: "object-center",
+    image: "/images/marketing/landing/commercial-hero.jpg",
+    imageAlt: "A cleaner in pink gloves wiping a table with spray and cloth",
+    imageClassName: "object-[center_28%]",
     intro: "Desks, shop floors, classrooms and the shared spaces between them.",
     label: "Commercial",
     items: [
@@ -77,8 +77,8 @@ const GROUPS = [
   {
     id: "recovery",
     image: "/images/marketing/landing/recovery-hero.jpg",
-    imageAlt: "A cleaner wiping a kitchen stovetop",
-    imageClassName: "object-center",
+    imageAlt: "A cleaner scrubbing the floor with spray and brush",
+    imageClassName: "object-[center_30%]",
     intro: "Practical cleaning support when life at home changes.",
     label: "Recovery",
     items: [

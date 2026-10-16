@@ -10,7 +10,7 @@ import { CategoryHeroOverlay } from "@/components/marketing/service-category/cat
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
 import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
 
-const HERO_IMAGE = "/images/marketing/landing/commercial-hero.png";
+const HERO_IMAGE = "/images/marketing/landing/commercial-hero.jpg";
 
 const SERVICE_CARDS = [
   {
@@ -63,7 +63,7 @@ export function CommercialCleaningPage({
           <Image
             alt=""
             aria-hidden
-            className="object-cover object-center"
+            className="object-cover object-[center_28%]"
             fill
             priority
             sizes="100vw"

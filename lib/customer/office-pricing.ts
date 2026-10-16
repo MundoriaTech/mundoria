@@ -4,10 +4,11 @@ import type { CleaningStandard } from "@/types/customer";
  * Office Cleaning time matrix from Mundoria commercial pricing logic.
  * Every minute value is for ONE cleaner.
  *
- * Override via COMMERCIAL_HOURLY_RATE_PENCE until platform rates are finalised.
+ * Default labour rate is £22/h (Essential). Pass a standard-aware rate from
+ * `hourlyRatePence`, or override all commercial labour via COMMERCIAL_HOURLY_RATE_PENCE.
  */
 export const OFFICE_HOURLY_RATE_PENCE = Number(
-  process.env.COMMERCIAL_HOURLY_RATE_PENCE ?? 3500,
+  process.env.COMMERCIAL_HOURLY_RATE_PENCE ?? 2200,
 );
 export const MAX_HOURS_PER_CLEANER = 5;
 

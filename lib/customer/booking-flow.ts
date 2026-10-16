@@ -1,4 +1,5 @@
 import {
+  availableAddOns,
   estimateDuration,
   serviceDefinition,
 } from "@/lib/customer/services";
@@ -125,7 +126,7 @@ export const bookingCategoryImages: Record<ServiceCategory, string> = {
   residential: "/images/marketing/landing/residential-hero.jpg",
   moving_home: "/images/marketing/landing/category-moving-home.jpg",
   short_term_rental: "/images/marketing/landing/category-str.jpg",
-  commercial: "/images/marketing/landing/commercial-hero.png",
+  commercial: "/images/marketing/landing/commercial-hero.jpg",
   recovery: "/images/marketing/landing/recovery-hero.jpg",
   exterior: "/images/marketing/landing/category-exterior.png",
 };
@@ -313,8 +314,11 @@ export function getFlowSteps(
   // The customer does not pick them.
   steps.push("rooms");
 
-  // Home-style personalisation — not for commercial premises.
-  if (!isCommercial) {
+  if (draft.serviceType) {
+    if (availableAddOns(draft.serviceType).length > 0) {
+      steps.push("addons");
+    }
+  } else if (!isCommercial) {
     steps.push("addons");
   }
 
@@ -358,7 +362,12 @@ export function durationSummary(args: {
     args.serviceType,
     args.cleaningStandard,
     args.selectedAddOns,
-    { officeSpaces: args.officeSpaces },
+    {
+      bathrooms: args.bathrooms,
+      bedrooms: args.bedrooms,
+      officeSpaces: args.officeSpaces,
+      otherRooms: args.otherRooms,
+    },
   );
 
   if (args.serviceType === "office" && args.officeSpaces?.length) {

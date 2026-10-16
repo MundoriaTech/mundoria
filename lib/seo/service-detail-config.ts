@@ -8,7 +8,7 @@ import {
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
 const CATEGORY_HERO: Record<ServiceCategory, string> = {
-  commercial: "/images/marketing/landing/commercial-hero.png",
+  commercial: "/images/marketing/landing/commercial-hero.jpg",
   exterior: "/images/marketing/landing/category-exterior.png",
   moving_home: "/images/marketing/landing/category-moving-home.jpg",
   recovery: "/images/marketing/landing/recovery-hero.jpg",

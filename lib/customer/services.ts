@@ -21,6 +21,11 @@ import {
   calculateOfficeQuote,
   type OfficeSpaceSelection,
 } from "@/lib/customer/office-pricing";
+import {
+  equipmentSupplyRatePence,
+  hourlyRatePence,
+  productSupplyRatePence,
+} from "@/lib/customer/rate-card";
 import type {
   Address,
   CleaningStandard,
@@ -51,10 +56,13 @@ export interface ServiceDefinition {
 }
 
 export interface ServiceAddOnDefinition {
+  /** Flat fee in pence. Hourly supply add-ons use amount 0 and compute via addOnAmountPence. */
   amount: number;
   categories?: ServiceCategory[];
   description: string;
   id: string;
+  /** When set, charge this many pence per cleaner-hour instead of `amount`. */
+  hourly?: "products" | "equipment";
   label: string;
   services?: ServiceType[];
 }
@@ -348,11 +356,34 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     label: "Ironing",
   },
   {
-    amount: 800,
-    categories: ["residential"],
-    description: "Cleaner brings standard cleaning products for the session.",
+    amount: 0,
+    categories: [
+      "residential",
+      "moving_home",
+      "short_term_rental",
+      "recovery",
+      "commercial",
+    ],
+    description:
+      "Cleaner brings the Mundoria product kit (£2/h home, £3/h commercial).",
+    hourly: "products",
     id: "cleaning_products",
     label: "Cleaning products",
+  },
+  {
+    amount: 0,
+    categories: [
+      "residential",
+      "moving_home",
+      "short_term_rental",
+      "recovery",
+      "commercial",
+    ],
+    description:
+      "Cleaner brings the Mundoria equipment kit (£3/h, or £5/h for deep cleaning).",
+    hourly: "equipment",
+    id: "cleaning_equipment",
+    label: "Cleaning equipment",
   },
   {
     amount: 1200,
@@ -412,12 +443,6 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     label: "Recovery priority care",
   },
 ];
-
-const standardMultipliers: Record<CleaningStandard, number> = {
-  comprehensive: 1.45,
-  enhanced: 1.2,
-  essential: 1,
-};
 
 const conditionLabels: Record<PropertyCondition, string> = {
   extra_attention: "needs a little extra attention",
@@ -588,10 +613,36 @@ export function availableAddOns(serviceType: ServiceType) {
   });
 }
 
-export function selectedAddOnTotal(selectedAddOns: string[]) {
+export type AddOnPriceContext = {
+  durationHours: number;
+  serviceType: ServiceType;
+  standard: CleaningStandard;
+};
+
+export function addOnAmountPence(
+  addOn: ServiceAddOnDefinition,
+  context?: AddOnPriceContext,
+) {
+  if (!addOn.hourly || !context) {
+    return addOn.amount;
+  }
+  const hours = Math.max(0, context.durationHours);
+  if (addOn.hourly === "products") {
+    const category = serviceDefinition(context.serviceType).category;
+    return Math.round(hours * productSupplyRatePence(category));
+  }
+  return Math.round(
+    hours * equipmentSupplyRatePence(context.serviceType),
+  );
+}
+
+export function selectedAddOnTotal(
+  selectedAddOns: string[],
+  context?: AddOnPriceContext,
+) {
   const selected = new Set(selectedAddOns);
   return SERVICE_ADD_ONS.filter((addOn) => selected.has(addOn.id)).reduce(
-    (sum, addOn) => sum + addOn.amount,
+    (sum, addOn) => sum + addOnAmountPence(addOn, context),
     0,
   );
 }
@@ -639,6 +690,55 @@ export function schedulePriceLabel(
   return "Timed arrival";
 }
 
+export function estimateDuration(
+  serviceType: ServiceType,
+  standard: CleaningStandard = recommendedStandardFor(serviceType),
+  selectedAddOns: string[] = [],
+  options?: {
+    bathrooms?: number | null;
+    bedrooms?: number | null;
+    officeSpaces?: OfficeSpaceSelection[];
+    otherRooms?: number | null;
+    propertyType?: Address["property_type"] | null;
+  },
+) {
+  if (serviceType === "office" && options?.officeSpaces?.length) {
+    const quote = calculateOfficeQuote(
+      options.officeSpaces,
+      standard,
+      hourlyRatePence(serviceType, standard),
+    );
+    return Math.max(1, quote.jobDurationHours);
+  }
+
+  const service = serviceDefinition(serviceType);
+  const standardExtra =
+    standard === "comprehensive" ? 1.5 : standard === "enhanced" ? 0.75 : 0;
+  // Flat extras (ironing etc.) still add time; hourly supply add-ons do not.
+  const timedAddOnCount = selectedAddOns.filter((id) => {
+    const addOn = SERVICE_ADD_ONS.find((item) => item.id === id);
+    return addOn && !addOn.hourly;
+  }).length;
+  const addOnExtra = timedAddOnCount * 0.25;
+
+  const bedrooms = options?.bedrooms ?? 1;
+  const bathrooms = options?.bathrooms ?? 1;
+  const otherRooms = options?.otherRooms ?? 0;
+  const roomExtra =
+    Math.max(0, bedrooms - 1) * 0.55 + bathrooms * 0.36 + otherRooms * 0.27;
+  const propertyMultiplier =
+    options?.propertyType === "office"
+      ? 1.35
+      : options?.propertyType === "house"
+        ? 1.1
+        : 1;
+
+  return Number(
+    ((service.duration + standardExtra + addOnExtra + roomExtra) *
+      propertyMultiplier).toFixed(2),
+  );
+}
+
 export function estimatePrice(
   serviceType: ServiceType,
   address: Address,
@@ -653,58 +753,36 @@ export function estimatePrice(
   },
 ) {
   const scheduleMult = schedulePriceMultiplier(schedule?.date, schedule?.time);
+  const rate = hourlyRatePence(serviceType, standard);
 
   if (serviceType === "office" && options?.officeSpaces?.length) {
-    const quote = calculateOfficeQuote(options.officeSpaces, standard);
+    const quote = calculateOfficeQuote(options.officeSpaces, standard, rate);
+    const labour = Math.round(quote.pricePence * scheduleMult);
     return (
-      Math.round(quote.pricePence * scheduleMult) +
-      selectedAddOnTotal(selectedAddOns)
+      labour +
+      selectedAddOnTotal(selectedAddOns, {
+        durationHours: quote.cleanerHours,
+        serviceType,
+        standard,
+      })
     );
   }
 
-  const service = serviceDefinition(serviceType);
-  const bedrooms = address.num_bedrooms ?? 1;
-  const bathrooms = address.num_bathrooms ?? 1;
-  const otherRooms = address.num_other_rooms ?? 0;
-  const propertyMultiplier =
-    address.property_type === "office"
-      ? 1.35
-      : address.property_type === "house"
-        ? 1.1
-        : 1;
-
-  const base = Math.round(
-    (service.basePrice +
-      Math.max(0, bedrooms - 1) * 1200 +
-      bathrooms * 800 +
-      otherRooms * 600) *
-      propertyMultiplier *
-      standardMultipliers[standard] *
-      scheduleMult,
+  const hours = estimateDuration(serviceType, standard, selectedAddOns, {
+    bathrooms: address.num_bathrooms,
+    bedrooms: address.num_bedrooms,
+    otherRooms: address.num_other_rooms,
+    propertyType: address.property_type,
+  });
+  const labour = Math.round(hours * rate * scheduleMult);
+  return (
+    labour +
+    selectedAddOnTotal(selectedAddOns, {
+      durationHours: hours,
+      serviceType,
+      standard,
+    })
   );
-
-  return base + selectedAddOnTotal(selectedAddOns);
-}
-
-export function estimateDuration(
-  serviceType: ServiceType,
-  standard: CleaningStandard = recommendedStandardFor(serviceType),
-  selectedAddOns: string[] = [],
-  options?: {
-    officeSpaces?: OfficeSpaceSelection[];
-  },
-) {
-  if (serviceType === "office" && options?.officeSpaces?.length) {
-    const quote = calculateOfficeQuote(options.officeSpaces, standard);
-    return Math.max(1, quote.jobDurationHours);
-  }
-
-  const service = serviceDefinition(serviceType);
-  const standardExtra =
-    standard === "comprehensive" ? 1.5 : standard === "enhanced" ? 0.75 : 0;
-  const addOnExtra = selectedAddOns.length * 0.25;
-
-  return Number((service.duration + standardExtra + addOnExtra).toFixed(2));
 }
 
 export function getSmartRecommendation({
@@ -791,10 +869,6 @@ export function formatMoney(amountInPence: number | null | undefined) {
 
 /** Baseline “from” price for cards / early basket (1 bed · 1 bath · recommended standard). */
 export function indicativeFromPrice(serviceType: ServiceType) {
-  const service = serviceDefinition(serviceType);
-  if (serviceType === "office") {
-    return service.basePrice;
-  }
   const stub = {
     address_line_1: "",
     address_line_2: null,

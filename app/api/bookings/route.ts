@@ -7,6 +7,7 @@ import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import { calculateOfficeQuote } from "@/lib/customer/office-pricing";
 import {
+  addOnAmountPence,
   formatMoney,
   formatServiceName,
   SERVICE_ADD_ONS,
@@ -248,10 +249,16 @@ export async function POST(request: Request) {
   }
 
   if (selectedAddOnDefs.length) {
+    const supplyHours =
+      officeQuote?.cleanerHours ?? parsed.data.estimatedDurationHours ?? 0;
     const { error: addOnError } = await admin.from("booking_add_ons").insert(
       selectedAddOnDefs.map((addOn) => ({
         add_on_id: addOn.id,
-        amount: addOn.amount,
+        amount: addOnAmountPence(addOn, {
+          durationHours: supplyHours,
+          serviceType: parsed.data.serviceType,
+          standard: parsed.data.cleaningStandard,
+        }),
         booking_id: booking.id,
         label: addOn.label,
       })),
