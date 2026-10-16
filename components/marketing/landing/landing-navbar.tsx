@@ -69,6 +69,7 @@ export function LandingNavbar({
   const loginHref = loginHrefProp ?? (configured ? "/login" : "/setup");
   const [viewer, setViewer] = useState<MarketingViewer>(initialViewer);
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
+  const showForCleanersCta = viewer?.role !== "cleaner";
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
 
@@ -195,6 +196,14 @@ export function LandingNavbar({
               Log in
             </Link>
           )}
+          {showForCleanersCta ? (
+            <Link
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
+              href="/for-cleaners"
+            >
+              For cleaners
+            </Link>
+          ) : null}
         </div>
 
         <MobileNav
@@ -203,6 +212,7 @@ export function LandingNavbar({
           loginHref={loginHref}
           mobileOpen={mobileOpen}
           onMobileOpenChange={setMobileOpen}
+          showForCleanersCta={showForCleanersCta}
           viewer={viewer}
         />
       </div>
@@ -364,6 +374,7 @@ function MobileNav({
   viewer,
   mobileOpen,
   onMobileOpenChange,
+  showForCleanersCta,
 }: {
   customerHref: string;
   loginHref: string;
@@ -371,6 +382,7 @@ function MobileNav({
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
   mobileOpen: boolean;
   onMobileOpenChange: (open: boolean) => void;
+  showForCleanersCta: boolean;
 }) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -415,6 +427,14 @@ function MobileNav({
             size="sm"
             url={viewer.avatar_url}
           />
+        </Link>
+      ) : null}
+      {showForCleanersCta ? (
+        <Link
+          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#1c133b] px-2.5 text-[11px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation min-[380px]:px-3.5 min-[380px]:text-[12px]"
+          href="/for-cleaners"
+        >
+          For cleaners
         </Link>
       ) : null}
       <button

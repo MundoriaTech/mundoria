@@ -14,10 +14,7 @@ export const landingColors = {
   pageGradientEnd: "#f6f0ff",
 } as const;
 
-export const landingNavLinks = [
-  ["Mag", "/blog"],
-  ["For cleaners", "/for-cleaners"],
-] as const;
+export const landingNavLinks = [["Mag", "/blog"]] as const;
 
 /** The three main categories, each with its own menu. */
 export const landingCategoryNav = [
