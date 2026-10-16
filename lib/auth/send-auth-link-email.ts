@@ -19,21 +19,29 @@ export async function sendAuthLinkEmail({
   appUrl,
   email,
   firstName,
+  password,
   redirectTo,
   type,
 }: {
   appUrl: string;
   email: string;
   firstName?: string;
+  /** Required when type is signup — Supabase generateLink needs it. */
+  password?: string;
   redirectTo: string;
   type: AuthLinkType;
 }) {
+  if (type === "signup" && !password) {
+    throw new Error("Signup confirmation requires the account password.");
+  }
+
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.generateLink(
     type === "signup"
       ? {
           email,
           options: { redirectTo },
+          password: password!,
           type: "signup",
         }
       : {

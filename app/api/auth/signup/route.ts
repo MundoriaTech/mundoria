@@ -95,6 +95,7 @@ export async function POST(request: Request) {
       appUrl,
       email,
       firstName: full_name.split(/\s+/)[0],
+      password,
       redirectTo: emailRedirectTo,
       type: "signup",
     });

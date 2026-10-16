@@ -62,7 +62,6 @@ export function LandingNavbar({
   const configured = hasSupabasePublicConfig();
   const loginHref = loginHrefProp ?? (configured ? "/login" : "/setup");
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
-  const showBookCta = viewer?.role !== "cleaner";
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
 
@@ -142,14 +141,6 @@ export function LandingNavbar({
               Log in
             </Link>
           )}
-          {showBookCta ? (
-          <Link
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
-            href={customerHref}
-          >
-            Book a clean
-          </Link>
-          ) : null}
         </div>
 
         <MobileNav
@@ -158,7 +149,6 @@ export function LandingNavbar({
           loginHref={loginHref}
           mobileOpen={mobileOpen}
           onMobileOpenChange={setMobileOpen}
-          showBookCta={showBookCta}
           viewer={viewer}
         />
       </div>
@@ -320,7 +310,6 @@ function MobileNav({
   viewer,
   mobileOpen,
   onMobileOpenChange,
-  showBookCta,
 }: {
   customerHref: string;
   loginHref: string;
@@ -328,7 +317,6 @@ function MobileNav({
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
   mobileOpen: boolean;
   onMobileOpenChange: (open: boolean) => void;
-  showBookCta: boolean;
 }) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -373,14 +361,6 @@ function MobileNav({
             size="sm"
             url={viewer.avatar_url}
           />
-        </Link>
-      ) : null}
-      {showBookCta ? (
-        <Link
-          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#1c133b] px-2.5 text-[11px] font-semibold text-white transition hover:bg-[#1c133b]/90 touch-manipulation min-[380px]:px-3.5 min-[380px]:text-[12px]"
-          href={customerHref}
-        >
-          Book a clean
         </Link>
       ) : null}
       <button
