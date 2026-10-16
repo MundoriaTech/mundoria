@@ -80,9 +80,11 @@ import {
   categoryDefinition,
   estimatePrice,
   estimateDuration,
+  formatHourlyRate,
   formatMoney,
   formatServiceName,
   indicativeFromPrice,
+  indicativeHourlyRatePence,
   normalizeStandard,
   pricingStandardFor,
   selectedAddOnTotal,
@@ -91,6 +93,7 @@ import {
   SERVICE_CATEGORIES,
   servicesForCategory,
 } from "@/lib/customer/services";
+import { hourlyRatePence } from "@/lib/customer/rate-card";
 import {
   calculateOfficeQuote,
   type OfficeSpaceSize,
@@ -147,6 +150,34 @@ const blankDraft: BookingDraft = {
 
 const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
 const BOOKING_STEP_KEY = "mundoria-booking-step-v5";
+
+/** Stops draft/step writes after abandon, checkout, or leave — reset on mount. */
+let allowBookingPersist = true;
+
+function clearBookingStorage() {
+  allowBookingPersist = false;
+  try {
+    window.localStorage.removeItem(BOOKING_DRAFT_KEY);
+    window.localStorage.removeItem(BOOKING_STEP_KEY);
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.).
+  }
+}
+
+function isBookingAuthReturnPath(pathname: string, search: string) {
+  if (
+    !pathname.startsWith("/login") &&
+    !pathname.startsWith("/signup") &&
+    !pathname.startsWith("/setup") &&
+    !pathname.startsWith("/auth")
+  ) {
+    return false;
+  }
+  return (
+    search.includes("next=/booking/new") ||
+    search.includes("next=%2Fbooking%2Fnew")
+  );
+}
 
 /** Avoid double-building the history stack under React Strict Mode remounts. */
 let bookingHistoryBootstrap: {
@@ -266,6 +297,7 @@ export function BookingWizard({
   const flowStepsRef = useRef<BookingFlowStepId[]>([]);
   const stepIdRef = useRef<BookingFlowStepId>("address");
   const stepIndexRef = useRef(0);
+  const persistBookingRef = useRef(true);
 
   const needsAuth = !userId;
   const includeCleanerChoice = knownCleaners.length > 0;
@@ -392,10 +424,13 @@ export function BookingWizard({
     serviceType: draft.serviceType,
   });
   useEffect(() => {
+    allowBookingPersist = true;
+    persistBookingRef.current = true;
     try {
       if (fresh) {
-        window.localStorage.removeItem(BOOKING_DRAFT_KEY);
-        window.localStorage.removeItem(BOOKING_STEP_KEY);
+        clearBookingStorage();
+        allowBookingPersist = true;
+        persistBookingRef.current = true;
         setDraft({
           ...blankDraft,
           ...initialDraft,
@@ -589,15 +624,14 @@ export function BookingWizard({
         );
       }
     } catch {
-      window.localStorage.removeItem(BOOKING_DRAFT_KEY);
-      window.localStorage.removeItem(BOOKING_STEP_KEY);
+      clearBookingStorage();
     }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
     window.localStorage.setItem(BOOKING_DRAFT_KEY, JSON.stringify(draft));
   }, [draft, hydrated]);
 
@@ -612,9 +646,22 @@ export function BookingWizard({
   }, [addresses, draft.addressId, hydrated]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
     window.localStorage.setItem(BOOKING_STEP_KEY, stepId);
   }, [hydrated, stepId]);
+
+  // Leaving the booking flow (browser back, logo, other nav) clears the basket,
+  // except auth round-trips that return to /booking/new.
+  useEffect(() => {
+    return () => {
+      if (!persistBookingRef.current || !allowBookingPersist) return;
+      const { pathname, search } = window.location;
+      if (pathname.startsWith("/booking/new")) return;
+      if (isBookingAuthReturnPath(pathname, search)) return;
+      clearBookingStorage();
+      persistBookingRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     setAddresses(initialAddresses);
@@ -807,7 +854,13 @@ export function BookingWizard({
     }
   }, [draft.recentlyMoved, draft.serviceType]);
 
+  function abandonBookingStorage() {
+    clearBookingStorage();
+    persistBookingRef.current = false;
+  }
+
   function exitBookingFlow() {
+    abandonBookingStorage();
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
       router.replace(returnTo);
       return;
@@ -1130,16 +1183,29 @@ export function BookingWizard({
   }
 
   const displayAmount = promoAmount ?? estimatedAmount;
+  const displayHourlyRatePence =
+    draft.serviceType && selectedStandard
+      ? hourlyRatePence(draft.serviceType, selectedStandard)
+      : draft.serviceType
+        ? indicativeHourlyRatePence(draft.serviceType)
+        : null;
   const priceLabel =
-    estimatedAmount > 0
-      ? `${priceIsIndicative ? "From " : ""}${formatMoney(displayAmount)}`
+    displayHourlyRatePence != null
+      ? `${priceIsIndicative ? "From " : ""}${formatHourlyRate(displayHourlyRatePence)}`
       : null;
   const addOnLines = draft.serviceType
     ? availableAddOns(draft.serviceType)
         .filter((item) => draft.selectedAddOns.includes(item.id))
         .map((item) => ({
           label: item.label,
-          amount: item.amount,
+          amount: item.hourly
+            ? addOnAmountPence(item, {
+                durationHours: 1,
+                serviceType: draft.serviceType!,
+                standard: selectedStandard ?? normalizeStandard(draft.serviceType!, null),
+              })
+            : item.amount,
+          hourly: Boolean(item.hourly),
         }))
     : [];
 
@@ -1181,6 +1247,7 @@ export function BookingWizard({
     durationHours: draft.estimatedDurationHours,
     frequencyLabel,
     hasPets: draft.hasPets,
+    hourlyRatePence: displayHourlyRatePence,
     onJumpAddress: () => jumpToStep("address"),
     onJumpSchedule: () => {
       if (flowSteps.includes("date")) jumpToStep("date");
@@ -1211,7 +1278,6 @@ export function BookingWizard({
   };
 
   const basket = <BookingBasket {...basketProps} />;
-  const hideBasket = stepId === "checkout" && needsAuth;
 
   const stepBody = (
     <>
@@ -1394,6 +1460,13 @@ export function BookingWizard({
     <BookingChrome
       backDisabled={checkoutBusy}
       onBack={goBack}
+      onHome={() => {
+        abandonBookingStorage();
+        router.replace("/");
+      }}
+      progress={
+        flowSteps.length > 0 ? (stepIndex + 1) / flowSteps.length : 0
+      }
       signedIn={Boolean(userId)}
     >
       <div
@@ -1401,24 +1474,22 @@ export function BookingWizard({
           // WeCasa funnel: 1140px shell, 20px side/top pad. Keep large bottom pad at every
           // breakpoint so the fixed Next bar never clips the last cards.
           "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-10 md:px-5 md:pt-5 xl:px-0 xl:pt-5",
-          stepId === "checkout"
+          stepId === "checkout" && !needsAuth
             ? "pb-10"
             : "pb-[calc(5.5rem+env(safe-area-inset-bottom))]",
         )}
       >
         <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:gap-0">
-          <div className={cn("min-w-0 w-full", !hideBasket && "lg:w-[49.13%]")}>
+          <div className="min-w-0 w-full lg:w-[49.13%]">
             {stepBody}
           </div>
-          {hideBasket ? null : (
-            <div className="hidden lg:ml-[8.77%] lg:flex lg:w-[42.1%] lg:shrink-0">
-              {basket}
-            </div>
-          )}
+          <div className="hidden lg:ml-[8.77%] lg:flex lg:w-[42.1%] lg:shrink-0">
+            {basket}
+          </div>
         </div>
       </div>
 
-      {stepId !== "checkout" ? (
+      {stepId !== "checkout" || needsAuth ? (
         <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#eeeef1] bg-white px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5 xl:px-0">
           <div className="mx-auto flex w-full max-w-[1140px] flex-col items-center lg:items-stretch">
             {/* Mobile: WeCasa row — total | ↑/↓ | Next */}
@@ -1445,26 +1516,32 @@ export function BookingWizard({
                   <ChevronUp className="h-5 w-5" strokeWidth={2.5} />
                 )}
               </button>
-              <button
-                className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
-                disabled={!canContinue()}
-                onClick={goNext}
-                type="button"
-              >
-                Next
-              </button>
+              {stepId !== "checkout" ? (
+                <button
+                  className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
+                  disabled={!canContinue()}
+                  onClick={goNext}
+                  type="button"
+                >
+                  Next
+                </button>
+              ) : (
+                <span className="inline-flex h-12 w-[5.5rem] shrink-0" />
+              )}
             </div>
             {/* Desktop: Next under the left column */}
-            <div className="hidden w-full lg:flex lg:w-[49.13%] lg:justify-center">
-              <button
-                className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
-                disabled={!canContinue()}
-                onClick={goNext}
-                type="button"
-              >
-                Next
-              </button>
-            </div>
+            {stepId !== "checkout" ? (
+              <div className="hidden w-full lg:flex lg:w-[49.13%] lg:justify-center">
+                <button
+                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
+                  disabled={!canContinue()}
+                  onClick={goNext}
+                  type="button"
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -1516,7 +1593,7 @@ export function BookingWizard({
       <BookingBasketSheet
         {...basketProps}
         onClose={() => setBasketOpen(false)}
-        open={basketOpen && !hideBasket}
+        open={basketOpen}
       />
     </BookingChrome>
   );
@@ -1790,7 +1867,12 @@ function ServiceStep({
                   />
                 </span>
                 <div className={cn("min-w-0 flex-1", popular && "pr-16")}>
-                  <p className="font-semibold text-[#1c133b]">{item.label}</p>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-semibold text-[#1c133b]">{item.label}</p>
+                    <p className="shrink-0 text-sm font-bold tabular-nums text-[#1c133b]">
+                      From {formatHourlyRate(indicativeHourlyRatePence(item.value))}
+                    </p>
+                  </div>
                   {active ? (
                     <ul className="mt-2 space-y-1 text-sm text-[#5a5470]">
                       <li>· {item.description}</li>
@@ -2433,12 +2515,17 @@ function AddOnsStep({
                     </p>
                   </div>
                   <p className="shrink-0 text-right text-sm font-bold text-[#1c133b]">
-                    +{formatMoney(addOnAmountPence(addOn, addOnPriceContext))}
-                    {addOn.hourly ? (
-                      <span className="mt-0.5 block text-[11px] font-semibold text-[#5a5470]">
-                        hourly
-                      </span>
-                    ) : null}
+                    +
+                    {addOn.hourly && addOnPriceContext
+                      ? formatHourlyRate(
+                          addOnAmountPence(addOn, {
+                            ...addOnPriceContext,
+                            durationHours: 1,
+                          }),
+                        )
+                      : formatMoney(
+                          addOnAmountPence(addOn, addOnPriceContext),
+                        )}
                   </p>
                 </div>
               </button>
@@ -2757,6 +2844,11 @@ function DurationStep({
   const options = [
     2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 9, 10, 11, 12,
   ];
+  const recommended = options.reduce((best, option) =>
+    Math.abs(option - duration.hours) < Math.abs(best - duration.hours)
+      ? option
+      : best,
+  );
 
   function labelFor(value: number) {
     const total = Math.round(value * 60);
@@ -2774,18 +2866,26 @@ function DurationStep({
       </h2>
       <div className="mt-8 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
         {options.map((option) => {
+          // Only a customer tap counts — never preselect the recommendation.
           const active = hours != null && Math.abs(option - hours) < 0.01;
+          const isRecommended = Math.abs(option - recommended) < 0.01;
           return (
             <button
               className={cn(
-                "inline-flex h-12 items-center justify-center rounded-xl bg-[#f3f3f5] text-sm font-semibold text-[#1c133b] transition touch-manipulation",
+                "relative inline-flex h-12 items-center justify-center rounded-xl bg-[#f3f3f5] text-sm font-semibold text-[#1c133b] transition touch-manipulation",
                 active && "border-2 border-[#6a45b8] bg-white",
+                !active && isRecommended && "ring-1 ring-[#c9b8ef]",
               )}
               key={option}
               onClick={() => onChange(option)}
               type="button"
             >
               {labelFor(option)}
+              {isRecommended ? (
+                <span className="absolute -top-1.5 right-1 rounded bg-[#efe6ff] px-1 text-[9px] font-bold uppercase tracking-wide text-[#6a45b8]">
+                  Rec
+                </span>
+              ) : null}
             </button>
           );
         })}
@@ -2795,7 +2895,8 @@ function DurationStep({
           i
         </span>
         <p>
-          {duration.propertyHint}. {duration.windowsTip}
+          {duration.propertyHint} (about {labelFor(recommended)}).{" "}
+          {duration.windowsTip}
         </p>
       </div>
     </div>
@@ -3270,8 +3371,7 @@ function CheckoutStep({
         throw new Error(booking.error ?? "Unable to create booking.");
       }
 
-      window.localStorage.removeItem(BOOKING_DRAFT_KEY);
-      window.localStorage.removeItem(BOOKING_STEP_KEY);
+      clearBookingStorage();
       const seriesNotice = booking.recurringError ? "?series=failed" : "";
       router.replace(`/booking/${booking.bookingId}${seriesNotice}`);
       router.refresh();
