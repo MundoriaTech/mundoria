@@ -117,14 +117,14 @@ export const bookingServiceImages: Record<ServiceType, string> = {
   post_injury: "/images/marketing/landing/recovery-illness.png",
   hospital_discharge: "/images/marketing/landing/recovery-hospital.png",
   bereavement_support: "/images/marketing/landing/recovery-bereavement.png",
-  post_construction: "/images/marketing/landing/category-residential.png",
-  window_cleaning: "/images/marketing/landing/category-residential.png",
+  post_construction: "/images/marketing/landing/category-residential.jpg",
+  window_cleaning: "/images/marketing/landing/category-residential.jpg",
 };
 
 export const bookingCategoryImages: Record<ServiceCategory, string> = {
   residential: "/images/marketing/landing/residential-hero.jpg",
-  moving_home: "/images/marketing/landing/category-moving-home.png",
-  short_term_rental: "/images/marketing/landing/category-str.png",
+  moving_home: "/images/marketing/landing/category-moving-home.jpg",
+  short_term_rental: "/images/marketing/landing/category-str.jpg",
   commercial: "/images/marketing/landing/commercial-hero.png",
   recovery: "/images/marketing/landing/recovery-hero.jpg",
   exterior: "/images/marketing/landing/category-exterior.png",
@@ -140,7 +140,7 @@ export function bookingFlowHeroImage(draft: {
   if (draft.serviceCategory && bookingCategoryImages[draft.serviceCategory]) {
     return bookingCategoryImages[draft.serviceCategory];
   }
-  return "/images/marketing/landing/category-residential.png";
+  return "/images/marketing/landing/category-residential.jpg";
 }
 
 const REQUIRED_RECURRING: ServiceType[] = ["regular"];

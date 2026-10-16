@@ -174,10 +174,10 @@ export const landingServicesMenu = {
 
 export const landingCategoryImages: Record<string, string> = {
   commercial: "/images/marketing/landing/commercial-hero.png",
-  moving_home: "/images/marketing/landing/category-moving-home.png",
+  moving_home: "/images/marketing/landing/category-moving-home.jpg",
   recovery: "/images/marketing/landing/recovery-hero.jpg",
   residential: "/images/marketing/landing/residential-hero.jpg",
-  short_term_rental: "/images/marketing/landing/category-str.png",
+  short_term_rental: "/images/marketing/landing/category-str.jpg",
 };
 
 /** Colour-coded cleaning scene loops for Smart Service cards. */
