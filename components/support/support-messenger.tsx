@@ -1246,7 +1246,9 @@ function ThreadView({
               );
               event.target.value = "";
             }}
-            ref={fileInputRef}
+            ref={(node) => {
+              fileInputRef.current = node;
+            }}
             type="file"
           />
           {error ? <p className="mt-2 text-xs text-[#9a3412]">{error}</p> : null}
