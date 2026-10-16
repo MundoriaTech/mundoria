@@ -4,12 +4,9 @@ import { notFound } from "next/navigation";
 import { CityLocationPage } from "@/components/marketing/city-location-page";
 import {
   birminghamCoveragePlaceBySlug,
-  birminghamCoveragePlaces,
   birminghamCoverageZoneById,
 } from "@/lib/seo/birmingham-coverage";
 import {
-  BIRMINGHAM_AREAS,
-  MARKETING_SERVICES,
   birminghamAreaBySlug,
   marketingServiceBySlug,
   servicePlacePath,
@@ -20,27 +17,18 @@ import {
   serviceSurroundingTownLinks,
 } from "@/lib/seo/service-place-links";
 import { buildPageMetadata } from "@/lib/seo/site";
+import { priorityServiceAreaStaticParams } from "@/lib/seo/static-params";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 type PageProps = {
   params: { area: string; slug: string };
 };
 
-export const dynamicParams = false;
+/** Deep coverage places stay linked from the sitemap and render on first request. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  const slugs = Array.from(
-    new Set([
-      ...BIRMINGHAM_AREAS.map((area) => area.slug),
-      ...birminghamCoveragePlaces().map((place) => place.slug),
-    ]),
-  );
-  return MARKETING_SERVICES.flatMap((service) =>
-    slugs.map((area) => ({
-      area,
-      slug: service.slug,
-    })),
-  );
+  return priorityServiceAreaStaticParams();
 }
 
 export function generateMetadata({ params }: PageProps): Metadata {

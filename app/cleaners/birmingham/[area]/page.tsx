@@ -6,7 +6,6 @@ import { PostcodeDistrictPage } from "@/components/marketing/postcode-district-p
 import {
   BIRMINGHAM_COVERAGE_ZONES,
   birminghamCoveragePlaceBySlug,
-  birminghamCoveragePlaces,
   birminghamCoverageZoneById,
   coverageAreaHref,
   coverageAreaSlug,
@@ -14,7 +13,6 @@ import {
   coverageZoneHref,
 } from "@/lib/seo/birmingham-coverage";
 import {
-  BIRMINGHAM_AREAS,
   BIRMINGHAM_POSTCODES,
   LAUNCH_CITY,
   birminghamAreaBySlug,
@@ -28,6 +26,7 @@ import {
   readPlacePageFocus,
 } from "@/lib/seo/place-page-focus";
 import { buildPageMetadata } from "@/lib/seo/site";
+import { priorityBirminghamAreaSlugs } from "@/lib/seo/static-params";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 type PageProps = {
@@ -35,16 +34,15 @@ type PageProps = {
   searchParams?: { category?: string | string[]; service?: string | string[] };
 };
 
+/** Coverage places beyond the core neighbourhoods render on demand. */
+export const dynamicParams = true;
+
 export function generateStaticParams() {
-  const areaSlugs = new Set(BIRMINGHAM_AREAS.map((area) => area.slug));
   return [
-    ...BIRMINGHAM_AREAS.map((area) => ({ area: area.slug })),
+    ...priorityBirminghamAreaSlugs().map((area) => ({ area })),
     ...BIRMINGHAM_POSTCODES.map((item) => ({
       area: `${item.areaSlug}-${item.prefix.toLowerCase()}`,
     })),
-    ...birminghamCoveragePlaces()
-      .filter((place) => !areaSlugs.has(place.slug))
-      .map((place) => ({ area: place.slug })),
   ];
 }
 

@@ -24,7 +24,8 @@ type PageProps = {
   params: { slug: string; zone: string };
 };
 
-export const dynamicParams = false;
+/** Zones stay prerendered; unknown zone ids still 404 via notFound(). */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return MARKETING_SERVICES.flatMap((service) =>
