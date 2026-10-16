@@ -37,9 +37,9 @@ export function BookingChrome({
 
   return (
     <div
-      className={cn("flex min-h-screen flex-col bg-[#f6e9c3]", className)}
+      className={cn("flex min-h-screen flex-col bg-[#f6f1e7]", className)}
     >
-      <header className="sticky top-0 z-50 border-b border-[#e8d9a8]/80 bg-[#f6e9c3]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-[#e8e0d0]/80 bg-[#f6f1e7]/95 backdrop-blur-sm">
         <div className="relative mx-auto grid h-14 w-full max-w-[1140px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:h-16 md:px-5">
           <button
             className="inline-flex items-center justify-self-start gap-0.5 text-sm font-medium text-[#1c133b] transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40 touch-manipulation"
@@ -82,7 +82,7 @@ export function BookingChrome({
             aria-valuemax={100}
             aria-valuemin={0}
             aria-valuenow={progressPct}
-            className="h-1 w-full bg-[#e8d9a8]"
+            className="h-1 w-full bg-[#e8e0d0]"
             role="progressbar"
           >
             <div
@@ -97,6 +97,7 @@ export function BookingChrome({
   );
 }
 
-export const BOOKING_BUTTER = "#f6e9c3";
+/** Same cream as the landing “A clean for every kind of day” panel. */
+export const BOOKING_BUTTER = "#f6f1e7";
 export const BOOKING_PURPLE = "#6a45b8";
 export const BOOKING_PURPLE_HOVER = "#5a38a3";
