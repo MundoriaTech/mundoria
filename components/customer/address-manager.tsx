@@ -520,13 +520,17 @@ export function AddressForm({
       <label className="flex items-center gap-3 text-sm text-[#1c133b]">
         <input
           checked={values.is_default}
-          className="h-4 w-4 accent-[#312c79]"
+          className="h-4 w-4 accent-[#c79c66]"
           onChange={(event) => update("is_default", event.target.checked)}
           type="checkbox"
         />
         Make this my default address
       </label>
-          <Button className="h-11 rounded-full bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]" disabled={saving} type="submit">
+          <Button
+            className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
+            disabled={saving}
+            type="submit"
+          >
             {saving ? (
               "Saving…"
             ) : (
@@ -540,23 +544,31 @@ export function AddressForm({
       ) : null}
 
       {!compact && localOnly ? (
-        <Button disabled={saving} type="submit">
+        <Button
+          className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
+          disabled={saving}
+          type="submit"
+        >
           <Check className="mr-2 h-4 w-4" />
           Continue with this address
         </Button>
       ) : null}
 
       {!localOnly && compact ? (
-      <Button disabled={saving} type="submit">
-        {saving ? (
-          "Saving…"
-        ) : (
-          <>
-            <Check className="mr-2 h-4 w-4" />
-            Save address
-          </>
-        )}
-      </Button>
+        <Button
+          className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
+          disabled={saving}
+          type="submit"
+        >
+          {saving ? (
+            "Saving…"
+          ) : (
+            <>
+              <Check className="mr-2 h-4 w-4" />
+              Save address
+            </>
+          )}
+        </Button>
       ) : null}
     </form>
   );
@@ -716,10 +728,10 @@ function AddressTagField({
       <div className="flex flex-wrap gap-2">
         {ADDRESS_TAGS.map((tag) => (
           <button
-            className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
               value === tag
-                ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                : "border-[#d9ccef] bg-white text-[#1c133b]"
+                ? "border-[#1c133b] bg-[#1c133b] text-white"
+                : "border-transparent bg-[#efe9df] text-[#5a5470] hover:bg-[#e8e0d0]"
             }`}
             key={tag}
             onClick={() => {
@@ -732,10 +744,10 @@ function AddressTagField({
           </button>
         ))}
         <button
-          className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
             custom
-              ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-              : "border-[#d9ccef] bg-white text-[#1c133b]"
+              ? "border-[#1c133b] bg-[#1c133b] text-white"
+              : "border-transparent bg-[#efe9df] text-[#5a5470] hover:bg-[#e8e0d0]"
           }`}
           onClick={() => {
             setCustom(true);

@@ -80,7 +80,7 @@ export function BookingCalendar({
   return (
     <div
       className={cn(
-        "max-w-md rounded-2xl bg-[#f3f3f5] p-4 sm:p-5",
+        "max-w-md rounded-2xl bg-[#ebe3f8] p-4 sm:p-5",
         className,
       )}
     >

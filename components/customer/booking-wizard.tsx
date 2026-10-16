@@ -1380,7 +1380,6 @@ export function BookingWizard({
             update("addressId", addressId);
             update("guestAddress", null);
             setShowAddressForm(false);
-            goNext();
           }}
           proName={requestedPro}
           selectedId={draft.addressId}
@@ -1411,7 +1410,6 @@ export function BookingWizard({
               });
               update("addressId", null);
               setShowAddressForm(false);
-              goNext();
               return;
             }
             setAddresses((current) => [address, ...current]);
@@ -1424,7 +1422,6 @@ export function BookingWizard({
               update("numBathrooms", address.num_bathrooms ?? 1);
             }
             setShowAddressForm(false);
-            goNext();
           }}
         />
       ) : null}
@@ -1460,7 +1457,6 @@ export function BookingWizard({
         <DateStep
           draft={draft}
           duration={duration}
-          onAdvance={goNext}
           update={update}
         />
       ) : null}
@@ -1505,7 +1501,7 @@ export function BookingWizard({
             />
           </Elements>
         ) : (
-          <p className="rounded-2xl bg-[#f3f3f5] p-4 text-sm text-[#5a5470]">
+          <p className="rounded-2xl bg-[#ebe3f8] p-4 text-sm text-[#5a5470]">
             Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure payment.
           </p>
         )
@@ -1524,73 +1520,30 @@ export function BookingWizard({
       progress={
         flowSteps.length > 0 ? (stepIndex + 1) / flowSteps.length : 0
       }
+      progressLabel={
+        flowSteps.length > 0
+          ? `Step ${stepIndex + 1} of ${flowSteps.length}`
+          : null
+      }
       signedIn={Boolean(userId)}
     >
       <div
         className={cn(
-          // WeCasa funnel: 1140px shell, 20px side/top pad. Keep large bottom pad at every
-          // breakpoint so the fixed Next bar never clips the last cards.
-          "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-10 md:px-5 md:pt-5 xl:px-0 xl:pt-5",
+          // WeCasa funnel: 1140px shell. Bottom pad on mobile for the fixed Next bar.
+          "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-6 sm:pt-8 md:px-5 md:pt-6 xl:px-0",
           stepId === "checkout" && !needsAuth
             ? "pb-10"
-            : "pb-[calc(5.5rem+env(safe-area-inset-bottom))]",
+            : "pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-10",
         )}
       >
-        <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:gap-0">
+        <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-start lg:gap-0">
           <div className="min-w-0 w-full lg:w-[49.13%]">
             {stepBody}
-          </div>
-          <div className="hidden lg:ml-[8.77%] lg:flex lg:w-[42.1%] lg:shrink-0">
-            {basket}
-          </div>
-        </div>
-      </div>
-
-      {stepId !== "checkout" || needsAuth ? (
-        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8e0d0]/80 bg-[#f6f1e7] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5 xl:px-0">
-          <div className="mx-auto flex w-full max-w-[1140px] flex-col items-center lg:items-stretch">
-            {/* Mobile: WeCasa row — total | ↑/↓ | Next */}
-            <div className="relative flex w-full items-center lg:hidden">
-              <button
-                aria-expanded={basketOpen}
-                aria-label={basketOpen ? "Close basket" : "Open basket"}
-                className="min-w-0 flex-1 truncate text-left text-base font-bold tabular-nums text-[#1c133b] touch-manipulation"
-                onClick={() => setBasketOpen((open) => !open)}
-                type="button"
-              >
-                {priceLabel ?? "My basket"}
-              </button>
-              <button
-                aria-expanded={basketOpen}
-                aria-label={basketOpen ? "Close basket" : "Open basket"}
-                className="absolute left-1/2 top-1/2 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[#1c133b] touch-manipulation"
-                onClick={() => setBasketOpen((open) => !open)}
-                type="button"
-              >
-                {basketOpen ? (
-                  <ChevronDown className="h-5 w-5" strokeWidth={2.5} />
-                ) : (
-                  <ChevronUp className="h-5 w-5" strokeWidth={2.5} />
-                )}
-              </button>
-              {stepId !== "checkout" ? (
-                <button
-                  className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
-                  disabled={!canContinue()}
-                  onClick={goNext}
-                  type="button"
-                >
-                  Next
-                </button>
-              ) : (
-                <span className="inline-flex h-12 w-[5.5rem] shrink-0" />
-              )}
-            </div>
-            {/* Desktop: Next under the left column */}
+            {/* Desktop: Next sits under the form — avoids a large empty band. */}
             {stepId !== "checkout" ? (
-              <div className="hidden w-full lg:flex lg:w-[49.13%] lg:justify-center">
+              <div className="mt-8 hidden lg:block">
                 <button
-                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#c9c9ce] disabled:text-white touch-manipulation"
+                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
                   disabled={!canContinue()}
                   onClick={goNext}
                   type="button"
@@ -1599,6 +1552,50 @@ export function BookingWizard({
                 </button>
               </div>
             ) : null}
+          </div>
+          <div className="hidden lg:ml-[8.77%] lg:flex lg:w-[42.1%] lg:shrink-0">
+            {basket}
+          </div>
+        </div>
+      </div>
+
+      {stepId !== "checkout" || needsAuth ? (
+        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8e0d0]/80 bg-[#f6f1e7]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:px-5 lg:hidden">
+          <div className="relative mx-auto flex w-full max-w-[1140px] items-center">
+            <button
+              aria-expanded={basketOpen}
+              aria-label={basketOpen ? "Close basket" : "Open basket"}
+              className="min-w-0 flex-1 truncate text-left text-base font-bold tabular-nums text-[#1c133b] touch-manipulation"
+              onClick={() => setBasketOpen((open) => !open)}
+              type="button"
+            >
+              {priceLabel ?? "My basket"}
+            </button>
+            <button
+              aria-expanded={basketOpen}
+              aria-label={basketOpen ? "Close basket" : "Open basket"}
+              className="absolute left-1/2 top-1/2 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[#1c133b] touch-manipulation"
+              onClick={() => setBasketOpen((open) => !open)}
+              type="button"
+            >
+              {basketOpen ? (
+                <ChevronDown className="h-5 w-5" strokeWidth={2.5} />
+              ) : (
+                <ChevronUp className="h-5 w-5" strokeWidth={2.5} />
+              )}
+            </button>
+            {stepId !== "checkout" ? (
+              <button
+                className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
+                disabled={!canContinue()}
+                onClick={goNext}
+                type="button"
+              >
+                Next
+              </button>
+            ) : (
+              <span className="inline-flex h-12 w-[5.5rem] shrink-0" />
+            )}
           </div>
         </div>
       ) : null}
@@ -1739,7 +1736,7 @@ function KnownCleanersStep({
           return (
             <button
               className={cn(
-                "flex items-center gap-4 rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation",
+                "flex items-center gap-4 rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation",
                 selectedId === cleaner.id && "border-[#6a45b8] bg-white",
               )}
               key={cleaner.id}
@@ -1779,7 +1776,7 @@ function KnownCleanersStep({
         })}
         <button
           className={cn(
-            "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-5 py-4 text-left transition hover:bg-[#ececef] touch-manipulation",
+            "rounded-2xl border-2 border-transparent bg-[#ebe3f8] px-5 py-4 text-left transition hover:bg-[#e4daf5] touch-manipulation",
             selectingNew && "border-[#6a45b8] bg-white",
           )}
           onClick={() => onSelect(null)}
@@ -1817,7 +1814,7 @@ function CategoryStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-3 text-left transition hover:bg-[#ececef] touch-manipulation sm:p-4",
+                "rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-3 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={category.value}
@@ -1901,7 +1898,7 @@ function ServiceStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-3 text-left transition hover:bg-[#ececef] touch-manipulation sm:p-4",
+                "relative rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-3 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={item.value}
@@ -2121,10 +2118,16 @@ function AddressStep({
           ? `Where should ${proName} clean?`
           : "Where will your cleaning take place?"}
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        🕵️ To find your address easily, enter it as:{" "}
-        <strong className="font-semibold text-[#1c133b]">number</strong>, street,
-        city, postcode.
+      <p className="mt-2 flex items-start gap-2 text-sm leading-6 text-[#5a5470]">
+        <MapPin
+          aria-hidden
+          className="mt-0.5 h-4 w-4 shrink-0 text-[#6a45b8]"
+        />
+        <span>
+          Enter as{" "}
+          <strong className="font-semibold text-[#1c133b]">number</strong>,
+          street, city, postcode — then pick a suggestion.
+        </span>
       </p>
 
       {guestAsAddress && localOnly ? (
@@ -2151,8 +2154,8 @@ function AddressStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef]",
-                  active && "border-[#6a45b8] bg-white",
+                  "rounded-2xl border border-[#e4daf5] bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:border-[#d4c8f0] hover:bg-[#f8f5ff]",
+                  active && "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
                 )}
                 key={address.id}
                 onClick={() => onSelect(address.id)}
@@ -2210,7 +2213,7 @@ function AddressStep({
       ) : null}
 
       {showForm || (localOnly && !guestAsAddress) ? (
-        <div className="relative z-20 mt-6 overflow-visible rounded-2xl border border-[#e8e8eb] bg-white p-3 sm:p-4">
+        <div className="relative z-20 mt-4 overflow-visible rounded-2xl border border-[#e4daf5] bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:mt-5 sm:p-5">
           <AddressForm
             address={localOnly ? guestAsAddress : null}
             compact
@@ -2363,7 +2366,7 @@ function OfficeSpacesStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-4 py-3 text-left",
+                "rounded-2xl border-2 border-transparent bg-[#ebe3f8] px-4 py-3 text-left",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -2415,7 +2418,7 @@ function CountField({
     <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
       <span>{label}</span>
       <select
-        className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#f3f3f5] px-4 text-sm"
+        className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#ebe3f8] px-4 text-sm"
         onChange={(event) => onChange(Number(event.target.value))}
         value={value}
       >
@@ -2453,7 +2456,7 @@ function RoomsStep({
         <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
           <span>Bedrooms</span>
           <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#f3f3f5] px-4 text-sm"
+            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#ebe3f8] px-4 text-sm"
             onChange={(event) => onBedrooms(Number(event.target.value))}
             value={bedrooms ?? ""}
           >
@@ -2470,7 +2473,7 @@ function RoomsStep({
         <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
           <span>Toilets</span>
           <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#f3f3f5] px-4 text-sm"
+            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-[#ebe3f8] px-4 text-sm"
             onChange={(event) => onBathrooms(Number(event.target.value))}
             value={bathrooms ?? ""}
           >
@@ -2553,7 +2556,7 @@ function AddOnsStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                  "rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:px-5 sm:py-4",
                   selected && "border-[#6a45b8] bg-white",
                 )}
                 key={addOn.id}
@@ -2628,7 +2631,7 @@ function AddOnsStep({
               return (
                 <button
                   className={cn(
-                    "rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                    "rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:px-5 sm:py-4",
                     active && "border-[#6a45b8] bg-white",
                   )}
                   key={label}
@@ -2860,7 +2863,7 @@ function FrequencyStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border-2 border-transparent bg-[#f3f3f5] p-4 text-left transition hover:bg-[#ececef] touch-manipulation sm:px-5 sm:py-4",
+                "relative rounded-2xl border-2 border-transparent bg-[#ebe3f8] p-4 text-left transition hover:bg-[#e4daf5] touch-manipulation sm:px-5 sm:py-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -2949,7 +2952,7 @@ function DurationStep({
           return (
             <button
               className={cn(
-                "relative inline-flex h-12 items-center justify-center rounded-xl bg-[#f3f3f5] text-sm font-semibold text-[#1c133b] transition touch-manipulation",
+                "relative inline-flex h-12 items-center justify-center rounded-xl bg-[#ebe3f8] text-sm font-semibold text-[#1c133b] transition touch-manipulation",
                 active && "border-2 border-[#6a45b8] bg-white",
                 !active && isRecommended && "ring-1 ring-[#c9b8ef]",
               )}
@@ -2983,12 +2986,10 @@ function DurationStep({
 function DateStep({
   draft,
   duration,
-  onAdvance,
   update,
 }: {
   draft: BookingDraft;
   duration: ReturnType<typeof durationSummary>;
-  onAdvance?: () => void;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -3053,10 +3054,7 @@ function DateStep({
           <DurationStep
             duration={duration}
             hours={draft.estimatedDurationHours}
-            onChange={(value) => {
-              update("estimatedDurationHours", value);
-              onAdvance?.();
-            }}
+            onChange={(value) => update("estimatedDurationHours", value)}
           />
         </div>
       ) : null}
@@ -3236,7 +3234,7 @@ function TimeStep({
           >
             <button
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#f3f3f5] text-[#1c133b] touch-manipulation"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ebe3f8] text-[#1c133b] touch-manipulation"
               onClick={dismissFlexPrompt}
               type="button"
             >
@@ -3512,7 +3510,7 @@ function CheckoutStep({
           ).map(([value, label]) => (
             <button
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-[#f3f3f5] px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
+                "rounded-2xl border-2 border-transparent bg-[#ebe3f8] px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
                 draft.keysPolicy === value && "border-[#6a45b8] bg-white",
               )}
               key={value}
