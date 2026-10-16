@@ -1055,6 +1055,7 @@ export function BookingWizard({
       serviceType: null,
       estimatedDurationHours: null,
     }));
+    goNext();
   }
 
   function selectService(serviceType: ServiceType) {
@@ -1094,6 +1095,7 @@ export function BookingWizard({
       hasPets: null,
       petTypes: [],
     }));
+    goNext();
   }
 
   function draftFromHistory(suggestion: HistoryRecommendation): BookingDraft {
@@ -1344,15 +1346,13 @@ export function BookingWizard({
               preferredCleanerId: cleanerId,
               rebookCleanerChoice: cleanerId ? "same" : "new",
             }));
-            historyWriteModeRef.current = "push";
-            setStepIndex((current) =>
-              Math.min(flowSteps.length - 1, current + 1),
-            );
+            goNext();
           }}
         />
       ) : null}
       {stepId === "history" && historySuggestion ? (
         <HistorySuggestionStep
+          onAccept={() => goNext()}
           onDecline={() => declineHistorySuggestion(historySuggestion)}
           suggestion={historySuggestion}
         />
@@ -1380,6 +1380,7 @@ export function BookingWizard({
             update("addressId", addressId);
             update("guestAddress", null);
             setShowAddressForm(false);
+            goNext();
           }}
           proName={requestedPro}
           selectedId={draft.addressId}
@@ -1410,6 +1411,7 @@ export function BookingWizard({
               });
               update("addressId", null);
               setShowAddressForm(false);
+              goNext();
               return;
             }
             setAddresses((current) => [address, ...current]);
@@ -1422,6 +1424,7 @@ export function BookingWizard({
               update("numBathrooms", address.num_bathrooms ?? 1);
             }
             setShowAddressForm(false);
+            goNext();
           }}
         />
       ) : null}
@@ -1429,19 +1432,26 @@ export function BookingWizard({
         draft.serviceType === "office" ? (
           <OfficeSpacesStep
             onChange={(value) => update("officeSpaces", value)}
+            onComplete={goNext}
             spaces={draft.officeSpaces}
           />
         ) : (
           <RoomsStep
             bathrooms={draft.numBathrooms}
             bedrooms={draft.numBedrooms}
-            onBathrooms={(value) => update("numBathrooms", value)}
-            onBedrooms={(value) => update("numBedrooms", value)}
+            onBathrooms={(value) => {
+              update("numBathrooms", value);
+              if (draft.numBedrooms != null) goNext();
+            }}
+            onBedrooms={(value) => {
+              update("numBedrooms", value);
+              if (draft.numBathrooms != null) goNext();
+            }}
           />
         )
       ) : null}
       {stepId === "addons" ? (
-        <AddOnsStep draft={draft} update={update} />
+        <AddOnsStep draft={draft} onAdvance={goNext} update={update} />
       ) : null}
       {stepId === "preferences" ? (
         <RecoveryPreferencesStep draft={draft} update={update} />
@@ -1450,11 +1460,12 @@ export function BookingWizard({
         <DateStep
           draft={draft}
           duration={duration}
+          onAdvance={goNext}
           update={update}
         />
       ) : null}
       {stepId === "frequency" ? (
-        <FrequencyStep draft={draft} update={update} />
+        <FrequencyStep draft={draft} onAdvance={goNext} update={update} />
       ) : null}
       {stepId === "time" ? (
         <TimeStep
@@ -1536,7 +1547,7 @@ export function BookingWizard({
       </div>
 
       {stepId !== "checkout" || needsAuth ? (
-        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8d9a8]/80 bg-[#f6e9c3] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5 xl:px-0">
+        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8e0d0]/80 bg-[#f6f1e7] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5 xl:px-0">
           <div className="mx-auto flex w-full max-w-[1140px] flex-col items-center lg:items-stretch">
             {/* Mobile: WeCasa row — total | ↑/↓ | Next */}
             <div className="relative flex w-full items-center lg:hidden">
@@ -1997,9 +2008,11 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
 }
 
 function HistorySuggestionStep({
+  onAccept,
   onDecline,
   suggestion,
 }: {
+  onAccept: () => void;
   onDecline: () => void;
   suggestion: HistoryRecommendation;
 }) {
@@ -2016,7 +2029,11 @@ function HistorySuggestionStep({
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
         {suggestion.message}
       </p>
-      <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-5">
+      <button
+        className="mt-8 w-full rounded-2xl border-2 border-[#6a45b8] bg-white p-5 text-left transition hover:bg-[#f8f5ff] touch-manipulation"
+        onClick={onAccept}
+        type="button"
+      >
         <p className="font-semibold text-[#1c133b]">{service.label}</p>
         {suggestion.isRecurring && suggestion.recurrencePattern ? (
           <p className="mt-1 text-sm capitalize text-[#5a5470]">
@@ -2033,7 +2050,10 @@ function HistorySuggestionStep({
             Special attention: {suggestion.specialAttentionAreas.join(", ")}
           </p>
         ) : null}
-      </div>
+        <p className="mt-4 text-sm font-semibold text-[#6a45b8]">
+          Use this suggestion
+        </p>
+      </button>
       <button
         className="mt-4 text-sm font-semibold text-[#5a38a3] underline-offset-2 hover:underline"
         onClick={onDecline}
@@ -2041,10 +2061,6 @@ function HistorySuggestionStep({
       >
         Choose something else
       </button>
-      <p className="mt-3 text-sm text-[#5a5470]">
-        Next uses this suggestion and skips to the first question it does not
-        answer.
-      </p>
     </div>
   );
 }
@@ -2262,9 +2278,11 @@ function quantityOf(
 
 function OfficeSpacesStep({
   onChange,
+  onComplete,
   spaces,
 }: {
   onChange: (value: OfficeSpaceDraft[]) => void;
+  onComplete?: () => void;
   spaces: OfficeSpaceDraft[];
 }) {
   const rooms = quantityOf(spaces, "office_work_area");
@@ -2284,6 +2302,7 @@ function OfficeSpacesStep({
     nextRooms: number,
     nextToilets: number,
     nextSize: Exclude<OfficeSpaceSize, "not_sure">,
+    advance = false,
   ) {
     const extras = spaces.filter(
       (space) =>
@@ -2298,6 +2317,7 @@ function OfficeSpacesStep({
       { quantity: nextToilets, size: "small", spaceType: "toilet" },
       ...extras,
     ]);
+    if (advance && nextRooms > 0) onComplete?.();
   }
 
   function setExtra(spaceType: OfficeSpaceDraft["spaceType"], quantity: number) {
@@ -2347,7 +2367,9 @@ function OfficeSpacesStep({
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
-              onClick={() => setCore(Math.max(rooms, 1), toilets, option.value)}
+              onClick={() =>
+                setCore(Math.max(rooms, 1), toilets, option.value, true)
+              }
               type="button"
             >
               <span className="font-semibold text-[#1c133b]">{option.label}</span>
@@ -2470,9 +2492,11 @@ function RoomsStep({
 
 function AddOnsStep({
   draft,
+  onAdvance,
   update,
 }: {
   draft: BookingDraft;
+  onAdvance?: () => void;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -2611,6 +2635,7 @@ function AddOnsStep({
                   onClick={() => {
                     update("hasPets", value);
                     if (!value) update("petTypes", []);
+                    onAdvance?.();
                   }}
                   type="button"
                 >
@@ -2760,9 +2785,11 @@ function RecoveryPreferencesStep({
 
 function FrequencyStep({
   draft,
+  onAdvance,
   update,
 }: {
   draft: BookingDraft;
+  onAdvance?: () => void;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -2780,6 +2807,7 @@ function FrequencyStep({
       update("isRecurring", false);
       update("recurrencePattern", null);
       update("customRecurrenceDates", []);
+      onAdvance?.();
       return;
     }
     update("isRecurring", true);
@@ -2796,15 +2824,18 @@ function FrequencyStep({
               ? [seed]
               : [];
       update("customRecurrenceDates", next);
-    } else {
-      update("customRecurrenceDates", []);
+      if (next.length >= 2) onAdvance?.();
+      return;
     }
+    update("customRecurrenceDates", []);
+    onAdvance?.();
   }
 
   function onCustomDatesChange(dates: string[]) {
     update("customRecurrenceDates", dates);
     const firstDate = isoDateOrEmpty(dates[0]);
     if (firstDate) update("scheduledDate", firstDate);
+    if (dates.length >= 2) onAdvance?.();
   }
 
   const selectedValue = draft.isRecurring
@@ -2952,10 +2983,12 @@ function DurationStep({
 function DateStep({
   draft,
   duration,
+  onAdvance,
   update,
 }: {
   draft: BookingDraft;
   duration: ReturnType<typeof durationSummary>;
+  onAdvance?: () => void;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -3020,7 +3053,10 @@ function DateStep({
           <DurationStep
             duration={duration}
             hours={draft.estimatedDurationHours}
-            onChange={(value) => update("estimatedDurationHours", value)}
+            onChange={(value) => {
+              update("estimatedDurationHours", value);
+              onAdvance?.();
+            }}
           />
         </div>
       ) : null}
