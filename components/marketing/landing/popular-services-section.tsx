@@ -103,9 +103,9 @@ function PopularServiceCard({
     <Link
       aria-label={`Book ${label}`}
       className={cn(
-        "group relative block h-[340px] w-[min(82vw,300px)] shrink-0 overflow-hidden rounded-[21px] outline-none transition",
+        "group relative block h-[280px] w-[min(78vw,15.5rem)] shrink-0 overflow-hidden rounded-[1.15rem] outline-none transition sm:h-[300px] sm:w-[16.5rem] sm:rounded-[1.25rem]",
         "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c133b]",
-        "active:brightness-[0.97] md:h-[372px] md:w-[371px] md:hover:-translate-y-0.5",
+        "active:brightness-[0.97] lg:h-[320px] lg:w-[17.5rem] lg:hover:-translate-y-0.5",
         className,
       )}
       href={href}
@@ -113,30 +113,30 @@ function PopularServiceCard({
       style={{ backgroundColor: service.color }}
     >
       <div
-        className="absolute inset-x-0 top-0 h-[220px] md:h-[255px]"
+        className="absolute inset-x-0 top-0 h-[175px] sm:h-[190px] lg:h-[205px]"
         style={starMaskStyle}
       >
         <LazyImage
           alt=""
           className="object-cover object-[center_30%]"
           fill
-          sizes="(min-width: 768px) 371px, 82vw"
+          sizes="(min-width: 1024px) 280px, (min-width: 640px) 264px, 78vw"
           src={service.image}
         />
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 px-5 pb-6 pt-4 md:px-8 md:pb-7">
-        <h3 className="max-w-[15.5rem] whitespace-pre-line text-[1.375rem] font-medium leading-[1.08] text-[#e9e1fa] md:text-[32px] md:leading-[33px]">
+      <div className="absolute inset-x-0 bottom-0 px-4 pb-5 pt-3 sm:px-5 sm:pb-6 lg:px-6">
+        <h3 className="max-w-[13.5rem] whitespace-pre-line text-[1.2rem] font-medium leading-[1.08] text-[#e9e1fa] sm:text-[1.35rem] lg:text-[1.5rem] lg:leading-[1.1]">
           {service.title}
         </h3>
-        <p className="mt-2 max-w-[15rem] text-[12px] font-light leading-[1.25] text-white md:text-[13px] md:leading-[14px]">
+        <p className="mt-1.5 max-w-[13rem] text-[12px] font-light leading-[1.3] text-white sm:mt-2 sm:text-[13px]">
           {service.description}
         </p>
       </div>
 
       <span
         aria-hidden
-        className="pointer-events-none absolute bottom-6 right-5 transition md:bottom-8 md:right-6 md:group-hover:scale-105"
+        className="pointer-events-none absolute bottom-5 right-4 transition sm:bottom-6 sm:right-5 lg:group-hover:scale-105"
       >
         <LazyImage
           alt=""

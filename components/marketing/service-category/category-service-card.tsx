@@ -36,7 +36,7 @@ export function CategoryServiceCard({
   return (
     <article
       className={cn(
-        "group flex w-[min(78vw,17.5rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[19rem] lg:w-auto xl:w-[calc((100%-3.75rem)/4)]",
+        "group flex w-[min(72vw,15rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.25rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-[0_16px_36px_rgba(28,19,59,0.16)] sm:w-[15.5rem] md:w-[16.25rem] lg:w-auto xl:w-[calc((100%-3.75rem)/4)]",
         className,
       )}
       onClick={(event) => {
@@ -102,8 +102,8 @@ export function CategoryServiceCard({
           </Link>
         </div>
       </div>
-      <div className="flex h-[4.25rem] items-center bg-[#e8def8] px-4">
-        <p className="line-clamp-2 text-[14px] font-semibold leading-snug text-[#312c79]">
+      <div className="flex min-h-[3.5rem] items-center bg-[#e8def8] px-3.5 py-2.5 sm:min-h-[3.75rem] sm:px-4">
+        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-[#312c79] sm:text-[14px]">
           {label}
         </p>
       </div>
