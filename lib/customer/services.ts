@@ -867,6 +867,16 @@ export function formatMoney(amountInPence: number | null | undefined) {
   }).format((amountInPence ?? 0) / 100);
 }
 
+/** Labour rate for display, e.g. "£22/h". */
+export function formatHourlyRate(amountInPence: number | null | undefined) {
+  return `${formatMoney(amountInPence)}/h`;
+}
+
+/** Published hourly labour rate for a service at its default pricing standard. */
+export function indicativeHourlyRatePence(serviceType: ServiceType) {
+  return hourlyRatePence(serviceType, normalizeStandard(serviceType, null));
+}
+
 /** Baseline “from” price for cards / early basket (1 bed · 1 bath · recommended standard). */
 export function indicativeFromPrice(serviceType: ServiceType) {
   const stub = {

@@ -14,16 +14,26 @@ export function BookingChrome({
   children,
   className,
   onBack,
+  onHome,
+  progress = null,
   signedIn,
 }: {
   backDisabled?: boolean;
   children: ReactNode;
   className?: string;
   onBack: () => void;
+  /** When set, logo abandons the booking flow instead of a plain home link. */
+  onHome?: () => void;
+  /** 0–1 progress through the booking funnel; omit to hide the bar. */
+  progress?: number | null;
   signedIn: boolean;
 }) {
   const configured = hasSupabasePublicConfig();
   const authHref = configured ? "/login?next=/booking/new" : "/setup";
+  const progressPct =
+    progress == null
+      ? null
+      : Math.min(100, Math.max(0, Math.round(progress * 100)));
 
   return (
     <div className={cn("flex min-h-screen flex-col bg-white", className)}>
@@ -38,10 +48,21 @@ export function BookingChrome({
             <ChevronLeft className="h-5 w-5" strokeWidth={2} />
             Back
           </button>
-          <LandingLogo
-            className="justify-self-center text-[1.25rem] sm:text-[1.4rem]"
-            href="/"
-          />
+          {onHome ? (
+            <button
+              aria-label="Mundoria home"
+              className="inline-flex shrink-0 items-center justify-self-center touch-manipulation"
+              onClick={onHome}
+              type="button"
+            >
+              <LandingLogo className="text-[1.25rem] sm:text-[1.4rem]" />
+            </button>
+          ) : (
+            <LandingLogo
+              className="justify-self-center text-[1.25rem] sm:text-[1.4rem]"
+              href="/"
+            />
+          )}
           {signedIn ? (
             <span />
           ) : (
@@ -53,6 +74,21 @@ export function BookingChrome({
             </Link>
           )}
         </div>
+        {progressPct != null ? (
+          <div
+            aria-label={`Booking progress: ${progressPct}%`}
+            aria-valuemax={100}
+            aria-valuemin={0}
+            aria-valuenow={progressPct}
+            className="h-1 w-full bg-[#eeeef1]"
+            role="progressbar"
+          >
+            <div
+              className="h-full bg-[#6a45b8] transition-[width] duration-300 ease-out"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        ) : null}
       </header>
       <div className="flex flex-1 flex-col">{children}</div>
     </div>

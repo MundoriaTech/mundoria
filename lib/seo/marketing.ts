@@ -1,8 +1,8 @@
 import {
   SERVICE_CATEGORIES,
   SERVICES,
-  formatMoney,
-  indicativeFromPrice,
+  formatHourlyRate,
+  indicativeHourlyRatePence,
   servicesForCategory,
 } from "@/lib/customer/services";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
@@ -54,10 +54,10 @@ export const MARKETING_SERVICES: MarketingService[] = SERVICES.map((service) => 
     category: service.category,
     categoryLabel: category.label,
     description: service.description,
-    fromPrice: formatMoney(indicativeFromPrice(service.value)),
+    fromPrice: formatHourlyRate(indicativeHourlyRatePence(service.value)),
     intro: `${service.label} with Mundoria — clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
     label: service.label,
-    seoDescription: `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${formatMoney(indicativeFromPrice(service.value))}.`,
+    seoDescription: `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${formatHourlyRate(indicativeHourlyRatePence(service.value))}.`,
     slug,
     value: service.value,
   };

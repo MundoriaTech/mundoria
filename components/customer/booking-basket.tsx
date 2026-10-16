@@ -6,14 +6,15 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { formatBookingDate } from "@/lib/customer/booking-flow";
-import { formatMoney } from "@/lib/customer/services";
+import { formatHourlyRate, formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
 import type { Address } from "@/types/customer";
 
 type BasketProps = {
-  addOns: { amount: number; label: string }[];
+  addOns: { amount: number; hourly?: boolean; label: string }[];
   address: Address | null;
   alternateTimes?: string[];
+  /** @deprecated Prefer hourlyRatePence for booking-flow display. */
   amount: number | null;
   bathrooms: number | null;
   bedrooms: number | null;
@@ -21,6 +22,7 @@ type BasketProps = {
   durationHours: number | null;
   frequencyLabel: string | null;
   hasPets?: boolean | null;
+  hourlyRatePence?: number | null;
   onJumpAddress?: () => void;
   onJumpSchedule?: () => void;
   onJumpService?: () => void;
@@ -96,11 +98,11 @@ function BasketSection({
           <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[#6a45b8]">
             {icon}
           </span>
-          <span className="min-w-0 flex-1 text-sm font-semibold text-[#1c133b]">
+          <span className="min-w-0 flex-1 text-sm font-bold text-[#1c133b]">
             {title}
           </span>
           {right ? (
-            <span className="shrink-0 text-sm font-semibold tabular-nums text-[#1c133b]">
+            <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#5a5470]">
               {right}
             </span>
           ) : null}
@@ -127,7 +129,7 @@ function BasketSection({
         </button>
       </div>
       {open && children ? (
-        <div className="px-4 pb-4 pl-[3.25rem] text-sm text-[#5a5470]">
+        <div className="px-4 pb-4 pl-[3.25rem] text-sm font-bold text-[#1c133b]">
           {children}
         </div>
       ) : null}
@@ -147,6 +149,7 @@ function BasketPanel({
   frequencyLabel,
   hasPets = null,
   headerTitle = "My basket",
+  hourlyRatePence = null,
   onJumpAddress,
   onJumpSchedule,
   onJumpService,
@@ -159,9 +162,9 @@ function BasketPanel({
   showHeader = true,
 }: BasketProps & { headerTitle?: string; showHeader?: boolean }) {
   const [open, setOpen] = useState({
-    address: true,
-    schedule: true,
-    service: true,
+    address: false,
+    schedule: false,
+    service: false,
   });
   const hasAnything = Boolean(address || serviceLabel || scheduledDate);
   const when = formatWhen(scheduledDate, scheduledTime);
@@ -198,28 +201,62 @@ function BasketPanel({
     );
   }
 
-  const serviceLines: string[] = [];
-  if (serviceLabel) serviceLines.push(serviceLabel);
-  if (frequencyLabel) serviceLines.push(frequencyLabel);
-  if (durationHours != null) {
-    serviceLines.push(`For ${formatDuration(durationHours)}`);
+  const serviceLines: { key: string; label: string; price?: string }[] = [];
+  if (serviceLabel) {
+    serviceLines.push({ key: "service", label: serviceLabel });
   }
-  if (standardLabel) serviceLines.push(standardLabel);
+  if (frequencyLabel) {
+    serviceLines.push({ key: "frequency", label: frequencyLabel });
+  }
+  if (durationHours != null) {
+    serviceLines.push({
+      key: "duration",
+      label: `For ${formatDuration(durationHours)}`,
+    });
+  }
+  if (standardLabel) {
+    serviceLines.push({ key: "standard", label: standardLabel });
+  }
   if (bedrooms != null || bathrooms != null) {
     const parts = [
       bedrooms != null ? `${bedrooms} bed` : null,
       bathrooms != null ? `${bathrooms} bath` : null,
     ].filter(Boolean);
-    if (parts.length) serviceLines.push(parts.join(" · "));
+    if (parts.length) {
+      serviceLines.push({ key: "rooms", label: parts.join(" · ") });
+    }
   }
-  if (hasPets === true) serviceLines.push("Pets present");
-  else if (hasPets === false) serviceLines.push("No pets");
+  if (hasPets === true) {
+    serviceLines.push({ key: "pets", label: "Pets present" });
+  } else if (hasPets === false) {
+    serviceLines.push({ key: "pets", label: "No pets" });
+  }
   if (priorityAreas.length) {
-    serviceLines.push(`Priority: ${priorityAreas.join(", ")}`);
+    serviceLines.push({
+      key: "priority",
+      label: `Priority: ${priorityAreas.join(", ")}`,
+    });
   }
   for (const addOn of addOns) {
-    serviceLines.push(`${addOn.label} ${formatMoney(addOn.amount)}`);
+    serviceLines.push({
+      key: `addon-${addOn.label}`,
+      label: addOn.label,
+      price: addOn.hourly
+        ? formatHourlyRate(addOn.amount)
+        : formatMoney(addOn.amount),
+    });
   }
+
+  const rateValue =
+    hourlyRatePence != null
+      ? formatHourlyRate(hourlyRatePence)
+      : amount != null
+        ? formatMoney(amount)
+        : null;
+  const rateLabel =
+    rateValue != null
+      ? `${priceIsIndicative ? "From " : ""}${rateValue}`
+      : null;
 
   const scheduleTitle =
     scheduleDates.length > 1
@@ -258,36 +295,42 @@ function BasketPanel({
         onEdit={onJumpService}
         onToggle={() => setOpen((c) => ({ ...c, service: !c.service }))}
         open={open.service}
-        right={
-          amount != null
-            ? `${priceIsIndicative ? "From " : ""}${formatMoney(amount)}`
-            : undefined
-        }
+        right={rateLabel ?? undefined}
         title="Cleaning"
       >
         {serviceLines.length ? (
           <ul className="space-y-1.5">
             {serviceLines.map((line) => (
-              <li key={line}>· {line}</li>
+              <li
+                className="flex items-baseline justify-between gap-3"
+                key={line.key}
+              >
+                <span>· {line.label}</span>
+                {line.price ? (
+                  <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#5a5470]">
+                    {line.price}
+                  </span>
+                ) : null}
+              </li>
             ))}
           </ul>
         ) : (
           <p>Choose your cleaning session.</p>
         )}
-        {amount != null ? (
+        {rateLabel ? (
           <div className="mt-3 border-t border-[#e8e8eb] pt-3">
-            <div className="flex items-center justify-between text-[#1c133b]">
-              <span className="font-semibold">
-                {priceIsIndicative ? "From" : "Total"}
+            <div className="flex items-center justify-between gap-3 text-[#1c133b]">
+              <span className="font-bold">
+                {priceIsIndicative ? "From" : "Rate"}
               </span>
-              <span className="text-lg font-bold tabular-nums">
-                {formatMoney(amount)}
+              <span className="text-[11px] font-normal tabular-nums text-[#5a5470]">
+                {rateValue}
               </span>
             </div>
-            <p className="mt-1 text-xs text-[#8b8798]">
+            <p className="mt-1 text-xs font-normal text-[#8b8798]">
               {priceIsIndicative
-                ? "Starting price — updates as you add details"
-                : "Service fee included"}
+                ? "Hourly rate — total updates with length and extras"
+                : "Charged per hour for the session length you choose"}
             </p>
           </div>
         ) : null}
