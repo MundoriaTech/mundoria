@@ -1,28 +1,33 @@
 import Link from "next/link";
 
-import { GoogleReviewsButton } from "@/components/marketing/google-reviews-drawer";
+import { FeaturedCleanerCards } from "@/components/marketing/featured-cleaner-cards";
+import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
 import { BrandedSection } from "@/components/marketing/branded-page-sections";
-import { popularMarketingServices } from "@/lib/seo/marketing";
-
-const TRUST_PILLARS = [
-  {
-    body: "Book online with a clear estimate — no agency middlemen or cash-in-hand ambiguity.",
-    title: "We’re efficient",
-  },
-  {
-    body: "Change, cancel or reschedule in your account before the fee window — life happens.",
-    title: "We’re flexible",
-  },
-  {
-    body: "Regular, deep, moving, short-let and Recovery cleans tailored to your space.",
-    title: "We’re accessible",
-  },
-] as const;
+import { directoryReviewsToLandingReviews } from "@/lib/marketing/location-review-display";
+import type { DirectoryReview } from "@/lib/seo/birmingham-directory";
+import {
+  PlaceServiceExplainerIntro,
+  PlaceServiceExplainerList,
+} from "@/components/marketing/place-service-explainer-list";
+import { houseCleanCoveredPoints } from "@/lib/seo/birmingham-place-faqs";
+import {
+  birminghamNearbyZone,
+  birminghamTownZones,
+  coverageAreaHref,
+  coverageAreaSlug,
+  coverageZoneHref,
+  type CoverageLinkFocus,
+} from "@/lib/seo/birmingham-coverage";
+import {
+  cleaningPlaceIntro,
+  cleaningPlaceTitle,
+  surroundingTownsIntro,
+} from "@/lib/seo/place-page-focus";
 
 const LOCATION_FAQS = (place: string) =>
   [
     {
-      answer: `Mundoria offers regular cleaning, one-off and deep cleans, end-of-tenancy / move cleans, Airbnb & short-let turnovers, commercial cleans and Mundoria Recovery support across ${place}.`,
+      answer: `Mundoria offers regular cleaning, one-off and deep cleans, end-of-tenancy / move cleans, Airbnb & short-let turnovers, commercial cleans and recovery cleaning across ${place}.`,
       question: `What cleaning services does Mundoria offer in ${place}?`,
     },
     {
@@ -52,63 +57,18 @@ const LOCATION_FAQS = (place: string) =>
     },
   ] as const;
 
-const COVERED = [
-  "Hoovering and floor care for hard floors and carpets in agreed rooms",
-  "Bathroom cleaning — sinks, toilets, mirrors and visible fixtures",
-  "Kitchen surfaces, sink and hob wipe-down (oven deep-clean as an add-on)",
-  "Dusting and surface wipe of reachable furniture and ledges",
-  "Emptying bins and light tidy of clutter-free areas",
-  "Bed linen change when requested and linen is left ready",
-];
-
-export function LocationTrustStrip() {
-  return (
-    <BrandedSection>
-      <div className="grid gap-4 md:grid-cols-3">
-        {TRUST_PILLARS.map((item) => (
-          <article
-            className="rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)]"
-            key={item.title}
-          >
-            <h3 className="text-lg font-semibold tracking-[-0.02em] text-[#1c133b]">
-              {item.title}
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-[#5a5470]">{item.body}</p>
-          </article>
-        ))}
-      </div>
-    </BrandedSection>
-  );
-}
-
 export function LocationServicesExplainer({ place }: { place: string }) {
-  const popular = popularMarketingServices(5);
   return (
     <BrandedSection tone="cream">
       <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
         What cleaning services does Mundoria offer in {place}?
       </h2>
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470]">
-        Mundoria connects you with independent cleaners for homes, guest turns
-        and workplaces in {place}. Each booking shows a clear estimate, live
-        status and checklist-led completion.
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470] sm:text-[15px] sm:leading-7">
+        <PlaceServiceExplainerIntro place={place} />
       </p>
-      <ul className="mt-6 space-y-3">
-        {popular.map((service) => (
-          <li key={service.slug}>
-            <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-              href={`/cleaning/${service.slug}`}
-            >
-              {service.label} in {place}
-            </Link>
-            <span className="text-sm text-[#5a5470]">
-              {" "}
-              — from {service.fromPrice}. {service.description}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-4 max-w-3xl text-[#5a5470] [&_li]:text-[#5a5470]">
+        <PlaceServiceExplainerList place={place} />
+      </div>
     </BrandedSection>
   );
 }
@@ -124,7 +84,7 @@ export function LocationWhatsCovered({ place }: { place: string }) {
         residential visits include:
       </p>
       <ul className="mt-6 list-disc space-y-2 pl-5 text-sm leading-7 text-[#5a5470]">
-        {COVERED.map((item) => (
+        {houseCleanCoveredPoints().map((item) => (
           <li key={item}>{item}</li>
         ))}
       </ul>
@@ -132,9 +92,24 @@ export function LocationWhatsCovered({ place }: { place: string }) {
   );
 }
 
-export function LocationHowToBook({ place }: { place: string }) {
+export function LocationHowToBook({
+  bookingHref = "/booking/new",
+  place,
+}: {
+  bookingHref?: string;
+  place: string;
+}) {
   const steps = [
-    "Open booking and enter your postcode in " + place,
+    <>
+      Open{" "}
+      <Link
+        className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+        href={bookingHref}
+      >
+        Mundoria booking
+      </Link>{" "}
+      and enter your postcode in {place}
+    </>,
     "Choose your service and cleaning standard",
     "Add property details, duration and any add-ons",
     "Pick a date and time that works for you",
@@ -149,12 +124,14 @@ export function LocationHowToBook({ place }: { place: string }) {
         {steps.map((step, index) => (
           <li
             className="flex gap-3 text-sm leading-6 text-[#5a5470]"
-            key={step}
+            key={index}
           >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-xs font-bold text-white">
               {index + 1}
             </span>
-            <span>{step}</span>
+            <span className="[&_a]:font-semibold [&_a]:text-[#6a45b8] [&_a]:underline-offset-2 [&_a]:hover:underline">
+              {step}
+            </span>
           </li>
         ))}
       </ol>
@@ -207,16 +184,155 @@ export function LocationFaqBlock({
   );
 }
 
+export function LocationNearPlacePills({
+  categoryFocus,
+  links,
+  place,
+  placesNote,
+  serviceLabel,
+  serviceSlug,
+  showNearbyTowns = false,
+  surroundingLinks,
+}: {
+  categoryFocus?: "commercial" | "recovery" | "residential";
+  links?: Array<{ href: string; label: string }>;
+  place: string;
+  placesNote?: string;
+  serviceLabel?: string;
+  serviceSlug?: string;
+  showNearbyTowns?: boolean;
+  surroundingLinks?: Array<{ href: string; label: string }>;
+}) {
+  const focus: CoverageLinkFocus = {
+    category: categoryFocus,
+    serviceSlug,
+  };
+  const items =
+    links ??
+    birminghamTownZones().map((zone) => ({
+      href: coverageZoneHref(zone.id, focus),
+      label: zone.label,
+    }));
+  const nearbyZone = birminghamNearbyZone();
+  const nearbyPlaces = showNearbyTowns
+    ? (nearbyZone?.areas ?? []).map((area) => ({
+        href: serviceSlug
+          ? `/cleaning/${serviceSlug}/birmingham/${coverageAreaSlug(area)}`
+          : coverageAreaHref(area, focus),
+        label: area.label,
+      }))
+    : [];
+  const heading = cleaningPlaceTitle({
+    category: categoryFocus,
+    place,
+    preposition: "near",
+    serviceLabel,
+  });
+  const intro = [
+    cleaningPlaceIntro({
+      category: categoryFocus,
+      scope: links ? "places" : "towns",
+      serviceLabel,
+    }),
+    placesNote,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const pillClass =
+    "inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]";
+
+  const placeList = (
+    <ul className="mt-4 flex flex-wrap gap-3">
+      {items.map((item) => (
+        <li key={`${item.href}-${item.label}`}>
+          <Link className={pillClass} href={item.href}>
+            {item.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const nearbyList = nearbyPlaces.length ? (
+    <div className="mt-10">
+      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+        Nearby towns
+      </h2>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+        {nearbyZone?.note}
+      </p>
+      <ul className="mt-4 flex flex-wrap gap-3">
+        {nearbyPlaces.map((item) => (
+          <li key={`${item.href}-${item.label}`}>
+            <Link className={pillClass} href={item.href}>
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : null;
+
+  return (
+    <BrandedSection>
+      {surroundingLinks?.length ? (
+        <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr] lg:items-start">
+          <div>
+            <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+              {heading}
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-[#5a5470]">{intro}</p>
+            {placeList}
+          </div>
+          <div>
+            <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+              Surrounding towns
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-[#5a5470]">
+              {surroundingTownsIntro({
+                category: categoryFocus,
+                serviceLabel,
+              })}
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-3">
+              {surroundingLinks.map((item) => (
+                <li key={`${item.href}-${item.label}`}>
+                  <Link className={pillClass} href={item.href}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            {heading}
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">{intro}</p>
+          {placeList}
+        </>
+      )}
+      {nearbyList}
+    </BrandedSection>
+  );
+}
+
 export function LocationFeaturedCleaners({
+  bookingHref = "/booking/new",
   cleaners,
   place,
 }: {
+  bookingHref?: string;
   cleaners: Array<{
     areas: string;
     avatarUrl?: string | null;
     href?: string;
     jobs?: number;
     name: string;
+    prefixes?: string[];
+    radiusMiles?: number | null;
     rating: number;
     reviewCount?: number;
   }>;
@@ -225,66 +341,30 @@ export function LocationFeaturedCleaners({
   if (!cleaners.length) return null;
   return (
     <BrandedSection tone="cream">
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+      <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
         Independent cleaners near {place}
       </h2>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-        Mundoria cleaners complete onboarding and document review before
-        receiving jobs. Availability varies by day and service.
+        Vetted independent cleaners covering {place}, with ratings from completed
+        visits.
       </p>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cleaners.map((cleaner) => {
-          const card = (
-            <>
-              {cleaner.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  alt=""
-                  className="h-14 w-14 rounded-full object-cover object-top"
-                  src={cleaner.avatarUrl}
-                />
-              ) : (
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#efe6ff] text-sm font-bold text-[#6a45b8]">
-                  {cleaner.name
-                    .split(" ")
-                    .map((part) => part[0])
-                    .join("")
-                    .slice(0, 2)}
-                </div>
-              )}
-              <h3 className="mt-4 text-base font-semibold text-[#1c133b]">
-                {cleaner.name}
-              </h3>
-              <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-[#823fb2]">
-                Domestic cleaner
-              </p>
-              <p className="mt-2 text-sm text-[#5a5470]">{cleaner.areas}</p>
-              <p className="mt-3 text-sm font-semibold text-[#1c133b]">
-                {cleaner.rating > 0 ? `${cleaner.rating.toFixed(1)} / 5` : "New"}
-                {cleaner.reviewCount
-                  ? ` · ${cleaner.reviewCount} review${cleaner.reviewCount === 1 ? "" : "s"}`
-                  : ""}
-                {cleaner.jobs ? ` · ${cleaner.jobs} jobs` : ""}
-              </p>
-            </>
-          );
-          const className =
-            "rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)]";
-          return cleaner.href ? (
-            <Link className={`${className} block transition hover:-translate-y-0.5`} href={cleaner.href} key={cleaner.href}>
-              {card}
-            </Link>
-          ) : (
-            <article className={className} key={cleaner.name}>
-              {card}
-            </article>
-          );
-        })}
+      <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
+      <div className="mt-8 flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:gap-5">
+        <p className="text-[15px] font-medium text-[#1c133b]">
+          Ready for a clean in {place}?
+        </p>
+        <Link
+          className="inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-[#b8894e]"
+          href={bookingHref}
+        >
+          Book a clean
+        </Link>
       </div>
     </BrandedSection>
   );
 }
 
+/** Location review copy in the homepage carousel layout (not a second UI). */
 export function LocationReviews({
   heading,
   place,
@@ -292,45 +372,14 @@ export function LocationReviews({
 }: {
   heading?: string;
   place: string;
-  reviews: Array<{
-    author: string;
-    body: string;
-    score?: number | null;
-    service: string;
-    when?: string | null;
-  }>;
+  reviews: DirectoryReview[];
 }) {
   if (!reviews.length) return null;
+
   return (
-    <BrandedSection>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-          {heading ?? `Cleaning reviews in ${place}`}
-        </h2>
-        <GoogleReviewsButton />
-      </div>
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {reviews.map((review) => (
-          <blockquote
-            className="rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)]"
-            key={`${review.author}-${review.service}-${review.body.slice(0, 24)}`}
-          >
-            <p className="text-sm leading-7 text-[#5a5470]">“{review.body}”</p>
-            <footer className="mt-4 text-sm font-semibold text-[#1c133b]">
-              {review.score != null ? (
-                <span className="mr-2 text-[#823fb2]">{review.score.toFixed(1)} / 5</span>
-              ) : null}
-              {review.when ? (
-                <span className="font-medium text-[#5a5470]">{review.when}</span>
-              ) : null}
-              <span className="mt-1 block">{review.author}</span>
-              <span className="mt-1 block text-xs font-medium text-[#823fb2]">
-                {review.service}
-              </span>
-            </footer>
-          </blockquote>
-        ))}
-      </div>
-    </BrandedSection>
+    <ReviewsSection
+      heading={heading ?? `Cleaning reviews in ${place}`}
+      reviews={directoryReviewsToLandingReviews(reviews)}
+    />
   );
 }

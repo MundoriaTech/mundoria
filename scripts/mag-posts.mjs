@@ -6,28 +6,288 @@
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
 
 const IMG = {
+  bathroom: "/images/mag/bathroom.jpg",
   bedding: "/images/mag/bedding.jpg",
   bedroom: "/images/mag/bedroom.jpg",
   cash: "/images/mag/cash-to-app.jpg",
   cleaner: "/images/mag/cleaner-portrait.jpg",
+  diySpray: "/images/mag/diy-spray.jpg",
   empty: "/images/mag/empty-flat.jpg",
   fiveStar: "/images/mag/five-star.jpg",
   fragrance: "/images/mag/fragrance-free.jpg",
   harborne: "/images/mag/harborne-home.jpg",
   hours: "/images/mag/cleaner-2hrs.jpg",
   kitchen: "/images/mag/kitchen.jpg",
+  laundry: "/images/mag/laundry.jpg",
   moveIn: "/images/mag/move-in.jpg",
   office: "/images/mag/home-office.jpg",
   prepare: "/images/mag/prepare-home.jpg",
   recovery: "/images/mag/recovery.jpg",
   recurring: "/images/mag/recurring.jpg",
+  roomDeep: "/images/mag/room-deep-clean.jpg",
   sameDay: "/images/mag/same-day.jpg",
   shortlet: "/images/mag/shortlet.jpg",
+  supplies: "/images/mag/supplies.jpg",
   welcome: "/images/mag/welcome-mag.jpg",
   wood: "/images/mag/wooden-detail.jpg",
 };
 
 export const MAG_POSTS = [
+  {
+    author_name: "Mundoria Team",
+    category: "Cleaning Tips",
+    content: `A full-home deep clean feels huge until you break it into rooms. Working room-by-room keeps standards consistent, stops you redistributing dirt, and makes it obvious when to DIY versus [book a deep clean](/cleaning/deep-cleaning).
+
+This guide gives you the sequence, a room checklist, and a clear handoff to Mundoria when you’d rather not spend the weekend on skirting boards.
+
+## Should You Clean Room-by-Room or All at Once?
+
+**Room-by-room wins** for most Birmingham homes. Finish one space to a high standard before you move on — especially if you only have a few hours. “All at once” only works when you have a full team (or a pro booking) and can keep wet and dry zones separate.
+
+## What’s the Best Order for a Whole-Home Deep Clean?
+
+1. Declutter walkways and clear surfaces in every room you’ll clean
+2. Dust high areas — tops of frames, light fittings you can safely reach
+3. Kitchen (grease first, floor last)
+4. Bathrooms (limescale and sanitise)
+5. Bedrooms and living rooms
+6. Hallways and stairs last so traffic dirt doesn’t undo earlier work
+
+![Work room by room and top to bottom so dust falls onto floors you haven’t finished yet.](/images/mag/room-deep-clean.jpg "A sequential deep clean keeps standards even across the home.")
+
+## Room-by-Room Deep Cleaning Checklist
+
+### Kitchen
+- Cupboard fronts, handles and splashback
+- Hob, extractor exterior and sink
+- Appliance exteriors (and interiors if you booked a deep-clean standard)
+- Edges, then mop
+
+### Bathroom
+- Descale taps, screen and shower head
+- Basin, toilet and bath or shower tray
+- Mirrors, switch surrounds and floor
+
+### Bedroom
+- Dust furniture and skirting
+- Change bedding if it’s part of the plan
+- Vacuum under the bed and finish with a made bed
+
+### Living room and hall
+- Soft furnishings vacuum
+- Screens and high-touch points
+- Floors and stairs
+
+| Home size | Typical DIY time | Mundoria tip |
+| --- | --- | --- |
+| 1-bed flat | Half a day | Often fits a focused deep-clean booking |
+| 2–3 bed terrace | Full day | Split kitchen/bath priority if time is short |
+| Larger family home | Weekend | Book longer or a multi-visit plan |
+
+## How Do You Avoid Getting Overwhelmed?
+
+Set a timer per room, finish the checklist for that room, then move on. Don’t start the oven if the bathroom still isn’t done — incomplete rooms are what make deep cleans feel endless.
+
+> **Pro Tip:** Note your top three priorities in a [Mundoria booking](/booking/new?service=deep_clean). Pros follow a checklist so time goes into cleaning, not guessing.
+
+## When Should You Hand It Over?
+
+If grease has built up for months, you’re preparing for guests, or you need inventory-ready finishes, book [deep cleaning](/cleaning/deep-cleaning) or [regular cleaning](/cleaning/regular-cleaning) for the upkeep afterwards. See your estimate before you pay — then keep this checklist for the light top-ups between visits.`,
+    cover_url: IMG.roomDeep,
+    excerpt:
+      "A practical room-by-room deep cleaning guide — sequence, checklists, and when to book a Mundoria deep clean.",
+    published: true,
+    published_at: daysAgo(0),
+    slug: "room-by-room-deep-cleaning-guide",
+    title: "Room-by-room deep cleaning: your complete home guide",
+  },
+  {
+    author_name: "Jess M.",
+    category: "Cleaning Tips",
+    content: `Bathrooms look fine until limescale, soap scum and grout catch the light. A proper bathroom deep clean doesn’t need to take all day — but it does need the right order, a short dwell time for products, and a plan for what you wipe last.
+
+Here’s a UK-friendly top-to-bottom method, a checklist you can reuse monthly, and when to put it on a Mundoria visit instead.
+
+## How Often Should You Deep Clean a Bathroom?
+
+Aim for a **monthly deep clean**, with a lighter weekly wipe of basin, toilet and floor in between. Busy family bathrooms or shared flats may need a deeper pass every two to three weeks.
+
+## What’s the Best Order?
+
+Work **top to bottom**, dry to wet:
+
+1. Clear products from the basin and bath edge
+2. Dust high areas and the extractor cover
+3. Spray and leave cleaner to dwell 10–15 minutes
+4. Scrub tiles, grout and screen
+5. Clean basin, taps and mirrors
+6. Toilet last
+7. Floor mop to finish
+
+![Leave bathroom cleaner to dwell before scrubbing — limescale and soap scum loosen faster.](/images/mag/bathroom.jpg "Top to bottom keeps dirty water off surfaces you’ve already finished.")
+
+## Bathroom Deep Clean Checklist
+
+- Extractor cover and high dust
+- Tiles and grout (focus on splash zones)
+- Shower screen or curtain rail
+- Basin, taps and overflow
+- Bath or shower tray
+- Toilet bowl, seat and base
+- Mirror and switch surrounds
+- Bin and floor
+
+## What Products Help Most in Hard-Water Areas?
+
+Birmingham’s hard water means taps and screens need a descaler more often than soft-water cities. White vinegar solutions can help on glass and chrome — never mix vinegar with bleach. For fragrance-sensitive homes, note preferences when you [book](/booking/new).
+
+| Task | DIY tip |
+| --- | --- |
+| Shower screen | Descale, then squeegee after each use |
+| Grout | Soft brush — avoid harsh scourers on cheap sealant |
+| Toilet | Bowl first, then seat and exterior |
+
+## Common Mistakes
+
+- Scrubbing immediately instead of letting product sit
+- Cleaning the floor before the basin and toilet
+- Forgetting the base of the toilet and behind the pedestals
+- Using the same cloth from toilet to basin
+
+> **Pro Tip:** Keep a bathroom-only cloth set. Cross-contamination is the fastest way to undo a “deep” clean.
+
+## When Should You Book a Pro?
+
+Before guests, after a neglected rental, or when limescale has hardened for months. Add bathroom priority notes on a [deep clean](/cleaning/deep-cleaning) or [one-off clean](/cleaning/one-off-cleaning), or keep bathrooms sharp with [regular cleaning](/cleaning/regular-cleaning). Mundoria shows a clear estimate before you confirm.`,
+    cover_url: IMG.bathroom,
+    excerpt:
+      "How to deep clean a bathroom from top to bottom — monthly checklist, hard-water tips, and when to book Mundoria.",
+    published: true,
+    published_at: daysAgo(0.5),
+    slug: "how-to-deep-clean-bathroom",
+    title: "How to deep clean a bathroom from top to bottom",
+  },
+  {
+    author_name: "Priya S.",
+    category: "Cleaning Tips",
+    content: `Homemade cleaning sprays are popular for a reason: fewer mystery fragrances, less plastic, and recipes that actually work when you match the ingredient to the job. They are not magic — and some mixes are unsafe — but a small set of DIY formulas covers most UK kitchens and bathrooms.
+
+Below are practical recipes, where they shine, and what to avoid.
+
+## Which DIY Cleaners Are Worth Making?
+
+Start with three: a **multi-surface spray**, a **bathroom descaler**, and a **kitchen degreaser**. That covers worktops, taps, splashbacks and most weekly messes.
+
+![A simple spray bottle and pantry staples cover most everyday cleaning jobs.](/images/mag/diy-spray.jpg "Label every bottle — vinegar and bleach should never meet.")
+
+## Homemade Multi-Surface Spray
+
+1. Fill a clean spray bottle with warm water
+2. Add a teaspoon of mild washing-up liquid
+3. Optional: a splash of white vinegar for glass and chrome (not stone)
+4. Shake gently before use
+
+Wipe with a microfibre cloth and dry shiny surfaces to avoid streaks.
+
+## Bathroom Descaler (Hard Water)
+
+1. Equal parts white vinegar and water in a spray bottle
+2. Spray taps, screens and tile splash zones
+3. Leave 10–15 minutes
+4. Agitate with a soft cloth or non-scratch pad
+5. Rinse and dry
+
+> **Never mix vinegar with bleach or products that contain chlorine.** The combination releases toxic gas.
+
+## Kitchen Degreaser
+
+1. Warm water with a few drops of washing-up liquid
+2. For stubborn hob grease, add a bicarbonate of soda paste, leave briefly, then wipe
+3. Rinse food-contact surfaces afterwards
+
+Baking soda and vinegar foam looks dramatic but is a weak cleaner once they neutralise each other — use them for agitation and rinse, not as a “super formula” left in a closed bottle.
+
+## What Should You Avoid?
+
+- Mixing bleach with acids or ammonia
+- Undiluted vinegar on natural stone, some wood finishes, or unsealed grout
+- Essential oils if anyone in the home has fragrance sensitivity
+- Storing mystery mixes without labels
+
+| Surface | Safer DIY choice |
+| --- | --- |
+| Worktops (sealed) | Mild soapy water |
+| Glass / chrome | Diluted vinegar, then dry |
+| Wood furniture | Barely damp cloth — see our [wood guide](/blog/how-to-clean-wooden-furniture) |
+| Stone (marble/limestone) | Avoid vinegar; use pH-neutral soap |
+
+## When Are Shop Products Still Better?
+
+Disinfecting after illness, oven interiors, and mould treatment often need purpose-made products. If you want a pro to bring supplies, add cleaning products in [booking extras](/booking/new?step=addons) or note fragrance-free preferences.
+
+DIY sprays keep the weekly reset cheap and controlled. For the heavy resets, [book a Mundoria clean](/booking/new) and keep your homemade kit for the top-ups in between.`,
+    cover_url: IMG.diySpray,
+    excerpt:
+      "Practical DIY cleaning spray recipes for UK homes — multi-surface, descaler, degreaser, and the mixes to avoid.",
+    published: true,
+    published_at: daysAgo(1),
+    slug: "diy-cleaning-sprays-uk-guide",
+    title: "DIY cleaning sprays: safe, practical recipes for every room",
+  },
+  {
+    author_name: "Aisha O.",
+    category: "Home Care",
+    content: `Laundry looks simple until a turmeric splash, a grass stain or a mystery mark sets in. Most stains are salvageable if you act quickly, avoid the wrong heat, and match the method to the fabric.
+
+This guide covers everyday UK laundry care, a stain-response order that actually works, and how clean linen ties into Mundoria short-let and home bookings.
+
+## What’s the Golden Rule for Stains?
+
+**Blot, don’t rub — and treat before you tumble-dry.** Heat sets many stains permanently. Check the care label, test treatments on a hidden seam, and wash on the coolest effective cycle for the fabric.
+
+![Treat stains before heat — tumble-drying can set marks that were still removable.](/images/mag/laundry.jpg "Keep a small stain kit: mild detergent, bicarbonate and a soft cloth.")
+
+## Everyday Laundry Habits That Prevent Remakes
+
+- Don’t overload the machine — clothes need water movement
+- Separate whites on first washes of new bedding
+- Empty pockets (pens destroy whole loads)
+- Shake out towels to reduce musty folds
+- Dry fully before cupboarding — damp storage causes smells
+
+## Quick Stain Response Guide
+
+| Stain | First move | Avoid |
+| --- | --- | --- |
+| Coffee / tea | Blot, cool rinse, mild detergent | Hot water first on protein stains |
+| Oil / grease | Absorb with kitchen paper, then detergent | Rubbing into the weave |
+| Red wine | Blot, cool water, detergent soak | Salt myths that grind colour in |
+| Mud | Let dry, brush off, then wash | Scrubbing wet mud deeper |
+| Makeup | Dish soap on the spot, then wash | Hot ironing before treatment |
+
+## How Do You Disinfect Laundry When Needed?
+
+For gym kit, illness recovery, or cloths used in bathrooms, a hotter cycle (where the label allows) or a laundry disinfectant can help. Sensitive households should prefer fragrance-free options and note that in [Recovery](/cleaning/recovery) or residential booking preferences.
+
+## Silk, Suede and Delicates
+
+Delicate fibres need gentler rules — cool water, mild detergent, and often hand wash or a delicates bag. When in doubt, specialist cleaners beat a ruined blouse. For everyday cottons and polycottons, the blot-and-pretreat method above is enough.
+
+## How This Links to Cleaner Visits
+
+Mundoria cleaners don’t replace your washing machine — but linen-ready homes finish faster. If you want beds remade, leave clean sets ready (hosts: keep two sets per bed — see [washing new bedding](/blog/should-you-wash-new-bedding)). Note laundry locations in the booking so time isn’t spent hunting cupboards.
+
+> **Pro Tip:** Pre-treat stains the night before a turnover or guest arrival. Fresh bedding looks better in photos and reviews alike.
+
+Keep a small stain kit under the sink, wash smarter, and [book a clean](/booking/new) when you’d rather the surfaces and floors matched the fresh laundry pile.`,
+    cover_url: IMG.laundry,
+    excerpt:
+      "A practical UK laundry and stain guide — what to blot first, what heat ruins, and how linen prep helps Mundoria visits.",
+    published: true,
+    published_at: daysAgo(1.5),
+    slug: "laundry-and-stain-removal-guide",
+    title: "Laundry and stain removal: a practical UK guide",
+  },
   {
     author_name: "Aisha O.",
     category: "Cleaning Tips",
@@ -845,3 +1105,79 @@ Set recurring cleaning, keep the notes honest, and let the scrambles become rare
     title: "Why recurring cleans beat last-minute scrambles",
   },
 ];
+
+/** Marketing service slugs each Mag post should rank for on money pages. */
+export const MAG_RELATED_SERVICES_BY_SLUG = {
+  "airbnb-turnovers-jewellery-quarter": [
+    "airbnb-shortlet-cleaning",
+    "serviced-accommodation-cleaning",
+  ],
+  "bedroom-cleaning-checklist": ["regular-cleaning", "one-off-cleaning"],
+  "day-in-the-life-mundoria-cleaner": ["regular-cleaning"],
+  "diy-cleaning-sprays-uk-guide": [
+    "regular-cleaning",
+    "deep-cleaning",
+    "one-off-cleaning",
+  ],
+  "end-of-tenancy-cleaning-checklist": [
+    "end-of-tenancy-cleaning",
+    "move-in-move-out-cleaning",
+  ],
+  "fragrance-free-cleaning-sensitive-homes": [
+    "pregnancy-and-postpartum-cleaning",
+    "illness-and-injury-recovery",
+    "regular-cleaning",
+  ],
+  "hosts-keep-five-star-reviews": [
+    "airbnb-shortlet-cleaning",
+    "serviced-accommodation-cleaning",
+  ],
+  "how-to-clean-wooden-furniture": ["regular-cleaning", "deep-cleaning"],
+  "how-to-deep-clean-bathroom": ["deep-cleaning", "regular-cleaning"],
+  "kitchen-deep-clean-without-the-stress": [
+    "deep-cleaning",
+    "regular-cleaning",
+  ],
+  "laundry-and-stain-removal-guide": [
+    "regular-cleaning",
+    "airbnb-shortlet-cleaning",
+  ],
+  "move-in-cleaning-checklist-for-renters": [
+    "move-in-move-out-cleaning",
+    "end-of-tenancy-cleaning",
+  ],
+  "office-clutter-and-wellbeing": ["office-cleaning"],
+  "prepare-your-home-before-a-clean": ["regular-cleaning", "one-off-cleaning"],
+  "recurring-cleans-beat-scrambles": ["regular-cleaning"],
+  "room-by-room-deep-cleaning-guide": [
+    "deep-cleaning",
+    "regular-cleaning",
+    "one-off-cleaning",
+  ],
+  "same-day-cleans-in-birmingham": ["one-off-cleaning", "regular-cleaning"],
+  "saturday-morning-clean-harborne": ["regular-cleaning", "one-off-cleaning"],
+  "should-you-wash-new-bedding": [
+    "airbnb-shortlet-cleaning",
+    "regular-cleaning",
+  ],
+  "welcome-to-mundoria-mag": ["regular-cleaning"],
+  "what-can-a-cleaner-do-in-2-hours": [
+    "regular-cleaning",
+    "one-off-cleaning",
+    "deep-cleaning",
+  ],
+  "what-recovery-cleaning-means": [
+    "pregnancy-and-postpartum-cleaning",
+    "illness-and-injury-recovery",
+    "hospital-discharge-home-cleaning",
+    "bereavement-support-cleaning",
+  ],
+  "why-i-switched-from-cash-jobs": ["regular-cleaning"],
+};
+
+export function magPostsForSeed() {
+  return MAG_POSTS.map((post) => ({
+    ...post,
+    related_services: MAG_RELATED_SERVICES_BY_SLUG[post.slug] ?? [],
+  }));
+}

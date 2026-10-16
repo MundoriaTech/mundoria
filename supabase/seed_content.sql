@@ -63,7 +63,7 @@ insert into public.help_articles (collection_id, title, slug, summary, body, sor
 
 -- Mundoria Mag posts (covers + full articles): prefer
 --   node --env-file=.env.local scripts/seed-content.mjs
--- which loads scripts/mag-posts.mjs (19 diverse articles with images).
+-- which loads scripts/mag-posts.mjs (23 diverse articles with images).
 
 commit;
 

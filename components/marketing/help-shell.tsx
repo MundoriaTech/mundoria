@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
-import { ZohoSalesIqWidget } from "@/components/shared/zoho-salesiq";
+import { SupportMessengerWidget } from "@/components/support/support-messenger";
 import { cn } from "@/lib/utils";
 
 /** Standalone Help Centre chrome — logo bar only, no marketing navbar/footer. */
@@ -74,7 +74,7 @@ export function HelpShell({
         </div>
       </footer>
 
-      <ZohoSalesIqWidget />
+      <SupportMessengerWidget />
     </div>
   );
 }

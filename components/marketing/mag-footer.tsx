@@ -29,7 +29,6 @@ export function MagFooter({
       links: [
         ["All stories", "/blog"],
         ["Help Centre", "/help"],
-        ["Contact us", "/help"],
       ] as [string, string][],
       title: "Guides",
     },
@@ -41,6 +40,7 @@ export function MagFooter({
         ["Home", "/"],
         ["For cleaners", "/for-cleaners"],
         ["How it works", "/how-it-works"],
+        ["Contact us", "/contact"],
       ] as [string, string][],
       title: "Mundoria",
     },
@@ -70,7 +70,11 @@ export function MagFooter({
               Birmingham stories for real homes.
             </p>
             <div className="mt-5 sm:mt-6">
-              <ContactSupportButton className="text-sm font-semibold text-[#6a45b8] transition hover:text-[#5a38a3]" />
+              <ContactSupportButton
+                className="text-sm font-semibold text-[#6a45b8] transition hover:text-[#5a38a3]"
+                label="Start a chat"
+                tab="home"
+              />
             </div>
           </div>
 
@@ -99,6 +103,15 @@ export function MagFooter({
                     </li>
                   );
                 })}
+                {section.title === "Guides" ? (
+                  <li>
+                    <ContactSupportButton
+                      className="text-sm font-medium text-muted-foreground transition hover:text-[#312c79]"
+                      label="Start a chat"
+                      tab="home"
+                    />
+                  </li>
+                ) : null}
               </ul>
             </div>
           ))}

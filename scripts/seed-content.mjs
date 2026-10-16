@@ -4,7 +4,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { HELP_ARTICLES, HELP_COLLECTIONS } from "./help-content.mjs";
-import { MAG_POSTS } from "./mag-posts.mjs";
+import { magPostsForSeed } from "./mag-posts.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -19,7 +19,7 @@ const admin = createClient(url, key, {
 
 const collections = HELP_COLLECTIONS;
 const articles = HELP_ARTICLES;
-const posts = MAG_POSTS;
+const posts = magPostsForSeed();
 
 async function main() {
   console.log("Seeding editorial content…");

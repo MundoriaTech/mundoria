@@ -53,7 +53,7 @@ export default function ForCleanersPage() {
           primaryHref={signupHref}
           primaryLabel="Apply as a cleaner"
           secondaryHref="/how-it-works"
-          secondaryLabel="See the customer journey"
+          secondaryLabel="How it works"
           title="Work with Mundoria"
         />
 
@@ -87,6 +87,7 @@ export default function ForCleanersPage() {
 
         <BrandedCtaBand
           body="Create a cleaner account, complete onboarding and wait for admin approval before jobs appear in your feed."
+          buttonClassName="bg-[#1c133b] text-white hover:bg-[#312c79]"
           href={signupHref}
           label="Create cleaner account"
           title="Ready to join?"

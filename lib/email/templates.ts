@@ -99,7 +99,6 @@ function resolveTemplate(
 
   switch (template) {
     case "auth.welcome":
-    case "auth.signup_confirmation":
     case "customer.welcome":
     case "cleaner.welcome":
       return {
@@ -118,6 +117,19 @@ function resolveTemplate(
         subject: `Welcome to Mundoria${firstName ? `, ${firstName}` : ""}`,
         title: "Welcome to Mundoria",
         tone: role === "cleaner" ? "cleaner" : "customer",
+      };
+    case "auth.signup_confirmation":
+      return {
+        body:
+          "Thanks for joining Mundoria. Confirm your email address to finish creating your account. This link is only for you — if you did not sign up, you can ignore this email.",
+        buttonHref: string(data.confirmUrl),
+        buttonLabel: "Confirm email",
+        cards: [{ label: "Account email", value: data.email }],
+        intro: firstName ? `Hi ${firstName},` : "Hi there,",
+        preview: "Confirm your Mundoria email address.",
+        subject: "Confirm your Mundoria email",
+        title: "Confirm your email",
+        tone: "security",
       };
     case "auth.password_reset":
       return {
@@ -558,7 +570,8 @@ function payoutTemplate(template: EmailTemplateId, data: Record<string, unknown>
 function renderBase(context: TemplateContext, data: Record<string, unknown>): RenderedEmail {
   const tone = toneStyles[context.tone ?? "customer"];
   const cards = (context.cards ?? []).filter((card) => card.value !== undefined && card.value !== null && String(card.value).trim() !== "");
-  const supportEmail = process.env.SUPPORT_EMAIL || "support@mundoriauk.local";
+  const supportEmail =
+    process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
   const logoUrl = publicEmailAssetUrl(MUNDORIA_WORDMARK_ON_DARK_SRC);
 
   const html = `<!doctype html>

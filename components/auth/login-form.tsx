@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { FormField } from "@/components/auth/form-field";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
+import { SIGNUP_EMAIL_SESSION_KEY } from "@/lib/auth/signup-email-pending";
 import { loginSchema, type LoginValues } from "@/lib/auth/schemas";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -46,10 +47,19 @@ export function LoginForm({
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
+    setValue,
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: initialEmail ?? "", password: "" },
   });
+
+  useEffect(() => {
+    if (initialEmail) return;
+    const stored = window.sessionStorage.getItem(SIGNUP_EMAIL_SESSION_KEY);
+    if (!stored) return;
+    setValue("email", stored);
+    window.sessionStorage.removeItem(SIGNUP_EMAIL_SESSION_KEY);
+  }, [initialEmail, setValue]);
 
   const onSubmit = handleSubmit(async ({ email, password }) => {
     setFormError(null);

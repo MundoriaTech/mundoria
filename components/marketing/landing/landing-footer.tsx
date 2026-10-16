@@ -1,10 +1,10 @@
 import Link from "next/link";
+import { FacebookLogo, InstagramLogo, TiktokLogo } from "@phosphor-icons/react/ssr";
 
 import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import {
-  BIRMINGHAM_AREAS,
   LAUNCH_CITY,
   popularMarketingServices,
   servicePlacePath,
@@ -17,69 +17,62 @@ export function LandingFooter({
   cleanerHref: string;
   configured: boolean;
 }) {
-  const bookingHref = configured ? "/booking/new" : "/setup";
-  const loginHref = configured ? "/login" : "/setup";
   const cleanerLoginHref = configured ? "/login/cleaner" : "/setup";
   const popularSeoServices = popularMarketingServices(4);
 
-  const footerSections = [
+  const linkClass =
+    "text-base font-medium text-muted-foreground transition hover:text-[#312c79]";
+
+  const footerSections: {
+    title: string;
+    links: Array<
+      | { href: string; label: string }
+      | { action: "chat"; label: string }
+    >;
+  }[] = [
     {
       links: [
-        ["Book a cleaner", bookingHref],
-        ["Customer login", loginHref],
-        ["Pricing", "/pricing"],
-        ["FAQ", "/faq"],
-        ["Help Centre", "/help"],
-      ],
-      title: "Customers",
-    },
-    {
-      links: [
-        ["All services", "/cleaning"],
-        ...popularSeoServices.map(
-          (service) =>
-            [
-              `${service.label} in Birmingham`,
-              servicePlacePath(service.slug),
-            ] as [string, string],
-        ),
+        { href: "/cleaning", label: "All services" },
+        ...popularSeoServices.map((service) => ({
+          href: servicePlacePath(service.slug),
+          label: service.label,
+        })),
       ],
       title: "Services",
     },
     {
       links: [
-        ["For cleaners", "/for-cleaners"],
-        ["Become a cleaner", cleanerHref],
-        ["Cleaner login", cleanerLoginHref],
-        ["Birmingham coverage", `/cleaners/${LAUNCH_CITY.slug}`],
-        ...BIRMINGHAM_AREAS.map(
-          (area) =>
-            [
-              area.name,
-              `/cleaners/${LAUNCH_CITY.slug}/${area.slug}`,
-            ] as [string, string],
-        ),
+        { href: "/for-cleaners", label: "For cleaners" },
+        { href: cleanerHref, label: "Become a cleaner" },
+        { href: cleanerLoginHref, label: "Cleaner login" },
+        {
+          href: `/cleaners/${LAUNCH_CITY.slug}`,
+          label: `Cleaners in ${LAUNCH_CITY.name}`,
+        },
       ],
-      title: "Cleaners",
+      title: "For pros",
     },
     {
       links: [
-        ["How it works", "/how-it-works"],
-        ["Mundoria Mag", "/blog"],
-        ["Help Centre", "/help"],
-        ["Coverage", "#coverage"],
-        ["Privacy", "/privacy"],
-        ["Cookie policy", "/cookies"],
-        ["Terms", "/terms"],
+        { href: "/blog", label: "Mundoria Mag" },
+        { href: "/how-it-works", label: "How it works" },
+        { href: "/contact", label: "Contact us" },
       ],
-      title: "Company",
+      title: "Discover",
+    },
+    {
+      links: [
+        { href: "/help", label: "Help Centre" },
+        { action: "chat", label: "Start a chat" },
+      ],
+      title: "Need help?",
     },
   ];
 
   return (
     <footer className="reveal-on-scroll-soft border-t border-border bg-white px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-14 sm:px-8 sm:py-16">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-8 border-b border-border pb-10 sm:grid-cols-2 sm:gap-10 sm:pb-12 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
+        <div className="grid gap-8 border-b border-border pb-10 sm:grid-cols-2 sm:gap-10 sm:pb-12 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
           <div className="sm:col-span-2 lg:col-span-1">
             <LandingLogo href="/" />
             <p className="mt-5 max-w-xl text-pretty text-base font-light leading-7 text-muted-foreground sm:mt-6 sm:text-[17px]">
@@ -88,7 +81,11 @@ export function LandingFooter({
               and tenancy handovers.
             </p>
             <div className="mt-5 sm:mt-6">
-              <ContactSupportButton className="text-base font-semibold text-[#6a45b8] transition hover:text-[#5a38a3]" />
+              <ContactSupportButton
+                className="text-base font-semibold text-[#6a45b8] transition hover:text-[#5a38a3]"
+                label="Start a chat"
+                tab="home"
+              />
             </div>
           </div>
 
@@ -98,21 +95,31 @@ export function LandingFooter({
                 {section.title}
               </h3>
               <ul className="mt-4 space-y-3 sm:mt-5">
-                {section.links.map(([label, href]) => (
-                  <li key={`${section.title}-${label}`}>
-                    <Link
-                      className="text-base font-medium text-muted-foreground transition hover:text-[#312c79]"
-                      href={href}
-                    >
-                      {label}
-                    </Link>
+                {section.links.map((item) => (
+                  <li key={`${section.title}-${item.label}`}>
+                    {"action" in item ? (
+                      <ContactSupportButton
+                        className={linkClass}
+                        label={item.label}
+                        tab="home"
+                      />
+                    ) : (
+                      <Link className={linkClass} href={item.href}>
+                        {item.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
+
+          <div className="flex justify-center sm:col-span-2 sm:justify-end lg:col-span-5">
+            <FooterSocial />
+          </div>
         </div>
 
+        <FooterPayments />
         <div className="flex flex-col gap-5 pt-8 text-base font-medium text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p>© 2026 Mundoria UK. All rights reserved.</p>
@@ -131,7 +138,6 @@ export function LandingFooter({
             <CookieSettingsLink className="transition hover:text-[#312c79]">
               Manage cookies
             </CookieSettingsLink>
-            <ContactSupportButton className="transition hover:text-[#312c79]" />
             <Link className="transition hover:text-[#312c79]" href="/terms">
               Terms
             </Link>
@@ -145,5 +151,87 @@ export function LandingFooter({
         </div>
       </div>
     </footer>
+  );
+}
+
+const SOCIAL = [
+  {
+    Icon: FacebookLogo,
+    className: "bg-[#1877F2] hover:brightness-110",
+    href:
+      process.env.NEXT_PUBLIC_FACEBOOK_URL ??
+      "https://www.facebook.com/mundoriauk",
+    label: "Facebook",
+  },
+  {
+    Icon: InstagramLogo,
+    className:
+      "bg-[linear-gradient(45deg,#f9ce34_0%,#ee2a7b_55%,#6228d7_100%)] hover:brightness-110",
+    href:
+      process.env.NEXT_PUBLIC_INSTAGRAM_URL ??
+      "https://www.instagram.com/mundoriauk",
+    label: "Instagram",
+  },
+  {
+    Icon: TiktokLogo,
+    className: "bg-[#111111] hover:bg-[#2a2a2a]",
+    href: process.env.NEXT_PUBLIC_TIKTOK_URL ?? "https://www.tiktok.com/@mundoriauk",
+    label: "TikTok",
+  },
+] as const;
+
+function FooterSocial() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-end">
+      <p className="text-base font-bold text-[#1c133b]">Follow us</p>
+      <ul className="flex gap-3">
+        {SOCIAL.map(({ Icon, className, href, label }) => (
+          <li key={label}>
+            <a
+              aria-label={label}
+              className="group relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-white"
+              href={href}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <span className="absolute inset-0 bg-[#1c133b] transition-opacity group-hover:opacity-0" />
+              <span
+                className={`absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100 ${className}`}
+              />
+              <Icon aria-hidden className="relative h-5 w-5" weight="fill" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+const PAYMENT_METHODS = [
+  { alt: "Visa", src: "/images/payments/visa.svg" },
+  { alt: "Mastercard", src: "/images/payments/mastercard.svg" },
+  { alt: "American Express", src: "/images/payments/amex.svg" },
+  { alt: "Apple Pay", src: "/images/payments/apple-pay.svg" },
+  { alt: "Google Pay", src: "/images/payments/google-pay.svg" },
+] as const;
+
+function FooterPayments() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-5 border-b border-border py-5 lg:flex-nowrap lg:justify-start lg:gap-24 lg:py-10">
+      <p className="text-base font-bold text-[#1c133b]">Accepted payment methods</p>
+      <ul className="flex flex-wrap items-center justify-center gap-6 lg:gap-10">
+        {PAYMENT_METHODS.map((method) => (
+          <li key={method.alt}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt={method.alt}
+              className="h-9 w-auto"
+              height={36}
+              src={`${method.src}?v=3`}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

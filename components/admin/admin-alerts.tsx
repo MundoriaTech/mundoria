@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, CheckCheck, X } from "lucide-react";
+import Link from "next/link";
 import {
   useEffect,
   useRef,
@@ -13,6 +14,15 @@ import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Notification } from "@/types/customer";
+
+function alertHref(item: Notification) {
+  const data = item.data as { conversation_id?: string } | null;
+  if (item.type === "support_message" && data?.conversation_id) {
+    return `/admin/inbox/${data.conversation_id}`;
+  }
+  if (item.type === "support_message") return "/admin/inbox";
+  return null;
+}
 
 export function AdminAlerts({
   initialNotifications,
@@ -190,20 +200,40 @@ export function AdminAlerts({
                 </div>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                {items.map((item) => (
-                  <div
-                    className={cn(
-                      "border-b border-border p-4 text-sm last:border-0",
-                      !item.is_read && "bg-primary/10",
-                    )}
-                    key={item.id}
-                  >
-                    <b className="text-foreground">{item.title}</b>
-                    <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">
-                      {item.body}
-                    </p>
-                  </div>
-                ))}
+                {items.map((item) => {
+                  const href = alertHref(item);
+                  const body = (
+                    <>
+                      <b className="text-foreground">{item.title}</b>
+                      <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">
+                        {item.body}
+                      </p>
+                    </>
+                  );
+                  return href ? (
+                    <Link
+                      className={cn(
+                        "block border-b border-border p-4 text-sm last:border-0 hover:bg-muted/40",
+                        !item.is_read && "bg-primary/10",
+                      )}
+                      href={href}
+                      key={item.id}
+                      onClick={() => setOpen(false)}
+                    >
+                      {body}
+                    </Link>
+                  ) : (
+                    <div
+                      className={cn(
+                        "border-b border-border p-4 text-sm last:border-0",
+                        !item.is_read && "bg-primary/10",
+                      )}
+                      key={item.id}
+                    >
+                      {body}
+                    </div>
+                  );
+                })}
                 {!items.length ? (
                   <p className="p-6 text-center text-sm text-muted-foreground">
                     No alerts.

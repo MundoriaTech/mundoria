@@ -50,7 +50,7 @@ const CARD_SLOT_STYLES = [
 const CARD_GAP = 20;
 const DESKTOP_SET_SIZE = 3;
 const AUTO_ADVANCE_HOLD_MS = 6500;
-const DESKTOP_STAGE_MIN_HEIGHT = 330;
+const DESKTOP_STAGE_MIN_HEIGHT = 360;
 
 function ReviewCardAccent({
   color,
@@ -91,14 +91,14 @@ function ReviewCard({
 
   return (
     <article
-      className={`relative flex min-h-[248px] w-full flex-col overflow-hidden rounded-[8px] shadow-[0_12px_32px_rgba(28,19,59,0.12)] md:min-h-[262px] md:shadow-[0_14px_36px_rgba(28,19,59,0.14)] ${slot.offsetClass}`}
+      className={`relative flex min-h-[280px] w-full flex-col overflow-hidden rounded-[8px] shadow-[0_12px_32px_rgba(28,19,59,0.12)] md:min-h-[300px] md:shadow-[0_14px_36px_rgba(28,19,59,0.14)] ${slot.offsetClass}`}
       style={{ backgroundColor: REVIEW_CARD_BG }}
     >
-      <div className="flex flex-1 flex-col px-6 pb-5 pt-7">
+      <div className="flex flex-1 flex-col px-6 pb-6 pt-7 sm:px-7">
         <div className="flex items-start justify-between gap-3">
           <p
             aria-hidden
-            className="text-[11px] tracking-[0.18em] text-[#c79c66]"
+            className="text-sm tracking-[0.12em] text-[#c79c66]"
           >
             ★★★★★
           </p>
@@ -110,14 +110,14 @@ function ReviewCard({
             width={36}
           />
         </div>
-        <p className="mt-4 flex-1 text-[12px] font-light leading-[17px] text-black">
+        <p className="mt-4 flex-1 text-[15px] font-normal leading-[1.55] text-[#1c133b] sm:text-base sm:leading-relaxed">
           “{review.quote}”
         </p>
         <div className="mt-6 pb-1">
-          <p className="text-[10px] font-semibold leading-[17px] text-black">
+          <p className="text-sm font-semibold leading-snug text-[#1c133b] sm:text-[15px]">
             {review.name}
           </p>
-          <p className="text-[8px] font-light leading-none text-black">
+          <p className="mt-1 text-xs font-normal leading-snug text-[#5a5470] sm:text-sm">
             {review.detail}
           </p>
         </div>
@@ -322,8 +322,10 @@ const DesktopReviewCarousel = forwardRef<
 });
 
 export function ReviewsSection({
+  heading = "What our customers say",
   reviews = landingReviewPlaceholders,
 }: {
+  heading?: string;
   reviews?: LandingReview[];
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -394,7 +396,7 @@ export function ReviewsSection({
           />
 
           <h2 className="max-w-[20rem] text-balance text-[1.5rem] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-[36px] sm:leading-[1.08]">
-            What our customers say
+            {heading}
           </h2>
           <GoogleReviewsButton className="mt-4" />
         </ScrollReveal>

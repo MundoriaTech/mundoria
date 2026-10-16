@@ -54,6 +54,16 @@ class MundoriaApi {
     _throwIfNeeded(response);
   }
 
+  /// Sends a Mundoria-branded password reset email via the web API (Resend).
+  Future<void> forgotPassword({required String email}) async {
+    final response = await http.post(
+      Uri.parse('${MundoriaConfig.apiBase}/api/auth/forgot-password'),
+      headers: const {'content-type': 'application/json'},
+      body: jsonEncode({'email': email.trim()}),
+    );
+    _throwIfNeeded(response);
+  }
+
   Future<dynamic> _send(
     String method,
     String path, [

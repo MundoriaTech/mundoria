@@ -6,28 +6,11 @@ import { useRef } from "react";
 import { Check, Star } from "lucide-react";
 
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
-import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
+import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
+import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
 
-const HERO_IMAGE = "/images/marketing/landing/residential-hero.png";
-
-const FEATURES = [
-  {
-    body: "No more wondering who's coming to clean. Connect with trusted cleaning professionals who are ready to take care of your space.",
-    icon: "/images/marketing/icons/reliable.png",
-    title: "We're reliable",
-  },
-  {
-    body: "Need a one-off clean or someone to come regularly? Choose a cleaning schedule that works for your home, routine, and budget.",
-    icon: "/images/marketing/icons/flexible.png",
-    title: "We're flexible",
-  },
-  {
-    body: "Pick a cleaner, choose the service you need and book with ease. Mundoria makes getting your home cleaned simple from start to finish.",
-    icon: "/images/marketing/icons/simple.png",
-    title: "We're simple",
-  },
-] as const;
+const HERO_IMAGE = "/images/marketing/landing/residential-hero.jpg";
 
 const SERVICE_CARDS = [
   {
@@ -62,47 +45,6 @@ const SERVICE_CARDS = [
   },
 ] as const;
 
-const FAQS = [
-  {
-    answer:
-      "Mundoria helps you find reliable cleaning professionals for your home. Whether you need regular upkeep, a move-in or move-out clean, a one-off refresh, an end of tenancy clean, or guest-ready Airbnb and shortlet turns, we make it easy to book trusted cleaners.",
-    question: "What is Mundoria?",
-    services: [
-      {
-        description: "Keep your home clean and fresh with scheduled visits.",
-        name: "Regular cleaning",
-      },
-      {
-        description: "A full reset when moving into or out of a property.",
-        name: "Move-in / move-out cleaning",
-      },
-      {
-        description: "Ideal when you need a clean for a specific occasion.",
-        name: "One-off cleaning",
-      },
-      {
-        description: "Move-out cleaning designed for landlord and agent standards.",
-        name: "End of tenancy cleaning",
-      },
-      {
-        description: "Guest-ready turnover cleans between Airbnb and shortlet stays.",
-        name: "Airbnb/Shortlet cleaning",
-      },
-    ],
-    servicesHeading: "What residential cleaning services does Mundoria offer?",
-  },
-  {
-    answer:
-      "Booking is simple. Choose the cleaning service you need, enter your location and preferred date, and complete your booking with a clear estimate.",
-    question: "How do I book a cleaner?",
-  },
-  {
-    answer:
-      "Mundoria helps you find cleaning professionals available in your area. Simply enter your location when booking to see the services and cleaners available near you.",
-    question: "How do I find a cleaner near me?",
-  },
-] as const;
-
 export function ResidentialCleaningPage({
   bookingHref,
 }: {
@@ -133,19 +75,16 @@ export function ResidentialCleaningPage({
             sizes="100vw"
             src={HERO_IMAGE}
           />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-r from-[#1c133b]/55 via-[#291845]/25 to-transparent"
-          />
+          <CategoryHeroOverlay />
         </div>
 
         <div
-          className="relative mx-auto flex min-h-[22rem] w-full max-w-[1400px] flex-col justify-between px-4 pb-8 sm:min-h-[26rem] sm:px-8 sm:pb-10 lg:min-h-[28rem] lg:px-12 lg:pb-12"
-          style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 1.25rem)` }}
+          className="relative mx-auto flex min-h-[22rem] w-full max-w-[1400px] flex-col justify-end px-4 pb-8 sm:min-h-[26rem] sm:px-8 sm:pb-10 lg:min-h-[28rem] lg:px-12 lg:pb-12"
+          style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2rem)` }}
         >
-          <div className="flex justify-end">
+          <div className="relative">
             <a
-              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-white/95 transition hover:text-white sm:text-[13px]"
+              className="absolute right-0 top-0 z-10 inline-flex items-center gap-1.5 text-[12px] font-medium text-white/95 transition hover:text-white sm:text-[13px]"
               href="#reviews"
             >
               <span className="inline-flex text-[#c79c66]" aria-hidden>
@@ -161,68 +100,40 @@ export function ResidentialCleaningPage({
                 4.8/5 <span className="underline underline-offset-2">Check reviews</span>
               </span>
             </a>
-          </div>
 
-          <div className="max-w-xl pb-2 sm:pb-4">
-            <h1 className="text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl lg:text-[3.25rem]">
-              Residential Cleaning
-            </h1>
-            <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
-              Everyday homes, deep resets and flexible one-off cleans
-            </p>
-            <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">
-              {[
-                "Cleaning from £15.90/h",
-                "Book once or schedule regularly",
-                "Reliable, vetted cleaners you can trust",
-              ].map((item) => (
-                <li className="flex items-start gap-2.5" key={item}>
-                  <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
-                    <Check className="h-3 w-3" strokeWidth={3} />
-                  </span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 sm:mt-8"
-              href={bookingHref}
-            >
-              Book residential cleaning
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[#f7f2fc] px-4 py-10 sm:px-8 sm:py-12">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-left text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-[1.75rem] lg:text-[2rem]">
-            Cleaning that works around you
-          </h2>
-          <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
-            {FEATURES.map(({ body, icon, title }) => (
-              <div
-                className="relative min-h-[9.5rem] overflow-hidden rounded-[1.75rem] bg-[#f3efe6] px-5 pb-14 pt-5 sm:min-h-[10.5rem] sm:px-6 sm:pb-16 sm:pt-6"
-                key={title}
+            <div className="max-w-xl pb-2 sm:pb-4">
+              <h1 className="text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl lg:text-[3.25rem]">
+                Residential Cleaning
+              </h1>
+              <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
+                Everyday homes, deep resets and flexible one-off cleans
+              </p>
+              <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">
+                {[
+                  "Cleaning from £15.90/h",
+                  "Book once or schedule regularly",
+                  "Reliable, vetted cleaners you can trust",
+                ].map((item) => (
+                  <li className="flex items-start gap-2.5" key={item}>
+                    <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
+                      <Check className="h-3 w-3" strokeWidth={3} />
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 sm:mt-8"
+                href={bookingHref}
               >
-                <h3 className="pr-14 text-[1.05rem] font-bold leading-tight text-[#1c133b] sm:text-[1.15rem]">
-                  {title}
-                </h3>
-                <p className="mt-2 max-w-[15.5rem] text-[13px] font-normal leading-[1.45] text-[#3d3a48] sm:text-[14px] sm:leading-[1.5]">
-                  {body}
-                </p>
-                <Image
-                  alt=""
-                  className="pointer-events-none absolute bottom-3 right-3 h-14 w-14 rounded-full object-cover sm:bottom-4 sm:right-4 sm:h-16 sm:w-16"
-                  height={512}
-                  src={icon}
-                  width={512}
-                />
-              </div>
-            ))}
+                Book residential cleaning
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      <PhotoFeatureBand />
 
       <section className="px-4 py-10 sm:px-8 sm:py-14">
         <div className="mx-auto max-w-6xl">
@@ -269,48 +180,6 @@ export function ResidentialCleaningPage({
         </div>
       </section>
 
-      <ReviewsSection />
-
-      <section className="bg-[#f3eef8] px-4 py-12 sm:px-8 sm:py-16">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#c45c3a] sm:text-3xl">
-            Mundoria FAQ
-          </h2>
-          <div className="mt-8 columns-1 gap-4 sm:columns-2 sm:gap-5">
-            {FAQS.map((faq) => (
-              <article
-                className="mb-4 break-inside-avoid rounded-[1.35rem] border border-[#d8d4e0] bg-[#f7f6f8] px-5 py-5 sm:mb-5 sm:rounded-[1.5rem] sm:px-6 sm:py-6"
-                key={faq.question}
-              >
-                <h3 className="text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
-                  {faq.question}
-                </h3>
-                <p className="mt-2.5 text-sm font-normal leading-6 text-[#414141]">
-                  {faq.answer}
-                </p>
-                {"services" in faq && faq.services ? (
-                  <>
-                    <h4 className="mt-4 text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
-                      {faq.servicesHeading}
-                    </h4>
-                    <ul className="mt-2.5 list-disc space-y-1.5 pl-5 text-sm font-normal leading-6 text-[#414141]">
-                      {faq.services.map((service) => (
-                        <li key={service.name}>
-                          <span className="font-semibold text-[#1c133b]">
-                            {service.name}
-                          </span>
-                          {" — "}
-                          {service.description}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
     </>
   );
 }

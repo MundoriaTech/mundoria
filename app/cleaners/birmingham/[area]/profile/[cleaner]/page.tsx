@@ -1,18 +1,61 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { Star } from "lucide-react";
 
 import { JsonLd } from "@/components/marketing/json-ld";
 import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
+import { FeaturedCleanerCards } from "@/components/marketing/featured-cleaner-cards";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import {
+  bookingHrefWithDirectoryCleaner,
   loadDirectoryCleaner,
+  loadDirectoryCleaners,
   loadDirectoryReviews,
+  type DirectoryCleaner,
 } from "@/lib/seo/birmingham-directory";
 import { LAUNCH_CITY, birminghamAreaBySlug } from "@/lib/seo/marketing";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+import { cn } from "@/lib/utils";
+
+function RatingStars({ score }: { score: number | null }) {
+  const value = score ?? 0;
+  return (
+    <span
+      aria-label={score == null ? "No rating" : `${score.toFixed(1)} out of 5`}
+      className="inline-flex gap-0.5 text-[#c79c66]"
+    >
+      {Array.from({ length: 5 }, (_, index) => (
+        <Star
+          aria-hidden
+          className={cn(
+            "size-3.5",
+            index < Math.round(value) ? "fill-current" : "fill-none",
+          )}
+          key={index}
+          strokeWidth={1.75}
+        />
+      ))}
+    </span>
+  );
+}
+
+async function otherPros(cleaner: DirectoryCleaner, areaSlug: string) {
+  const nearby = await loadDirectoryCleaners({ areaSlug, limit: 8 });
+  const picked = (nearby ?? []).filter((item) => item.id !== cleaner.id);
+  if (picked.length >= 3) return picked.slice(0, 3);
+
+  const wider = await loadDirectoryCleaners({ limit: 12 });
+  const seen = new Set([cleaner.id, ...picked.map((item) => item.id)]);
+  for (const item of wider ?? []) {
+    if (seen.has(item.id)) continue;
+    picked.push(item);
+    if (picked.length === 3) break;
+  }
+  return picked.slice(0, 3);
+}
 
 type PageProps = {
   params: { area: string; cleaner: string };
@@ -22,9 +65,8 @@ export const dynamicParams = true;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const area = birminghamAreaBySlug(params.area);
-  const shortId = params.cleaner.split("-").at(-1) ?? "";
-  if (!area || shortId.length < 8) return {};
-  const cleaner = await loadDirectoryCleaner(shortId, area.slug);
+  if (!area) return {};
+  const cleaner = await loadDirectoryCleaner(params.cleaner, area.slug);
   if (!cleaner) return {};
   return buildPageMetadata({
     description: cleaner.bio,
@@ -36,33 +78,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function BirminghamCleanerPage({ params }: PageProps) {
   const area = birminghamAreaBySlug(params.area);
   if (!area) notFound();
-  const shortId = params.cleaner.split("-").at(-1) ?? "";
-  if (shortId.length < 8) notFound();
 
-  const cleaner = await loadDirectoryCleaner(shortId, area.slug);
+  const cleaner = await loadDirectoryCleaner(params.cleaner, area.slug);
   if (!cleaner) notFound();
-  const reviews = await loadDirectoryReviews({
-    cleanerId: cleaner.id,
-    limit: 6,
-  });
+  const canonicalSlug = cleaner.href.split("/").at(-1);
+  if (canonicalSlug && canonicalSlug !== params.cleaner) {
+    permanentRedirect(cleaner.href);
+  }
+  const [reviews, pros] = await Promise.all([
+    loadDirectoryReviews({
+      cleanerId: cleaner.id,
+      limit: 6,
+    }),
+    otherPros(cleaner, area.slug),
+  ]);
 
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
+  const bookWithHref = bookingHrefWithDirectoryCleaner(bookingHref, cleaner);
   const areaHref = `/cleaners/${LAUNCH_CITY.slug}/${area.slug}`;
   const initials = cleaner.name
     .split(" ")
     .map((part) => part[0])
     .join("")
     .slice(0, 2);
-  const facts = [
-    {
-      label: "Rating",
-      value: cleaner.rating > 0 ? cleaner.rating.toFixed(1) : "New",
-    },
-    { label: "Reviews", value: String(cleaner.reviewCount) },
-    { label: "Jobs", value: String(cleaner.jobs) },
-    { label: "Covers", value: cleaner.areas },
-  ];
+  const ratingLabel = cleaner.rating > 0 ? cleaner.rating.toFixed(1) : "New";
+  const reviewLabel = `${cleaner.reviewCount} review${cleaner.reviewCount === 1 ? "" : "s"}`;
 
   return (
     <MarketingShell>
@@ -126,17 +167,17 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
               </ol>
             </nav>
 
-            <article className="mt-6 overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_18px_50px_rgba(28,19,59,0.08)]">
-              <div className="flex flex-col gap-8 p-6 sm:p-8 lg:flex-row lg:items-start lg:gap-10">
+            <article className="mt-8 overflow-hidden rounded-[2rem] bg-white shadow-[0_18px_50px_rgba(28,19,59,0.08)]">
+              <div className="flex flex-col gap-6 px-6 py-8 sm:px-10 sm:py-10 lg:flex-row lg:items-start lg:gap-10">
                 {cleaner.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     alt=""
-                    className="h-36 w-36 shrink-0 rounded-full object-cover object-top ring-4 ring-[#fff4ee] sm:h-44 sm:w-44"
+                    className="h-28 w-28 shrink-0 rounded-full object-cover object-top sm:h-36 sm:w-36"
                     src={cleaner.avatarUrl}
                   />
                 ) : (
-                  <div className="flex h-36 w-36 shrink-0 items-center justify-center rounded-full bg-[#efe6ff] text-3xl font-semibold text-[#6a45b8] ring-4 ring-[#fff4ee] sm:h-44 sm:w-44">
+                  <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-[#f3f4f6] text-3xl font-semibold text-[#1c133b] sm:h-36 sm:w-36">
                     {initials}
                   </div>
                 )}
@@ -148,91 +189,91 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                   <h1 className="mt-2 text-[2.4rem] font-semibold leading-none tracking-[-0.045em] text-[#1c133b] sm:text-5xl">
                     {cleaner.name}
                   </h1>
+                  <p className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-[#5a5470]">
+                    <span className="inline-flex items-center gap-1 font-semibold text-[#1c133b]">
+                      <Star
+                        aria-hidden
+                        className="size-4 fill-[#c79c66] text-[#c79c66]"
+                      />
+                      {ratingLabel}
+                    </span>
+                    <span aria-hidden>·</span>
+                    <span>{reviewLabel}</span>
+                    <span aria-hidden>·</span>
+                    <span>{cleaner.jobs} jobs</span>
+                    <span aria-hidden>·</span>
+                    <span>Covers {cleaner.areas}</span>
+                  </p>
                   <p className="mt-4 max-w-xl text-base leading-7 text-[#5a5470]">
                     {cleaner.bio}
                   </p>
-
-                  <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {facts.map((fact) => (
-                      <div
-                        className="rounded-2xl bg-[#f3f4f6] px-4 py-3"
-                        key={fact.label}
-                      >
-                        <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#8b8798]">
-                          {fact.label}
-                        </dt>
-                        <dd className="mt-1 truncate text-lg font-semibold tracking-tight text-[#1c133b]">
-                          {fact.value}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-
-                  {cleaner.services.length ? (
-                    <ul className="mt-6 flex flex-wrap gap-2">
-                      {cleaner.services.map((service) => (
-                        <li
-                          className="rounded-full bg-[#fff4ee] px-3 py-1.5 text-sm font-medium text-[#7a3b28]"
-                          key={service}
-                        >
-                          {service}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-
-                  <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <Link
-                      className="inline-flex h-12 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#312c79]"
-                      href={bookingHref}
-                    >
-                      Book a clean
-                    </Link>
-                    <Link
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-[#e5e7eb] px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f3f4f6]"
-                      href={areaHref}
-                    >
-                      More cleaners in {area.name}
-                    </Link>
-                  </div>
-                  <p className="mt-3 max-w-md text-xs leading-5 text-[#8b8798]">
-                    Booking matches a cleaner who covers your postcode.
-                  </p>
+                  <Link
+                    className="mt-7 inline-flex h-12 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+                    href={bookWithHref}
+                  >
+                    Book with {cleaner.name}
+                  </Link>
                 </div>
               </div>
+
+              {cleaner.services.length ? (
+                <div className="border-t border-[#efeaf8] px-6 py-6 sm:px-10">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b8798]">
+                    Services
+                  </h2>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {cleaner.services.map((service) => (
+                      <li
+                        className="rounded-full border border-[#e4daf5] bg-[#faf8ff] px-3 py-1.5 text-sm font-medium text-[#1c133b]"
+                        key={service}
+                      >
+                        {service}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </article>
 
             {reviews?.length ? (
-              <section className="mt-10">
-                <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+              <section className="mt-14">
+                <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
                   Reviews for {cleaner.name}
                 </h2>
-                <ul className="mt-5 divide-y divide-[#e5e7eb] overflow-hidden rounded-[1.75rem] border border-white/80 bg-white shadow-[0_12px_32px_rgba(28,19,59,0.05)]">
+                <ul className="mt-6 grid gap-4">
                   {reviews.map((review) => (
                     <li
-                      className="flex gap-4 px-5 py-5 sm:gap-6 sm:px-7"
+                      className="rounded-[1.5rem] bg-white px-6 py-6 shadow-[0_12px_32px_rgba(28,19,59,0.05)] sm:px-7"
                       key={`${review.author}-${review.service}-${review.body.slice(0, 24)}`}
                     >
-                      <p className="w-12 shrink-0 pt-0.5 text-lg font-semibold tracking-tight text-[#1c133b]">
-                        {review.score != null ? review.score.toFixed(1) : "—"}
+                      <RatingStars score={review.score} />
+                      <p className="mt-3 text-base leading-7 text-[#3d3a48]">
+                        “{review.body}”
                       </p>
-                      <div className="min-w-0">
-                        <p className="text-sm leading-7 text-[#3d3a48]">
-                          “{review.body}”
-                        </p>
-                        <p className="mt-2 text-sm text-[#5a5470]">
-                          <span className="font-semibold text-[#1c133b]">
-                            {review.author}
-                          </span>
-                          {review.when ? ` · ${review.when}` : ""}
-                          <span className="mt-0.5 block text-xs font-medium text-[#d4694a]">
-                            {review.service}
-                          </span>
-                        </p>
-                      </div>
+                      <p className="mt-4 text-sm text-[#5a5470]">
+                        <span className="font-semibold text-[#1c133b]">
+                          {review.author}
+                        </span>
+                        {review.when ? ` · ${review.when}` : ""}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-[#d4694a]">
+                        {review.service}
+                      </p>
                     </li>
                   ))}
                 </ul>
+              </section>
+            ) : null}
+
+            {pros.length ? (
+              <section className="mt-16">
+                <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                  Discover other pros
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+                  Other independent cleaners covering {area.name}.
+                </p>
+                <FeaturedCleanerCards bookingHref={bookingHref} cleaners={pros} />
               </section>
             ) : null}
           </div>

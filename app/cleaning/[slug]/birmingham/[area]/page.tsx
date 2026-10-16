@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { ServicePlacePage } from "@/components/marketing/service-place-page";
+import { CityLocationPage } from "@/components/marketing/city-location-page";
+import {
+  birminghamCoveragePlaceBySlug,
+  birminghamCoveragePlaces,
+  birminghamCoverageZoneById,
+} from "@/lib/seo/birmingham-coverage";
 import {
   BIRMINGHAM_AREAS,
   MARKETING_SERVICES,
@@ -9,7 +14,13 @@ import {
   marketingServiceBySlug,
   servicePlacePath,
 } from "@/lib/seo/marketing";
+import { bookingHrefForFocus } from "@/lib/seo/place-page-focus";
+import {
+  serviceInnerPlaceLinks,
+  serviceSurroundingTownLinks,
+} from "@/lib/seo/service-place-links";
 import { buildPageMetadata } from "@/lib/seo/site";
+import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 type PageProps = {
   params: { area: string; slug: string };
@@ -18,9 +29,15 @@ type PageProps = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
+  const slugs = Array.from(
+    new Set([
+      ...BIRMINGHAM_AREAS.map((area) => area.slug),
+      ...birminghamCoveragePlaces().map((place) => place.slug),
+    ]),
+  );
   return MARKETING_SERVICES.flatMap((service) =>
-    BIRMINGHAM_AREAS.map((area) => ({
-      area: area.slug,
+    slugs.map((area) => ({
+      area,
       slug: service.slug,
     })),
   );
@@ -29,17 +46,47 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: PageProps): Metadata {
   const service = marketingServiceBySlug(params.slug);
   const area = birminghamAreaBySlug(params.area);
-  if (!service || !area) return {};
+  const coverage = birminghamCoveragePlaceBySlug(params.area);
+  const name = area?.name ?? coverage?.label;
+  if (!service || !name) return {};
+  const title = `${service.label} in ${name}`;
   return buildPageMetadata({
-    description: `${service.description} Book ${service.label.toLowerCase()} in ${area.name}, Birmingham from ${service.fromPrice}.`,
-    path: servicePlacePath(service.slug, area.slug),
-    title: `${service.label} in ${area.name}, Birmingham`,
+    description: coverage?.note
+      ? `${title} (${coverage.note}). Book from ${service.fromPrice}.`
+      : `${service.description} Book ${service.label.toLowerCase()} in ${name}, Birmingham from ${service.fromPrice}.`,
+    path: servicePlacePath(service.slug, area?.slug ?? coverage!.slug),
+    title: `${title} | Mundoria`,
   });
 }
 
 export default function ServiceBirminghamAreaPage({ params }: PageProps) {
   const service = marketingServiceBySlug(params.slug);
   const area = birminghamAreaBySlug(params.area);
-  if (!service || !area) notFound();
-  return <ServicePlacePage area={area} service={service} />;
+  const coverage = birminghamCoveragePlaceBySlug(params.area);
+  if (!service || (!area && !coverage)) notFound();
+
+  const name = area?.name ?? coverage!.label;
+  const slug = area?.slug ?? coverage!.slug;
+  const zone = coverage ? birminghamCoverageZoneById(coverage.zoneId) : null;
+  const focus = {
+    serviceLabel: service.label,
+    serviceSlug: service.slug,
+  };
+
+  return (
+    <CityLocationPage
+      bookingHref={bookingHrefForFocus(hasSupabasePublicConfig(), focus)}
+      focus={focus}
+      name={name}
+      path={servicePlacePath(service.slug, slug)}
+      placeLinks={
+        zone ? serviceInnerPlaceLinks(service.slug, zone.id, slug) : undefined
+      }
+      placesNote={coverage?.note ?? zone?.note}
+      serviceCardLocation={{ kind: "place", slug }}
+      surroundingLinks={
+        zone ? serviceSurroundingTownLinks(service.slug, zone.id) : undefined
+      }
+    />
+  );
 }

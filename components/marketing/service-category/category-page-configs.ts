@@ -36,24 +36,6 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
       question: "Where is this available?",
     },
   ],
-  features: [
-    {
-      body: "Handovers are stressful enough. Get a dependable cleaner matched for tenancy and move standards — with live status so you know what’s happening.",
-      icon: "reliable",
-      title: "We're reliable",
-    },
-    {
-      body: "Moving in, moving out or ending a tenancy — book the exact clean you need around your keys and inventory dates.",
-      icon: "flexible",
-      title: "We're flexible",
-    },
-    {
-      body: "Pick the moving service, share property details and see a clear estimate before you confirm.",
-      icon: "simple",
-      title: "We're simple",
-    },
-  ],
-  featuresTitle: "Cleaning that works around your move",
   heroImage: "/images/marketing/landing/category-moving-home.png",
   serviceCards: [
     {
@@ -107,24 +89,6 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
       question: "Can I book recurring turnovers?",
     },
   ],
-  features: [
-    {
-      body: "Hosts need properties ready when guests are. Get matched with cleaners who understand turnaround windows and live status updates.",
-      icon: "reliable",
-      title: "We're reliable",
-    },
-    {
-      body: "One-off changeovers or a recurring schedule aligned to your bookings — choose what fits your operation.",
-      icon: "flexible",
-      title: "We're flexible",
-    },
-    {
-      body: "Select the short-let service, add property details and book with a clear estimate — without chasing cleaners.",
-      icon: "simple",
-      title: "We're simple",
-    },
-  ],
-  featuresTitle: "Cleaning that works around your guests",
   heroImage: "/images/marketing/landing/category-str.png",
   serviceCards: [
     {
@@ -144,7 +108,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
 };
 
 export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
-  bookCta: "Book Mundoria Recovery",
+  bookCta: "Book recovery cleaning",
   bullets: [
     "Cleaning that adapts when life does",
     "Share preferences before the cleaner arrives",
@@ -153,8 +117,8 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   faqs: [
     {
       answer:
-        "Mundoria Recovery is a cleaning service for times when life changes — pregnancy, recovery, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
-      question: "What is Mundoria Recovery?",
+        "Recovery cleaning is for times when life changes — pregnancy, recovery, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
+      question: "What is recovery cleaning?",
       services: [
         {
           description:
@@ -175,7 +139,7 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
           name: "Bereavement Support Cleaning",
         },
       ],
-      servicesHeading: "What Mundoria Recovery services are available?",
+      servicesHeading: "What recovery cleaning services are available?",
     },
     {
       answer:
@@ -188,25 +152,7 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
       question: "How do I book?",
     },
   ],
-  features: [
-    {
-      body: "When circumstances change, you need someone dependable. Mundoria matches vetted cleaners and keeps you updated through the booking.",
-      icon: "reliable",
-      title: "We're reliable",
-    },
-    {
-      body: "Different circumstances need different care. Share preferences so cleaning can fit around you — not the other way around.",
-      icon: "flexible",
-      title: "We're flexible",
-    },
-    {
-      body: "Choose the Recovery service, add home details and preferences, then book with a clear estimate.",
-      icon: "simple",
-      title: "We're simple",
-    },
-  ],
-  featuresTitle: "Cleaning that works around life’s changes",
-  heroImage: "/images/marketing/landing/recovery-hero-section.png",
+  heroImage: "/images/marketing/landing/recovery-hero.jpg",
   serviceCards: [
     {
       href: "/cleaning/pregnancy-and-postpartum-cleaning",
@@ -230,7 +176,7 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
     },
   ],
   servicesGridClassName: "lg:grid-cols-2 xl:flex xl:flex-wrap xl:justify-center",
-  servicesTitle: "Choose your Mundoria Recovery service",
+  servicesTitle: "Choose your recovery cleaning service",
   subtitle: "Cleaning that adapts when life does — with a little more consideration",
-  title: "Mundoria Recovery",
+  title: "Recovery cleaning",
 };

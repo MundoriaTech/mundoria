@@ -1,11 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
 import { AuthShell } from "@/components/auth/auth-shell";
-import {
-  displayEmail,
-  EmailSentPanel,
-} from "@/components/auth/email-sent-panel";
+import { EmailSentPanel } from "@/components/auth/email-sent-panel";
 
 export const metadata = {
   title: "Check your email",
@@ -22,7 +20,15 @@ export default function PasswordEmailSentPage({
 }: {
   searchParams: { email?: string; from?: string };
 }) {
-  const email = displayEmail(searchParams.email);
+  if (searchParams.email) {
+    const params = new URLSearchParams();
+    if (searchParams.from === "admin" || searchParams.from === "cleaner") {
+      params.set("from", searchParams.from);
+    }
+    const query = params.toString();
+    redirect(query ? `/forgot-password/sent?${query}` : "/forgot-password/sent");
+  }
+
   const isAdmin = searchParams.from === "admin";
   const isCleaner = searchParams.from === "cleaner";
   const actionHref = isAdmin
@@ -45,7 +51,7 @@ export default function PasswordEmailSentPage({
             ? "Back to cleaner sign in"
             : "Back to sign in"
       }
-      email={email}
+      email={null}
       steps={STEPS}
     />
   );

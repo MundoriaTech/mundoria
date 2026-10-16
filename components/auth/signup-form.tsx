@@ -3,19 +3,27 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { FormField } from "@/components/auth/form-field";
+import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { FormStatus } from "@/components/auth/form-status";
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { dashboardForRole } from "@/lib/auth/redirects";
+import { signupPendingLoginPath, rememberSignupEmail } from "@/lib/auth/signup-email-pending";
 import {
   signupSchema,
   type SignupValues,
 } from "@/lib/auth/schemas";
+import {
+  nationalFromPhone,
+  storedPhone,
+  UK_DIAL_CODE,
+} from "@/lib/auth/uk-phone";
+import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/auth";
 
 interface SignupResponse {
@@ -35,11 +43,13 @@ export function SignupForm({
 }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const [nationalNumber, setNationalNumber] = useState("");
   const nextPath =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
       ? redirectTo
       : null;
   const {
+    control,
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
@@ -55,6 +65,19 @@ export function SignupForm({
       role,
     },
   });
+  const passwordValue = useWatch({ control, name: "password", defaultValue: "" });
+
+  function updateNationalNumber(value: string) {
+    const national = nationalFromPhone(value)
+      .replace(/[^\d\s]/g, "")
+      .replace(/^\s+/, "")
+      .replace(/\s{2,}/g, " ");
+    setNationalNumber(national);
+    setValue("phone", storedPhone(national), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
 
   useEffect(() => {
     setValue("role", role);
@@ -94,15 +117,12 @@ export function SignupForm({
             result.referralPromoCode,
           );
         }
-        const params = new URLSearchParams({
-          email: values.email.trim(),
-          role,
-        });
-        if (result.referralPromoCode) {
-          params.set("code", result.referralPromoCode);
-        }
-        if (nextPath) params.set("next", nextPath);
-        router.replace(`/signup/check-email?${params.toString()}`);
+        rememberSignupEmail(values.email.trim());
+        router.replace(
+          signupPendingLoginPath(role, {
+            next: nextPath,
+          }),
+        );
         return;
       }
 
@@ -168,27 +188,44 @@ export function SignupForm({
 
         <FormField
           error={errors.phone}
-          htmlFor="phone"
+          htmlFor="phone-national"
           label={role === "cleaner" ? "Phone number" : "Phone (optional)"}
         >
-          <Input
-            autoComplete="tel"
-            id="phone"
-            placeholder="+44 7700 900000"
-            required={role === "cleaner"}
-            type="tel"
-            {...register("phone")}
-          />
+          <div className="flex gap-2">
+            <span
+              className={cn(
+                "inline-flex h-11 w-[4.5rem] shrink-0 items-center justify-center rounded-md border border-[#e8e8eb] bg-[#f7f6f8] text-sm font-semibold text-[#1c133b]",
+                errors.phone && "border-[#d4694a]",
+              )}
+            >
+              {UK_DIAL_CODE}
+            </span>
+            <Input
+              autoComplete="tel-national"
+              className="min-w-0 flex-1"
+              id="phone-national"
+              inputMode="tel"
+              onChange={(event) => updateNationalNumber(event.target.value)}
+              placeholder="7700 900000"
+              required={role === "cleaner"}
+              type="tel"
+              value={nationalNumber}
+            />
+          </div>
+          <input type="hidden" {...register("phone")} />
         </FormField>
 
-        <FormField error={errors.password} htmlFor="password" label="Password">
-          <PasswordInput
-            autoComplete="new-password"
-            id="password"
-            placeholder="8+ characters, a capital, a number, and a symbol"
-            {...register("password")}
-          />
-        </FormField>
+        <div className="space-y-2">
+          <FormField error={errors.password} htmlFor="password" label="Password">
+            <PasswordInput
+              autoComplete="new-password"
+              id="password"
+              placeholder="Create a password"
+              {...register("password")}
+            />
+          </FormField>
+          <PasswordRequirementsList password={passwordValue ?? ""} />
+        </div>
 
         {role === "customer" ? (
           <FormField

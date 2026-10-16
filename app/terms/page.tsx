@@ -95,7 +95,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Questions about these terms can be sent through Contact us on the website.",
+      "Questions about these terms can be sent through Contact us chat on the website, or via the Help Centre.",
     title: "Contact",
   },
 ];

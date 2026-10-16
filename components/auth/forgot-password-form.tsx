@@ -41,9 +41,10 @@ export function ForgotPasswordForm({ from }: { from?: "admin" | "cleaner" }) {
       return;
     }
 
-    const params = new URLSearchParams({ email: email.trim() });
+    const params = new URLSearchParams();
     if (from === "admin" || from === "cleaner") params.set("from", from);
-    router.replace(`/forgot-password/sent?${params.toString()}`);
+    const query = params.toString();
+    router.replace(query ? `/forgot-password/sent?${query}` : "/forgot-password/sent");
   });
 
   return (

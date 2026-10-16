@@ -1,7 +1,6 @@
 import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
-  MARKETING_FAQS,
   MARKETING_SERVICES,
   popularMarketingServices,
 } from "@/lib/seo/marketing";
@@ -15,7 +14,7 @@ export function organizationSchema() {
       "@type": "ContactPoint",
       contactType: "customer support",
       email: SUPPORT_EMAIL,
-      url: absoluteUrl("/faq"),
+      url: absoluteUrl("/help"),
     },
     description:
       "Mundoria connects UK customers with independent cleaning professionals for homes, workplaces and short-term rentals.",
@@ -63,21 +62,6 @@ export function localBusinessSchema() {
   };
 }
 
-export function faqPageSchema(limit = 8) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: MARKETING_FAQS.slice(0, limit).map((item) => ({
-      "@type": "Question",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
-      name: item.question,
-    })),
-  };
-}
-
 export function serviceListSchema() {
   const services = popularMarketingServices(6);
 
@@ -112,7 +96,6 @@ export function homePageStructuredData() {
     organizationSchema(),
     webSiteSchema(),
     localBusinessSchema(),
-    faqPageSchema(),
     serviceListSchema(),
   ];
 }

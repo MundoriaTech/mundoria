@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 const GROUPS = [
   {
     id: "home",
-    image: "/images/marketing/landing/category-home-glove.png",
-    imageAlt: "A yellow glove holding a pink cleaning cloth",
-    imageClassName: "object-[center_42%] lg:object-[center_38%]",
+    image: "/images/marketing/landing/residential-hero.jpg",
+    imageAlt: "Residential cleaning in a home",
+    imageClassName: "object-center",
     intro: "Scheduled upkeep, a one-off visit, a move, or a home ready for guests.",
     label: "Residential",
     items: [
@@ -46,8 +46,8 @@ const GROUPS = [
   },
   {
     id: "workplace",
-    image: "/images/marketing/landing/commercial-category.png",
-    imageAlt: "A bright workplace ready for a clean",
+    image: "/images/marketing/landing/commercial-hero.png",
+    imageAlt: "A Mundoria cleaner steam-cleaning an office chair",
     imageClassName: "object-center",
     intro: "Desks, shop floors, classrooms and the shared spaces between them.",
     label: "Commercial",
@@ -76,8 +76,8 @@ const GROUPS = [
   },
   {
     id: "recovery",
-    image: "/images/booking/categories/recovery.jpg",
-    imageAlt: "A family holding a baby against a pink wall",
+    image: "/images/marketing/landing/recovery-hero.jpg",
+    imageAlt: "A cleaner wiping a kitchen stovetop",
     imageClassName: "object-center",
     intro: "Practical cleaning support when life at home changes.",
     label: "Recovery",
@@ -132,7 +132,7 @@ export function ServiceCategoriesSection({
         </h2>
 
         <div
-          className="mt-5 grid grid-cols-3 border-b border-[#e6d8c8] sm:mt-8"
+          className="mt-5 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3"
           role="tablist"
           aria-label="Cleaning categories"
         >
@@ -142,20 +142,17 @@ export function ServiceCategoriesSection({
               <button
                 aria-selected={selected}
                 className={cn(
-                  "relative flex min-h-11 items-end justify-center px-1 pb-3 text-center text-[13px] font-semibold leading-tight tracking-[-0.02em] transition sm:text-[12px] sm:uppercase sm:tracking-[0.14em]",
-                  selected ? "text-[#1c133b]" : "text-[#b7a48a] hover:text-[#1c133b]",
+                  "flex min-h-11 items-center justify-center rounded-full border px-2 text-center text-[13px] font-semibold leading-tight transition sm:min-h-12 sm:px-4 sm:text-sm",
+                  selected
+                    ? "border-[#1c133b] bg-[#1c133b] text-white"
+                    : "border-[#1c133b]/25 bg-transparent text-[#1c133b] hover:border-[#1c133b] hover:bg-white",
                 )}
                 key={group.id}
                 onClick={() => selectGroup(group.id)}
                 role="tab"
                 type="button"
               >
-                <span className="relative">
-                  {group.label}
-                  {selected ? (
-                    <span className="absolute -bottom-3 left-0 right-0 h-[3px] rounded-full bg-[#312c79]" />
-                  ) : null}
-                </span>
+                {group.label}
               </button>
             );
           })}

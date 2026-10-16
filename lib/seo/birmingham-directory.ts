@@ -8,6 +8,7 @@ import {
   LAUNCH_CITY,
   prefixesForArea,
 } from "@/lib/seo/marketing";
+import { bioWithCoverage, milesFromRadiusKm } from "@/lib/seo/cleaner-coverage";
 import { BIRMINGHAM_LOCATION_REVIEWS } from "@/lib/seo/location-social-proof";
 
 export type DirectoryCleaner = {
@@ -19,6 +20,7 @@ export type DirectoryCleaner = {
   jobs: number;
   name: string;
   prefixes: string[];
+  radiusMiles: number | null;
   rating: number;
   reviewCount: number;
   services: string[];
@@ -42,6 +44,7 @@ type CleanerRow = {
   rating: number | null;
   service_types: string[] | null;
   total_jobs: number | null;
+  working_radius_km: number | null;
   years_experience: number | null;
 };
 
@@ -60,6 +63,28 @@ export function publicCleanerName(fullName: string) {
   const first = parts[0] ?? fullName;
   const last = parts.length > 1 ? parts[parts.length - 1] : "";
   return last ? `${first} ${last.slice(0, 1).toUpperCase()}.` : first;
+}
+
+/** First name for booking `?pro=` (matches public profile book CTA). */
+export function directoryCleanerProName(name: string) {
+  return name.split(/\s+/)[0]?.replace(/\.$/, "") || name;
+}
+
+/** Keep service/category params; attach requested-pro booking context. */
+export function bookingHrefWithDirectoryCleaner(
+  baseHref: string,
+  cleaner: Pick<DirectoryCleaner, "name" | "prefixes">,
+) {
+  if (!baseHref.startsWith("/booking/new")) return baseHref;
+  const url = new URL(baseHref, "https://mundoria.local");
+  url.searchParams.set("pro", directoryCleanerProName(cleaner.name));
+  const cover = cleaner.prefixes
+    .map((prefix) => prefix.toUpperCase())
+    .filter(Boolean)
+    .join(",");
+  if (cover) url.searchParams.set("cover", cover);
+  else url.searchParams.delete("cover");
+  return `${url.pathname}${url.search}`;
 }
 
 function directoryClient() {
@@ -89,13 +114,13 @@ function areaSlugForPrefixes(prefixes: string[]) {
   return BIRMINGHAM_AREAS[0]?.slug ?? "birmingham";
 }
 
-export function cleanerPublicPath(name: string, id: string, areaSlug: string) {
-  const base = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-  const short = id.replace(/-/g, "").slice(0, 8);
-  return `/cleaners/${LAUNCH_CITY.slug}/${areaSlug}/profile/${base}-${short}`;
+export function cleanerPublicPath(name: string, areaSlug: string) {
+  const base =
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "cleaner";
+  return `/cleaners/${LAUNCH_CITY.slug}/${areaSlug}/profile/${base}`;
 }
 
 function serviceLabel(value: string) {
@@ -114,15 +139,20 @@ function toCleaner(row: CleanerRow): DirectoryCleaner {
     ),
   );
   const areaSlug = areaSlugForPrefixes(prefixes);
+  const homeArea = areaNames[0] ?? "Birmingham";
+  const radiusMiles = milesFromRadiusKm(row.working_radius_km);
+  const bio = row.bio?.trim() || "Independent cleaner covering Birmingham.";
   return {
     areas: areaNames.length ? areaNames.join(" · ") : "Birmingham",
     avatarUrl: row.avatar_url,
-    bio: row.bio?.trim() || "Independent cleaner covering Birmingham.",
-    href: cleanerPublicPath(row.full_name, row.id, areaSlug),
+    bio:
+      radiusMiles == null ? bio : bioWithCoverage(bio, radiusMiles, homeArea),
+    href: cleanerPublicPath(row.full_name, areaSlug),
     id: row.id,
     jobs: row.total_jobs ?? 0,
     name: publicCleanerName(row.full_name),
     prefixes,
+    radiusMiles,
     rating: Number(row.rating ?? 0),
     reviewCount: 0,
     services: (row.service_types ?? []).slice(0, 4).map(serviceLabel),
@@ -134,12 +164,7 @@ function toReview(row: ReviewRow): DirectoryReview | null {
   if (!row.comment) return null;
   const area = row.postcode_prefix ? areaNameForPrefix(row.postcode_prefix) : null;
   const first = row.author_first_name?.trim() || "Customer";
-  const prefix = row.postcode_prefix?.toUpperCase() ?? "";
-  const place = area
-    ? prefix
-      ? `${area}, ${prefix}`
-      : area
-    : prefix || "Birmingham";
+  const place = area || "Birmingham";
   const created = row.created_at ? new Date(row.created_at) : null;
   return {
     author: `${first} (${place})`,
@@ -169,11 +194,14 @@ export async function loadDirectoryCleaners(options?: {
       ? prefixesForArea(options.areaSlug)
       : BIRMINGHAM_POSTCODES.map((item) => item.prefix);
 
+  const columns =
+    "id, full_name, avatar_url, bio, rating, total_jobs, years_experience, working_radius_km, postcode_prefixes, service_types";
+  const columnsWithoutRadius =
+    "id, full_name, avatar_url, bio, rating, total_jobs, years_experience, postcode_prefixes, service_types";
+
   let query = client
     .from("marketing_cleaners")
-    .select(
-      "id, full_name, avatar_url, bio, rating, total_jobs, years_experience, postcode_prefixes, service_types",
-    )
+    .select(columns)
     .overlaps("postcode_prefixes", prefixes)
     .order("rating", { ascending: false })
     .limit(Math.max(limit, 12));
@@ -182,13 +210,39 @@ export async function loadDirectoryCleaners(options?: {
     query = query.contains("service_types", [options.serviceType]);
   }
 
-  const { data, error } = await query;
+  let { data, error } = await query;
+  if (error) {
+    let fallback = client
+      .from("marketing_cleaners")
+      .select(columnsWithoutRadius)
+      .overlaps("postcode_prefixes", prefixes)
+      .order("rating", { ascending: false })
+      .limit(Math.max(limit, 12));
+    if (options?.serviceType) {
+      fallback = fallback.contains("service_types", [options.serviceType]);
+    }
+    const retry = await fallback;
+    data = (retry.data ?? null) as typeof data;
+    error = retry.error;
+  }
   if (error || !data) return null;
 
   const cleaners = (data as CleanerRow[]).map(toCleaner);
   const unique = new Map<string, DirectoryCleaner>();
   for (const cleaner of cleaners) unique.set(cleaner.id, cleaner);
-  return attachReviewCounts(Array.from(unique.values()).slice(0, limit));
+  return attachReviewCounts(
+    withUniqueProfileHrefs(Array.from(unique.values())).slice(0, limit),
+  );
+}
+
+function withUniqueProfileHrefs(cleaners: DirectoryCleaner[]) {
+  const used = new Map<string, number>();
+  return cleaners.map((cleaner) => {
+    const seen = used.get(cleaner.href) ?? 0;
+    used.set(cleaner.href, seen + 1);
+    if (seen === 0) return cleaner;
+    return { ...cleaner, href: `${cleaner.href}-${seen + 1}` };
+  });
 }
 
 async function attachReviewCounts(cleaners: DirectoryCleaner[]) {
@@ -214,10 +268,15 @@ async function attachReviewCounts(cleaners: DirectoryCleaner[]) {
   }));
 }
 
-export async function loadDirectoryCleaner(shortId: string, areaSlug: string) {
+export async function loadDirectoryCleaner(slug: string, areaSlug: string) {
   const cleaners = await loadDirectoryCleaners({ areaSlug, limit: 80 });
   if (!cleaners) return null;
-  const needle = shortId.toLowerCase();
+  const exact = cleaners.find((cleaner) => cleaner.href.endsWith(`/profile/${slug}`));
+  if (exact) return exact;
+
+  const legacy = slug.match(/^(.*)-([a-f0-9]{8})$/i);
+  if (!legacy) return null;
+  const needle = legacy[2].toLowerCase();
   return (
     cleaners.find((cleaner) =>
       cleaner.id.replace(/-/g, "").toLowerCase().startsWith(needle),

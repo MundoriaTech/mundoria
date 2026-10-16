@@ -79,7 +79,7 @@ export function WhatsAppButton() {
           <div className="border-t border-black/5 bg-white p-3">
             <a
               className="flex h-11 items-center justify-center gap-2 rounded-full bg-[#25d366] text-sm font-semibold text-white transition hover:bg-[#1ebe5d]"
-              href={href ?? "/contact"}
+              href={href ?? "/help"}
               rel={href ? "noopener noreferrer" : undefined}
               target={href ? "_blank" : undefined}
             >

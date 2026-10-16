@@ -11,6 +11,7 @@ import {
   MarketingHero,
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
+import { LaunchCityHubSections } from "@/components/marketing/launch-city-hub-sections";
 import {
   LocationFeaturedCleaners,
   LocationReviews,
@@ -26,7 +27,6 @@ import {
   type MarketingArea,
   type MarketingService,
   publicMarketingServices,
-  servicePlaceFaqs,
   servicePlacePath,
 } from "@/lib/seo/marketing";
 import {
@@ -49,7 +49,6 @@ export async function ServicePlacePage({
   const path = servicePlacePath(service.slug, area?.slug);
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? service.bookingHref : "/setup";
-  const faqs = servicePlaceFaqs(service, place);
   const siblings = publicMarketingServices().filter(
     (item) => item.category === service.category && item.slug !== service.slug,
   );
@@ -128,18 +127,6 @@ export async function ServicePlacePage({
             },
             url: absoluteUrl(path),
           },
-          {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: faqs.map((item) => ({
-              "@type": "Question",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: item.answer,
-              },
-              name: item.question,
-            })),
-          },
         ]}
       />
 
@@ -177,7 +164,11 @@ export async function ServicePlacePage({
         </BrandedSection>
 
         {cleaners?.length ? (
-          <LocationFeaturedCleaners cleaners={cleaners} place={place} />
+          <LocationFeaturedCleaners
+            bookingHref={bookingHref}
+            cleaners={cleaners}
+            place={place}
+          />
         ) : null}
 
         <BrandedSection tone="cream">
@@ -248,28 +239,15 @@ export async function ServicePlacePage({
 
         <LocationReviews place={place} reviews={reviews} />
 
-        <BrandedSection>
-          {faqs.map((item) => (
-            <div className="mt-8 first:mt-0" key={item.question}>
-              <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-                {item.question}
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5a5470]">
-                {item.answer}
-              </p>
-            </div>
-          ))}
-          <p className="mt-8 text-sm text-[#5a5470]">
-            More answers in the{" "}
-            <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-              href="/help"
-            >
-              Help Centre
-            </Link>
-            .
-          </p>
-        </BrandedSection>
+        <LaunchCityHubSections
+          bookingHref={bookingHref}
+          serviceFocus={service}
+          showAreaCards={false}
+          showFaqs={false}
+          showFeatured={false}
+          showLookingForDifferent={false}
+          showReviews={false}
+        />
 
         <BrandedCtaBand
           body={`Book ${service.label.toLowerCase()} in ${placeLabel} and see the price before you confirm.`}

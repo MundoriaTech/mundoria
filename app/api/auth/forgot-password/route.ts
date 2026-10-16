@@ -2,8 +2,10 @@ import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { forgotPasswordSchema } from "@/lib/auth/schemas";
-import { sendBrandedEmail } from "@/lib/email/send-email";
-import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  resolveAppUrl,
+  sendAuthLinkEmail,
+} from "@/lib/auth/send-auth-link-email";
 
 export async function POST(request: Request) {
   const parsed = forgotPasswordSchema.safeParse(await request.json());
@@ -16,40 +18,18 @@ export async function POST(request: Request) {
   }
 
   const { email } = parsed.data;
-  const requestOrigin = new URL(request.url).origin;
-  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
-  const appUrl = requestOrigin.includes("localhost")
-    ? requestOrigin
-    : configuredAppUrl ?? requestOrigin;
+  const appUrl = resolveAppUrl(request);
   // Prefer the update-password page directly so recovery works even when
   // Supabase falls back to hash tokens on the redirect target.
   const redirectTo = `${appUrl}/update-password`;
 
   try {
-    const admin = createAdminClient();
-    const { data, error } = await admin.auth.admin.generateLink({
+    await sendAuthLinkEmail({
+      appUrl,
       email,
-      options: { redirectTo },
+      redirectTo,
       type: "recovery",
     });
-
-    if (error) throw error;
-
-    const resetUrl = data.properties?.action_link;
-
-    if (resetUrl) {
-      await sendBrandedEmail({
-        data: {
-          appUrl,
-          email,
-          resetUrl,
-          securityNote:
-            "For your safety, never forward password reset emails. Mundoria will never ask for your password by email.",
-        },
-        template: "auth.password_reset",
-        to: email,
-      });
-    }
   } catch (error) {
     // Avoid account enumeration: users always see the same response.
     Sentry.captureException(error);

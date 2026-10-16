@@ -8,6 +8,7 @@ import {
   MAG_POST_CATEGORIES,
   slugifyMagTitle,
 } from "@/lib/content/mag-admin";
+import { normalizeRelatedServices } from "@/lib/content/mag-service-links";
 
 const categoryEnum = z.enum(
   MAG_POST_CATEGORIES as unknown as [string, ...string[]],
@@ -22,6 +23,7 @@ const schema = z.object({
   excerpt: z.string().trim().max(600).nullable().optional(),
   id: z.string().uuid().optional(),
   published: z.boolean().optional(),
+  related_services: z.array(z.string()).optional(),
   slug: z.string().trim().max(160).optional(),
   title: z.string().trim().max(200).optional(),
 });
@@ -158,6 +160,7 @@ export async function POST(request: Request) {
     cover_url: cleanNullable(body.cover_url),
     excerpt: cleanNullable(body.excerpt),
     published,
+    related_services: normalizeRelatedServices(body.related_services),
     slug,
     title,
     updated_at: now,

@@ -5,7 +5,7 @@ import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { cn } from "@/lib/utils";
 
-/** Soft cream page wash used across secondary marketing pages. */
+/** Soft lavender page wash used across secondary marketing pages. */
 export function BrandedPageWash({
   children,
   underNav = false,
@@ -17,18 +17,14 @@ export function BrandedPageWash({
   return (
     <div
       className="relative overflow-hidden bg-[#faf8ff]"
-      style={
-        underNav ? { marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` } : undefined
-      }
+      style={{
+        ...(underNav
+          ? { marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` }
+          : undefined),
+        backgroundImage:
+          "linear-gradient(180deg, #f3eef8 0%, #f7f2fc 35%, #faf8ff 100%)",
+      }}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[28rem]"
-        style={{
-          backgroundImage:
-            "radial-gradient(ellipse 70% 55% at 12% 0%, rgba(244, 176, 140, 0.35) 0%, transparent 58%), radial-gradient(ellipse 50% 40% at 88% 8%, rgba(232, 188, 140, 0.28) 0%, transparent 52%), linear-gradient(180deg, #f7f2ea 0%, #faf8ff 72%)",
-        }}
-      />
       <div className="relative">{children}</div>
     </div>
   );
@@ -98,12 +94,14 @@ export function BrandedCtaBand({
   label,
   title,
   tone = "gradient",
+  buttonClassName,
 }: {
   body: string;
   href: string;
   label: string;
   title: string;
   tone?: "gradient" | "white";
+  buttonClassName?: string;
 }) {
   const onWhite = tone === "white";
 
@@ -151,8 +149,12 @@ export function BrandedCtaBand({
           className={cn(
             "inline-flex items-center justify-center rounded-full font-semibold transition",
             onWhite
-              ? "h-[3.25rem] bg-[#ff5274] px-8 text-base text-white hover:bg-[#ff3d63]"
-              : "h-12 bg-white px-7 text-sm text-[#1c133b] hover:bg-[#e8e0f9]",
+              ? "h-[3.25rem] px-8 text-base"
+              : "h-12 px-7 text-sm",
+            onWhite
+              ? (buttonClassName ??
+                "bg-[#ff5274] text-white hover:bg-[#ff3d63]")
+              : "bg-white text-[#1c133b] hover:bg-[#e8e0f9]",
           )}
           href={href}
         >

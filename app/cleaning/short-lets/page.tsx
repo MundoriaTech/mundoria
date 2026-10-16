@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { CategoryMagLinks } from "@/components/marketing/category-mag-links";
 import { ShortLetsCleaningPage } from "@/components/marketing/short-lets/short-lets-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -38,6 +39,7 @@ export default function ShortLetsCleaningRoute() {
         }}
       />
       <ShortLetsCleaningPage bookingHref={bookingHref} />
+      <CategoryMagLinks category="short_term_rental" />
     </MarketingShell>
   );
 }

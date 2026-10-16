@@ -22,12 +22,9 @@ const CUSTOMER_PREFIXES = [
 const PUBLIC_MARKETING_PREFIXES = [
   "/cleaning",
   "/cleaners",
-  "/faq",
   "/help",
   "/blog",
-  "/contact",
   "/how-it-works",
-  "/pricing",
   "/for-cleaners",
   "/privacy",
   "/cookies",
@@ -102,6 +99,23 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/signup/check-email") {
+    const role = request.nextUrl.searchParams.get("role");
+    const destination = new URL(
+      role === "cleaner" ? "/login/cleaner" : "/login",
+      request.url,
+    );
+    destination.searchParams.set("verify", "1");
+    const next = request.nextUrl.searchParams.get("next");
+    if (next) {
+      destination.searchParams.set(
+        "redirectTo",
+        safeRedirectPath(next, "/dashboard"),
+      );
+    }
+    return NextResponse.redirect(destination);
+  }
 
   // Google returns a one-time code. If Supabase sends that code to the site
   // home page instead of /auth/callback, finish the signup there.

@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
+import { SIGNUP_VERIFY_MESSAGE } from "@/lib/auth/signup-email-pending";
 
 export const metadata = {
   title: "Log in",
@@ -13,16 +15,25 @@ interface LoginPageProps {
     error?: string;
     message?: string;
     redirectTo?: string;
+    verify?: string;
   };
 }
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
+  if (searchParams.email) {
+    const params = new URLSearchParams();
+    if (searchParams.verify === "1") params.set("verify", "1");
+    if (searchParams.redirectTo) params.set("redirectTo", searchParams.redirectTo);
+    if (searchParams.message) params.set("message", searchParams.message);
+    if (searchParams.error) params.set("error", searchParams.error);
+    const query = params.toString();
+    redirect(query ? `/login?${query}` : "/login");
+  }
+
   const signupHref = searchParams.redirectTo
     ? `/signup?redirectTo=${encodeURIComponent(searchParams.redirectTo)}`
     : "/signup";
-  const returningFromBooking =
-    searchParams.redirectTo?.startsWith("/booking") &&
-    Boolean(searchParams.email);
+  const returningFromBooking = searchParams.redirectTo?.startsWith("/booking");
 
   return (
     <AuthShell
@@ -53,7 +64,11 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
       <LoginForm
         initialEmail={searchParams.email}
         initialError={searchParams.error}
-        initialMessage={searchParams.message}
+        initialMessage={
+          searchParams.verify === "1"
+            ? SIGNUP_VERIFY_MESSAGE
+            : searchParams.message
+        }
         redirectTo={searchParams.redirectTo}
         requiredRole="customer"
       />

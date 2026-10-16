@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 
 type EditorialBlock = {
@@ -18,18 +20,38 @@ type EditorialBlock = {
     | { alt: string; src: string; caption?: string };
 };
 
-function formatInline(text: string) {
+function formatInline(
+  text: string,
+  onLinkClick?: (href: string) => boolean | void,
+) {
   const withLinks = text.split(/(\[[^\]]+\]\([^)]+\))/g);
   return withLinks.map((segment, segmentIndex) => {
     const linkMatch = segment.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (linkMatch) {
+      const href = linkMatch[2];
+      const label = linkMatch[1];
+      if (onLinkClick) {
+        return (
+          <button
+            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            key={`l-${segmentIndex}`}
+            onClick={() => {
+              if (onLinkClick(href)) return;
+              window.location.assign(href);
+            }}
+            type="button"
+          >
+            {label}
+          </button>
+        );
+      }
       return (
         <a
           className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-          href={linkMatch[2]}
+          href={href}
           key={`l-${segmentIndex}`}
         >
-          {linkMatch[1]}
+          {label}
         </a>
       );
     }
@@ -51,18 +73,30 @@ export function EditorialBody({
   accent = "#d4694a",
   blocks,
   className,
+  compact = false,
+  onLinkClick,
 }: {
   accent?: string;
   blocks: EditorialBlock[];
   className?: string;
+  /** Tighter type for in-widget Help Centre. */
+  compact?: boolean;
+  /** Return true if the link was handled in-app (e.g. messenger Help). */
+  onLinkClick?: (href: string) => boolean | void;
 }) {
+  const inline = (text: string) => formatInline(text, onLinkClick);
   return (
     <div className={cn("mx-auto max-w-3xl", className)}>
       {blocks.map((block, index) => {
         if (block.type === "h2") {
           return (
             <h2
-              className="mt-12 text-[1.65rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-3xl"
+              className={cn(
+                "font-semibold tracking-[-0.03em] text-[#1c133b]",
+                compact
+                  ? "mt-5 text-base"
+                  : "mt-12 text-[1.65rem] sm:text-3xl",
+              )}
               key={index}
             >
               {block.value as string}
@@ -72,7 +106,10 @@ export function EditorialBody({
         if (block.type === "h3") {
           return (
             <h3
-              className="mt-8 text-xl font-semibold text-[#1c133b]"
+              className={cn(
+                "font-semibold text-[#1c133b]",
+                compact ? "mt-4 text-sm" : "mt-8 text-xl",
+              )}
               key={index}
             >
               {block.value as string}
@@ -82,7 +119,10 @@ export function EditorialBody({
         if (block.type === "tip") {
           return (
             <aside
-              className="mt-8 rounded-[1.25rem] border px-5 py-4 text-sm leading-7 text-[#5a5470]"
+              className={cn(
+                "rounded-[1.25rem] border text-sm leading-7 text-[#5a5470]",
+                compact ? "mt-4 px-3 py-3" : "mt-8 px-5 py-4",
+              )}
               key={index}
               style={{
                 backgroundColor: `${accent}14`,
@@ -90,7 +130,7 @@ export function EditorialBody({
               }}
             >
               <p className="font-semibold text-[#1c133b]">
-                {formatInline(block.value as string)}
+                {inline(block.value as string)}
               </p>
             </aside>
           );
@@ -120,22 +160,28 @@ export function EditorialBody({
         if (block.type === "quote") {
           return (
             <blockquote
-              className="mt-6 border-l-4 py-1 pl-4 text-sm italic leading-7 text-[#5a5470]"
+              className={cn(
+                "border-l-4 py-1 pl-4 text-sm italic leading-7 text-[#5a5470]",
+                compact ? "mt-3" : "mt-6",
+              )}
               key={index}
               style={{ borderColor: accent }}
             >
-              {formatInline(block.value as string)}
+              {inline(block.value as string)}
             </blockquote>
           );
         }
         if (block.type === "ul") {
           return (
             <ul
-              className="mt-5 list-disc space-y-2.5 pl-5 text-sm leading-7 text-[#5a5470] sm:text-[15px]"
+              className={cn(
+                "list-disc space-y-2 pl-5 text-sm leading-6 text-[#5a5470]",
+                compact ? "mt-3" : "mt-5 space-y-2.5 leading-7 sm:text-[15px]",
+              )}
               key={index}
             >
               {(block.value as string[]).map((item) => (
-                <li key={item}>{formatInline(item)}</li>
+                <li key={item}>{inline(item)}</li>
               ))}
             </ul>
           );
@@ -143,11 +189,14 @@ export function EditorialBody({
         if (block.type === "ol") {
           return (
             <ol
-              className="mt-5 list-decimal space-y-2.5 pl-5 text-sm leading-7 text-[#5a5470] sm:text-[15px]"
+              className={cn(
+                "list-decimal space-y-2 pl-5 text-sm leading-6 text-[#5a5470]",
+                compact ? "mt-3" : "mt-5 space-y-2.5 leading-7 sm:text-[15px]",
+              )}
               key={index}
             >
               {(block.value as string[]).map((item) => (
-                <li key={item}>{formatInline(item)}</li>
+                <li key={item}>{inline(item)}</li>
               ))}
             </ol>
           );
@@ -159,7 +208,10 @@ export function EditorialBody({
           };
           return (
             <div
-              className="mt-6 overflow-x-auto rounded-[1.25rem] border border-[#eadfce] bg-white/90 shadow-[0_8px_24px_rgba(49,44,121,0.05)]"
+              className={cn(
+                "overflow-x-auto rounded-[1.25rem] border border-[#eadfce] bg-white/90 shadow-[0_8px_24px_rgba(49,44,121,0.05)]",
+                compact ? "mt-3" : "mt-6",
+              )}
               key={index}
             >
               <table className="min-w-full text-left text-sm">
@@ -186,7 +238,7 @@ export function EditorialBody({
                           className="px-4 py-3 align-top leading-6 text-[#5a5470]"
                           key={`${rowIndex}-${cellIndex}`}
                         >
-                          {formatInline(cell)}
+                          {inline(cell)}
                         </td>
                       ))}
                     </tr>
@@ -198,10 +250,13 @@ export function EditorialBody({
         }
         return (
           <p
-            className="mt-5 text-sm leading-7 text-[#5a5470] sm:text-[15px] sm:leading-8"
+            className={cn(
+              "text-sm leading-6 text-[#5a5470]",
+              compact ? "mt-3" : "mt-5 leading-7 sm:text-[15px] sm:leading-8",
+            )}
             key={index}
           >
-            {formatInline(block.value as string)}
+            {inline(block.value as string)}
           </p>
         );
       })}
