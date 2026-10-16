@@ -29,11 +29,19 @@ export async function sendAuthLinkEmail({
   type: AuthLinkType;
 }) {
   const admin = createAdminClient();
-  const { data, error } = await admin.auth.admin.generateLink({
-    email,
-    options: { redirectTo },
-    type,
-  });
+  const { data, error } = await admin.auth.admin.generateLink(
+    type === "signup"
+      ? {
+          email,
+          options: { redirectTo },
+          type: "signup",
+        }
+      : {
+          email,
+          options: { redirectTo },
+          type: "recovery",
+        },
+  );
 
   if (error) throw error;
 
