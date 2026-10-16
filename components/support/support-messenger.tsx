@@ -1026,9 +1026,9 @@ function ThreadView({
   awaitingTriage: boolean;
   draft: string;
   error: string | null;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
   messages: SupportMessage[];
-  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  messagesEndRef: React.MutableRefObject<HTMLDivElement | null>;
   onDraftChange: (value: string) => void;
   onPickTriage: (option: string) => void;
   onSend: () => void;
@@ -1108,7 +1108,11 @@ function ThreadView({
             </div>
           );
         })}
-        <div ref={messagesEndRef} />
+        <div
+          ref={(node) => {
+            messagesEndRef.current = node;
+          }}
+        />
       </div>
 
       {awaitingTriage && messages.length === 0 ? (
