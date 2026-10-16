@@ -493,9 +493,6 @@ export function BookingWizard({
         : indicativeFromPrice(draft.serviceType) +
           selectedAddOnTotal(draft.selectedAddOns, addOnPriceContext)
       : 0;
-  const priceIsIndicative = Boolean(
-    draft.serviceType && estimatedAmount > 0 && !hasPropertySizing,
-  );
   const duration = durationSummary({
     bathrooms: draft.numBathrooms ?? roomsAddress?.num_bathrooms,
     bedrooms: draft.numBedrooms ?? roomsAddress?.num_bedrooms,
@@ -1321,7 +1318,7 @@ export function BookingWizard({
         : null;
   const priceLabel =
     displayHourlyRatePence != null
-      ? `${priceIsIndicative ? "From " : ""}${formatHourlyRate(displayHourlyRatePence)}`
+      ? formatHourlyRate(displayHourlyRatePence)
       : null;
   const addOnLines = draft.serviceType
     ? availableAddOns(draft.serviceType)
@@ -1388,7 +1385,6 @@ export function BookingWizard({
       else if (flowSteps.includes("category")) jumpToStep("category");
     },
     priorityAreas: draft.specialAttentionAreas,
-    priceIsIndicative,
     scheduledDate: draft.scheduledDate,
     scheduledTime: draft.scheduledTime,
     serviceLabel: service
@@ -2006,7 +2002,7 @@ function ServiceStep({
                   <div className="flex items-start justify-between gap-3">
                     <p className="font-semibold text-[#1c133b]">{item.label}</p>
                     <p className="shrink-0 text-sm font-bold tabular-nums text-[#1c133b]">
-                      From {formatHourlyRate(indicativeHourlyRatePence(item.value))}
+                      {formatHourlyRate(indicativeHourlyRatePence(item.value))}
                     </p>
                   </div>
                   {active ? (

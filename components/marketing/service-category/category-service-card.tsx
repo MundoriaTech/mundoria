@@ -108,7 +108,7 @@ export function CategoryServiceCard({
         </p>
         {service?.fromPrice ? (
           <p className="shrink-0 text-[12px] font-bold tabular-nums text-[#312c79] sm:text-[13px]">
-            From {service.fromPrice}
+            {service.fromPrice}
           </p>
         ) : null}
       </div>
