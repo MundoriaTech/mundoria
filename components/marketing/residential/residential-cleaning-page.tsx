@@ -162,7 +162,7 @@ export function ResidentialCleaningPage({
           </div>
 
           <div
-            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0 xl:flex xl:flex-wrap xl:justify-center"
+            className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0"
             ref={carouselRef}
           >
             {SERVICE_CARDS.map((service) => (
@@ -173,7 +173,7 @@ export function ResidentialCleaningPage({
                 key={service.label}
                 label={service.label}
                 objectPosition={service.objectPosition}
-                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 50vw, 300px"
+                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
               />
             ))}
           </div>
