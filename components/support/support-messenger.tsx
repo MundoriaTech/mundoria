@@ -518,7 +518,7 @@ export function SupportMessengerWidget() {
           : "Messages";
 
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-[80] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className="support-messenger-dock pointer-events-none fixed bottom-4 right-4 z-[80] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {open ? (
         <div
           aria-label="Mundoria support"

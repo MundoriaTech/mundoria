@@ -66,6 +66,27 @@
     color-scheme: light only;
   }
 
+  /* Opacity-only — a transform here would trap position:fixed children
+     (sticky book bar, FABs) to the page box instead of the viewport. */
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .page-enter {
+    animation: page-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-enter {
+      animation: none;
+    }
+  }
+
   html.dark {
     color-scheme: light only;
   }
@@ -263,6 +284,13 @@
       animation: medallion-shine 4.5s ease-in-out infinite;
     }
 
+  }
+}
+
+/* Lift the help FAB when the mobile sticky Book bar is present. */
+@media (max-width: 767px) {
+  html[data-sticky-book] .support-messenger-dock {
+    bottom: 5.5rem;
   }
 }
 

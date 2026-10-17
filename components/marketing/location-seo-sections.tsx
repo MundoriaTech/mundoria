@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FeaturedCleanerCards } from "@/components/marketing/featured-cleaner-cards";
 import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
 import { BrandedSection } from "@/components/marketing/branded-page-sections";
+import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { directoryReviewsToLandingReviews } from "@/lib/marketing/location-review-display";
 import type { DirectoryReview } from "@/lib/seo/birmingham-directory";
 import {
@@ -340,27 +341,19 @@ export function LocationFeaturedCleaners({
 }) {
   if (!cleaners.length) return null;
   return (
-    <BrandedSection tone="cream">
-      <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-        Independent cleaners near {place}
-      </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-        Vetted independent cleaners covering {place}, with ratings from completed
-        visits.
-      </p>
-      <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
-      <div className="mt-8 flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:gap-5">
-        <p className="text-[15px] font-medium text-[#1c133b]">
-          Ready for a clean in {place}?
+    <>
+      <BrandedSection tone="cream">
+        <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+          Independent cleaners near {place}
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+          Vetted independent cleaners covering {place}, with ratings from
+          completed visits.
         </p>
-        <Link
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-[#b8894e]"
-          href={bookingHref}
-        >
-          Book a clean
-        </Link>
-      </div>
-    </BrandedSection>
+        <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
+      </BrandedSection>
+      <LocationStickyBookBar bookingHref={bookingHref} />
+    </>
   );
 }
 
