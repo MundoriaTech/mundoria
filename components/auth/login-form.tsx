@@ -156,13 +156,7 @@ export function LoginForm({
         <div className="-mt-2 text-right">
           <Link
             className="text-sm font-medium text-[#291845] hover:underline"
-            href={
-              requiredRole === "admin"
-                ? "/forgot-password?from=admin"
-                : requiredRole === "cleaner"
-                  ? "/forgot-password?from=cleaner"
-                  : "/forgot-password"
-            }
+            href={forgotPasswordHref(requiredRole, redirectTo)}
           >
             Forgot Password?
           </Link>
@@ -180,4 +174,22 @@ export function LoginForm({
       </form>
     </div>
   );
+}
+
+function forgotPasswordHref(
+  requiredRole: LoginFormProps["requiredRole"],
+  redirectTo?: string,
+) {
+  const params = new URLSearchParams();
+  if (requiredRole === "admin") params.set("from", "admin");
+  if (requiredRole === "cleaner") params.set("from", "cleaner");
+  if (
+    redirectTo &&
+    redirectTo.startsWith("/") &&
+    !redirectTo.startsWith("//")
+  ) {
+    params.set("redirectTo", redirectTo);
+  }
+  const query = params.toString();
+  return query ? `/forgot-password?${query}` : "/forgot-password";
 }

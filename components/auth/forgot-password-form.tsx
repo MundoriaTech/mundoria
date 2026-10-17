@@ -14,7 +14,13 @@ import {
   type ForgotPasswordValues,
 } from "@/lib/auth/schemas";
 
-export function ForgotPasswordForm({ from }: { from?: "admin" | "cleaner" }) {
+export function ForgotPasswordForm({
+  from,
+  redirectTo,
+}: {
+  from?: "admin" | "cleaner";
+  redirectTo?: string | null;
+}) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -30,7 +36,10 @@ export function ForgotPasswordForm({ from }: { from?: "admin" | "cleaner" }) {
     setFormError(null);
 
     const response = await fetch("/api/auth/forgot-password", {
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({
+        email,
+        ...(redirectTo ? { redirectTo } : {}),
+      }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
@@ -43,8 +52,11 @@ export function ForgotPasswordForm({ from }: { from?: "admin" | "cleaner" }) {
 
     const params = new URLSearchParams();
     if (from === "admin" || from === "cleaner") params.set("from", from);
+    if (redirectTo) params.set("redirectTo", redirectTo);
     const query = params.toString();
-    router.replace(query ? `/forgot-password/sent?${query}` : "/forgot-password/sent");
+    router.replace(
+      query ? `/forgot-password/sent?${query}` : "/forgot-password/sent",
+    );
   });
 
   return (

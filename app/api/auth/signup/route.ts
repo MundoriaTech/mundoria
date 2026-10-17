@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
+import { safeRedirectPath } from "@/lib/auth/redirects";
 import { signupSchema } from "@/lib/auth/schemas";
 import {
   resolveAppUrl,
@@ -11,7 +12,8 @@ import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
-  const parsed = signupSchema.safeParse(await request.json());
+  const body = (await request.json()) as Record<string, unknown>;
+  const parsed = signupSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -24,7 +26,10 @@ export async function POST(request: Request) {
   const avatarUrl = role === "cleaner" ? pickDefaultAvatar(email).src : undefined;
   const admin = createAdminClient();
   const appUrl = resolveAppUrl(request);
-  const nextPath = role === "cleaner" ? "/cleaner/dashboard" : "/dashboard";
+  const defaultNext = role === "cleaner" ? "/cleaner/dashboard" : "/dashboard";
+  const requestedNext =
+    typeof body.next === "string" ? body.next : null;
+  const nextPath = safeRedirectPath(requestedNext, defaultNext);
   const emailRedirectTo = `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(nextPath)}`;
 
   const { data: created, error } = await admin.auth.admin.createUser({

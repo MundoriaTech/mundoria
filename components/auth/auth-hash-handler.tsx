@@ -53,14 +53,24 @@ export function AuthHashHandler() {
       }
 
       if (type === "recovery") {
-        router.replace("/update-password");
+        const next = new URLSearchParams(window.location.search).get("next");
+        const updatePath =
+          next && next.startsWith("/") && !next.startsWith("//")
+            ? `/update-password?next=${encodeURIComponent(next)}`
+            : "/update-password";
+        router.replace(updatePath);
         router.refresh();
         return;
       }
 
       if (type === "signup" || type === "email") {
         await fetch("/api/auth/welcome", { method: "POST" });
-        router.replace("/signup/confirmed");
+        const next = new URLSearchParams(window.location.search).get("next");
+        const confirmedPath =
+          next && next.startsWith("/") && !next.startsWith("//")
+            ? `/signup/confirmed?next=${encodeURIComponent(next)}`
+            : "/signup/confirmed";
+        router.replace(confirmedPath);
         router.refresh();
         return;
       }

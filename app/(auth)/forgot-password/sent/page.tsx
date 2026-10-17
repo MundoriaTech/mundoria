@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { EmailSentPanel } from "@/components/auth/email-sent-panel";
+import { safeRedirectPath } from "@/lib/auth/redirects";
 
 export const metadata = {
   title: "Check your email",
@@ -18,12 +19,15 @@ const STEPS = [
 export default function PasswordEmailSentPage({
   searchParams,
 }: {
-  searchParams: { email?: string; from?: string };
+  searchParams: { email?: string; from?: string; redirectTo?: string };
 }) {
   if (searchParams.email) {
     const params = new URLSearchParams();
     if (searchParams.from === "admin" || searchParams.from === "cleaner") {
       params.set("from", searchParams.from);
+    }
+    if (searchParams.redirectTo) {
+      params.set("redirectTo", searchParams.redirectTo);
     }
     const query = params.toString();
     redirect(query ? `/forgot-password/sent?${query}` : "/forgot-password/sent");
@@ -31,16 +35,24 @@ export default function PasswordEmailSentPage({
 
   const isAdmin = searchParams.from === "admin";
   const isCleaner = searchParams.from === "cleaner";
+  const redirectTo = searchParams.redirectTo
+    ? safeRedirectPath(searchParams.redirectTo, "/login")
+    : null;
   const actionHref = isAdmin
     ? "/admin/login"
     : isCleaner
       ? "/login/cleaner"
-      : "/login";
-  const againHref = isAdmin
-    ? "/forgot-password?from=admin"
-    : isCleaner
-      ? "/forgot-password?from=cleaner"
-      : "/forgot-password";
+      : redirectTo
+        ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+        : "/login";
+  const againParams = new URLSearchParams();
+  if (isAdmin) againParams.set("from", "admin");
+  if (isCleaner) againParams.set("from", "cleaner");
+  if (redirectTo) againParams.set("redirectTo", redirectTo);
+  const againQuery = againParams.toString();
+  const againHref = againQuery
+    ? `/forgot-password?${againQuery}`
+    : "/forgot-password";
   const panel = (
     <EmailSentPanel
       actionHref={actionHref}

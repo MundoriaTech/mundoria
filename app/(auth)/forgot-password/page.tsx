@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
+import { safeRedirectPath } from "@/lib/auth/redirects";
 
 export const metadata = {
   title: "Reset password",
@@ -11,11 +12,20 @@ export const metadata = {
 export default function ForgotPasswordPage({
   searchParams,
 }: {
-  searchParams: { from?: string };
+  searchParams: { from?: string; redirectTo?: string };
 }) {
   const isAdmin = searchParams.from === "admin";
   const isCleaner = searchParams.from === "cleaner";
-  const backHref = isAdmin ? "/admin/login" : isCleaner ? "/login/cleaner" : "/login";
+  const redirectTo = searchParams.redirectTo
+    ? safeRedirectPath(searchParams.redirectTo, "/login")
+    : null;
+  const loginHref = isAdmin
+    ? "/admin/login"
+    : isCleaner
+      ? "/login/cleaner"
+      : redirectTo
+        ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+        : "/login";
   const backLabel = isAdmin
     ? "Back to admin sign in"
     : isCleaner
@@ -26,10 +36,13 @@ export default function ForgotPasswordPage({
     : "Enter your email and we’ll send you a secure reset link.";
 
   const form = (
-    <ForgotPasswordForm from={isAdmin ? "admin" : isCleaner ? "cleaner" : undefined} />
+    <ForgotPasswordForm
+      from={isAdmin ? "admin" : isCleaner ? "cleaner" : undefined}
+      redirectTo={redirectTo}
+    />
   );
   const footer = (
-    <Link className="font-medium text-primary hover:underline" href={backHref}>
+    <Link className="font-medium text-primary hover:underline" href={loginHref}>
       {backLabel}
     </Link>
   );

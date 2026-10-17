@@ -10,13 +10,14 @@ import { PasswordRequirementsList } from "@/components/auth/password-requirement
 import { FormStatus } from "@/components/auth/form-status";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
+import { safeRedirectPath } from "@/lib/auth/redirects";
 import {
   updatePasswordSchema,
   type UpdatePasswordValues,
 } from "@/lib/auth/schemas";
 import { createBrowserClient } from "@/lib/supabase/client";
 
-export function UpdatePasswordForm() {
+export function UpdatePasswordForm({ next }: { next?: string | null }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -60,9 +61,15 @@ export function UpdatePasswordForm() {
         : profile?.role === "cleaner"
           ? "/login/cleaner"
           : "/login";
-    router.replace(
-      `${loginPath}?message=${encodeURIComponent("Password updated. You can sign in.")}`,
-    );
+    const params = new URLSearchParams({
+      message: "Password updated. You can sign in.",
+    });
+    const returnPath =
+      profile?.role === "customer" && next
+        ? safeRedirectPath(next, "")
+        : "";
+    if (returnPath) params.set("redirectTo", returnPath);
+    router.replace(`${loginPath}?${params.toString()}`);
     router.refresh();
   });
 

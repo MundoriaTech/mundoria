@@ -32,7 +32,9 @@ export function BookingChrome({
   signedIn: boolean;
 }) {
   const configured = hasSupabasePublicConfig();
-  const authHref = configured ? "/login?next=/booking/new" : "/setup";
+  const authHref = configured
+    ? `/login?redirectTo=${encodeURIComponent("/booking/new")}`
+    : "/setup";
   const progressPct =
     progress == null
       ? null
