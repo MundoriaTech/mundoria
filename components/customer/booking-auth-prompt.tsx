@@ -6,7 +6,10 @@ import { useState } from "react";
 
 import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { OAuthButton } from "@/components/auth/oauth-button";
-import { signupPendingLoginPath, rememberSignupEmail } from "@/lib/auth/signup-email-pending";
+import {
+  signupPendingLoginPath,
+  rememberSignupEmail,
+} from "@/lib/auth/signup-email-pending";
 import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,16 +43,51 @@ export function BookingAuthPrompt({
     onModeChange(next);
   }
 
-  function continueWithEmail(event: React.FormEvent) {
+  async function continueWithEmail(event: React.FormEvent) {
     event.preventDefault();
     setMessage(null);
-    const trimmed = email.trim();
+    const trimmed = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       setMessage("Enter a valid email address.");
       return;
     }
     setEmail(trimmed);
-    setMode("create");
+    setBusy(true);
+    try {
+      const response = await fetch("/api/auth/email-status", {
+        body: JSON.stringify({ email: trimmed }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        exists?: boolean;
+        role?: string | null;
+      };
+      if (!response.ok) {
+        throw new Error(result.error ?? "Unable to check that email.");
+      }
+      if (result.exists) {
+        if (result.role && result.role !== "customer") {
+          setMessage(
+            result.role === "cleaner"
+              ? "Cleaner accounts can’t book. Use a customer email instead."
+              : "This account can’t continue a booking. Use a customer email.",
+          );
+          return;
+        }
+        setMode("signin");
+        setMessage("Welcome back — enter your password to continue.");
+        return;
+      }
+      setMode("create");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Unable to check that email.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function createAccount(event: React.FormEvent) {
@@ -61,6 +99,7 @@ export function BookingAuthPrompt({
         body: JSON.stringify({
           email: email.trim(),
           full_name: fullName.trim(),
+          next: RETURN_PATH,
           password,
           phone: "",
           referral_code: "",
@@ -77,7 +116,9 @@ export function BookingAuthPrompt({
 
       if (result.code === "email_taken") {
         setMode("signin");
-        setMessage("That email already has an account — enter your password to continue.");
+        setMessage(
+          "That email already has an account — enter your password to continue.",
+        );
         setBusy(false);
         return;
       }
@@ -152,9 +193,9 @@ export function BookingAuthPrompt({
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             {mode === "ask"
-              ? "Your selections are already saved. Add an email to continue to your address."
+              ? "Your selections are already saved. Enter your email to create an account or sign in."
               : mode === "create"
-                ? "Name and a password — then you’ll go straight back to booking."
+                ? "Choose a name and password. We’ll email a confirmation link, then you can finish this booking."
                 : "Enter your password to continue this booking."}
           </p>
         </>
@@ -162,7 +203,7 @@ export function BookingAuthPrompt({
 
       {mode === "ask" ? (
         <div className={cn("space-y-4", !hideTitle && "mt-6")}>
-          <form className="space-y-3" onSubmit={continueWithEmail}>
+          <form className="space-y-3" onSubmit={(event) => void continueWithEmail(event)}>
             <Input
               autoComplete="email"
               className="h-11"
@@ -171,8 +212,8 @@ export function BookingAuthPrompt({
               type="email"
               value={email}
             />
-            <Button className="h-11 w-full" type="submit">
-              Continue
+            <Button className="h-11 w-full" disabled={busy} type="submit">
+              {busy ? "Checking…" : "Continue"}
             </Button>
           </form>
 
@@ -214,7 +255,7 @@ export function BookingAuthPrompt({
           />
           <PasswordRequirementsList password={password} />
           <Button className="h-11 w-full" disabled={busy} type="submit">
-            {busy ? "Saving…" : "Continue booking"}
+            {busy ? "Saving…" : "Create account"}
           </Button>
           <button
             className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
@@ -272,6 +313,7 @@ export function BookingAuthPrompt({
       ) : null}
 
       {message ? (
+        message.toLowerCase().includes("welcome back") ||
         message.toLowerCase().includes("already has an account") ? (
           <p className="mt-4 text-sm text-muted-foreground">{message}</p>
         ) : (

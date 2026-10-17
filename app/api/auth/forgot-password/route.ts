@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
+import { safeRedirectPath } from "@/lib/auth/redirects";
 import { forgotPasswordSchema } from "@/lib/auth/schemas";
 import {
   resolveAppUrl,
@@ -8,7 +9,8 @@ import {
 } from "@/lib/auth/send-auth-link-email";
 
 export async function POST(request: Request) {
-  const parsed = forgotPasswordSchema.safeParse(await request.json());
+  const body = (await request.json()) as Record<string, unknown>;
+  const parsed = forgotPasswordSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -19,9 +21,15 @@ export async function POST(request: Request) {
 
   const { email } = parsed.data;
   const appUrl = resolveAppUrl(request);
+  const returnPath =
+    typeof body.redirectTo === "string"
+      ? safeRedirectPath(body.redirectTo, "")
+      : "";
   // Prefer the update-password page directly so recovery works even when
   // Supabase falls back to hash tokens on the redirect target.
-  const redirectTo = `${appUrl}/update-password`;
+  const redirectTo = returnPath
+    ? `${appUrl}/update-password?next=${encodeURIComponent(returnPath)}`
+    : `${appUrl}/update-password`;
 
   try {
     await sendAuthLinkEmail({

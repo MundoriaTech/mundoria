@@ -100,7 +100,11 @@ export function SignupForm({
 
     try {
       const response = await fetch("/api/auth/signup", {
-        body: JSON.stringify({ ...values, role }),
+        body: JSON.stringify({
+          ...values,
+          next: nextPath,
+          role,
+        }),
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });

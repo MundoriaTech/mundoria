@@ -243,11 +243,17 @@ function isBookingAuthReturnPath(pathname: string, search: string) {
     !pathname.startsWith("/login") &&
     !pathname.startsWith("/signup") &&
     !pathname.startsWith("/setup") &&
-    !pathname.startsWith("/auth")
+    !pathname.startsWith("/auth") &&
+    !pathname.startsWith("/forgot-password") &&
+    !pathname.startsWith("/complete-profile") &&
+    !pathname.startsWith("/update-password")
   ) {
     return false;
   }
+  // Login/signup use redirectTo=; OAuth/callback/complete-profile use next=.
   return (
+    search.includes("redirectTo=/booking/new") ||
+    search.includes("redirectTo=%2Fbooking%2Fnew") ||
     search.includes("next=/booking/new") ||
     search.includes("next=%2Fbooking%2Fnew")
   );
@@ -758,14 +764,41 @@ export function BookingWizard({
   }, [draft.addressId, draft.guestAddress, hydrated]);
 
   useEffect(() => {
-    if (!hydrated || draft.addressId || addresses.length === 0) return;
+    // Don't overwrite a guest address just entered with a saved default after sign-in.
+    if (
+      !hydrated ||
+      draft.addressId ||
+      draft.guestAddress ||
+      addresses.length === 0
+    ) {
+      return;
+    }
     const preferred =
       addresses.find((address) => address.is_default) ?? addresses[0];
     if (!preferred) return;
     setDraft((current) =>
-      current.addressId ? current : { ...current, addressId: preferred.id },
+      current.addressId || current.guestAddress
+        ? current
+        : { ...current, addressId: preferred.id },
     );
-  }, [addresses, draft.addressId, hydrated]);
+  }, [addresses, draft.addressId, draft.guestAddress, hydrated]);
+
+  // Guest who signs in at checkout may gain a "known cleaners" step — send them there once.
+  useEffect(() => {
+    if (!hydrated || !userId || knownCleaners.length === 0) return;
+    if (draft.rebookCleanerChoice) return;
+    if (stepId !== "checkout") return;
+    const cleanerIndex = flowSteps.indexOf("cleaner");
+    if (cleanerIndex < 0) return;
+    setStepIndex(cleanerIndex);
+  }, [
+    draft.rebookCleanerChoice,
+    flowSteps,
+    hydrated,
+    knownCleaners.length,
+    stepId,
+    userId,
+  ]);
 
   useEffect(() => {
     if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
@@ -1746,10 +1779,10 @@ function CheckoutAuthGate({
         : "Sign in";
   const subtitle =
     authMode === "ask"
-      ? "Your selections are already saved. Add an email to continue."
+      ? "Your selections are already saved. Enter your email to create an account or sign in."
       : authMode === "create"
-        ? "Name and a password — then you’ll go straight back to booking."
-        : "Enter your password to continue this booking.";
+        ? "Choose a name and password. We’ll email a confirmation link, then you can finish this booking."
+        : "Welcome back — enter your password to continue this booking.";
 
   return (
     <div>
