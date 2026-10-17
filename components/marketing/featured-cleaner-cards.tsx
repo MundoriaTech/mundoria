@@ -5,7 +5,6 @@ import { ChevronDown, MapPin, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { bookingHrefWithDirectoryCleaner } from "@/lib/seo/birmingham-directory";
-import { cleanerCoverageSentence } from "@/lib/seo/cleaner-coverage";
 import { cn } from "@/lib/utils";
 
 export type FeaturedCleanerCardData = {
@@ -30,14 +29,14 @@ function CleanerAvatar({ cleaner }: { cleaner: FeaturedCleanerCardData }) {
       // eslint-disable-next-line @next/next/no-img-element
       <img
         alt=""
-        className="h-[5.25rem] w-[5.25rem] shrink-0 rounded-full object-cover object-top ring-[2.5px] ring-[#c79c66] sm:h-[5.75rem] sm:w-[5.75rem]"
+        className="h-12 w-12 shrink-0 rounded-full object-cover object-top ring-2 ring-[#c79c66] sm:h-14 sm:w-14"
         src={cleaner.avatarUrl}
       />
     );
   }
 
   return (
-    <div className="flex h-[5.25rem] w-[5.25rem] shrink-0 items-center justify-center rounded-full bg-[#efe6ff] text-base font-bold text-[#5b3d9e] ring-[2.5px] ring-[#c79c66] sm:h-[5.75rem] sm:w-[5.75rem]">
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#efe6ff] text-xs font-bold text-[#5b3d9e] ring-2 ring-[#c79c66] sm:h-14 sm:w-14 sm:text-sm">
       {cleaner.name
         .split(" ")
         .map((part) => part[0])
@@ -77,51 +76,46 @@ function FeaturedCleanerCard({
   return (
     <article
       className={cn(
-        "rounded-[1.75rem] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 sm:rounded-[2rem]",
-        open && "shadow-[0_16px_36px_rgba(28,19,59,0.16)]",
+        "rounded-2xl bg-white shadow-[0_8px_22px_rgba(28,19,59,0.08)] transition duration-300",
+        open && "shadow-[0_12px_28px_rgba(28,19,59,0.12)]",
       )}
     >
       <button
         aria-expanded={open}
         aria-label={`${open ? "Hide" : "Show"} booking options for ${cleaner.name}`}
-        className="flex w-full items-start gap-4 p-5 text-left sm:gap-5 sm:p-6"
+        className="flex w-full items-center gap-3 px-3.5 py-3 text-left sm:gap-3.5 sm:px-4 sm:py-3.5"
         onClick={onToggle}
         type="button"
       >
         <CleanerAvatar cleaner={cleaner} />
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="truncate text-[1.2rem] font-bold tracking-[-0.02em] text-[#1c133b] sm:text-[1.3rem]">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="truncate text-[0.95rem] font-bold tracking-[-0.02em] text-[#1c133b] sm:text-base">
               {cleaner.name}
             </h3>
             <ChevronDown
               aria-hidden
               className={cn(
-                "mt-1 size-5 shrink-0 text-[#8a8498] transition-transform duration-300",
+                "mt-0.5 size-4 shrink-0 text-[#8a8498] transition-transform duration-300",
                 open && "rotate-180 text-[#1c133b]",
               )}
             />
           </div>
-          <p className="mt-2 flex items-center gap-1.5 text-[14px] text-[#6b6578]">
+          <p className="mt-0.5 flex items-center gap-1 text-[12px] text-[#6b6578]">
             <MapPin
               aria-hidden
-              className="size-3.5 shrink-0 text-[#c79c66]"
+              className="size-3 shrink-0 text-[#c79c66]"
               strokeWidth={2.25}
             />
             <span className="truncate">{area}</span>
           </p>
-          {cleaner.radiusMiles ? (
-            <p className="mt-1.5 text-[13px] leading-5 text-[#6b6578]">
-              {cleanerCoverageSentence(cleaner.radiusMiles, area)}
-            </p>
-          ) : null}
-          <p className="mt-2 flex flex-wrap items-center gap-x-1.5 text-[13px] font-medium text-[#1c133b]">
-            <span className="inline-flex items-center gap-1">
+          <p className="mt-1 flex flex-wrap items-center gap-x-1 text-[11px] font-medium text-[#1c133b] sm:text-[12px]">
+            <span className="inline-flex items-center gap-0.5">
               <Star
                 aria-hidden
                 className={cn(
-                  "size-3.5",
+                  "size-3",
                   cleaner.rating > 0
                     ? "fill-[#c79c66] text-[#c79c66]"
                     : "text-[#c79c66]",
@@ -143,13 +137,13 @@ function FeaturedCleanerCard({
         <div className="overflow-hidden">
           <div
             className={cn(
-              "border-t border-[#ece7f5] px-5 pb-5 pt-4 sm:px-6 sm:pb-6",
-              cleaner.href ? "grid grid-cols-2 gap-2.5" : "flex",
+              "border-t border-[#ece7f5] px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4",
+              cleaner.href ? "grid grid-cols-2 gap-2" : "flex",
             )}
           >
             {cleaner.href ? (
               <Link
-                className="inline-flex h-10 items-center justify-center rounded-full border border-[#1c133b]/20 bg-white px-3 text-[13px] font-semibold text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f7f2fc]"
+                className="inline-flex h-9 items-center justify-center rounded-full border border-[#1c133b]/20 bg-white px-3 text-[12px] font-semibold text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f7f2fc]"
                 href={cleaner.href}
                 onClick={(event) => event.stopPropagation()}
               >
@@ -157,7 +151,7 @@ function FeaturedCleanerCard({
               </Link>
             ) : null}
             <Link
-              className="inline-flex h-10 flex-1 items-center justify-center rounded-full bg-[#1c133b] px-3 text-[13px] font-semibold text-white transition hover:bg-[#1c133b]/90"
+              className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-[#1c133b] px-3 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
               href={bookHref}
               onClick={(event) => event.stopPropagation()}
             >
@@ -208,7 +202,7 @@ export function FeaturedCleanerCards({
 
   return (
     <div>
-      <div className="mt-8 grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid items-start gap-2.5 sm:mt-8 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
         {visible.map((cleaner) => {
           const key = cleanerKey(cleaner);
           return (
@@ -226,9 +220,9 @@ export function FeaturedCleanerCards({
         })}
       </div>
       {hiddenCount > 0 ? (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-5 flex justify-center">
           <button
-            className="inline-flex h-11 items-center justify-center rounded-full border border-[#1c133b]/20 bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f7f2fc]"
+            className="inline-flex h-10 items-center justify-center rounded-full border border-[#1c133b]/15 bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f7f2fc]"
             onClick={() => setShowAll((current) => !current)}
             type="button"
           >

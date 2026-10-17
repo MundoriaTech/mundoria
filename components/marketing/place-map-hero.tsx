@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Check, Star } from "lucide-react";
+import { Check } from "lucide-react";
 
+import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { Button } from "@/components/ui/button";
 
@@ -71,28 +72,9 @@ export function PlaceMapHero({
         style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2rem)` }}
       >
         <div className="relative">
-          {showReviews ? (
-            <a
-              className="absolute right-0 top-0 z-10 inline-flex items-center gap-1.5 text-[12px] font-medium text-[#1c133b]/85 transition hover:text-[#1c133b] sm:text-[13px]"
-              href="#reviews"
-            >
-              <span className="inline-flex text-[#c79c66]" aria-hidden>
-                {Array.from({ length: 5 }, (_, index) => (
-                  <Star
-                    className="h-3.5 w-3.5 fill-current"
-                    key={index}
-                    strokeWidth={0}
-                  />
-                ))}
-              </span>
-              <span>
-                4.8/5{" "}
-                <span className="underline underline-offset-2">Check reviews</span>
-              </span>
-            </a>
-          ) : null}
+          {showReviews ? <HeroReviewsLink tone="dark" /> : null}
 
-          <div className="max-w-[34rem]">
+          <div className={showReviews ? "max-w-[34rem] sm:pr-44" : "max-w-[34rem]"}>
             {eyebrow ? (
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[#823fb2]">
                 {eyebrow}

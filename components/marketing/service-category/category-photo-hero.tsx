@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Check, Star } from "lucide-react";
+import { Check } from "lucide-react";
 
+import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
 import { marketingServiceBySlug } from "@/lib/seo/marketing";
@@ -122,26 +123,9 @@ export function CategoryPhotoHero({
         style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2rem)` }}
       >
         <div className="relative">
-          <a
-            className="absolute right-0 top-0 z-10 inline-flex items-center gap-1.5 text-[12px] font-medium text-white/95 transition hover:text-white sm:text-[13px]"
-            href="#reviews"
-          >
-            <span className="inline-flex text-[#c79c66]" aria-hidden>
-              {Array.from({ length: 5 }, (_, index) => (
-                <Star
-                  className="h-3.5 w-3.5 fill-current"
-                  key={index}
-                  strokeWidth={0}
-                />
-              ))}
-            </span>
-            <span>
-              4.8/5{" "}
-              <span className="underline underline-offset-2">Check reviews</span>
-            </span>
-          </a>
+          <HeroReviewsLink tone="light" />
 
-          <div className="max-w-xl pb-2 sm:pb-4">
+          <div className="max-w-xl pb-2 sm:pb-4 sm:pr-44">
             <h1 className="text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl lg:text-[3.25rem]">
               {hero.title}
             </h1>

@@ -16,9 +16,9 @@ const PopularServicesSection = nextDynamic(() =>
   ),
 );
 
-const HowItWorksSection = nextDynamic(() =>
-  import("@/components/marketing/landing/how-it-works-section").then(
-    (module) => ({ default: module.HowItWorksSection }),
+const HowMundoriaWorksSection = nextDynamic(() =>
+  import("@/components/marketing/landing/how-mundoria-works-section").then(
+    (module) => ({ default: module.HowMundoriaWorksSection }),
   ),
 );
 
@@ -63,7 +63,7 @@ export default async function HomePage() {
         <ServiceCategoriesSection bookingHref={bookingHref} />
         <PopularServicesSection bookingBaseHref={bookingHref} />
       </LandingPurpleField>
-      <HowItWorksSection />
+      <HowMundoriaWorksSection />
       <ReviewsSection />
       <AboutSection cleanerHref={cleanerHref} customerHref={customerHref} />
       <CoverageSection />
