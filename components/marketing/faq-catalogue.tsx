@@ -80,6 +80,14 @@ export function FaqCatalogue() {
     return () => window.removeEventListener("hashchange", openFaqFromHash);
   }, [sections]);
 
+  useEffect(() => {
+    if (!autoOpenMatches) return;
+
+    document.querySelectorAll<HTMLDetailsElement>("details[data-faq-item]").forEach((el) => {
+      el.open = true;
+    });
+  }, [autoOpenMatches, deferredQuery, sections]);
+
   return (
     <>
       <header className="mx-auto max-w-6xl px-4 pb-8 pt-4 sm:px-8 sm:pb-10 sm:pt-6 lg:px-12">
@@ -207,9 +215,9 @@ export function FaqCatalogue() {
                     return (
                       <details
                         className="group scroll-mt-32 rounded-[1.25rem] border border-[#e4daf5]/90 bg-white/95 shadow-[0_8px_22px_rgba(49,44,121,0.04)] open:shadow-[0_10px_28px_rgba(49,44,121,0.07)]"
-                        defaultOpen={autoOpenMatches}
+                        data-faq-item=""
                         id={anchor}
-                        key={`${anchor}-${autoOpenMatches ? deferredQuery : "browse"}`}
+                        key={item.question}
                       >
                         <summary className="cursor-pointer list-none px-5 py-4 marker:content-none sm:px-6 [&::-webkit-details-marker]:hidden">
                           <span className="flex items-start justify-between gap-3">
