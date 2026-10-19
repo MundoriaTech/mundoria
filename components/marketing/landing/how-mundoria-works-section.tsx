@@ -5,17 +5,17 @@ import { ScrollReveal } from "@/components/shared/scroll-reveal";
 const STEPS = [
   {
     body: "Tell us what you need, where and when. Add any details or preferences that matter to you.",
-    image: "/images/marketing/landing/how-step-choose.png",
+    icon: "/images/marketing/icons/plain/how-choose.png",
     title: "Choose",
   },
   {
     body: "Mundoria uses your booking details to help find a suitable professional and keep everything organised in one place.",
-    image: "/images/marketing/landing/how-step-arrange.png",
+    icon: "/images/marketing/icons/plain/how-arrange.png",
     title: "We arrange it",
   },
   {
     body: "Follow your booking, receive updates, manage changes and keep payment connected to the service.",
-    image: "/images/marketing/landing/how-step-loop.png",
+    icon: "/images/marketing/icons/plain/how-loop.png",
     title: "Stay in the loop",
   },
 ] as const;
@@ -56,16 +56,16 @@ export function HowMundoriaWorksSection() {
                   className="absolute bottom-2 left-0 top-2 hidden w-px bg-[#d9d2c6] sm:block"
                 />
               ) : null}
-              <div className="relative mx-auto aspect-[5/4] w-full max-w-[13.5rem]">
+              <div className="relative mx-auto h-28 w-28 shrink-0 overflow-hidden sm:mx-0 sm:h-32 sm:w-32">
                 <Image
                   alt=""
                   className="object-contain object-center"
                   fill
-                  sizes="220px"
-                  src={step.image}
+                  sizes="128px"
+                  src={step.icon}
                 />
               </div>
-              <h3 className="mt-4 text-center text-[1.15rem] font-bold tracking-[-0.02em] text-[#1c133b] sm:text-left">
+              <h3 className="mt-5 text-center text-[1.15rem] font-bold tracking-[-0.02em] text-[#1c133b] sm:text-left">
                 {step.title}
               </h3>
               <p className="mt-2 text-center text-[13.5px] font-light leading-6 text-[#5a5470] sm:text-left">
