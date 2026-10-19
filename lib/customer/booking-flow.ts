@@ -259,6 +259,7 @@ export function frequencyChoiceSatisfied(
   draft: Pick<
     BookingDraft,
     | "customRecurrenceDates"
+    | "frequencyChosen"
     | "isRecurring"
     | "recurrencePattern"
     | "serviceType"
@@ -266,6 +267,7 @@ export function frequencyChoiceSatisfied(
 ) {
   const mode = frequencyModeFor(draft.serviceType);
   if (mode === "none") return true;
+  if (!draft.frequencyChosen) return false;
   const needsSchedule =
     mode === "required_recurring" || !frequencyAllowsOneOff(draft.serviceType);
   if (needsSchedule) {
@@ -279,6 +281,27 @@ export function frequencyChoiceSatisfied(
     return draft.customRecurrenceDates.length >= 2;
   }
   return Boolean(draft.recurrencePattern);
+}
+
+/** Basket / summary label — null until the customer has chosen a frequency. */
+export function frequencyBasketLabel(
+  draft: Pick<
+    BookingDraft,
+    "frequencyChosen" | "isRecurring" | "recurrencePattern" | "serviceType"
+  >,
+) {
+  if (!draft.serviceType) return null;
+  const mode = frequencyModeFor(draft.serviceType);
+  if (mode === "none") return "Once";
+  if (!draft.frequencyChosen) return null;
+  if (!draft.isRecurring) {
+    return frequencyAllowsOneOff(draft.serviceType) ? "Once" : null;
+  }
+  if (draft.recurrencePattern === "weekly") return "Once a week";
+  if (draft.recurrencePattern === "fortnightly") return "Once a fortnight";
+  if (draft.recurrencePattern === "monthly") return "Once a month";
+  if (draft.recurrencePattern === "custom") return "Custom schedule";
+  return "Regular";
 }
 
 export type BookingEntryLock = "category" | "service" | null;

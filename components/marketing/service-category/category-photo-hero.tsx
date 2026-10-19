@@ -143,7 +143,7 @@ export function CategoryPhotoHero({
               ))}
             </ul>
             <Link
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 sm:mt-8"
+              className="mt-6 hidden h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 md:inline-flex sm:mt-8"
               href={bookingHref}
             >
               {hero.bookCta}

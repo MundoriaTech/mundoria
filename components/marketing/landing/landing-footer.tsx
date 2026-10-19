@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { FacebookLogo, InstagramLogo, TiktokLogo } from "@phosphor-icons/react/ssr";
+import {
+  FacebookLogo,
+  InstagramLogo,
+  LinkedinLogo,
+  TiktokLogo,
+} from "@phosphor-icons/react/ssr";
 
 import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
@@ -62,6 +67,7 @@ export function LandingFooter({
     },
     {
       links: [
+        { href: "/faq", label: "FAQ" },
         { href: "/help", label: "Help Centre" },
         { action: "chat", label: "Start a chat" },
       ],
@@ -170,6 +176,14 @@ const SOCIAL = [
     className: "bg-[#111111] hover:bg-[#2a2a2a]",
     href: process.env.NEXT_PUBLIC_TIKTOK_URL ?? "https://www.tiktok.com/@mundoriauk",
     label: "TikTok",
+  },
+  {
+    Icon: LinkedinLogo,
+    className: "bg-[#0A66C2] hover:brightness-110",
+    href:
+      process.env.NEXT_PUBLIC_LINKEDIN_URL ??
+      "https://www.linkedin.com/company/mundoriauk",
+    label: "LinkedIn",
   },
 ] as const;
 

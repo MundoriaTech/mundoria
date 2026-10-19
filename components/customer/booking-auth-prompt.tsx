@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AuthPhoneField } from "@/components/auth/auth-phone-field";
+import { AuthSignupLegal } from "@/components/auth/auth-signup-legal";
+import { FormField } from "@/components/auth/form-field";
 import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { OAuthButton } from "@/components/auth/oauth-button";
 import {
@@ -14,6 +17,10 @@ import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import {
+  nationalFromPhone,
+  storedPhone,
+} from "@/lib/auth/uk-phone";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { isUserRole } from "@/types/auth";
@@ -34,7 +41,9 @@ export function BookingAuthPrompt({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
+  const [nationalNumber, setNationalNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -93,14 +102,21 @@ export function BookingAuthPrompt({
     event.preventDefault();
     setBusy(true);
     setMessage(null);
+    const phone = storedPhone(nationalFromPhone(nationalNumber));
+    if (phone.replace(/\D/g, "").length < 10) {
+      setMessage("Enter a valid phone number.");
+      setBusy(false);
+      return;
+    }
     try {
       const response = await fetch("/api/auth/signup", {
         body: JSON.stringify({
           email: email.trim(),
           full_name: fullName.trim(),
+          marketing_opt_in: marketingOptIn,
           next: RETURN_PATH,
           password,
-          phone: "",
+          phone,
           referral_code: "",
           role: "customer",
         }),
@@ -203,14 +219,16 @@ export function BookingAuthPrompt({
       {mode === "ask" ? (
         <div className={cn("space-y-4", !hideTitle && "mt-6")}>
           <form className="space-y-3" onSubmit={(event) => void continueWithEmail(event)}>
-            <Input
-              autoComplete="email"
-              className="h-11"
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email"
-              type="email"
-              value={email}
-            />
+            <FormField htmlFor="booking-auth-email" label="Email">
+              <Input
+                autoComplete="email"
+                id="booking-auth-email"
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder=" "
+                type="email"
+                value={email}
+              />
+            </FormField>
             <Button className="h-11 w-full" disabled={busy} type="submit">
               {busy ? "Checking…" : "Continue"}
             </Button>
@@ -238,21 +256,41 @@ export function BookingAuthPrompt({
           onSubmit={(event) => void createAccount(event)}
         >
           <EmailChip email={email} onEdit={() => setMode("ask")} />
-          <Input
-            autoComplete="name"
-            className="h-11"
-            onChange={(event) => setFullName(event.target.value)}
-            placeholder="Full name"
-            value={fullName}
+          <FormField htmlFor="booking-auth-full-name" label="Full name">
+            <Input
+              autoComplete="name"
+              id="booking-auth-full-name"
+              onChange={(event) => setFullName(event.target.value)}
+              placeholder=" "
+              required
+              value={fullName}
+            />
+          </FormField>
+          <AuthPhoneField
+            htmlFor="booking-auth-phone"
+            nationalNumber={nationalNumber}
+            onNationalNumberChange={(value) =>
+              setNationalNumber(nationalFromPhone(value))
+            }
+            required
           />
-          <PasswordInput
-            autoComplete="new-password"
-            className="h-11"
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Create a password"
-            value={password}
+          <div className="space-y-2">
+            <FormField htmlFor="booking-auth-password" label="Password">
+              <PasswordInput
+                autoComplete="new-password"
+                id="booking-auth-password"
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder=" "
+                value={password}
+              />
+            </FormField>
+            <PasswordRequirementsList password={password} />
+          </div>
+          <AuthSignupLegal
+            checked={marketingOptIn}
+            id="booking-marketing-opt-in"
+            onCheckedChange={setMarketingOptIn}
           />
-          <PasswordRequirementsList password={password} />
           <Button className="h-11 w-full" disabled={busy} type="submit">
             {busy ? "Saving…" : "Create account"}
           </Button>
@@ -274,22 +312,26 @@ export function BookingAuthPrompt({
           {email ? (
             <EmailChip email={email} onEdit={() => setMode("ask")} />
           ) : (
-            <Input
-              autoComplete="email"
-              className="h-11"
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email"
-              type="email"
-              value={email}
-            />
+            <FormField htmlFor="booking-auth-signin-email" label="Email">
+              <Input
+                autoComplete="email"
+                id="booking-auth-signin-email"
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder=" "
+                type="email"
+                value={email}
+              />
+            </FormField>
           )}
-          <PasswordInput
-            autoComplete="current-password"
-            className="h-11"
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Password"
-            value={password}
-          />
+          <FormField htmlFor="booking-auth-signin-password" label="Password">
+            <PasswordInput
+              autoComplete="current-password"
+              id="booking-auth-signin-password"
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder=" "
+              value={password}
+            />
+          </FormField>
           <Button className="h-11 w-full" disabled={busy} type="submit">
             {busy ? "Signing in…" : "Continue booking"}
           </Button>

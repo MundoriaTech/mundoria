@@ -24,9 +24,6 @@ type BasketProps = {
   hasPets?: boolean | null;
   /** Optional; no longer shown on the Cleaning row (kept for callers). */
   hourlyRatePence?: number | null;
-  onJumpAddress?: () => void;
-  onJumpSchedule?: () => void;
-  onJumpService?: () => void;
   priorityAreas?: string[];
   scheduledDate: string;
   scheduledTime: string;
@@ -75,17 +72,15 @@ function BasketSection({
   filled = true,
   icon,
   open,
-  onEdit,
   onToggle,
   right,
   title,
 }: {
   children?: ReactNode;
-  /** When false, show a quiet placeholder row (no Edit / chevron). */
+  /** When false, show a quiet placeholder row (no chevron). */
   filled?: boolean;
   icon: ReactNode;
   open: boolean;
-  onEdit?: () => void;
   onToggle: () => void;
   right?: ReactNode;
   title: string;
@@ -126,15 +121,6 @@ function BasketSection({
             ) : null}
           </div>
         )}
-        {filled && onEdit ? (
-          <button
-            className="shrink-0 rounded-full px-2.5 py-1.5 text-xs font-semibold text-[#6a45b8] touch-manipulation hover:bg-white/50"
-            onClick={onEdit}
-            type="button"
-          >
-            Edit
-          </button>
-        ) : null}
         {filled ? (
           <button
             aria-expanded={open}
@@ -170,9 +156,6 @@ function BasketPanel({
   frequencyLabel,
   hasPets = null,
   headerTitle = "My basket",
-  onJumpAddress,
-  onJumpSchedule,
-  onJumpService,
   priorityAreas = [],
   scheduledDate,
   scheduledTime,
@@ -262,7 +245,9 @@ function BasketPanel({
       label: addOn.label,
       price: addOn.hourly
         ? formatHourlyRate(addOn.amount)
-        : formatMoney(addOn.amount),
+        : addOn.amount <= 0
+          ? undefined
+          : formatMoney(addOn.amount),
     });
   }
 
@@ -296,7 +281,6 @@ function BasketPanel({
       <BasketSection
         filled={addressFilled}
         icon={<MapPin className="h-5 w-5" weight="fill" />}
-        onEdit={addressFilled ? onJumpAddress : undefined}
         onToggle={() => setOpen((c) => ({ ...c, address: !c.address }))}
         open={open.address}
         title={address ? formatBasketAddress(address) : "Add your address"}
@@ -307,7 +291,6 @@ function BasketPanel({
       <BasketSection
         filled={serviceFilled || amount != null}
         icon={<ShoppingCart className="h-5 w-5" weight="fill" />}
-        onEdit={serviceFilled ? onJumpService : undefined}
         onToggle={() => setOpen((c) => ({ ...c, service: !c.service }))}
         open={open.service}
         right={cleaningTotalLabel ?? undefined}
@@ -339,7 +322,6 @@ function BasketPanel({
       <BasketSection
         filled={scheduleFilled}
         icon={<Clock className="h-5 w-5" weight="fill" />}
-        onEdit={scheduleFilled ? onJumpSchedule : undefined}
         onToggle={() => setOpen((c) => ({ ...c, schedule: !c.schedule }))}
         open={open.schedule}
         title={scheduleTitle}

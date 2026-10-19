@@ -25,10 +25,13 @@ import {
   type AccountMenuItem,
 } from "@/components/shared/account-menu";
 import { dashboardForRole } from "@/lib/auth/redirects";
+import type { FaqNavMenu } from "@/lib/seo/site-faqs";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 import { isUserRole, type Profile } from "@/types/auth";
+
+export type { FaqNavMenu };
 
 type MarketingViewer = Pick<
   Profile,
@@ -54,12 +57,15 @@ const NAV_LINK_CLASS =
 export function LandingNavbar({
   accountMenuItems,
   customerHref,
+  faqNav,
   headerExtra,
   loginHref: loginHrefProp,
   viewer: initialViewer = null,
 }: {
   accountMenuItems?: AccountMenuItem[];
   customerHref: string;
+  /** When set, centre nav shows FAQ category dropdowns instead of service menus. */
+  faqNav?: FaqNavMenu[];
   headerExtra?: React.ReactNode;
   loginHref?: string;
   viewer?: MarketingViewer;
@@ -68,7 +74,8 @@ export function LandingNavbar({
   const loginHref = loginHrefProp ?? (configured ? "/login" : "/setup");
   const [viewer, setViewer] = useState<MarketingViewer>(initialViewer);
   const accountHref = viewer ? dashboardForRole(viewer.role) : loginHref;
-  const showForCleanersCta = viewer?.role !== "cleaner";
+  const isFaqNav = Boolean(faqNav?.length);
+  const showForCleanersCta = !isFaqNav && viewer?.role !== "cleaner";
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
 
@@ -150,31 +157,41 @@ export function LandingNavbar({
         />
 
         <nav
-          aria-label="Primary navigation"
+          aria-label={isFaqNav ? "FAQ categories" : "Primary navigation"}
           className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex xl:gap-2"
         >
-          {landingCategoryNav.map((menu) => (
-            <CategoryNavDropdown
-              customerHref={customerHref}
-              key={menu.label}
-              menu={menu}
-            />
-          ))}
-          {landingNavLinks.map(([label, href]) =>
-            href.startsWith("mailto:") ? (
-              <a className={cn(NAV_LINK_CLASS, "px-2 py-1")} href={href} key={label}>
-                {label}
-              </a>
-            ) : (
-              <Link
-                className={cn(NAV_LINK_CLASS, "px-2 py-1")}
-                href={href}
-                key={label}
-              >
-                {label}
-              </Link>
-            ),
-          )}
+          {isFaqNav
+            ? faqNav!.map((menu) => (
+                <FaqNavDropdown key={menu.id} menu={menu} />
+              ))
+            : landingCategoryNav.map((menu) => (
+                <CategoryNavDropdown
+                  customerHref={customerHref}
+                  key={menu.label}
+                  menu={menu}
+                />
+              ))}
+          {!isFaqNav
+            ? landingNavLinks.map(([label, href]) =>
+                href.startsWith("mailto:") ? (
+                  <a
+                    className={cn(NAV_LINK_CLASS, "px-2 py-1")}
+                    href={href}
+                    key={label}
+                  >
+                    {label}
+                  </a>
+                ) : (
+                  <Link
+                    className={cn(NAV_LINK_CLASS, "px-2 py-1")}
+                    href={href}
+                    key={label}
+                  >
+                    {label}
+                  </Link>
+                ),
+              )
+            : null}
         </nav>
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
@@ -212,6 +229,7 @@ export function LandingNavbar({
         <MobileNav
           accountHref={accountHref}
           customerHref={customerHref}
+          faqNav={faqNav}
           loginHref={loginHref}
           mobileOpen={mobileOpen}
           onMobileOpenChange={setMobileOpen}
@@ -226,6 +244,143 @@ export function LandingNavbar({
 function categoryBookHref(customerHref: string, category: string) {
   if (!customerHref.startsWith("/booking")) return customerHref;
   return `/booking/new?category=${category}`;
+}
+
+function FaqNavDropdown({ menu }: { menu: FaqNavMenu }) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuId = useId();
+  const sections = menu.items.filter((item) => item.kind === "section");
+  const questions = menu.items.filter((item) => item.kind === "question");
+
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  const openMenu = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+
+  const scheduleClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), 140);
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={openMenu}
+      onMouseLeave={scheduleClose}
+    >
+      <Link
+        aria-controls={menuId}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className={cn(
+          NAV_LINK_CLASS,
+          "inline-flex items-center gap-0.5 rounded-full px-1.5 py-1.5 xl:gap-1 xl:px-2.5",
+          open && "bg-white/55 text-[#312c79]",
+        )}
+        href={menu.href}
+        onFocus={openMenu}
+      >
+        <span>{menu.label}</span>
+        <ChevronDown
+          aria-hidden
+          className={cn(
+            "size-3.5 shrink-0 opacity-70 transition-transform duration-200",
+            open && "rotate-180",
+          )}
+        />
+      </Link>
+
+      <div
+        aria-hidden={!open}
+        className={cn(
+          "absolute left-1/2 top-full z-[60] w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 pt-3 transition duration-200",
+          open
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-1 opacity-0",
+        )}
+        id={menuId}
+        onMouseEnter={openMenu}
+        onMouseLeave={scheduleClose}
+        role="menu"
+      >
+        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
+          <div className="border-b border-[#1c133b]/06 bg-[#f8f4ff] px-4 py-3">
+            <p className="text-[13px] font-semibold text-[#1c133b]">
+              {menu.label}
+            </p>
+            <p className="mt-1 text-[12px] leading-5 text-[#5a5470]">
+              {menu.description}
+            </p>
+          </div>
+          <div className="max-h-[min(22rem,55vh)] overflow-y-auto p-2">
+            <p className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
+              Topics
+            </p>
+            <ul>
+              {sections.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    className="block rounded-xl px-3 py-2.5 text-[13px] font-semibold leading-snug text-[#1c133b] transition hover:bg-[#f6f0ff] hover:text-[#312c79]"
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    role="menuitem"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {questions.length ? (
+              <>
+                <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
+                  Popular questions
+                </p>
+                <ul>
+                  {questions.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        className="block rounded-xl px-3 py-2 text-[12px] font-medium leading-snug text-[#5a5470] transition hover:bg-[#f6f0ff] hover:text-[#312c79]"
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        role="menuitem"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+          </div>
+          <div className="border-t border-[#1c133b]/06 p-2">
+            <Link
+              className="flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-semibold text-[#6a45b8] transition hover:bg-[#f6f0ff]"
+              href={menu.href}
+              onClick={() => setOpen(false)}
+              role="menuitem"
+            >
+              <span>
+                {menu.questionCount > 0
+                  ? `Browse ${menu.questionCount} answers`
+                  : `View ${menu.label}`}
+              </span>
+              <ChevronDown
+                aria-hidden
+                className="size-3.5 -rotate-90 opacity-70"
+              />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function CategoryNavDropdown({
@@ -372,6 +527,7 @@ function CategoryNavDropdown({
 
 function MobileNav({
   customerHref,
+  faqNav,
   loginHref,
   accountHref,
   viewer,
@@ -380,6 +536,7 @@ function MobileNav({
   showForCleanersCta,
 }: {
   customerHref: string;
+  faqNav?: FaqNavMenu[];
   loginHref: string;
   accountHref: string;
   viewer: Pick<Profile, "id" | "full_name" | "avatar_url" | "role"> | null;
@@ -429,11 +586,12 @@ function MobileNav({
       <MarketingMobileMenuSheet
         accountHref={accountHref}
         customerHref={customerHref}
+        faqNav={faqNav}
         loginHref={loginHref}
         mobileOpen={mobileOpen}
         onClose={() => onMobileOpenChange(false)}
         showForCleanersCta={showForCleanersCta}
-        variant="marketing"
+        variant={faqNav?.length ? "faq" : "marketing"}
         viewerDashboard={Boolean(viewer)}
       />
     </div>

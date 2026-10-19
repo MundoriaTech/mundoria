@@ -1,12 +1,15 @@
 import { z } from "zod";
 
-/** New passwords: length, plus one capital letter, one number, and one symbol. */
+/** New passwords: 8+, capital, lowercase, number, and symbol. */
 export const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters")
   .max(72, "Password is too long")
   .refine((value) => /[A-Z]/.test(value), {
     message: "Password must include a capital letter",
+  })
+  .refine((value) => /[a-z]/.test(value), {
+    message: "Password must include a lowercase letter",
   })
   .refine((value) => /\d/.test(value), {
     message: "Password must include a number",
@@ -26,24 +29,11 @@ export const signupSchema = z.object({
   phone: z
     .string()
     .trim()
-    .max(30, "Phone number is too long")
-    .optional()
-    .or(z.literal(""))
-    .refine((value) => !value || value.length >= 7, {
-      message: "Enter a valid phone number",
-    }),
+    .min(7, "Enter a valid phone number")
+    .max(30, "Phone number is too long"),
   role: z.enum(["customer", "cleaner"]),
   referral_code: z.string().trim().max(40).optional().or(z.literal("")),
-}).superRefine((value, ctx) => {
-  if (value.role !== "cleaner") return;
-  const phone = (value.phone ?? "").trim();
-  if (phone.length < 7) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Enter a valid phone number",
-      path: ["phone"],
-    });
-  }
+  marketing_opt_in: z.boolean().optional().default(false),
 });
 
 export const loginSchema = z.object({

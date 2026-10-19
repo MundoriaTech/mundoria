@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { LandingFooter } from "@/components/marketing/landing/landing-footer";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { getMarketingViewer } from "@/components/marketing/marketing-shell";
@@ -10,6 +11,8 @@ interface AuthShellProps {
   children: React.ReactNode;
   description: string;
   footer: React.ReactNode;
+  /** Site-wide marketing footer (customer login/signup). */
+  showSiteFooter?: boolean;
   title: string;
 }
 
@@ -17,10 +20,12 @@ export async function AuthShell({
   children,
   description,
   footer,
+  showSiteFooter = false,
   title,
 }: AuthShellProps) {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
+  const cleanerHref = configured ? "/signup/cleaner" : "/setup";
   const viewer = await getMarketingViewer();
 
   return (
@@ -57,6 +62,9 @@ export async function AuthShell({
           </div>
         </div>
       </section>
+      {showSiteFooter ? (
+        <LandingFooter cleanerHref={cleanerHref} configured={configured} />
+      ) : null}
     </main>
   );
 }

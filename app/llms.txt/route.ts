@@ -37,6 +37,7 @@ Mundoria is a UK cleaning marketplace. Customers book vetted independent cleaner
 - All services: ${absoluteUrl("/cleaning")}
 - Birmingham cleaners: ${absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`)}
 - Help Centre: ${absoluteUrl("/help")}
+- FAQ: ${absoluteUrl("/faq")}
 - For cleaners: ${absoluteUrl("/for-cleaners")}
 
 ## Popular services

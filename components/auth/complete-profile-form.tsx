@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
 import { FormStatus } from "@/components/auth/form-status";
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import {
   nationalFromPhone,
   storedPhone,
-  UK_DIAL_CODE,
 } from "@/lib/auth/uk-phone";
-import { cn } from "@/lib/utils";
 
 export function CompleteProfileForm({
   defaultFullName,
@@ -86,38 +85,19 @@ export function CompleteProfileForm({
         <Input
           autoComplete="name"
           id="full_name"
-          placeholder="Alex Morgan"
+          placeholder=" "
           {...register("full_name")}
         />
       </FormField>
-      <FormField error={errors.phone} htmlFor="phone" label="Phone number">
-        <div className="flex gap-2">
-          <span
-            className={cn(
-              "inline-flex h-11 w-[4.5rem] shrink-0 items-center justify-center rounded-md border border-[#e8e8eb] bg-[#f7f6f8] text-sm font-semibold text-[#1c133b]",
-              errors.phone && "border-[#d4694a]",
-            )}
-          >
-            {UK_DIAL_CODE}
-          </span>
-          <Input
-            autoComplete="tel-national"
-            className="min-w-0 flex-1"
-            id="phone"
-            inputMode="tel"
-            onChange={(event) => updateNationalNumber(event.target.value)}
-            placeholder="7700 900000"
-            type="tel"
-            value={nationalNumber}
-          />
-        </div>
-        <input type="hidden" {...register("phone")} />
-      </FormField>
-      <p className="text-sm leading-6 text-muted-foreground">
-        We use your phone number for booking updates, cleaner arrival notices,
-        and account recovery. SMS verification can be added later when Twilio is
-        live.
-      </p>
+      <AuthPhoneField
+        error={errors.phone}
+        hint="Used for booking updates, arrival notices, and account recovery."
+        htmlFor="phone"
+        nationalNumber={nationalNumber}
+        onNationalNumberChange={updateNationalNumber}
+        required
+      />
+      <input type="hidden" {...register("phone")} />
       <Button className="w-full" disabled={isSubmitting} type="submit">
         {isSubmitting ? "Saving…" : "Continue"}
       </Button>

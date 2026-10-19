@@ -19,9 +19,6 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { isUserRole } from "@/types/auth";
 
-const fieldClassName =
-  "h-12 rounded-xl border-[#ddd6eb] bg-[#ece8f2] text-[#291845] placeholder:text-[#9a93ad] focus-visible:ring-[#291845]/30";
-
 interface LoginFormProps {
   initialEmail?: string;
   initialError?: string;
@@ -109,11 +106,7 @@ export function LoginForm({
         <>
           <OAuthButton
             className="h-12 rounded-xl border-[#ddd6eb] bg-white text-[#414141] hover:bg-white/90"
-            label={
-              requiredRole === "cleaner"
-                ? "Continue with Google as a cleaner"
-                : "Continue with Google"
-            }
+            label="Continue with Google"
             next={
               requiredRole === "cleaner"
                 ? "/cleaner/dashboard"
@@ -136,9 +129,8 @@ export function LoginForm({
         <FormField error={errors.email} htmlFor="email" label="Email">
           <Input
             autoComplete="email"
-            className={fieldClassName}
             id="email"
-            placeholder="alex@example.com"
+            placeholder=" "
             type="email"
             {...register("email")}
           />
@@ -147,8 +139,8 @@ export function LoginForm({
         <FormField error={errors.password} htmlFor="password" label="Password">
           <PasswordInput
             autoComplete="current-password"
-            className={fieldClassName}
             id="password"
+            placeholder=" "
             {...register("password")}
           />
         </FormField>

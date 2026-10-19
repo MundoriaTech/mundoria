@@ -57,6 +57,7 @@ import {
   durationSummary,
   formatBookingDate,
   frequencyAllowsOneOff,
+  frequencyBasketLabel,
   frequencyChoiceSatisfied,
   frequencyModeFor,
   frequencyOptionsFor,
@@ -119,6 +120,7 @@ const blankDraft: BookingDraft = {
   cleaningStandard: null,
   customRecurrenceDates: [],
   estimatedDurationHours: null,
+  frequencyChosen: false,
   guestAddress: null,
   hasPets: null,
   isRecurring: false,
@@ -267,9 +269,9 @@ let bookingHistoryBootstrap: {
 } | null = null;
 
 const ADD_ON_IMAGES: Record<string, string> = {
-  cleaning_products: "/images/marketing/icons/cleaning-products.png",
-  cleaning_equipment: "/images/marketing/icons/tools.png",
-  ironing: "/images/marketing/icons/ironing.png",
+  cleaning_products: "/images/marketing/icons/plain/cleaning-products.png",
+  cleaning_equipment: "/images/marketing/icons/plain/tools.png",
+  ironing: "/images/marketing/icons/plain/ironing.png",
 };
 
 const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
@@ -357,9 +359,6 @@ export function BookingWizard({
   });
   const [stepIndex, setStepIndex] = useState(0);
   const [hydrated, setHydrated] = useState(false);
-  const [showAddressForm, setShowAddressForm] = useState(
-    () => initialAddresses.length === 0 && Boolean(userId),
-  );
   const [authMode, setAuthMode] = useState<BookingAuthMode>("ask");
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
@@ -588,6 +587,7 @@ export function BookingWizard({
         },
       );
       const dateIndex = previewSteps.indexOf("date");
+      const frequencyIndex = previewSteps.indexOf("frequency");
       const savedIndex = isBookingFlowStepId(storedStepRaw)
         ? resolveFlowStepIndex(previewSteps, storedStepRaw)
         : Number.isFinite(Number(storedStepRaw))
@@ -595,6 +595,12 @@ export function BookingWizard({
           : -1;
       const keepDuration =
         keepSaved && dateIndex >= 0 && savedIndex >= dateIndex;
+      const restoredFrequencyChosen = keepSaved
+        ? Boolean(
+            (parsed as BookingDraft | null)?.frequencyChosen ||
+              (frequencyIndex >= 0 && savedIndex > frequencyIndex),
+          )
+        : Boolean(initialDraft?.frequencyChosen);
 
       if (urlService || parsed) {
         setDraft({
@@ -642,12 +648,17 @@ export function BookingWizard({
                 .map((date) => isoDateOrEmpty(date))
                 .filter(Boolean)
             : [],
-          isRecurring: keepSaved
-            ? Boolean(parsed?.isRecurring)
-            : Boolean(initialDraft?.isRecurring),
-          recurrencePattern: keepSaved
-            ? (parsed?.recurrencePattern ?? null)
-            : (initialDraft?.recurrencePattern ?? null),
+          frequencyChosen: restoredFrequencyChosen,
+          isRecurring: restoredFrequencyChosen
+            ? keepSaved
+              ? Boolean(parsed?.isRecurring)
+              : Boolean(initialDraft?.isRecurring)
+            : false,
+          recurrencePattern: restoredFrequencyChosen
+            ? keepSaved
+              ? (parsed?.recurrencePattern ?? null)
+              : (initialDraft?.recurrencePattern ?? null)
+            : null,
           preferSameCleaner: previousCleaner
             ? (sameService ? Boolean(parsed?.preferSameCleaner) : false)
             : Boolean(resumedKnownCleaner),
@@ -819,10 +830,7 @@ export function BookingWizard({
 
   useEffect(() => {
     setAddresses(initialAddresses);
-    if (userId && initialAddresses.length === 0) {
-      setShowAddressForm(true);
-    }
-  }, [initialAddresses, userId]);
+  }, [initialAddresses]);
 
   useEffect(() => {
     if (stepId !== "checkout") setAuthMode("ask");
@@ -1038,10 +1046,6 @@ export function BookingWizard({
 
   function goBack() {
     if (checkoutBusy) return;
-    if (stepId === "address" && showAddressForm && draft.addressId) {
-      setShowAddressForm(false);
-      return;
-    }
     if (stepId === "checkout" && needsAuth && authMode !== "ask") {
       setAuthMode("ask");
       return;
@@ -1170,7 +1174,6 @@ export function BookingWizard({
   }
 
   function selectService(serviceType: ServiceType) {
-    const mode = frequencyModeFor(serviceType);
     const today = new Date().toISOString().slice(0, 10);
     setDraft((current) => ({
       ...current,
@@ -1180,7 +1183,8 @@ export function BookingWizard({
         recentlyMoved: current.recentlyMoved,
         serviceType,
       }),
-      isRecurring: mode === "required_recurring",
+      frequencyChosen: false,
+      isRecurring: false,
       preferSameCleaner: current.rebookCleanerChoice === "same",
       preferredCleanerId:
         current.rebookCleanerChoice === "same"
@@ -1193,7 +1197,7 @@ export function BookingWizard({
           : current.recommendationOutcome,
       recommendedCleaningStandard: null,
       recommendedServiceType: null,
-      recurrencePattern: mode === "required_recurring" ? "weekly" : null,
+      recurrencePattern: null,
       customRecurrenceDates: [],
       scheduledDate:
         serviceType === "same_day" ? today : current.scheduledDate,
@@ -1226,6 +1230,9 @@ export function BookingWizard({
       cleaningStandard: suggestion.cleaningStandard,
       customRecurrenceDates: [],
       estimatedDurationHours: duration,
+      frequencyChosen: suggestion.isRecurring
+        ? Boolean(suggestion.recurrencePattern)
+        : true,
       isRecurring: suggestion.isRecurring,
       recommendationOutcome: "accepted",
       recommendedCleaningStandard: suggestion.cleaningStandard,
@@ -1368,29 +1375,7 @@ export function BookingWizard({
         }))
     : [];
 
-  const frequencyLabel = (() => {
-    if (!draft.serviceType) return null;
-    const mode = frequencyModeFor(draft.serviceType);
-    if (mode === "none") return "Once";
-    if (!draft.isRecurring) {
-      return frequencyAllowsOneOff(draft.serviceType) ? "Once" : null;
-    }
-    if (draft.recurrencePattern === "weekly") return "Once a week";
-    if (draft.recurrencePattern === "fortnightly") return "Once a fortnight";
-    if (draft.recurrencePattern === "monthly") return "Once a month";
-    if (draft.recurrencePattern === "custom") return "Custom schedule";
-    return "Regular";
-  })();
-
-  function jumpToStep(id: (typeof flowSteps)[number]) {
-    const index = flowSteps.indexOf(id);
-    if (index >= 0) {
-      setBasketOpen(false);
-      // Replace the current history entry so Back still pops the prior step.
-      historyWriteModeRef.current = "replace";
-      setStepIndex(index);
-    }
-  }
+  const frequencyLabel = frequencyBasketLabel(draft);
 
   const basketProps = {
     addOns: addOnLines,
@@ -1407,15 +1392,6 @@ export function BookingWizard({
     frequencyLabel,
     hasPets: draft.hasPets,
     hourlyRatePence: displayHourlyRatePence,
-    onJumpAddress: () => jumpToStep("address"),
-    onJumpSchedule: () => {
-      if (flowSteps.includes("date")) jumpToStep("date");
-      else if (flowSteps.includes("time")) jumpToStep("time");
-    },
-    onJumpService: () => {
-      if (flowSteps.includes("service")) jumpToStep("service");
-      else if (flowSteps.includes("category")) jumpToStep("category");
-    },
     priorityAreas: draft.specialAttentionAreas,
     scheduledDate: draft.scheduledDate,
     scheduledTime: draft.scheduledTime,
@@ -1489,16 +1465,9 @@ export function BookingWizard({
           onSelect={(addressId) => {
             update("addressId", addressId);
             update("guestAddress", null);
-            setShowAddressForm(false);
           }}
           proName={requestedPro}
           selectedId={draft.addressId}
-          setShowForm={setShowAddressForm}
-          showForm={
-            showAddressForm ||
-            (Boolean(userId) && !draft.addressId) ||
-            (!userId && !guestAddressComplete(draft.guestAddress))
-          }
           userId={userId}
           onSaved={(address) => {
             if (!userId || address.id.startsWith("guest-")) {
@@ -1519,7 +1488,6 @@ export function BookingWizard({
                 special_requirements: address.special_requirements,
               });
               update("addressId", null);
-              setShowAddressForm(false);
               return;
             }
             setAddresses((current) => [address, ...current]);
@@ -1531,7 +1499,6 @@ export function BookingWizard({
             if (draft.numBathrooms == null) {
               update("numBathrooms", address.num_bathrooms ?? 1);
             }
-            setShowAddressForm(false);
           }}
         />
       ) : null}
@@ -2179,8 +2146,6 @@ function AddressStep({
   onSelect,
   proName,
   selectedId,
-  setShowForm,
-  showForm,
   userId,
 }: {
   addresses: Address[];
@@ -2190,8 +2155,6 @@ function AddressStep({
   onSelect: (addressId: string) => void;
   proName?: string | null;
   selectedId: string | null;
-  setShowForm: (value: boolean) => void;
-  showForm: boolean;
   userId: string | null;
 }) {
   const guestAsAddress: Address | null = guestAddressComplete(guestAddress)
@@ -2215,10 +2178,9 @@ function AddressStep({
         updated_at: "",
       }
     : null;
-  const selected =
-    !localOnly && selectedId
-      ? (addresses.find((address) => address.id === selectedId) ?? null)
-      : null;
+  const signedIn = Boolean(userId) && !localOnly;
+  const collapsibleSaved = signedIn && addresses.length > 1;
+  const [savedOpen, setSavedOpen] = useState(() => addresses.length <= 2);
 
   return (
     <div>
@@ -2239,17 +2201,15 @@ function AddressStep({
         </span>
       </p>
 
-      {showForm || (localOnly && !guestAsAddress) ? (
-        <div className="relative z-20 mt-8 overflow-visible rounded-2xl border-2 border-transparent bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:p-5">
-          <AddressForm
-            address={localOnly ? guestAsAddress : null}
-            compact
-            localOnly={localOnly}
-            onSaved={onSaved}
-            userId={userId ?? undefined}
-          />
-        </div>
-      ) : null}
+      <div className="relative z-20 mt-8 overflow-visible rounded-2xl border-2 border-transparent bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:p-5">
+        <AddressForm
+          address={localOnly ? guestAsAddress : null}
+          compact
+          localOnly={localOnly}
+          onSaved={onSaved}
+          userId={userId ?? undefined}
+        />
+      </div>
 
       {guestAsAddress && localOnly ? (
         <div className="mt-6 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
@@ -2268,69 +2228,78 @@ function AddressStep({
         </div>
       ) : null}
 
-      {!localOnly && addresses.length > 0 ? (
-        <div className="mt-6 grid gap-3">
-          {addresses.map((address) => {
-            const active = selectedId === address.id;
-            return (
-              <button
-                className={cn(
-                  "rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]",
-                  active && "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
-                )}
-                key={address.id}
-                onClick={() => onSelect(address.id)}
-                type="button"
-              >
-                <p className="font-semibold text-[#1c133b]">
-                  {address.label ?? "Saved address"}
-                  {address.is_default ? (
-                    <span className="ml-2 text-xs font-medium text-[#6a45b8]">
-                      Default
-                    </span>
-                  ) : null}
-                </p>
-                <p className="mt-1 break-words text-sm text-[#5a5470]">
-                  {address.address_line_1}, {address.city}, {address.postcode}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
+      {signedIn && addresses.length > 0 ? (
+        <div className="mt-6">
+          {collapsibleSaved ? (
+            <button
+              aria-controls="saved-addresses-panel"
+              aria-expanded={savedOpen}
+              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-transparent bg-white px-4 py-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]"
+              onClick={() => setSavedOpen((open) => !open)}
+              type="button"
+            >
+              <span className="min-w-0">
+                <span className="block text-base font-semibold text-[#1c133b] sm:text-[1.05rem]">
+                  {savedOpen
+                    ? "My saved addresses"
+                    : "View my saved addresses"}
+                </span>
+                <span className="mt-0.5 block text-sm text-[#5a5470]">
+                  {addresses.length}{" "}
+                  {addresses.length === 1 ? "place" : "places"}
+                </span>
+              </span>
+              {savedOpen ? (
+                <ChevronUp className="h-5 w-5 shrink-0 text-[#6a45b8]" />
+              ) : (
+                <ChevronDown className="h-5 w-5 shrink-0 text-[#6a45b8]" />
+              )}
+            </button>
+          ) : (
+            <p className="mb-3 text-sm font-semibold text-[#1c133b]">
+              Saved address
+            </p>
+          )}
 
-      {selected && !localOnly && addresses.length === 0 ? (
-        <div className="mt-6 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
-          <div className="flex gap-3">
-            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
-            <div className="min-w-0">
-              <p className="font-semibold text-[#1c133b]">
-                {selected.label ?? "Your address"}
-              </p>
-              <p className="mt-1 break-words text-sm text-[#5a5470]">
-                {selected.address_line_1}, {selected.city}, {selected.postcode}
-              </p>
+          {!collapsibleSaved || savedOpen ? (
+            <div
+              className={cn("grid gap-3", collapsibleSaved && "mt-3")}
+              id="saved-addresses-panel"
+            >
+              {addresses.map((address) => {
+                const active = selectedId === address.id;
+                return (
+                  <button
+                    className={cn(
+                      "rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]",
+                      active &&
+                        "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
+                    )}
+                    key={address.id}
+                    onClick={() => {
+                      onSelect(address.id);
+                      if (collapsibleSaved) setSavedOpen(false);
+                    }}
+                    type="button"
+                  >
+                    <p className="font-semibold text-[#1c133b]">
+                      {address.label ?? "Saved address"}
+                      {address.is_default ? (
+                        <span className="ml-2 text-xs font-medium text-[#6a45b8]">
+                          Default
+                        </span>
+                      ) : null}
+                    </p>
+                    <p className="mt-1 break-words text-sm text-[#5a5470]">
+                      {address.address_line_1}, {address.city},{" "}
+                      {address.postcode}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
-          </div>
+          ) : null}
         </div>
-      ) : null}
-
-      {!localOnly && selected ? (
-        <button
-          className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#1c133b] bg-white px-4 text-sm font-semibold text-[#1c133b] touch-manipulation sm:w-auto"
-          onClick={() => setShowForm(!showForm)}
-          type="button"
-        >
-          {showForm ? "Cancel" : "Use a different address"}
-        </button>
-      ) : guestAsAddress ? (
-        <button
-          className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#1c133b] bg-white px-4 text-sm font-semibold text-[#1c133b] touch-manipulation sm:w-auto"
-          onClick={() => setShowForm(true)}
-          type="button"
-        >
-          Edit address
-        </button>
       ) : null}
 
       {proName ? (
@@ -2676,16 +2645,16 @@ function AddOnsStep({
                   {ADD_ON_IMAGES[addOn.id] ? (
                     <Image
                       alt=""
-                      className="h-11 w-11 shrink-0 rounded-full object-cover"
+                      className="h-11 w-11 shrink-0 object-contain"
                       height={512}
                       src={ADD_ON_IMAGES[addOn.id]}
                       width={512}
                     />
                   ) : AddOnIcon ? (
-                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#e8def8]">
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center">
                       <AddOnIcon
                         aria-hidden
-                        className={cn("h-6 w-6", icon?.className)}
+                        className={cn("h-7 w-7", icon?.className)}
                         weight="duotone"
                       />
                     </span>
@@ -2697,17 +2666,18 @@ function AddOnsStep({
                     </p>
                   </div>
                   <p className="shrink-0 text-right text-sm font-bold text-[#1c133b]">
-                    +
-                    {addOn.hourly && addOnPriceContext
-                      ? formatHourlyRate(
+                    {(() => {
+                      if (addOn.hourly && addOnPriceContext) {
+                        return `+${formatHourlyRate(
                           addOnAmountPence(addOn, {
                             ...addOnPriceContext,
                             durationHours: 1,
                           }),
-                        )
-                      : formatMoney(
-                          addOnAmountPence(addOn, addOnPriceContext),
-                        )}
+                        )}`;
+                      }
+                      const pence = addOnAmountPence(addOn, addOnPriceContext);
+                      return pence <= 0 ? "" : `+${formatMoney(pence)}`;
+                    })()}
                   </p>
                 </div>
               </button>
@@ -2754,12 +2724,12 @@ function AddOnsStep({
                   <div className="flex items-center gap-3">
                     <Image
                       alt=""
-                      className="h-11 w-11 shrink-0 rounded-full object-cover"
+                      className="h-11 w-11 shrink-0 object-contain"
                       height={512}
                       src={
                         value
-                          ? "/images/marketing/icons/pets.png"
-                          : "/images/marketing/icons/no-pets.png"
+                          ? "/images/marketing/icons/plain/pets.png"
+                          : "/images/marketing/icons/plain/no-pets.png"
                       }
                       width={512}
                     />
@@ -2916,12 +2886,14 @@ function FrequencyStep({
     value: "one_off" | "weekly" | "fortnightly" | "monthly" | "custom",
   ) {
     if (value === "one_off") {
+      update("frequencyChosen", true);
       update("isRecurring", false);
       update("recurrencePattern", null);
       update("customRecurrenceDates", []);
       onAdvance?.();
       return;
     }
+    update("frequencyChosen", true);
     update("isRecurring", true);
     update("recurrencePattern", value);
     if (value === "custom") {
@@ -2950,11 +2922,13 @@ function FrequencyStep({
     if (dates.length >= 2) onAdvance?.();
   }
 
-  const selectedValue = draft.isRecurring
-    ? draft.recurrencePattern
-    : mode === "optional" && allowsOneOff
-      ? "one_off"
-      : draft.recurrencePattern;
+  const selectedValue = !draft.frequencyChosen
+    ? null
+    : draft.isRecurring
+      ? draft.recurrencePattern
+      : mode === "optional" && allowsOneOff
+        ? "one_off"
+        : draft.recurrencePattern;
 
   return (
     <div>

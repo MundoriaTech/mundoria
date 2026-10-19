@@ -39,6 +39,8 @@ const PUBLIC_MARKETING_ALLOW = [
   "/cleaners/",
   "/help",
   "/help/",
+  "/faq",
+  "/faq/",
   "/blog",
   "/blog/",
   "/how-it-works",

@@ -59,6 +59,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
           </span>
         </>
       }
+      showSiteFooter
       title="Customer sign in"
     >
       <LoginForm

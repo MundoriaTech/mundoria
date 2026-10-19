@@ -81,7 +81,7 @@ export function UpdatePasswordForm({ next }: { next?: string | null }) {
           <PasswordInput
             autoComplete="new-password"
             id="password"
-            placeholder="Create a password"
+            placeholder=" "
             {...register("password")}
           />
         </FormField>
@@ -95,6 +95,7 @@ export function UpdatePasswordForm({ next }: { next?: string | null }) {
         <PasswordInput
           autoComplete="new-password"
           id="confirmPassword"
+          placeholder=" "
           {...register("confirmPassword")}
         />
       </FormField>

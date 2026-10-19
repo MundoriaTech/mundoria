@@ -58,7 +58,7 @@ export function CategoryServiceCard({
         />
         <button
           aria-expanded={open}
-          aria-label={`Show Read more and Book now for ${label}`}
+          aria-label={`Show options for ${label}`}
           className={cn(
             "absolute inset-0 z-[1] [@media(hover:hover)]:hidden",
             open && "hidden",
@@ -94,7 +94,7 @@ export function CategoryServiceCard({
             aria-label={`Book ${label}`}
             className={cn(
               overlayLinkClass,
-              "bg-white text-[#1c133b] hover:bg-[#f3efe6]",
+              "hidden bg-white text-[#1c133b] hover:bg-[#f3efe6] md:inline-flex",
             )}
             href={bookHref}
           >

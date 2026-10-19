@@ -75,7 +75,7 @@ export function AdminInviteAcceptForm({
           autoComplete="name"
           id="full_name"
           onChange={(event) => setFullName(event.target.value)}
-          placeholder="Alex Morgan"
+          placeholder=" "
           required
           value={fullName}
         />
@@ -88,7 +88,7 @@ export function AdminInviteAcceptForm({
             id="password"
             minLength={8}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="Create a password"
+            placeholder=" "
             required
             value={password}
           />

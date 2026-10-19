@@ -35,3 +35,44 @@ export function softScrollToTop(durationMs = 420) {
 
   requestAnimationFrame(frame);
 }
+
+function documentScrollHeight() {
+  return Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight,
+  );
+}
+
+/** Gentle scroll to the bottom of the page. */
+export function softScrollToBottom(durationMs = 420) {
+  const start = window.scrollY || document.documentElement.scrollTop || 0;
+  const end = Math.max(
+    0,
+    documentScrollHeight() - window.innerHeight,
+  );
+  if (end - start < 2) {
+    window.scrollTo(0, end);
+    return;
+  }
+
+  if (prefersReducedMotion()) {
+    window.scrollTo(0, end);
+    return;
+  }
+
+  const distance = end - start;
+  const startedAt = performance.now();
+
+  function frame(now: number) {
+    const t = Math.min(1, (now - startedAt) / durationMs);
+    const y = Math.round(start + distance * easeOutExpo(t));
+    window.scrollTo(0, y);
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      window.scrollTo(0, end);
+    }
+  }
+
+  requestAnimationFrame(frame);
+}

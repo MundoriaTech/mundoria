@@ -95,12 +95,19 @@
     @apply bg-background font-sans text-foreground antialiased;
   }
 
-  /* Keep form controls light even when the OS is in dark mode. */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]),
+  /* Keep form controls light even when the OS is in dark mode.
+     `.auth-inset-input` sits inside a chrome wrapper — keep it transparent. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]):not(.auth-inset-input),
   textarea,
   select {
     color-scheme: light;
     background-color: #ffffff;
+    color: #1c133b;
+  }
+
+  input.auth-inset-input {
+    color-scheme: light;
+    background-color: transparent;
     color: #1c133b;
   }
 
@@ -109,9 +116,9 @@
     color: #8b8798;
   }
 
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
+  input:not(.auth-inset-input):-webkit-autofill,
+  input:not(.auth-inset-input):-webkit-autofill:hover,
+  input:not(.auth-inset-input):-webkit-autofill:focus,
   textarea:-webkit-autofill,
   textarea:-webkit-autofill:hover,
   textarea:-webkit-autofill:focus,
@@ -121,6 +128,15 @@
     -webkit-text-fill-color: #1c133b;
     caret-color: #1c133b;
     box-shadow: 0 0 0 1000px #ffffff inset;
+    transition: background-color 99999s ease-out;
+  }
+
+  input.auth-inset-input:-webkit-autofill,
+  input.auth-inset-input:-webkit-autofill:hover,
+  input.auth-inset-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #1c133b;
+    caret-color: #1c133b;
+    box-shadow: 0 0 0 1000px #f6f5f8 inset;
     transition: background-color 99999s ease-out;
   }
 }

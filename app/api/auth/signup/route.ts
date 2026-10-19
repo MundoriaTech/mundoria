@@ -22,7 +22,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const { full_name, email, password, phone, role, referral_code } = parsed.data;
+  const {
+    full_name,
+    email,
+    password,
+    phone,
+    role,
+    referral_code,
+    marketing_opt_in,
+  } = parsed.data;
   const avatarUrl = role === "cleaner" ? pickDefaultAvatar(email).src : undefined;
   const admin = createAdminClient();
   const appUrl = resolveAppUrl(request);
@@ -39,7 +47,8 @@ export async function POST(request: Request) {
     user_metadata: {
       avatar_url: avatarUrl,
       full_name,
-      phone: phone?.trim() || null,
+      marketing_opt_in: Boolean(marketing_opt_in),
+      phone: phone.trim(),
       role,
     },
   });

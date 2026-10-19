@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
+import { AuthPhoneField } from "@/components/auth/auth-phone-field";
+import { AuthSignupLegal } from "@/components/auth/auth-signup-legal";
 import { FormField } from "@/components/auth/form-field";
 import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { FormStatus } from "@/components/auth/form-status";
@@ -21,9 +23,7 @@ import {
 import {
   nationalFromPhone,
   storedPhone,
-  UK_DIAL_CODE,
 } from "@/lib/auth/uk-phone";
-import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/auth";
 
 interface SignupResponse {
@@ -62,10 +62,16 @@ export function SignupForm({
       password: "",
       phone: "",
       referral_code: "",
+      marketing_opt_in: false,
       role,
     },
   });
   const passwordValue = useWatch({ control, name: "password", defaultValue: "" });
+  const marketingOptIn = useWatch({
+    control,
+    name: "marketing_opt_in",
+    defaultValue: false,
+  });
 
   function updateNationalNumber(value: string) {
     const national = nationalFromPhone(value)
@@ -155,11 +161,7 @@ export function SignupForm({
   return (
     <div className="space-y-6">
       <OAuthButton
-        label={
-          role === "cleaner"
-            ? "Continue with Google as a cleaner"
-            : "Continue with Google as a customer"
-        }
+        label="Continue with Google"
         next={
           role === "customer" && nextPath
             ? nextPath
@@ -175,7 +177,7 @@ export function SignupForm({
           <Input
             autoComplete="name"
             id="full_name"
-            placeholder="Alex Morgan"
+            placeholder=" "
             {...register("full_name")}
           />
         </FormField>
@@ -184,47 +186,26 @@ export function SignupForm({
           <Input
             autoComplete="email"
             id="email"
-            placeholder="alex@example.com"
+            placeholder=" "
             type="email"
             {...register("email")}
           />
         </FormField>
 
-        <FormField
+        <AuthPhoneField
           error={errors.phone}
-          htmlFor="phone-national"
-          label={role === "cleaner" ? "Phone number" : "Phone (optional)"}
-        >
-          <div className="flex gap-2">
-            <span
-              className={cn(
-                "inline-flex h-11 w-[4.5rem] shrink-0 items-center justify-center rounded-md border border-[#e8e8eb] bg-[#f7f6f8] text-sm font-semibold text-[#1c133b]",
-                errors.phone && "border-[#d4694a]",
-              )}
-            >
-              {UK_DIAL_CODE}
-            </span>
-            <Input
-              autoComplete="tel-national"
-              className="min-w-0 flex-1"
-              id="phone-national"
-              inputMode="tel"
-              onChange={(event) => updateNationalNumber(event.target.value)}
-              placeholder="7700 900000"
-              required={role === "cleaner"}
-              type="tel"
-              value={nationalNumber}
-            />
-          </div>
-          <input type="hidden" {...register("phone")} />
-        </FormField>
+          nationalNumber={nationalNumber}
+          onNationalNumberChange={updateNationalNumber}
+          required
+        />
+        <input type="hidden" {...register("phone")} />
 
         <div className="space-y-2">
           <FormField error={errors.password} htmlFor="password" label="Password">
             <PasswordInput
               autoComplete="new-password"
               id="password"
-              placeholder="Create a password"
+              placeholder=" "
               {...register("password")}
             />
           </FormField>
@@ -240,18 +221,23 @@ export function SignupForm({
             <Input
               autoComplete="off"
               id="referral_code"
-              placeholder="Friend’s code"
+              placeholder=" "
               {...register("referral_code")}
             />
           </FormField>
         ) : null}
 
+        <AuthSignupLegal
+          checked={Boolean(marketingOptIn)}
+          onCheckedChange={(checked) =>
+            setValue("marketing_opt_in", checked, { shouldDirty: true })
+          }
+        />
+
         <Button className="w-full" disabled={isSubmitting} type="submit">
           {isSubmitting
             ? "Creating account…"
-            : role === "cleaner"
-              ? "Create cleaner account"
-              : "Create customer account"}
+            : "Create account"}
         </Button>
       </form>
     </div>

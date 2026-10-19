@@ -1,36 +1,57 @@
 export type PasswordRequirementId =
-  | "length"
   | "capital"
+  | "small"
   | "number"
-  | "symbol";
+  | "symbol"
+  | "length";
 
 export type PasswordRequirement = {
   id: PasswordRequirementId;
+  /** Short example glyph, e.g. A, a, 123, #$%, 8+. */
+  glyph: string;
+  /** Short category label, e.g. Capital. */
   label: string;
+  /** Example-style copy for tips/status, e.g. "A capital". */
+  example: string;
   met: boolean;
 };
 
 export function passwordRequirements(password: string): PasswordRequirement[] {
   return [
     {
-      id: "length",
-      label: "At least 8 characters",
-      met: password.length >= 8 && password.length <= 72,
-    },
-    {
       id: "capital",
-      label: "One capital letter",
+      glyph: "A",
+      label: "Uppercase",
+      example: "an uppercase letter (A)",
       met: /[A-Z]/.test(password),
     },
     {
+      id: "small",
+      glyph: "a",
+      label: "Lowercase",
+      example: "a lowercase letter (a)",
+      met: /[a-z]/.test(password),
+    },
+    {
       id: "number",
-      label: "One number",
+      glyph: "123",
+      label: "Number",
+      example: "a number (123)",
       met: /\d/.test(password),
     },
     {
       id: "symbol",
-      label: "One symbol",
+      glyph: "#$%",
+      label: "Symbol",
+      example: "a symbol (#$%)",
       met: /[^A-Za-z0-9]/.test(password),
+    },
+    {
+      id: "length",
+      glyph: "8+",
+      label: "Characters",
+      example: "8+ characters",
+      met: password.length >= 8 && password.length <= 72,
     },
   ];
 }

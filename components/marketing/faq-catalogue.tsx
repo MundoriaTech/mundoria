@@ -1,0 +1,302 @@
+"use client";
+
+import { ArrowDown, ArrowUp, ChevronDown, Search, X } from "lucide-react";
+import Link from "next/link";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+
+import { FAQ_NAV_GROUPS } from "@/lib/seo/site-faq-catalogue";
+import {
+  faqItemAnchor,
+  SITE_FAQ_SECTIONS,
+  type SiteFaqSection,
+} from "@/lib/seo/site-faqs";
+import {
+  softScrollToBottom,
+  softScrollToTop,
+} from "@/lib/soft-scroll-to-top";
+
+function filterSections(query: string): SiteFaqSection[] {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return SITE_FAQ_SECTIONS;
+
+  const terms = normalized.split(/\s+/).filter(Boolean);
+
+  return SITE_FAQ_SECTIONS.map((section) => {
+    const items = section.items.filter((item) => {
+      const haystack = `${item.question} ${item.answer}`.toLowerCase();
+      return terms.every((term) => haystack.includes(term));
+    });
+    return { ...section, items };
+  }).filter((section) => section.items.length > 0);
+}
+
+function groupSections(sections: SiteFaqSection[]) {
+  const byId = new Map(sections.map((section) => [section.id, section]));
+
+  return FAQ_NAV_GROUPS.map((group) => ({
+    description: group.description,
+    id: group.id,
+    label: group.label,
+    sections: group.sectionIds
+      .map((id) => byId.get(id))
+      .filter((section): section is SiteFaqSection => Boolean(section)),
+  })).filter((group) => group.sections.length > 0);
+}
+
+function openFaqFromHash() {
+  const id = window.location.hash.replace(/^#/, "");
+  if (!id) return;
+
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (el instanceof HTMLDetailsElement) {
+    el.open = true;
+  }
+
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+export function FaqCatalogue() {
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
+  const sections = useMemo(
+    () => filterSections(deferredQuery),
+    [deferredQuery],
+  );
+  const jumpGroups = useMemo(() => groupSections(sections), [sections]);
+  const totalAnswers = sections.reduce(
+    (count, section) => count + section.items.length,
+    0,
+  );
+  const isFiltering = deferredQuery.trim().length > 0;
+  /** Narrow search results open so people see answers without an extra click. */
+  const autoOpenMatches =
+    isFiltering && totalAnswers > 0 && totalAnswers <= 8;
+
+  useEffect(() => {
+    openFaqFromHash();
+    window.addEventListener("hashchange", openFaqFromHash);
+    return () => window.removeEventListener("hashchange", openFaqFromHash);
+  }, [sections]);
+
+  return (
+    <>
+      <header className="mx-auto max-w-6xl px-4 pb-8 pt-4 sm:px-8 sm:pb-10 sm:pt-6 lg:px-12">
+        <h1 className="text-[2rem] font-semibold tracking-[-0.04em] text-[#1c133b] sm:text-[2.5rem]">
+          FAQ
+        </h1>
+        <p className="mt-2 max-w-xl text-pretty text-base leading-7 text-[#5a5470]">
+          Find answers about booking, cleaning, pricing and more.
+        </p>
+
+        <label className="relative mt-6 block max-w-xl">
+          <span className="sr-only">Search FAQs</span>
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8798]" />
+          <input
+            autoComplete="off"
+            className="h-12 w-full rounded-full border border-[#e4daf5] bg-white pl-11 pr-11 text-sm text-[#1c133b] shadow-[0_8px_24px_rgba(49,44,121,0.04)] outline-none transition placeholder:text-[#9a95a8] focus:border-[#1c133b]/35 focus:shadow-[0_10px_28px_rgba(49,44,121,0.08)]"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search questions…"
+            type="search"
+            value={query}
+          />
+          {query ? (
+            <button
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#8b8798] transition hover:bg-[#f3eef8] hover:text-[#1c133b]"
+              onClick={() => setQuery("")}
+              type="button"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
+        </label>
+
+        {isFiltering ? (
+          <p className="mt-3 text-sm text-[#8b8798]">
+            {totalAnswers === 0
+              ? "No matching answers."
+              : `${totalAnswers} ${totalAnswers === 1 ? "answer" : "answers"} across ${sections.length} ${sections.length === 1 ? "topic" : "topics"}`}
+          </p>
+        ) : null}
+      </header>
+
+      <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-12">
+        <div className="grid gap-14 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12">
+          <aside className="hidden lg:block">
+            <div className="sticky top-28 flex max-h-[calc(100vh-8rem)] flex-col pr-1">
+              <div className="mb-4 flex gap-2">
+                <button
+                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-[#e4daf5] bg-white text-[12px] font-semibold text-[#1c133b] transition hover:border-[#1c133b]/25 hover:bg-[#faf8ff]"
+                  onClick={() => softScrollToTop()}
+                  type="button"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                  Top
+                </button>
+                <button
+                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-[#e4daf5] bg-white text-[12px] font-semibold text-[#1c133b] transition hover:border-[#1c133b]/25 hover:bg-[#faf8ff]"
+                  onClick={() => softScrollToBottom()}
+                  type="button"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                  Bottom
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8b8798]">
+                  Jump to
+                </p>
+                {jumpGroups.length > 0 ? (
+                  <nav aria-label="On this page" className="mt-4 space-y-5">
+                    {jumpGroups.map((group) => (
+                      <div key={group.id}>
+                        <p className="px-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c79c66]">
+                          {group.label}
+                        </p>
+                        <div className="mt-1.5 space-y-0.5">
+                          {group.sections.map((section) => (
+                            <a
+                              className="block rounded-lg px-2.5 py-1.5 text-[13px] font-medium leading-snug text-[#5a5470] transition hover:bg-white hover:text-[#1c133b]"
+                              href={`#${section.id}`}
+                              key={section.id}
+                            >
+                              {section.title}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </nav>
+                ) : (
+                  <p className="mt-4 text-sm leading-6 text-[#8b8798]">
+                    No topics match this search.
+                  </p>
+                )}
+              </div>
+            </div>
+          </aside>
+
+          <div className="min-w-0 space-y-16">
+            {sections.map((section) => (
+              <section
+                className="scroll-mt-32"
+                id={section.id}
+                key={section.id}
+              >
+                <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#1c133b]/10 pb-4">
+                  <div>
+                    <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                      {section.title}
+                    </h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+                      {section.description}
+                    </p>
+                  </div>
+                  <p className="text-xs font-medium tabular-nums text-[#8b8798]">
+                    {section.items.length}{" "}
+                    {section.items.length === 1 ? "answer" : "answers"}
+                  </p>
+                </div>
+
+                <div className="mt-5 space-y-2.5">
+                  {section.items.map((item) => {
+                    const anchor = faqItemAnchor(section.id, item.question);
+                    return (
+                      <details
+                        className="group scroll-mt-32 rounded-[1.25rem] border border-[#e4daf5]/90 bg-white/95 shadow-[0_8px_22px_rgba(49,44,121,0.04)] open:shadow-[0_10px_28px_rgba(49,44,121,0.07)]"
+                        defaultOpen={autoOpenMatches}
+                        id={anchor}
+                        key={`${anchor}-${autoOpenMatches ? deferredQuery : "browse"}`}
+                      >
+                        <summary className="cursor-pointer list-none px-5 py-4 marker:content-none sm:px-6 [&::-webkit-details-marker]:hidden">
+                          <span className="flex items-start justify-between gap-3">
+                            <h3 className="text-[15px] font-semibold leading-snug text-[#1c133b] sm:text-base">
+                              {item.question}
+                            </h3>
+                            <ChevronDown
+                              aria-hidden
+                              className="mt-0.5 h-4 w-4 shrink-0 text-[#8b8798] transition group-open:rotate-180 group-open:text-[#6a45b8]"
+                            />
+                          </span>
+                        </summary>
+                        <div className="border-t border-[#e4daf5]/70 px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
+                          <p className="whitespace-pre-line text-sm leading-6 text-[#5a5470] sm:text-[15px] sm:leading-7">
+                            {item.answer}
+                          </p>
+                        </div>
+                      </details>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+
+            {sections.length === 0 ? (
+              <div className="rounded-[1.35rem] border border-dashed border-[#e4daf5] bg-white/60 px-6 py-10 text-center">
+                <p className="text-base font-semibold text-[#1c133b]">
+                  No answers match “{deferredQuery.trim()}”
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+                  Try a shorter phrase, or clear the search to browse all topics.
+                </p>
+                <button
+                  className="mt-5 inline-flex h-10 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#15102e]"
+                  onClick={() => setQuery("")}
+                  type="button"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : null}
+
+            <section className="rounded-[1.5rem] bg-[#1c133b] px-6 py-8 text-white sm:px-8 sm:py-10">
+              <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] sm:text-2xl">
+                Still looking for something?
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-white/75 sm:text-[15px] sm:leading-7">
+                The Help Centre has longer guides, or you can chat with the
+                Mundoria team.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f3eef8]"
+                  href="/help"
+                >
+                  Help Centre
+                </Link>
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 px-6 text-sm font-semibold text-white transition hover:border-white/50"
+                  href="/contact"
+                >
+                  Contact us
+                </Link>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <div className="fixed bottom-6 left-4 z-40 flex flex-col gap-2 sm:bottom-8 sm:left-6 lg:hidden">
+        <button
+          aria-label="Scroll to top"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e4daf5] bg-white text-[#1c133b] shadow-[0_10px_28px_rgba(49,44,121,0.12)] transition hover:bg-[#faf8ff]"
+          onClick={() => softScrollToTop()}
+          type="button"
+        >
+          <ArrowUp className="h-4 w-4" />
+        </button>
+        <button
+          aria-label="Scroll to bottom"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e4daf5] bg-white text-[#1c133b] shadow-[0_10px_28px_rgba(49,44,121,0.12)] transition hover:bg-[#faf8ff]"
+          onClick={() => softScrollToBottom()}
+          type="button"
+        >
+          <ArrowDown className="h-4 w-4" />
+        </button>
+      </div>
+    </>
+  );
+}

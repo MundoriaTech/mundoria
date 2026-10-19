@@ -6,7 +6,6 @@ import {
   SERVICE_CATEGORIES,
 } from "@/lib/customer/services";
 import type { BookingEntryLock } from "@/lib/customer/booking-flow";
-import { frequencyModeFor } from "@/lib/customer/booking-flow";
 import {
   type HistoryRatingMood,
   type HistoryVisit,
@@ -61,17 +60,17 @@ function draftFromSearchParams(searchParams: {
   if (!category && !service) return undefined;
 
   const serviceTypeValue = service?.value ?? null;
-  const mode = frequencyModeFor(serviceTypeValue);
 
   return {
     cleaningStandard: serviceTypeValue
       ? normalizeStandard(serviceTypeValue, recommendedStandardFor(serviceTypeValue))
       : null,
-    isRecurring: mode === "required_recurring",
+    frequencyChosen: false,
+    isRecurring: false,
     preferSameCleaner: false,
     preferredCleanerId: null,
     rebookCleanerChoice: null,
-    recurrencePattern: mode === "required_recurring" ? "weekly" : null,
+    recurrencePattern: null,
     scheduledDate:
       rawService === "same_day"
         ? new Date().toISOString().slice(0, 10)

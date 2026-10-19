@@ -123,7 +123,7 @@ export function ServiceCategoryMarketingPage({
                 ))}
               </ul>
               <Link
-                className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 sm:mt-8"
+                className="mt-6 hidden h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 md:inline-flex sm:mt-8"
                 href={bookingHref}
               >
                 {bookCta}
@@ -149,7 +149,7 @@ export function ServiceCategoryMarketingPage({
       {showFaqs ? (
         <MarketingFaqColumnsSection
           footer={
-            <div className="flex justify-center">
+            <div className="hidden justify-center md:flex">
               <Link
                 className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90"
                 href={bookingHref}

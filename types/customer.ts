@@ -283,6 +283,8 @@ export interface BookingDraft {
   /** Office cleaning spaces (commercial → office). */
   officeSpaces: OfficeSpaceDraft[];
   isRecurring: boolean;
+  /** True only after the customer picks a frequency option (not a default). */
+  frequencyChosen: boolean;
   recurrencePattern: "weekly" | "fortnightly" | "monthly" | "custom" | null;
   preferSameCleaner: boolean;
   /** When rebooking: keep this cleaner preferred for matching, if available. */

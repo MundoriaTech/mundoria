@@ -35,6 +35,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
           </span>
         </>
       }
+      showSiteFooter
       title="Create your customer account"
     >
       <SignupForm redirectTo={searchParams.redirectTo} role="customer" />

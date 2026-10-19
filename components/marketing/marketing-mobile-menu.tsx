@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import { landingCategoryNav } from "@/components/marketing/landing/constants";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { magThemeFor } from "@/lib/content/mag-theme";
+import type { FaqNavMenu } from "@/lib/seo/site-faqs";
 import { cn } from "@/lib/utils";
 
 export type MagMobileTopic = {
@@ -15,7 +16,7 @@ export type MagMobileTopic = {
   label: string;
 };
 
-type Panel = "main" | "mag" | `cat:${string}`;
+type Panel = "main" | "mag" | `cat:${string}` | `faq:${string}`;
 
 function categoryBookHref(customerHref: string, category: string) {
   if (!customerHref.startsWith("/booking")) return customerHref;
@@ -31,6 +32,7 @@ const ROW_CLASS =
 /** WeCasa-style left off-canvas drawer: Services → My account → About us. */
 export function MarketingMobileMenuSheet({
   customerHref,
+  faqNav,
   loginHref = "/login",
   magTopics,
   mobileOpen,
@@ -42,12 +44,13 @@ export function MarketingMobileMenuSheet({
 }: {
   accountHref?: string;
   customerHref: string;
+  faqNav?: FaqNavMenu[];
   loginHref?: string;
   magTopics?: MagMobileTopic[];
   mobileOpen: boolean;
   onClose: () => void;
   showForCleanersCta?: boolean;
-  variant?: "marketing" | "mag";
+  variant?: "marketing" | "mag" | "faq";
   viewerDashboard?: boolean;
 }) {
   const [panel, setPanel] = useState<Panel>("main");
@@ -59,11 +62,21 @@ export function MarketingMobileMenuSheet({
           (menu) => menu.label === panel.slice(4),
         ) ?? null)
       : null;
+  const activeFaqSection =
+    panel.startsWith("faq:") && faqNav
+      ? (faqNav.find((menu) => menu.id === panel.slice(4)) ?? null)
+      : null;
   const hasMagTopics = Boolean(magTopics?.length);
   const onDrill =
     panel !== "main"
       ? () => {
-          if (panel.startsWith("cat:") || panel === "mag") setPanel("main");
+          if (
+            panel.startsWith("cat:") ||
+            panel.startsWith("faq:") ||
+            panel === "mag"
+          ) {
+            setPanel("main");
+          }
         }
       : null;
 
@@ -192,6 +205,39 @@ export function MarketingMobileMenuSheet({
                     </li>
                   </ul>
                 </section>
+              ) : variant === "faq" && faqNav?.length ? (
+                <section className="pb-6">
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                    FAQ topics
+                  </h2>
+                  <ul className="mt-1">
+                    {faqNav.map((menu) => (
+                      <li key={menu.id}>
+                        <button
+                          className={ROW_CLASS}
+                          onClick={() => setPanel(`faq:${menu.id}`)}
+                          type="button"
+                        >
+                          <span>{menu.label}</span>
+                          <ChevronRight
+                            aria-hidden
+                            className="size-4 shrink-0 text-[#5b6cff]"
+                            strokeWidth={2.25}
+                          />
+                        </button>
+                      </li>
+                    ))}
+                    <li>
+                      <Link
+                        className={LINK_CLASS}
+                        href="/help"
+                        onClick={onClose}
+                      >
+                        Help Centre
+                      </Link>
+                    </li>
+                  </ul>
+                </section>
               ) : (
                 <section className="pb-6">
                   <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
@@ -300,9 +346,11 @@ export function MarketingMobileMenuSheet({
               aria-label={
                 panel === "mag"
                   ? "Mag topics"
-                  : activeCategory
-                    ? `${activeCategory.label} services`
-                    : "Services"
+                  : activeFaqSection
+                    ? activeFaqSection.label
+                    : activeCategory
+                      ? `${activeCategory.label} services`
+                      : "Services"
               }
               className="flex h-full w-1/2 flex-col overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]"
             >
@@ -354,6 +402,39 @@ export function MarketingMobileMenuSheet({
                       onClick={onClose}
                     >
                       All stories
+                    </Link>
+                  </div>
+                </>
+              ) : activeFaqSection ? (
+                <>
+                  <div className="px-6 pb-3">
+                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                      {activeFaqSection.label}
+                    </h2>
+                    <p className="mt-1 text-[13px] leading-5 text-[#1c133b]/55">
+                      {activeFaqSection.description}
+                    </p>
+                  </div>
+                  <ul className="flex-1 px-6">
+                    {activeFaqSection.items.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          className="block border-b border-[#1c133b]/08 py-3.5 text-[15px] font-medium leading-snug text-[#1c133b] touch-manipulation"
+                          href={item.href}
+                          onClick={onClose}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-auto px-6 pt-4">
+                    <Link
+                      className={LINK_CLASS}
+                      href={activeFaqSection.href}
+                      onClick={onClose}
+                    >
+                      View all in this section
                     </Link>
                   </div>
                 </>

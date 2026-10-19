@@ -302,7 +302,7 @@ export function AddressForm({
           address_line_2: address.address_line_2 ?? "",
           city: address.city,
           is_default: address.is_default,
-          label: address.label ?? "Home",
+          label: localOnly ? "" : (address.label ?? "Home"),
           latitude: address.latitude,
           longitude: address.longitude,
           num_bathrooms: address.num_bathrooms ?? 1,
@@ -312,7 +312,9 @@ export function AddressForm({
           property_type: address.property_type ?? "flat",
           special_requirements: address.special_requirements ?? "",
         }
-      : emptyAddress,
+      : localOnly
+        ? { ...emptyAddress, label: "" }
+        : emptyAddress,
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -518,12 +520,13 @@ export function AddressForm({
         ) : null}
       </div>
 
-      {bare ? null : (
+      {/* Tags + saving to account only apply when signed in. */}
+      {!bare && !localOnly ? (
         <AddressTagField
           onChange={(label) => update("label", label)}
           value={values.label}
         />
-      )}
+      ) : null}
 
       {showAccountExtras ? (
         <>
@@ -537,9 +540,10 @@ export function AddressForm({
         Make this my default address
       </label>
           <Button
-            className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
+            className="h-11 rounded-full border border-[#1c133b] bg-white px-5 font-semibold text-[#1c133b] hover:bg-[#f8f5ff]"
             disabled={saving}
             type="submit"
+            variant="outline"
           >
             {saving ? (
               "Saving…"
@@ -566,9 +570,10 @@ export function AddressForm({
 
       {!localOnly && compact ? (
         <Button
-          className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
+          className="h-11 rounded-full border border-[#1c133b] bg-white px-5 font-semibold text-[#1c133b] hover:bg-[#f8f5ff]"
           disabled={saving}
           type="submit"
+          variant="outline"
         >
           {saving ? (
             "Saving…"
@@ -827,7 +832,8 @@ function AddressTagField({
           </button>
         ))}
         <button
-          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+          aria-label="Add custom tag"
+          className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
             custom
               ? "border-[#1c133b] bg-[#1c133b] text-white"
               : "border-transparent bg-[#efe9df] text-[#5a5470] hover:bg-[#e8e0d0]"
@@ -838,7 +844,7 @@ function AddressTagField({
           }}
           type="button"
         >
-          Other
+          <Plus aria-hidden className="h-4 w-4" strokeWidth={2.5} />
         </button>
       </div>
       {custom ? (
