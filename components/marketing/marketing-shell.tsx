@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { LandingFooter } from "@/components/marketing/landing/landing-footer";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
+import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { SupportMessengerWidget } from "@/components/support/support-messenger";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,11 @@ export async function MarketingShell({
         viewer={null}
       />
       {children}
+      <LocationStickyBookBar
+        bookingHref={bookingHref}
+        label="Book my cleaning"
+        secondary="Free quote — no commitment"
+      />
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
       <SupportMessengerWidget />
     </main>

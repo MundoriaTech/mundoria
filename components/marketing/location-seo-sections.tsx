@@ -3,7 +3,6 @@ import Link from "next/link";
 import { FeaturedCleanerCards } from "@/components/marketing/featured-cleaner-cards";
 import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
 import { BrandedSection } from "@/components/marketing/branded-page-sections";
-import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { directoryReviewsToLandingReviews } from "@/lib/marketing/location-review-display";
 import type { DirectoryReview } from "@/lib/seo/birmingham-directory";
 import {
@@ -352,7 +351,6 @@ export function LocationFeaturedCleaners({
         </p>
         <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
       </BrandedSection>
-      <LocationStickyBookBar bookingHref={bookingHref} />
     </>
   );
 }

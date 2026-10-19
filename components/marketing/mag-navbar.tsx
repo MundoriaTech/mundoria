@@ -11,6 +11,7 @@ import {
 } from "@/components/marketing/landing/nav-metrics";
 import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-scroll-hide";
 import { HideForCleaners } from "@/components/marketing/hide-for-cleaners";
+import { MarketingMobileMenuSheet } from "@/components/marketing/marketing-mobile-menu";
 import { magThemeFor } from "@/lib/content/mag-theme";
 import { cn } from "@/lib/utils";
 
@@ -182,29 +183,6 @@ export function MagNavbar({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const hidden = useLandingNavScrollHide(mobileOpen);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setMobileOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", onKey);
-    panelRef.current?.focus();
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [mobileOpen]);
 
   return (
     <header
@@ -284,69 +262,19 @@ export function MagNavbar({
         </div>
       </div>
 
-      {mobileOpen ? (
-        <div className="pointer-events-auto fixed inset-0 z-[70] lg:hidden">
-          <button
-            aria-label="Close menu"
-            className="absolute inset-0 bg-black/35"
-            onClick={() => setMobileOpen(false)}
-            type="button"
-          />
-          <div
-            className="absolute inset-x-4 top-[calc(var(--landing-nav-pill-h)+max(1.25rem,env(safe-area-inset-top,0px)+0.5rem)+0.35rem)] max-h-[min(70dvh,28rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#1c133b]/08 bg-white p-4 shadow-[0_24px_60px_rgba(28,19,59,0.22)] outline-none sm:inset-x-8"
-            ref={panelRef}
-            tabIndex={-1}
-          >
-            <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4694a]">
-              Topics
-            </p>
-            <ul className="mt-2 grid gap-1">
-              {categories.map((category) => {
-                const theme = magThemeFor(category.label);
-                return (
-                  <li key={category.href}>
-                    <Link
-                      className="flex min-h-11 items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-semibold text-[#1c133b] touch-manipulation"
-                      href={category.href}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <span
-                        aria-hidden
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: theme.accent }}
-                      />
-                      {category.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="mt-3 border-t border-[#eadfce]/80 pt-2">
-              <Link
-                className="flex min-h-11 items-center px-2 text-sm font-semibold text-[#6a45b8] touch-manipulation"
-                href="/blog"
-                onClick={() => setMobileOpen(false)}
-              >
-                All stories
-              </Link>
-              <Link
-                className="flex min-h-11 items-center px-2 text-sm font-semibold text-[#6a45b8] touch-manipulation"
-                href="/help"
-                onClick={() => setMobileOpen(false)}
-              >
-                Help Centre
-              </Link>
-              <Link
-                className="flex min-h-11 items-center px-2 text-sm font-semibold text-[#6a45b8] touch-manipulation"
-                href="/"
-                onClick={() => setMobileOpen(false)}
-              >
-                Home
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <div className="pointer-events-auto lg:hidden">
+        <MarketingMobileMenuSheet
+          customerHref={bookingHref}
+          magTopics={categories.map((category) => ({
+            href: category.href,
+            label: category.label,
+          }))}
+          mobileOpen={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          showForCleanersCta={false}
+          variant="mag"
+        />
+      </div>
     </header>
   );
 }

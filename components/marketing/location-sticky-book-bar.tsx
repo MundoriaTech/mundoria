@@ -6,7 +6,16 @@ import { createPortal } from "react-dom";
 
 const MOBILE_MAX = "(max-width: 767px)";
 
-export function LocationStickyBookBar({ bookingHref }: { bookingHref: string }) {
+/** Mobile sticky book CTA — WeCasa-style primary + secondary line. */
+export function LocationStickyBookBar({
+  bookingHref,
+  label = "Book a clean",
+  secondary = "Free quote — no commitment",
+}: {
+  bookingHref: string;
+  label?: string;
+  secondary?: string;
+}) {
   const [mounted, setMounted] = useState(false);
   const [mobile, setMobile] = useState(false);
 
@@ -33,7 +42,7 @@ export function LocationStickyBookBar({ bookingHref }: { bookingHref: string }) 
   return (
     <>
       {/* In-flow spacer so content isn’t hidden under the bar. */}
-      <div aria-hidden className="h-20 md:hidden" />
+      <div aria-hidden className="h-[5.5rem] md:hidden" />
       {mounted && mobile
         ? createPortal(
             <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 print:hidden">
@@ -43,8 +52,13 @@ export function LocationStickyBookBar({ bookingHref }: { bookingHref: string }) 
                     className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#1c133b] text-sm font-semibold text-white transition hover:bg-[#1c133b]/90"
                     href={bookingHref}
                   >
-                    Book a clean
+                    {label}
                   </Link>
+                  {secondary ? (
+                    <p className="mt-2 text-center text-[12px] font-medium text-[#1c133b]/55">
+                      {secondary}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>,

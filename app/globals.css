@@ -290,7 +290,7 @@
 /* Lift the help FAB when the mobile sticky Book bar is present. */
 @media (max-width: 767px) {
   html[data-sticky-book] .support-messenger-dock {
-    bottom: 5.5rem;
+    bottom: 6.75rem;
   }
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
@@ -11,9 +11,9 @@ import {
   LANDING_NAV_TOP,
 } from "@/components/marketing/landing/nav-metrics";
 import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-scroll-hide";
+import { MarketingMobileMenuSheet } from "@/components/marketing/marketing-mobile-menu";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { Button } from "@/components/ui/button";
 import {
   landingCategoryNav,
   landingNavLinks,
@@ -383,46 +383,6 @@ function MobileNav({
   onMobileOpenChange: (open: boolean) => void;
   showForCleanersCta: boolean;
 }) {
-  const [panel, setPanel] = useState<"main" | string>("main");
-  const panelRef = useRef<HTMLDivElement>(null);
-  const activeCategory =
-    panel === "main"
-      ? null
-      : (landingCategoryNav.find((menu) => menu.label === panel) ?? null);
-
-  useEffect(() => {
-    if (!mobileOpen) {
-      setPanel("main");
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        if (panel !== "main") {
-          setPanel("main");
-          return;
-        }
-        onMobileOpenChange(false);
-      }
-    }
-
-    document.addEventListener("keydown", onKey);
-    panelRef.current?.focus();
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [mobileOpen, onMobileOpenChange, panel]);
-
-  function closeMenu() {
-    onMobileOpenChange(false);
-  }
-
   return (
     <div className="flex items-center gap-1.5 lg:hidden">
       {viewer ? <NotificationBell userId={viewer.id} /> : null}
@@ -462,193 +422,15 @@ function MobileNav({
         )}
       </button>
 
-      {mobileOpen ? (
-        <div className="fixed inset-0 z-[70]">
-          <button
-            aria-label="Close menu"
-            className="absolute inset-0 bg-[#1c133b]/45"
-            onClick={closeMenu}
-            type="button"
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 top-[calc(var(--landing-nav-pill-h)+max(1.1rem,env(safe-area-inset-top,0px)+0.35rem))] flex outline-none sm:inset-x-6 sm:bottom-6 sm:top-[calc(var(--landing-nav-pill-h)+max(1.25rem,env(safe-area-inset-top,0px)+0.5rem)+0.35rem)]"
-            ref={panelRef}
-            tabIndex={-1}
-          >
-            <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-[1.5rem] bg-white shadow-[0_-12px_48px_rgba(28,19,59,0.2)] sm:rounded-[1.5rem] sm:shadow-[0_24px_60px_rgba(28,19,59,0.22)]">
-              <div
-                className={cn(
-                  "flex h-full w-[200%] transition-transform duration-300 ease-out motion-reduce:transition-none",
-                  activeCategory ? "-translate-x-1/2" : "translate-x-0",
-                )}
-              >
-                {/* Main services panel */}
-                <nav
-                  aria-hidden={Boolean(activeCategory)}
-                  aria-label="Mobile navigation"
-                  className="flex h-full w-1/2 flex-col overflow-y-auto overscroll-contain"
-                >
-                  <div className="border-b border-[#1c133b]/08 px-5 py-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#823fb2]">
-                      Services
-                    </p>
-                  </div>
-                  <ul className="flex-1">
-                    {landingCategoryNav.map((menu) => (
-                      <li
-                        className="border-b border-[#1c133b]/06"
-                        key={menu.label}
-                      >
-                        <button
-                          className="flex min-h-14 w-full items-center justify-between gap-3 px-5 py-3.5 text-left touch-manipulation"
-                          onClick={() => setPanel(menu.label)}
-                          type="button"
-                        >
-                          <span>
-                            <span className="block text-[15px] font-semibold text-[#1c133b]">
-                              {menu.label}
-                            </span>
-                            <span className="mt-0.5 block text-[12px] font-normal text-[#1c133b]/55">
-                              {menu.description}
-                            </span>
-                          </span>
-                          <ChevronRight
-                            aria-hidden
-                            className="size-5 shrink-0 text-[#1c133b]/45"
-                          />
-                        </button>
-                      </li>
-                    ))}
-                    {landingNavLinks.map(([label, href]) => (
-                      <li
-                        className="border-b border-[#1c133b]/06"
-                        key={label}
-                      >
-                        {href.startsWith("mailto:") ? (
-                          <a
-                            className="flex min-h-14 items-center px-5 py-3.5 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
-                            href={href}
-                            onClick={closeMenu}
-                          >
-                            {label}
-                          </a>
-                        ) : (
-                          <Link
-                            className="flex min-h-14 items-center px-5 py-3.5 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
-                            href={href}
-                            onClick={closeMenu}
-                          >
-                            {label}
-                          </Link>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-auto grid gap-2 border-t border-[#1c133b]/08 bg-[#f8f4ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                    {viewer ? (
-                      <Button
-                        asChild
-                        className="h-11 rounded-full text-sm font-semibold"
-                        variant="outline"
-                      >
-                        <Link href={accountHref} onClick={closeMenu}>
-                          Dashboard
-                        </Link>
-                      </Button>
-                    ) : null}
-                    {showForCleanersCta ? (
-                      <Button
-                        asChild
-                        className="h-11 rounded-full bg-[#1c133b] text-sm font-semibold text-white hover:bg-[#1c133b]/90"
-                      >
-                        <Link href="/for-cleaners" onClick={closeMenu}>
-                          For cleaners
-                        </Link>
-                      </Button>
-                    ) : null}
-                  </div>
-                </nav>
-
-                {/* Category drill-down panel */}
-                <nav
-                  aria-hidden={!activeCategory}
-                  aria-label={
-                    activeCategory
-                      ? `${activeCategory.label} services`
-                      : "Category services"
-                  }
-                  className="flex h-full w-1/2 flex-col overflow-y-auto overscroll-contain"
-                >
-                  {activeCategory ? (
-                    <>
-                      <div className="sticky top-0 z-10 border-b border-[#1c133b]/08 bg-white px-2 py-2">
-                        <button
-                          className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
-                          onClick={() => setPanel("main")}
-                          type="button"
-                        >
-                          <ChevronLeft aria-hidden className="size-5" />
-                          Back
-                        </button>
-                      </div>
-                      <div className="px-5 pb-3 pt-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#823fb2]">
-                          {activeCategory.label}
-                        </p>
-                        <p className="mt-2 text-[15px] font-semibold leading-snug text-[#1c133b]">
-                          {activeCategory.description}
-                        </p>
-                        <Link
-                          className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#312c79] px-3 text-sm font-semibold text-white touch-manipulation"
-                          href={categoryBookHref(
-                            customerHref,
-                            activeCategory.bookCategory,
-                          )}
-                          onClick={closeMenu}
-                        >
-                          {activeCategory.bookLabel}
-                        </Link>
-                      </div>
-                      <div className="px-5 pb-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
-                          Services
-                        </p>
-                      </div>
-                      <ul className="flex-1 pb-2">
-                        {activeCategory.items.map((item) => (
-                          <li key={item.href}>
-                            <Link
-                              className="block border-b border-[#1c133b]/06 px-5 py-3.5 touch-manipulation"
-                              href={item.href}
-                              onClick={closeMenu}
-                            >
-                              <span className="block text-[15px] font-semibold text-[#1c133b]">
-                                {item.label}
-                              </span>
-                              <span className="mt-0.5 block text-[12px] font-normal text-[#1c133b]/55">
-                                {item.description}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="mt-auto border-t border-[#1c133b]/08 bg-[#f8f4ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                        <Link
-                          className="inline-flex h-11 w-full items-center justify-center rounded-full bg-white px-3 text-sm font-semibold text-[#312c79] ring-1 ring-[#1c133b]/10 touch-manipulation"
-                          href={activeCategory.href}
-                          onClick={closeMenu}
-                        >
-                          {activeCategory.pageLabel}
-                        </Link>
-                      </div>
-                    </>
-                  ) : null}
-                </nav>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <MarketingMobileMenuSheet
+        accountHref={accountHref}
+        customerHref={customerHref}
+        mobileOpen={mobileOpen}
+        onClose={() => onMobileOpenChange(false)}
+        showForCleanersCta={showForCleanersCta}
+        variant="marketing"
+        viewerDashboard={Boolean(viewer)}
+      />
     </div>
   );
 }
