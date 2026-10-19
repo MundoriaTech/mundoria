@@ -2241,8 +2241,20 @@ function AddressStep({
         </span>
       </p>
 
+      {showForm || (localOnly && !guestAsAddress) ? (
+        <div className="relative z-20 mt-8 overflow-visible rounded-2xl border-2 border-transparent bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:p-5">
+          <AddressForm
+            address={localOnly ? guestAsAddress : null}
+            compact
+            localOnly={localOnly}
+            onSaved={onSaved}
+            userId={userId ?? undefined}
+          />
+        </div>
+      ) : null}
+
       {guestAsAddress && localOnly ? (
-        <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
+        <div className="mt-6 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
           <div className="flex gap-3">
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
             <div className="min-w-0">
@@ -2259,7 +2271,7 @@ function AddressStep({
       ) : null}
 
       {!localOnly && addresses.length > 0 ? (
-        <div className="mt-8 grid gap-3">
+        <div className="mt-6 grid gap-3">
           {addresses.map((address) => {
             const active = selectedId === address.id;
             return (
@@ -2290,7 +2302,7 @@ function AddressStep({
       ) : null}
 
       {selected && !localOnly && addresses.length === 0 ? (
-        <div className="mt-8 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
+        <div className="mt-6 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
           <div className="flex gap-3">
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
             <div className="min-w-0">
@@ -2321,18 +2333,6 @@ function AddressStep({
         >
           Edit address
         </button>
-      ) : null}
-
-      {showForm || (localOnly && !guestAsAddress) ? (
-        <div className="relative z-20 mt-4 overflow-visible rounded-2xl border-2 border-transparent bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:mt-5 sm:p-5">
-          <AddressForm
-            address={localOnly ? guestAsAddress : null}
-            compact
-            localOnly={localOnly}
-            onSaved={onSaved}
-            userId={userId ?? undefined}
-          />
-        </div>
       ) : null}
 
       {proName ? (
@@ -3315,7 +3315,7 @@ function TimeStep({
           <span className="inline-flex items-center gap-2">
             <span
               aria-hidden
-              className="h-3 w-3 rounded-sm bg-[#ff5274]"
+              className="h-3 w-3 rounded-sm bg-[#c79c66]"
             />
             Preferred time
           </span>

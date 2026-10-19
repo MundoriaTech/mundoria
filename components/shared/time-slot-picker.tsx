@@ -113,7 +113,7 @@ export function TimeSlotPicker({
             className={cn(
               "flex min-h-12 flex-col items-center justify-center rounded-xl bg-[#f3f3f5] px-1.5 py-2 text-sm text-[#1c133b] transition-colors touch-manipulation sm:px-2",
               isPreferred &&
-                "border-2 border-transparent bg-[#ff5274] font-semibold text-white",
+                "border-2 border-transparent bg-[#c79c66] font-semibold text-white",
               isAlternate &&
                 "border-2 border-transparent bg-[#6a45b8] font-semibold text-white",
               !selected && enabled && "hover:bg-[#ececef]",

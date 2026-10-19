@@ -14,7 +14,7 @@ type BasketProps = {
   addOns: { amount: number; hourly?: boolean; label: string }[];
   address: Address | null;
   alternateTimes?: string[];
-  /** @deprecated Prefer hourlyRatePence for booking-flow display. */
+  /** Visit total in pence (labour + add-ons) shown on the Cleaning row. */
   amount: number | null;
   bathrooms: number | null;
   bedrooms: number | null;
@@ -22,6 +22,7 @@ type BasketProps = {
   durationHours: number | null;
   frequencyLabel: string | null;
   hasPets?: boolean | null;
+  /** Optional; no longer shown on the Cleaning row (kept for callers). */
   hourlyRatePence?: number | null;
   onJumpAddress?: () => void;
   onJumpSchedule?: () => void;
@@ -169,7 +170,7 @@ function BasketPanel({
   frequencyLabel,
   hasPets = null,
   headerTitle = "My basket",
-  hourlyRatePence = null,
+  hourlyRatePence: _hourlyRatePence = null,
   onJumpAddress,
   onJumpSchedule,
   onJumpService,
@@ -266,13 +267,8 @@ function BasketPanel({
     });
   }
 
-  const rateValue =
-    hourlyRatePence != null
-      ? formatHourlyRate(hourlyRatePence)
-      : amount != null
-        ? formatMoney(amount)
-        : null;
-  const rateLabel = rateValue;
+  /** Cleaning header shows visit total (labour + add-ons), not the hourly rate. */
+  const cleaningTotalLabel = amount != null ? formatMoney(amount) : null;
 
   const scheduleTitle =
     scheduleDates.length > 1
@@ -310,12 +306,12 @@ function BasketPanel({
       </BasketSection>
 
       <BasketSection
-        filled={serviceFilled || hourlyRatePence != null}
+        filled={serviceFilled || amount != null}
         icon={<ShoppingCart className="h-5 w-5" weight="fill" />}
         onEdit={serviceFilled ? onJumpService : undefined}
         onToggle={() => setOpen((c) => ({ ...c, service: !c.service }))}
         open={open.service}
-        right={rateLabel ?? undefined}
+        right={cleaningTotalLabel ?? undefined}
         title="Cleaning"
       >
         {serviceLines.length ? (

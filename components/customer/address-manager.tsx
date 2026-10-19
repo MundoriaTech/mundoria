@@ -793,7 +793,7 @@ function AddressAutocompleteInput({
   );
 }
 
-const ADDRESS_TAGS = ["Home", "Work", "Mum's home", "Dad's home"] as const;
+const ADDRESS_TAGS = ["Home", "Work"] as const;
 
 function AddressTagField({
   onChange,
@@ -844,7 +844,7 @@ function AddressTagField({
       {custom ? (
         <Input
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Dad's home"
+          placeholder="e.g. Parents"
           value={value}
         />
       ) : null}
