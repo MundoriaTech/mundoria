@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { landingCategoryNav } from "@/components/marketing/landing/constants";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ export function MarketingMobileMenuSheet({
   viewerDashboard?: boolean;
 }) {
   const [panel, setPanel] = useState<Panel>("main");
+  const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const depth = panelIndex(panel);
   const activeCategory =
@@ -56,6 +58,10 @@ export function MarketingMobileMenuSheet({
         ) ?? null)
       : null;
   const hasMagTopics = Boolean(magTopics?.length);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -89,9 +95,9 @@ export function MarketingMobileMenuSheet({
     };
   }, [mobileOpen, onClose, panel]);
 
-  if (!mobileOpen) return null;
+  if (!mobileOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[70]">
       <button
         aria-label="Close menu"
@@ -310,9 +316,6 @@ export function MarketingMobileMenuSheet({
                     >
                       Book my cleaning
                     </Link>
-                    <p className="mt-2 text-center text-[12px] font-medium text-[#1c133b]/50">
-                      Free quote — no commitment
-                    </p>
                   </div>
                   <div className="px-5 pb-2">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
@@ -438,6 +441,7 @@ export function MarketingMobileMenuSheet({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -5,7 +5,6 @@ import {
   MagNavbar,
   type MagNavCategory,
 } from "@/components/marketing/mag-navbar";
-import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { SupportMessengerWidget } from "@/components/support/support-messenger";
 import {
   BLOG_CATEGORIES,
@@ -49,11 +48,6 @@ export async function MagShell({
     >
       <MagNavbar bookingHref={bookingHref} categories={categories} />
       <main className="flex-1">{children}</main>
-      <LocationStickyBookBar
-        bookingHref={bookingHref}
-        label="Book my cleaning"
-        secondary="Free quote — no commitment"
-      />
       <MagFooter bookingHref={bookingHref} />
       <SupportMessengerWidget />
     </div>
