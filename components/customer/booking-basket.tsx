@@ -196,7 +196,7 @@ function BasketPanel({
 
   if (!hasAnything) {
     return (
-      <div className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
+      <div className="overflow-hidden rounded-[1.25rem] border border-transparent bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
         {showHeader ? (
           <p className="px-5 pt-5 text-center text-base font-bold text-[#1c133b]">
             {headerTitle}
@@ -289,7 +289,7 @@ function BasketPanel({
   const scheduleFilled = scheduleDates.length > 0 || times.length > 0;
 
   return (
-    <div className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
+    <div className="overflow-hidden rounded-[1.25rem] border border-transparent bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
       {showHeader ? (
         <div className="border-b border-[#e4daf5] px-5 py-4">
           <p className="text-center text-base font-bold text-[#1c133b]">

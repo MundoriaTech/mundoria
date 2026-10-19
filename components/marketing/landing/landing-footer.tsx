@@ -80,13 +80,6 @@ export function LandingFooter({
               professionals for regular cleaning, deep cleans, Airbnb turnovers
               and tenancy handovers.
             </p>
-            <div className="mt-5 sm:mt-6">
-              <ContactSupportButton
-                className="text-base font-semibold text-[#6a45b8] transition hover:text-[#5a38a3]"
-                label="Start a chat"
-                tab="home"
-              />
-            </div>
           </div>
 
           {footerSections.map((section) => (

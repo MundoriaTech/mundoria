@@ -209,7 +209,7 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                     {cleaner.bio}
                   </p>
                   <Link
-                    className="mt-7 inline-flex h-12 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+                    className="mt-7 hidden h-12 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#312c79] md:inline-flex"
                     href={bookWithHref}
                   >
                     Book with {cleaner.name}

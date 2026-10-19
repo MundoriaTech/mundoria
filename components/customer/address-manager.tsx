@@ -1,7 +1,8 @@
 "use client";
 
 import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
@@ -495,17 +496,26 @@ export function AddressForm({
             onQueryChange={(next) => update("address_line_1", next)}
           />
         ) : (
-          addressInput
+          <>
+            {addressInput}
+            {!bare ? (
+              <p className="text-xs text-amber-700">
+                Address search isn’t configured. Add{" "}
+                <code className="font-mono">NEXT_PUBLIC_GEOAPIFY_API_KEY</code>{" "}
+                and restart the dev server.
+              </p>
+            ) : null}
+          </>
         )}
         {bare ? null : values.city && values.postcode ? (
           <p className="text-xs text-muted-foreground">
             {values.city} · {values.postcode.toUpperCase()}
           </p>
-        ) : bare ? null : (
+        ) : mapsKey && !bare ? (
           <p className="text-xs text-muted-foreground">
             Choose a suggestion so city and postcode fill in automatically.
           </p>
-        )}
+        ) : null}
       </div>
 
       {bare ? null : (
@@ -588,19 +598,34 @@ function AddressAutocompleteInput({
   const [suggestions, setSuggestions] = useState<GeoapifyFeature[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [menuBox, setMenuBox] = useState<{
+    left: number;
+    top: number;
+    width: number;
+  } | null>(null);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (value.trim().length < 3) {
       setSuggestions([]);
       setOpen(false);
+      setFetchError(null);
       return;
     }
 
     const controller = new AbortController();
     const timeout = setTimeout(async () => {
       setLoading(true);
+      setFetchError(null);
       try {
         const url = new URL("https://api.geoapify.com/v1/geocode/autocomplete");
         url.searchParams.set("apiKey", apiKey);
@@ -612,6 +637,8 @@ function AddressAutocompleteInput({
         const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) {
           setSuggestions([]);
+          setOpen(true);
+          setFetchError("Address search failed. Try again in a moment.");
           return;
         }
 
@@ -621,6 +648,8 @@ function AddressAutocompleteInput({
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
           setSuggestions([]);
+          setOpen(true);
+          setFetchError("Couldn’t reach address search.");
         }
       } finally {
         setLoading(false);
@@ -633,18 +662,51 @@ function AddressAutocompleteInput({
     };
   }, [apiKey, value]);
 
+  const syncMenuBox = () => {
+    const node = inputRef.current;
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    setMenuBox({
+      left: rect.left,
+      top: rect.bottom + 6,
+      width: rect.width,
+    });
+  };
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuBox(null);
+      return;
+    }
+    syncMenuBox();
+    window.addEventListener("resize", syncMenuBox);
+    window.addEventListener("scroll", syncMenuBox, true);
+    return () => {
+      window.removeEventListener("resize", syncMenuBox);
+      window.removeEventListener("scroll", syncMenuBox, true);
+    };
+  }, [open, suggestions.length, loading]);
+
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
+      const target = event.target as Node;
+      if (
+        rootRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
+        return;
       }
+      setOpen(false);
     }
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, []);
 
+  const showMenu =
+    mounted && open && menuBox && (suggestions.length > 0 || loading || fetchError);
+
   return (
-    <div className="relative z-30" ref={rootRef}>
+    <div className="relative" ref={rootRef}>
       <Input
         autoComplete="off"
         onBlur={() => {
@@ -653,59 +715,80 @@ function AddressAutocompleteInput({
         onChange={(event) => onQueryChange(event.target.value)}
         onFocus={() => {
           if (blurTimer.current) clearTimeout(blurTimer.current);
-          if (suggestions.length) setOpen(true);
+          if (suggestions.length || fetchError) setOpen(true);
         }}
         placeholder="Enter your address here"
+        ref={inputRef}
         required
         value={value}
       />
-      {open && (suggestions.length > 0 || loading) ? (
-        <ul
-          className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-[80] max-h-72 overflow-auto rounded-xl border border-[#d9ccef] bg-white p-1 shadow-[0_16px_40px_rgba(28,19,59,0.18)]"
-          role="listbox"
-        >
-          {loading ? (
-            <li className="px-3 py-2 text-sm text-muted-foreground">
-              Searching addresses…
-            </li>
-          ) : null}
-          {suggestions.map((suggestion) => {
-            const primary =
-              suggestion.properties.formatted ||
-              suggestion.properties.address_line1 ||
-              "Address";
-            return (
-              <li key={`${suggestion.properties.lat}-${suggestion.properties.lon}-${primary}`}>
-            <button
-                  className="block w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-[#efe6ff] touch-manipulation"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => {
-                    if (blurTimer.current) clearTimeout(blurTimer.current);
-                    const formatted =
-                      suggestion.properties.formatted ||
-                      suggestion.properties.address_line1 ||
-                      value;
-                    onQueryChange(formatted);
-                onPlaceSelected(suggestion);
-                setOpen(false);
-                    setSuggestions([]);
+      {showMenu
+        ? createPortal(
+            <ul
+              className="fixed z-[120] max-h-72 overflow-auto rounded-xl border border-[#d9ccef] bg-white p-1 shadow-[0_16px_40px_rgba(28,19,59,0.18)]"
+              ref={menuRef}
+              role="listbox"
+              style={{
+                left: menuBox.left,
+                top: menuBox.top,
+                width: menuBox.width,
               }}
-              type="button"
             >
-                  <span className="font-medium text-[#1c133b]">{primary}</span>
-                  {suggestion.properties.city || suggestion.properties.postcode ? (
-                <span className="mt-0.5 block text-xs text-muted-foreground">
-                      {[suggestion.properties.city, suggestion.properties.postcode]
-                        .filter(Boolean)
-                        .join(" · ")}
-                </span>
+              {loading ? (
+                <li className="px-3 py-2 text-sm text-muted-foreground">
+                  Searching addresses…
+                </li>
               ) : null}
-            </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
+              {fetchError && !loading ? (
+                <li className="px-3 py-2 text-sm text-amber-800">{fetchError}</li>
+              ) : null}
+              {suggestions.map((suggestion) => {
+                const primary =
+                  suggestion.properties.formatted ||
+                  suggestion.properties.address_line1 ||
+                  "Address";
+                return (
+                  <li
+                    key={`${suggestion.properties.lat}-${suggestion.properties.lon}-${primary}`}
+                  >
+                    <button
+                      className="block w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-[#efe6ff] touch-manipulation"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        if (blurTimer.current) clearTimeout(blurTimer.current);
+                        const formatted =
+                          suggestion.properties.formatted ||
+                          suggestion.properties.address_line1 ||
+                          value;
+                        onQueryChange(formatted);
+                        onPlaceSelected(suggestion);
+                        setOpen(false);
+                        setSuggestions([]);
+                      }}
+                      type="button"
+                    >
+                      <span className="font-medium text-[#1c133b]">
+                        {primary}
+                      </span>
+                      {suggestion.properties.city ||
+                      suggestion.properties.postcode ? (
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                          {[
+                            suggestion.properties.city,
+                            suggestion.properties.postcode,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

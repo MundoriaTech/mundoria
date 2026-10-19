@@ -58,15 +58,15 @@ export default function HowItWorksPage() {
             in an insurance form — tell us what you need, see a clear estimate,
             then book.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-full bg-[#733fb2] px-5 text-sm font-semibold text-white touch-manipulation"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#733fb2] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#6434a0] active:scale-[0.98] touch-manipulation sm:min-h-[3.25rem] sm:px-9"
               href={bookingHref}
             >
               Book a Service
             </Link>
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-full border border-[#504477]/70 px-5 text-sm font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white touch-manipulation"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#504477]/70 px-8 text-[15px] font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white touch-manipulation sm:min-h-[3.25rem] sm:px-9"
               href={cleanerHref}
             >
               Become a cleaner
@@ -92,15 +92,15 @@ export default function HowItWorksPage() {
             in an insurance form — tell us what you need, see a clear estimate,
             then book.
           </p>
-          <div className="mt-8 flex items-center gap-[0.65vw]">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              className="inline-flex h-[2.5vw] items-center justify-center rounded-full bg-[#733fb2] px-[1.15vw] text-[0.78vw] font-semibold text-white transition hover:bg-[#6434a0]"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#733fb2] px-8 text-[15px] font-semibold text-white transition duration-200 hover:scale-[1.03] hover:bg-[#6434a0] active:scale-[0.98] sm:min-h-[3.25rem] sm:px-9"
               href={bookingHref}
             >
               Book a Service
             </Link>
             <Link
-              className="inline-flex h-[2.5vw] items-center justify-center rounded-full border border-[#504477]/70 px-[1.15vw] text-[0.78vw] font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#504477]/70 px-8 text-[15px] font-semibold text-[#504477] transition hover:bg-[#504477] hover:text-white sm:min-h-[3.25rem] sm:px-9"
               href={cleanerHref}
             >
               Become a cleaner

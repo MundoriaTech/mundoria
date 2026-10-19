@@ -1847,7 +1847,7 @@ function KnownCleanersStep({
           return (
             <button
               className={cn(
-                "flex items-center gap-4 rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
+                "flex items-center gap-4 rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
                 selectedId === cleaner.id && "border-[#6a45b8] bg-white",
               )}
               key={cleaner.id}
@@ -1887,7 +1887,7 @@ function KnownCleanersStep({
         })}
         <button
           className={cn(
-            "rounded-2xl border-2 border-[#e4daf5] bg-white px-5 py-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
+            "rounded-2xl border-2 border-transparent bg-white px-5 py-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
             selectingNew && "border-[#6a45b8] bg-white",
           )}
           onClick={() => onSelect(null)}
@@ -1925,7 +1925,7 @@ function CategoryStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border-2 border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
+                "rounded-2xl border-2 border-transparent bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={category.value}
@@ -2009,7 +2009,7 @@ function ServiceStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border-2 border-[#e4daf5] bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
+                "relative rounded-2xl border-2 border-transparent bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={item.value}
@@ -2265,7 +2265,7 @@ function AddressStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:border-[#d4c8f0] hover:bg-[#f8f5ff]",
+                  "rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]",
                   active && "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
                 )}
                 key={address.id}
@@ -2324,7 +2324,7 @@ function AddressStep({
       ) : null}
 
       {showForm || (localOnly && !guestAsAddress) ? (
-        <div className="relative z-20 mt-4 overflow-visible rounded-2xl border-2 border-[#e4daf5] bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:mt-5 sm:p-5">
+        <div className="relative z-20 mt-4 overflow-visible rounded-2xl border-2 border-transparent bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:mt-5 sm:p-5">
           <AddressForm
             address={localOnly ? guestAsAddress : null}
             compact
@@ -2477,7 +2477,7 @@ function OfficeSpacesStep({
           return (
             <button
               className={cn(
-                "rounded-2xl border-2 border-[#e4daf5] bg-white px-4 py-3 text-left",
+                "rounded-2xl border-2 border-transparent bg-white px-4 py-3 text-left",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -2667,7 +2667,7 @@ function AddOnsStep({
             return (
               <button
                 className={cn(
-                  "rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                  "rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                   selected && "border-[#6a45b8] bg-white",
                 )}
                 key={addOn.id}
@@ -2742,7 +2742,7 @@ function AddOnsStep({
               return (
                 <button
                   className={cn(
-                    "rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                    "rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                     active && "border-[#6a45b8] bg-white",
                   )}
                   key={label}
@@ -2836,7 +2836,7 @@ function RecoveryPreferencesStep({
                 "rounded-full border px-3.5 py-2 text-sm font-semibold touch-manipulation",
                 active
                   ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                  : "border-[#d9ccef] bg-white text-[#1c133b]",
+                  : "border-transparent bg-white text-[#1c133b]",
               )}
               key={area}
               onClick={() => toggleArea(area)}
@@ -2870,7 +2870,7 @@ function RecoveryPreferencesStep({
                 "rounded-2xl border px-4 py-3 text-left text-sm font-semibold touch-manipulation",
                 active
                   ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                  : "border-[#d9ccef] bg-white text-[#1c133b]",
+                  : "border-transparent bg-white text-[#1c133b]",
               )}
               key={value}
               onClick={() => update("propertyCondition", value)}
@@ -2887,7 +2887,7 @@ function RecoveryPreferencesStep({
           Products, fragrance & other notes
         </span>
         <textarea
-          className="mt-2 min-h-[110px] w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] focus:ring-2"
+          className="mt-2 min-h-[110px] w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] focus:ring-2"
           onChange={(event) => update("specialInstructions", event.target.value)}
           placeholder="e.g. fragrance-free only, avoid bleach, leave bedroom door closed…"
           value={draft.specialInstructions}
@@ -2974,7 +2974,7 @@ function FrequencyStep({
           return (
             <button
               className={cn(
-                "relative rounded-2xl border-2 border-[#e4daf5] bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                "relative rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={option.value}
@@ -3063,7 +3063,7 @@ function DurationStep({
           return (
             <button
               className={cn(
-                "relative inline-flex h-12 items-center justify-center rounded-xl border-2 border-[#e4daf5] bg-white text-sm font-semibold text-[#1c133b] transition touch-manipulation",
+                "relative inline-flex h-12 items-center justify-center rounded-xl border-2 border-transparent bg-white text-sm font-semibold text-[#1c133b] transition touch-manipulation",
                 active && "border-2 border-[#6a45b8] bg-white",
                 !active && isRecommended && "ring-1 ring-[#c9b8ef]",
               )}
@@ -3142,7 +3142,7 @@ function DateStep({
         </>
       ) : (
         <button
-          className="flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-[#e4daf5] bg-white px-4 py-3.5 text-left transition touch-manipulation hover:border-[#6a45b8]/40"
+          className="flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-transparent bg-white px-4 py-3.5 text-left transition touch-manipulation"
           onClick={() => setDateExpanded(true)}
           type="button"
         >
@@ -3587,7 +3587,7 @@ function CheckoutStep({
         All good? Book your cleaning
       </h2>
 
-      <div className="mt-4 rounded-2xl border border-[#d9ccef] bg-white/70 p-4 text-sm text-[#4a4266]">
+      <div className="mt-4 rounded-2xl border border-transparent bg-white/70 p-4 text-sm text-[#4a4266]">
         <p>
           <span className="font-semibold text-[#1c133b]">
             {formatServiceName(draft.serviceType)}
@@ -3621,7 +3621,7 @@ function CheckoutStep({
           ).map(([value, label]) => (
             <button
               className={cn(
-                "rounded-2xl border-2 border-[#e4daf5] bg-white px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
+                "rounded-2xl border-2 border-transparent bg-white px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
                 draft.keysPolicy === value && "border-[#6a45b8] bg-white",
               )}
               key={value}
@@ -3639,7 +3639,7 @@ function CheckoutStep({
       <label className="mt-5 block">
         <span className="sr-only">Special requirements</span>
         <textarea
-          className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white/80 p-4 text-sm text-[#1c133b] outline-none focus:border-[#6a45b8]"
+          className="min-h-24 w-full rounded-2xl border border-transparent bg-white/80 p-4 text-sm text-[#1c133b] outline-none focus:border-[#6a45b8]"
           onChange={(event) =>
             update("specialInstructions", event.target.value)
           }
@@ -3680,7 +3680,7 @@ function CheckoutStep({
       <div className="mt-6">
         <p className="font-semibold text-[#1c133b]">Add your payment method</p>
         <button
-          className="mt-3 flex w-full items-center justify-between rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-left"
+          className="mt-3 flex w-full items-center justify-between rounded-2xl border border-transparent bg-white px-4 py-3 text-left"
           onClick={() => setShowCard((value) => !value)}
           type="button"
         >
@@ -3691,7 +3691,7 @@ function CheckoutStep({
           <span className="text-[#6a45b8]">{showCard ? "▴" : "▾"}</span>
         </button>
         {showCard ? (
-          <div className="mt-3 rounded-2xl border border-[#d9ccef] bg-white/80 p-4">
+          <div className="mt-3 rounded-2xl border border-transparent bg-white/80 p-4">
         <CardElement
           options={{
             hidePostalCode: true,
@@ -3766,7 +3766,7 @@ function CheckoutStep({
       ) : null}
 
       {processing ? (
-        <ol className="mt-5 space-y-2 rounded-2xl border-2 border-[#e4daf5] bg-white/80 p-4 text-sm">
+        <ol className="mt-5 space-y-2 rounded-2xl border-2 border-transparent bg-white/80 p-4 text-sm">
           {(
             [
               { id: "saving", label: "Saving your address" },
