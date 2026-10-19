@@ -60,7 +60,7 @@ const LOCATION_FAQS = (place: string) =>
 export function LocationServicesExplainer({ place }: { place: string }) {
   return (
     <BrandedSection tone="cream">
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
         What cleaning services does Mundoria offer in {place}?
       </h2>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470] sm:text-[15px] sm:leading-7">
@@ -76,7 +76,7 @@ export function LocationServicesExplainer({ place }: { place: string }) {
 export function LocationWhatsCovered({ place }: { place: string }) {
   return (
     <BrandedSection>
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
         What’s covered in a Mundoria house clean in {place}?
       </h2>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470]">
@@ -117,7 +117,7 @@ export function LocationHowToBook({
   ];
   return (
     <BrandedSection tone="lavender">
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
         How do I book a cleaner in {place}?
       </h2>
       <ol className="mt-6 space-y-3">
@@ -149,7 +149,7 @@ export function LocationFaqBlock({
   const faqs = [...extraFaqs, ...LOCATION_FAQS(place)];
   return (
     <BrandedSection>
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
         Frequently asked questions — {place}
       </h2>
       <div className="mt-8 space-y-3">
@@ -255,7 +255,7 @@ export function LocationNearPlacePills({
 
   const nearbyList = nearbyPlaces.length ? (
     <div className="mt-10">
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
         Nearby towns
       </h2>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
@@ -278,14 +278,14 @@ export function LocationNearPlacePills({
       {surroundingLinks?.length ? (
         <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr] lg:items-start">
           <div>
-            <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
               {heading}
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-[#5a5470]">{intro}</p>
             {placeList}
           </div>
           <div>
-            <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
               Surrounding towns
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-[#5a5470]">
@@ -307,7 +307,7 @@ export function LocationNearPlacePills({
         </div>
       ) : (
         <>
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             {heading}
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">{intro}</p>

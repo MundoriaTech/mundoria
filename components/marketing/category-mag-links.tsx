@@ -108,7 +108,7 @@ export async function CategoryMagLinks({
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">
         <div>
           <div className="flex items-end justify-between gap-4">
-            <h2 className="max-w-[16rem] text-[1.7rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[1.9rem]">
+            <h2 className="max-w-[16rem] text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
               {MAG_HEADING}
             </h2>
           </div>
@@ -144,7 +144,7 @@ export async function CategoryMagLinks({
 
         {index.length ? (
           <div>
-            <h3 className="text-[1.7rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[1.9rem]">
+            <h3 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
               More to read
             </h3>
             <ol className="mt-6 grid gap-x-10 sm:grid-cols-2">

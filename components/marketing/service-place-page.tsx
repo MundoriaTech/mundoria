@@ -147,7 +147,7 @@ export async function ServicePlacePage({
         />
 
         <BrandedSection>
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             {service.label} in {placeLabel}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5a5470]">
@@ -172,7 +172,7 @@ export async function ServicePlacePage({
         ) : null}
 
         <BrandedSection tone="cream">
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             Guides for {service.label.toLowerCase()} in Birmingham
           </h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -192,7 +192,7 @@ export async function ServicePlacePage({
 
         {siblings.length ? (
           <BrandedSection tone="cream">
-            <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
               Other {service.categoryLabel.toLowerCase()} in {place}
             </h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -210,7 +210,7 @@ export async function ServicePlacePage({
         ) : null}
 
         <BrandedSection tone="lavender">
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             {service.label} in nearby Birmingham areas
           </h2>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

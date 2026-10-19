@@ -11,7 +11,7 @@ export function ServiceCityCoverage({ service }: { service: MarketingService }) 
 
   return (
     <BrandedSection>
-      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
         {label} in your city
       </h2>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">

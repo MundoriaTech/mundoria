@@ -83,8 +83,8 @@ export function ForCleanersHero({
   eyebrow: string;
   primaryHref: string;
   primaryLabel: string;
-  secondaryHref: string;
-  secondaryLabel: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
   title: string;
 }) {
   return (
@@ -133,12 +133,14 @@ export function ForCleanersHero({
             >
               {primaryLabel}
             </Link>
-            <Link
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 px-8 text-[15px] font-semibold text-white transition hover:bg-white hover:text-[#1c133b] sm:min-h-[3.25rem] sm:px-9"
-              href={secondaryHref}
-            >
-              {secondaryLabel}
-            </Link>
+            {secondaryHref && secondaryLabel ? (
+              <Link
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 px-8 text-[15px] font-semibold text-white transition hover:bg-white hover:text-[#1c133b] sm:min-h-[3.25rem] sm:px-9"
+                href={secondaryHref}
+              >
+                {secondaryLabel}
+              </Link>
+            ) : null}
           </div>
         </div>
 

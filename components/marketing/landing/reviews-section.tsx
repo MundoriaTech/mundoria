@@ -395,7 +395,7 @@ export function ReviewsSection({
             width={30}
           />
 
-          <h2 className="max-w-[20rem] text-balance text-[1.5rem] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-[36px] sm:leading-[1.08]">
+          <h2 className="max-w-[20rem] text-balance text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
             {heading}
           </h2>
           <GoogleReviewsButton className="mt-4" />

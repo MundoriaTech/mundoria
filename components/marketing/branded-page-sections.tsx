@@ -127,9 +127,8 @@ export function BrandedCtaBand({
           <h2
             className={cn(
               "font-semibold tracking-[-0.03em]",
-              onWhite
-                ? "text-[1.9rem] text-[#1c133b] sm:text-[2.25rem]"
-                : "text-[1.6rem] text-white sm:text-2xl",
+              "text-[1.35rem] leading-tight sm:text-2xl lg:text-[1.75rem]",
+              onWhite ? "text-[#1c133b]" : "text-white",
             )}
           >
             {title}

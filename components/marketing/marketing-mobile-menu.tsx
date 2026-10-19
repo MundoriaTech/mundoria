@@ -131,48 +131,92 @@ export function MarketingMobileMenuSheet({
               className="flex h-full w-1/2 flex-col overflow-y-auto overscroll-contain px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]"
             >
               <div className="mb-5 pt-1">
-                <LandingLogo className="h-7 w-auto" href="/" />
+                {variant === "mag" ? (
+                  <Link
+                    aria-label="Mundoria Mag home"
+                    className="inline-block text-[1.15rem] font-black tracking-[-0.06em] text-[#1c133b]"
+                    href="/blog"
+                    onClick={onClose}
+                  >
+                    Mundoria <span className="text-[#d4694a]">Mag</span>
+                  </Link>
+                ) : (
+                  <LandingLogo className="h-7 w-auto" href="/" />
+                )}
               </div>
 
-              <section className="pb-6">
-                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
-                  Services
-                </h2>
-                <ul className="mt-1">
-                  {landingCategoryNav.map((menu) => (
-                    <li key={menu.label}>
-                      <button
-                        className={ROW_CLASS}
-                        onClick={() => setPanel(`cat:${menu.label}`)}
-                        type="button"
-                      >
-                        <span>{menu.label}</span>
-                        <ChevronRight
-                          aria-hidden
-                          className="size-4 shrink-0 text-[#5b6cff]"
-                          strokeWidth={2.25}
-                        />
-                      </button>
-                    </li>
-                  ))}
-                  {variant === "mag" && hasMagTopics ? (
+              {variant === "mag" ? (
+                <section className="pb-6">
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                    Mag
+                  </h2>
+                  <ul className="mt-1">
+                    {hasMagTopics ? (
+                      <li>
+                        <button
+                          className={ROW_CLASS}
+                          onClick={() => setPanel("mag")}
+                          type="button"
+                        >
+                          <span>Topics</span>
+                          <ChevronRight
+                            aria-hidden
+                            className="size-4 shrink-0 text-[#5b6cff]"
+                            strokeWidth={2.25}
+                          />
+                        </button>
+                      </li>
+                    ) : null}
                     <li>
-                      <button
-                        className={ROW_CLASS}
-                        onClick={() => setPanel("mag")}
-                        type="button"
+                      <Link
+                        className={LINK_CLASS}
+                        href="/blog"
+                        onClick={onClose}
                       >
-                        <span>Mag topics</span>
-                        <ChevronRight
-                          aria-hidden
-                          className="size-4 shrink-0 text-[#5b6cff]"
-                          strokeWidth={2.25}
-                        />
-                      </button>
+                        All stories
+                      </Link>
                     </li>
-                  ) : null}
-                </ul>
-              </section>
+                    <li>
+                      <Link
+                        className={LINK_CLASS}
+                        href="/help"
+                        onClick={onClose}
+                      >
+                        Help
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className={LINK_CLASS} href="/" onClick={onClose}>
+                        Home
+                      </Link>
+                    </li>
+                  </ul>
+                </section>
+              ) : (
+                <section className="pb-6">
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                    Services
+                  </h2>
+                  <ul className="mt-1">
+                    {landingCategoryNav.map((menu) => (
+                      <li key={menu.label}>
+                        <button
+                          className={ROW_CLASS}
+                          onClick={() => setPanel(`cat:${menu.label}`)}
+                          type="button"
+                        >
+                          <span>{menu.label}</span>
+                          <ChevronRight
+                            aria-hidden
+                            className="size-4 shrink-0 text-[#5b6cff]"
+                            strokeWidth={2.25}
+                          />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
 
               <section className="pb-6">
                 <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
@@ -201,50 +245,53 @@ export function MarketingMobileMenuSheet({
                 </ul>
               </section>
 
-              <section>
-                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
-                  About us
-                </h2>
-                <ul className="mt-1">
-                  <li>
-                    <Link
-                      className={LINK_CLASS}
-                      href="/contact"
-                      onClick={onClose}
-                    >
-                      Contact us
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className={LINK_CLASS} href="/help" onClick={onClose}>
-                      Help centre
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className={LINK_CLASS} href="/blog" onClick={onClose}>
-                      Mundoria Mag
-                    </Link>
-                  </li>
-                  {showForCleanersCta ? (
+              {variant === "marketing" ? (
+                <section>
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                    About us
+                  </h2>
+                  <ul className="mt-1">
                     <li>
                       <Link
                         className={LINK_CLASS}
-                        href="/for-cleaners"
+                        href="/contact"
                         onClick={onClose}
                       >
-                        Become a cleaner
+                        Contact us
                       </Link>
                     </li>
-                  ) : null}
-                  {variant === "mag" ? (
                     <li>
-                      <Link className={LINK_CLASS} href="/" onClick={onClose}>
-                        Home
+                      <Link
+                        className={LINK_CLASS}
+                        href="/help"
+                        onClick={onClose}
+                      >
+                        Help centre
                       </Link>
                     </li>
-                  ) : null}
-                </ul>
-              </section>
+                    <li>
+                      <Link
+                        className={LINK_CLASS}
+                        href="/blog"
+                        onClick={onClose}
+                      >
+                        Mundoria Mag
+                      </Link>
+                    </li>
+                    {showForCleanersCta ? (
+                      <li>
+                        <Link
+                          className={LINK_CLASS}
+                          href="/for-cleaners"
+                          onClick={onClose}
+                        >
+                          Become a cleaner
+                        </Link>
+                      </li>
+                    ) : null}
+                  </ul>
+                </section>
+              ) : null}
             </nav>
 
             {/* Drill-down */}

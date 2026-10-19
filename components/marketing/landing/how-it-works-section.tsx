@@ -35,7 +35,7 @@ export function HowItWorksSection() {
         <p className="text-[13px] font-medium uppercase tracking-[0.28em] text-[#c79c66] sm:text-sm">
           Why Mundoria works
         </p>
-        <h2 className="mt-5 max-w-[16rem] text-[1.9rem] font-medium leading-[1.12] tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-[3.05rem]">
+        <h2 className="mt-5 max-w-[16rem] text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
           A better way to get it sorted
         </h2>
 

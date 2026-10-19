@@ -195,7 +195,7 @@ export async function LaunchCityHubSections({
 
       {showLookingForDifferent && lookingFor.length ? (
         <BrandedSection tone="lavender">
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             Looking for something different in cleaning?
           </h2>
           <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0">
@@ -228,7 +228,7 @@ export async function LaunchCityHubSections({
 
       {showAreaCards ? (
         <BrandedSection>
-          <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             Neighbourhoods we prioritise
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">

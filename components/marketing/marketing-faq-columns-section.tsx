@@ -31,7 +31,7 @@ export function MarketingFaqColumnsSection({
       <div className="mx-auto max-w-6xl">
         <h2
           className={cn(
-            "text-[1.5rem] font-semibold tracking-[-0.03em] sm:text-3xl",
+            "text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] sm:text-2xl lg:text-[1.75rem]",
             service ? "text-[#1c133b]" : "text-[#c45c3a]",
           )}
         >

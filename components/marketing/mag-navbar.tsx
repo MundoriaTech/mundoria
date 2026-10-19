@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import {
   LANDING_NAV_PILL_H,
   LANDING_NAV_PILL_RADIUS,
@@ -211,13 +210,10 @@ export function MagNavbar({
       >
         <Link
           aria-label="Mundoria Mag home"
-          className="inline-flex shrink-0 items-center gap-1.5 sm:gap-2"
+          className="shrink-0 text-[1.05rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.3rem]"
           href="/blog"
         >
-          <LandingLogo className="h-6 w-auto min-[380px]:h-7 sm:h-8" priority />
-          <span className="text-[0.95rem] font-black tracking-[-0.06em] text-[#d4694a] sm:text-[1.15rem]">
-            Mag
-          </span>
+          Mundoria <span className="text-[#d4694a]">Mag</span>
         </Link>
 
         <nav

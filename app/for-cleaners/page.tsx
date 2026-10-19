@@ -67,8 +67,6 @@ export default function ForCleanersPage() {
           eyebrow="Cleaners"
           primaryHref={signupHref}
           primaryLabel="Apply as a cleaner"
-          secondaryHref="/how-it-works"
-          secondaryLabel="How it works"
           title="Work with Mundoria"
         />
 
