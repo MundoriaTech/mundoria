@@ -6,7 +6,7 @@ import { HowItWorksCluster } from "@/components/marketing/how-it-works-cluster";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
-import { BIRMINGHAM_AREAS, HOW_IT_WORKS_STEPS, LAUNCH_CITY } from "@/lib/seo/marketing";
+import { HOW_IT_WORKS_STEPS } from "@/lib/seo/marketing";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
@@ -16,14 +16,6 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/how-it-works",
   title: "How Mundoria Works | Mundoria",
 });
-
-const CITY_COLUMNS = [
-  "Residential",
-  "Commercial",
-  "Short lets",
-  "Moving home",
-  "Recovery",
-] as const;
 
 export default function HowItWorksPage() {
   const configured = hasSupabasePublicConfig();
@@ -164,7 +156,7 @@ export default function HowItWorksPage() {
 
       <section className="bg-[#f4f0f8] px-4 py-16 sm:px-8 sm:py-20">
         <div className="mx-auto max-w-5xl">
-          <div className="flex flex-col items-start justify-between gap-6 border-b border-[#2c2458]/15 pb-10 sm:flex-row sm:items-center">
+          <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div className="max-w-sm">
               <h2 className="text-[1.9rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-[2.15rem]">
                 From booking to cleaner confirmed
@@ -181,33 +173,6 @@ export default function HowItWorksPage() {
             >
               Book a Service
             </Link>
-          </div>
-
-          <div className="pt-12">
-            <h2 className="max-w-xs text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-[1.85rem]">
-              Mundoria services in our top cities
-            </h2>
-            <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-              {CITY_COLUMNS.map((column) => (
-                <div key={column}>
-                  <h3 className="text-sm font-semibold text-[#1c133b]">
-                    {column}
-                  </h3>
-                  <ul className="mt-3 space-y-2">
-                    {BIRMINGHAM_AREAS.map((area) => (
-                      <li key={`${column}-${area.slug}`}>
-                        <Link
-                          className="text-[13px] leading-5 text-[#5c5670] transition hover:text-[#312c79]"
-                          href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
-                        >
-                          {column} cleaning in {area.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>

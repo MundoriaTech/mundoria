@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/marketing/json-ld";
 import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
 import { FeaturedCleanerCards } from "@/components/marketing/featured-cleaner-cards";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
+import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import {
   bookingHrefWithDirectoryCleaner,
@@ -278,6 +279,11 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
             ) : null}
           </div>
         </section>
+
+        <LocationStickyBookBar
+          bookingHref={bookWithHref}
+          label={`Book with ${cleaner.name}`}
+        />
       </BrandedPageWash>
     </MarketingShell>
   );

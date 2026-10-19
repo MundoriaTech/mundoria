@@ -7,6 +7,7 @@ import { Check } from "lucide-react";
 
 import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
+import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
 import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
@@ -160,6 +161,7 @@ export function CommercialCleaningPage({
         </div>
       </section>
 
+      <LocationStickyBookBar bookingHref={bookingHref} />
     </>
   );
 }

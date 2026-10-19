@@ -8,6 +8,7 @@ import { Check } from "lucide-react";
 import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
+import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { MarketingFaqColumnsSection } from "@/components/marketing/marketing-faq-columns-section";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
@@ -194,6 +195,11 @@ export function ServiceCategoryMarketingPage({
           variant={faqVariant}
         />
       ) : null}
+
+      <LocationStickyBookBar
+        bookingHref={bookingHref}
+        label={bookCta || "Book my cleaning"}
+      />
     </>
   );
 }
