@@ -6,40 +6,43 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { landingCategoryNav } from "@/components/marketing/landing/constants";
-import { Button } from "@/components/ui/button";
+import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { magThemeFor } from "@/lib/content/mag-theme";
+import { cn } from "@/lib/utils";
 
 export type MagMobileTopic = {
   href: string;
   label: string;
 };
 
-type Panel = "main" | "cleaning" | "mag" | `cat:${string}`;
+type Panel = "main" | "mag" | `cat:${string}`;
 
 function categoryBookHref(customerHref: string, category: string) {
   if (!customerHref.startsWith("/booking")) return customerHref;
   return `/booking/new?category=${category}`;
 }
 
-function panelIndex(panel: Panel) {
-  if (panel === "main") return 0;
-  if (panel.startsWith("cat:")) return 2;
-  return 1;
-}
+const LINK_CLASS =
+  "block py-3 text-[15px] font-normal text-[#1c133b] underline decoration-[#1c133b]/25 underline-offset-[5px] touch-manipulation";
 
-/** WeCasa-style multi-panel mobile menu: verticals → hub → services. */
+const ROW_CLASS =
+  "flex min-h-12 w-full items-center justify-between gap-3 py-3 text-left text-[15px] font-normal text-[#1c133b] touch-manipulation";
+
+/** WeCasa-style left off-canvas drawer: Services → My account → About us. */
 export function MarketingMobileMenuSheet({
   customerHref,
+  loginHref = "/login",
   magTopics,
   mobileOpen,
   onClose,
-  showForCleanersCta,
+  showForCleanersCta = true,
   accountHref,
   viewerDashboard,
   variant = "marketing",
 }: {
   accountHref?: string;
   customerHref: string;
+  loginHref?: string;
   magTopics?: MagMobileTopic[];
   mobileOpen: boolean;
   onClose: () => void;
@@ -50,7 +53,6 @@ export function MarketingMobileMenuSheet({
   const [panel, setPanel] = useState<Panel>("main");
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const depth = panelIndex(panel);
   const activeCategory =
     panel.startsWith("cat:")
       ? (landingCategoryNav.find(
@@ -58,6 +60,12 @@ export function MarketingMobileMenuSheet({
         ) ?? null)
       : null;
   const hasMagTopics = Boolean(magTopics?.length);
+  const onDrill =
+    panel !== "main"
+      ? () => {
+          if (panel.startsWith("cat:") || panel === "mag") setPanel("main");
+        }
+      : null;
 
   useEffect(() => {
     setMounted(true);
@@ -75,10 +83,6 @@ export function MarketingMobileMenuSheet({
     function onKey(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
       event.preventDefault();
-      if (panel.startsWith("cat:")) {
-        setPanel("cleaning");
-        return;
-      }
       if (panel !== "main") {
         setPanel("main");
         return;
@@ -101,151 +105,164 @@ export function MarketingMobileMenuSheet({
     <div className="fixed inset-0 z-[70]">
       <button
         aria-label="Close menu"
-        className="absolute inset-0 bg-[#1c133b]/45"
+        className="absolute inset-0 bg-[#1c133b]/40"
         onClick={onClose}
         type="button"
       />
       <div
-        className="absolute inset-x-0 bottom-0 top-[calc(var(--landing-nav-pill-h)+max(1.1rem,env(safe-area-inset-top,0px)+0.35rem))] flex outline-none sm:inset-x-6 sm:bottom-6 sm:top-[calc(var(--landing-nav-pill-h)+max(1.25rem,env(safe-area-inset-top,0px)+0.5rem)+0.35rem)]"
+        className="absolute inset-y-0 left-0 flex w-[min(20.5rem,86vw)] outline-none"
         ref={panelRef}
         tabIndex={-1}
       >
-        <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-[1.5rem] bg-white shadow-[0_-12px_48px_rgba(28,19,59,0.2)] sm:rounded-[1.5rem] sm:shadow-[0_24px_60px_rgba(28,19,59,0.22)]">
+        <div className="relative flex h-full w-full flex-col overflow-hidden bg-white shadow-[12px_0_40px_rgba(28,19,59,0.18)]">
           <div
-            className="flex h-full w-[300%] transition-transform duration-300 ease-out motion-reduce:transition-none"
-            style={{ transform: `translateX(-${(depth * 100) / 3}%)` }}
+            className={cn(
+              "flex h-full w-[200%] transition-transform duration-300 ease-out motion-reduce:transition-none",
+            )}
+            style={{
+              transform:
+                panel === "main" ? "translateX(0%)" : "translateX(-50%)",
+            }}
           >
-            {/* Main — verticals */}
+            {/* Main — WeCasa sections */}
             <nav
-              aria-hidden={depth !== 0}
+              aria-hidden={panel !== "main"}
               aria-label="Mobile navigation"
-              className="flex h-full w-1/3 flex-col overflow-y-auto overscroll-contain"
+              className="flex h-full w-1/2 flex-col overflow-y-auto overscroll-contain px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]"
             >
-              <div className="border-b border-[#1c133b]/08 px-5 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#823fb2]">
-                  Services
-                </p>
+              <div className="mb-5 pt-1">
+                <LandingLogo className="h-7 w-auto" href="/" />
               </div>
-              <ul className="flex-1">
-                <li className="border-b border-[#1c133b]/06">
-                  <button
-                    className="flex min-h-14 w-full items-center justify-between gap-3 px-5 py-3.5 text-left touch-manipulation"
-                    onClick={() => setPanel("cleaning")}
-                    type="button"
-                  >
-                    <span>
-                      <span className="block text-[15px] font-semibold text-[#1c133b]">
-                        Cleaning
-                      </span>
-                      <span className="mt-0.5 block text-[12px] font-normal text-[#1c133b]/55">
-                        Homes, workplaces and recovery support
-                      </span>
-                    </span>
-                    <ChevronRight
-                      aria-hidden
-                      className="size-5 shrink-0 text-[#1c133b]/45"
-                    />
-                  </button>
-                </li>
-                {hasMagTopics ? (
-                  <li className="border-b border-[#1c133b]/06">
-                    <button
-                      className="flex min-h-14 w-full items-center justify-between gap-3 px-5 py-3.5 text-left touch-manipulation"
-                      onClick={() => setPanel("mag")}
-                      type="button"
-                    >
-                      <span>
-                        <span className="block text-[15px] font-semibold text-[#1c133b]">
-                          Mag
-                        </span>
-                        <span className="mt-0.5 block text-[12px] font-normal text-[#1c133b]/55">
-                          Guides, tips and stories
-                        </span>
-                      </span>
-                      <ChevronRight
-                        aria-hidden
-                        className="size-5 shrink-0 text-[#1c133b]/45"
-                      />
-                    </button>
+
+              <section className="pb-6">
+                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                  Services
+                </h2>
+                <ul className="mt-1">
+                  {landingCategoryNav.map((menu) => (
+                    <li key={menu.label}>
+                      <button
+                        className={ROW_CLASS}
+                        onClick={() => setPanel(`cat:${menu.label}`)}
+                        type="button"
+                      >
+                        <span>{menu.label}</span>
+                        <ChevronRight
+                          aria-hidden
+                          className="size-4 shrink-0 text-[#5b6cff]"
+                          strokeWidth={2.25}
+                        />
+                      </button>
+                    </li>
+                  ))}
+                  {variant === "mag" && hasMagTopics ? (
+                    <li>
+                      <button
+                        className={ROW_CLASS}
+                        onClick={() => setPanel("mag")}
+                        type="button"
+                      >
+                        <span>Mag topics</span>
+                        <ChevronRight
+                          aria-hidden
+                          className="size-4 shrink-0 text-[#5b6cff]"
+                          strokeWidth={2.25}
+                        />
+                      </button>
+                    </li>
+                  ) : null}
+                </ul>
+              </section>
+
+              <section className="pb-6">
+                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                  My account
+                </h2>
+                <ul className="mt-1">
+                  <li>
+                    {viewerDashboard && accountHref ? (
+                      <Link
+                        className={LINK_CLASS}
+                        href={accountHref}
+                        onClick={onClose}
+                      >
+                        Dashboard
+                      </Link>
+                    ) : (
+                      <Link
+                        className={LINK_CLASS}
+                        href={loginHref}
+                        onClick={onClose}
+                      >
+                        Sign in
+                      </Link>
+                    )}
                   </li>
-                ) : (
-                  <li className="border-b border-[#1c133b]/06">
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                  About us
+                </h2>
+                <ul className="mt-1">
+                  <li>
                     <Link
-                      className="flex min-h-14 items-center px-5 py-3.5 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
-                      href="/blog"
+                      className={LINK_CLASS}
+                      href="/contact"
                       onClick={onClose}
                     >
-                      Mag
+                      Contact us
                     </Link>
                   </li>
-                )}
-                {variant === "mag" ? (
-                  <>
-                    <li className="border-b border-[#1c133b]/06">
+                  <li>
+                    <Link className={LINK_CLASS} href="/help" onClick={onClose}>
+                      Help centre
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className={LINK_CLASS} href="/blog" onClick={onClose}>
+                      Mundoria Mag
+                    </Link>
+                  </li>
+                  {showForCleanersCta ? (
+                    <li>
                       <Link
-                        className="flex min-h-14 items-center px-5 py-3.5 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
-                        href="/blog"
+                        className={LINK_CLASS}
+                        href="/for-cleaners"
                         onClick={onClose}
                       >
-                        All stories
+                        Become a cleaner
                       </Link>
                     </li>
-                    <li className="border-b border-[#1c133b]/06">
-                      <Link
-                        className="flex min-h-14 items-center px-5 py-3.5 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
-                        href="/help"
-                        onClick={onClose}
-                      >
-                        Help
-                      </Link>
-                    </li>
-                    <li className="border-b border-[#1c133b]/06">
-                      <Link
-                        className="flex min-h-14 items-center px-5 py-3.5 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
-                        href="/"
-                        onClick={onClose}
-                      >
+                  ) : null}
+                  {variant === "mag" ? (
+                    <li>
+                      <Link className={LINK_CLASS} href="/" onClick={onClose}>
                         Home
                       </Link>
                     </li>
-                  </>
-                ) : null}
-              </ul>
-              <div className="mt-auto grid gap-2 border-t border-[#1c133b]/08 bg-[#f8f4ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                {viewerDashboard && accountHref ? (
-                  <Button
-                    asChild
-                    className="h-11 rounded-full text-sm font-semibold"
-                    variant="outline"
-                  >
-                    <Link href={accountHref} onClick={onClose}>
-                      Dashboard
-                    </Link>
-                  </Button>
-                ) : null}
-                {showForCleanersCta ? (
-                  <Button
-                    asChild
-                    className="h-11 rounded-full bg-[#1c133b] text-sm font-semibold text-white hover:bg-[#1c133b]/90"
-                  >
-                    <Link href="/for-cleaners" onClick={onClose}>
-                      For cleaners
-                    </Link>
-                  </Button>
-                ) : null}
-              </div>
+                  ) : null}
+                </ul>
+              </section>
             </nav>
 
-            {/* Hub — Cleaning or Mag topics */}
+            {/* Drill-down */}
             <nav
-              aria-hidden={depth !== 1}
-              aria-label={panel === "mag" ? "Mag topics" : "Cleaning"}
-              className="flex h-full w-1/3 flex-col overflow-y-auto overscroll-contain"
+              aria-hidden={panel === "main"}
+              aria-label={
+                panel === "mag"
+                  ? "Mag topics"
+                  : activeCategory
+                    ? `${activeCategory.label} services`
+                    : "Services"
+              }
+              className="flex h-full w-1/2 flex-col overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]"
             >
-              <div className="sticky top-0 z-10 border-b border-[#1c133b]/08 bg-white px-2 py-2">
+              <div className="sticky top-0 z-10 bg-white px-3 py-2">
                 <button
-                  className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
-                  onClick={() => setPanel("main")}
+                  className="inline-flex min-h-11 items-center gap-1 px-2 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
+                  onClick={() => onDrill?.()}
                   type="button"
                 >
                   <ChevronLeft aria-hidden className="size-5" />
@@ -255,21 +272,18 @@ export function MarketingMobileMenuSheet({
 
               {panel === "mag" && magTopics ? (
                 <>
-                  <div className="px-5 pb-2 pt-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d4694a]">
-                      Mag
-                    </p>
-                    <p className="mt-2 text-[15px] font-semibold text-[#1c133b]">
-                      Browse topics
-                    </p>
+                  <div className="px-6 pb-2">
+                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                      Mag topics
+                    </h2>
                   </div>
-                  <ul className="flex-1 pb-2">
+                  <ul className="flex-1 px-6">
                     {magTopics.map((topic) => {
                       const theme = magThemeFor(topic.label);
                       return (
                         <li key={topic.href}>
                           <Link
-                            className="flex min-h-14 items-center gap-3 border-b border-[#1c133b]/06 px-5 py-3.5 touch-manipulation"
+                            className="flex min-h-12 items-center gap-3 py-3 touch-manipulation"
                             href={topic.href}
                             onClick={onClose}
                           >
@@ -278,7 +292,7 @@ export function MarketingMobileMenuSheet({
                               className="h-2.5 w-2.5 shrink-0 rounded-full"
                               style={{ backgroundColor: theme.accent }}
                             />
-                            <span className="text-[15px] font-semibold text-[#1c133b]">
+                            <span className="text-[15px] text-[#1c133b]">
                               {topic.label}
                             </span>
                           </Link>
@@ -286,9 +300,9 @@ export function MarketingMobileMenuSheet({
                       );
                     })}
                   </ul>
-                  <div className="mt-auto border-t border-[#1c133b]/08 bg-[#f8f4ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                  <div className="mt-auto px-6 pt-4">
                     <Link
-                      className="inline-flex h-11 w-full items-center justify-center rounded-full bg-white px-3 text-sm font-semibold text-[#312c79] ring-1 ring-[#1c133b]/10 touch-manipulation"
+                      className={LINK_CLASS}
                       href="/blog"
                       onClick={onClose}
                     >
@@ -296,100 +310,17 @@ export function MarketingMobileMenuSheet({
                     </Link>
                   </div>
                 </>
-              ) : (
+              ) : activeCategory ? (
                 <>
-                  <div className="px-5 pb-3 pt-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#823fb2]">
-                      Cleaning
-                    </p>
-                    <p className="mt-2 text-[15px] font-semibold leading-snug text-[#1c133b]">
-                      Domestic cleaning near you
-                    </p>
-                    <Link
-                      className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#312c79] px-3 text-sm font-semibold text-white touch-manipulation"
-                      href={
-                        customerHref.startsWith("/booking")
-                          ? "/booking/new"
-                          : customerHref
-                      }
-                      onClick={onClose}
-                    >
-                      Book my cleaning
-                    </Link>
-                  </div>
-                  <div className="px-5 pb-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
-                      Categories
-                    </p>
-                  </div>
-                  <ul className="flex-1 pb-2">
-                    {landingCategoryNav.map((menu) => (
-                      <li key={menu.label}>
-                        <button
-                          className="flex min-h-14 w-full items-center justify-between gap-3 border-b border-[#1c133b]/06 px-5 py-3.5 text-left touch-manipulation"
-                          onClick={() => setPanel(`cat:${menu.label}`)}
-                          type="button"
-                        >
-                          <span>
-                            <span className="block text-[15px] font-semibold text-[#1c133b]">
-                              {menu.label}
-                            </span>
-                            <span className="mt-0.5 block text-[12px] font-normal text-[#1c133b]/55">
-                              {menu.description}
-                            </span>
-                          </span>
-                          <ChevronRight
-                            aria-hidden
-                            className="size-5 shrink-0 text-[#1c133b]/45"
-                          />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-auto border-t border-[#1c133b]/08 bg-[#f8f4ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                    <Link
-                      className="inline-flex h-11 w-full items-center justify-center rounded-full bg-white px-3 text-sm font-semibold text-[#312c79] ring-1 ring-[#1c133b]/10 touch-manipulation"
-                      href="/cleaning"
-                      onClick={onClose}
-                    >
-                      See cleaning services
-                    </Link>
-                  </div>
-                </>
-              )}
-            </nav>
-
-            {/* Category services */}
-            <nav
-              aria-hidden={depth !== 2}
-              aria-label={
-                activeCategory
-                  ? `${activeCategory.label} services`
-                  : "Category services"
-              }
-              className="flex h-full w-1/3 flex-col overflow-y-auto overscroll-contain"
-            >
-              {activeCategory ? (
-                <>
-                  <div className="sticky top-0 z-10 border-b border-[#1c133b]/08 bg-white px-2 py-2">
-                    <button
-                      className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
-                      onClick={() => setPanel("cleaning")}
-                      type="button"
-                    >
-                      <ChevronLeft aria-hidden className="size-5" />
-                      Back
-                    </button>
-                  </div>
-                  <div className="px-5 pb-3 pt-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#823fb2]">
+                  <div className="px-6 pb-3">
+                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
                       {activeCategory.label}
-                    </p>
-                    <p className="mt-2 text-[15px] font-semibold leading-snug text-[#1c133b]">
+                    </h2>
+                    <p className="mt-1 text-[13px] leading-5 text-[#1c133b]/55">
                       {activeCategory.description}
                     </p>
                     <Link
-                      className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#312c79] px-3 text-sm font-semibold text-white touch-manipulation"
+                      className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#1c133b] px-3 text-sm font-semibold text-white touch-manipulation"
                       href={categoryBookHref(
                         customerHref,
                         activeCategory.bookCategory,
@@ -399,20 +330,15 @@ export function MarketingMobileMenuSheet({
                       {activeCategory.bookLabel}
                     </Link>
                   </div>
-                  <div className="px-5 pb-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
-                      Services
-                    </p>
-                  </div>
-                  <ul className="flex-1 pb-2">
+                  <ul className="flex-1 px-6">
                     {activeCategory.items.map((item) => (
                       <li key={item.href}>
                         <Link
-                          className="block border-b border-[#1c133b]/06 px-5 py-3.5 touch-manipulation"
+                          className="block border-b border-[#1c133b]/08 py-3.5 touch-manipulation"
                           href={item.href}
                           onClick={onClose}
                         >
-                          <span className="block text-[15px] font-semibold text-[#1c133b]">
+                          <span className="block text-[15px] font-medium text-[#1c133b]">
                             {item.label}
                           </span>
                           <span className="mt-0.5 block text-[12px] font-normal text-[#1c133b]/55">
@@ -422,9 +348,9 @@ export function MarketingMobileMenuSheet({
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-auto border-t border-[#1c133b]/08 bg-[#f8f4ff] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                  <div className="mt-auto px-6 pt-4">
                     <Link
-                      className="inline-flex h-11 w-full items-center justify-center rounded-full bg-white px-3 text-sm font-semibold text-[#312c79] ring-1 ring-[#1c133b]/10 touch-manipulation"
+                      className={LINK_CLASS}
                       href={activeCategory.href}
                       onClick={onClose}
                     >
@@ -433,7 +359,7 @@ export function MarketingMobileMenuSheet({
                   </div>
                 </>
               ) : (
-                <div className="p-5 text-sm text-[#1c133b]/50">
+                <div className="px-6 text-sm text-[#1c133b]/50">
                   Choose a category
                 </div>
               )}

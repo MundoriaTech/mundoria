@@ -143,7 +143,11 @@ export function LandingNavbar({
           paddingBottom: "0.5rem",
         }}
       >
-        <LandingLogo className="h-5 min-[380px]:h-6 sm:h-8" href="/" priority />
+        <LandingLogo
+          className="h-6 w-auto shrink-0 min-[380px]:h-7 sm:h-8"
+          href="/"
+          priority
+        />
 
         <nav
           aria-label="Primary navigation"
@@ -425,6 +429,7 @@ function MobileNav({
       <MarketingMobileMenuSheet
         accountHref={accountHref}
         customerHref={customerHref}
+        loginHref={loginHref}
         mobileOpen={mobileOpen}
         onClose={() => onMobileOpenChange(false)}
         showForCleanersCta={showForCleanersCta}

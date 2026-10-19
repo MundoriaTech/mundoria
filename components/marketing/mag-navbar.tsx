@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import {
   LANDING_NAV_PILL_H,
   LANDING_NAV_PILL_RADIUS,
@@ -210,10 +211,13 @@ export function MagNavbar({
       >
         <Link
           aria-label="Mundoria Mag home"
-          className="shrink-0 text-[1.05rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.3rem]"
+          className="inline-flex shrink-0 items-center gap-1.5 sm:gap-2"
           href="/blog"
         >
-          Mundoria <span className="text-[#d4694a]">Mag</span>
+          <LandingLogo className="h-6 w-auto min-[380px]:h-7 sm:h-8" priority />
+          <span className="text-[0.95rem] font-black tracking-[-0.06em] text-[#d4694a] sm:text-[1.15rem]">
+            Mag
+          </span>
         </Link>
 
         <nav
@@ -265,13 +269,14 @@ export function MagNavbar({
       <div className="pointer-events-auto lg:hidden">
         <MarketingMobileMenuSheet
           customerHref={bookingHref}
+          loginHref="/login"
           magTopics={categories.map((category) => ({
             href: category.href,
             label: category.label,
           }))}
           mobileOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}
-          showForCleanersCta={false}
+          showForCleanersCta
           variant="mag"
         />
       </div>
