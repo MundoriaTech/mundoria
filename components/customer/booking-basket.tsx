@@ -170,7 +170,6 @@ function BasketPanel({
   frequencyLabel,
   hasPets = null,
   headerTitle = "My basket",
-  hourlyRatePence: _hourlyRatePence = null,
   onJumpAddress,
   onJumpSchedule,
   onJumpService,

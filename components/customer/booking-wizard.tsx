@@ -82,7 +82,6 @@ import {
   estimateDuration,
   formatHourlyRate,
   formatMoney,
-  formatServiceName,
   indicativeFromPrice,
   indicativeHourlyRatePence,
   normalizeStandard,
@@ -1593,7 +1592,6 @@ export function BookingWizard({
           <Elements stripe={stripePromise}>
             <CheckoutStep
               address={roomsAddress}
-              amount={displayAmount}
               draft={{
                 ...draft,
                 cleaningStandard: selectedStandard,
@@ -3389,7 +3387,6 @@ function TimeStep({
 
 function CheckoutStep({
   address,
-  amount,
   draft,
   onAddressPersisted,
   onProcessingChange,
@@ -3399,7 +3396,6 @@ function CheckoutStep({
   validatePromo,
 }: {
   address: Address;
-  amount: number;
   draft: BookingDraft & {
     cleaningStandard: CleaningStandard;
     serviceType: ServiceType;
@@ -3586,25 +3582,6 @@ function CheckoutStep({
       <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
         All good? Book your cleaning
       </h2>
-
-      <div className="mt-4 rounded-2xl border border-transparent bg-white/70 p-4 text-sm text-[#4a4266]">
-        <p>
-          <span className="font-semibold text-[#1c133b]">
-            {formatServiceName(draft.serviceType)}
-          </span>
-        </p>
-        <p className="mt-1">
-          {resolvedAddress.address_line_1}, {resolvedAddress.city},{" "}
-          {resolvedAddress.postcode}
-        </p>
-        <p className="mt-1">
-          {draft.scheduledDate} at {draft.scheduledTime}
-          {draft.isRecurring ? ` · ${draft.recurrencePattern}` : ""}
-        </p>
-        <p className="mt-3 text-2xl font-bold text-[#1c133b]">
-          {formatMoney(amount)}
-          </p>
-        </div>
 
       <fieldset className="mt-5">
         <legend className="font-semibold text-[#1c133b]">Keys</legend>

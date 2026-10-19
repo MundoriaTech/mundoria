@@ -77,7 +77,6 @@ export function BookingAuthPrompt({
           return;
         }
         setMode("signin");
-        setMessage("Welcome back — enter your password to continue.");
         return;
       }
       setMode("create");
