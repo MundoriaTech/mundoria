@@ -159,7 +159,7 @@ const SOCIAL = [
     className: "bg-[#1877F2] hover:brightness-110",
     href:
       process.env.NEXT_PUBLIC_FACEBOOK_URL ??
-      "https://www.facebook.com/mundoriauk",
+      "https://www.facebook.com/people/Mundoria/61593293454130/",
     label: "Facebook",
   },
   {
@@ -168,7 +168,7 @@ const SOCIAL = [
       "bg-[linear-gradient(45deg,#f9ce34_0%,#ee2a7b_55%,#6228d7_100%)] hover:brightness-110",
     href:
       process.env.NEXT_PUBLIC_INSTAGRAM_URL ??
-      "https://www.instagram.com/mundoriauk",
+      "https://www.instagram.com/mundoria.uk",
     label: "Instagram",
   },
   {
@@ -182,7 +182,7 @@ const SOCIAL = [
     className: "bg-[#0A66C2] hover:brightness-110",
     href:
       process.env.NEXT_PUBLIC_LINKEDIN_URL ??
-      "https://www.linkedin.com/company/mundoriauk",
+      "https://www.linkedin.com/company/mundoria",
     label: "LinkedIn",
   },
 ] as const;
