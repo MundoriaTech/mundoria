@@ -10,6 +10,8 @@ interface FormFieldProps {
   hint?: string;
   htmlFor: string;
   label: string;
+  /** No fill — border only (e.g. booking address on a warm page wash). */
+  plain?: boolean;
 }
 
 /** Clears the shared Input chrome so only the outer field highlight shows. */
@@ -41,14 +43,22 @@ export function FormField({
   hint,
   htmlFor,
   label,
+  plain = false,
 }: FormFieldProps) {
   return (
     <div className="space-y-1.5">
       <div
         className={cn(
-          "group/field relative min-h-[3.25rem] rounded-xl border bg-[#f6f5f8] px-3.5 transition",
-          "focus-within:border-[#6a45b8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
-          error ? "border-[#d4694a]" : "border-[#e4e0eb]",
+          "group/field relative min-h-[3.25rem] rounded-xl border px-3.5 transition",
+          plain
+            ? "bg-transparent focus-within:bg-transparent"
+            : "bg-[#f6f5f8] focus-within:bg-white",
+          "focus-within:border-[#6a45b8] focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
+          error
+            ? "border-[#d4694a]"
+            : plain
+              ? "border-black"
+              : "border-[#e4e0eb]",
           // Empty + idle: label is the large in-field placeholder
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:top-1/2",
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:-translate-y-1/2",

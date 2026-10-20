@@ -202,8 +202,8 @@ export function ServiceCategoriesSection({
                       }
                       type="button"
                     >
-                      <span className="min-w-0">
-                        <span className="block text-[16px] font-semibold tracking-[-0.02em] text-[#2a2158] sm:text-[17px]">
+                      <span className="min-w-0 flex-1">
+                        <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#2a2158] sm:text-[17px]">
                           {item.label}
                         </span>
                         <span className="mt-1 block max-w-sm text-sm leading-5 text-[#5c5670]">

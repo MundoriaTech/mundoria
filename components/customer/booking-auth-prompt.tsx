@@ -9,6 +9,7 @@ import { AuthSignupLegal } from "@/components/auth/auth-signup-legal";
 import { FormField } from "@/components/auth/form-field";
 import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { passwordMeetsRequirements } from "@/lib/auth/password-requirements";
 import {
   signupPendingLoginPath,
   rememberSignupEmail,
@@ -43,12 +44,15 @@ export function BookingAuthPrompt({
   const [fullName, setFullName] = useState("");
   const [nationalNumber, setNationalNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const passwordReady = passwordMeetsRequirements(password);
 
   function setMode(next: BookingAuthMode) {
     setMessage(null);
+    setPasswordError(undefined);
     onModeChange(next);
   }
 
@@ -102,9 +106,17 @@ export function BookingAuthPrompt({
     event.preventDefault();
     setBusy(true);
     setMessage(null);
+    setPasswordError(undefined);
     const phone = storedPhone(nationalFromPhone(nationalNumber));
     if (phone.replace(/\D/g, "").length < 10) {
       setMessage("Enter a valid phone number.");
+      setBusy(false);
+      return;
+    }
+    if (!passwordMeetsRequirements(password)) {
+      setPasswordError(
+        "Use 8+ characters with uppercase, lowercase, a number, and a symbol.",
+      );
       setBusy(false);
       return;
     }
@@ -275,12 +287,22 @@ export function BookingAuthPrompt({
             required
           />
           <div className="space-y-2">
-            <FormField htmlFor="booking-auth-password" label="Password">
+            <FormField
+              error={
+                passwordError ? { message: passwordError, type: "validate" } : undefined
+              }
+              htmlFor="booking-auth-password"
+              label="Password"
+            >
               <PasswordInput
                 autoComplete="new-password"
                 id="booking-auth-password"
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setPasswordError(undefined);
+                }}
                 placeholder=" "
+                required
                 value={password}
               />
             </FormField>
@@ -291,7 +313,11 @@ export function BookingAuthPrompt({
             id="booking-marketing-opt-in"
             onCheckedChange={setMarketingOptIn}
           />
-          <Button className="h-11 w-full" disabled={busy} type="submit">
+          <Button
+            className="h-11 w-full"
+            disabled={busy || !passwordReady}
+            type="submit"
+          >
             {busy ? "Saving…" : "Create account"}
           </Button>
           <button
@@ -323,15 +349,19 @@ export function BookingAuthPrompt({
               />
             </FormField>
           )}
-          <FormField htmlFor="booking-auth-signin-password" label="Password">
-            <PasswordInput
-              autoComplete="current-password"
-              id="booking-auth-signin-password"
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder=" "
-              value={password}
-            />
-          </FormField>
+          <div className="space-y-2">
+            <FormField htmlFor="booking-auth-signin-password" label="Password">
+              <PasswordInput
+                autoComplete="current-password"
+                id="booking-auth-signin-password"
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder=" "
+                required
+                value={password}
+              />
+            </FormField>
+            <PasswordRequirementsList password={password} />
+          </div>
           <Button className="h-11 w-full" disabled={busy} type="submit">
             {busy ? "Signing in…" : "Continue booking"}
           </Button>

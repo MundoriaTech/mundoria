@@ -1,4 +1,5 @@
 import { MUNDORIA_WORDMARK_ON_DARK_SRC } from "@/lib/brand";
+import { FAQ_LINKS } from "@/lib/seo/faq-links";
 
 export type EmailTemplateId =
   | "admin.alert"
@@ -65,6 +66,8 @@ interface TemplateContext {
   cards?: Array<{ label: string; value?: unknown }>;
   intro?: string;
   preview: string;
+  /** Contextual FAQ / help links shown after the primary CTA. */
+  relatedLinks?: Array<{ href: string; label: string }>;
   subject: string;
   title: string;
   tone?: Tone;
@@ -207,6 +210,16 @@ function resolveTemplate(
         cards: bookingCards(data),
         intro: firstName ? `Hi ${firstName}, your cleaner request is in.` : "Your cleaner request is in.",
         preview: "Your Mundoria booking is confirmed.",
+        relatedLinks: [
+          {
+            href: publicEmailAssetUrl(FAQ_LINKS.whenCharged),
+            label: "When will I be charged?",
+          },
+          {
+            href: publicEmailAssetUrl(FAQ_LINKS.cancellationFee),
+            label: "Cancellation fees",
+          },
+        ],
         subject: "Your Mundoria booking is confirmed",
         title: "Booking confirmed",
         tone: "customer",
@@ -308,6 +321,16 @@ function resolveTemplate(
         buttonLabel: "View booking",
         cards: bookingCards(data),
         preview: "Your Mundoria booking was cancelled.",
+        relatedLinks: [
+          {
+            href: publicEmailAssetUrl(FAQ_LINKS.refundOnCancel),
+            label: "Refunds after cancellation",
+          },
+          {
+            href: publicEmailAssetUrl(FAQ_LINKS.cancellationFee),
+            label: "Cancellation fees",
+          },
+        ],
         subject: "Your Mundoria booking was cancelled",
         title: "Booking cancelled",
         tone: "warning",
@@ -639,6 +662,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
                 <p class="email-copy" style="margin:0;font-size:16px;line-height:1.6;color:#1c133b;">${escapeHtml(context.body)}</p>
                 ${cards.length ? renderCards(cards) : ""}
                 ${context.buttonHref ? renderButton(context.buttonHref, context.buttonLabel ?? "Open Mundoria") : ""}
+                ${renderRelatedLinks(context.relatedLinks)}
                 ${renderSecurityNote(data)}
               </td>
             </tr>
@@ -691,6 +715,19 @@ function renderSecurityNote(data: Record<string, unknown>) {
   return `<p class="email-note" style="margin:22px 0 0;padding:14px 16px;border-radius:16px;background:#fff1ea;color:#9a3412;font-size:13px;line-height:1.55;">${escapeHtml(String(data.securityNote))}</p>`;
 }
 
+function renderRelatedLinks(
+  links?: Array<{ href: string; label: string }>,
+) {
+  if (!links?.length) return "";
+  const items = links
+    .map(
+      (link) =>
+        `<a href="${escapeAttribute(link.href)}" style="color:#312c79;font-weight:700;text-decoration:underline;">${escapeHtml(link.label)}</a>`,
+    )
+    .join(" · ");
+  return `<p class="email-copy" style="margin:18px 0 0;font-size:13px;line-height:1.55;color:#6b6588;">More detail: ${items}</p>`;
+}
+
 function renderText(context: TemplateContext, cards: Array<{ label: string; value?: unknown }>, supportEmail: string) {
   return [
     "Mundoria",
@@ -699,6 +736,9 @@ function renderText(context: TemplateContext, cards: Array<{ label: string; valu
     context.body,
     ...cards.map((card) => `${card.label}: ${formatValue(card.value)}`),
     context.buttonHref ? `${context.buttonLabel ?? "Open Mundoria"}: ${context.buttonHref}` : "",
+    ...(context.relatedLinks ?? []).map(
+      (link) => `${link.label}: ${link.href}`,
+    ),
     `Need help? Contact ${supportEmail}.`,
   ]
     .filter(Boolean)

@@ -1,9 +1,16 @@
 "use client";
 
 import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
+import { FormField } from "@/components/auth/form-field";
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
@@ -427,15 +434,10 @@ export function AddressForm({
     }
   }
 
-  const addressInput = (
-    <Input
-      onChange={(event) => update("address_line_1", event.target.value)}
-      placeholder="Enter your address here"
-      required
-      value={values.address_line_1}
-    />
-  );
-
+  const addressFieldId = useId();
+  const addressLabel = compact
+    ? "Search address"
+    : "Enter your address here";
   const showAccountExtras = !compact && !localOnly;
 
   return (
@@ -445,14 +447,11 @@ export function AddressForm({
       ) : null}
 
       <div className="space-y-2">
-        {bare ? null : (
-          <p className="text-sm font-medium">
-            {compact ? "Search address" : "Where will your cleaning take place"}
-          </p>
-        )}
         {mapsKey ? (
           <AddressAutocompleteInput
             apiKey={mapsKey}
+            id={addressFieldId}
+            label={addressLabel}
             onPlaceSelected={(place) => {
               applySelectedPlace(place);
               if (localOnly && compact) {
@@ -499,7 +498,17 @@ export function AddressForm({
           />
         ) : (
           <>
-            {addressInput}
+            <FormField htmlFor={addressFieldId} label={addressLabel} plain>
+              <Input
+                id={addressFieldId}
+                onChange={(event) =>
+                  update("address_line_1", event.target.value)
+                }
+                placeholder=" "
+                required
+                value={values.address_line_1}
+              />
+            </FormField>
             {!bare ? (
               <p className="text-xs text-amber-700">
                 Address search isn’t configured. Add{" "}
@@ -509,13 +518,9 @@ export function AddressForm({
             ) : null}
           </>
         )}
-        {bare ? null : values.city && values.postcode ? (
+        {!bare && values.city && values.postcode ? (
           <p className="text-xs text-muted-foreground">
             {values.city} · {values.postcode.toUpperCase()}
-          </p>
-        ) : mapsKey && !bare ? (
-          <p className="text-xs text-muted-foreground">
-            Choose a suggestion so city and postcode fill in automatically.
           </p>
         ) : null}
       </div>
@@ -591,11 +596,15 @@ export function AddressForm({
 
 function AddressAutocompleteInput({
   apiKey,
+  id,
+  label,
   onPlaceSelected,
   onQueryChange,
   value,
 }: {
   apiKey: string;
+  id: string;
+  label: string;
   onPlaceSelected: (place: GeoapifyFeature) => void;
   onQueryChange: (value: string) => void;
   value: string;
@@ -668,7 +677,7 @@ function AddressAutocompleteInput({
   }, [apiKey, value]);
 
   const syncMenuBox = () => {
-    const node = inputRef.current;
+    const node = rootRef.current;
     if (!node) return;
     const rect = node.getBoundingClientRect();
     setMenuBox({
@@ -712,21 +721,24 @@ function AddressAutocompleteInput({
 
   return (
     <div className="relative" ref={rootRef}>
-      <Input
-        autoComplete="off"
-        onBlur={() => {
-          blurTimer.current = setTimeout(() => setOpen(false), 180);
-        }}
-        onChange={(event) => onQueryChange(event.target.value)}
-        onFocus={() => {
-          if (blurTimer.current) clearTimeout(blurTimer.current);
-          if (suggestions.length || fetchError) setOpen(true);
-        }}
-        placeholder="Enter your address here"
-        ref={inputRef}
-        required
-        value={value}
-      />
+      <FormField htmlFor={id} label={label} plain>
+        <Input
+          autoComplete="off"
+          id={id}
+          onBlur={() => {
+            blurTimer.current = setTimeout(() => setOpen(false), 180);
+          }}
+          onChange={(event) => onQueryChange(event.target.value)}
+          onFocus={() => {
+            if (blurTimer.current) clearTimeout(blurTimer.current);
+            if (suggestions.length || fetchError) setOpen(true);
+          }}
+          placeholder=" "
+          ref={inputRef}
+          required
+          value={value}
+        />
+      </FormField>
       {showMenu
         ? createPortal(
             <ul
@@ -807,6 +819,7 @@ function AddressTagField({
   onChange: (label: string) => void;
   value: string;
 }) {
+  const fieldId = useId();
   const preset = ADDRESS_TAGS.includes(value as (typeof ADDRESS_TAGS)[number]);
   const [custom, setCustom] = useState(!preset && value.length > 0);
 
@@ -848,11 +861,14 @@ function AddressTagField({
         </button>
       </div>
       {custom ? (
-        <Input
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="e.g. Parents"
-          value={value}
-        />
+        <FormField htmlFor={fieldId} label="Custom tag" plain>
+          <Input
+            id={fieldId}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder=" "
+            value={value}
+          />
+        </FormField>
       ) : null}
     </div>
   );

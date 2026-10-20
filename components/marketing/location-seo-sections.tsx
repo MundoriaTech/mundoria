@@ -174,6 +174,13 @@ export function LocationFaqBlock({
         More answers in our{" "}
         <Link
           className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          href="/faq"
+        >
+          FAQ
+        </Link>{" "}
+        and{" "}
+        <Link
+          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
           href="/help"
         >
           Help Centre

@@ -140,12 +140,6 @@ export function LandingFooter({
             <Link className="transition hover:text-[#312c79]" href="/terms">
               Terms
             </Link>
-            <Link
-              className="transition hover:text-[#312c79]"
-              href={configured ? "/login" : "/setup"}
-            >
-              Login
-            </Link>
           </div>
         </div>
       </div>

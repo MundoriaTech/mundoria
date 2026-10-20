@@ -2,7 +2,13 @@
 
 import { ArrowDown, ArrowUp, ChevronDown, Search, X } from "lucide-react";
 import Link from "next/link";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { FAQ_NAV_GROUPS } from "@/lib/seo/site-faq-catalogue";
 import {
@@ -43,23 +49,62 @@ function groupSections(sections: SiteFaqSection[]) {
   })).filter((group) => group.sections.length > 0);
 }
 
-function openFaqFromHash() {
-  const id = window.location.hash.replace(/^#/, "");
-  if (!id) return;
+function readFaqHash() {
+  return window.location.hash.replace(/^#/, "");
+}
 
+/**
+ * Track URL hash, including Next.js same-page `/faq#…` navigations that often
+ * skip the native `hashchange` event.
+ */
+function subscribeFaqHash(onStoreChange: () => void) {
+  const notify = () => onStoreChange();
+  window.addEventListener("hashchange", notify);
+  window.addEventListener("popstate", notify);
+
+  const { pushState, replaceState } = window.history;
+  window.history.pushState = function (...args) {
+    const result = pushState.apply(this, args as Parameters<typeof pushState>);
+    queueMicrotask(notify);
+    return result;
+  };
+  window.history.replaceState = function (...args) {
+    const result = replaceState.apply(
+      this,
+      args as Parameters<typeof replaceState>,
+    );
+    queueMicrotask(notify);
+    return result;
+  };
+
+  return () => {
+    window.removeEventListener("hashchange", notify);
+    window.removeEventListener("popstate", notify);
+    window.history.pushState = pushState;
+    window.history.replaceState = replaceState;
+  };
+}
+
+function useFaqHash() {
+  return useSyncExternalStore(subscribeFaqHash, readFaqHash, () => "");
+}
+
+function openFaqTarget(id: string) {
   const el = document.getElementById(id);
-  if (!el) return;
+  if (!el) return false;
 
   if (el instanceof HTMLDetailsElement) {
     el.open = true;
   }
 
   el.scrollIntoView({ behavior: "smooth", block: "start" });
+  return true;
 }
 
 export function FaqCatalogue() {
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
+  const hashId = useFaqHash();
   const sections = useMemo(
     () => filterSections(deferredQuery),
     [deferredQuery],
@@ -75,10 +120,64 @@ export function FaqCatalogue() {
     isFiltering && totalAnswers > 0 && totalAnswers <= 8;
 
   useEffect(() => {
-    openFaqFromHash();
-    window.addEventListener("hashchange", openFaqFromHash);
-    return () => window.removeEventListener("hashchange", openFaqFromHash);
-  }, [sections]);
+    if (!hashId) return;
+
+    // Search can hide the target Q&A from the DOM — clear it first.
+    if (query.trim()) {
+      setQuery("");
+      return;
+    }
+
+    let cancelled = false;
+    let attempts = 0;
+    let frame = 0;
+
+    const tryOpen = () => {
+      if (cancelled) return;
+      if (openFaqTarget(hashId)) return;
+      if (attempts++ >= 40) return;
+      frame = requestAnimationFrame(tryOpen);
+    };
+
+    tryOpen();
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
+  }, [hashId, query, sections]);
+
+  // Same-hash navbar re-clicks don't change the URL snapshot — open directly.
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const anchor = (event.target as Element | null)?.closest?.("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+
+      const href = anchor.getAttribute("href");
+      if (!href) return;
+
+      let url: URL;
+      try {
+        url = new URL(href, window.location.origin);
+      } catch {
+        return;
+      }
+
+      if (url.pathname !== "/faq" && url.pathname !== "/faq/") return;
+      const id = url.hash.replace(/^#/, "");
+      if (!id) return;
+
+      window.setTimeout(() => {
+        if (query.trim()) {
+          setQuery("");
+          return;
+        }
+        openFaqTarget(id);
+      }, 0);
+    };
+
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [query]);
 
   useEffect(() => {
     if (!autoOpenMatches) return;
@@ -103,7 +202,7 @@ export function FaqCatalogue() {
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8798]" />
           <input
             autoComplete="off"
-            className="h-12 w-full rounded-full border border-[#e4daf5] bg-white pl-11 pr-11 text-sm text-[#1c133b] shadow-[0_8px_24px_rgba(49,44,121,0.04)] outline-none transition placeholder:text-[#9a95a8] focus:border-[#1c133b]/35 focus:shadow-[0_10px_28px_rgba(49,44,121,0.08)]"
+            className="h-12 w-full rounded-full border border-[#e4daf5] bg-white pl-11 pr-11 text-sm text-[#1c133b] shadow-[0_8px_24px_rgba(49,44,121,0.04)] outline-none transition placeholder:text-[#9a95a8] focus:border-[#1c133b]/35 focus:shadow-[0_10px_28px_rgba(49,44,121,0.08)] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search questions…"
             type="search"

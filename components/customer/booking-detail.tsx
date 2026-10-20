@@ -28,6 +28,7 @@ import {
   isCleanerVisibleToCustomer,
   isWaitingForCleanerAcceptance,
 } from "@/lib/customer/booking-visibility";
+import { hourlyRatePence } from "@/lib/customer/rate-card";
 import {
   formatMoney,
   formatServiceName,
@@ -37,6 +38,7 @@ import {
   paymentStatusDescription,
   paymentStatusLabel,
 } from "@/lib/customer/payment-status";
+import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import {
   canCustomerChangeSchedule,
   canCustomerReschedule,
@@ -518,6 +520,10 @@ export function BookingDetail({
             durationHours={booking.estimated_duration_hours}
             frequencyLabel={frequencyLabelForBooking(booking)}
             hasPets={petsFromNotes(booking.special_instructions)}
+            hourlyRatePence={hourlyRatePence(
+              booking.service_type,
+              booking.cleaning_standard,
+            )}
             priorityAreas={booking.special_attention_areas ?? []}
             scheduledDate={booking.scheduled_date}
             scheduledTime={booking.scheduled_start_time}
@@ -738,6 +744,23 @@ export function BookingDetail({
               </label>
             </div>
           ) : null}
+          <p className="mb-3 text-sm leading-6 text-[#5a5470]">
+            Full policy:{" "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href={FAQ_LINKS.cancellationFee}
+            >
+              cancellation fees
+            </Link>
+            {" · "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href={FAQ_LINKS.refundOnCancel}
+            >
+              refunds
+            </Link>
+            .
+          </p>
           <textarea
             autoFocus
             className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] placeholder:text-[#8b8798] focus:ring-2"

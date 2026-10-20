@@ -71,7 +71,9 @@ The booking flow shows a clear estimate before you confirm. You only pay what is
 Mundoria accepts card payments through our secure checkout. Cash and cheque are not supported for platform bookings.
 
 ## Why card only
-Card payments protect both of you: the cleaner gets paid after the job, and you keep a clear record with status updates on the booking.`,
+Card payments protect both of you: the cleaner gets paid after the job, and you keep a clear record with status updates on the booking.
+
+See also: [When will I be charged?](/faq#payments-when-will-i-be-charged) in the FAQ.`,
     collection_id: C[0].id,
     slug: "payment-methods",
     sort_order: 30,
@@ -89,7 +91,9 @@ Mundoria authorises (holds) your card when you book. Funds are captured after th
 3. **After the clean** — status **Paid**, and your receipt / invoice is ready under Payments & receipts.
 
 ## If you prefer not to pay in advance
-The hold is how we keep the booking secure for you and the cleaner. The actual charge usually lands after checkout and confirmation of the clean.`,
+The hold is how we keep the booking secure for you and the cleaner. The actual charge usually lands after checkout and confirmation of the clean.
+
+Full answer: [When will I be charged?](/faq#payments-when-will-i-be-charged).`,
     collection_id: C[0].id,
     slug: "why-pay-in-advance",
     sort_order: 40,
@@ -103,7 +107,7 @@ The hold is how we keep the booking secure for you and the cleaner. The actual c
 - Within 48 hours: a partial fee may apply.
 - Within 24 hours: the full amount may be retained.
 
-Exact timing is based on your scheduled start. See Terms for the full policy.
+Exact timing is based on your scheduled start. See [cancellation fees](/faq#cancellations-is-there-a-cancellation-fee) and [refunds](/faq#payments-can-i-get-a-refund-if-my-booking-is-cancelled) in the FAQ, or Terms for the full policy.
 
 ## Reschedule instead
 If you can keep the booking with a new time, request a change first — cancelling is a last resort.`,
@@ -121,7 +125,9 @@ If you can keep the booking with a new time, request a change first — cancelli
 3. Contact us in chat with the time you tried — include any error message shown.
 
 ## After a booking already exists
-If a later payment step fails (for example a recurring visit), open the booking in your account and contact support with the booking reference. Do not pay the cleaner off-platform.`,
+If a later payment step fails (for example a recurring visit), open the booking in your account and contact support with the booking reference. Do not pay the cleaner off-platform.
+
+Related FAQ: [What happens if my payment fails?](/faq#payments-what-happens-if-my-payment-fails).`,
     collection_id: C[0].id,
     slug: "payment-failed",
     sort_order: 60,
@@ -391,7 +397,7 @@ Recurring schedules make it easier to keep the same cleaner over time.`,
     body: `## Before the visit
 - Clear surfaces you want cleaned thoroughly.
 - Secure pets or note them in Preferences.
-- Leave access instructions (key safe, entry code, who will be home).
+- Leave access instructions (key safe, entry code, who will be home). See [How do I provide access if I am not home?](/faq#booking-how-do-i-provide-access-if-i-am-not-home).
 - Flag fragile items or rooms to skip.
 
 ## Supplies

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { CategoryFaq } from "@/components/marketing/service-category/service-category-marketing-page";
+import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import {
   LAUNCH_CITY,
   marketingServiceBySlug,
@@ -452,7 +453,8 @@ function costFaq(service: MarketingService): CategoryFaq {
       property size, duration, cleaning standard and any add-ons.{" "}
       <FaqLink href={service.bookingHref}>See your price in booking</FaqLink>{" "}
       before you pay — no surprise extras on the day. More pricing detail is in
-      the <FaqLink href="/help">Help Centre</FaqLink>.
+      the <FaqLink href={FAQ_LINKS.pricing}>FAQ</FaqLink> and{" "}
+      <FaqLink href="/help">Help Centre</FaqLink>.
     </p>,
   );
 }
@@ -539,8 +541,9 @@ function suppliesFaq(service: MarketingService): CategoryFaq {
         DIY cleaning sprays guide
       </FaqLink>
       . Share entry notes, pets and any rooms to skip in the{" "}
-      <FaqLink href={service.bookingHref}>booking</FaqLink>. More detail is in
-      the <FaqLink href="/help">Help Centre</FaqLink>.
+      <FaqLink href={service.bookingHref}>booking</FaqLink>. More on access is
+      in the <FaqLink href={FAQ_LINKS.accessNotHome}>FAQ</FaqLink> and{" "}
+      <FaqLink href="/help">Help Centre</FaqLink>.
     </p>,
   );
 }
@@ -557,7 +560,8 @@ function whyFaq(service: MarketingService): CategoryFaq {
       <FaqLink href={`/cleaners/${LAUNCH_CITY.slug}`}>
         vetted cleaners in {LAUNCH_CITY.name}
       </FaqLink>
-      , or read more in the <FaqLink href="/help">Help Centre</FaqLink>:
+      , or read more in the <FaqLink href="/faq">FAQ</FaqLink> and{" "}
+      <FaqLink href="/help">Help Centre</FaqLink>:
     </p>,
     {
       points: [

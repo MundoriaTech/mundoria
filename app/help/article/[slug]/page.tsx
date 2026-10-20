@@ -97,13 +97,29 @@ export default async function HelpArticlePage({ params }: PageProps) {
             Didn’t find what you need?
           </p>
           <p className="mt-2 text-sm leading-6 text-[#5a5470]">
-            Reach the Mundoria team in chat — we’ll point you to the right
+            Try the{" "}
+            <Link
+              className="font-semibold underline-offset-2 hover:underline"
+              href="/faq"
+              style={{ color: accent }}
+            >
+              FAQ
+            </Link>{" "}
+            or reach the Mundoria team in chat — we’ll point you to the right
             place.
           </p>
-          <ContactSupportButton
-            className="mt-3 inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold text-white transition hover:brightness-95"
-            style={{ backgroundColor: accent }}
-          />
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <ContactSupportButton
+              className="inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold text-white transition hover:brightness-95"
+              style={{ backgroundColor: accent }}
+            />
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-full border border-[#d9ccef] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-white/80"
+              href="/faq"
+            >
+              Browse FAQ
+            </Link>
+          </div>
         </div>
       </BrandedSection>
     </BrandedPageWash>

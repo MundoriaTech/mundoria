@@ -123,11 +123,25 @@ export default async function HelpCentrePage() {
               Still need a hand?
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-              Reach the Mundoria team in chat. For an active booking, use in-app
-              messaging so the right people see the full context.
+              Browse the{" "}
+              <Link
+                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                href="/faq"
+              >
+                FAQ
+              </Link>{" "}
+              for booking, payments and cancellations, or reach the Mundoria
+              team in chat. For an active booking, use in-app messaging so the
+              right people see the full context.
             </p>
-            <div className="mt-5">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
               <ContactSupportButton className="inline-flex h-11 items-center justify-center rounded-full bg-[#6a45b8] px-5 text-sm font-semibold text-white transition hover:bg-[#5a38a3]" />
+              <Link
+                className="inline-flex h-11 items-center justify-center rounded-full border border-[#d9ccef] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+                href="/faq"
+              >
+                Browse FAQ
+              </Link>
             </div>
           </div>
         </BrandedSection>

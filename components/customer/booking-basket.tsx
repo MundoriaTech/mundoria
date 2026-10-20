@@ -10,6 +10,10 @@ import { formatHourlyRate, formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
 import type { Address } from "@/types/customer";
 
+/** Gold tint — Mundoria option 5 on the cream booking wash. */
+const BASKET_SURFACE =
+  "border border-[#e8d4b0] bg-[#fffefb] shadow-[0_10px_28px_rgba(28,19,59,0.05)]";
+
 type BasketProps = {
   addOns: { amount: number; hourly?: boolean; label: string }[];
   address: Address | null;
@@ -22,7 +26,7 @@ type BasketProps = {
   durationHours: number | null;
   frequencyLabel: string | null;
   hasPets?: boolean | null;
-  /** Optional; no longer shown on the Cleaning row (kept for callers). */
+  /** Labour rate for the selected service / standard (pence per hour). */
   hourlyRatePence?: number | null;
   priorityAreas?: string[];
   scheduledDate: string;
@@ -69,6 +73,7 @@ function formatBasketAddress(address: Address) {
 
 function BasketSection({
   children,
+  expandable = true,
   filled = true,
   icon,
   open,
@@ -77,6 +82,8 @@ function BasketSection({
   title,
 }: {
   children?: ReactNode;
+  /** When false, no chevron / expand (title already shows everything). */
+  expandable?: boolean;
   /** When false, show a quiet placeholder row (no chevron). */
   filled?: boolean;
   icon: ReactNode;
@@ -85,47 +92,59 @@ function BasketSection({
   right?: ReactNode;
   title: string;
 }) {
+  const canExpand = filled && expandable;
+  const row = (
+    <>
+      <span
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center",
+          filled ? "text-[#6a45b8]" : "text-[#b0a9bc]",
+        )}
+      >
+        {icon}
+      </span>
+      <span
+        className={cn(
+          "min-w-0 flex-1 text-sm",
+          filled ? "font-bold text-[#1c133b]" : "font-semibold text-[#8a8498]",
+        )}
+      >
+        {title}
+      </span>
+      {right ? (
+        <span
+          className={cn(
+            "shrink-0 text-[11px] font-normal tabular-nums",
+            filled ? "text-[#5a5470]" : "text-[#8a8498]",
+          )}
+        >
+          {right}
+        </span>
+      ) : null}
+    </>
+  );
+
   return (
     <div className="border-b border-[#e4daf5] last:border-b-0">
       <div className="flex w-full items-center gap-1 px-2 py-2 sm:px-3">
-        {filled ? (
+        {canExpand ? (
           <button
-            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 text-left touch-manipulation hover:bg-white/50"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 text-left touch-manipulation hover:bg-black/[0.03]"
             onClick={onToggle}
             type="button"
           >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[#6a45b8]">
-              {icon}
-            </span>
-            <span className="min-w-0 flex-1 text-sm font-bold text-[#1c133b]">
-              {title}
-            </span>
-            {right ? (
-              <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#5a5470]">
-                {right}
-              </span>
-            ) : null}
+            {row}
           </button>
         ) : (
           <div className="flex min-w-0 flex-1 items-center gap-3 px-2 py-1.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[#b0a9bc]">
-              {icon}
-            </span>
-            <span className="min-w-0 flex-1 text-sm font-semibold text-[#8a8498]">
-              {title}
-            </span>
-            {right ? (
-              <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#8a8498]">
-                {right}
-              </span>
-            ) : null}
+            {row}
           </div>
         )}
-        {filled ? (
+        {canExpand ? (
           <button
             aria-expanded={open}
             aria-label={open ? "Hide details" : "Show details"}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8b8798] touch-manipulation hover:bg-white/50"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8b8798] touch-manipulation hover:bg-black/[0.03]"
             onClick={onToggle}
             type="button"
           >
@@ -135,7 +154,7 @@ function BasketSection({
           </button>
         ) : null}
       </div>
-      {filled && open && children ? (
+      {canExpand && open && children ? (
         <div className="px-4 pb-4 pl-[3.25rem] text-sm font-bold text-[#1c133b]">
           {children}
         </div>
@@ -156,6 +175,7 @@ function BasketPanel({
   frequencyLabel,
   hasPets = null,
   headerTitle = "My basket",
+  hourlyRatePence = null,
   priorityAreas = [],
   scheduledDate,
   scheduledTime,
@@ -164,10 +184,17 @@ function BasketPanel({
   showHeader = true,
 }: BasketProps & { headerTitle?: string; showHeader?: boolean }) {
   const [open, setOpen] = useState({
-    address: false,
     schedule: false,
-    service: false,
+    /** Open when a category is already chosen so the £/h rate is visible. */
+    service: Boolean(serviceLabel),
   });
+  const prevServiceLabel = useRef(serviceLabel);
+  useEffect(() => {
+    if (serviceLabel && serviceLabel !== prevServiceLabel.current) {
+      setOpen((current) => ({ ...current, service: true }));
+    }
+    prevServiceLabel.current = serviceLabel;
+  }, [serviceLabel]);
   const hasAnything = Boolean(address || serviceLabel || scheduledDate);
   const when = formatWhen(scheduledDate, scheduledTime);
   const scheduleDates =
@@ -179,7 +206,7 @@ function BasketPanel({
 
   if (!hasAnything) {
     return (
-      <div className="overflow-hidden rounded-[1.25rem] border border-transparent bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
+      <div className={cn("overflow-hidden rounded-[1.25rem]", BASKET_SURFACE)}>
         {showHeader ? (
           <p className="px-5 pt-5 text-center text-base font-bold text-[#1c133b]">
             {headerTitle}
@@ -203,9 +230,22 @@ function BasketPanel({
     );
   }
 
+  const hourlyLabel =
+    hourlyRatePence != null ? formatHourlyRate(hourlyRatePence) : undefined;
+
   const serviceLines: { key: string; label: string; price?: string }[] = [];
   if (serviceLabel) {
-    serviceLines.push({ key: "service", label: serviceLabel });
+    serviceLines.push({
+      key: "service",
+      label: serviceLabel,
+      price: hourlyLabel,
+    });
+  } else if (hourlyLabel) {
+    serviceLines.push({
+      key: "hourly",
+      label: "Hourly rate",
+      price: hourlyLabel,
+    });
   }
   if (frequencyLabel) {
     serviceLines.push({ key: "frequency", label: frequencyLabel });
@@ -251,7 +291,7 @@ function BasketPanel({
     });
   }
 
-  /** Cleaning header shows visit total (labour + add-ons), not the hourly rate. */
+  /** Cleaning header shows visit total; hourly rate sits on the service line. */
   const cleaningTotalLabel = amount != null ? formatMoney(amount) : null;
 
   const scheduleTitle =
@@ -269,7 +309,7 @@ function BasketPanel({
   const scheduleFilled = scheduleDates.length > 0 || times.length > 0;
 
   return (
-    <div className="overflow-hidden rounded-[1.25rem] border border-transparent bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]">
+    <div className={cn("overflow-hidden rounded-[1.25rem]", BASKET_SURFACE)}>
       {showHeader ? (
         <div className="border-b border-[#e4daf5] px-5 py-4">
           <p className="text-center text-base font-bold text-[#1c133b]">
@@ -279,14 +319,13 @@ function BasketPanel({
       ) : null}
 
       <BasketSection
+        expandable={false}
         filled={addressFilled}
         icon={<MapPin className="h-5 w-5" weight="fill" />}
-        onToggle={() => setOpen((c) => ({ ...c, address: !c.address }))}
-        open={open.address}
+        onToggle={() => {}}
+        open={false}
         title={address ? formatBasketAddress(address) : "Add your address"}
-      >
-        {null}
-      </BasketSection>
+      />
 
       <BasketSection
         filled={serviceFilled || amount != null}
@@ -431,7 +470,7 @@ export function BookingBasketSheet({
         type="button"
       />
       <div
-        className="relative flex max-h-[min(78dvh,34rem)] w-full flex-col overflow-hidden rounded-t-[1.25rem] bg-white outline-none"
+        className="relative flex max-h-[min(78dvh,34rem)] w-full flex-col overflow-hidden rounded-t-[1.25rem] border border-[#e8d4b0] bg-[#fffefb] outline-none"
         ref={panelRef}
         tabIndex={-1}
       >

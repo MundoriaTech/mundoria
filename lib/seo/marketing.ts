@@ -438,7 +438,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Visit the Help Centre, or use Contact us on the site to open chat with the Mundoria team. For an active booking, use in-app messaging so the right people see the full context.",
+      "Start with the FAQ for booking, payments and cancellations. Visit the Help Centre for longer guides, or use Contact us on the site to open chat with the Mundoria team. For an active booking, use in-app messaging so the right people see the full context.",
     question: "How do I contact support?",
   },
 ];

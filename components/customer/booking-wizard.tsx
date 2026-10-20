@@ -32,7 +32,13 @@ import {
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
 import { addressOutsideCoverage } from "@/lib/seo/cleaner-coverage";
@@ -98,6 +104,7 @@ import {
   calculateOfficeQuote,
   type OfficeSpaceSize,
 } from "@/lib/customer/office-pricing";
+import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import { cn } from "@/lib/utils";
 import type {
   Address,
@@ -1613,11 +1620,11 @@ export function BookingWizard({
         )}
       >
         <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-start lg:gap-0">
-          <div className="min-w-0 w-full lg:w-[49.13%]">
-            {stepBody}
-            {/* Desktop: Next sits under the form — avoids a large empty band. */}
+          <div className="flex min-w-0 w-full flex-col lg:min-h-[calc(100vh-9.5rem)] lg:w-[49.13%]">
+            <div className="min-w-0">{stepBody}</div>
+            {/* Desktop: Next pinned to the bottom of the content column. */}
             {stepId !== "checkout" ? (
-              <div className="mt-8 hidden lg:block">
+              <div className="mt-10 hidden lg:mt-auto lg:block lg:pt-10 lg:pb-2">
                 <button
                   className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
                   disabled={!canContinue()}
@@ -1636,7 +1643,7 @@ export function BookingWizard({
       </div>
 
       {stepId !== "checkout" || needsAuth ? (
-        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8e0d0]/80 bg-[#f6f1e7]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:px-5 lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8e0d0]/80 bg-[#f9f6ef]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:px-5 lg:hidden">
           <div className="relative mx-auto flex w-full max-w-[1140px] items-center">
             <button
               aria-expanded={basketOpen}
@@ -2201,7 +2208,7 @@ function AddressStep({
         </span>
       </p>
 
-      <div className="relative z-20 mt-8 overflow-visible rounded-2xl border-2 border-transparent bg-white p-4 shadow-[0_12px_32px_rgba(28,19,59,0.08)] sm:p-5">
+      <div className="relative z-20 mt-8">
         <AddressForm
           address={localOnly ? guestAsAddress : null}
           compact
@@ -3667,7 +3674,17 @@ function CheckoutStep({
       <div className="mt-6 divide-y divide-[#e4daf5] border-y border-[#e4daf5]">
         <TrustRow
           icon={<span className="text-[10px] font-bold leading-none">48H</span>}
-          subtitle="Free up to 48 hours before each session."
+          subtitle={
+            <>
+              Free up to 48 hours before each session.{" "}
+              <a
+                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                href={FAQ_LINKS.cancellationFee}
+              >
+                Fee details
+              </a>
+            </>
+          }
           title="Free cancellation"
         />
         <TrustRow
@@ -3687,6 +3704,13 @@ function CheckoutStep({
         <p>
           We authorise (hold) your card when you confirm. The payment is
           captured after the clean — not upfront as a final charge.{" "}
+          <a
+            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            href={FAQ_LINKS.whenCharged}
+          >
+            When am I charged?
+          </a>{" "}
+          ·{" "}
           <a
             className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
             href="/help/article/why-pay-in-advance"
@@ -3801,8 +3825,8 @@ function TrustRow({
   subtitle,
   title,
 }: {
-  icon: React.ReactNode;
-  subtitle: string;
+  icon: ReactNode;
+  subtitle: ReactNode;
   title: string;
 }) {
   return (

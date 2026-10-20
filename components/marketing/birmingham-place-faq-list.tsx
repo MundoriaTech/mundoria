@@ -13,6 +13,7 @@ import {
   houseCleanCoveredPoints,
   whyChooseMundoriaPoints,
 } from "@/lib/seo/birmingham-place-faqs";
+import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
 
 const linkClass =
@@ -112,11 +113,15 @@ export function BirminghamPlaceFaqList({
       <>
         Cancel or reschedule free of charge more than 48 hours before the visit.
         A partial fee may apply within 48 hours, and the full amount within 24
-        hours. See the{" "}
+        hours. See{" "}
+        <Link className={linkClass} href={FAQ_LINKS.cancellationFee}>
+          cancellation fees
+        </Link>
+        , the{" "}
         <Link className={linkClass} href="/help">
           Help Centre
-        </Link>{" "}
-        and your booking confirmation for the exact windows.
+        </Link>
+        , and your booking confirmation for the exact windows.
       </>
     ),
   };
@@ -131,10 +136,14 @@ export function BirminghamPlaceFaqList({
       footer={
         <>
           More answers in our{" "}
+          <Link className={linkClass} href="/faq">
+            FAQ
+          </Link>
+          ,{" "}
           <Link className={linkClass} href="/help">
             Help Centre
-          </Link>{" "}
-          and{" "}
+          </Link>
+          , and{" "}
           <Link className={linkClass} href="/blog">
             Mundoria Mag
           </Link>
