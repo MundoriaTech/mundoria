@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <title>Mundoria email template sample (preview)</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background: #ebe6dc;
+        color: #1c133b;
+      }
+      .preview-chrome {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 28px 16px 12px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .preview-chrome h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        letter-spacing: -0.03em;
+      }
+      .preview-chrome p {
+        margin: 0 0 18px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #5a5470;
+      }
+      .preview-chrome .note {
+        margin-bottom: 22px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #fff8e8;
+        border: 1px solid #ead9a8;
+        color: #6b5420;
+        font-size: 13px;
+      }
+      .preview-chrome .note strong {
+        color: #4a3a12;
+      }
+
+      /*
+        Preview only: keep the top sample cream/white even if the OS is in
+        dark mode. Real send markup will still include prefers-color-scheme
+        rules — the bottom block shows that look via .force-dark.
+      */
+      .force-light .email-page,
+      .force-light .email-page > tbody > tr > td {
+        background-color: #f4f0e8 !important;
+      }
+      .force-light .email-card {
+        background-color: #ffffff !important;
+        border-color: #e3ddd0 !important;
+      }
+      .force-light .email-logo-wrap,
+      .force-light .email-logo {
+        background-color: #ffffff !important;
+      }
+      .force-light .email-title,
+      .force-light .email-intro {
+        color: #1c133b !important;
+      }
+      .force-light .email-copy {
+        color: #3d3754 !important;
+      }
+      .force-light .email-eyebrow {
+        color: #8a7a5c !important;
+      }
+      .force-light .email-row-label {
+        color: #8a8498 !important;
+        border-bottom-color: #f0ebe0 !important;
+      }
+      .force-light .email-row-value {
+        color: #1c133b !important;
+        border-bottom-color: #f0ebe0 !important;
+      }
+      .force-light .email-button,
+      .force-light .email-button a {
+        background-color: #1c133b !important;
+        color: #ffffff !important;
+      }
+      .force-light .email-help {
+        color: #6b6588 !important;
+      }
+      .force-light .email-help a {
+        color: #1c133b !important;
+      }
+      .force-light .email-footer {
+        border-top-color: #f0ebe0 !important;
+        color: #8a8498 !important;
+      }
+      .force-light .email-legal {
+        color: #9a94a8 !important;
+      }
+
+      /* Simulated dark preview (works even if your OS is in light mode) */
+      .force-dark .email-page,
+      .force-dark .email-page > tbody > tr > td {
+        background-color: #141226 !important;
+      }
+      .force-dark .email-card {
+        background-color: #1c1733 !important;
+        border-color: #322b4f !important;
+      }
+      .force-dark .email-logo-wrap {
+        background-color: #ffffff !important;
+        border-bottom-color: #e8e0d4 !important;
+      }
+      .force-dark .email-logo {
+        background-color: #ffffff !important;
+      }
+      .force-dark .email-accent {
+        background-color: #c79c66 !important;
+      }
+      .force-dark .email-eyebrow {
+        color: #c4a574 !important;
+      }
+      .force-dark .email-title {
+        color: #f7f5fb !important;
+      }
+      .force-dark .email-copy,
+      .force-dark .email-intro {
+        color: #d9d3ea !important;
+      }
+      .force-dark .email-details {
+        border-color: #3a3358 !important;
+      }
+      .force-dark .email-row-label {
+        color: #a89fc0 !important;
+        border-bottom-color: #322b4f !important;
+      }
+      .force-dark .email-row-value {
+        color: #f7f5fb !important;
+        border-bottom-color: #322b4f !important;
+      }
+      .force-dark .email-button,
+      .force-dark .email-button a {
+        background-color: #c79c66 !important;
+        color: #1c133b !important;
+      }
+      .force-dark .email-help {
+        color: #c4bdd8 !important;
+      }
+      .force-dark .email-help a {
+        color: #e8d4b0 !important;
+      }
+      .force-dark .email-note {
+        background-color: #2a2444 !important;
+        border-color: #3a3358 !important;
+        color: #d9d3ea !important;
+      }
+      .force-dark .email-footer {
+        border-top-color: #322b4f !important;
+        color: #a89fc0 !important;
+      }
+      .force-dark .email-legal {
+        color: #7a738f !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-chrome">
+      <h1>Proposed Mundoria email look</h1>
+      <p>
+        Preview only — not live yet. Approve or request changes before we wire
+        it into <code>lib/email/templates.ts</code>.
+      </p>
+      <div class="note">
+        <strong>Why the top looked dark blue:</strong> if your Mac/phone is in
+        dark mode, the preview was applying dark-email styles to the “light”
+        sample too. The top block is now forced cream/white. Scroll for the
+        intentional dark version.
+      </div>
+    </div>
+
+    <!-- ========== LIGHT EMAIL (forced, for comparison) ========== -->
+    <div class="force-light">
+    <table
+      role="presentation"
+      class="email-page"
+      width="100%"
+      cellspacing="0"
+      cellpadding="0"
+      bgcolor="#f4f0e8"
+      style="
+        margin: 0;
+        background: #f4f0e8;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #1c133b;
+      "
+    >
+      <tr>
+        <td align="center" style="padding: 36px 14px 48px">
+          <table
+            role="presentation"
+            class="email-card"
+            width="100%"
+            cellspacing="0"
+            cellpadding="0"
+            bgcolor="#ffffff"
+            style="
+              max-width: 560px;
+              background: #ffffff;
+              border: 1px solid #e3ddd0;
+              border-radius: 20px;
+              overflow: hidden;
+            "
+          >
+            <tr>
+              <td
+                class="email-logo-wrap"
+                bgcolor="#ffffff"
+                style="
+                  background: #ffffff;
+                  padding: 26px 28px 18px;
+                  border-bottom: 1px solid #f0ebe0;
+                "
+              >
+                <img
+                  class="email-logo"
+                  alt="Mundoria"
+                  width="178"
+                  height="36"
+                  src="https://www.mundoria.co.uk/images/brand/mundoria-wordmark.png"
+                  style="
+                    display: block;
+                    border: 0;
+                    height: 36px;
+                    width: 178px;
+                    background: #ffffff;
+                  "
+                />
+              </td>
+            </tr>
+            <tr>
+              <td
+                class="email-accent"
+                bgcolor="#c79c66"
+                height="3"
+                style="
+                  height: 3px;
+                  background: #c79c66;
+                  font-size: 0;
+                  line-height: 0;
+                "
+              >
+                &nbsp;
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 30px 28px 8px">
+                <p
+                  class="email-eyebrow"
+                  style="
+                    margin: 0 0 10px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    color: #8a7a5c;
+                  "
+                >
+                  Booking update
+                </p>
+                <h1
+                  class="email-title"
+                  style="
+                    margin: 0 0 14px;
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: 28px;
+                    line-height: 1.2;
+                    font-weight: 500;
+                    letter-spacing: -0.02em;
+                    color: #1c133b;
+                  "
+                >
+                  Your clean is confirmed
+                </h1>
+                <p
+                  class="email-intro"
+                  style="
+                    margin: 0 0 12px;
+                    font-size: 16px;
+                    line-height: 1.65;
+                    color: #1c133b;
+                  "
+                >
+                  Hi Sam,
+                </p>
+                <p
+                  class="email-copy"
+                  style="
+                    margin: 0;
+                    font-size: 16px;
+                    line-height: 1.65;
+                    color: #3d3754;
+                  "
+                >
+                  We’ve locked in your Mundoria session. You’ll get another
+                  note when your cleaner is matched and when they’re on the
+                  way.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 22px 28px 6px">
+                <table
+                  role="presentation"
+                  class="email-details"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  style="
+                    border: 1px solid #ebe4d6;
+                    border-radius: 14px;
+                    overflow: hidden;
+                  "
+                >
+                  <tr>
+                    <td
+                      class="email-row-label"
+                      width="36%"
+                      style="
+                        padding: 13px 16px;
+                        border-bottom: 1px solid #f0ebe0;
+                        font-size: 12px;
+                        font-weight: 700;
+                        letter-spacing: 0.04em;
+                        text-transform: uppercase;
+                        color: #8a8498;
+                      "
+                    >
+                      Service
+                    </td>
+                    <td
+                      class="email-row-value"
+                      style="
+                        padding: 13px 16px;
+                        border-bottom: 1px solid #f0ebe0;
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: #1c133b;
+                      "
+                    >
+                      Home clean
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="email-row-label"
+                      style="
+                        padding: 13px 16px;
+                        border-bottom: 1px solid #f0ebe0;
+                        font-size: 12px;
+                        font-weight: 700;
+                        letter-spacing: 0.04em;
+                        text-transform: uppercase;
+                        color: #8a8498;
+                      "
+                    >
+                      When
+                    </td>
+                    <td
+                      class="email-row-value"
+                      style="
+                        padding: 13px 16px;
+                        border-bottom: 1px solid #f0ebe0;
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: #1c133b;
+                      "
+                    >
+                      Tue 21 Oct · 10:00
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="email-row-label"
+                      style="
+                        padding: 13px 16px;
+                        border-bottom: 1px solid #f0ebe0;
+                        font-size: 12px;
+                        font-weight: 700;
+                        letter-spacing: 0.04em;
+                        text-transform: uppercase;
+                        color: #8a8498;
+                      "
+                    >
+                      Where
+                    </td>
+                    <td
+                      class="email-row-value"
+                      style="
+                        padding: 13px 16px;
+                        border-bottom: 1px solid #f0ebe0;
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: #1c133b;
+                      "
+                    >
+                      12 Harbour Lane, Birmingham
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="email-row-label"
+                      style="
+                        padding: 13px 16px;
+                        font-size: 12px;
+                        font-weight: 700;
+                        letter-spacing: 0.04em;
+                        text-transform: uppercase;
+                        color: #8a8498;
+                      "
+                    >
+                      Reference
+                    </td>
+                    <td
+                      class="email-row-value"
+                      style="
+                        padding: 13px 16px;
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: #1c133b;
+                      "
+                    >
+                      #a3f9c210
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 26px 28px 8px">
+                <table role="presentation" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td
+                      class="email-button"
+                      bgcolor="#1c133b"
+                      style="background: #1c133b; border-radius: 999px"
+                    >
+                      <a
+                        class="email-button"
+                        href="https://www.mundoria.co.uk/bookings"
+                        style="
+                          display: inline-block;
+                          padding: 14px 24px;
+                          font-size: 15px;
+                          font-weight: 700;
+                          color: #ffffff;
+                          text-decoration: none;
+                          border-radius: 999px;
+                        "
+                        >View booking</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+                <p
+                  class="email-help"
+                  style="
+                    margin: 16px 0 0;
+                    font-size: 13px;
+                    line-height: 1.55;
+                    color: #6b6588;
+                  "
+                >
+                  Need to change something?
+                  <a
+                    href="https://www.mundoria.co.uk/help"
+                    style="color: #1c133b; font-weight: 700"
+                    >Reschedule help</a
+                  >
+                  ·
+                  <a
+                    href="https://www.mundoria.co.uk/help"
+                    style="color: #1c133b; font-weight: 700"
+                    >Cancellation policy</a
+                  >
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="email-footer"
+                style="
+                  padding: 24px 28px 28px;
+                  border-top: 1px solid #f0ebe0;
+                  color: #8a8498;
+                "
+              >
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 12px;
+                    line-height: 1.6;
+                    color: inherit;
+                  "
+                >
+                  Mundoria · trusted cleaning, clearly managed
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <p
+            class="email-legal"
+            style="
+              margin: 18px 0 0;
+              max-width: 560px;
+              font-family: Arial, Helvetica, sans-serif;
+              font-size: 11px;
+              line-height: 1.5;
+              color: #9a94a8;
+            "
+          >
+            You’re receiving this because you have a Mundoria account.
+          </p>
+        </td>
+      </tr>
+    </table>
+    </div>
+
+    <!-- ========== SIMULATED DARK (always shows dark styling) ========== -->
+    <div class="preview-chrome" style="padding-top: 8px">
+      <p style="margin-bottom: 8px; font-weight: 700; color: #1c133b">
+        Dark mode version (same design)
+      </p>
+      <p style="margin-bottom: 12px">
+        White logo strip stays put so purple + gold mark colours stay true;
+        body softens to navy and light text.
+      </p>
+    </div>
+
+    <div class="force-dark">
+      <table
+        role="presentation"
+        class="email-page"
+        width="100%"
+        cellspacing="0"
+        cellpadding="0"
+        bgcolor="#141226"
+        style="
+          margin: 0;
+          background: #141226;
+          font-family: Arial, Helvetica, sans-serif;
+          color: #f7f5fb;
+        "
+      >
+        <tr>
+          <td align="center" style="padding: 12px 14px 56px">
+            <table
+              role="presentation"
+              class="email-card"
+              width="100%"
+              cellspacing="0"
+              cellpadding="0"
+              bgcolor="#1c1733"
+              style="
+                max-width: 560px;
+                background: #1c1733;
+                border: 1px solid #322b4f;
+                border-radius: 20px;
+                overflow: hidden;
+              "
+            >
+              <tr>
+                <td
+                  class="email-logo-wrap"
+                  bgcolor="#ffffff"
+                  style="
+                    background: #ffffff;
+                    padding: 26px 28px 18px;
+                    border-bottom: 1px solid #e8e0d4;
+                  "
+                >
+                  <img
+                    class="email-logo"
+                    alt="Mundoria"
+                    width="178"
+                    height="36"
+                    src="https://www.mundoria.co.uk/images/brand/mundoria-wordmark.png"
+                    style="
+                      display: block;
+                      border: 0;
+                      height: 36px;
+                      width: 178px;
+                      background: #ffffff;
+                    "
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td
+                  class="email-accent"
+                  bgcolor="#c79c66"
+                  height="3"
+                  style="
+                    height: 3px;
+                    background: #c79c66;
+                    font-size: 0;
+                    line-height: 0;
+                  "
+                >
+                  &nbsp;
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 30px 28px 8px">
+                  <p
+                    class="email-eyebrow"
+                    style="
+                      margin: 0 0 10px;
+                      font-size: 11px;
+                      font-weight: 700;
+                      letter-spacing: 0.14em;
+                      text-transform: uppercase;
+                      color: #c4a574;
+                    "
+                  >
+                    Booking update
+                  </p>
+                  <h1
+                    class="email-title"
+                    style="
+                      margin: 0 0 14px;
+                      font-family: Georgia, 'Times New Roman', serif;
+                      font-size: 28px;
+                      line-height: 1.2;
+                      font-weight: 500;
+                      letter-spacing: -0.02em;
+                      color: #f7f5fb;
+                    "
+                  >
+                    Your clean is confirmed
+                  </h1>
+                  <p
+                    class="email-intro"
+                    style="
+                      margin: 0 0 12px;
+                      font-size: 16px;
+                      line-height: 1.65;
+                      color: #d9d3ea;
+                    "
+                  >
+                    Hi Sam,
+                  </p>
+                  <p
+                    class="email-copy"
+                    style="
+                      margin: 0;
+                      font-size: 16px;
+                      line-height: 1.65;
+                      color: #d9d3ea;
+                    "
+                  >
+                    We’ve locked in your Mundoria session. You’ll get another
+                    note when your cleaner is matched and when they’re on the
+                    way.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 22px 28px 6px">
+                  <table
+                    role="presentation"
+                    class="email-details"
+                    width="100%"
+                    cellspacing="0"
+                    cellpadding="0"
+                    style="
+                      border: 1px solid #3a3358;
+                      border-radius: 14px;
+                      overflow: hidden;
+                    "
+                  >
+                    <tr>
+                      <td
+                        class="email-row-label"
+                        width="36%"
+                        style="
+                          padding: 13px 16px;
+                          border-bottom: 1px solid #322b4f;
+                          font-size: 12px;
+                          font-weight: 700;
+                          letter-spacing: 0.04em;
+                          text-transform: uppercase;
+                          color: #a89fc0;
+                        "
+                      >
+                        Service
+                      </td>
+                      <td
+                        class="email-row-value"
+                        style="
+                          padding: 13px 16px;
+                          border-bottom: 1px solid #322b4f;
+                          font-size: 15px;
+                          font-weight: 700;
+                          color: #f7f5fb;
+                        "
+                      >
+                        Home clean
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        class="email-row-label"
+                        style="
+                          padding: 13px 16px;
+                          border-bottom: 1px solid #322b4f;
+                          font-size: 12px;
+                          font-weight: 700;
+                          letter-spacing: 0.04em;
+                          text-transform: uppercase;
+                          color: #a89fc0;
+                        "
+                      >
+                        When
+                      </td>
+                      <td
+                        class="email-row-value"
+                        style="
+                          padding: 13px 16px;
+                          border-bottom: 1px solid #322b4f;
+                          font-size: 15px;
+                          font-weight: 700;
+                          color: #f7f5fb;
+                        "
+                      >
+                        Tue 21 Oct · 10:00
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        class="email-row-label"
+                        style="
+                          padding: 13px 16px;
+                          font-size: 12px;
+                          font-weight: 700;
+                          letter-spacing: 0.04em;
+                          text-transform: uppercase;
+                          color: #a89fc0;
+                        "
+                      >
+                        Where
+                      </td>
+                      <td
+                        class="email-row-value"
+                        style="
+                          padding: 13px 16px;
+                          font-size: 15px;
+                          font-weight: 700;
+                          color: #f7f5fb;
+                        "
+                      >
+                        12 Harbour Lane, Birmingham
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 26px 28px 8px">
+                  <table role="presentation" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td
+                        class="email-button"
+                        bgcolor="#c79c66"
+                        style="background: #c79c66; border-radius: 999px"
+                      >
+                        <a
+                          class="email-button"
+                          href="https://www.mundoria.co.uk/bookings"
+                          style="
+                            display: inline-block;
+                            padding: 14px 24px;
+                            font-size: 15px;
+                            font-weight: 700;
+                            color: #1c133b;
+                            text-decoration: none;
+                            border-radius: 999px;
+                          "
+                          >View booking</a
+                        >
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td
+                  class="email-footer"
+                  style="
+                    padding: 24px 28px 28px;
+                    border-top: 1px solid #322b4f;
+                    color: #a89fc0;
+                  "
+                >
+                  <p
+                    style="
+                      margin: 0;
+                      font-size: 12px;
+                      line-height: 1.6;
+                      color: inherit;
+                    "
+                  >
+                    Mundoria · trusted cleaning, clearly managed
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>
