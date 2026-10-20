@@ -44,7 +44,9 @@ of the public URL and cannot distinguish otherwise-identical dashboard routes.
 
 Google OAuth is available after enabling the Google provider in Supabase Auth
 and adding `<app-url>/auth/callback` to the allowed redirect URLs. Welcome
-emails require `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL`.
+emails require `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL`. Seed and
+other non-routable addresses (`*@seed.mundoria.local`, `.local`, etc.) are
+skipped before Resend so they never bounce.
 
 ## Sentry
 

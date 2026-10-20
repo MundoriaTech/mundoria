@@ -49,7 +49,7 @@ const STEPS = [
   { id: "services", label: "Your services" },
   { id: "hours", label: "Your hours" },
   { id: "coverage", label: "Your coverage area" },
-  { id: "quiz", label: "Online training" },
+  { id: "quiz", label: "Quiz" },
   { id: "utr", label: "Your UTR" },
   { id: "identity", label: "Your identity document" },
   { id: "dbs", label: "Your DBS certificate" },
@@ -562,15 +562,17 @@ export function OnboardingWizard({
               {previewNote}
             </p>
           ) : null}
-          <div className="mt-8 flex justify-end border-t border-[#e8e0f5] pt-5">
-            <Button
-              disabled={submitting || completedCount < STEPS.length}
-              onClick={() => void submit()}
-              size="lg"
-            >
-              {submitting ? "Submitting…" : "Submit application"}
-            </Button>
-          </div>
+          {completedCount >= STEPS.length ? (
+            <div className="mt-8 flex justify-end border-t border-[#e8e0f5] pt-5">
+              <Button
+                disabled={submitting}
+                onClick={() => void submit()}
+                size="lg"
+              >
+                {submitting ? "Submitting…" : "Submit application"}
+              </Button>
+            </div>
+          ) : null}
         </section>
       </div>
     </main>

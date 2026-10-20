@@ -10,6 +10,9 @@
  *   admin@seed.mundoria.local
  *   demo.customer@seed.mundoria.local
  *   demo.cleaner@seed.mundoria.local
+ *
+ * Seed emails are non-routable; sendBrandedEmail skips them so Resend
+ * never receives bounces from *@seed.mundoria.local.
  */
 
 import { createClient } from "@supabase/supabase-js";
