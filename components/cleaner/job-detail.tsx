@@ -12,7 +12,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
+import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
+import { safetyAlertAllowed } from "@/lib/bookings/safety-alert-shared";
 import { checkInWindowMessage } from "@/lib/bookings/schedule";
 import {
   formatMoney,
@@ -63,6 +65,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
   const [job, setJob] = useState(initialJob);
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const [showSafety, setShowSafety] = useState(false);
   const [overrideCoords, setOverrideCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -219,23 +222,6 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     }
   }
 
-  async function sendSos() {
-    setWorking(true);
-    setError(null);
-    const response = await fetch(`/api/bookings/${job.id}/sos`, {
-      body: JSON.stringify({}),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-    const result = (await response.json()) as { error?: string };
-    setWorking(false);
-    setError(
-      response.ok
-        ? "Emergency alert sent to Mundoria."
-        : (result.error ?? "Unable to send the alert."),
-    );
-  }
-
   async function confirmGate(confirmed: boolean) {
     setWorking(true);
     setError(null);
@@ -297,6 +283,17 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
           </Link>
         </Button>
       </div>
+
+      {job.safety_hold_at ? (
+        <section className="rounded-xl border border-[#f0c4b8] bg-[#fff7f2] p-5 text-sm text-[#7a3b28]">
+          <h2 className="font-semibold">Safety review in progress</h2>
+          <p className="mt-2 leading-6">
+            This job is on hold. Leave if you feel unsafe. Call 999 if you are
+            in danger. Check-in and completion stay paused until Mundoria clears
+            the hold.
+          </p>
+        </section>
+      ) : null}
 
       {job.confirmation_gate &&
       job.confirmation_gate !== "none" &&
@@ -425,14 +422,14 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
               Start cleaning
             </Button>
           ) : null}
-          {["confirmed", "cleaner_en_route", "in_progress"].includes(job.status) ? (
+          {safetyAlertAllowed(job.status, job.scheduled_date) ? (
             <Button
               disabled={working}
-              onClick={() => void sendSos()}
-              variant="destructive"
+              onClick={() => setShowSafety(true)}
+              variant="outline"
             >
               <ShieldAlert className="mr-2 h-4 w-4" />
-              Emergency
+              Safety alert
             </Button>
           ) : null}
           {job.status === "in_progress" ? (
@@ -468,6 +465,24 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
           ) : null}
         </div>
       </section>
+
+      <SafetyAlertSheet
+        bookingId={job.id}
+        onClose={() => setShowSafety(false)}
+        onSubmitted={() => {
+          setJob((current) => ({
+            ...current,
+            safety_hold_at: new Date().toISOString(),
+          }));
+          setError("Safety alert sent to Mundoria.");
+          router.refresh();
+        }}
+        open={showSafety}
+        role="cleaner"
+        scheduledDate={job.scheduled_date}
+        status={job.status}
+        supportHref="/help"
+      />
     </div>
   );
 }

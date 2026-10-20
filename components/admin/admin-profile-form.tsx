@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ChangeEmailForm } from "@/components/auth/change-email-form";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
@@ -87,10 +88,9 @@ export function AdminProfileForm({
             value={profile.phone ?? ""}
           />
         </label>
-        <label className="block space-y-2 text-sm font-medium sm:col-span-2">
-          <span>Email</span>
-          <Input disabled value={profile.email} />
-        </label>
+        <div className="sm:col-span-2">
+          <ChangeEmailForm currentEmail={profile.email} />
+        </div>
       </div>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">

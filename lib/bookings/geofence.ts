@@ -1,3 +1,4 @@
+import { assertNoSafetyHold } from "@/lib/bookings/safety-alert";
 import { checkInWindowMessage } from "@/lib/bookings/schedule";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
@@ -41,6 +42,7 @@ export async function validateBookingGeofence({
       .single(),
   ]);
   if (!booking?.address) throw new Error("Booking not found.");
+  await assertNoSafetyHold(bookingId);
   if (!cleanerProfile?.location_tracking_consent_at) {
     throw new Error("Location consent is required before check-in/check-out.");
   }

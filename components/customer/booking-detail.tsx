@@ -22,7 +22,9 @@ import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
+import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
+import { formatBookingDate } from "@/lib/customer/booking-flow";
 import {
   formatConfirmByDeadline,
   isCleanerVisibleToCustomer,
@@ -39,12 +41,13 @@ import {
   paymentStatusLabel,
 } from "@/lib/customer/payment-status";
 import { FAQ_LINKS } from "@/lib/seo/faq-links";
+import { safetyAlertAllowed } from "@/lib/bookings/safety-alert-shared";
 import {
   canCustomerChangeSchedule,
   canCustomerReschedule,
   scheduleChangeFeePreview,
 } from "@/lib/bookings/schedule";
-import { cleanerTierLabel } from "@/lib/cleaner/tier";
+import { cleanerTierLabel, medallionIconSrc } from "@/lib/cleaner/tier";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Booking, BookingChecklistItem } from "@/types/customer";
@@ -79,6 +82,7 @@ export function BookingDetail({
   const [pauseStart, setPauseStart] = useState("");
   const [pauseEnd, setPauseEnd] = useState("");
   const [showPause, setShowPause] = useState(false);
+  const [showSafety, setShowSafety] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canCancel = useMemo(
     () =>
@@ -294,24 +298,6 @@ export function BookingDetail({
     router.refresh();
   }
 
-  async function sendSos() {
-    const response = await fetch(`/api/bookings/${booking.id}/sos`, {
-      body: JSON.stringify({}),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-    const result = (await response.json()) as { error?: string };
-    if (!response.ok) {
-      setError(result.error ?? "Unable to send the alert.");
-      return;
-    }
-    success({
-      kind: "sent",
-      title: "Emergency alert sent",
-      note: "Mundoria has been told.",
-    });
-  }
-
   const confirmByLabel = offerExpiresAt
     ? formatConfirmByDeadline(offerExpiresAt)
     : null;
@@ -325,105 +311,98 @@ export function BookingDetail({
           lng: Number(booking.address.longitude),
         }
       : null;
+  const whenLabel = [
+    formatBookingDate(booking.scheduled_date, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    }),
+    booking.scheduled_start_time.slice(0, 5),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const placeLabel =
+    booking.address?.city ?? booking.address?.postcode ?? null;
+  const showSos = safetyAlertAllowed(
+    booking.status,
+    booking.scheduled_date,
+  );
+  const onSafetyHold = Boolean(booking.safety_hold_at);
+  const canMessage = cleanerVisible && Boolean(booking.cleaner_id);
+  const needsStartConfirm =
+    Boolean(booking.arrived_at) && !booking.customer_start_confirmed_at;
 
   return (
-    <div className="min-w-0 space-y-5 sm:space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-primary">Booking</p>
-          <h1 className="mt-1 break-words text-2xl font-semibold tracking-tight sm:text-3xl">
-            {formatServiceName(booking.service_type)}
-          </h1>
-          <p className="mt-2 font-mono text-xs text-muted-foreground sm:text-sm">
-            #{booking.id.slice(0, 8)}
+    <div className="min-w-0 space-y-6 sm:space-y-8">
+      <header className="space-y-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            Booking
           </p>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-          {needsPayment ? (
-            <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => setShowPay(true)}
-            >
-              Authorise payment
-            </Button>
-          ) : null}
-          {canReschedule ? (
-            <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => setShowReschedule(true)}
-              variant="outline"
-            >
-              Change date &amp; time
-            </Button>
-          ) : null}
-          <Button
-            className="min-h-11 w-full sm:w-auto"
-            onClick={() => setShowDispute(true)}
-            variant="outline"
-          >
-            Report issue
-          </Button>
-          {cleanerVisible && booking.cleaner_id ? (
-            <Button asChild className="min-h-11 w-full sm:w-auto" variant="outline">
-              <Link href={`/messages/${booking.id}`}>
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Message
-              </Link>
-            </Button>
-          ) : null}
-          {canChangePro ? (
-            <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => void changePro()}
-              variant="outline"
-            >
-              Change pro
-            </Button>
-          ) : null}
-          {booking.is_recurring && canCancel ? (
-            <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => setShowPause(true)}
-              variant="outline"
-            >
-              Pause for a holiday
-            </Button>
-          ) : null}
-          {booking.arrived_at && !booking.customer_start_confirmed_at ? (
-            <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => void confirmStart()}
-            >
-              Start cleaning
-            </Button>
-          ) : null}
-          {["confirmed", "cleaner_en_route", "in_progress"].includes(booking.status) ? (
-            <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => void sendSos()}
-              variant="destructive"
-            >
-              Emergency
-            </Button>
-          ) : null}
-          {canCancel ? (
-            <Button
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => setShowCancel(true)}
-              variant="destructive"
-            >
-              Cancel booking
-            </Button>
+          {!waitingForCleaner && booking.status !== "cancelled" ? (
+            <BookingStatusBadge status={booking.status} />
           ) : null}
         </div>
-      </div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <h1 className="break-words text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-3xl">
+              {formatServiceName(booking.service_type)}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+              {[whenLabel, placeLabel, `#${booking.id.slice(0, 8)}`]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            {needsPayment ? (
+              <Button
+                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                onClick={() => setShowPay(true)}
+              >
+                Authorise payment
+              </Button>
+            ) : null}
+            {needsStartConfirm ? (
+              <Button
+                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                onClick={() => void confirmStart()}
+              >
+                Start cleaning
+              </Button>
+            ) : null}
+            {canMessage ? (
+              <Button
+                asChild
+                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+              >
+                <Link href={`/messages/${booking.id}`}>
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Message cleaner
+                </Link>
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      </header>
 
       {error && !showCancel && !showPause ? (
         <ActionError message={error} title="Something went wrong" />
       ) : null}
 
+      {onSafetyHold ? (
+        <div className="rounded-[1.25rem] border border-[#f0c4b8] bg-[#fff7f2] px-5 py-4 text-sm text-[#7a3b28]">
+          <p className="font-semibold">Safety review in progress</p>
+          <p className="mt-1 leading-6">
+            This booking is on hold while Mundoria reviews a safety alert.
+            Check-in and completion stay paused until ops clear the hold. If you
+            are in danger, call 999.
+          </p>
+        </div>
+      ) : null}
+
       {booking.status === "cancelled" ? (
-        <div className="rounded-xl bg-muted p-4 text-sm text-foreground">
+        <div className="rounded-[1.25rem] bg-[#f3f3f5] px-5 py-4 text-sm text-[#3d3654]">
           This booking was cancelled.
           {booking.payment_status === "refunded"
             ? " Any payment taken has been refunded."
@@ -433,25 +412,10 @@ export function BookingDetail({
         </div>
       ) : waitingForCleaner ? (
         <LookingForCleanerCard confirmByLabel={confirmByLabel} />
-      ) : (
-        <div className="flex items-center gap-3">
-          <BookingStatusBadge status={booking.status} />
-        </div>
-      )}
+      ) : null}
 
-      {booking.status !== "cancelled" ? (
-        <div
-          className={cn(
-            "rounded-xl border p-4 text-sm",
-            booking.payment_status === "released"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-950"
-              : booking.payment_status === "held"
-                ? "border-[#d9ccef] bg-[#efe6ff] text-[#3b3358]"
-                : booking.payment_status === "refunded"
-                  ? "border-border bg-muted text-foreground"
-                  : "border-amber-200 bg-amber-50 text-amber-950",
-          )}
-        >
+      {needsPayment ? (
+        <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
           <p className="font-semibold">
             {paymentStatusLabel(booking.payment_status)}
           </p>
@@ -464,15 +428,13 @@ export function BookingDetail({
               How payment works
             </Link>
           </p>
-          {needsPayment ? (
-            <Button
-              className="mt-3 min-h-11"
-              onClick={() => setShowPay(true)}
-              size="sm"
-            >
-              Authorise {formatMoney(booking.amount_total ?? 0)}
-            </Button>
-          ) : null}
+          <Button
+            className="mt-3 min-h-11 rounded-full"
+            onClick={() => setShowPay(true)}
+            size="sm"
+          >
+            Authorise {formatMoney(booking.amount_total ?? 0)}
+          </Button>
         </div>
       ) : null}
 
@@ -504,7 +466,7 @@ export function BookingDetail({
         />
       ) : null}
 
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.85fr)] lg:gap-6">
         <div className="space-y-4">
           <BookingSummaryCard
             addOns={(booking.add_ons ?? []).map((addOn) => ({
@@ -532,85 +494,182 @@ export function BookingDetail({
             title="Booking details"
           />
 
-          <div className="rounded-[1.25rem] bg-[#f3f3f5] px-5 py-4 text-sm text-[#5a5470]">
-            <div className="flex items-center justify-between gap-3 text-[#1c133b]">
-              <span className="font-semibold">Payment</span>
-              <span className="font-semibold">
-                {paymentStatusLabel(booking.payment_status)}
-              </span>
-            </div>
-            {["completed", "awaiting_customer_confirmation"].includes(
-              booking.status,
-            ) || booking.payment_status === "released" ? (
-              <div className="mt-3">
-                <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
-                  <Link href={`/booking/${booking.id}/receipt`}>
-                    Download invoice
-                  </Link>
-                </Button>
+          {booking.status !== "cancelled" ? (
+            <div className="rounded-[1.25rem] border border-[#e8d4b0]/70 bg-[#fffefb] px-5 py-4 text-sm text-[#5a5470]">
+              <div className="flex items-center justify-between gap-3 text-[#1c133b]">
+                <span className="font-semibold">Payment</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8b6bc4]">
+                  {paymentStatusLabel(booking.payment_status)}
+                </span>
               </div>
-            ) : booking.payment_status === "held" ? (
-              <p className="mt-2 text-xs text-[#8b8798]">
-                Your receipt becomes available after the clean when payment is
-                captured.
+              <p className="mt-2 leading-6">
+                {paymentStatusDescription(booking.payment_status)}{" "}
+                <Link
+                  className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                  href={PAYMENT_HELP_HREF}
+                >
+                  How payment works
+                </Link>
               </p>
-            ) : null}
-          </div>
-        </div>
-
-        <section className="overflow-hidden rounded-[1.25rem] bg-[#f3f3f5] p-4 sm:p-5">
-          <h2 className="text-base font-bold text-[#1c133b]">Your cleaner</h2>
-          {cleanerVisible && booking.cleaner ? (
-            <div className="mt-5 flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white text-lg font-bold text-[#6a45b8]">
-                {booking.cleaner.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt={booking.cleaner.full_name}
-                    className={avatarImageClass(
-                      resolveAvatarUrl(booking.cleaner.avatar_url, booking.cleaner.id),
-                    )}
-                    src={resolveAvatarUrl(
-                      booking.cleaner.avatar_url,
-                      booking.cleaner.id,
-                    )}
-                  />
-                ) : (
-                  booking.cleaner.full_name.charAt(0)
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-[#1c133b]">
-                  {booking.cleaner.full_name}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-                  <span className="rounded-full bg-[#efe6ff] px-2 py-0.5 text-xs font-semibold capitalize text-[#6a45b8]">
-                    {cleanerTierLabel(booking.cleaner.tier)}
-                  </span>
-                  <span className="text-xs text-[#8b8798]">
-                    Mundoria medallion
-                  </span>
+              {["completed", "awaiting_customer_confirmation"].includes(
+                booking.status,
+              ) || booking.payment_status === "released" ? (
+                <div className="mt-3">
+                  <Button
+                    asChild
+                    className="w-full rounded-full sm:w-auto"
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Link href={`/booking/${booking.id}/receipt`}>
+                      Download invoice
+                    </Link>
+                  </Button>
                 </div>
-              </div>
-              {booking.cleaner_id ? (
-                <Button asChild className="mt-4" size="sm" variant="outline">
-                  <Link href={`/booking/new?rebook=${booking.id}&keep=1`}>
-                    Book this cleaner again
-                  </Link>
-                </Button>
+              ) : booking.payment_status === "held" ? (
+                <p className="mt-2 text-xs text-[#8b8798]">
+                  Your receipt becomes available after the clean when payment is
+                  captured.
+                </p>
               ) : null}
             </div>
-          ) : waitingForCleaner ? (
-            <p className="mt-4 text-sm text-[#5a5470]">
-              We’re looking for your cleaner. You’ll see their details once your
-              session is confirmed.
-            </p>
-          ) : (
-            <p className="mt-4 text-sm text-[#5a5470]">
-              Cleaner details will appear here once your session is confirmed.
-            </p>
-          )}
-        </section>
+          ) : null}
+        </div>
+
+        <aside className="space-y-4">
+          <section className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
+            <h2 className="text-base font-bold text-[#1c133b]">Your cleaner</h2>
+            {cleanerVisible && booking.cleaner ? (
+              <div className="mt-5 space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#efe6ff] text-lg font-bold text-[#6a45b8]">
+                    {booking.cleaner.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        alt={booking.cleaner.full_name}
+                        className={avatarImageClass(
+                          resolveAvatarUrl(
+                            booking.cleaner.avatar_url,
+                            booking.cleaner.id,
+                          ),
+                        )}
+                        src={resolveAvatarUrl(
+                          booking.cleaner.avatar_url,
+                          booking.cleaner.id,
+                        )}
+                      />
+                    ) : (
+                      booking.cleaner.full_name.charAt(0)
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-[#1c133b]">
+                      {booking.cleaner.full_name}
+                    </p>
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#5a5470]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt=""
+                        aria-hidden
+                        className="h-5 w-5"
+                        src={medallionIconSrc(booking.cleaner.tier)}
+                      />
+                      {cleanerTierLabel(booking.cleaner.tier)} medallion
+                    </p>
+                  </div>
+                </div>
+                {booking.cleaner_id ? (
+                  <Button
+                    asChild
+                    className="h-11 w-full rounded-full"
+                    variant="outline"
+                  >
+                    <Link href={`/booking/new?rebook=${booking.id}&keep=1`}>
+                      Book this cleaner again
+                    </Link>
+                  </Button>
+                ) : null}
+              </div>
+            ) : waitingForCleaner ? (
+              <p className="mt-4 text-sm leading-6 text-[#5a5470]">
+                We’re looking for your cleaner. You’ll see their details once
+                your session is confirmed.
+              </p>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-[#5a5470]">
+                Cleaner details will appear here once your session is confirmed.
+              </p>
+            )}
+          </section>
+
+          <section className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
+            <h2 className="text-base font-bold text-[#1c133b]">Manage</h2>
+            <div className="mt-4 grid gap-2">
+              {canReschedule ? (
+                <Button
+                  className="h-11 justify-start rounded-full px-4"
+                  onClick={() => setShowReschedule(true)}
+                  variant="outline"
+                >
+                  Change date &amp; time
+                </Button>
+              ) : null}
+              {canChangePro ? (
+                <Button
+                  className="h-11 justify-start rounded-full px-4"
+                  onClick={() => void changePro()}
+                  variant="outline"
+                >
+                  Change pro
+                </Button>
+              ) : null}
+              {booking.is_recurring && canCancel ? (
+                <Button
+                  className="h-11 justify-start rounded-full px-4"
+                  onClick={() => setShowPause(true)}
+                  variant="outline"
+                >
+                  Pause for a holiday
+                </Button>
+              ) : null}
+              <Button
+                className="h-11 justify-start rounded-full px-4"
+                onClick={() => setShowDispute(true)}
+                variant="outline"
+              >
+                Report issue
+              </Button>
+            </div>
+          </section>
+
+          {showSos || canCancel ? (
+            <section className="rounded-[1.25rem] bg-[#faf7f5] px-5 py-4">
+              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#a67c52]">
+                Need help?
+              </p>
+              <div className="mt-3 flex flex-col gap-2">
+                {showSos ? (
+                  <button
+                    className="text-left text-sm font-semibold text-[#9f1239] underline-offset-2 hover:underline"
+                    onClick={() => setShowSafety(true)}
+                    type="button"
+                  >
+                    Safety alert
+                  </button>
+                ) : null}
+                {canCancel ? (
+                  <button
+                    className="text-left text-sm font-semibold text-[#9f1239] underline-offset-2 hover:underline"
+                    onClick={() => setShowCancel(true)}
+                    type="button"
+                  >
+                    Cancel booking
+                  </button>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
+        </aside>
       </div>
 
       {booking.status === "cleaner_en_route" &&
@@ -852,6 +911,28 @@ export function BookingDetail({
           />
         </Modal>
       ) : null}
+
+      <SafetyAlertSheet
+        bookingId={booking.id}
+        onClose={() => setShowSafety(false)}
+        onSubmitted={() => {
+          setBooking((current) => ({
+            ...current,
+            safety_hold_at: new Date().toISOString(),
+          }));
+          success({
+            kind: "sent",
+            title: "Safety alert sent",
+            note: "Mundoria has been notified. Call 999 if you are still in danger.",
+          });
+          router.refresh();
+        }}
+        open={showSafety}
+        role="customer"
+        scheduledDate={booking.scheduled_date}
+        status={booking.status}
+        supportHref="/help"
+      />
     </div>
   );
 }

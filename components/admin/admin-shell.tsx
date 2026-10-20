@@ -13,6 +13,7 @@ import {
   Newspaper,
   Percent,
   Settings,
+  ShieldAlert,
   Users,
   UserRound,
   UsersRound,
@@ -56,6 +57,13 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
           pathname === "/admin/inbox" || pathname.startsWith("/admin/inbox/"),
       },
       { href: "/admin/disputes", icon: AlertTriangle, label: "Disputes" },
+      {
+        href: "/admin/safety",
+        icon: ShieldAlert,
+        label: "Safety",
+        match: (pathname: string) =>
+          pathname === "/admin/safety" || pathname.startsWith("/admin/safety/"),
+      },
       { href: "/admin/feedback", icon: MessageSquare, label: "Feedback" },
     ],
   },
@@ -129,6 +137,9 @@ function pageTitle(pathname: string) {
       pathname !== "/admin/disputes"
     ) {
       return "Dispute";
+    }
+    if (match.href === "/admin/safety" && pathname !== "/admin/safety") {
+      return "Safety case";
     }
     if (match.href === "/admin/inbox" && pathname !== "/admin/inbox") {
       return "Conversation";

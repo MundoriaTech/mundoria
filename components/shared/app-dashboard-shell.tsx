@@ -12,6 +12,10 @@ import {
   AccountMenu,
   type AccountMenuItem,
 } from "@/components/shared/account-menu";
+import {
+  appParentBackLink,
+  DashboardBackLink,
+} from "@/components/shared/dashboard-back-link";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
@@ -67,6 +71,7 @@ export function AppDashboardShell({
   const desktop = useIsDesktop();
   const cols = Math.min(Math.max(navItems.length, 3), 5);
   const bookingHref = hasSupabasePublicConfig() ? "/booking/new" : "/setup";
+  const backLink = appParentBackLink(pathname);
   const viewer = {
     avatar_url: profile.avatar_url ?? null,
     full_name: profile.full_name,
@@ -165,6 +170,13 @@ export function AppDashboardShell({
         ) : null}
 
         <main className="min-w-0 flex-1 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:py-8 md:pb-10 md:pt-2">
+          {backLink ? (
+            <DashboardBackLink
+              className="mb-3 -ml-1"
+              href={backLink.href}
+              label={backLink.label}
+            />
+          ) : null}
           {topSlot}
           {children}
         </main>

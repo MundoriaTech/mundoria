@@ -176,6 +176,8 @@ export interface Booking {
   tip_pence?: number | null;
   pause_starts_on?: string | null;
   pause_ends_on?: string | null;
+  /** Set while a Safety alert hold is active. */
+  safety_hold_at?: string | null;
   created_at: string;
   updated_at: string;
   address?: Address | null;

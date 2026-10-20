@@ -32,6 +32,12 @@ export const FAQ_LINKS = {
     "How much notice do I need to cancel?",
   ),
   cancellations: faqSectionHref("cancellations"),
+  changeEmail: faqItemHref("account", "How do I change my email address?"),
+  changePhone: faqItemHref("account", "How do I change my phone number?"),
+  lockedOut: faqItemHref(
+    "account",
+    "What if I cannot access my email or phone?",
+  ),
   paymentFails: faqItemHref(
     "payments",
     "What happens if my payment fails?",
@@ -42,5 +48,11 @@ export const FAQ_LINKS = {
     "payments",
     "Can I get a refund if my booking is cancelled?",
   ),
+  safetyAlert: faqItemHref("safety", "What is a Safety alert?"),
+  safetyAlertAfter: faqItemHref(
+    "safety",
+    "What happens after I raise a Safety alert?",
+  ),
+  safetyCall999: faqItemHref("safety", "Should I call 999?"),
   whenCharged: faqItemHref("payments", "When will I be charged?"),
 } as const;

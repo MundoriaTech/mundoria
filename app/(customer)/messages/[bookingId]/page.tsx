@@ -18,7 +18,9 @@ export default async function CustomerMessagesPage({
   const [{ data: booking }, { data: messages }] = await Promise.all([
     supabase
       .from("bookings")
-      .select("customer_id, cleaner_id, status, service_type, scheduled_date")
+      .select(
+        "customer_id, cleaner_id, status, service_type, scheduled_date, safety_hold_at",
+      )
       .eq("id", params.bookingId)
       .eq("customer_id", user!.id)
       .single(),
@@ -66,6 +68,7 @@ export default async function CustomerMessagesPage({
         [booking.cleaner_id]: cleaner?.full_name ?? "Cleaner",
       }}
       peerLabel={cleanerName}
+      safetyHold={Boolean(booking.safety_hold_at)}
       subtitle={`${formatServiceName(booking.service_type as ServiceType)} · ${when}`}
     />
   );

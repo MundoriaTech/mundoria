@@ -221,15 +221,57 @@ Mundoria is rolling out from Birmingham. If your postcode is not recognised yet,
   // ── For customers · Manage my account ─────────────────────────────────────
   {
     body: `## Update your details
-Open Account settings to change name, phone and notification preferences.
+Open Account settings to change phone and notification preferences.
+
+## Change email
+1. Open Account (or cleaner Profile) and choose **Change email**.
+2. Enter the new address and your current password.
+3. Confirm via the link sent to the **new** inbox.
+4. Your old email is notified and stays active for login until you confirm.
 
 ## Address changes
 Update the property address on the booking or in saved addresses before the cleaner is en route. Mid-job address changes need support help.`,
     collection_id: C[0].id,
     slug: "modify-profile",
     sort_order: 210,
-    summary: "Update contact details and addresses from your account settings.",
+    summary: "Update phone, notifications, and verified email from Account.",
     title: "How do I modify my profile information?",
+    topic: "Manage my account",
+  },
+  {
+    body: `## Change your email
+1. Open Account → **Change email**.
+2. Enter the new email and your current password.
+3. Open the confirmation link we send to the new address.
+4. Sign in with the new email once confirmed.
+
+> Your current email stays active until you confirm. We also notify the old address that a change was requested.
+
+## Locked out of email?
+Use Contact us chat. We will verify your identity (booking reference, address, last four of card where needed) before helping you recover the account.`,
+    collection_id: C[0].id,
+    slug: "change-email",
+    sort_order: 215,
+    summary: "Verified email change — confirm the new inbox before it becomes login.",
+    title: "How do I change my email address?",
+    topic: "Manage my account",
+  },
+  {
+    body: `## Customers
+Open Account, edit Phone, and save. No SMS code is required for customers.
+
+## Cleaning professionals
+1. Open Profile and enter your phone number.
+2. Choose **Send SMS code**.
+3. Enter the 6-digit code to verify.
+4. Changing the number resets verification until you confirm again.
+
+Verified numbers are trusted for job contact. If SMS fails, try again later or contact support via chat.`,
+    collection_id: C[0].id,
+    slug: "change-phone",
+    sort_order: 218,
+    summary: "Customers edit freely; cleaners verify by SMS before the number is trusted.",
+    title: "How do I change my phone number?",
     topic: "Manage my account",
   },
   {
@@ -262,6 +304,22 @@ Contact us in chat and ask to close your account. We will confirm identity, canc
   },
 
   // ── For customers · Booking issues ────────────────────────────────────────
+  {
+    body: `## Safety alert during a visit
+1. Open the booking → **Safety alert** (under Need help).
+2. If you are in immediate danger, **Call 999** first. Mundoria cannot replace emergency services.
+3. Choose a reason, optionally add a private note for Mundoria, then hold to confirm.
+4. Stay somewhere safe. Mundoria is paged and the booking goes on hold.
+
+## Not for quality issues
+Late cleaners, missed rooms or breakage → use **Report issue**, not Safety alert.`,
+    collection_id: C[0].id,
+    slug: "safety-alert",
+    sort_order: 275,
+    summary: "Call 999 if in danger, then alert Mundoria — booking pauses for review.",
+    title: "How does Safety alert work?",
+    topic: "Booking issues",
+  },
   {
     body: `## Cancel a booking
 Open the booking → Cancel. Review any fee shown before you confirm.
@@ -660,6 +718,40 @@ Time, what happened, and any messages. We take safety reports seriously.`,
     summary: "Leave if unsafe, then report in-app with the job reference.",
     title: "How do I report inappropriate behaviour?",
     topic: "Reputation & safety",
+  },
+  {
+    body: `## Safety alert on a live job
+1. Open the job → **Safety alert**.
+2. If you are in immediate danger, **Call 999** first. Mundoria is not emergency services.
+3. Choose a reason, add an optional private note, then hold to send.
+4. Leave the property if you feel unsafe. The job goes on hold while Mundoria reviews.
+
+## After you send
+Ops is paged. The customer is told an alert was raised (not your private note). You can withdraw within 15 minutes if it was a mistake — Mundoria still clears the hold.`,
+    collection_id: C[2].id,
+    slug: "safety-alert-cleaner",
+    sort_order: 102,
+    summary: "Call 999 if in danger, then Safety alert — job holds for Mundoria review.",
+    title: "How does Safety alert work for cleaners?",
+    topic: "Reputation & safety",
+  },
+  {
+    body: `## Verify your phone
+1. Open Profile and enter your mobile number.
+2. Tap **Send SMS code**.
+3. Enter the 6-digit code.
+4. Changing the number resets verification until you confirm again.
+
+Mundoria uses a verified number as trusted contact for jobs.
+
+## Change email
+Use **Change email** on Profile, confirm your password, then open the link sent to the new inbox. Your old email is notified and stays active until you confirm.`,
+    collection_id: C[2].id,
+    slug: "verify-phone-cleaner",
+    sort_order: 105,
+    summary: "SMS-verify your phone for jobs; change email with inbox confirmation.",
+    title: "How do I verify my phone or change my email?",
+    topic: "App & account",
   },
   {
     body: `## App issues

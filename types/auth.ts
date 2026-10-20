@@ -7,6 +7,8 @@ export interface Profile {
   full_name: string;
   email: string;
   phone: string | null;
+  /** Set when the current phone passed SMS OTP (required for trusted cleaner contact). */
+  phone_verified_at?: string | null;
   role: UserRole;
   avatar_url: string | null;
   onesignal_player_id: string | null;

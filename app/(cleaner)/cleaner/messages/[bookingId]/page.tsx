@@ -21,7 +21,9 @@ export default async function CleanerMessagesPage({
     await Promise.all([
       admin
         .from("bookings")
-        .select("customer_id,cleaner_id,service_type,scheduled_date")
+        .select(
+          "customer_id,cleaner_id,service_type,scheduled_date,safety_hold_at",
+        )
         .eq("id", params.bookingId)
         .maybeSingle(),
       admin
@@ -72,6 +74,7 @@ export default async function CleanerMessagesPage({
         (profiles ?? []).map((profile) => [profile.id, profile.full_name]),
       )}
       peerLabel={customerName.split(" ")[0] ?? customerName}
+      safetyHold={Boolean(booking.safety_hold_at)}
       subtitle={`${formatServiceName(booking.service_type as ServiceType)} · ${when}`}
     />
   );

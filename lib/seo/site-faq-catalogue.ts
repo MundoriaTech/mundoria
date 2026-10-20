@@ -1878,14 +1878,29 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
           "That is your choice.\n\nSome customers prefer to stay home while cleaning takes place.\n\nOthers provide secure access and leave the professional to complete the booking while they are out.\n\nIf you decide not to be there, make sure access instructions are clear and valuables or sensitive belongings are stored appropriately.\n\nMundoria's onboarding process is there to provide more information and due diligence around professionals, but the final decision about whether you are comfortable leaving the property remains yours.",
       },
       {
+        question: "What is a Safety alert?",
+        answer:
+          "A Safety alert is how you tell Mundoria you need urgent attention during a live visit.\n\nIt is available on the day of the booking and while the cleaner is en route or the session is in progress.\n\nIt is not the same as reporting a cleaning-quality issue, asking to cancel, or calling the police.\n\nUse Safety alert when you feel unsafe, there has been an accident, or something about access or the property needs Mundoria's immediate ops review.",
+      },
+      {
+        question: "Should I call 999?",
+        answer:
+          "Yes, if you or someone else is in immediate danger.\n\nMundoria is not an emergency service and cannot replace the police, ambulance or fire brigade.\n\nCall 999 first when needed, then use Safety alert so Mundoria can support the booking and both parties.\n\nIf you are already safe and the issue is not an emergency, you can alert Mundoria without calling 999.",
+      },
+      {
+        question: "What happens after I raise a Safety alert?",
+        answer:
+          "Mundoria ops is paged with the booking details and your reason.\n\nThe booking is placed on a safety hold so check-in and completion cannot quietly continue.\n\nThe other party is told that an alert was raised, but they do not see your private note.\n\nStay somewhere you feel safe. A team member will respond.\n\nIf you raised the alert by mistake, you can withdraw it within 15 minutes. Ops still need to clear the hold before the booking can continue.",
+      },
+      {
         question: "What happens if I have a safety concern?",
         answer:
-          "Tell Mundoria as soon as possible.\n\nIf the concern is happening during a booking and you feel unsafe, prioritise your immediate safety first.\n\nOnce you are in a safe position, contact Mundoria and explain what happened so the issue can be reviewed.\n\nSafety concerns should not be treated like ordinary service feedback.\n\nThey need to be taken seriously and handled through the appropriate internal process.",
+          "If it is happening during a booking and you feel unsafe, prioritise your immediate safety first — leave if you can, and call 999 if you are in danger.\n\nThen use Safety alert on the booking so Mundoria can review the case.\n\nOutside a live visit, contact Mundoria support and explain what happened.\n\nSafety concerns should not be treated like ordinary service feedback.",
       },
       {
         question: "How do I report inappropriate behaviour?",
         answer:
-          "Contact Mundoria and provide as much relevant information as you reasonably can about what happened.\n\nThat may include the booking, the behaviour you experienced, when it happened and any supporting information that helps us understand the situation.\n\nThe matter should then be reviewed separately from an ordinary cleaning-quality complaint.\n\nIf the issue involves immediate danger or potentially criminal behaviour, customers should also contact the appropriate emergency or law-enforcement service.",
+          "During a live visit, use Safety alert if you feel unsafe.\n\nOtherwise contact Mundoria and provide as much relevant information as you reasonably can about what happened.\n\nThat may include the booking, the behaviour you experienced, when it happened and any supporting information that helps us understand the situation.\n\nThe matter should then be reviewed separately from an ordinary cleaning-quality complaint.\n\nIf the issue involves immediate danger or potentially criminal behaviour, also contact the appropriate emergency or law-enforcement service.",
       },
       {
         question: "What happens if a cleaner breaches my instructions?",
@@ -2485,6 +2500,28 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       },
     ],
   },
+  {
+    id: "account",
+    title: "Account & Contact Details",
+    description: "Changing email or phone, and what to do if you are locked out.",
+    items: [
+      {
+        question: "How do I change my email address?",
+        answer:
+          "Open Account (or your cleaner profile) and choose Change email.\n\nEnter the new address and your current password.\n\nMundoria sends a confirmation link to the new inbox and notifies your old email that a change was requested.\n\nYour current email stays active for sign-in until you open the confirmation link.\n\nEmail is your login identity, so it cannot be swapped with a silent edit the way a phone number can.",
+      },
+      {
+        question: "How do I change my phone number?",
+        answer:
+          "Customers can update their phone in Account settings and save.\n\nNo SMS code is required for customers today.\n\nCleaning professionals must verify a new number by SMS before Mundoria treats it as trusted for job contact.\n\nEditing a cleaner phone number resets verification until the code is entered.",
+      },
+      {
+        question: "What if I cannot access my email or phone?",
+        answer:
+          "Use Contact us chat and ask for an account recovery check.\n\nSupport will ask you to confirm identity with details such as a recent booking reference, the address on the booking, and the last four digits of the card used where applicable.\n\nDo not share passwords in chat.\n\nOnce identity is confirmed, Mundoria can help you regain access or update the contact details that are blocking you.",
+      },
+    ],
+  },
 ];
 export const FAQ_NAV_GROUPS: Array<{
   description: string;
@@ -2549,6 +2586,7 @@ export const FAQ_NAV_GROUPS: Array<{
       "preferences",
       "coverage",
       "common",
+      "account",
     ],
   },
 ];

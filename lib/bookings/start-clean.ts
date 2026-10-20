@@ -1,3 +1,4 @@
+import { assertNoSafetyHold } from "@/lib/bookings/safety-alert";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -31,6 +32,7 @@ export async function confirmCleanStart({
     .eq(column, userId)
     .single();
   if (!booking) throw new Error("Booking not found.");
+  await assertNoSafetyHold(bookingId);
   if (!booking.arrived_at) {
     throw new Error("The clean can start after the cleaner has arrived.");
   }

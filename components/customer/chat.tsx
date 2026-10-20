@@ -29,6 +29,7 @@ export function Chat({
   initialMessages,
   names,
   peerLabel,
+  safetyHold = false,
   subtitle,
 }: {
   bookingId: string;
@@ -36,6 +37,8 @@ export function Chat({
   initialMessages: Message[];
   names: Record<string, string>;
   peerLabel?: string;
+  /** When true, show a safety-review banner above the thread. */
+  safetyHold?: boolean;
   subtitle?: string;
 }) {
   const [messages, setMessages] = useState(initialMessages);
@@ -258,6 +261,13 @@ export function Chat({
           {subtitle ?? "Only you and your cleaner can see these messages."}
         </p>
       </div>
+
+      {safetyHold ? (
+        <div className="border-b border-[#f0c4b8] bg-[#fff7f2] px-4 py-3 text-xs leading-5 text-[#7a3b28] sm:px-5">
+          Safety review in progress — keep messages respectful. Mundoria can see
+          this thread.
+        </div>
+      ) : null}
 
       <div className="flex-1 space-y-3 overflow-y-auto bg-[#faf8ff] px-3 py-4 dark:bg-background sm:space-y-4 sm:px-5 sm:py-5">
         {messages.length ? (

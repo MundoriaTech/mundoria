@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth/oauth-intent";
 import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
+import { notifyEmailChangeCompleted } from "@/lib/auth/notify-email-changed";
 import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isUserRole, type UserRole } from "@/types/auth";
@@ -66,6 +67,17 @@ export async function GET(request: Request) {
           });
         } catch {
           // Email should never block sign-in.
+        }
+      }
+
+      if (user && !isPasswordReset) {
+        try {
+          await notifyEmailChangeCompleted({
+            appUrl: requestUrl.origin,
+            user,
+          });
+        } catch {
+          // Notification should never block sign-in.
         }
       }
 

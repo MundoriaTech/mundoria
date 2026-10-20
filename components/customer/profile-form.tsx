@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ChangeEmailForm } from "@/components/auth/change-email-form";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
@@ -92,10 +93,7 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
             <span>Full name</span>
             <Input disabled readOnly value={profile.full_name} />
           </label>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>Email</span>
-            <Input disabled value={profile.email} />
-          </label>
+          <ChangeEmailForm currentEmail={profile.email} />
           <label className="block space-y-2 text-sm font-medium">
             <span>Phone</span>
             <Input

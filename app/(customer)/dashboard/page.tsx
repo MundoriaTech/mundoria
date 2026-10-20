@@ -317,23 +317,13 @@ function NextCleanCard({ booking }: { booking: Booking }) {
 
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-[#e6e0f2] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
-      <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
-        <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            {waiting
-              ? customerWaitingLabel(booking.status)
-              : "Confirmed"}
-          </p>
-          <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-            {formatServiceName(booking.service_type)}
-          </h3>
-          <p className="mt-1 text-sm leading-6 text-[#5c5670]">
-            {when} at {time}, in {area}. {personLine(booking)}
-          </p>
-        </div>
-        <p className="shrink-0 rounded-full bg-[#fff4ee] px-3 py-1.5 text-sm font-semibold text-[#7a3b28]">
-          {time}
+      <div className="px-5 pt-5 sm:px-6">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+          {waiting ? customerWaitingLabel(booking.status) : "Confirmed"}
         </p>
+        <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+          {formatServiceName(booking.service_type)}
+        </h3>
       </div>
       <dl className="mt-5 grid grid-cols-2 gap-px border-y border-[#efe6ff] bg-[#efe6ff] sm:grid-cols-4">
         {facts.map((fact) => (
@@ -365,20 +355,4 @@ function NextCleanCard({ booking }: { booking: Booking }) {
       </div>
     </article>
   );
-}
-
-function personLine(booking: Booking) {
-  if (booking.status === "pending_match") {
-    return "We’re looking for your cleaner";
-  }
-  if (booking.status === "matched") {
-    return "A cleaner has been offered this job and needs to confirm";
-  }
-  if (
-    isCleanerVisibleToCustomer(booking.status) &&
-    booking.cleaner?.full_name
-  ) {
-    return `With ${booking.cleaner.full_name.split(" ")[0]}`;
-  }
-  return "Cleaner to be confirmed";
 }

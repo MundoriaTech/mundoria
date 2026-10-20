@@ -51,7 +51,7 @@ const sections: LegalSection[] = [
       "Supabase for authentication, database, storage and realtime features.",
       "Stripe and Stripe Connect for payments, authorisations, refunds, transfers and payout account onboarding.",
       "Resend for transactional and account emails.",
-      "Twilio for SMS and future phone verification.",
+      "Twilio for SMS and cleaner phone verification codes.",
       "OneSignal for push notifications.",
       "Google Maps/Geoapify-style mapping providers for address search, maps and routing.",
       "Sentry for error monitoring and diagnostics.",

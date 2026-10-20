@@ -4,12 +4,15 @@ import { CreditCard, LogOut, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ChangeEmailForm } from "@/components/auth/change-email-form";
+import { PhoneVerifyPanel } from "@/components/cleaner/phone-verify-panel";
 import { ActionError, FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { normalizePhone } from "@/lib/auth/phone-verify";
 import { SERVICES } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -39,6 +42,11 @@ export function CleanerProfileForm({
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [stripeError, setStripeError] = useState<string | null>(null);
   const [profile, setProfile] = useState(initialProfile);
+  const [verifiedPhone, setVerifiedPhone] = useState(() =>
+    initialProfile.phone_verified_at
+      ? normalizePhone(initialProfile.phone ?? "")
+      : "",
+  );
   const [cleaner, setCleaner] = useState(initialCleaner);
   const [services, setServices] = useState(
     initialServices.map((service) => service.service_type),
@@ -67,12 +75,15 @@ export function CleanerProfileForm({
     setStatus("Saving…");
     const supabase = createBrowserClient();
 
+    const phoneChanged =
+      normalizePhone(phone) !== verifiedPhone || !profile.phone_verified_at;
     await Promise.all([
       supabase
         .from("profiles")
         .update({
           avatar_url: profile.avatar_url,
           phone,
+          ...(phoneChanged ? { phone_verified_at: null } : {}),
         })
         .eq("id", profile.id),
       supabase
@@ -124,11 +135,16 @@ export function CleanerProfileForm({
       ),
     ]);
 
+    if (phoneChanged) {
+      setProfile((current) => ({ ...current, phone_verified_at: null }));
+    }
     setStatus(null);
     success({
       kind: "saved",
       title: "Profile saved",
-      note: "Your availability and services are up to date.",
+      note: phoneChanged
+        ? "Verify your phone below so Mundoria can trust it for jobs."
+        : "Your availability and services are up to date.",
     });
     router.refresh();
   }
@@ -212,14 +228,20 @@ export function CleanerProfileForm({
               value={profile.full_name}
             />
           </Field>
+          <ChangeEmailForm currentEmail={profile.email} />
           <Field error={phoneError} label="Phone number">
             <Input
               className={cn(fieldClass, phoneError && invalidControlClass)}
               onChange={(event) => {
                 setPhoneError(null);
+                const next = event.target.value;
                 setProfile((current) => ({
                   ...current,
-                  phone: event.target.value,
+                  phone: next,
+                  phone_verified_at:
+                    normalizePhone(next) === verifiedPhone
+                      ? current.phone_verified_at
+                      : null,
                 }));
               }}
               required
@@ -227,6 +249,22 @@ export function CleanerProfileForm({
               value={profile.phone ?? ""}
             />
           </Field>
+          <PhoneVerifyPanel
+            onVerified={(verifiedAt) => {
+              const phone = normalizePhone(profile.phone ?? "");
+              setVerifiedPhone(phone);
+              setProfile((current) => ({
+                ...current,
+                phone_verified_at: verifiedAt,
+              }));
+            }}
+            phone={profile.phone ?? ""}
+            phoneVerifiedAt={
+              normalizePhone(profile.phone ?? "") === verifiedPhone
+                ? profile.phone_verified_at
+                : null
+            }
+          />
           <AboutYou
             name={profile.full_name}
             onChange={(bio) =>

@@ -159,19 +159,31 @@ function resolveTemplate(
         title: "Password changed",
         tone: "security",
       };
-    case "auth.email_changed":
+    case "auth.email_changed": {
+      const pending = string(data.status) === "requested";
       return {
-        body:
-          "The email address on your Mundoria account was changed. If you did not request this, contact support immediately.",
+        body: pending
+          ? "Someone requested to change the email on your Mundoria account. We sent a confirmation link to the new address. Your current email stays active until that link is used. If you did not request this, contact support immediately and ignore any confirmation emails."
+          : "The email address on your Mundoria account was changed. If you did not request this, contact support immediately.",
+        buttonHref: pending ? undefined : `${appUrl}/login`,
+        buttonLabel: pending ? undefined : "Sign in",
         cards: [
           { label: "Previous email", value: data.previousEmail },
-          { label: "New email", value: data.newEmail },
+          { label: pending ? "Requested email" : "New email", value: data.newEmail },
         ],
-        preview: "Your Mundoria email address was changed.",
-        subject: "Your Mundoria email address was changed",
-        title: "Email address changed",
+        preview: pending
+          ? "Email change requested on your Mundoria account."
+          : "Your Mundoria email address was changed.",
+        relatedLinks: [
+          { href: FAQ_LINKS.changeEmail, label: "How to change your email" },
+        ],
+        subject: pending
+          ? "Email change requested on your Mundoria account"
+          : "Your Mundoria email address was changed",
+        title: pending ? "Email change requested" : "Email address changed",
         tone: "security",
       };
+    }
     case "auth.account_closed":
       return {
         body:

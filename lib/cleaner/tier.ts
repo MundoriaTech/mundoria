@@ -46,3 +46,18 @@ export function cleanerTierLabel(tier: CleanerTier) {
   if (tier === "elite") return "Elite";
   return tier.charAt(0).toUpperCase() + tier.slice(1);
 }
+
+const MEDALLION_ICON: Record<
+  (typeof TIER_LADDER)[number],
+  string
+> = {
+  bronze: "/images/marketing/icons/medallions/bronze.svg",
+  silver: "/images/marketing/icons/medallions/silver.svg",
+  gold: "/images/marketing/icons/medallions/gold.svg",
+  rose_gold: "/images/marketing/icons/medallions/rose-gold.svg",
+};
+
+/** Mundoria circular medallion icons (marketing icon style). */
+export function medallionIconSrc(tier: CleanerTier) {
+  return MEDALLION_ICON[normalizeMedallionTier(tier) as (typeof TIER_LADDER)[number]];
+}
