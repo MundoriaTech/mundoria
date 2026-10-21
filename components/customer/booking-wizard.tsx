@@ -56,6 +56,7 @@ import { AddressForm } from "@/components/customer/address-manager";
 import { TimeSlotPicker, slotsFinishingByWindowEnd } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { trackClientActivity } from "@/lib/analytics/track-client";
 import {
   composeBookingNotes,
   bookingCategoryImages,
@@ -821,6 +822,15 @@ export function BookingWizard({
     if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
     window.localStorage.setItem(BOOKING_STEP_KEY, stepId);
   }, [hydrated, stepId]);
+
+  useEffect(() => {
+    if (!hydrated || !userId) return;
+    trackClientActivity({
+      eventName: "booking_step_viewed",
+      metadata: { step: stepId },
+      path: "/booking/new",
+    });
+  }, [hydrated, stepId, userId]);
 
   // Leaving the booking flow (browser back, logo, other nav) clears the basket,
   // except auth round-trips that return to /booking/new. Address is always kept.

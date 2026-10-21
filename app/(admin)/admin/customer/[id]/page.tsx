@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import {
+  UserActivityTimeline,
+  type UserActivityRow,
+} from "@/components/admin/user-activity-timeline";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -10,8 +14,12 @@ export default async function AdminCustomerPage({
   params: { id: string };
 }) {
   const admin = createAdminClient();
-  const [{ data: profile }, { data: bookings }, { data: addresses }] =
-    await Promise.all([
+  const [
+    { data: profile },
+    { data: bookings },
+    { data: addresses },
+    { data: activity },
+  ] = await Promise.all([
       admin
         .from("profiles")
         .select("*")
@@ -31,6 +39,12 @@ export default async function AdminCustomerPage({
         .eq("customer_id", params.id)
         .is("archived_at", null)
         .order("is_default", { ascending: false }),
+      admin
+        .from("user_activity_events")
+        .select("id, event_name, path, metadata, created_at")
+        .eq("user_id", params.id)
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
 
   if (!profile) notFound();
@@ -78,6 +92,10 @@ export default async function AdminCustomerPage({
           </p>
         </div>
       </section>
+
+      <UserActivityTimeline
+        events={(activity ?? []) as UserActivityRow[]}
+      />
 
       <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Saved addresses</h2>

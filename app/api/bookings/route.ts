@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import twilio from "twilio";
 
+import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import { calculateOfficeQuote } from "@/lib/customer/office-pricing";
@@ -365,6 +366,16 @@ export async function POST(request: Request) {
   } catch (matchingError) {
     Sentry.captureException(matchingError);
   }
+
+  await trackUserActivity({
+    eventName: "booking_created",
+    metadata: {
+      bookingId: booking.id,
+      serviceType: parsed.data.serviceType,
+    },
+    path: "/booking/new",
+    userId: user.id,
+  });
 
   return NextResponse.json({
     bookingId: booking.id,

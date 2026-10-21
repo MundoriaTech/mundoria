@@ -2,6 +2,7 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const addressBodySchema = z.object({
@@ -134,6 +135,19 @@ async function saveAddress(request: Request, mode: "create" | "update") {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (mode === "create") {
+    await trackUserActivity({
+      eventName: "address_saved",
+      metadata: {
+        addressId: data?.id,
+        city: data?.city,
+        postcode: data?.postcode,
+      },
+      path: "/api/addresses",
+      userId: user.id,
+    });
   }
 
   return NextResponse.json({ address: data });

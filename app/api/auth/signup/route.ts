@@ -8,6 +8,7 @@ import {
   resolveAppUrl,
   sendAuthLinkEmail,
 } from "@/lib/auth/send-auth-link-email";
+import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -124,6 +125,13 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  await trackUserActivity({
+    eventName: "signed_up",
+    metadata: { role },
+    path: role === "cleaner" ? "/signup/cleaner" : "/signup",
+    userId: user.id,
+  });
 
   return NextResponse.json({
     hasSession: false,

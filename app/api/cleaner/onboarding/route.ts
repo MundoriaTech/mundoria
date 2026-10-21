@@ -15,6 +15,7 @@ import {
   SKILLS_EXAM_PASS_SCORE,
   SKILLS_EXAM_QUESTIONS,
 } from "@/lib/cleaner/skills-exam";
+import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -274,6 +275,16 @@ export async function POST(request: Request) {
   } catch (emailError) {
     Sentry.captureException(emailError);
   }
+
+  await trackUserActivity({
+    eventName: "cleaner_onboarding_submitted",
+    metadata: {
+      interviewScheduledAt: value.interview_scheduled_at,
+      yearsExperience: value.years_experience,
+    },
+    path: "/cleaner/onboarding",
+    userId: user.id,
+  });
 
   return NextResponse.json({ success: true });
 }

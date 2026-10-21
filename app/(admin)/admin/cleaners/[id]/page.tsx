@@ -2,6 +2,10 @@ import { notFound } from "next/navigation";
 
 import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
 import { DocumentViewerButton } from "@/components/admin/document-viewer";
+import {
+  UserActivityTimeline,
+  type UserActivityRow,
+} from "@/components/admin/user-activity-timeline";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
@@ -26,6 +30,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
     { data: medallionEvents },
     { data: bookings },
     { data: ratings },
+    { data: activity },
   ] = await Promise.all([
     admin.from("profiles").select("*").eq("id", params.id).single(),
     admin.from("cleaner_profiles").select("*").eq("id", params.id).single(),
@@ -33,6 +38,12 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
     admin.from("cleaner_medallion_events").select("*").eq("cleaner_id", params.id).order("created_at", { ascending: false }),
     admin.from("bookings").select("*").eq("cleaner_id", params.id).order("scheduled_date", { ascending: false }),
     admin.from("ratings").select("*").eq("cleaner_id", params.id).order("created_at", { ascending: false }),
+    admin
+      .from("user_activity_events")
+      .select("id, event_name, path, metadata, created_at")
+      .eq("user_id", params.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
   if (!profile || !cleaner) notFound();
   const signed = await Promise.all(
@@ -101,6 +112,10 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         skillsExamScore={cleaner.skills_exam_score ?? null}
         totalJobs={cleaner.total_jobs}
         yearsExperience={cleaner.years_experience ?? 0}
+      />
+
+      <UserActivityTimeline
+        events={(activity ?? []) as UserActivityRow[]}
       />
 
       <section className="rounded-xl border bg-card p-4 sm:p-5">

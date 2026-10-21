@@ -13,6 +13,7 @@ import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
 import { notifyEmailChangeCompleted } from "@/lib/auth/notify-email-changed";
 import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
+import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isUserRole, type UserRole } from "@/types/auth";
 
@@ -68,6 +69,19 @@ export async function GET(request: Request) {
         } catch {
           // Email should never block sign-in.
         }
+      }
+
+      if (
+        user &&
+        requestUrl.searchParams.get("type") === "signup" &&
+        !isPasswordReset
+      ) {
+        await trackUserActivity({
+          eventName: "email_confirmed",
+          metadata: { role: profile?.role ?? null },
+          path: "/auth/callback",
+          userId: user.id,
+        });
       }
 
       if (user && !isPasswordReset) {

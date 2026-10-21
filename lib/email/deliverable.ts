@@ -41,5 +41,5 @@ export function filterDeliverableEmails(to: string | string[]): string[] {
   const list = (Array.isArray(to) ? to : [to])
     .map((address) => address.trim())
     .filter(Boolean);
-  return [...new Set(list.filter(isDeliverableEmail))];
+  return Array.from(new Set(list.filter(isDeliverableEmail)));
 }
