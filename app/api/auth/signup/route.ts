@@ -9,6 +9,7 @@ import {
   sendAuthLinkEmail,
 } from "@/lib/auth/send-auth-link-email";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
+import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -130,6 +131,14 @@ export async function POST(request: Request) {
     eventName: "signed_up",
     metadata: { role },
     path: role === "cleaner" ? "/signup/cleaner" : "/signup",
+    userId: user.id,
+  });
+
+  await notifyAdminUserSignedUp({
+    appUrl,
+    email,
+    fullName: full_name,
+    role,
     userId: user.id,
   });
 

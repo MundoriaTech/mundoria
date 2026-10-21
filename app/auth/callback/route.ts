@@ -14,6 +14,7 @@ import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
 import { notifyEmailChangeCompleted } from "@/lib/auth/notify-email-changed";
 import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
+import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isUserRole, type UserRole } from "@/types/auth";
 
@@ -80,6 +81,22 @@ export async function GET(request: Request) {
           eventName: "email_confirmed",
           metadata: { role: profile?.role ?? null },
           path: "/auth/callback",
+          userId: user.id,
+        });
+      }
+
+      if (
+        user &&
+        boot &&
+        !boot.profileExisted &&
+        (profile?.role === "customer" || profile?.role === "cleaner") &&
+        !isPasswordReset
+      ) {
+        await notifyAdminUserSignedUp({
+          appUrl: requestUrl.origin,
+          email: profile.email ?? user.email ?? "",
+          fullName: profile.full_name ?? "Mundoria user",
+          role: profile.role,
           userId: user.id,
         });
       }

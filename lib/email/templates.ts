@@ -4,6 +4,7 @@ import { FAQ_LINKS } from "@/lib/seo/faq-links";
 export type EmailTemplateId =
   | "admin.alert"
   | "admin.cleaner_application_submitted"
+  | "admin.user_signed_up"
   | "admin.daily_summary"
   | "admin.dispute_created"
   | "admin.geofence_override_requested"
@@ -545,6 +546,24 @@ function resolveTemplate(
         title: "New cleaner application",
         tone: "admin",
       };
+    case "admin.user_signed_up": {
+      const roleLabel =
+        string(data.role) === "cleaner" ? "Cleaner" : "Customer";
+      return {
+        body: `${string(data.userName) || "Someone"} just signed up as a ${roleLabel.toLowerCase()} on Mundoria.`,
+        buttonHref: string(data.profileUrl) || `${appUrl}/admin/customers`,
+        buttonLabel: "Open profile",
+        cards: [
+          { label: "Name", value: data.userName },
+          { label: "Email", value: data.userEmail },
+          { label: "Role", value: roleLabel },
+        ],
+        preview: `New ${roleLabel.toLowerCase()} signup.`,
+        subject: `New ${roleLabel.toLowerCase()} signup${data.userName ? `: ${data.userName}` : ""}`,
+        title: `New ${roleLabel.toLowerCase()} signup`,
+        tone: "admin",
+      };
+    }
     case "admin.dispute_created":
     case "admin.no_show_alert":
     case "admin.payout_failure":
