@@ -688,7 +688,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
             </tr>
             <tr>
               <td class="email-footer" align="center" style="padding:36px 28px 40px;color:#8a8498;font-size:12px;line-height:1.7;text-align:center;">
-                <p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a></p>
+                <p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a> or visit <a href="${escapeAttribute(appUrl)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>
                 ${renderSocialLinks()}
                 <p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
               </td>
