@@ -5,6 +5,7 @@ import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { EmailSentPanel } from "@/components/auth/email-sent-panel";
 import { safeRedirectPath } from "@/lib/auth/redirects";
+import { bookingCheckoutSignInPath } from "@/lib/customer/booking-auth-return";
 
 export const metadata = {
   title: "Check your email",
@@ -38,13 +39,16 @@ export default function PasswordEmailSentPage({
   const redirectTo = searchParams.redirectTo
     ? safeRedirectPath(searchParams.redirectTo, "/login")
     : null;
+  const bookingSignIn = bookingCheckoutSignInPath(redirectTo);
   const actionHref = isAdmin
     ? "/admin/login"
     : isCleaner
       ? "/login/cleaner"
-      : redirectTo
-        ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
-        : "/login";
+      : bookingSignIn
+        ? bookingSignIn
+        : redirectTo
+          ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+          : "/login";
   const againParams = new URLSearchParams();
   if (isAdmin) againParams.set("from", "admin");
   if (isCleaner) againParams.set("from", "cleaner");
@@ -61,7 +65,9 @@ export default function PasswordEmailSentPage({
           ? "Back to admin sign in"
           : isCleaner
             ? "Back to cleaner sign in"
-            : "Back to sign in"
+            : bookingSignIn
+              ? "Back to booking"
+              : "Back to sign in"
       }
       email={null}
       steps={STEPS}

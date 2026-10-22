@@ -15,6 +15,7 @@ import {
   updatePasswordSchema,
   type UpdatePasswordValues,
 } from "@/lib/auth/schemas";
+import { bookingCheckoutSignInPath } from "@/lib/customer/booking-auth-return";
 import { createBrowserClient } from "@/lib/supabase/client";
 
 export function UpdatePasswordForm({ next }: { next?: string | null }) {
@@ -55,6 +56,17 @@ export function UpdatePasswordForm({ next }: { next?: string | null }) {
     await fetch("/api/auth/password-updated", { method: "POST" });
     await supabase.auth.signOut();
 
+    const returnPath =
+      profile?.role === "customer" && next
+        ? safeRedirectPath(next, "")
+        : "";
+    const bookingSignIn = bookingCheckoutSignInPath(returnPath);
+    if (bookingSignIn) {
+      router.replace(bookingSignIn);
+      router.refresh();
+      return;
+    }
+
     const loginPath =
       profile?.role === "admin"
         ? "/admin/login"
@@ -64,10 +76,6 @@ export function UpdatePasswordForm({ next }: { next?: string | null }) {
     const params = new URLSearchParams({
       message: "Password updated. You can sign in.",
     });
-    const returnPath =
-      profile?.role === "customer" && next
-        ? safeRedirectPath(next, "")
-        : "";
     if (returnPath) params.set("redirectTo", returnPath);
     router.replace(`${loginPath}?${params.toString()}`);
     router.refresh();

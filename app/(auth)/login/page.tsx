@@ -5,6 +5,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
 import { safeRedirectPath } from "@/lib/auth/redirects";
 import { SIGNUP_VERIFY_MESSAGE } from "@/lib/auth/signup-email-pending";
+import { bookingCheckoutSignInPath } from "@/lib/customer/booking-auth-return";
 
 export const metadata = {
   title: "Log in",
@@ -20,27 +21,12 @@ interface LoginPageProps {
   };
 }
 
-/** Booking auth uses the wizard chrome — bounce login redirects back into it. */
-function bookingAuthRedirect(redirectTo: string, verify?: string) {
-  const next = safeRedirectPath(redirectTo, "");
-  if (!next.startsWith("/booking")) return null;
-  const [pathname, query = ""] = next.split("?");
-  const params = new URLSearchParams(query);
-  if (pathname.startsWith("/booking/new") && !params.get("step")) {
-    params.set("step", "checkout");
-  }
-  params.set("auth", "signin");
-  if (verify === "1") params.set("verify", "1");
-  const qs = params.toString();
-  return qs ? `${pathname}?${qs}` : pathname;
-}
-
 export default function LoginPage({ searchParams }: LoginPageProps) {
   if (searchParams.redirectTo) {
-    const bookingHref = bookingAuthRedirect(
-      searchParams.redirectTo,
-      searchParams.verify,
-    );
+    const next = safeRedirectPath(searchParams.redirectTo, "");
+    const bookingHref = bookingCheckoutSignInPath(next, {
+      verify: searchParams.verify === "1",
+    });
     if (bookingHref) redirect(bookingHref);
   }
 

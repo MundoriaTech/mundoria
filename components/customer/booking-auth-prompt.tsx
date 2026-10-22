@@ -173,19 +173,37 @@ export function BookingAuthPrompt({
       if (!response.ok || result.error) {
         throw new Error(result.error ?? "Unable to create your account.");
       }
-      if (result.requiresEmailConfirmation) {
-        rememberSignupEmail(email.trim());
-        setPassword("");
-        setPasswordError(undefined);
-        setMessage(null);
-        setSuccessMessage(SIGNUP_VERIFY_MESSAGE);
-        onModeChange("signin");
+
+      // Booking signup auto-confirms — sign in immediately and stay on checkout.
+      if (!result.requiresEmailConfirmation) {
+        const supabase = createBrowserClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (signInError) {
+          rememberSignupEmail(email.trim());
+          setPassword("");
+          setSuccessMessage(
+            "Account created. Enter your password to continue this booking.",
+          );
+          onModeChange("signin");
+          setBusy(false);
+          return;
+        }
+        markBookingAuthReturn();
         setBusy(false);
+        router.refresh();
         return;
       }
-      markBookingAuthReturn();
-      router.replace(RETURN_PATH);
-      router.refresh();
+
+      rememberSignupEmail(email.trim());
+      setPassword("");
+      setPasswordError(undefined);
+      setMessage(null);
+      setSuccessMessage(SIGNUP_VERIFY_MESSAGE);
+      onModeChange("signin");
+      setBusy(false);
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Unable to create your account.",
@@ -247,7 +265,7 @@ export function BookingAuthPrompt({
             {mode === "ask"
               ? "Your selections are already saved. Enter your email to create an account or sign in."
               : mode === "create"
-                ? "Choose a name and password. We’ll email a confirmation link, then you can finish this booking."
+                ? "Save your details to finish this booking. You can manage cleans from your account anytime."
                 : "Enter your password to continue this booking."}
           </p>
         </>
@@ -393,6 +411,7 @@ export function BookingAuthPrompt({
             <Link
               className="hover:text-foreground"
               href={`/forgot-password?redirectTo=${encodeURIComponent(RETURN_PATH)}`}
+              onClick={markBookingAuthReturn}
             >
               Forgot password?
             </Link>

@@ -1,6 +1,35 @@
 /** Resume booking checkout after signup / sign-in / Google OAuth. */
 export const BOOKING_CHECKOUT_RETURN_PATH = "/booking/new?step=checkout";
 
+/**
+ * Map a booking redirectTo into wizard checkout sign-in (keeps booking chrome).
+ * Returns null when redirectTo is not a booking path.
+ */
+export function bookingCheckoutSignInPath(
+  redirectTo: string | null | undefined,
+  options: { verify?: boolean } = {},
+) {
+  const raw = (redirectTo ?? "").trim();
+  if (!raw.startsWith("/booking")) return null;
+  const [pathname, query = ""] = raw.split("?");
+  const params = new URLSearchParams(query);
+  if (pathname.startsWith("/booking/new") && !params.get("step")) {
+    params.set("step", "checkout");
+  }
+  params.set("auth", "signin");
+  if (options.verify) params.set("verify", "1");
+  const qs = params.toString();
+  return qs ? `${pathname}?${qs}` : pathname;
+}
+
+/** Default checkout URL opened in sign-in mode. */
+export function bookingCheckoutAuthHref(options: { verify?: boolean } = {}) {
+  return (
+    bookingCheckoutSignInPath(BOOKING_CHECKOUT_RETURN_PATH, options) ??
+    BOOKING_CHECKOUT_RETURN_PATH
+  );
+}
+
 const BOOKING_AUTH_RETURN_KEY = "mundoria-booking-auth-return";
 
 /** Mark that the customer left the wizard only to authenticate. */

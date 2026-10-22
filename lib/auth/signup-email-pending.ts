@@ -1,4 +1,4 @@
-import { BOOKING_CHECKOUT_RETURN_PATH } from "@/lib/customer/booking-auth-return";
+import { bookingCheckoutAuthHref } from "@/lib/customer/booking-auth-return";
 
 /** Session-only copy of the address just submitted. Never put it in the URL. */
 export const SIGNUP_EMAIL_SESSION_KEY = "mundoria-signup-email";
@@ -45,10 +45,7 @@ export function signupPendingLoginPath(
 
 /** Resume booking checkout in sign-in mode after email confirmation is sent. */
 export function signupPendingBookingPath() {
-  const url = new URL(BOOKING_CHECKOUT_RETURN_PATH, "https://www.mundoria.co.uk");
-  url.searchParams.set("auth", "signin");
-  url.searchParams.set("verify", "1");
-  return `${url.pathname}?${url.searchParams.toString()}`;
+  return bookingCheckoutAuthHref({ verify: true });
 }
 
 export const SIGNUP_VERIFY_MESSAGE =

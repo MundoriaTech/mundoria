@@ -1784,7 +1784,7 @@ function CheckoutAuthGate({
     authMode === "ask"
       ? "Your selections are already saved. Enter your email to create an account or sign in."
       : authMode === "create"
-        ? "Choose a name and password. We’ll email a confirmation link, then you can finish this booking."
+        ? "Save your details to finish this booking. You can manage cleans from your account anytime."
         : initialVerifyPending
           ? "Confirm the email we just sent, then enter your password to finish this booking."
           : "Welcome back — enter your password to continue this booking.";

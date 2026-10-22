@@ -4,6 +4,7 @@ import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { safeRedirectPath } from "@/lib/auth/redirects";
+import { bookingCheckoutSignInPath } from "@/lib/customer/booking-auth-return";
 
 export const metadata = {
   title: "Reset password",
@@ -19,18 +20,23 @@ export default function ForgotPasswordPage({
   const redirectTo = searchParams.redirectTo
     ? safeRedirectPath(searchParams.redirectTo, "/login")
     : null;
+  const bookingSignIn = bookingCheckoutSignInPath(redirectTo);
   const loginHref = isAdmin
     ? "/admin/login"
     : isCleaner
       ? "/login/cleaner"
-      : redirectTo
-        ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
-        : "/login";
+      : bookingSignIn
+        ? bookingSignIn
+        : redirectTo
+          ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+          : "/login";
   const backLabel = isAdmin
     ? "Back to admin sign in"
     : isCleaner
       ? "Back to cleaner sign in"
-      : "Back to sign in";
+      : bookingSignIn
+        ? "Back to booking"
+        : "Back to sign in";
   const description = isAdmin
     ? "Enter your admin email and we’ll send you a secure reset link."
     : "Enter your email and we’ll send you a secure reset link.";

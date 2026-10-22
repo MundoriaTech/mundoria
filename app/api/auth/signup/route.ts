@@ -10,6 +10,7 @@ import {
 } from "@/lib/auth/send-auth-link-email";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
+import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -40,11 +41,14 @@ export async function POST(request: Request) {
   const requestedNext =
     typeof body.next === "string" ? body.next : null;
   const nextPath = safeRedirectPath(requestedNext, defaultNext);
+  /** Checkout signup must not block on email confirmation. */
+  const bookingCheckoutSignup =
+    role === "customer" && nextPath.startsWith("/booking");
   const emailRedirectTo = `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(nextPath)}`;
 
   const { data: created, error } = await admin.auth.admin.createUser({
     email,
-    email_confirm: false,
+    email_confirm: bookingCheckoutSignup,
     password,
     user_metadata: {
       avatar_url: avatarUrl,
@@ -106,31 +110,55 @@ export async function POST(request: Request) {
     }
   }
 
-  try {
-    await sendAuthLinkEmail({
-      appUrl,
-      email,
-      firstName: full_name.split(/\s+/)[0],
-      password,
-      redirectTo: emailRedirectTo,
-      type: "signup",
-    });
-  } catch (emailError) {
-    Sentry.captureException(emailError);
-    return NextResponse.json(
-      {
-        code: "signup_email_failed",
-        error:
-          "Your account was created, but we could not send the confirmation email. Try again in a moment, or use Forgot password after confirming with support.",
-      },
-      { status: 500 },
-    );
+  let welcomeEmailSent = false;
+
+  if (bookingCheckoutSignup) {
+    try {
+      welcomeEmailSent = await sendAccountWelcomeIfNeeded({
+        appUrl,
+        email,
+        emailConfirmedAt: user.email_confirmed_at ?? new Date().toISOString(),
+        fullName: full_name,
+        metadata: user.user_metadata,
+        profileExisted: false,
+        role: "customer",
+        userId: user.id,
+      });
+    } catch (welcomeError) {
+      Sentry.captureException(welcomeError);
+      // Welcome must never block checkout.
+    }
+  } else {
+    try {
+      await sendAuthLinkEmail({
+        appUrl,
+        email,
+        firstName: full_name.split(/\s+/)[0],
+        password,
+        redirectTo: emailRedirectTo,
+        type: "signup",
+      });
+    } catch (emailError) {
+      Sentry.captureException(emailError);
+      return NextResponse.json(
+        {
+          code: "signup_email_failed",
+          error:
+            "Your account was created, but we could not send the confirmation email. Try again in a moment, or use Forgot password after confirming with support.",
+        },
+        { status: 500 },
+      );
+    }
   }
 
   await trackUserActivity({
     eventName: "signed_up",
-    metadata: { role },
-    path: role === "cleaner" ? "/signup/cleaner" : "/signup",
+    metadata: { bookingCheckout: bookingCheckoutSignup, role },
+    path: bookingCheckoutSignup
+      ? "/booking/new"
+      : role === "cleaner"
+        ? "/signup/cleaner"
+        : "/signup",
     userId: user.id,
   });
 
@@ -143,10 +171,11 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json({
+    email,
     hasSession: false,
     referralPromoCode,
-    requiresEmailConfirmation: true,
+    requiresEmailConfirmation: !bookingCheckoutSignup,
     role,
-    welcomeEmailSent: false,
+    welcomeEmailSent,
   });
 }
