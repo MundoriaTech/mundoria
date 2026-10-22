@@ -29,6 +29,16 @@ const requiredStringList = (label: string) =>
     .transform((items) => items.filter(Boolean))
     .pipe(z.array(z.string()).min(1, label));
 
+/** UK outward code from a full or partial postcode (e.g. B15 2TT → B15). */
+function ukOutwardCode(value: string) {
+  const cleaned = value.trim().toUpperCase().replace(/\s+/g, " ");
+  if (!cleaned) return "";
+  const spaced = cleaned.split(" ");
+  if (spaced.length >= 2) return spaced[0] ?? "";
+  const match = cleaned.match(/^([A-Z]{1,2}\d[A-Z\d]?)/);
+  return match?.[1] ?? cleaned;
+}
+
 const schema = z.object({
   availability: z.array(
     z.object({
@@ -77,7 +87,18 @@ const schema = z.object({
     .string()
     .trim()
     .regex(/^\d{10}$/, "UTR must be exactly 10 digits"),
-  working_areas: requiredStringList("Add at least one working area"),
+  home_base: z
+    .string()
+    .trim()
+    .min(2, "Enter your home postcode or area"),
+  home_base_lat: z.number().finite().nullable(),
+  home_base_lng: z.number().finite().nullable(),
+  working_areas: z
+    .array(z.string().trim())
+    .transform((items) =>
+      items.map((item) => item.toUpperCase()).filter(Boolean),
+    ),
+  working_radius_miles: z.number().min(1).max(15),
   years_experience: z.number().int().min(0).max(60),
 });
 
@@ -177,10 +198,26 @@ export async function POST(request: Request) {
       stripe_onboarding_complete: stripeOnboardingComplete,
       utr_number: value.utr_number,
       utr_verified: false,
+      working_radius_km: Math.round(value.working_radius_miles * 1.609344 * 100) / 100,
       years_experience: value.years_experience,
     })
     .eq("id", user.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  const homePrefix = ukOutwardCode(value.home_base);
+  const areaPrefixes = Array.from(
+    new Set(
+      [homePrefix, ...value.working_areas.map((item) => ukOutwardCode(item))]
+        .map((item) => item.trim().toUpperCase())
+        .filter(Boolean),
+    ),
+  );
+  if (areaPrefixes.length === 0) {
+    return NextResponse.json(
+      { error: "Add a home postcode or coverage area." },
+      { status: 400 },
+    );
+  }
 
   await Promise.all([
     admin
@@ -203,9 +240,13 @@ export async function POST(request: Request) {
       })),
     ),
     admin.from("cleaner_working_areas").insert(
-      value.working_areas.map((postcode_prefix) => ({
+      areaPrefixes.map((postcode_prefix) => ({
         cleaner_id: user.id,
-        postcode_prefix: postcode_prefix.toUpperCase(),
+        latitude:
+          postcode_prefix === homePrefix ? value.home_base_lat : null,
+        longitude:
+          postcode_prefix === homePrefix ? value.home_base_lng : null,
+        postcode_prefix,
       })),
     ),
     admin.from("cleaner_availability").insert(
@@ -249,7 +290,7 @@ export async function POST(request: Request) {
           fullName: value.full_name,
           interviewWhen,
           payoutPreference: value.payout_preference,
-          workingAreas: value.working_areas.join(", "),
+          workingAreas: areaPrefixes.join(", "),
         },
         template: "cleaner.application_submitted",
         to: profile.email,

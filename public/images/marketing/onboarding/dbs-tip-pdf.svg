@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 200" fill="none">
+  <!-- PDF page -->
+  <path
+    d="M42 14h68l38 38v120c0 9.9-8.1 18-18 18H42c-9.9 0-18-8.1-18-18V32c0-9.9 8.1-18 18-18Z"
+    fill="#ffffff"
+    stroke="#1C133B"
+    stroke-width="4.5"
+    stroke-linejoin="round"
+  />
+  <!-- dog-ear fold -->
+  <path d="M110 14v30c0 4.4 3.6 8 8 8h30" fill="#EBE4F5" stroke="#1C133B" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M110 14l38 38" stroke="#1C133B" stroke-width="4.5"/>
+  <!-- protruding PDF tab -->
+  <path
+    d="M8 68h66c8.8 0 16 7.2 16 16v48c0 8.8-7.2 16-16 16H8V68Z"
+    fill="#6A45B8"
+    stroke="#1C133B"
+    stroke-width="4.5"
+    stroke-linejoin="round"
+  />
+  <text
+    x="41"
+    y="112"
+    fill="#ffffff"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="22"
+    font-weight="800"
+    letter-spacing="1"
+    text-anchor="middle"
+  >PDF</text>
+</svg>

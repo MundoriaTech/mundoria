@@ -8,6 +8,7 @@ import { UK_DIAL_CODE } from "@/lib/auth/uk-phone";
 import { cn } from "@/lib/utils";
 
 interface AuthPhoneFieldProps {
+  className?: string;
   error?: HookFieldError;
   hint?: string;
   htmlFor?: string;
@@ -17,7 +18,7 @@ interface AuthPhoneFieldProps {
   required?: boolean;
 }
 
-function UkFlag({ className }: { className?: string }) {
+export function UkFlag({ className }: { className?: string }) {
   return (
     <svg
       aria-hidden
@@ -34,8 +35,9 @@ function UkFlag({ className }: { className?: string }) {
   );
 }
 
-/** WeCasa-style UK phone control: flag + caret, floating label, national number. */
+/** UK phone control: flag, dial code, and national number. */
 export function AuthPhoneField({
+  className,
   error,
   hint,
   htmlFor = "phone-national",
@@ -44,69 +46,47 @@ export function AuthPhoneField({
   onNationalNumberChange,
   required,
 }: AuthPhoneFieldProps) {
-  const empty = nationalNumber.trim().length === 0;
-
   return (
     <div className="space-y-1.5">
       <label
-        className={cn(
-          "group/phone relative flex min-h-[3.25rem] cursor-text items-stretch rounded-xl border bg-[#f6f5f8] transition",
-          "focus-within:border-[#6a45b8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
-          error ? "border-[#d4694a]" : "border-[#e4e0eb]",
-        )}
+        className="block text-sm font-medium text-[#1c133b]"
         htmlFor={htmlFor}
       >
-        <div
-          aria-hidden
-          className="flex shrink-0 items-center self-center pl-3.5 pr-1"
-        >
-          <UkFlag className="h-4 w-6 overflow-hidden rounded-[2px] shadow-sm" />
-        </div>
-
-        <div className="relative min-w-0 flex-1 px-2.5 py-2">
-          <span
-            className={cn(
-              "pointer-events-none absolute left-2.5 right-3 z-[1] origin-left transition-all duration-150",
-              empty
-                ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#8b8798] group-focus-within/phone:top-2 group-focus-within/phone:translate-y-0 group-focus-within/phone:text-[11px] group-focus-within/phone:font-semibold group-focus-within/phone:text-[#6a45b8]"
-                : "top-2 translate-y-0 text-[11px] font-semibold text-[#5a5470]",
-              error && !empty && "text-[#d4694a]",
-              error &&
-                empty &&
-                "group-focus-within/phone:text-[#d4694a]",
-            )}
-          >
-            {label}
-          </span>
-
-          <div
-            className={cn(
-              "flex items-center gap-1.5 transition-all duration-150",
-              empty
-                ? "pt-0 opacity-0 group-focus-within/phone:pt-4 group-focus-within/phone:opacity-100"
-                : "pt-4 opacity-100",
-            )}
-          >
-            <span
-              aria-hidden
-              className="shrink-0 text-[15px] font-medium text-[#1c133b]"
-            >
-              {UK_DIAL_CODE}
-            </span>
-            <Input
-              autoComplete="tel-national"
-              className="auth-inset-input h-7 min-w-0 flex-1 !rounded-none !border-0 !bg-transparent px-0 py-0 text-[15px] !shadow-none !outline-none !ring-0 !ring-offset-0 placeholder:text-[#b0a9bc] focus:!border-0 focus:!outline-none focus:!ring-0 focus:!ring-offset-0 focus-visible:!border-0 focus-visible:!outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0"
-              id={htmlFor}
-              inputMode="tel"
-              onChange={(event) => onNationalNumberChange(event.target.value)}
-              placeholder="7400 123456"
-              required={required}
-              type="tel"
-              value={nationalNumber}
-            />
-          </div>
-        </div>
+        {label}
+        {required ? (
+          <span className="sr-only"> (required)</span>
+        ) : null}
       </label>
+      <div
+        className={cn(
+          "flex min-h-11 items-center gap-2 rounded-xl border bg-[#f6f5f8] px-3.5 transition",
+          "focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
+          error ? "border-[#d4694a]" : "border-[#e4e0eb]",
+          className,
+          error ? "border-[#d4694a]" : null,
+        )}
+      >
+        <span aria-hidden className="shrink-0">
+          <UkFlag className="h-4 w-6 overflow-hidden rounded-[2px]" />
+        </span>
+        <span
+          aria-hidden
+          className="shrink-0 text-[15px] font-medium text-[#1c133b]"
+        >
+          {UK_DIAL_CODE}
+        </span>
+        <Input
+          autoComplete="tel-national"
+          className="auth-inset-input h-9 min-w-0 flex-1 !rounded-none !border-0 !bg-transparent px-0 py-0 text-[15px] !shadow-none !outline-none !ring-0 !ring-offset-0 placeholder:text-[#b0a9bc] focus:!border-0 focus:!outline-none focus:!ring-0 focus:!ring-offset-0 focus-visible:!border-0 focus-visible:!outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0"
+          id={htmlFor}
+          inputMode="tel"
+          onChange={(event) => onNationalNumberChange(event.target.value)}
+          placeholder="7400 123456"
+          required={required}
+          type="tel"
+          value={nationalNumber}
+        />
+      </div>
       {hint ? (
         <p className="px-0.5 text-xs leading-5 text-[#8b8798]">{hint}</p>
       ) : null}

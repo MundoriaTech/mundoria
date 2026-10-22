@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { FieldError } from "@/components/shared/action-error";
-import { Button } from "@/components/ui/button";
 import {
   CHARTER_AGREEMENTS,
   TRAINING_PAGES,
@@ -104,24 +103,28 @@ export function TrainingSurvey({
         </div>
       ) : null}
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <Button
+      <div className="mt-6 flex items-center gap-4">
+        <button
+          className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b] disabled:opacity-40"
           disabled={page === 0}
           onClick={() => {
             setPageError(null);
             setPage((value) => Math.max(value - 1, 0));
           }}
           type="button"
-          variant="outline"
         >
           Previous
-        </Button>
+        </button>
         {page < TRAINING_PAGES.length - 1 ? (
-          <Button onClick={goNext} type="button">
-            Next
-          </Button>
+          <button
+            className="ml-auto text-sm font-semibold text-[#312c79] transition hover:text-[#1c133b]"
+            onClick={goNext}
+            type="button"
+          >
+            Next →
+          </button>
         ) : (
-          <p className="text-sm text-[#6b6588]">
+          <p className="ml-auto text-sm text-[#8b8798]">
             Tick every agreement, then submit your application below.
           </p>
         )}

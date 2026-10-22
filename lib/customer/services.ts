@@ -352,7 +352,7 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     amount: 0,
     categories: ["residential"],
     description:
-      "Pressing and folding during the visit. No extra fee — adds about 15 minutes to the booking.",
+      "Pressing and folding during the visit. Adds about 15 minutes to the booking.",
     id: "ironing",
     label: "Ironing",
   },

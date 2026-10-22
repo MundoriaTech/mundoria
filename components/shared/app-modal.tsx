@@ -6,14 +6,18 @@ import {
   useEffect,
   useId,
   useRef,
+  useState,
 } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
 
 export function AppModal({
   accent = "none",
+  backdrop = "dim",
   children,
   className,
+  closeClassName,
   closeDisabled = false,
   description,
   dismissOnOverlay = true,
@@ -22,8 +26,11 @@ export function AppModal({
   title,
 }: {
   accent?: "none" | "peach" | "destructive";
+  /** `dim` — soft dark scrim. `blur` — page blur only, no overlay tint. */
+  backdrop?: "dim" | "blur";
   children: ReactNode;
   className?: string;
+  closeClassName?: string;
   closeDisabled?: boolean;
   description?: string;
   dismissOnOverlay?: boolean;
@@ -36,8 +43,13 @@ export function AppModal({
   const panelRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   const closeDisabledRef = useRef(closeDisabled);
+  const [mounted, setMounted] = useState(false);
   onCloseRef.current = onClose;
   closeDisabledRef.current = closeDisabled;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
@@ -67,12 +79,19 @@ export function AppModal({
     };
   }, []);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       aria-describedby={description ? descriptionId : undefined}
       aria-labelledby={titleId}
       aria-modal="true"
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-[2px] sm:items-center sm:p-4"
+      className={cn(
+        "fixed inset-0 z-[200] flex items-end justify-center p-0 sm:items-center sm:p-4",
+        backdrop === "blur"
+          ? "bg-[#1c133b]/20 backdrop-blur-md"
+          : "bg-slate-950/45 backdrop-blur-[2px]",
+      )}
       role="dialog"
     >
       <button
@@ -105,12 +124,15 @@ export function AppModal({
           {showClose ? (
             <button
               aria-label="Close"
-              className="absolute right-2 top-2 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+              className={cn(
+                "absolute right-2 top-2 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50",
+                closeClassName,
+              )}
               disabled={closeDisabled}
               onClick={onClose}
               type="button"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" strokeWidth={2.5} />
             </button>
           ) : null}
 
@@ -131,6 +153,7 @@ export function AppModal({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

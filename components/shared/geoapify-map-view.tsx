@@ -110,7 +110,11 @@ function LoadedGeoapifyMapView({
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }));
-    map.once("load", () => setMapReady(true));
+    // Style JSON can reset the camera (often to London). Re-apply our centre after load.
+    map.once("load", () => {
+      map.jumpTo({ center: [center.lng, center.lat], zoom });
+      setMapReady(true);
+    });
     mapRef.current = map;
 
     return () => {

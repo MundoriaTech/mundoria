@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- stack of gold coins -->
+  <ellipse cx="32" cy="46" rx="16" ry="7" fill="#C79C66" stroke="#1C133B" stroke-width="2.75"/>
+  <ellipse cx="32" cy="40" rx="16" ry="7" fill="#C79C66" stroke="#1C133B" stroke-width="2.75"/>
+  <ellipse cx="32" cy="34" rx="16" ry="7" fill="#C79C66" stroke="#1C133B" stroke-width="2.75"/>
+  <ellipse cx="32" cy="28" rx="16" ry="7" fill="#C79C66" stroke="#1C133B" stroke-width="2.75"/>
+  <ellipse cx="32" cy="22" rx="16" ry="7" fill="#C79C66" stroke="#1C133B" stroke-width="2.75"/>
+  <!-- small accent dashes -->
+  <path d="M14 16l-3-4M18 13l-1.5-4.5M23 12v-4.5" stroke="#1C133B" stroke-width="2.25" stroke-linecap="round"/>
+</svg>

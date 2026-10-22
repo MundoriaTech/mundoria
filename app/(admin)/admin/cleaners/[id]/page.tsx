@@ -8,6 +8,7 @@ import {
 } from "@/components/admin/user-activity-timeline";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
@@ -46,14 +47,51 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
       .limit(100),
   ]);
   if (!profile || !cleaner) notFound();
+  const dbsSlots = parseDocumentUrls(cleaner.dbs_document_url);
+  const idSlots = parseDocumentUrls(cleaner.id_document_url);
+  const dbsFilled = dbsSlots.filter(Boolean);
+  const idFilled = idSlots.filter(Boolean);
+  const documentEntries: Array<[string, string | null, "storage" | "public"]> = [
+    ...(dbsFilled.length
+      ? dbsSlots.flatMap(
+          (path, index): Array<[string, string | null, "storage" | "public"]> =>
+            path
+              ? [
+                  [
+                    dbsSlots.length > 1
+                      ? `DBS page ${index + 1}`
+                      : "DBS certificate",
+                    path,
+                    "storage",
+                  ],
+                ]
+              : [],
+        )
+      : ([
+          ["DBS certificate", null, "storage"],
+        ] as Array<[string, string | null, "storage" | "public"]>)),
+    ...(idFilled.length
+      ? idSlots.flatMap(
+          (path, index): Array<[string, string | null, "storage" | "public"]> =>
+            path
+              ? [
+                  [
+                    idSlots.length > 1
+                      ? `ID ${index === 0 ? "front" : "back"}`
+                      : "Government ID",
+                    path,
+                    "storage",
+                  ],
+                ]
+              : [],
+        )
+      : ([
+          ["Government ID", null, "storage"],
+        ] as Array<[string, string | null, "storage" | "public"]>)),
+    ["Headshot", cleaner.headshot_url ?? null, "public"],
+  ];
   const signed = await Promise.all(
-    (
-      [
-        ["DBS certificate", cleaner.dbs_document_url, "storage"],
-        ["Government ID", cleaner.id_document_url, "storage"],
-        ["Headshot", cleaner.headshot_url, "public"],
-      ] as const
-    ).map(async ([label, path, kind]) => {
+    documentEntries.map(async ([label, path, kind]) => {
       if (!path) return { label, path: null as string | null, url: null as string | null };
       if (kind === "public" || path.startsWith("http")) {
         return { label, path, url: path };
