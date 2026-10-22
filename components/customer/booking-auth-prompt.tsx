@@ -2,17 +2,20 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { AuthSignupLegal } from "@/components/auth/auth-signup-legal";
 import { FormField } from "@/components/auth/form-field";
+import { FormStatus } from "@/components/auth/form-status";
 import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { passwordMeetsRequirements } from "@/lib/auth/password-requirements";
 import {
-  signupPendingLoginPath,
+  clearSignupEmail,
+  readSignupEmail,
   rememberSignupEmail,
+  SIGNUP_VERIFY_MESSAGE,
 } from "@/lib/auth/signup-email-pending";
 import {
   BOOKING_CHECKOUT_RETURN_PATH,
@@ -36,10 +39,13 @@ const RETURN_PATH = BOOKING_CHECKOUT_RETURN_PATH;
 
 export function BookingAuthPrompt({
   hideTitle = false,
+  initialVerifyPending = false,
   mode,
   onModeChange,
 }: {
   hideTitle?: boolean;
+  /** Landing from email-confirmation signup — open sign-in with success copy. */
+  initialVerifyPending?: boolean;
   mode: BookingAuthMode;
   onModeChange: (mode: BookingAuthMode) => void;
 }) {
@@ -51,11 +57,24 @@ export function BookingAuthPrompt({
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(
+    initialVerifyPending ? SIGNUP_VERIFY_MESSAGE : null,
+  );
   const [busy, setBusy] = useState(false);
   const passwordReady = passwordMeetsRequirements(password);
 
+  useEffect(() => {
+    if (!initialVerifyPending) return;
+    const stored = readSignupEmail();
+    if (stored) {
+      setEmail(stored);
+      clearSignupEmail();
+    }
+  }, [initialVerifyPending]);
+
   function setMode(next: BookingAuthMode) {
     setMessage(null);
+    setSuccessMessage(null);
     setPasswordError(undefined);
     onModeChange(next);
   }
@@ -155,13 +174,13 @@ export function BookingAuthPrompt({
         throw new Error(result.error ?? "Unable to create your account.");
       }
       if (result.requiresEmailConfirmation) {
-        markBookingAuthReturn();
         rememberSignupEmail(email.trim());
-        router.replace(
-          signupPendingLoginPath("customer", {
-            next: RETURN_PATH,
-          }),
-        );
+        setPassword("");
+        setPasswordError(undefined);
+        setMessage(null);
+        setSuccessMessage(SIGNUP_VERIFY_MESSAGE);
+        onModeChange("signin");
+        setBusy(false);
         return;
       }
       markBookingAuthReturn();
@@ -342,6 +361,7 @@ export function BookingAuthPrompt({
           className={cn("space-y-3", !hideTitle && "mt-6")}
           onSubmit={(event) => void signIn(event)}
         >
+          <FormStatus message={successMessage} tone="success" />
           {email ? (
             <EmailChip email={email} onEdit={() => setMode("ask")} />
           ) : (
@@ -356,19 +376,16 @@ export function BookingAuthPrompt({
               />
             </FormField>
           )}
-          <div className="space-y-2">
-            <FormField htmlFor="booking-auth-signin-password" label="Password">
-              <PasswordInput
-                autoComplete="current-password"
-                id="booking-auth-signin-password"
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder=" "
-                required
-                value={password}
-              />
-            </FormField>
-            <PasswordRequirementsList password={password} />
-          </div>
+          <FormField htmlFor="booking-auth-signin-password" label="Password">
+            <PasswordInput
+              autoComplete="current-password"
+              id="booking-auth-signin-password"
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder=" "
+              required
+              value={password}
+            />
+          </FormField>
           <Button className="h-11 w-full" disabled={busy} type="submit">
             {busy ? "Signing in…" : "Continue booking"}
           </Button>

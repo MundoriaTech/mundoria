@@ -33,7 +33,9 @@ export async function sendBrandedEmail({
   if (!recipients.length) return true;
 
   const rendered = renderEmailTemplate(template, data);
-  const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
+  const { data: sent, error } = await new Resend(
+    process.env.RESEND_API_KEY,
+  ).emails.send({
     from: from ?? defaultFrom(),
     html: rendered.html,
     replyTo: replyTo ?? defaultReplyTo(),
@@ -42,7 +44,16 @@ export async function sendBrandedEmail({
     to: recipients.length === 1 ? recipients[0] : recipients,
   });
 
-  return !error;
+  if (error) {
+    console.error("[email] Resend send failed", {
+      message: error.message,
+      name: error.name,
+      template,
+    });
+    return false;
+  }
+
+  return Boolean(sent?.id);
 }
 
 function defaultFrom() {

@@ -14,6 +14,48 @@ const LINK_FIELD_BY_TYPE: Record<AuthLinkType, "resetUrl" | "confirmUrl"> = {
   signup: "confirmUrl",
 };
 
+/**
+ * Build a Mundoria auth link from generateLink's hashed_token.
+ * Prefer this over action_link: Supabase rewrites redirect_to to Site URL when
+ * the intended host is not on the Auth redirect allow-list, which currently
+ * still points at cleanscapeuk.com.
+ */
+export function buildAppAuthLink({
+  appUrl,
+  hashedToken,
+  redirectTo,
+  type,
+}: {
+  appUrl: string;
+  hashedToken: string;
+  redirectTo: string;
+  type: AuthLinkType;
+}) {
+  const url = new URL("/auth/callback", appUrl);
+  url.searchParams.set("token_hash", hashedToken);
+  url.searchParams.set("type", type);
+
+  try {
+    const intended = new URL(redirectTo);
+    const nextFromQuery = intended.searchParams.get("next");
+    if (nextFromQuery) {
+      url.searchParams.set("next", nextFromQuery);
+    } else if (type === "recovery") {
+      const path = `${intended.pathname}${intended.search}`;
+      url.searchParams.set(
+        "next",
+        path.startsWith("/") ? path : "/update-password",
+      );
+    }
+  } catch {
+    if (type === "recovery") {
+      url.searchParams.set("next", "/update-password");
+    }
+  }
+
+  return url.toString();
+}
+
 /** Build a Supabase auth action link and send it with a Mundoria Resend template. */
 export async function sendAuthLinkEmail({
   appUrl,
@@ -53,10 +95,17 @@ export async function sendAuthLinkEmail({
 
   if (error) throw error;
 
-  const actionLink = data.properties?.action_link;
-  if (!actionLink) {
-    throw new Error("Auth link was not generated.");
+  const hashedToken = data.properties?.hashed_token;
+  if (!hashedToken) {
+    throw new Error("Auth link token was not generated.");
   }
+
+  const actionLink = buildAppAuthLink({
+    appUrl,
+    hashedToken,
+    redirectTo,
+    type,
+  });
 
   const linkField = LINK_FIELD_BY_TYPE[type];
   const sent = await sendBrandedEmail({

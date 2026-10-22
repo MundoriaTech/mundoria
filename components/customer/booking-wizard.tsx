@@ -352,6 +352,7 @@ export function BookingWizard({
   const [stepIndex, setStepIndex] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const [authMode, setAuthMode] = useState<BookingAuthMode>("ask");
+  const [authVerifyPending, setAuthVerifyPending] = useState(false);
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
@@ -545,11 +546,29 @@ export function BookingWizard({
       const keptAddress = readStoredAddressFields();
       const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
       const storedStepRaw = window.localStorage.getItem(BOOKING_STEP_KEY) ?? "";
-      const urlStepRaw =
-        new URLSearchParams(window.location.search).get("step") ?? "";
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlStepRaw = urlParams.get("step") ?? "";
       const preferredStepRaw = isBookingFlowStepId(urlStepRaw)
         ? urlStepRaw
         : storedStepRaw;
+      const urlAuth = urlParams.get("auth");
+      const urlVerify = urlParams.get("verify") === "1";
+      if (urlAuth === "signin" || urlVerify) {
+        setAuthMode("signin");
+        if (urlVerify) setAuthVerifyPending(true);
+      }
+      if (urlAuth || urlVerify) {
+        urlParams.delete("auth");
+        urlParams.delete("verify");
+        const cleaned = urlParams.toString();
+        window.history.replaceState(
+          window.history.state,
+          "",
+          cleaned
+            ? `${window.location.pathname}?${cleaned}`
+            : window.location.pathname,
+        );
+      }
       const parsed = stored
         ? (JSON.parse(stored) as BookingDraft)
         : null;
@@ -1564,7 +1583,14 @@ export function BookingWizard({
       roomsAddress &&
       selectedStandard ? (
         needsAuth ? (
-          <CheckoutAuthGate authMode={authMode} onModeChange={setAuthMode} />
+          <CheckoutAuthGate
+            authMode={authMode}
+            initialVerifyPending={authVerifyPending}
+            onModeChange={(mode) => {
+              setAuthMode(mode);
+              if (mode !== "signin") setAuthVerifyPending(false);
+            }}
+          />
         ) : stripePromise ? (
           <Elements stripe={stripePromise}>
             <CheckoutStep
@@ -1741,9 +1767,11 @@ export function BookingWizard({
 
 function CheckoutAuthGate({
   authMode,
+  initialVerifyPending = false,
   onModeChange,
 }: {
   authMode: BookingAuthMode;
+  initialVerifyPending?: boolean;
   onModeChange: (mode: BookingAuthMode) => void;
 }) {
   const title =
@@ -1757,7 +1785,9 @@ function CheckoutAuthGate({
       ? "Your selections are already saved. Enter your email to create an account or sign in."
       : authMode === "create"
         ? "Choose a name and password. We’ll email a confirmation link, then you can finish this booking."
-        : "Welcome back — enter your password to continue this booking.";
+        : initialVerifyPending
+          ? "Confirm the email we just sent, then enter your password to finish this booking."
+          : "Welcome back — enter your password to continue this booking.";
 
   return (
     <div>
@@ -1768,6 +1798,7 @@ function CheckoutAuthGate({
       <div className="mt-8 max-w-md">
         <BookingAuthPrompt
           hideTitle
+          initialVerifyPending={initialVerifyPending}
           mode={authMode}
           onModeChange={onModeChange}
         />

@@ -33,7 +33,7 @@ export function BookingChrome({
 }) {
   const configured = hasSupabasePublicConfig();
   const authHref = configured
-    ? `/login?redirectTo=${encodeURIComponent("/booking/new")}`
+    ? "/booking/new?step=checkout&auth=signin"
     : "/setup";
   const progressPct =
     progress == null

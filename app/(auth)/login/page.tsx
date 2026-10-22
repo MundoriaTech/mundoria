@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
+import { safeRedirectPath } from "@/lib/auth/redirects";
 import { SIGNUP_VERIFY_MESSAGE } from "@/lib/auth/signup-email-pending";
 
 export const metadata = {
@@ -19,7 +20,30 @@ interface LoginPageProps {
   };
 }
 
+/** Booking auth uses the wizard chrome — bounce login redirects back into it. */
+function bookingAuthRedirect(redirectTo: string, verify?: string) {
+  const next = safeRedirectPath(redirectTo, "");
+  if (!next.startsWith("/booking")) return null;
+  const [pathname, query = ""] = next.split("?");
+  const params = new URLSearchParams(query);
+  if (pathname.startsWith("/booking/new") && !params.get("step")) {
+    params.set("step", "checkout");
+  }
+  params.set("auth", "signin");
+  if (verify === "1") params.set("verify", "1");
+  const qs = params.toString();
+  return qs ? `${pathname}?${qs}` : pathname;
+}
+
 export default function LoginPage({ searchParams }: LoginPageProps) {
+  if (searchParams.redirectTo) {
+    const bookingHref = bookingAuthRedirect(
+      searchParams.redirectTo,
+      searchParams.verify,
+    );
+    if (bookingHref) redirect(bookingHref);
+  }
+
   if (searchParams.email) {
     const params = new URLSearchParams();
     if (searchParams.verify === "1") params.set("verify", "1");
@@ -33,15 +57,10 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
   const signupHref = searchParams.redirectTo
     ? `/signup?redirectTo=${encodeURIComponent(searchParams.redirectTo)}`
     : "/signup";
-  const returningFromBooking = searchParams.redirectTo?.startsWith("/booking");
 
   return (
     <AuthShell
-      description={
-        returningFromBooking
-          ? "Looks like you already have a Mundoria customer account. Sign in to finish your booking."
-          : "Welcome back. Sign in to book and manage your cleans."
-      }
+      description="Welcome back. Sign in to book and manage your cleans."
       footer={
         <>
           New to Mundoria?{" "}

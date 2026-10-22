@@ -1,4 +1,5 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -20,9 +21,20 @@ import { isUserRole, type UserRole } from "@/types/auth";
 
 type SelfRegisterableRole = Extract<UserRole, "customer" | "cleaner">;
 
+const OTP_TYPES = new Set<string>([
+  "signup",
+  "invite",
+  "magiclink",
+  "recovery",
+  "email_change",
+  "email",
+]);
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const tokenHash = requestUrl.searchParams.get("token_hash");
+  const otpTypeRaw = requestUrl.searchParams.get("type");
   const jar = cookies();
   const requestedNext =
     requestUrl.searchParams.get("next") ??
@@ -30,110 +42,127 @@ export async function GET(request: Request) {
   const requestedRole =
     parseOAuthRole(requestUrl.searchParams.get("role")) ??
     parseOAuthRole(jar.get(OAUTH_ROLE_COOKIE)?.value);
-  if (code) {
-    const supabase = createRouteHandlerClient({ cookies });
+
+  const supabase = createRouteHandlerClient({ cookies });
+  let sessionError: Error | null = null;
+
+  if (tokenHash && otpTypeRaw && OTP_TYPES.has(otpTypeRaw)) {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: otpTypeRaw as EmailOtpType,
+    });
+    sessionError = error;
+  } else if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    sessionError = error;
+  } else {
+    return clearOAuthIntent(
+      NextResponse.redirect(
+        new URL("/login?error=Unable%20to%20complete%20sign-in", requestUrl.origin),
+      ),
+      requestUrl.protocol === "https:",
+    );
+  }
 
-    if (!error) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const boot = user
-        ? await bootstrapOAuthProfile({
-            requestedRole,
-            user,
-          })
-        : null;
-      const profile = boot?.profile ?? null;
-      const fallback = isUserRole(profile?.role)
-        ? dashboardForRole(profile.role)
-        : requestedRole
-          ? dashboardForRole(requestedRole)
-          : "/login?error=Unable%20to%20finish%20sign-up";
-      const next = isUserRole(profile?.role)
-        ? redirectForRole(profile.role, requestedNext, fallback)
-        : redirectForRole(requestedRole ?? "customer", requestedNext, fallback);
-      const isPasswordReset = next === "/update-password";
+  if (!sessionError) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const boot = user
+      ? await bootstrapOAuthProfile({
+          requestedRole,
+          user,
+        })
+      : null;
+    const profile = boot?.profile ?? null;
+    const fallback = isUserRole(profile?.role)
+      ? dashboardForRole(profile.role)
+      : requestedRole
+        ? dashboardForRole(requestedRole)
+        : "/login?error=Unable%20to%20finish%20sign-up";
+    const next = isUserRole(profile?.role)
+      ? redirectForRole(profile.role, requestedNext, fallback)
+      : redirectForRole(requestedRole ?? "customer", requestedNext, fallback);
+    const isPasswordReset = next === "/update-password" || next.startsWith("/update-password?");
 
-      if (user && profile && isUserRole(profile.role) && !isPasswordReset) {
-        try {
-          await sendAccountWelcomeIfNeeded({
-            appUrl: requestUrl.origin,
-            email: profile.email ?? user.email ?? "",
-            emailConfirmedAt: user.email_confirmed_at,
-            fullName: profile.full_name,
-            metadata: user.user_metadata,
-            profileExisted: boot?.profileExisted ?? true,
-            role: profile.role,
-            userId: user.id,
-          });
-        } catch {
-          // Email should never block sign-in.
-        }
-      }
-
-      if (
-        user &&
-        requestUrl.searchParams.get("type") === "signup" &&
-        !isPasswordReset
-      ) {
-        await trackUserActivity({
-          eventName: "email_confirmed",
-          metadata: { role: profile?.role ?? null },
-          path: "/auth/callback",
-          userId: user.id,
-        });
-      }
-
-      if (
-        user &&
-        boot &&
-        !boot.profileExisted &&
-        (profile?.role === "customer" || profile?.role === "cleaner") &&
-        !isPasswordReset
-      ) {
-        await notifyAdminUserSignedUp({
+    if (user && profile && isUserRole(profile.role) && !isPasswordReset) {
+      try {
+        await sendAccountWelcomeIfNeeded({
           appUrl: requestUrl.origin,
           email: profile.email ?? user.email ?? "",
-          fullName: profile.full_name ?? "Mundoria user",
+          emailConfirmedAt: user.email_confirmed_at,
+          fullName: profile.full_name,
+          metadata: user.user_metadata,
+          profileExisted: boot?.profileExisted ?? true,
           role: profile.role,
           userId: user.id,
         });
+      } catch {
+        // Email should never block sign-in.
       }
+    }
 
-      if (user && !isPasswordReset) {
-        try {
-          await notifyEmailChangeCompleted({
-            appUrl: requestUrl.origin,
-            user,
-          });
-        } catch {
-          // Notification should never block sign-in.
-        }
+    if (
+      user &&
+      requestUrl.searchParams.get("type") === "signup" &&
+      !isPasswordReset
+    ) {
+      await trackUserActivity({
+        eventName: "email_confirmed",
+        metadata: { role: profile?.role ?? null },
+        path: "/auth/callback",
+        userId: user.id,
+      });
+    }
+
+    if (
+      user &&
+      boot &&
+      !boot.profileExisted &&
+      (profile?.role === "customer" || profile?.role === "cleaner") &&
+      !isPasswordReset
+    ) {
+      await notifyAdminUserSignedUp({
+        appUrl: requestUrl.origin,
+        email: profile.email ?? user.email ?? "",
+        fullName: profile.full_name ?? "Mundoria user",
+        role: profile.role,
+        userId: user.id,
+      });
+    }
+
+    if (user && !isPasswordReset) {
+      try {
+        await notifyEmailChangeCompleted({
+          appUrl: requestUrl.origin,
+          user,
+        });
+      } catch {
+        // Notification should never block sign-in.
       }
+    }
 
-      if (
-        user &&
-        isUserRole(profile?.role) &&
-        !profile?.phone?.trim() &&
-        next !== "/complete-profile" &&
-        !isPasswordReset
-      ) {
-        const completionUrl = new URL("/complete-profile", requestUrl.origin);
-        completionUrl.searchParams.set("next", next);
-        return finishAuthRedirect(
-          requestUrl,
-          completionUrl,
-          requestUrl.searchParams.get("type") === "signup",
-        );
-      }
-
+    if (
+      user &&
+      isUserRole(profile?.role) &&
+      !profile?.phone?.trim() &&
+      next !== "/complete-profile" &&
+      !isPasswordReset
+    ) {
+      const completionUrl = new URL("/complete-profile", requestUrl.origin);
+      completionUrl.searchParams.set("next", next);
       return finishAuthRedirect(
         requestUrl,
-        new URL(next, requestUrl.origin),
-        requestUrl.searchParams.get("type") === "signup" && !isPasswordReset,
+        completionUrl,
+        requestUrl.searchParams.get("type") === "signup",
       );
     }
+
+    return finishAuthRedirect(
+      requestUrl,
+      new URL(next, requestUrl.origin),
+      requestUrl.searchParams.get("type") === "signup" && !isPasswordReset,
+    );
   }
 
   return clearOAuthIntent(
