@@ -440,15 +440,6 @@ export function composeBookingNotes(draft: BookingDraft) {
   if (draft.specialInstructions.trim()) {
     parts.push(draft.specialInstructions.trim());
   }
-  if (draft.keysPolicy === "with_cleaner") {
-    parts.push(
-      "Keys: the customer will leave keys with the cleaner, at the customer's own risk.",
-    );
-  } else if (draft.keysPolicy === "key_box") {
-    parts.push(
-      "Keys: the customer will use a key box, at the customer's own risk.",
-    );
-  }
   if (draft.hasPets === true) {
     const types = draft.petTypes.length
       ? ` (${draft.petTypes.join(", ")})`

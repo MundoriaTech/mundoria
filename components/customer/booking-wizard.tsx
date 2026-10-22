@@ -56,7 +56,6 @@ import {
 import { AddressForm } from "@/components/customer/address-manager";
 import { TimeSlotPicker, slotsFinishingByWindowEnd } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { trackClientActivity } from "@/lib/analytics/track-client";
 import {
   composeBookingNotes,
@@ -1422,6 +1421,18 @@ export function BookingWizard({
     hasPets: draft.hasPets,
     hourlyRatePence: displayHourlyRatePence,
     priorityAreas: draft.specialAttentionAreas,
+    promo:
+      stepId === "checkout"
+        ? {
+            addressReady: Boolean(
+              draft.addressId && !draft.addressId.startsWith("guest-"),
+            ),
+            code: draft.promoCode,
+            feedback: promoFeedback,
+            onChange: (code: string) => update("promoCode", code),
+            onValidate: () => void validatePromo(),
+          }
+        : null,
     scheduledDate: draft.scheduledDate,
     scheduledTime: draft.scheduledTime,
     serviceLabel: service
@@ -1606,10 +1617,8 @@ export function BookingWizard({
                 update("guestAddress", null);
               }}
               onProcessingChange={setCheckoutBusy}
-              promoFeedback={promoFeedback}
               update={update}
               userId={userId}
-              validatePromo={() => void validatePromo()}
             />
           </Elements>
         ) : (
@@ -3456,10 +3465,8 @@ function CheckoutStep({
   draft,
   onAddressPersisted,
   onProcessingChange,
-  promoFeedback,
   update,
   userId,
-  validatePromo,
 }: {
   address: Address;
   draft: BookingDraft & {
@@ -3468,13 +3475,11 @@ function CheckoutStep({
   };
   onAddressPersisted: (address: Address) => void;
   onProcessingChange?: (busy: boolean) => void;
-  promoFeedback: string | null;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
   ) => void;
   userId: string | null;
-  validatePromo: () => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -3485,7 +3490,7 @@ function CheckoutStep({
   const [paymentPhase, setPaymentPhase] = useState<
     "idle" | "saving" | "authorising" | "confirming"
   >("idle");
-  const [showCard, setShowCard] = useState(true);
+  const [cardOpen, setCardOpen] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState(address);
 
   useEffect(() => {
@@ -3543,8 +3548,17 @@ function CheckoutStep({
     setError(null);
     if (payingRef.current || processing) return;
     if (!stripe || !elements) return;
+    if (!cardOpen) {
+      setCardOpen(true);
+      setError("Enter your card details to continue.");
+      return;
+    }
     const card = elements.getElement(CardElement);
-    if (!card) return;
+    if (!card) {
+      setCardOpen(true);
+      setError("Enter your card details to continue.");
+      return;
+    }
 
     payingRef.current = true;
     setProcessing(true);
@@ -3649,36 +3663,6 @@ function CheckoutStep({
         All good? Book your cleaning
       </h2>
 
-      <fieldset className="mt-5">
-        <legend className="font-semibold text-[#1c133b]">Keys</legend>
-        <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          Leave keys with the cleaner, or use a key box. Either way, this is at
-          your own risk.
-        </p>
-        <div className="mt-3 grid gap-2">
-          {(
-            [
-              ["with_cleaner", "Leave keys with the cleaner"],
-              ["key_box", "Use a key box"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              className={cn(
-                "rounded-2xl border-2 border-transparent bg-white px-4 py-3 text-left text-sm font-semibold text-[#1c133b]",
-                draft.keysPolicy === value && "border-[#6a45b8] bg-white",
-              )}
-              key={value}
-              onClick={() =>
-                update("keysPolicy", draft.keysPolicy === value ? null : value)
-              }
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
       <label className="mt-5 block">
         <span className="sr-only">Special requirements</span>
         <textarea
@@ -3691,69 +3675,49 @@ function CheckoutStep({
         />
       </label>
 
-      <div className="mt-5">
-        <p className="font-semibold text-[#1c133b]">Promo code</p>
-        <div className="mt-2 flex flex-col gap-2 min-[400px]:flex-row">
-          <Input
-            className="min-h-11 rounded-full border-[#d9ccef] bg-white/80"
-            onChange={(event) => update("promoCode", event.target.value)}
-            placeholder="CLEAN10"
-            value={draft.promoCode}
-          />
-          <Button
-            className="min-h-11 shrink-0 rounded-full touch-manipulation"
-            disabled={!draft.promoCode || !draft.addressId}
-            onClick={validatePromo}
-            type="button"
-            variant="outline"
-          >
-            Apply
-          </Button>
-        </div>
-        {promoFeedback ? (
-          <p className="mt-2 text-sm text-[#5b5478]">{promoFeedback}</p>
-        ) : null}
-        {!draft.addressId ? (
-          <p className="mt-2 text-xs text-[#7a7198]">
-            Promo codes apply after your address is saved at payment.
-          </p>
-        ) : null}
-      </div>
-
       <div className="mt-6">
-        <p className="font-semibold text-[#1c133b]">Add your payment method</p>
-        <button
-          className="mt-3 flex w-full items-center justify-between rounded-2xl border border-transparent bg-white px-4 py-3 text-left"
-          onClick={() => setShowCard((value) => !value)}
-          type="button"
+        <p className="font-semibold text-[#1c133b]">Your payment method</p>
+        <div
+          className={cn(
+            "mt-3 overflow-hidden rounded-2xl border bg-white transition-colors",
+            cardOpen ? "border-[#c9a227]" : "border-[#e4daf5]",
+          )}
         >
-          <span className="flex items-center gap-2 font-semibold text-[#1c133b]">
-            <CreditCard className="h-4 w-4" />
-            Card
-          </span>
-          <span className="text-[#6a45b8]">{showCard ? "▴" : "▾"}</span>
-        </button>
-        {showCard ? (
-          <div className="mt-3 rounded-2xl border border-transparent bg-white/80 p-4">
-        <CardElement
-          options={{
-            hidePostalCode: true,
-            style: {
-              base: {
-                    color: "#1c133b",
-                fontFamily: "system-ui, sans-serif",
-                fontSize: "16px",
-              },
-            },
-          }}
-        />
-            <p className="mt-3 text-xs text-[#7a7198]">
-              By providing your card information, you allow Mundoria to
-              authorise a hold on your card for this booking in accordance with
-              our terms. The charge is captured after the clean is completed.
-            </p>
-          </div>
-        ) : null}
+          <button
+            aria-expanded={cardOpen}
+            className="flex w-full items-center gap-3 px-4 py-3.5 text-left touch-manipulation"
+            onClick={() => setCardOpen((value) => !value)}
+            type="button"
+          >
+            <CreditCard className="h-5 w-5 shrink-0 text-[#1c133b]" />
+            <span className="font-semibold text-[#1c133b]">Card</span>
+          </button>
+          {cardOpen ? (
+            <div className="border-t border-[#efe6ff] px-4 pb-4 pt-3">
+              <div className="rounded-xl border border-[#e4daf5] bg-white px-3 py-3">
+                <CardElement
+                  options={{
+                    hidePostalCode: true,
+                    style: {
+                      base: {
+                        color: "#1c133b",
+                        fontFamily: "system-ui, sans-serif",
+                        fontSize: "16px",
+                        "::placeholder": { color: "#8a8498" },
+                      },
+                    },
+                  }}
+                />
+              </div>
+              <p className="mt-3 text-xs leading-5 text-[#7a7198]">
+                By providing your card information, you allow Mundoria to
+                authorise a hold on your card for this booking in accordance
+                with our terms. The charge is captured after the clean is
+                completed.
+              </p>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-6 divide-y divide-[#e4daf5] border-y border-[#e4daf5]">

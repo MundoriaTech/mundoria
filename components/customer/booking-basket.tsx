@@ -14,6 +14,15 @@ import type { Address } from "@/types/customer";
 const BASKET_SURFACE =
   "border border-[#e8d4b0] bg-[#fffefb] shadow-[0_10px_28px_rgba(28,19,59,0.05)]";
 
+type BasketPromo = {
+  /** Address must be saved before promo can be applied. */
+  addressReady: boolean;
+  code: string;
+  feedback: string | null;
+  onChange: (code: string) => void;
+  onValidate: () => void;
+};
+
 type BasketProps = {
   addOns: { amount: number; hourly?: boolean; label: string }[];
   address: Address | null;
@@ -29,6 +38,8 @@ type BasketProps = {
   /** Labour rate for the selected service / standard (pence per hour). */
   hourlyRatePence?: number | null;
   priorityAreas?: string[];
+  /** Checkout-only: “Add a promo code” expands to an input (Wecasa-style). */
+  promo?: BasketPromo | null;
   scheduledDate: string;
   scheduledTime: string;
   serviceLabel: string | null;
@@ -177,6 +188,7 @@ function BasketPanel({
   headerTitle = "My basket",
   hourlyRatePence = null,
   priorityAreas = [],
+  promo = null,
   scheduledDate,
   scheduledTime,
   serviceLabel,
@@ -188,6 +200,10 @@ function BasketPanel({
     /** Open when a category is already chosen so the £/h rate is visible. */
     service: Boolean(serviceLabel),
   });
+  const [promoOpen, setPromoOpen] = useState(Boolean(promo?.code));
+  useEffect(() => {
+    if (promo?.code) setPromoOpen(true);
+  }, [promo?.code]);
   const prevServiceLabel = useRef(serviceLabel);
   useEffect(() => {
     if (serviceLabel && serviceLabel !== prevServiceLabel.current) {
@@ -357,6 +373,68 @@ function BasketPanel({
           </p>
         )}
       </BasketSection>
+
+      {promo ? (
+        <div className="border-b border-[#e4daf5] px-4 py-3 sm:px-5">
+          {!promoOpen ? (
+            <button
+              className="text-sm font-semibold text-[#1c133b] underline underline-offset-2 touch-manipulation"
+              onClick={() => setPromoOpen(true)}
+              type="button"
+            >
+              Add a promo code
+            </button>
+          ) : (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#8a8498]">
+                Your code
+              </p>
+              <div className="mt-2 flex gap-2">
+                <input
+                  autoFocus
+                  className="min-h-10 min-w-0 flex-1 rounded-full border border-[#e4daf5] bg-white px-4 text-sm text-[#1c133b] outline-none focus:border-[#6a45b8]"
+                  onChange={(event) => promo.onChange(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      promo.onValidate();
+                    }
+                  }}
+                  placeholder="Promo code"
+                  value={promo.code}
+                />
+                <button
+                  className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white touch-manipulation disabled:opacity-40"
+                  disabled={!promo.code.trim() || !promo.addressReady}
+                  onClick={promo.onValidate}
+                  type="button"
+                >
+                  Add
+                </button>
+              </div>
+              {promo.feedback ? (
+                <p className="mt-2 text-xs leading-5 text-[#5a5470]">
+                  {promo.feedback}
+                </p>
+              ) : null}
+              {!promo.addressReady ? (
+                <p className="mt-2 text-xs leading-5 text-[#8a8498]">
+                  Promo codes apply once your address is saved at payment.
+                </p>
+              ) : null}
+              {promo.code || promo.feedback ? null : (
+                <button
+                  className="mt-2 text-xs font-medium text-[#8a8498] hover:text-[#1c133b]"
+                  onClick={() => setPromoOpen(false)}
+                  type="button"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      ) : null}
 
       <BasketSection
         filled={scheduleFilled}

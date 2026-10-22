@@ -725,37 +725,55 @@ function renderCards(cards: Array<{ label: string; value?: unknown }>) {
 }
 
 function renderSocialLinks() {
+  // Match site footer order and default profiles (circular navy icons).
   const links = [
     {
       href:
-        process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() ||
-        "https://www.instagram.com/mundoriauk",
-      label: "Instagram",
+        process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() ||
+        "https://www.facebook.com/people/Mundoria/61593293454130/",
+      icon: "/images/social/facebook.svg",
+      label: "Facebook",
     },
     {
       href:
-        process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() ||
-        "https://www.facebook.com/mundoriauk",
-      label: "Facebook",
+        process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() ||
+        "https://www.instagram.com/mundoria.uk",
+      icon: "/images/social/instagram.svg",
+      label: "Instagram",
     },
     {
       href:
         process.env.NEXT_PUBLIC_TIKTOK_URL?.trim() ||
         "https://www.tiktok.com/@mundoriauk",
+      icon: "/images/social/tiktok.svg",
       label: "TikTok",
     },
-  ].filter((link) => Boolean(link.href));
+    {
+      href:
+        process.env.NEXT_PUBLIC_LINKEDIN_URL?.trim() ||
+        "https://www.linkedin.com/company/mundoria",
+      icon: "/images/social/linkedin.svg",
+      label: "LinkedIn",
+    },
+  ];
 
-  if (!links.length) return "";
+  const cells = links
+    .map((link) => {
+      const src = publicEmailAssetUrl(link.icon);
+      return `<td style="padding:0 6px;">
+        <a href="${escapeAttribute(link.href)}" style="text-decoration:none;" title="${escapeAttribute(link.label)}">
+          <img alt="${escapeAttribute(link.label)}" height="36" src="${escapeAttribute(src)}" style="display:block;border:0;height:36px;width:36px;" width="36" />
+        </a>
+      </td>`;
+    })
+    .join("");
 
-  const items = links
-    .map(
-      (link) =>
-        `<a href="${escapeAttribute(link.href)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(link.label)}</a>`,
-    )
-    .join(" &nbsp;·&nbsp; ");
-
-  return `<p class="email-social" style="margin:0 0 4px;font-size:12px;line-height:1.6;">${items}</p>`;
+  return `<table role="presentation" class="email-social" cellspacing="0" cellpadding="0" style="margin:0 auto 8px;">
+    <tr>
+      <td style="padding:0 10px 0 0;font-size:13px;font-weight:700;color:#1c133b;vertical-align:middle;">Follow us</td>
+      ${cells}
+    </tr>
+  </table>`;
 }
 
 /** Never surface retired CleanScape addresses in customer mail. */
@@ -815,7 +833,7 @@ function renderText(
     ),
     "See you soon — the Mundoria team",
     `Questions? ${supportEmail}`,
-    "Instagram · Facebook · TikTok — @mundoriauk",
+    "Follow us: Facebook, Instagram, TikTok, LinkedIn",
     "Mundoria · trusted cleaning, clearly managed",
   ]
     .filter(Boolean)
