@@ -14,6 +14,10 @@ import {
   signupPendingLoginPath,
   rememberSignupEmail,
 } from "@/lib/auth/signup-email-pending";
+import {
+  BOOKING_CHECKOUT_RETURN_PATH,
+  markBookingAuthReturn,
+} from "@/lib/customer/booking-auth-return";
 import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +32,7 @@ import { isUserRole } from "@/types/auth";
 
 export type BookingAuthMode = "ask" | "create" | "signin";
 
-const RETURN_PATH = "/booking/new";
+const RETURN_PATH = BOOKING_CHECKOUT_RETURN_PATH;
 
 export function BookingAuthPrompt({
   hideTitle = false,
@@ -154,6 +158,7 @@ export function BookingAuthPrompt({
         throw new Error(result.error ?? "Unable to create your account.");
       }
       if (result.requiresEmailConfirmation) {
+        markBookingAuthReturn();
         rememberSignupEmail(email.trim());
         router.replace(
           signupPendingLoginPath("customer", {
@@ -162,6 +167,8 @@ export function BookingAuthPrompt({
         );
         return;
       }
+      markBookingAuthReturn();
+      router.replace(RETURN_PATH);
       router.refresh();
     } catch (error) {
       setMessage(
@@ -200,6 +207,8 @@ export function BookingAuthPrompt({
         return;
       }
 
+      markBookingAuthReturn();
+      router.replace(RETURN_PATH);
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to sign in.");
@@ -249,6 +258,7 @@ export function BookingAuthPrompt({
           <OAuthButton
             label="Use Google"
             next={RETURN_PATH}
+            onBeforeRedirect={markBookingAuthReturn}
             role="customer"
           />
 

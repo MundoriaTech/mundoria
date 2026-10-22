@@ -60,6 +60,8 @@ export interface ServiceAddOnDefinition {
   amount: number;
   categories?: ServiceCategory[];
   description: string;
+  /** Optional expandable “A little more detail” copy shown in booking. */
+  detail?: string;
   id: string;
   /** When set, charge this many pence per cleaner-hour instead of `amount`. */
   hourly?: "products" | "equipment";
@@ -353,6 +355,8 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     categories: ["residential"],
     description:
       "Pressing and folding during the visit. Adds about 15 minutes to the booking.",
+    detail:
+      "We’ll add 15 minutes to your booking to start with, and you can adjust the time depending on how much ironing you have.\n\nKindly note: you’ll need to provide the ironing board. If you’ve asked the professional to bring cleaning equipment, they can also bring an iron, but the ironing board is not included.",
     id: "ironing",
     label: "Ironing",
   },
@@ -367,6 +371,8 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     ],
     description:
       "Cleaner brings the Mundoria product kit (£2/h home, £3/h commercial).",
+    detail:
+      "This option covers cleaning products only. It does not include equipment such as a vacuum, mop or bucket.\n\nIf you choose cleaning products without equipment, you’ll need to make sure suitable cleaning equipment is available at the property.",
     hourly: "products",
     id: "cleaning_products",
     label: "Cleaning products",
@@ -382,10 +388,12 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     ],
     description:
       "Cleaner brings the Mundoria equipment kit (£3/h, or £5/h for deep cleaning).",
+    detail:
+      "This option covers cleaning equipment only, such as a vacuum, mop, bucket and other standard tools needed for the clean. It does not include cleaning products.\n\nIf you want the professional to bring both, select Cleaning products and Cleaning equipment when booking.",
     hourly: "equipment",
     id: "cleaning_equipment",
     label: "Cleaning equipment",
-  },
+  }
   {
     amount: 1200,
     categories: ["short_term_rental"],

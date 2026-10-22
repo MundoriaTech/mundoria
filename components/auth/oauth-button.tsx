@@ -13,6 +13,8 @@ interface OAuthButtonProps {
   className?: string;
   label?: string;
   next?: string;
+  /** Called just before the browser leaves for Google (e.g. preserve booking draft). */
+  onBeforeRedirect?: () => void;
   role?: Extract<UserRole, "customer" | "cleaner">;
 }
 
@@ -20,6 +22,7 @@ export function OAuthButton({
   className,
   label = "Continue with Google",
   next = "/dashboard",
+  onBeforeRedirect,
   role,
 }: OAuthButtonProps) {
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +32,7 @@ export function OAuthButton({
     setError(null);
     setIsLoading(true);
 
+    onBeforeRedirect?.();
     writeOAuthIntent(role, next);
     const { error: oauthError } = await createBrowserClient().auth.signInWithOAuth(
       {

@@ -77,6 +77,10 @@ import {
   type BookingFlowStepId,
 } from "@/lib/customer/booking-flow";
 import {
+  clearBookingAuthReturn,
+  isBookingAuthReturnPath,
+} from "@/lib/customer/booking-auth-return";
+import {
   recommendFromHistory,
   type HistoryRecommendation,
   type HistoryVisit,
@@ -245,27 +249,6 @@ function clearBookingStorage(keep?: Partial<StoredAddressFields>) {
   } catch {
     // Ignore storage failures (private mode, quota, etc.).
   }
-}
-
-function isBookingAuthReturnPath(pathname: string, search: string) {
-  if (
-    !pathname.startsWith("/login") &&
-    !pathname.startsWith("/signup") &&
-    !pathname.startsWith("/setup") &&
-    !pathname.startsWith("/auth") &&
-    !pathname.startsWith("/forgot-password") &&
-    !pathname.startsWith("/complete-profile") &&
-    !pathname.startsWith("/update-password")
-  ) {
-    return false;
-  }
-  // Login/signup use redirectTo=; OAuth/callback/complete-profile use next=.
-  return (
-    search.includes("redirectTo=/booking/new") ||
-    search.includes("redirectTo=%2Fbooking%2Fnew") ||
-    search.includes("next=/booking/new") ||
-    search.includes("next=%2Fbooking%2Fnew")
-  );
 }
 
 /** Avoid double-building the history stack under React Strict Mode remounts. */
@@ -557,9 +540,15 @@ export function BookingWizard({
         return;
       }
 
+      clearBookingAuthReturn();
       const keptAddress = readStoredAddressFields();
       const stored = window.localStorage.getItem(BOOKING_DRAFT_KEY);
       const storedStepRaw = window.localStorage.getItem(BOOKING_STEP_KEY) ?? "";
+      const urlStepRaw =
+        new URLSearchParams(window.location.search).get("step") ?? "";
+      const preferredStepRaw = isBookingFlowStepId(urlStepRaw)
+        ? urlStepRaw
+        : storedStepRaw;
       const parsed = stored
         ? (JSON.parse(stored) as BookingDraft)
         : null;
@@ -596,10 +585,10 @@ export function BookingWizard({
       );
       const dateIndex = previewSteps.indexOf("date");
       const frequencyIndex = previewSteps.indexOf("frequency");
-      const savedIndex = isBookingFlowStepId(storedStepRaw)
-        ? resolveFlowStepIndex(previewSteps, storedStepRaw)
-        : Number.isFinite(Number(storedStepRaw))
-          ? Number(storedStepRaw)
+      const savedIndex = isBookingFlowStepId(preferredStepRaw)
+        ? resolveFlowStepIndex(previewSteps, preferredStepRaw)
+        : Number.isFinite(Number(preferredStepRaw))
+          ? Number(preferredStepRaw)
           : -1;
       const keepDuration =
         keepSaved && dateIndex >= 0 && savedIndex >= dateIndex;
@@ -735,6 +724,9 @@ export function BookingWizard({
         !parsed?.rebookCleanerChoice
       ) {
         setStepIndex(0);
+      } else if (isBookingFlowStepId(urlStepRaw)) {
+        // Auth return uses ?step=checkout — prefer URL over a deep-link reset.
+        setStepIndex(resolveFlowStepIndex(restoredSteps, urlStepRaw));
       } else if (urlService) {
         setStepIndex(resolveFlowStepIndex(restoredSteps, "address"));
       } else if (initialDraft?.serviceCategory && !urlService) {
@@ -2681,6 +2673,28 @@ function AddOnsStep({
                     <p className="mt-0.5 text-sm leading-5 text-[#5a5470]">
                       {addOn.description}
                     </p>
+                    {addOn.detail ? (
+                      <details
+                        className="group/addon-detail mt-2"
+                        onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
+                      >
+                        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-[#6a45b8] marker:content-none [&::-webkit-details-marker]:hidden">
+                          <span
+                            aria-hidden
+                            className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#6a45b8]/40 text-[0.65rem] leading-none"
+                          >
+                            i
+                          </span>
+                          A little more detail
+                        </summary>
+                        <div className="mt-2 space-y-2 text-sm leading-6 text-[#5a5470]">
+                          {addOn.detail.split("\n\n").map((paragraph) => (
+                            <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                          ))}
+                        </div>
+                      </details>
+                    ) : null}
                   </div>
                   <p className="shrink-0 text-right text-sm font-bold text-[#1c133b]">
                     {(() => {
