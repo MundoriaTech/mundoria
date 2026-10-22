@@ -147,9 +147,6 @@ export function BookingAuthPrompt({
 
       if (result.code === "email_taken") {
         setMode("signin");
-        setMessage(
-          "That email already has an account — enter your password to continue.",
-        );
         setBusy(false);
         return;
       }
@@ -394,21 +391,16 @@ export function BookingAuthPrompt({
       ) : null}
 
       {message ? (
-        message.toLowerCase().includes("welcome back") ||
-        message.toLowerCase().includes("already has an account") ? (
-          <p className="mt-4 text-sm text-muted-foreground">{message}</p>
-        ) : (
-          <div className="mt-4">
-            <ActionError
-              message={message}
-              title={
-                mode === "signin"
-                  ? "Couldn’t sign you in"
-                  : "Couldn’t continue"
-              }
-            />
-          </div>
-        )
+        <div className="mt-4">
+          <ActionError
+            message={message}
+            title={
+              mode === "signin"
+                ? "Couldn’t sign you in"
+                : "Couldn’t continue"
+            }
+          />
+        </div>
       ) : null}
     </div>
   );

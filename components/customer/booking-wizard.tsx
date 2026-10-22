@@ -41,6 +41,7 @@ import {
 } from "react";
 
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
+import { AppModal } from "@/components/shared/app-modal";
 import { addressOutsideCoverage } from "@/lib/seo/cleaner-coverage";
 import {
   BookingBasket,
@@ -2592,7 +2593,11 @@ function AddOnsStep({
     value: BookingDraft[K],
   ) => void;
 }) {
+  const [detailAddOnId, setDetailAddOnId] = useState<string | null>(null);
   const addOns = draft.serviceType ? availableAddOns(draft.serviceType) : [];
+  const detailAddOn = detailAddOnId
+    ? addOns.find((item) => item.id === detailAddOnId)
+    : null;
   const standard = draft.serviceType
     ? normalizeStandard(draft.serviceType, draft.cleaningStandard)
     : null;
@@ -2674,26 +2679,30 @@ function AddOnsStep({
                       {addOn.description}
                     </p>
                     {addOn.detail ? (
-                      <details
-                        className="group/addon-detail mt-2"
-                        onClick={(event) => event.stopPropagation()}
-                        onKeyDown={(event) => event.stopPropagation()}
+                      <span
+                        className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#6a45b8]"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setDetailAddOnId(addOn.id);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key !== "Enter" && event.key !== " ") return;
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setDetailAddOnId(addOn.id);
+                        }}
+                        role="button"
+                        tabIndex={0}
                       >
-                        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-[#6a45b8] marker:content-none [&::-webkit-details-marker]:hidden">
-                          <span
-                            aria-hidden
-                            className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#6a45b8]/40 text-[0.65rem] leading-none"
-                          >
-                            i
-                          </span>
-                          A little more detail
-                        </summary>
-                        <div className="mt-2 space-y-2 text-sm leading-6 text-[#5a5470]">
-                          {addOn.detail.split("\n\n").map((paragraph) => (
-                            <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-                          ))}
-                        </div>
-                      </details>
+                        <span
+                          aria-hidden
+                          className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#6a45b8]/40 text-[0.65rem] leading-none"
+                        >
+                          i
+                        </span>
+                        A little more detail
+                      </span>
                     ) : null}
                   </div>
                   <p className="shrink-0 text-right text-sm font-bold text-[#1c133b]">
@@ -2720,6 +2729,27 @@ function AddOnsStep({
           No extras for this service.
         </p>
       )}
+      {detailAddOn?.detail ? (
+        <AppModal
+          onClose={() => setDetailAddOnId(null)}
+          title={detailAddOn.label}
+        >
+          <div className="mt-4 space-y-3 text-sm leading-6 text-[#5a5470]">
+            {detailAddOn.detail.split("\n\n").map((paragraph) => (
+              <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+            ))}
+          </div>
+          <div className="mt-6">
+            <Button
+              className="min-h-11 w-full rounded-xl bg-[#291845] text-white hover:bg-[#291845]/90"
+              onClick={() => setDetailAddOnId(null)}
+              type="button"
+            >
+              Got it
+            </Button>
+          </div>
+        </AppModal>
+      ) : null}
       {draft.serviceType &&
       serviceDefinition(draft.serviceType).category !== "commercial" ? (
         <>
