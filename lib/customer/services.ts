@@ -393,7 +393,7 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     hourly: "equipment",
     id: "cleaning_equipment",
     label: "Cleaning equipment",
-  }
+  },
   {
     amount: 1200,
     categories: ["short_term_rental"],
