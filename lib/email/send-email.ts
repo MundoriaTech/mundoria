@@ -61,5 +61,7 @@ function defaultFrom() {
 }
 
 function defaultReplyTo() {
-  return process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
+  const raw = process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
+  if (/cleanscape/i.test(raw)) return "hello@mundoria.co.uk";
+  return raw;
 }

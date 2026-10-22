@@ -178,7 +178,7 @@ export function BookingAuthPrompt({
       if (!result.requiresEmailConfirmation) {
         const supabase = createBrowserClient();
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
+          email: email.trim().toLowerCase(),
           password,
         });
         if (signInError) {
@@ -188,11 +188,11 @@ export function BookingAuthPrompt({
             "Account created. Enter your password to continue this booking.",
           );
           onModeChange("signin");
-          setBusy(false);
           return;
         }
         markBookingAuthReturn();
-        setBusy(false);
+        // Hard resume checkout so the auth gate unmounts with a fresh session.
+        router.replace(RETURN_PATH);
         router.refresh();
         return;
       }
@@ -203,11 +203,11 @@ export function BookingAuthPrompt({
       setMessage(null);
       setSuccessMessage(SIGNUP_VERIFY_MESSAGE);
       onModeChange("signin");
-      setBusy(false);
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Unable to create your account.",
       );
+    } finally {
       setBusy(false);
     }
   }

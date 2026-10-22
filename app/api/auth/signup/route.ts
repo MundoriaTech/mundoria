@@ -27,13 +27,13 @@ export async function POST(request: Request) {
 
   const {
     full_name,
-    email,
     password,
     phone,
     role,
     referral_code,
     marketing_opt_in,
   } = parsed.data;
+  const email = parsed.data.email.trim().toLowerCase();
   const avatarUrl = role === "cleaner" ? pickDefaultAvatar(email).src : undefined;
   const admin = createAdminClient();
   const appUrl = resolveAppUrl(request);
@@ -110,24 +110,22 @@ export async function POST(request: Request) {
     }
   }
 
-  let welcomeEmailSent = false;
-
   if (bookingCheckoutSignup) {
-    try {
-      welcomeEmailSent = await sendAccountWelcomeIfNeeded({
-        appUrl,
-        email,
-        emailConfirmedAt: user.email_confirmed_at ?? new Date().toISOString(),
-        fullName: full_name,
-        metadata: user.user_metadata,
-        profileExisted: false,
-        role: "customer",
-        userId: user.id,
-      });
-    } catch (welcomeError) {
+    // Never block checkout on mail — send welcome in the background.
+    void sendAccountWelcomeIfNeeded({
+      actionLabel: "Continue your booking",
+      actionUrl: `${appUrl}${nextPath.startsWith("/") ? nextPath : `/${nextPath}`}`,
+      appUrl,
+      email,
+      emailConfirmedAt: user.email_confirmed_at ?? new Date().toISOString(),
+      fullName: full_name,
+      metadata: user.user_metadata,
+      profileExisted: false,
+      role: "customer",
+      userId: user.id,
+    }).catch((welcomeError) => {
       Sentry.captureException(welcomeError);
-      // Welcome must never block checkout.
-    }
+    });
   } else {
     try {
       await sendAuthLinkEmail({
@@ -176,6 +174,6 @@ export async function POST(request: Request) {
     referralPromoCode,
     requiresEmailConfirmation: !bookingCheckoutSignup,
     role,
-    welcomeEmailSent,
+    welcomeEmailSent: false,
   });
 }

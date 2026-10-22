@@ -18,6 +18,8 @@ export function emailConfirmedJustNow(emailConfirmedAt: string | null | undefine
  * confirmation link is opened.
  */
 export async function sendAccountWelcomeIfNeeded({
+  actionLabel,
+  actionUrl,
   appUrl,
   email,
   emailConfirmedAt,
@@ -27,6 +29,8 @@ export async function sendAccountWelcomeIfNeeded({
   role,
   userId,
 }: {
+  actionLabel?: string;
+  actionUrl?: string;
   appUrl: string;
   email: string;
   emailConfirmedAt?: string | null;
@@ -43,7 +47,10 @@ export async function sendAccountWelcomeIfNeeded({
 
   const sent = await sendBrandedEmail({
     data: {
-      actionUrl: `${appUrl}${dashboardForRole(role)}`,
+      actionLabel:
+        actionLabel ??
+        (role === "cleaner" ? "Continue cleaner onboarding" : "Open your account"),
+      actionUrl: actionUrl || `${appUrl}${dashboardForRole(role)}`,
       appUrl,
       email,
       firstName: fullName.split(" ")[0],
@@ -53,7 +60,6 @@ export async function sendAccountWelcomeIfNeeded({
     template: role === "cleaner" ? "cleaner.welcome" : "customer.welcome",
     to: email,
   });
-
   if (!sent) return false;
 
   try {

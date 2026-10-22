@@ -99,16 +99,16 @@ function resolveTemplate(
       return {
         body:
           role === "cleaner"
-            ? "Your cleaner account has been created. Complete onboarding so our team can review your documents and certify your account."
-            : "Your account is ready. You can now manage bookings, addresses, messages, payments, and notifications from your dashboard.",
+            ? "We’re glad you’re here. Finish onboarding when you’re ready — our team will review your documents and help you get certified."
+            : "We’re glad you’re here. Your booking is saved to your account, and you can manage cleans, addresses, and payments whenever you need.",
         buttonHref: string(data.actionUrl) || dashboardUrl,
-        buttonLabel: role === "cleaner" ? "Continue cleaner onboarding" : "Open dashboard",
-        cards: [
-          { label: "Account type", value: role || "Customer" },
-          { label: "Email", value: data.email },
-        ],
-        intro: firstName ? `Hi ${firstName}, welcome to Mundoria.` : "Welcome to Mundoria.",
-        preview: "Your Mundoria account is ready.",
+        buttonLabel:
+          string(data.actionLabel) ||
+          (role === "cleaner" ? "Continue onboarding" : "Continue"),
+        intro: firstName
+          ? `Hello ${firstName}, welcome to Mundoria!`
+          : "Hello, welcome to Mundoria!",
+        preview: "Welcome to Mundoria — we’re glad you’re here.",
         subject: `Welcome to Mundoria${firstName ? `, ${firstName}` : ""}`,
         title: "Welcome to Mundoria",
         tone: role === "cleaner" ? "cleaner" : "customer",
@@ -622,13 +622,12 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const logoUrl = publicEmailAssetUrl(MUNDORIA_WORDMARK_SRC);
   const appUrl =
     string(data.appUrl) || process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_SITE_URL;
-  const supportEmail =
-    process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
+  const supportEmail = resolveSupportEmail();
   const hasIntro = Boolean(context.intro?.trim());
   // Frameless letter: greeting leads; title only when there is no intro.
   const lead = hasIntro
-    ? `<p class="email-intro" style="margin:0 0 18px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">${escapeHtml(context.intro!)}</p>`
-    : `<h1 class="email-title" style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;font-weight:500;letter-spacing:-0.02em;color:#1c133b;">${escapeHtml(context.title)}</h1>`;
+    ? `<p class="email-intro" style="margin:0 0 16px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">${escapeHtml(context.intro!)}</p>`
+    : `<h1 class="email-title" style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;font-weight:500;letter-spacing:-0.02em;color:#1c133b;">${escapeHtml(context.title)}</h1>`;
 
   const html = `<!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -645,17 +644,15 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
         .email-shell { background-color: #141226 !important; }
         .email-logo { background-color: transparent !important; }
         .email-title, .email-intro, .email-row-value, .email-signoff { color: #f7f5fb !important; }
-        .email-copy, .email-meta { color: #d9d3ea !important; }
+        .email-copy, .email-meta, .email-detail-line { color: #d9d3ea !important; }
         .email-row-label { color: #a89fc0 !important; }
-        .email-details { border-color: #3a3358 !important; }
-        .email-cta, .email-cta a, .email-help a { color: #e0b87a !important; }
-        .email-divider { border-color: #322b4f !important; }
+        .email-cta, .email-cta a, .email-help a, .email-social a { color: #e0b87a !important; }
         .email-footer, .email-legal { color: #a89fc0 !important; }
         .email-note { color: #c4bdd8 !important; }
       }
       [data-ogsc] .email-title, [data-ogsc] .email-intro, [data-ogsc] .email-row-value, [data-ogsc] .email-signoff { color: #f7f5fb !important; }
-      [data-ogsc] .email-copy, [data-ogsc] .email-meta, [data-ogsc] .email-footer, [data-ogsc] .email-legal, [data-ogsc] .email-row-label { color: #d9d3ea !important; }
-      [data-ogsc] .email-cta, [data-ogsc] .email-cta a, [data-ogsc] .email-help a { color: #e0b87a !important; }
+      [data-ogsc] .email-copy, [data-ogsc] .email-meta, [data-ogsc] .email-footer, [data-ogsc] .email-legal, [data-ogsc] .email-row-label, [data-ogsc] .email-detail-line { color: #d9d3ea !important; }
+      [data-ogsc] .email-cta, [data-ogsc] .email-cta a, [data-ogsc] .email-help a, [data-ogsc] .email-social a { color: #e0b87a !important; }
       [data-ogsb] .email-page, [data-ogsb].email-page, [data-ogsb] .email-shell { background-color: #141226 !important; }
     </style>
   </head>
@@ -666,12 +663,12 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
         <td align="center" style="padding:0;">
           <table role="presentation" class="email-shell" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:560px;background:#ffffff;">
             <tr>
-              <td align="center" style="padding:40px 28px 28px;">
+              <td align="center" style="padding:40px 28px 24px;">
                 <img class="email-logo" alt="Mundoria" height="40" src="${escapeAttribute(logoUrl)}" style="display:block;border:0;outline:none;text-decoration:none;height:40px;width:198px;" width="198" />
               </td>
             </tr>
             <tr>
-              <td style="padding:8px 28px 0;text-align:left;">
+              <td style="padding:4px 28px 0;text-align:left;">
                 ${lead}
                 <p class="email-copy" style="margin:0;font-size:16px;line-height:1.7;color:#4a4460;">${escapeHtml(context.body)}</p>
                 ${cards.length ? renderCards(cards) : ""}
@@ -690,14 +687,10 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
               </td>
             </tr>
             <tr>
-              <td style="padding:32px 28px 12px;">
-                <div class="email-divider" style="border-top:1px solid #ebe6dc;font-size:0;line-height:0;">&nbsp;</div>
-              </td>
-            </tr>
-            <tr>
-              <td class="email-footer" align="center" style="padding:8px 28px 40px;color:#8a8498;font-size:12px;line-height:1.65;text-align:center;">
-                <p style="margin:0 0 10px;">A question? A kind word? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#c79c66;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a> or visit <a href="${escapeAttribute(appUrl)}" style="color:#c79c66;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>
-                <p class="email-legal" style="margin:0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
+              <td class="email-footer" align="center" style="padding:36px 28px 40px;color:#8a8498;font-size:12px;line-height:1.7;text-align:center;">
+                <p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a></p>
+                ${renderSocialLinks()}
+                <p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
               </td>
             </tr>
           </table>
@@ -716,18 +709,60 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
 }
 
 function renderCards(cards: Array<{ label: string; value?: unknown }>) {
-  return `<table role="presentation" class="email-details" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;border-top:1px solid #ebe6dc;">
+  // Soft detail list — spacing only, no boxed rows or heavy rules.
+  return `<table role="presentation" class="email-details" width="100%" cellspacing="0" cellpadding="0" style="margin-top:22px;">
     ${cards
-      .map((card, index) => {
-        const border =
-          index < cards.length - 1 ? "border-bottom:1px solid #f0ebe0;" : "";
-        return `<tr>
-          <td class="email-row-label" style="padding:12px 0;${border}font-size:13px;color:#8a8498;width:34%;vertical-align:top;">${escapeHtml(card.label)}</td>
-          <td class="email-row-value" style="padding:12px 0;${border}font-size:15px;font-weight:600;color:#1c133b;vertical-align:top;">${escapeHtml(formatValue(card.value))}</td>
-        </tr>`;
-      })
+      .map(
+        (card) => `<tr>
+          <td class="email-detail-line" style="padding:0 0 10px;font-size:15px;line-height:1.5;color:#4a4460;">
+            <span class="email-row-label" style="color:#8a8498;">${escapeHtml(card.label)}:</span>
+            <span class="email-row-value" style="color:#1c133b;font-weight:600;"> ${escapeHtml(formatValue(card.value))}</span>
+          </td>
+        </tr>`,
+      )
       .join("")}
   </table>`;
+}
+
+function renderSocialLinks() {
+  const links = [
+    {
+      href:
+        process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() ||
+        "https://www.instagram.com/mundoriauk",
+      label: "Instagram",
+    },
+    {
+      href:
+        process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() ||
+        "https://www.facebook.com/mundoriauk",
+      label: "Facebook",
+    },
+    {
+      href:
+        process.env.NEXT_PUBLIC_TIKTOK_URL?.trim() ||
+        "https://www.tiktok.com/@mundoriauk",
+      label: "TikTok",
+    },
+  ].filter((link) => Boolean(link.href));
+
+  if (!links.length) return "";
+
+  const items = links
+    .map(
+      (link) =>
+        `<a href="${escapeAttribute(link.href)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(link.label)}</a>`,
+    )
+    .join(" &nbsp;·&nbsp; ");
+
+  return `<p class="email-social" style="margin:0 0 4px;font-size:12px;line-height:1.6;">${items}</p>`;
+}
+
+/** Never surface retired CleanScape addresses in customer mail. */
+function resolveSupportEmail() {
+  const raw = process.env.SUPPORT_EMAIL?.trim() || "hello@mundoria.co.uk";
+  if (/cleanscape/i.test(raw)) return "hello@mundoria.co.uk";
+  return raw;
 }
 
 /** Warm text CTA — open letter style, not a boxed button. */
@@ -780,6 +815,7 @@ function renderText(
     ),
     "See you soon — the Mundoria team",
     `Questions? ${supportEmail}`,
+    "Instagram · Facebook · TikTok — @mundoriauk",
     "Mundoria · trusted cleaning, clearly managed",
   ]
     .filter(Boolean)

@@ -1,23 +1,12 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mundoria email preview</title>
-<style>
-body{margin:0;background:#ebe6dc;font-family:Arial,Helvetica,sans-serif;color:#1c133b}
-.wrap{max-width:720px;margin:0 auto;padding:28px 16px}
-h1{margin:0 0 8px;font-size:22px;letter-spacing:-0.03em}
-.lead{margin:0 0 18px;font-size:14px;line-height:1.5;color:#5a5470}
-.frame{margin:0 0 36px;background:#fff;box-shadow:0 1px 0 rgba(28,19,59,.06)}
-.frame-label{padding:10px 16px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8a7a5c;background:#f7f3ea;border-bottom:1px solid #e8e0d0}
-</style></head><body>
-<div class="wrap">
-  <h1>Mundoria email — open letter</h1>
-  <p class="lead">Frameless layout (no card). Warm gold text CTAs, friendly sign-off. Live output from <code>lib/email/templates.ts</code>.</p>
-  <div class="frame"><div class="frame-label">Signup confirmation</div><!doctype html>
+<!doctype html><html><head><meta charset="utf-8"><title>Mundoria email preview</title>
+<style>body{margin:0;background:#ebe6dc;font-family:Arial,sans-serif}.wrap{max-width:720px;margin:0 auto;padding:24px 16px}.frame{margin:0 0 32px;background:#fff}.label{padding:10px 16px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8a7a5c;background:#f7f3ea}</style></head><body><div class="wrap"><div class="frame"><div class="label">Welcome</div><!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="supported-color-schemes" content="light dark">
-    <title>Confirm your Mundoria email</title>
+    <title>Welcome to Mundoria, Marie</title>
     <style>
       :root { color-scheme: light dark; supported-color-schemes: light dark; }
       @media (prefers-color-scheme: dark) {
@@ -25,53 +14,47 @@ h1{margin:0 0 8px;font-size:22px;letter-spacing:-0.03em}
         .email-shell { background-color: #141226 !important; }
         .email-logo { background-color: transparent !important; }
         .email-title, .email-intro, .email-row-value, .email-signoff { color: #f7f5fb !important; }
-        .email-copy, .email-meta { color: #d9d3ea !important; }
+        .email-copy, .email-meta, .email-detail-line { color: #d9d3ea !important; }
         .email-row-label { color: #a89fc0 !important; }
-        .email-details { border-color: #3a3358 !important; }
-        .email-cta, .email-cta a, .email-help a { color: #e0b87a !important; }
-        .email-divider { border-color: #322b4f !important; }
+        .email-cta, .email-cta a, .email-help a, .email-social a { color: #e0b87a !important; }
         .email-footer, .email-legal { color: #a89fc0 !important; }
         .email-note { color: #c4bdd8 !important; }
       }
       [data-ogsc] .email-title, [data-ogsc] .email-intro, [data-ogsc] .email-row-value, [data-ogsc] .email-signoff { color: #f7f5fb !important; }
-      [data-ogsc] .email-copy, [data-ogsc] .email-meta, [data-ogsc] .email-footer, [data-ogsc] .email-legal, [data-ogsc] .email-row-label { color: #d9d3ea !important; }
-      [data-ogsc] .email-cta, [data-ogsc] .email-cta a, [data-ogsc] .email-help a { color: #e0b87a !important; }
+      [data-ogsc] .email-copy, [data-ogsc] .email-meta, [data-ogsc] .email-footer, [data-ogsc] .email-legal, [data-ogsc] .email-row-label, [data-ogsc] .email-detail-line { color: #d9d3ea !important; }
+      [data-ogsc] .email-cta, [data-ogsc] .email-cta a, [data-ogsc] .email-help a, [data-ogsc] .email-social a { color: #e0b87a !important; }
       [data-ogsb] .email-page, [data-ogsb].email-page, [data-ogsb] .email-shell { background-color: #141226 !important; }
     </style>
   </head>
   <body class="email-page" style="margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif;color:#1c133b;">
-    <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0;">Confirm your Mundoria email address.</div>
+    <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0;">Welcome to Mundoria — we’re glad you’re here.</div>
     <table role="presentation" class="email-page" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="background:#ffffff;">
       <tr>
         <td align="center" style="padding:0;">
           <table role="presentation" class="email-shell" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:560px;background:#ffffff;">
             <tr>
-              <td align="center" style="padding:40px 28px 28px;">
+              <td align="center" style="padding:40px 28px 24px;">
                 <img class="email-logo" alt="Mundoria" height="40" src="https://www.mundoria.co.uk/images/brand/mundoria-wordmark.png" style="display:block;border:0;outline:none;text-decoration:none;height:40px;width:198px;" width="198" />
               </td>
             </tr>
             <tr>
-              <td style="padding:8px 28px 0;text-align:left;">
-                <p class="email-intro" style="margin:0 0 18px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">Hello Maritha, welcome to Mundoria!</p>
-                <p class="email-copy" style="margin:0;font-size:16px;line-height:1.7;color:#4a4460;">Confirm your email address to activate your account and get the most from Mundoria. This link is only for you — if you did not sign up, you can safely ignore this email.</p>
+              <td style="padding:4px 28px 0;text-align:left;">
+                <p class="email-intro" style="margin:0 0 16px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">Hello Marie, welcome to Mundoria!</p>
+                <p class="email-copy" style="margin:0;font-size:16px;line-height:1.7;color:#4a4460;">We’re glad you’re here. Your booking is saved to your account, and you can manage cleans, addresses, and payments whenever you need.</p>
                 
                 <p class="email-cta" style="margin:26px 0 0;font-size:16px;line-height:1.5;">
-    <a class="email-cta" href="https://www.mundoria.co.uk/auth/callback?token_hash=demo" style="color:#b8894e;font-weight:700;text-decoration:underline;">Confirm my email</a>
-  </p><p class="email-meta" style="margin:10px 0 0;font-size:13px;line-height:1.5;color:#8a8498;">This link stays active for 2 days.</p>
+    <a class="email-cta" href="https://www.mundoria.co.uk/booking/new?step=checkout" style="color:#b8894e;font-weight:700;text-decoration:underline;">Continue your booking</a>
+  </p>
                 
                 
                 <p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">See you soon — the Mundoria team</p>
               </td>
             </tr>
             <tr>
-              <td style="padding:32px 28px 12px;">
-                <div class="email-divider" style="border-top:1px solid #ebe6dc;font-size:0;line-height:0;">&nbsp;</div>
-              </td>
-            </tr>
-            <tr>
-              <td class="email-footer" align="center" style="padding:8px 28px 40px;color:#8a8498;font-size:12px;line-height:1.65;text-align:center;">
-                <p style="margin:0 0 10px;">A question? A kind word? Write to us at <a href="mailto:hello@mundoria.co.uk" style="color:#c79c66;font-weight:600;text-decoration:underline;">hello@mundoria.co.uk</a> or visit <a href="https://www.mundoria.co.uk" style="color:#c79c66;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>
-                <p class="email-legal" style="margin:0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
+              <td class="email-footer" align="center" style="padding:36px 28px 40px;color:#8a8498;font-size:12px;line-height:1.7;text-align:center;">
+                <p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:hello@mundoria.co.uk" style="color:#b8894e;font-weight:600;text-decoration:underline;">hello@mundoria.co.uk</a></p>
+                <p class="email-social" style="margin:0 0 4px;font-size:12px;line-height:1.6;"><a href="https://www.instagram.com/mundoriauk" style="color:#b8894e;font-weight:600;text-decoration:underline;">Instagram</a> &nbsp;·&nbsp; <a href="https://www.facebook.com/mundoriauk" style="color:#b8894e;font-weight:600;text-decoration:underline;">Facebook</a> &nbsp;·&nbsp; <a href="https://www.tiktok.com/@mundoriauk" style="color:#b8894e;font-weight:600;text-decoration:underline;">TikTok</a></p>
+                <p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
               </td>
             </tr>
           </table>
@@ -79,8 +62,7 @@ h1{margin:0 0 8px;font-size:22px;letter-spacing:-0.03em}
       </tr>
     </table>
   </body>
-</html></div>
-  <div class="frame"><div class="frame-label">Booking confirmed</div><!doctype html>
+</html></div><div class="frame"><div class="label">Booking</div><!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8">
@@ -95,17 +77,15 @@ h1{margin:0 0 8px;font-size:22px;letter-spacing:-0.03em}
         .email-shell { background-color: #141226 !important; }
         .email-logo { background-color: transparent !important; }
         .email-title, .email-intro, .email-row-value, .email-signoff { color: #f7f5fb !important; }
-        .email-copy, .email-meta { color: #d9d3ea !important; }
+        .email-copy, .email-meta, .email-detail-line { color: #d9d3ea !important; }
         .email-row-label { color: #a89fc0 !important; }
-        .email-details { border-color: #3a3358 !important; }
-        .email-cta, .email-cta a, .email-help a { color: #e0b87a !important; }
-        .email-divider { border-color: #322b4f !important; }
+        .email-cta, .email-cta a, .email-help a, .email-social a { color: #e0b87a !important; }
         .email-footer, .email-legal { color: #a89fc0 !important; }
         .email-note { color: #c4bdd8 !important; }
       }
       [data-ogsc] .email-title, [data-ogsc] .email-intro, [data-ogsc] .email-row-value, [data-ogsc] .email-signoff { color: #f7f5fb !important; }
-      [data-ogsc] .email-copy, [data-ogsc] .email-meta, [data-ogsc] .email-footer, [data-ogsc] .email-legal, [data-ogsc] .email-row-label { color: #d9d3ea !important; }
-      [data-ogsc] .email-cta, [data-ogsc] .email-cta a, [data-ogsc] .email-help a { color: #e0b87a !important; }
+      [data-ogsc] .email-copy, [data-ogsc] .email-meta, [data-ogsc] .email-footer, [data-ogsc] .email-legal, [data-ogsc] .email-row-label, [data-ogsc] .email-detail-line { color: #d9d3ea !important; }
+      [data-ogsc] .email-cta, [data-ogsc] .email-cta a, [data-ogsc] .email-help a, [data-ogsc] .email-social a { color: #e0b87a !important; }
       [data-ogsb] .email-page, [data-ogsb].email-page, [data-ogsb] .email-shell { background-color: #141226 !important; }
     </style>
   </head>
@@ -116,33 +96,40 @@ h1{margin:0 0 8px;font-size:22px;letter-spacing:-0.03em}
         <td align="center" style="padding:0;">
           <table role="presentation" class="email-shell" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:560px;background:#ffffff;">
             <tr>
-              <td align="center" style="padding:40px 28px 28px;">
+              <td align="center" style="padding:40px 28px 24px;">
                 <img class="email-logo" alt="Mundoria" height="40" src="https://www.mundoria.co.uk/images/brand/mundoria-wordmark.png" style="display:block;border:0;outline:none;text-decoration:none;height:40px;width:198px;" width="198" />
               </td>
             </tr>
             <tr>
-              <td style="padding:8px 28px 0;text-align:left;">
-                <p class="email-intro" style="margin:0 0 18px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">Hi Maritha, your cleaner request is in.</p>
+              <td style="padding:4px 28px 0;text-align:left;">
+                <p class="email-intro" style="margin:0 0 16px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">Hi Marie, your cleaner request is in.</p>
                 <p class="email-copy" style="margin:0;font-size:16px;line-height:1.7;color:#4a4460;">Your booking is confirmed. We’ve authorised a hold on your card — the charge is captured after the clean is completed. You can follow payment progress on your booking page.</p>
-                <table role="presentation" class="email-details" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;border-top:1px solid #ebe6dc;">
+                <table role="presentation" class="email-details" width="100%" cellspacing="0" cellpadding="0" style="margin-top:22px;">
     <tr>
-          <td class="email-row-label" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:13px;color:#8a8498;width:34%;vertical-align:top;">Service</td>
-          <td class="email-row-value" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:15px;font-weight:600;color:#1c133b;vertical-align:top;">Home clean</td>
+          <td class="email-detail-line" style="padding:0 0 10px;font-size:15px;line-height:1.5;color:#4a4460;">
+            <span class="email-row-label" style="color:#8a8498;">Service:</span>
+            <span class="email-row-value" style="color:#1c133b;font-weight:600;"> Home clean</span>
+          </td>
         </tr><tr>
-          <td class="email-row-label" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:13px;color:#8a8498;width:34%;vertical-align:top;">Date</td>
-          <td class="email-row-value" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:15px;font-weight:600;color:#1c133b;vertical-align:top;">Tue 28 Oct</td>
+          <td class="email-detail-line" style="padding:0 0 10px;font-size:15px;line-height:1.5;color:#4a4460;">
+            <span class="email-row-label" style="color:#8a8498;">Date:</span>
+            <span class="email-row-value" style="color:#1c133b;font-weight:600;"> Sat 24 Oct</span>
+          </td>
         </tr><tr>
-          <td class="email-row-label" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:13px;color:#8a8498;width:34%;vertical-align:top;">Time</td>
-          <td class="email-row-value" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:15px;font-weight:600;color:#1c133b;vertical-align:top;">10:00</td>
+          <td class="email-detail-line" style="padding:0 0 10px;font-size:15px;line-height:1.5;color:#4a4460;">
+            <span class="email-row-label" style="color:#8a8498;">Time:</span>
+            <span class="email-row-value" style="color:#1c133b;font-weight:600;"> 18:00</span>
+          </td>
         </tr><tr>
-          <td class="email-row-label" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:13px;color:#8a8498;width:34%;vertical-align:top;">Address</td>
-          <td class="email-row-value" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:15px;font-weight:600;color:#1c133b;vertical-align:top;">12 Rose Lane, York</td>
+          <td class="email-detail-line" style="padding:0 0 10px;font-size:15px;line-height:1.5;color:#4a4460;">
+            <span class="email-row-label" style="color:#8a8498;">Address:</span>
+            <span class="email-row-value" style="color:#1c133b;font-weight:600;"> 24 Bonney Way, Swanley</span>
+          </td>
         </tr><tr>
-          <td class="email-row-label" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:13px;color:#8a8498;width:34%;vertical-align:top;">Amount</td>
-          <td class="email-row-value" style="padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:15px;font-weight:600;color:#1c133b;vertical-align:top;">£84.00</td>
-        </tr><tr>
-          <td class="email-row-label" style="padding:12px 0;font-size:13px;color:#8a8498;width:34%;vertical-align:top;">Booking ID</td>
-          <td class="email-row-value" style="padding:12px 0;font-size:15px;font-weight:600;color:#1c133b;vertical-align:top;">bk_demo</td>
+          <td class="email-detail-line" style="padding:0 0 10px;font-size:15px;line-height:1.5;color:#4a4460;">
+            <span class="email-row-label" style="color:#8a8498;">Amount:</span>
+            <span class="email-row-value" style="color:#1c133b;font-weight:600;"> £81.95</span>
+          </td>
         </tr>
   </table>
                 
@@ -152,14 +139,10 @@ h1{margin:0 0 8px;font-size:22px;letter-spacing:-0.03em}
               </td>
             </tr>
             <tr>
-              <td style="padding:32px 28px 12px;">
-                <div class="email-divider" style="border-top:1px solid #ebe6dc;font-size:0;line-height:0;">&nbsp;</div>
-              </td>
-            </tr>
-            <tr>
-              <td class="email-footer" align="center" style="padding:8px 28px 40px;color:#8a8498;font-size:12px;line-height:1.65;text-align:center;">
-                <p style="margin:0 0 10px;">A question? A kind word? Write to us at <a href="mailto:hello@mundoria.co.uk" style="color:#c79c66;font-weight:600;text-decoration:underline;">hello@mundoria.co.uk</a> or visit <a href="https://www.mundoria.co.uk" style="color:#c79c66;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>
-                <p class="email-legal" style="margin:0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
+              <td class="email-footer" align="center" style="padding:36px 28px 40px;color:#8a8498;font-size:12px;line-height:1.7;text-align:center;">
+                <p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:hello@mundoria.co.uk" style="color:#b8894e;font-weight:600;text-decoration:underline;">hello@mundoria.co.uk</a></p>
+                <p class="email-social" style="margin:0 0 4px;font-size:12px;line-height:1.6;"><a href="https://www.instagram.com/mundoriauk" style="color:#b8894e;font-weight:600;text-decoration:underline;">Instagram</a> &nbsp;·&nbsp; <a href="https://www.facebook.com/mundoriauk" style="color:#b8894e;font-weight:600;text-decoration:underline;">Facebook</a> &nbsp;·&nbsp; <a href="https://www.tiktok.com/@mundoriauk" style="color:#b8894e;font-weight:600;text-decoration:underline;">TikTok</a></p>
+                <p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
               </td>
             </tr>
           </table>
@@ -167,6 +150,4 @@ h1{margin:0 0 8px;font-size:22px;letter-spacing:-0.03em}
       </tr>
     </table>
   </body>
-</html></div>
-</div>
-</body></html>
+</html></div></div></body></html>
