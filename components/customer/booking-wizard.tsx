@@ -15,8 +15,6 @@ import {
   ChevronUp,
   CreditCard,
   MapPin,
-  ShieldCheck,
-  Star,
   X,
 } from "lucide-react";
 import {
@@ -27,7 +25,6 @@ import {
   Fire,
   Heart,
   Plant,
-  Square,
   type Icon,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
@@ -40,6 +37,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { FormField } from "@/components/auth/form-field";
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
 import { AppModal } from "@/components/shared/app-modal";
 import { addressOutsideCoverage } from "@/lib/seo/cleaner-coverage";
@@ -57,6 +55,7 @@ import { AddressForm } from "@/components/customer/address-manager";
 import { TimeSlotPicker, slotsFinishingByWindowEnd } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
 import { trackClientActivity } from "@/lib/analytics/track-client";
+import { createBrowserClient } from "@/lib/supabase/client";
 import {
   composeBookingNotes,
   bookingCategoryImages,
@@ -262,6 +261,7 @@ let bookingHistoryBootstrap: {
 const ADD_ON_IMAGES: Record<string, string> = {
   cleaning_products: "/images/marketing/icons/plain/cleaning-products.png",
   cleaning_equipment: "/images/marketing/icons/plain/tools.png",
+  interior_windows: "/images/marketing/icons/plain/interior-windows.svg",
   ironing: "/images/marketing/icons/plain/ironing.png",
 };
 
@@ -291,11 +291,6 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
     className:
       "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#d4694a]",
   },
-  interior_windows: {
-    Icon: Square,
-    className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#312c79]",
-  },
   linen_change: {
     Icon: Bed,
     className:
@@ -310,6 +305,7 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
 
 export function BookingWizard({
   cleaningHistory = [],
+  customerFirstName = null,
   entryLock = null,
   focusServices,
   fresh = false,
@@ -324,6 +320,8 @@ export function BookingWizard({
   userId,
 }: {
   cleaningHistory?: HistoryVisit[];
+  /** Signed-in customer’s first name for checkout greeting. */
+  customerFirstName?: string | null;
   /** Skip the category and/or service step when the customer arrived from that page. */
   entryLock?: BookingEntryLock;
   focusServices?: ServiceType[];
@@ -1324,6 +1322,13 @@ export function BookingWizard({
       case "standard":
         return Boolean(draft.cleaningStandard);
       case "addons":
+        // Pets are only asked on home services; commercial can skip extras.
+        if (
+          draft.serviceType &&
+          serviceDefinition(draft.serviceType).category === "commercial"
+        ) {
+          return true;
+        }
         return draft.hasPets !== null;
       case "frequency":
         return frequencyChoiceSatisfied(draft);
@@ -1606,6 +1611,7 @@ export function BookingWizard({
           <Elements stripe={stripePromise}>
             <CheckoutStep
               address={roomsAddress}
+              customerFirstName={customerFirstName}
               draft={{
                 ...draft,
                 cleaningStandard: selectedStandard,
@@ -2093,6 +2099,12 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
     case "history":
       return true;
     case "addons":
+      if (
+        draft.serviceType &&
+        serviceDefinition(draft.serviceType).category === "commercial"
+      ) {
+        return true;
+      }
       return draft.hasPets !== null;
     case "cleaner":
       return (
@@ -3462,6 +3474,7 @@ function TimeStep({
 
 function CheckoutStep({
   address,
+  customerFirstName = null,
   draft,
   onAddressPersisted,
   onProcessingChange,
@@ -3469,6 +3482,7 @@ function CheckoutStep({
   userId,
 }: {
   address: Address;
+  customerFirstName?: string | null;
   draft: BookingDraft & {
     cleaningStandard: CleaningStandard;
     serviceType: ServiceType;
@@ -3491,11 +3505,39 @@ function CheckoutStep({
     "idle" | "saving" | "authorising" | "confirming"
   >("idle");
   const [cardOpen, setCardOpen] = useState(false);
+  const [cardFocused, setCardFocused] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState(address);
+  const [firstName, setFirstName] = useState(customerFirstName);
 
   useEffect(() => {
     setResolvedAddress(address);
   }, [address]);
+
+  useEffect(() => {
+    setFirstName(customerFirstName);
+  }, [customerFirstName]);
+
+  useEffect(() => {
+    if (customerFirstName || !userId) return;
+    const supabase = createBrowserClient();
+    let cancelled = false;
+    void supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        const name =
+          (data as { full_name?: string | null } | null)?.full_name
+            ?.trim()
+            .split(/\s+/)[0] || null;
+        if (name) setFirstName(name);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [customerFirstName, userId]);
 
   useEffect(() => {
     onProcessingChange?.(processing);
@@ -3660,27 +3702,38 @@ function CheckoutStep({
   return (
     <form onSubmit={pay}>
       <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
-        All good? Book your cleaning
+        {firstName
+          ? `Ready to book your clean, ${firstName}?`
+          : "Ready to book your clean?"}
       </h2>
 
-      <label className="mt-5 block">
-        <span className="sr-only">Special requirements</span>
-        <textarea
-          className="min-h-24 w-full rounded-2xl border border-transparent bg-white/80 p-4 text-sm text-[#1c133b] outline-none focus:border-[#6a45b8]"
-          onChange={(event) =>
-            update("specialInstructions", event.target.value)
-          }
-          placeholder="Any specific requirements? If you would feel more comfortable with a female pro, please let us know here"
-          value={draft.specialInstructions}
-        />
-      </label>
+      <div className="mt-5">
+        <FormField
+          htmlFor="checkout-special-requirements"
+          label="Any specific requirements?"
+          multiline
+          plain
+        >
+          <textarea
+            id="checkout-special-requirements"
+            onChange={(event) =>
+              update("specialInstructions", event.target.value)
+            }
+            placeholder=" "
+            value={draft.specialInstructions}
+          />
+        </FormField>
+        <p className="mt-1.5 px-0.5 text-xs leading-5 text-[#8a8498]">
+          e.g. female pro preferred, key notes, fragrance-free products
+        </p>
+      </div>
 
       <div className="mt-6">
         <p className="font-semibold text-[#1c133b]">Your payment method</p>
         <div
           className={cn(
-            "mt-3 overflow-hidden rounded-2xl border bg-white transition-colors",
-            cardOpen ? "border-[#c9a227]" : "border-[#e4daf5]",
+            "mt-3 overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-transparent transition",
+            cardOpen && "ring-2 ring-[#1c133b] ring-offset-0",
           )}
         >
           <button
@@ -3693,9 +3746,16 @@ function CheckoutStep({
             <span className="font-semibold text-[#1c133b]">Card</span>
           </button>
           {cardOpen ? (
-            <div className="border-t border-[#efe6ff] px-4 pb-4 pt-3">
-              <div className="rounded-xl border border-[#e4daf5] bg-white px-3 py-3">
+            <div className="px-4 pb-4 pt-1">
+              <div
+                className={cn(
+                  "rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] px-3 py-3 transition",
+                  cardFocused && "ring-2 ring-[#1c133b] ring-offset-0",
+                )}
+              >
                 <CardElement
+                  onBlur={() => setCardFocused(false)}
+                  onFocus={() => setCardFocused(true)}
                   options={{
                     hidePostalCode: true,
                     style: {
@@ -3722,7 +3782,7 @@ function CheckoutStep({
 
       <div className="mt-6 divide-y divide-[#e4daf5] border-y border-[#e4daf5]">
         <TrustRow
-          icon={<span className="text-[10px] font-bold leading-none">48H</span>}
+          iconSrc="/images/marketing/icons/plain/free-cancellation.svg"
           subtitle={
             <>
               Free up to 48 hours before each session.{" "}
@@ -3737,38 +3797,35 @@ function CheckoutStep({
           title="Free cancellation"
         />
         <TrustRow
-          icon={<ShieldCheck className="h-4 w-4" />}
+          iconSrc="/images/marketing/icons/plain/cleaning-experts.svg"
           subtitle="Only home cleaning professionals."
           title="Cleaning experts"
         />
         <TrustRow
-          icon={<Star className="h-4 w-4 fill-current" />}
+          iconSrc="/images/marketing/icons/plain/verified-reviews.svg"
           subtitle="Verified reviews collected after launch."
           title="Trust-first booking"
         />
       </div>
 
-      <div className="mt-5 flex gap-3 rounded-2xl bg-[#efe6ff] p-4 text-sm text-[#3b3358]">
-        <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
-        <p>
-          We authorise (hold) your card when you confirm. The payment is
-          captured after the clean — not upfront as a final charge.{" "}
-          <a
-            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-            href={FAQ_LINKS.whenCharged}
-          >
-            When am I charged?
-          </a>{" "}
-          ·{" "}
-          <a
-            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-            href="/help/article/why-pay-in-advance"
-          >
-            How payment works
-          </a>
-          .
-        </p>
-      </div>
+      <p className="mt-5 text-sm leading-6 text-[#5b5478]">
+        We authorise (hold) your card when you confirm. The payment is captured
+        after the clean, not upfront as a final charge.{" "}
+        <a
+          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          href={FAQ_LINKS.whenCharged}
+        >
+          When am I charged?
+        </a>{" "}
+        ·{" "}
+        <a
+          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          href="/help/article/why-pay-in-advance"
+        >
+          How payment works
+        </a>
+        .
+      </p>
 
       {processing ? (
         <BookingLoadingOverlay
@@ -3870,19 +3927,23 @@ function CheckoutStep({
 }
 
 function TrustRow({
-  icon,
+  iconSrc,
   subtitle,
   title,
 }: {
-  icon: ReactNode;
+  iconSrc: string;
   subtitle: ReactNode;
   title: string;
 }) {
   return (
     <div className="flex items-start gap-3 py-3">
-      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#efe6ff] text-[#6a45b8]">
-        {icon}
-      </span>
+      <Image
+        alt=""
+        className="mt-0.5 h-11 w-11 shrink-0 object-contain"
+        height={88}
+        src={iconSrc}
+        width={88}
+      />
       <div>
         <p className="font-semibold text-[#1c133b]">{title}</p>
         <p className="text-sm text-[#5b5478]">{subtitle}</p>

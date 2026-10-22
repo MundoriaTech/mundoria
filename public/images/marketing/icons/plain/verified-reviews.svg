@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Single well-balanced star -->
+  <path
+    d="M32 8.5l6.2 12.6 13.9 2-10.05 9.8 2.35 13.85L32 39.9l-12.4 6.55 2.35-13.85L12 23.1l13.9-2z"
+    fill="#C79C66"
+    stroke="#1C133B"
+    stroke-width="2.75"
+    stroke-linejoin="round"
+  />
+</svg>

@@ -125,6 +125,7 @@ export default async function NewBookingPage({
   let addresses: Address[] = [];
   let cleaningHistory: HistoryVisit[] = [];
   let knownCleaners: KnownCleaner[] = [];
+  let customerFirstName: string | null = null;
   let initialDraft: Partial<BookingDraft> | undefined = draftFromSearchParams(
     searchParams,
   );
@@ -138,13 +139,24 @@ export default async function NewBookingPage({
   const returnTo = safeReturnTo(searchParams.returnTo);
 
   if (user) {
-    const { data } = await supabase
-      .from("addresses")
-      .select("*")
-      .eq("customer_id", user.id)
-      .is("archived_at", null)
-      .order("is_default", { ascending: false });
+    const [{ data }, { data: profile }] = await Promise.all([
+      supabase
+        .from("addresses")
+        .select("*")
+        .eq("customer_id", user.id)
+        .is("archived_at", null)
+        .order("is_default", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle(),
+    ]);
     addresses = (data ?? []) as Address[];
+    customerFirstName =
+      (profile as { full_name?: string | null } | null)?.full_name
+        ?.trim()
+        .split(/\s+/)[0] || null;
     cleaningHistory = await loadCleaningHistory(supabase, user.id);
     knownCleaners = await loadKnownCleaners(supabase, user.id);
 
@@ -252,6 +264,7 @@ export default async function NewBookingPage({
   return (
     <BookingWizard
       cleaningHistory={cleaningHistory}
+      customerFirstName={customerFirstName}
       entryLock={searchParams.rebook ? null : entryLock}
       fresh={fresh}
       initialAddresses={addresses}

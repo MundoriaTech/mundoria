@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Window frame with panes  no checkmark -->
+  <rect x="12" y="10" width="40" height="44" rx="4" fill="#EBE4F5" stroke="#1C133B" stroke-width="2.75"/>
+  <path d="M32 10v44M12 32h40" stroke="#1C133B" stroke-width="2.5"/>
+  <rect x="16" y="14" width="12" height="14" rx="1.5" fill="#FFFFFF" stroke="#1C133B" stroke-width="1.75"/>
+  <rect x="36" y="14" width="12" height="14" rx="1.5" fill="#FFFFFF" stroke="#1C133B" stroke-width="1.75"/>
+  <rect x="16" y="36" width="12" height="14" rx="1.5" fill="#FFFFFF" stroke="#1C133B" stroke-width="1.75"/>
+  <rect x="36" y="36" width="12" height="14" rx="1.5" fill="#6A45B8" stroke="#1C133B" stroke-width="1.75"/>
+</svg>

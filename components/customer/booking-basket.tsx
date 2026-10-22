@@ -5,6 +5,7 @@ import { Clock, MapPin, ShoppingCart } from "@phosphor-icons/react";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { Input } from "@/components/ui/input";
 import { formatBookingDate } from "@/lib/customer/booking-flow";
 import { formatHourlyRate, formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
@@ -12,7 +13,7 @@ import type { Address } from "@/types/customer";
 
 /** Gold tint — Mundoria option 5 on the cream booking wash. */
 const BASKET_SURFACE =
-  "border border-[#e8d4b0] bg-[#fffefb] shadow-[0_10px_28px_rgba(28,19,59,0.05)]";
+  "border border-transparent bg-[#fffefb] shadow-[0_10px_28px_rgba(28,19,59,0.05)]";
 
 type BasketPromo = {
   /** Address must be saved before promo can be applied. */
@@ -201,9 +202,22 @@ function BasketPanel({
     service: Boolean(serviceLabel),
   });
   const [promoOpen, setPromoOpen] = useState(Boolean(promo?.code));
+  const promoRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (promo?.code) setPromoOpen(true);
   }, [promo?.code]);
+  useEffect(() => {
+    if (!promoOpen) return;
+
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target as Node | null;
+      if (target && promoRef.current?.contains(target)) return;
+      setPromoOpen(false);
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [promoOpen]);
   const prevServiceLabel = useRef(serviceLabel);
   useEffect(() => {
     if (serviceLabel && serviceLabel !== prevServiceLabel.current) {
@@ -375,24 +389,27 @@ function BasketPanel({
       </BasketSection>
 
       {promo ? (
-        <div className="border-b border-[#e4daf5] px-4 py-3 sm:px-5">
+        <div
+          className="border-b border-[#e4daf5] px-4 py-3 sm:px-5"
+          ref={promoRef}
+        >
           {!promoOpen ? (
-            <button
-              className="text-sm font-semibold text-[#1c133b] underline underline-offset-2 touch-manipulation"
-              onClick={() => setPromoOpen(true)}
-              type="button"
-            >
-              Add a promo code
-            </button>
+            <div className="flex justify-center">
+              <button
+                className="text-sm font-semibold text-[#1c133b] underline underline-offset-2 touch-manipulation"
+                onClick={() => setPromoOpen(true)}
+                type="button"
+              >
+                Add a promo code
+              </button>
+            </div>
           ) : (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#8a8498]">
-                Your code
-              </p>
-              <div className="mt-2 flex gap-2">
-                <input
+              <div className="flex items-center justify-center gap-2">
+                <Input
                   autoFocus
-                  className="min-h-10 min-w-0 flex-1 rounded-full border border-[#e4daf5] bg-white px-4 text-sm text-[#1c133b] outline-none focus:border-[#6a45b8]"
+                  className="h-9 w-[8.5rem] shrink-0 rounded-lg border-2 border-[#1c133b] bg-transparent px-2.5 text-sm focus-visible:ring-1 focus-visible:ring-[#1c133b] focus-visible:ring-offset-0"
+                  id="basket-promo-code"
                   onChange={(event) => promo.onChange(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
@@ -404,7 +421,7 @@ function BasketPanel({
                   value={promo.code}
                 />
                 <button
-                  className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white touch-manipulation disabled:opacity-40"
+                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-[#1c133b] px-3 text-sm font-semibold text-white touch-manipulation disabled:opacity-40"
                   disabled={!promo.code.trim() || !promo.addressReady}
                   onClick={promo.onValidate}
                   type="button"
@@ -413,24 +430,15 @@ function BasketPanel({
                 </button>
               </div>
               {promo.feedback ? (
-                <p className="mt-2 text-xs leading-5 text-[#5a5470]">
+                <p className="mt-2 text-center text-xs leading-5 text-[#5a5470]">
                   {promo.feedback}
                 </p>
               ) : null}
               {!promo.addressReady ? (
-                <p className="mt-2 text-xs leading-5 text-[#8a8498]">
+                <p className="mt-2 text-center text-xs leading-5 text-[#8a8498]">
                   Promo codes apply once your address is saved at payment.
                 </p>
               ) : null}
-              {promo.code || promo.feedback ? null : (
-                <button
-                  className="mt-2 text-xs font-medium text-[#8a8498] hover:text-[#1c133b]"
-                  onClick={() => setPromoOpen(false)}
-                  type="button"
-                >
-                  Cancel
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -548,7 +556,7 @@ export function BookingBasketSheet({
         type="button"
       />
       <div
-        className="relative flex max-h-[min(78dvh,34rem)] w-full flex-col overflow-hidden rounded-t-[1.25rem] border border-[#e8d4b0] bg-[#fffefb] outline-none"
+        className="relative flex max-h-[min(78dvh,34rem)] w-full flex-col overflow-hidden rounded-t-[1.25rem] border border-transparent bg-[#fffefb] outline-none"
         ref={panelRef}
         tabIndex={-1}
       >

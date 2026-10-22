@@ -10,6 +10,8 @@ interface FormFieldProps {
   hint?: string;
   htmlFor: string;
   label: string;
+  /** Taller shell for textarea; empty label sits on the first line. */
+  multiline?: boolean;
   /** No fill — border only (e.g. booking address on a warm page wash). */
   plain?: boolean;
 }
@@ -43,37 +45,51 @@ export function FormField({
   hint,
   htmlFor,
   label,
+  multiline = false,
   plain = false,
 }: FormFieldProps) {
   return (
     <div className="space-y-1.5">
       <div
         className={cn(
-          "group/field relative min-h-[3.25rem] rounded-xl border px-3.5 transition",
+          "group/field relative rounded-xl px-3.5 transition",
+          multiline ? "min-h-[7.5rem]" : "min-h-[3.25rem]",
+          // Booking / onboarding plain: thick ink border + thicker ink ring on focus (no purple).
+          // Auth default: thin grey border, purple focus.
           plain
-            ? "bg-transparent focus-within:bg-transparent"
-            : "bg-[#f6f5f8] focus-within:bg-white",
-          "focus-within:border-[#6a45b8] focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
-          error
-            ? "border-[#d4694a]"
-            : plain
-              ? "border-black"
-              : "border-[#e4e0eb]",
+            ? "border-2 border-[#1c133b] bg-transparent focus-within:ring-2 focus-within:ring-[#1c133b] focus-within:ring-offset-0"
+            : "border border-[#e4e0eb] bg-[#f6f5f8] focus-within:border-[#6a45b8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
+          error &&
+            (plain
+              ? "border-[#d4694a] focus-within:ring-[#d4694a]"
+              : "border-[#d4694a]"),
           // Empty + idle: label is the large in-field placeholder
-          "[&:has(input:placeholder-shown):not(:focus-within)_label]:top-1/2",
-          "[&:has(input:placeholder-shown):not(:focus-within)_label]:-translate-y-1/2",
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-[15px]",
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:font-normal",
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-[#8b8798]",
+          "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-[15px]",
+          "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:font-normal",
+          "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-[#8b8798]",
+          multiline
+            ? cn(
+                "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:top-5",
+                "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:translate-y-0",
+              )
+            : cn(
+                "[&:has(input:placeholder-shown):not(:focus-within)_label]:top-1/2",
+                "[&:has(input:placeholder-shown):not(:focus-within)_label]:-translate-y-1/2",
+              ),
         )}
       >
         <label
           className={cn(
-            "pointer-events-none absolute left-3.5 right-10 top-2.5 z-[1]",
+            "pointer-events-none absolute left-3.5 right-3.5 top-2.5 z-[1]",
             "origin-left text-[11px] font-semibold leading-none text-[#5a5470]",
             "transition-all duration-150",
             error && "text-[#d4694a]",
-            "group-focus-within/field:text-[#6a45b8]",
+            plain
+              ? "group-focus-within/field:text-[#1c133b]"
+              : "group-focus-within/field:text-[#6a45b8]",
           )}
           htmlFor={htmlFor}
         >
@@ -86,6 +102,12 @@ export function FormField({
             "[&_input]:h-7 [&_input]:rounded-none [&_input]:px-0 [&_input]:py-0",
             "[&_input]:text-[15px]",
             "[&_input]:placeholder:text-transparent",
+            "[&_textarea]:min-h-[5.5rem] [&_textarea]:w-full [&_textarea]:resize-none",
+            "[&_textarea]:rounded-none [&_textarea]:border-0 [&_textarea]:bg-transparent",
+            "[&_textarea]:px-0 [&_textarea]:py-0 [&_textarea]:text-[15px]",
+            "[&_textarea]:leading-6 [&_textarea]:text-[#1c133b]",
+            "[&_textarea]:outline-none [&_textarea]:ring-0",
+            "[&_textarea]:placeholder:text-transparent",
             // Flatten PasswordInput shell so the toggle anchors to the field chrome
             "[&_.password-input-root]:contents",
             "[&_.password-toggle]:absolute [&_.password-toggle]:right-2 [&_.password-toggle]:top-1/2 [&_.password-toggle]:-translate-y-1/2",
