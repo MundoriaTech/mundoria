@@ -557,12 +557,8 @@ export async function POST(request: Request) {
       bio: value.bio,
       booking_preferences: [],
       can_transport_equipment: value.can_transport_equipment || null,
-      cleaning_skills: value.cleaning_skills,
-      cleaning_skills_other: value.cleaning_skills.some((item) =>
-        item.toLowerCase().startsWith("other"),
-      )
-        ? value.cleaning_skills_other || null
-        : null,
+      cleaning_skills: [],
+      cleaning_skills_other: null,
       dbs_certificate_number:
         value.dbs_path === "have" ? value.dbs_certificate_number || null : null,
       dbs_document_status: reviewStatusForSubmitted(dbsSubmitted),
@@ -637,10 +633,10 @@ export async function POST(request: Request) {
       ppe_other: otherText(value.ppe_owned, value.ppe_other),
       ppe_owned: value.ppe_owned,
       preferred_hours_band: value.preferred_hours_band || null,
-      prior_work_duration: value.prior_work_duration || null,
-      prior_work_employer: value.prior_work_employer || null,
-      prior_work_summary: value.prior_work_summary || null,
-      prior_work_type: value.prior_work_type || null,
+      prior_work_duration: null,
+      prior_work_employer: null,
+      prior_work_summary: null,
+      prior_work_type: null,
       products_other: otherText(value.products_owned, value.products_other),
       products_owned: value.products_owned,
       products_ownership: value.products_ownership,

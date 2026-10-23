@@ -7,7 +7,6 @@ import { FieldError, invalidControlClass } from "@/components/shared/action-erro
 import { Input } from "@/components/ui/input";
 import { MAX_DBS_DOCUMENT_PAGES } from "@/lib/cleaner/document-urls";
 import {
-  CLEANING_SKILLS,
   CLEANER_AGREEMENT_DOCS,
   DBS_APPLY_URL,
   DBS_FAQS,
@@ -717,22 +716,10 @@ export function InsuranceComplianceStep({
 }
 
 export function ExperienceExtras({
-  cleaningSkills,
-  cleaningSkillsOther,
-  onCleaningSkills,
-  onCleaningSkillsOther,
-  onPriorType,
-  onPriorEmployer,
-  onPriorDuration,
-  onPriorSummary,
   onTrainingCertFile,
   onTrainingCertRemove,
   onTrainingCompleted,
   onTrainingPath,
-  priorDuration,
-  priorEmployer,
-  priorSummary,
-  priorType,
   trainingCertPreview,
   trainingCertUploaded,
   trainingCertUploading,
@@ -740,22 +727,10 @@ export function ExperienceExtras({
   trainingCompleted,
   trainingPath,
 }: {
-  cleaningSkills: string[];
-  cleaningSkillsOther: string;
-  onCleaningSkills: (next: string[]) => void;
-  onCleaningSkillsOther: (next: string) => void;
-  onPriorType: (next: string) => void;
-  onPriorEmployer: (next: string) => void;
-  onPriorDuration: (next: string) => void;
-  onPriorSummary: (next: string) => void;
   onTrainingCertFile: (file: File) => void;
   onTrainingCertRemove: () => void;
   onTrainingCompleted: (next: string[]) => void;
   onTrainingPath: (next: string) => void;
-  priorDuration: string;
-  priorEmployer: string;
-  priorSummary: string;
-  priorType: string;
   trainingCertPreview?: { isPdf?: boolean; url?: string };
   trainingCertUploaded: boolean;
   trainingCertUploading: boolean;
@@ -763,76 +738,8 @@ export function ExperienceExtras({
   trainingCompleted: string[];
   trainingPath: string;
 }) {
-  const hasPrior =
-    priorType === "company" ||
-    priorType === "independent" ||
-    priorType === "both";
-  const showSkillsOther = cleaningSkills.includes("Other (please specify)");
-
   return (
     <div className="mt-8 space-y-6 border-t border-[#e8e0d0] pt-8">
-      <SectionHeading subtitle="Select the tasks you’re confident carrying out.">
-        Cleaning skills
-      </SectionHeading>
-      <ChipMultiSelect
-        onChange={onCleaningSkills}
-        options={[...CLEANING_SKILLS, "Other (please specify)"]}
-        selected={cleaningSkills}
-      />
-      {showSkillsOther ? (
-        <Input
-          className={FIELD}
-          onChange={(event) => onCleaningSkillsOther(event.target.value)}
-          placeholder="Please specify other skills"
-          value={cleaningSkillsOther}
-        />
-      ) : null}
-
-      <SectionHeading>Have you worked professionally as a cleaner before?</SectionHeading>
-      <BranchChoice
-        onChange={onPriorType}
-        options={[
-          { label: "Yes, for a cleaning company", value: "company" },
-          { label: "Yes, independently / self-employed", value: "independent" },
-          { label: "Yes, both", value: "both" },
-          { label: "No, I'm just starting", value: "none" },
-        ]}
-        value={priorType || null}
-      />
-
-      {hasPrior ? (
-        <div className="space-y-3">
-          <Input
-            className={FIELD}
-            onChange={(event) => onPriorEmployer(event.target.value)}
-            placeholder="Company or business name (optional)"
-            value={priorEmployer}
-          />
-          <Input
-            className={FIELD}
-            onChange={(event) => onPriorDuration(event.target.value)}
-            placeholder="How long did you work there?"
-            value={priorDuration}
-          />
-          <textarea
-            className={cn(
-              "min-h-24 w-full rounded-md p-3 text-sm outline-none ring-offset-white focus-visible:ring-2",
-              FIELD,
-            )}
-            onChange={(event) => onPriorSummary(event.target.value)}
-            placeholder="Briefly describe the cleaning work you've done"
-            value={priorSummary}
-          />
-        </div>
-      ) : null}
-
-      {priorType === "none" ? (
-        <InfoCallout>
-          Everyone starts somewhere. Applications without professional
-          experience may need extra training or assessment before approval.
-        </InfoCallout>
-      ) : null}
-
       <SectionHeading subtitle="Optional — certificates help verification.">
         Training &amp; qualifications
       </SectionHeading>

@@ -306,7 +306,7 @@ const STEPS = [
 
 // Labels used on the final review screen (sentence case; pack section names).
 const SUMMARY_LABELS: Partial<Record<StepId, string>> = {
-  about: "Cleaning experience & skills",
+  about: "Cleaning experience",
   coverage: "Work location & availability (area)",
   dbs: "Basic DBS check",
   emergency: "Emergency contact",
@@ -338,7 +338,7 @@ const GROUPS: { ids: StepId[]; title: string; blurb: string }[] = [
 
 const STEP_WHY: Record<StepId, string> = {
   about:
-    "Every cleaner brings something different. Tell us about your experience, skills and what you do best so we can match you well.",
+    "Every cleaner brings something different. Tell us about your experience so we can match you well.",
   photo: "A clear face photo helps customers recognise you on the day.",
   services: "Only select services you have the experience and confidence to carry out.",
   hours:
@@ -2165,16 +2165,6 @@ function StepBody({
           />
         </Field>
         <ExperienceExtras
-          cleaningSkills={data.cleaning_skills}
-          cleaningSkillsOther={data.cleaning_skills_other}
-          onCleaningSkills={(next) => onUpdate("cleaning_skills", next)}
-          onCleaningSkillsOther={(next) =>
-            onUpdate("cleaning_skills_other", next)
-          }
-          onPriorDuration={(next) => onUpdate("prior_work_duration", next)}
-          onPriorEmployer={(next) => onUpdate("prior_work_employer", next)}
-          onPriorSummary={(next) => onUpdate("prior_work_summary", next)}
-          onPriorType={(next) => onUpdate("prior_work_type", next)}
           onTrainingCertFile={(file) => onFile("training", file, 0)}
           onTrainingCertRemove={() => onRemove("training", 0)}
           onTrainingCompleted={(next) => onUpdate("training_completed", next)}
@@ -2185,10 +2175,6 @@ function StepBody({
               if (data.training_certificate_url) onRemove("training", 0);
             }
           }}
-          priorDuration={data.prior_work_duration}
-          priorEmployer={data.prior_work_employer}
-          priorSummary={data.prior_work_summary}
-          priorType={data.prior_work_type}
           trainingCertPreview={docPreviews["training:0"]}
           trainingCertProgress={uploadProgress}
           trainingCertUploaded={Boolean(

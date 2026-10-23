@@ -166,14 +166,6 @@ export const INSURANCE_FAQS = [
 
 export const EXPERIENCE_FAQS = [
   {
-    a: "Be honest. New cleaners can join; Mundoria may ask for extra training or an assessment before activation.",
-    q: "What if I’m new to professional cleaning?",
-  },
-  {
-    a: "Skills help matching you to suitable bookings. Selecting a skill doesn’t automatically mean every related job will be offered.",
-    q: "Do selected skills auto-approve me for those jobs?",
-  },
-  {
     a: "Optional but useful. Certificates (for example COSHH awareness) help us verify readiness.",
     q: "Do I need training certificates?",
   },
@@ -365,22 +357,6 @@ export const INCIDENT_CATEGORIES = [
   { label: "Theft or missing items", value: "theft" },
   { label: "Customer behaviour", value: "customer_behaviour" },
   { label: "Other", value: "other" },
-] as const;
-
-export const CLEANING_SKILLS = [
-  "Kitchen cleaning and degreasing",
-  "Bathroom cleaning and descaling",
-  "Dusting and surface cleaning",
-  "Vacuuming and mopping",
-  "Interior window cleaning",
-  "Appliance exterior cleaning",
-  "Oven cleaning",
-  "Fridge cleaning",
-  "Deep cleaning",
-  "End-of-tenancy cleaning",
-  "Office desks and workstations",
-  "Commercial washrooms",
-  "Safe handling of cleaning chemicals",
 ] as const;
 
 export const EQUIPMENT_ITEMS = [
