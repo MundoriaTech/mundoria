@@ -71,7 +71,7 @@ export async function notifyAdminUserSignedUp(input: {
 
   try {
     await Promise.all(
-      [...recipients].map((to) =>
+      Array.from(recipients).map((to) =>
         sendBrandedEmail({
           data: emailData,
           template: "admin.user_signed_up",
