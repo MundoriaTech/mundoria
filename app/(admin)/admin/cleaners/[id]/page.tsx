@@ -9,6 +9,7 @@ import {
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
+import { verificationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
@@ -88,8 +89,21 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
       : ([
           ["Government ID", null, "storage"],
         ] as Array<[string, string | null, "storage" | "public"]>)),
+    ["UTR proof", cleaner.utr_document_url ?? null, "storage"],
+    [
+      "Insurance certificate",
+      cleaner.insurance_certificate_url ?? null,
+      "storage",
+    ],
     ["Headshot", cleaner.headshot_url ?? null, "public"],
   ];
+
+  const reviewLabel = verificationLifecycleLabel;
+  const verificationFlagList = Object.entries(
+    (cleaner.verification_flags ?? {}) as Record<string, unknown>,
+  )
+    .filter(([, flagged]) => Boolean(flagged))
+    .map(([flag]) => flag);
   const signed = await Promise.all(
     documentEntries.map(async ([label, path, kind]) => {
       if (!path) return { label, path: null as string | null, url: null as string | null };
@@ -146,8 +160,12 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
           (cleaner.interview_status as InterviewStatus | null) ?? "not_started"
         }
         medallionScore={cleaner.medallion_score ?? 0}
+        skillsAssessmentStatus={
+          (cleaner.skills_assessment_status as string | null) ?? null
+        }
         skillsExamPassed={Boolean(cleaner.skills_exam_passed)}
         skillsExamScore={cleaner.skills_exam_score ?? null}
+        specialistReviewRequired={Boolean(cleaner.specialist_review_required)}
         totalJobs={cleaner.total_jobs}
         yearsExperience={cleaner.years_experience ?? 0}
       />
@@ -163,8 +181,88 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
             <dt className="text-muted-foreground">UTR</dt>
             <dd className="font-medium">
               {cleaner.utr_number
-                ? `${cleaner.utr_number}${cleaner.utr_verified ? " · verified" : " · pending"}`
-                : "Not provided"}
+                ? `${cleaner.utr_number} · ${reviewLabel(cleaner.utr_document_status, cleaner.utr_path, { kind: "utr" })}`
+                : `${reviewLabel(cleaner.utr_document_status, cleaner.utr_path, { kind: "utr" })}${
+                    cleaner.utr_path ? ` · path: ${cleaner.utr_path}` : ""
+                  }`}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">DBS</dt>
+            <dd className="font-medium">
+              {reviewLabel(cleaner.dbs_document_status, cleaner.dbs_path, { kind: "dbs" })}
+              {cleaner.dbs_certificate_number
+                ? ` · ${cleaner.dbs_certificate_number}`
+                : ""}
+              {cleaner.dbs_path ? ` · path: ${cleaner.dbs_path}` : ""}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Insurance</dt>
+            <dd className="font-medium">
+              {reviewLabel(cleaner.insurance_status, cleaner.insurance_path, {
+                kind: "insurance",
+              })}
+              {cleaner.insurance_provider
+                ? ` · ${cleaner.insurance_provider}`
+                : ""}
+              {cleaner.insurance_cover_amount
+                ? ` · £${cleaner.insurance_cover_amount}`
+                : ""}
+              {cleaner.insurance_expiry_date
+                ? ` · expires ${cleaner.insurance_expiry_date}`
+                : ""}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Application reference</dt>
+            <dd className="font-medium">
+              {cleaner.application_reference ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Verification flags</dt>
+            <dd className="font-medium">
+              {verificationFlagList.length > 0 ? (
+                <span className="flex flex-wrap gap-1.5">
+                  {verificationFlagList.map((flag) => (
+                    <span
+                      className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900"
+                      key={flag}
+                    >
+                      {flag.replaceAll("_", " ")}
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                "None"
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Skills assessment</dt>
+            <dd className="font-medium capitalize">
+              {(cleaner.skills_assessment_status ?? "not set").replaceAll(
+                "_",
+                " ",
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Equipment status</dt>
+            <dd className="font-medium">
+              {cleaner.equipment_status === "update_required"
+                ? verificationLifecycleLabel(
+                    cleaner.equipment_status,
+                    null,
+                    { kind: "equipment" },
+                  )
+                : cleaner.equipment_status
+                  ? String(cleaner.equipment_status).replaceAll("_", " ")
+                  : "Not set"}
+              {cleaner.specialist_review_required
+                ? " · specialist review required"
+                : ""}
             </dd>
           </div>
           <div>
@@ -193,6 +291,27 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
             </dd>
           </div>
           <div>
+            <dt className="text-muted-foreground">Emergency contact</dt>
+            <dd className="font-medium">
+              {cleaner.emergency_contact?.name
+                ? `${cleaner.emergency_contact.name}${
+                    cleaner.emergency_contact.mobile
+                      ? ` · ${cleaner.emergency_contact.mobile}`
+                      : ""
+                  }`
+                : "Not provided"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Agreements</dt>
+            <dd className="font-medium">
+              {Array.isArray(cleaner.agreement_acceptances) &&
+              cleaner.agreement_acceptances.length > 0
+                ? `${cleaner.agreement_acceptances.length} accepted`
+                : "None logged"}
+            </dd>
+          </div>
+          <div>
             <dt className="text-muted-foreground">Phone</dt>
             <dd className="font-medium">{profile.phone ?? "No phone"}</dd>
           </div>
@@ -202,7 +321,8 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
       <section className="rounded-xl border bg-card p-4 sm:p-5">
         <h2 className="font-semibold">Documents</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Open DBS, ID, and headshot here without leaving the admin portal.
+          Open DBS, ID, UTR, insurance, and headshot without leaving the admin
+          portal.
         </p>
         <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap">
           {signed.map((document) => (

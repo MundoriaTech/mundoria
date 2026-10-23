@@ -9,6 +9,27 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 const tierRank = { bronze: 0, silver: 1, gold: 2, rose_gold: 3, elite: 3 };
 
+// Specialist work needs an approved skills assessment when ops flagged the
+// cleaner for specialist review. (deep_clean is silver-gated, so not listed.)
+const SPECIALIST_SERVICE_TYPES = new Set([
+  "end_of_tenancy",
+  "move_in",
+  "move_out",
+  "hospital_discharge",
+  "illness_recovery",
+  "post_injury",
+  "postpartum",
+  "bereavement_support",
+  "post_construction",
+]);
+
+// Booking add-ons where the cleaner brings the Mundoria product/equipment kit.
+const SUPPLY_ADD_ON_IDS = ["cleaning_products", "cleaning_equipment"];
+
+const LONG_TRAVEL_METRES = 8046; // 5 miles
+const TRANSPORT_RANK_PENALTY = 5; // reliability points, soft only
+const EQUIPMENT_RANK_PENALTY = 5; // reliability points, soft only
+
 interface MatchingOptions {
   excludeCleanerIds?: string[];
 }
@@ -28,12 +49,17 @@ export async function runMatchingEngine(
   if (!booking?.address) throw new Error("Booking or address not found.");
 
   const day = new Date(`${booking.scheduled_date}T12:00:00`).getDay();
-  const [{ data: candidates }, { data: existingBookings }, { data: absences }] =
+  const [
+    { data: candidates },
+    { data: existingBookings },
+    { data: absences },
+    { data: supplyAddOns },
+  ] =
     await Promise.all([
     admin
       .from("profiles")
       .select(
-        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!cleaner_profiles_id_fkey!inner(tier,status,dbs_verified,working_radius_km,location_tracking_consent_at,cancellation_count),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
+        "id,email,full_name,notification_preferences,onesignal_player_id,cleaner_profiles!cleaner_profiles_id_fkey!inner(tier,status,dbs_verified,insurance_status,insurance_expiry_date,working_radius_km,location_tracking_consent_at,cancellation_count,specialist_review_required,skills_assessment_status,transport_mode,equipment_ownership,equipment_transport),cleaner_services!inner(service_type,is_active),cleaner_availability!inner(day_of_week,start_time,end_time,is_available),cleaner_working_areas(postcode_prefix,latitude,longitude)",
       )
       .eq("role", "cleaner")
       .in("cleaner_profiles.status", ["certified", "active"])
@@ -55,7 +81,14 @@ export async function runMatchingEngine(
       .select("cleaner_id")
       .lte("starts_on", booking.scheduled_date)
       .gte("ends_on", booking.scheduled_date),
+    admin
+      .from("booking_add_ons")
+      .select("add_on_id")
+      .eq("booking_id", bookingId)
+      .in("add_on_id", SUPPLY_ADD_ON_IDS),
   ]);
+  const needsSupply = (supplyAddOns ?? []).length > 0;
+  const specialistService = SPECIALIST_SERVICE_TYPES.has(booking.service_type);
   const absentCleaners = new Set(
     (absences ?? []).map((absence) => absence.cleaner_id as string),
   );
@@ -125,12 +158,12 @@ export async function runMatchingEngine(
         ),
       );
     const distance = distances.length ? Math.min(...distances) : Infinity;
-    // Platform cap is 15 miles. A cleaner can work a smaller radius. A postcode
+    // Platform cap is 25 miles. A cleaner can work a smaller radius. A postcode
     // prefix only qualifies when we have no coordinates to measure.
-    const FIFTEEN_MILES_METRES = 15 * 1609.344;
+    const MAX_RADIUS_METRES = 25 * 1609.344;
     const cleanerRadiusMetres =
       Number(cleanerProfile.working_radius_km ?? 24.14) * 1000;
-    const radiusLimit = Math.min(cleanerRadiusMetres, FIFTEEN_MILES_METRES);
+    const radiusLimit = Math.min(cleanerRadiusMetres, MAX_RADIUS_METRES);
     const inRadius = Number.isFinite(distance) && distance <= radiusLimit;
     const tierOk =
       tierRank[cleanerProfile.tier as keyof typeof tierRank] >=
@@ -158,15 +191,41 @@ export async function runMatchingEngine(
         )[booking.service_type] ?? "bronze"
       ];
     const consentOk = Boolean(cleanerProfile.location_tracking_consent_at);
+    const insuranceExpiry = cleanerProfile.insurance_expiry_date as
+      | string
+      | null;
+    const insuranceExpired =
+      cleanerProfile.insurance_status === "expired" ||
+      Boolean(
+        insuranceExpiry && insuranceExpiry < new Date().toISOString().slice(0, 10),
+      );
     const reliability = Math.max(
       0,
       100 - Number(cleanerProfile.cancellation_count ?? 0) * 10,
     );
     const reliabilityOk =
       reliability >= 40 || booking.preferred_cleaner_id === candidate.id;
+    const specialistBlocked =
+      specialistService &&
+      cleanerProfile.specialist_review_required === true &&
+      cleanerProfile.skills_assessment_status !== "approved";
+    const transportMode = cleanerProfile.transport_mode as string | null;
+    const slowTransportLongTrip =
+      (transportMode === "walk" || transportMode === "bike") &&
+      Number.isFinite(distance) &&
+      distance > LONG_TRAVEL_METRES;
+    const equipmentGap =
+      needsSupply &&
+      (cleanerProfile.equipment_ownership === "none" ||
+        cleanerProfile.equipment_transport === "prefer_provided");
+    const rankPenalty =
+      (slowTransportLongTrip ? TRANSPORT_RANK_PENALTY : 0) +
+      (equipmentGap ? EQUIPMENT_RANK_PENALTY : 0);
     const eligible =
+      !specialistBlocked &&
       !excluded.has(candidate.id) &&
       !absentCleaners.has(candidate.id) &&
+      !insuranceExpired &&
       slotAvailable &&
       !conflict &&
       tierOk &&
@@ -184,6 +243,7 @@ export async function runMatchingEngine(
         eligible,
         playerId: candidate.onesignal_player_id as string | null,
         preferred: booking.preferred_cleaner_id === candidate.id,
+        rankPenalty,
         reliability,
         reasons: {
           absent: absentCleaners.has(candidate.id),
@@ -191,9 +251,13 @@ export async function runMatchingEngine(
           distance_metres: Number.isFinite(distance) ? Math.round(distance) : null,
           excluded: excluded.has(candidate.id),
           in_radius: inRadius,
+          equipment_gap: equipmentGap,
+          insurance_expired: insuranceExpired,
           postcode_match: postcodeMatch,
           reliability_ok: reliabilityOk,
           slot_available: slotAvailable,
+          specialist_blocked: specialistBlocked,
+          transport_penalty: slowTransportLongTrip,
           tier_ok: tierOk,
           location_consent: consentOk,
         },
@@ -208,7 +272,9 @@ export async function runMatchingEngine(
     .sort(
       (left, right) =>
         Number(right.preferred) - Number(left.preferred) ||
-        right.reliability - left.reliability ||
+        right.reliability -
+          right.rankPenalty -
+          (left.reliability - left.rankPenalty) ||
         tierRank[right.tier] - tierRank[left.tier] ||
         left.distance - right.distance,
     );
@@ -228,6 +294,7 @@ export async function runMatchingEngine(
       score:
         (candidate.preferred ? 10_000 : 0) +
         tierRank[candidate.tier] * 1_000 -
+        candidate.rankPenalty * 10 -
         (Number.isFinite(candidate.distance) ? candidate.distance / 100 : 10_000),
     })),
   );

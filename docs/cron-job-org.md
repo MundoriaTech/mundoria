@@ -40,6 +40,8 @@ seconds.
 | Mundoria Apply Rating Holds | `https://www.mundoria.co.uk/api/cron/apply-rating-holds` | `0 * * * *` | Applies held low ratings after the dispute window expires. |
 | Mundoria Weekly Payouts | `https://www.mundoria.co.uk/api/cron/process-payouts` | `0 6 * * 1` | Processes weekly payout batches. |
 | Mundoria Monthly Scores | `https://www.mundoria.co.uk/api/cron/calculate-scores` | `0 0 1 * *` | Recalculates cleaner performance scores monthly. |
+| Mundoria Insurance Expiry | `https://www.mundoria.co.uk/api/cron/insurance-expiry` | `0 1 * * *` | Marks cleaner Public Liability insurance as expired after its expiry date, notifies the cleaner and admins, and removes them from matching until renewed. |
+| Mundoria Insurance Reminders | `https://www.mundoria.co.uk/api/cron/insurance-reminders` | `0 2 * * *` | Reminds cleaners 30, 14 and 7 days before verified Public Liability insurance expires (in-app + email). Sends once per threshold per expiry date. |
 | Mundoria Recurring Payments | `https://www.mundoria.co.uk/api/cron/recurring-payments` | `0 9 * * *` | Prepares PaymentIntents and reminds customers for unpaid series visits (T−7…T−2). |
 
 Use `Africa/Lagos` as the timezone for calendar-style schedules. For interval

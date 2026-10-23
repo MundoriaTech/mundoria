@@ -13,7 +13,8 @@ export type DocumentReviewStatus =
   | "missing"
   | "pending"
   | "verified"
-  | "rejected";
+  | "rejected"
+  | "expired";
 
 export type InterviewStatus =
   | "not_started"
@@ -39,6 +40,9 @@ export interface CleanerProfile {
   dbs_verified: boolean;
   dbs_document_url: string | null;
   dbs_document_status: DocumentReviewStatus;
+  dbs_path: string | null;
+  dbs_certificate_number: string | null;
+  dbs_issued_on: string | null;
   id_verified: boolean;
   id_document_url: string | null;
   id_document_status: DocumentReviewStatus;
@@ -46,6 +50,66 @@ export interface CleanerProfile {
   headshot_status: DocumentReviewStatus;
   utr_number: string | null;
   utr_verified: boolean;
+  utr_path: string | null;
+  utr_document_url: string | null;
+  utr_document_status: DocumentReviewStatus;
+  insurance_path: string | null;
+  insurance_provider: string | null;
+  insurance_policy_number: string | null;
+  insurance_cover_amount: string | null;
+  insurance_expiry_date: string | null;
+  insurance_certificate_url: string | null;
+  insurance_status: DocumentReviewStatus;
+  experience_band: string | null;
+  cleaning_skills: string[];
+  cleaning_skills_other: string | null;
+  prior_work_type: string | null;
+  prior_work_employer: string | null;
+  prior_work_duration: string | null;
+  prior_work_summary: string | null;
+  training_path: string | null;
+  training_completed: string[];
+  training_certificate_url: string | null;
+  reference_name: string | null;
+  reference_company: string | null;
+  reference_relationship: string | null;
+  reference_email: string | null;
+  reference_phone: string | null;
+  reference_contact_ok: boolean | null;
+  starting_postcode: string | null;
+  preferred_hours_band: string | null;
+  transport_mode: string | null;
+  can_transport_equipment: string | null;
+  booking_preferences: string[];
+  equipment_ownership: string | null;
+  equipment_owned: string[];
+  equipment_other: string | null;
+  equipment_condition: string | null;
+  products_ownership: string | null;
+  products_owned: string[];
+  products_other: string | null;
+  ppe_owned: string[];
+  ppe_other: string | null;
+  equipment_transport: string | null;
+  specialised_equipment: string[];
+  specialised_other: string | null;
+  specialised_training: string | null;
+  insurance_insured_name: string | null;
+  insurance_activity_confirmed: boolean | null;
+  application_reference: string | null;
+  marketing_consent_at: string | null;
+  info_accuracy_confirmed_at: string | null;
+  verification_flags: Record<string, unknown>;
+  skills_assessment_status: string | null;
+  equipment_status: string | null;
+  specialist_review_required: boolean;
+  emergency_contact: Record<string, string> | null;
+  safety_acknowledged_at: string | null;
+  agreement_acceptances: Array<{
+    accepted_at: string;
+    key: string;
+    version: string;
+  }>;
   interview_status: InterviewStatus;
   interview_scheduled_at: string | null;
   interview_notes: string | null;

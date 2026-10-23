@@ -47,8 +47,10 @@ export function CleanerReviewPanel({
   interviewScheduledAt = null,
   interviewStatus,
   medallionScore,
+  skillsAssessmentStatus = null,
   skillsExamPassed,
   skillsExamScore,
+  specialistReviewRequired = false,
   totalJobs,
   yearsExperience,
 }: {
@@ -62,14 +64,17 @@ export function CleanerReviewPanel({
   interviewScheduledAt?: string | null;
   interviewStatus: InterviewStatus;
   medallionScore: number;
+  skillsAssessmentStatus?: string | null;
   skillsExamPassed: boolean;
   skillsExamScore: number | null;
+  specialistReviewRequired?: boolean;
   totalJobs: number;
   yearsExperience: number;
 }) {
   const router = useRouter();
   const { confirm, success } = useFeedback();
   const [reason, setReason] = useState("");
+  const [flagUnreadable, setFlagUnreadable] = useState(false);
   const [status, setStatus] = useState(currentStatus);
   const [interview, setInterview] = useState(interviewStatus);
   const [tier, setTier] = useState<CleanerTier>(currentTier);
@@ -104,7 +109,12 @@ export function CleanerReviewPanel({
     setBusy(true);
     setMessage(null);
     const response = await fetch(`/api/admin/cleaners/${cleanerId}`, {
-      body: JSON.stringify({ action, reason, tier }),
+      body: JSON.stringify({
+        action,
+        flag_unreadable_doc: flagUnreadable,
+        reason,
+        tier,
+      }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
@@ -134,6 +144,10 @@ export function CleanerReviewPanel({
                 ? "Cleaner banned"
                 : action === "complete_interview"
                   ? "Interview marked complete"
+                  : action === "approve_skills"
+                    ? "Specialist skills approved"
+                    : action === "request_info"
+                      ? "More information requested"
                   : action === "fail_interview"
                     ? "Interview marked failed"
                     : "Cleaner updated",
@@ -229,6 +243,18 @@ export function CleanerReviewPanel({
           placeholder="Note, e.g. Interview done — DBS and ID checked"
           value={reason}
         />
+        <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm text-muted-foreground">
+          <input
+            checked={flagUnreadable}
+            className="mt-1"
+            onChange={(event) => setFlagUnreadable(event.target.checked)}
+            type="checkbox"
+          />
+          <span>
+            Flag uploaded document as unreadable / poor quality (sets review
+            flag for ops).
+          </span>
+        </label>
 
         <div className="mt-4 grid gap-2">
           {interview !== "completed" && interview !== "failed" ? (
@@ -269,6 +295,34 @@ export function CleanerReviewPanel({
               </ul>
             </div>
           ) : null}
+          {specialistReviewRequired &&
+          skillsAssessmentStatus !== "approved" ? (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-3 text-sm text-amber-950">
+              <p className="font-medium">
+                Specialist skills review pending
+              </p>
+              <p className="mt-1 text-amber-900/80">
+                This cleaner is excluded from specialist services (end of
+                tenancy, moves, recovery, post-construction) until approved.
+              </p>
+              <Button
+                className="mt-3 min-h-11 w-full"
+                disabled={!reasonIsValid || busy}
+                onClick={() => void act("approve_skills")}
+                variant="outline"
+              >
+                Approve specialist skills
+              </Button>
+            </div>
+          ) : null}
+          <Button
+            className="min-h-11"
+            disabled={!reasonIsValid || busy}
+            onClick={() => void act("request_info")}
+            variant="outline"
+          >
+            Request more information
+          </Button>
           <Button
             className="min-h-11"
             disabled={!reasonIsValid || busy}

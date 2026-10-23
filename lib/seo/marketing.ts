@@ -132,7 +132,7 @@ export const LAUNCH_CITY = {
     "Book trusted cleaners in Birmingham with Mundoria. Regular, deep, end-of-tenancy, Airbnb and office cleaning with clear pricing and live status.",
   slug: "birmingham",
   summary:
-    "Mundoria’s launch focus is Birmingham and nearby neighbourhoods where we can fulfil reliably — starting with central and south-west clusters.",
+    "Mundoria covers Birmingham and the nearby towns listed on our location pages — cleaners choose a home district from the same live postcode list.",
 } as const;
 
 export const BIRMINGHAM_AREAS: MarketingArea[] = [
@@ -292,17 +292,118 @@ export function birminghamAreaBySlug(slug: string) {
   return BIRMINGHAM_AREAS.find((area) => area.slug === slug) ?? null;
 }
 
-/** Districts with seeded cleaner coverage. Empty postcodes stay unpublished. */
-export const BIRMINGHAM_POSTCODES = [
-  { areaSlug: "jewellery-quarter", prefix: "B1" },
-  { areaSlug: "jewellery-quarter", prefix: "B3" },
-  { areaSlug: "moseley", prefix: "B13" },
-  { areaSlug: "kings-heath", prefix: "B14" },
-  { areaSlug: "edgbaston", prefix: "B15" },
-  { areaSlug: "edgbaston", prefix: "B16" },
-  { areaSlug: "harborne", prefix: "B17" },
-  { areaSlug: "selly-oak", prefix: "B29" },
-] as const;
+/**
+ * Live postcode districts for matching, cleaner home base, and district SEO pages.
+ * Kept in sync with `BIRMINGHAM_COVERAGE_ZONES` (city + nearby towns on location pages).
+ */
+export type BirminghamPostcodeDistrict = {
+  areaSlug: string;
+  name: string;
+  prefix: string;
+  zoneId:
+    | "central"
+    | "west"
+    | "south-west"
+    | "south"
+    | "north-west"
+    | "north-east"
+    | "east"
+    | "south-east"
+    | "sutton"
+    | "border";
+};
+
+const BIRMINGHAM_POSTCODE_ZONE_ORDER: BirminghamPostcodeDistrict["zoneId"][] = [
+  "central",
+  "west",
+  "south-west",
+  "south",
+  "north-west",
+  "north-east",
+  "east",
+  "south-east",
+  "sutton",
+  "border",
+];
+
+/** Districts cleaners can choose and customers can be matched into. */
+export const BIRMINGHAM_POSTCODES: readonly BirminghamPostcodeDistrict[] = [
+  // Birmingham City Centre
+  { areaSlug: "jewellery-quarter", name: "City Centre", prefix: "B1", zoneId: "central" },
+  { areaSlug: "city-centre", name: "City Centre", prefix: "B2", zoneId: "central" },
+  { areaSlug: "jewellery-quarter", name: "City Centre", prefix: "B3", zoneId: "central" },
+  { areaSlug: "city-centre", name: "City Centre", prefix: "B4", zoneId: "central" },
+  { areaSlug: "digbeth", name: "Digbeth & Highgate", prefix: "B5", zoneId: "central" },
+  // Edgbaston & Harborne
+  { areaSlug: "edgbaston", name: "Edgbaston", prefix: "B15", zoneId: "west" },
+  { areaSlug: "edgbaston", name: "Edgbaston & Ladywood", prefix: "B16", zoneId: "west" },
+  { areaSlug: "harborne", name: "Harborne", prefix: "B17", zoneId: "west" },
+  { areaSlug: "winson-green", name: "Winson Green & Hockley", prefix: "B18", zoneId: "west" },
+  { areaSlug: "quinton", name: "Quinton & Bartley Green", prefix: "B32", zoneId: "west" },
+  // Selly Oak & Bournville
+  { areaSlug: "selly-oak", name: "Selly Oak", prefix: "B29", zoneId: "south-west" },
+  { areaSlug: "bournville", name: "Bournville & Stirchley", prefix: "B30", zoneId: "south-west" },
+  { areaSlug: "northfield", name: "Northfield & Longbridge", prefix: "B31", zoneId: "south-west" },
+  { areaSlug: "kings-norton", name: "Kings Norton", prefix: "B38", zoneId: "south-west" },
+  { areaSlug: "rubery", name: "Rubery & Rednal", prefix: "B45", zoneId: "south-west" },
+  // Moseley & Kings Heath
+  { areaSlug: "sparkhill", name: "Sparkhill & Tyseley", prefix: "B11", zoneId: "south" },
+  { areaSlug: "balsall-heath", name: "Balsall Heath & Sparkbrook", prefix: "B12", zoneId: "south" },
+  { areaSlug: "moseley", name: "Moseley", prefix: "B13", zoneId: "south" },
+  { areaSlug: "kings-heath", name: "Kings Heath", prefix: "B14", zoneId: "south" },
+  { areaSlug: "acocks-green", name: "Acocks Green", prefix: "B27", zoneId: "south" },
+  { areaSlug: "hall-green", name: "Hall Green", prefix: "B28", zoneId: "south" },
+  // Aston & Handsworth
+  { areaSlug: "aston", name: "Aston", prefix: "B6", zoneId: "north-west" },
+  { areaSlug: "lozells", name: "Lozells & Newtown", prefix: "B19", zoneId: "north-west" },
+  { areaSlug: "handsworth-wood", name: "Handsworth Wood", prefix: "B20", zoneId: "north-west" },
+  { areaSlug: "handsworth", name: "Handsworth", prefix: "B21", zoneId: "north-west" },
+  { areaSlug: "perry-barr", name: "Perry Barr & Great Barr", prefix: "B42", zoneId: "north-west" },
+  { areaSlug: "kingstanding", name: "Kingstanding", prefix: "B44", zoneId: "north-west" },
+  // Erdington
+  { areaSlug: "erdington", name: "Erdington", prefix: "B23", zoneId: "north-east" },
+  { areaSlug: "erdington", name: "Erdington & Tyburn", prefix: "B24", zoneId: "north-east" },
+  { areaSlug: "castle-vale", name: "Castle Vale", prefix: "B35", zoneId: "north-east" },
+  // Alum Rock & Hodge Hill
+  { areaSlug: "nechells", name: "Nechells", prefix: "B7", zoneId: "east" },
+  { areaSlug: "alum-rock", name: "Alum Rock & Saltley", prefix: "B8", zoneId: "east" },
+  { areaSlug: "bordesley-green", name: "Bordesley Green", prefix: "B9", zoneId: "east" },
+  { areaSlug: "small-heath", name: "Small Heath", prefix: "B10", zoneId: "east" },
+  { areaSlug: "stechford", name: "Stechford & Kitts Green", prefix: "B33", zoneId: "east" },
+  { areaSlug: "shard-end", name: "Shard End", prefix: "B34", zoneId: "east" },
+  // Yardley & Sheldon
+  { areaSlug: "yardley", name: "Yardley", prefix: "B25", zoneId: "south-east" },
+  { areaSlug: "sheldon", name: "Sheldon & Yardley", prefix: "B26", zoneId: "south-east" },
+  // Sutton Coldfield
+  { areaSlug: "sutton-coldfield", name: "Sutton Coldfield", prefix: "B72", zoneId: "sutton" },
+  { areaSlug: "boldmere", name: "Boldmere & New Oscott", prefix: "B73", zoneId: "sutton" },
+  { areaSlug: "four-oaks", name: "Four Oaks & Mere Green", prefix: "B74", zoneId: "sutton" },
+  { areaSlug: "sutton-coldfield", name: "Sutton Coldfield East", prefix: "B75", zoneId: "sutton" },
+  { areaSlug: "walmley", name: "Walmley", prefix: "B76", zoneId: "sutton" },
+  // Nearby towns (border SEO zone)
+  { areaSlug: "castle-bromwich", name: "Castle Bromwich", prefix: "B36", zoneId: "border" },
+  { areaSlug: "chelmsley-wood", name: "Chelmsley Wood", prefix: "B37", zoneId: "border" },
+  { areaSlug: "bickenhill", name: "NEC & Airport", prefix: "B40", zoneId: "border" },
+  { areaSlug: "great-barr", name: "Great Barr (border)", prefix: "B43", zoneId: "border" },
+  { areaSlug: "coleshill", name: "Coleshill & Water Orton", prefix: "B46", zoneId: "border" },
+  { areaSlug: "hollywood", name: "Hollywood & Wythall", prefix: "B47", zoneId: "border" },
+  { areaSlug: "alvechurch", name: "Alvechurch", prefix: "B48", zoneId: "border" },
+  { areaSlug: "halesowen", name: "Halesowen", prefix: "B62", zoneId: "border" },
+  { areaSlug: "halesowen", name: "Halesowen South", prefix: "B63", zoneId: "border" },
+  { areaSlug: "cradley-heath", name: "Cradley Heath", prefix: "B64", zoneId: "border" },
+  { areaSlug: "rowley-regis", name: "Rowley Regis", prefix: "B65", zoneId: "border" },
+  { areaSlug: "smethwick", name: "Smethwick & Bearwood", prefix: "B66", zoneId: "border" },
+  { areaSlug: "smethwick", name: "Smethwick", prefix: "B67", zoneId: "border" },
+  { areaSlug: "oldbury", name: "Oldbury", prefix: "B68", zoneId: "border" },
+  { areaSlug: "oldbury", name: "Oldbury North", prefix: "B69", zoneId: "border" },
+  { areaSlug: "west-bromwich", name: "West Bromwich", prefix: "B70", zoneId: "border" },
+  { areaSlug: "west-bromwich", name: "West Bromwich North", prefix: "B71", zoneId: "border" },
+  { areaSlug: "shirley", name: "Shirley", prefix: "B90", zoneId: "border" },
+  { areaSlug: "solihull", name: "Solihull", prefix: "B91", zoneId: "border" },
+  { areaSlug: "olton", name: "Olton & Solihull", prefix: "B92", zoneId: "border" },
+  { areaSlug: "knowle", name: "Knowle & Dorridge", prefix: "B93", zoneId: "border" },
+  { areaSlug: "solihull", name: "Solihull South", prefix: "B94", zoneId: "border" },
+];
 
 export function birminghamPostcode(prefix: string) {
   return (
@@ -310,6 +411,17 @@ export function birminghamPostcode(prefix: string) {
       (item) => item.prefix.toLowerCase() === prefix.toLowerCase(),
     ) ?? null
   );
+}
+
+/** Home-base / coverage picker order: SEO zone, then district number. */
+export function birminghamPostcodesForPicker() {
+  return [...BIRMINGHAM_POSTCODES].sort((a, b) => {
+    const zoneDiff =
+      BIRMINGHAM_POSTCODE_ZONE_ORDER.indexOf(a.zoneId) -
+      BIRMINGHAM_POSTCODE_ZONE_ORDER.indexOf(b.zoneId);
+    if (zoneDiff !== 0) return zoneDiff;
+    return a.prefix.localeCompare(b.prefix, undefined, { numeric: true });
+  });
 }
 
 /** `/cleaners/birmingham/harborne-b17` — place name in the path, postcode at the end. */
@@ -337,10 +449,7 @@ export function districtFromAreaParam(param: string) {
 export function districtLinkLabel(prefix: string) {
   const district = birminghamPostcode(prefix);
   if (!district) return prefix.toUpperCase();
-  const area = birminghamAreaBySlug(district.areaSlug);
-  const siblings = prefixesForArea(district.areaSlug);
-  if (!area) return district.prefix;
-  return siblings.length > 1 ? `${area.name}, ${district.prefix}` : area.name;
+  return `${district.name}, ${district.prefix}`;
 }
 
 export function prefixesForArea(areaSlug: string) {

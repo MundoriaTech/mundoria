@@ -404,6 +404,7 @@ function resolveTemplate(
         buttonHref: `${appUrl}/cleaner/dashboard`,
         buttonLabel: "View application status",
         cards: [
+          { label: "Application reference", value: data.applicationReference },
           { label: "Interview", value: data.interviewWhen },
           { label: "Payout preference", value: data.payoutPreference },
           { label: "Working areas", value: data.workingAreas },
@@ -428,17 +429,29 @@ function resolveTemplate(
         tone: "success",
       };
     case "cleaner.application_needs_info":
+      return {
+        body:
+          string(data.reason) ||
+          "We need a little more information before we can finish reviewing your application. Please check the details below and update your profile.",
+        buttonHref: `${appUrl}/cleaner/profile`,
+        buttonLabel: "Update application",
+        cards: [{ label: "What we need", value: data.reason }],
+        preview: "Mundoria needs more information on your application.",
+        subject: "Action required: more information needed",
+        title: "Action required",
+        tone: "warning",
+      };
     case "cleaner.application_rejected":
       return {
         body:
           string(data.reason) ||
-          "Our team needs more information before your cleaner account can be certified.",
+          "We're unable to approve your application at this time. Where appropriate, we'll explain whether you can provide additional information or request a review.",
         buttonHref: `${appUrl}/cleaner/profile`,
-        buttonLabel: "Review profile",
+        buttonLabel: "View application",
         cards: [{ label: "Reason", value: data.reason }],
-        preview: "Your cleaner application needs attention.",
-        subject: "Your Mundoria cleaner application needs attention",
-        title: "Application update",
+        preview: "Your Mundoria cleaner application was not approved.",
+        subject: "Update on your Mundoria cleaner application",
+        title: "Application not approved",
         tone: "warning",
       };
     case "cleaner.job_offer":

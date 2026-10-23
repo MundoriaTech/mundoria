@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Banknote,
   BookOpenCheck,
+  FileCheck2,
   Gauge,
   Inbox,
   LogOut,
@@ -64,6 +65,14 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
         match: (pathname: string) =>
           pathname === "/admin/safety" || pathname.startsWith("/admin/safety/"),
       },
+      {
+        href: "/admin/incidents",
+        icon: AlertTriangle,
+        label: "Incidents",
+        match: (pathname: string) =>
+          pathname === "/admin/incidents" ||
+          pathname.startsWith("/admin/incidents/"),
+      },
       { href: "/admin/feedback", icon: MessageSquare, label: "Feedback" },
     ],
   },
@@ -86,6 +95,14 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
         match: (pathname) =>
           pathname === "/admin/customers" ||
           pathname.startsWith("/admin/customer/"),
+      },
+      {
+        href: "/admin/verification",
+        icon: FileCheck2,
+        label: "Verification",
+        match: (pathname: string) =>
+          pathname === "/admin/verification" ||
+          pathname.startsWith("/admin/verification/"),
       },
       { href: "/admin/team", icon: Users, label: "Team" },
     ],
@@ -137,6 +154,9 @@ function pageTitle(pathname: string) {
       pathname !== "/admin/disputes"
     ) {
       return "Dispute";
+    }
+    if (match.href === "/admin/incidents" && pathname !== "/admin/incidents") {
+      return "Incident";
     }
     if (match.href === "/admin/safety" && pathname !== "/admin/safety") {
       return "Safety case";

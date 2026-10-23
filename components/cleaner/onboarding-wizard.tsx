@@ -5,11 +5,8 @@ import {
   Check,
   ChevronDown,
   Clock3,
-  FileBadge,
-  FileUp,
-  Minus,
   Monitor,
-  Plus,
+  Search,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -35,15 +32,53 @@ import {
   storedPhone,
 } from "@/lib/auth/uk-phone";
 import {
+  hasAnyDocument,
   hasBothDocumentSides,
+  parseDocumentList,
   parseDocumentUrls,
+  removeDocumentAt,
+  withDocumentAt,
   withDocumentSide,
 } from "@/lib/cleaner/document-urls";
 import {
   INTERVIEW_DURATION_MINUTES,
   upcomingInterviewDays,
 } from "@/lib/cleaner/interview-slots";
+import {
+  AgreementsReviewStep,
+  DbsComplianceStep,
+  EmergencyContactStep,
+  EquipmentComplianceStep,
+  ExperienceExtras,
+  InsuranceComplianceStep,
+  LocationExtras,
+  PayoutFaqs,
+  UtrComplianceStep,
+} from "@/components/cleaner/onboarding-compliance-steps";
+import {
+  BranchChoice,
+  DocumentUpload,
+  InfoCallout,
+  OnboardingCheckbox,
+} from "@/components/cleaner/onboarding-primitives";
 import { TrainingSurvey } from "@/components/cleaner/training-survey";
+import {
+  CLEANER_AGREEMENT_DOCS,
+  PREFERRED_HOURS_BANDS,
+  RADIUS_PRESETS,
+  assessDocumentFile,
+  isAcceptableInsuranceCover,
+  isPastDateIso,
+  isValidUtr,
+  mergeVerificationFlags,
+  snapToRadiusPreset,
+  transportModeBand,
+  transportModeOtherText,
+  yearsFromExperienceBand,
+  type DbsPath,
+  type InsurancePath,
+  type UtrPath,
+} from "@/lib/cleaner/onboarding-compliance";
 import {
   CHARTER_AGREEMENTS,
   SKILLS_EXAM_PASS_SCORE,
@@ -69,8 +104,7 @@ import {
   type GeoapifyAutocompleteResponse,
 } from "@/lib/maps/geoapify";
 import {
-  BIRMINGHAM_AREAS,
-  BIRMINGHAM_POSTCODES,
+  birminghamPostcodesForPicker,
 } from "@/lib/seo/marketing";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
@@ -78,17 +112,15 @@ import type { CleanerProfile } from "@/types/cleaner";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
 const BIRMINGHAM_CENTER = { lat: 52.4862, lng: -1.8904 };
-const MAX_RADIUS_MILES = 15;
-const DEFAULT_RADIUS_MILES = 8;
+const MAX_RADIUS_MILES = 25;
+/** Pack default sits on the “up to 15 miles” preset. */
+const DEFAULT_RADIUS_MILES = 15;
 const MILES_TO_METRES = 1609.344;
 
-const COVERAGE_SHORTCUTS = BIRMINGHAM_POSTCODES.map((item) => {
-  const area = BIRMINGHAM_AREAS.find((entry) => entry.slug === item.areaSlug);
-  return {
-    label: area ? `${area.name} · ${item.prefix}` : item.prefix,
-    prefix: item.prefix,
-  };
-});
+const COVERAGE_SHORTCUTS = birminghamPostcodesForPicker().map((item) => ({
+  label: `${item.name} · ${item.prefix}`,
+  prefix: item.prefix,
+}));
 
 function ukOutwardCode(value: string) {
   const cleaned = value.trim().toUpperCase().replace(/\s+/g, " ");
@@ -189,14 +221,46 @@ function servicesForMainCategory(
   return servicesForCategory(main);
 }
 
-type DocSlotKey = "headshot" | "id:0" | "id:1" | "dbs:0" | "dbs:1";
+type DocKind = "dbs" | "id" | "headshot" | "utr" | "insurance" | "training";
+type DocSlotKey =
+  | "headshot"
+  | "id:0"
+  | "id:1"
+  | `dbs:${number}`
+  | "utr:0"
+  | "insurance:0"
+  | "training:0";
 
-function docSlotKey(
-  kind: "dbs" | "id" | "headshot",
-  side: 0 | 1 = 0,
-): DocSlotKey {
+function docSlotKey(kind: DocKind, side = 0): DocSlotKey {
   if (kind === "headshot") return "headshot";
-  return `${kind}:${side}`;
+  return `${kind}:${side}` as DocSlotKey;
+}
+
+function isSingleDocKind(kind: DocKind) {
+  return (
+    kind === "headshot" ||
+    kind === "utr" ||
+    kind === "insurance" ||
+    kind === "training"
+  );
+}
+
+function isListDocKind(kind: DocKind) {
+  return kind === "dbs";
+}
+
+function setMultiDocValue(
+  kind: DocKind,
+  stored: string,
+  side: number,
+  next: string,
+) {
+  if (isListDocKind(kind)) {
+    return next.trim()
+      ? withDocumentAt(stored, side, next)
+      : removeDocumentAt(stored, side);
+  }
+  return withDocumentSide(stored, side === 1 ? 1 : 0, next);
 }
 
 const days = [
@@ -215,52 +279,91 @@ const ONBOARDING_PAGE_BG = "bg-[#f9f6ef]";
 const ONBOARDING_FIELD_CLASS =
   "border-2 border-[#1c133b] bg-[#f9f6ef] focus-visible:ring-[#1c133b]";
 
+/** Pack page headings in sentence case (not Title Case). Keep acronyms: UTR, DBS. */
 const STEPS = [
-  { id: "about", label: "About you", minutes: 2 },
+  {
+    id: "about",
+    label: "Tell us about your cleaning experience",
+    minutes: 2,
+  },
   { id: "photo", label: "Your profile picture", minutes: 2 },
   { id: "services", label: "Your services", minutes: 2 },
-  { id: "hours", label: "Your hours", minutes: 3 },
-  { id: "coverage", label: "Your coverage area", minutes: 2 },
-  { id: "identity", label: "Your identity document", minutes: 3 },
-  { id: "dbs", label: "Your DBS certificate", minutes: 3 },
-  { id: "utr", label: "Your UTR", minutes: 2 },
+  { id: "hours", label: "When would you like to work?", minutes: 3 },
+  { id: "coverage", label: "Where would you like to work?", minutes: 2 },
+  { id: "identity", label: "Identity & right to work", minutes: 3 },
+  { id: "utr", label: "Your UTR", minutes: 3 },
+  { id: "dbs", label: "Your DBS check", minutes: 3 },
+  { id: "insurance", label: "Your insurance", minutes: 3 },
+  {
+    id: "equipment",
+    label: "Your cleaning equipment & supplies",
+    minutes: 3,
+  },
   { id: "quiz", label: "Quiz", minutes: 5 },
   { id: "consent", label: "Location consent", minutes: 1 },
   { id: "appointment", label: "Your appointment with Mundoria", minutes: 3 },
-  { id: "payout", label: "Getting paid", minutes: 2 },
+  { id: "payout", label: "Let's get you paid", minutes: 2 },
+  { id: "emergency", label: "Your emergency contact", minutes: 2 },
+  { id: "agreements", label: "You're almost there!", minutes: 2 },
 ] as const;
+
+// Labels used on the final review screen (sentence case; pack section names).
+const SUMMARY_LABELS: Partial<Record<StepId, string>> = {
+  about: "Cleaning experience & skills",
+  coverage: "Work location & availability (area)",
+  dbs: "Basic DBS check",
+  emergency: "Emergency contact",
+  equipment: "Cleaning equipment & supplies",
+  hours: "Work location & availability (hours)",
+  identity: "Identity & right to work",
+  payout: "Bank details",
+  photo: "Personal information & profile photo",
+  utr: "UTR verification",
+};
 
 const GROUPS: { ids: StepId[]; title: string; blurb: string }[] = [
   {
     ids: ["about", "photo", "services", "hours", "coverage"],
     title: "About your work",
-    blurb: "Who you are and how you like to work",
+    blurb: "Experience, services, hours and coverage",
   },
   {
-    ids: ["identity", "dbs", "utr", "quiz"],
-    title: "Checks and documents",
-    blurb: "ID, DBS, tax and a short quiz",
+    ids: ["identity", "utr", "dbs", "insurance", "equipment", "quiz"],
+    title: "Checks and readiness",
+    blurb: "ID, tax, DBS, insurance, kit and training",
   },
   {
-    ids: ["consent", "appointment", "payout"],
+    ids: ["consent", "appointment", "payout", "emergency", "agreements"],
     title: "Finish",
-    blurb: "Consent, interview and payout preference",
+    blurb: "Consent, interview, payouts, safety and agreements",
   },
 ];
 
 const STEP_WHY: Record<StepId, string> = {
-  about: "Customers see your name and a short bio before they book.",
+  about:
+    "Every cleaner brings something different. Tell us about your experience, skills and what you do best so we can match you well.",
   photo: "A clear face photo helps customers recognise you on the day.",
-  services: "We only offer you jobs that match what you’re happy to do.",
-  hours: "We’ll match bookings to the days and times you can work.",
-  coverage: "Jobs stay near your home base, inside the radius you choose.",
+  services: "Only select services you have the experience and confidence to carry out.",
+  hours:
+    "Choose the days and times you’re usually available for Mundoria bookings.",
+  coverage:
+    "Work where it suits you. Tell us which areas you’d like to cover so we can match suitable bookings.",
   identity: "We verify identity before any jobs go live.",
-  dbs: "DBS checks help keep homes and families safe.",
-  utr: "Confirms you’re set up as self-employed with HMRC.",
+  utr: "A Unique Taxpayer Reference (UTR) is a 10-digit number issued by HMRC. We’ll use it to verify your tax registration.",
+  dbs: "To help keep customers and cleaners safe, we require a Basic DBS check as part of joining Mundoria.",
+  insurance:
+    "Public Liability Insurance helps protect you if someone is injured or property is damaged because of your cleaning work, subject to the policy.",
+  equipment:
+    "Don’t worry if you don’t have everything. We’ll use your answers to determine which bookings are suitable for you.",
   quiz: "A quick check that you know how Mundoria jobs work.",
   consent: "GPS is only used when you check in and check out of an active job.",
   appointment: "A short online chat so we can approve your account.",
-  payout: "Pick weekly or monthly payouts. Bank details can wait until later.",
+  payout:
+    "You’ve done the hard work, so getting paid should be simple. Add your bank details securely so we know where to send your earnings from completed Mundoria bookings.",
+  emergency:
+    "Provide someone we can contact in an emergency while you’re on a Mundoria booking.",
+  agreements:
+    "You’ve made it to the final stage. Review your application and accept the agreements before submitting.",
 };
 
 const STEP_HEADER_ICONS: Record<StepId, string> = {
@@ -270,12 +373,16 @@ const STEP_HEADER_ICONS: Record<StepId, string> = {
   hours: "/images/marketing/icons/hours-mark.svg",
   coverage: "/images/marketing/icons/coverage-mark.svg",
   identity: "/images/marketing/icons/identity-mark.svg",
-  dbs: "/images/marketing/icons/dbs-mark.svg",
   utr: "/images/marketing/icons/utr-mark.svg",
+  dbs: "/images/marketing/icons/dbs-mark.svg",
+  insurance: "/images/marketing/icons/dbs-mark.svg",
+  equipment: "/images/marketing/icons/services-mark.svg",
   quiz: "/images/marketing/icons/quiz-mark.svg",
   consent: "/images/marketing/icons/consent-mark.svg",
   appointment: "/images/marketing/icons/appointment-mark.svg",
   payout: "/images/marketing/icons/payout-mark.svg",
+  emergency: "/images/marketing/icons/consent-mark.svg",
+  agreements: "/images/marketing/icons/onboarding-mark.svg",
 };
 
 function guideTipGridClass(count: number) {
@@ -320,25 +427,89 @@ type AvailabilityDay = {
   end_time: string;
   is_available: boolean;
   start_time: string;
+  /** Optional second range for the same day (empty = none). */
+  end_time_2?: string;
+  start_time_2?: string;
 };
 
 type OnboardingData = {
+  accuracy_confirmed: boolean;
+  cleaning_skills_other: string;
+  emergency_relationship_other: string;
+  equipment_other: string;
+  insurance_activity_confirmed: boolean;
+  insurance_insured_name: string;
+  marketing_consent: boolean;
+  ppe_other: string;
+  preferred_hours_band: string;
+  products_other: string;
+  reference_company: string;
+  reference_contact_ok: boolean;
+  reference_email: string;
+  reference_name: string;
+  reference_phone: string;
+  reference_relationship: string;
+  specialised_other: string;
+  training_certificate_url: string;
+  training_completed: string[];
+  training_path: string;
   interview_scheduled_at: string | null;
   availability: AvailabilityDay[];
   bio: string;
+  booking_preferences: string[];
+  can_transport_equipment: string;
+  cleaning_skills: string[];
+  dbs_certificate_number: string;
   dbs_document_url: string;
+  dbs_issued_on: string;
+  dbs_path: DbsPath | null;
+  emergency_alt_phone: string;
+  emergency_country: string;
+  emergency_email: string;
+  emergency_informed: string;
+  emergency_mobile: string;
+  emergency_name: string;
+  emergency_relationship: string;
+  equipment_condition: string;
+  equipment_owned: string[];
+  equipment_ownership: string;
+  equipment_transport: string;
+  experience_band: string;
   full_name: string;
   headshot_url: string;
   id_document_url: string;
+  insurance_certificate_url: string;
+  insurance_cover_amount: string;
+  insurance_expiry_date: string;
+  insurance_path: InsurancePath | null;
+  insurance_policy_number: string;
+  insurance_provider: string;
   location_tracking_consent_accepted: boolean;
   location_tracking_consent_version: string;
   payout_confirmed: boolean;
   payout_preference: "weekly" | "monthly";
   phone: string;
+  ppe_owned: string[];
+  prior_work_duration: string;
+  prior_work_employer: string;
+  prior_work_summary: string;
+  prior_work_type: string;
+  products_owned: string[];
+  products_ownership: string;
+  safety_acknowledged: boolean;
   services: string[];
   skills_exam_answers: Record<string, SkillsExamAnswer>;
+  specialised_equipment: string[];
+  specialised_training: string;
   training_agreements: boolean[];
+  transport_mode: string;
+  agreement_keys: string[];
+  utr_clarity_confirmed: boolean;
+  utr_document_url: string;
   utr_number: string;
+  utr_path: UtrPath | null;
+  /** Client-side review flags merged into verification_flags on submit. */
+  verification_flags: Record<string, unknown>;
   home_base: string;
   home_base_lat: number | null;
   home_base_lng: number | null;
@@ -374,19 +545,76 @@ export function OnboardingWizard({
   const [fieldIssue, setFieldIssue] = useState<FieldIssue | null>(null);
   const [previewNote, setPreviewNote] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [stepSuccess, setStepSuccess] = useState<string | null>(null);
+  const [applicationReference, setApplicationReference] = useState<
+    string | null
+  >(null);
+  const [savedNote, setSavedNote] = useState<string | null>(null);
+  const advanceTimer = useRef<number | null>(null);
   const [data, setData] = useState<OnboardingData>({
+    accuracy_confirmed: Boolean(cleaner.info_accuracy_confirmed_at),
+    cleaning_skills_other: cleaner.cleaning_skills_other ?? "",
+    emergency_relationship_other:
+      cleaner.emergency_contact?.relationship_other ?? "",
+    equipment_other: cleaner.equipment_other ?? "",
+    insurance_activity_confirmed: Boolean(cleaner.insurance_activity_confirmed),
+    insurance_insured_name: cleaner.insurance_insured_name ?? "",
+    marketing_consent: Boolean(cleaner.marketing_consent_at),
+    ppe_other: cleaner.ppe_other ?? "",
+    preferred_hours_band: cleaner.preferred_hours_band ?? "",
+    products_other: cleaner.products_other ?? "",
+    reference_company: cleaner.reference_company ?? "",
+    reference_contact_ok: Boolean(cleaner.reference_contact_ok),
+    reference_email: cleaner.reference_email ?? "",
+    reference_name: cleaner.reference_name ?? "",
+    reference_phone: cleaner.reference_phone ?? "",
+    reference_relationship: cleaner.reference_relationship ?? "",
+    specialised_other: cleaner.specialised_other ?? "",
+    training_certificate_url: cleaner.training_certificate_url ?? "",
+    training_completed: cleaner.training_completed ?? [],
+    training_path: cleaner.training_path ?? "",
     interview_scheduled_at: cleaner.interview_scheduled_at ?? null,
+    agreement_keys: (cleaner.agreement_acceptances ?? []).map(
+      (item) => item.key,
+    ),
     availability: days.map((_, day_of_week) => ({
       day_of_week,
       end_time: "23:00",
+      end_time_2: "",
       is_available: false,
       start_time: "07:00",
+      start_time_2: "",
     })),
     bio: cleaner.bio ?? "",
+    booking_preferences: cleaner.booking_preferences ?? [],
+    can_transport_equipment: cleaner.can_transport_equipment ?? "",
+    cleaning_skills: cleaner.cleaning_skills ?? [],
+    dbs_certificate_number: cleaner.dbs_certificate_number ?? "",
     dbs_document_url: cleaner.dbs_document_url ?? "",
+    dbs_issued_on: cleaner.dbs_issued_on ?? "",
+    dbs_path: (cleaner.dbs_path as DbsPath | null) ?? null,
+    emergency_alt_phone: cleaner.emergency_contact?.alt_phone ?? "",
+    emergency_country:
+      cleaner.emergency_contact?.country ?? "United Kingdom",
+    emergency_email: cleaner.emergency_contact?.email ?? "",
+    emergency_informed: cleaner.emergency_contact?.informed ?? "",
+    emergency_mobile: cleaner.emergency_contact?.mobile ?? "",
+    emergency_name: cleaner.emergency_contact?.name ?? "",
+    emergency_relationship: cleaner.emergency_contact?.relationship ?? "",
+    equipment_condition: cleaner.equipment_condition ?? "",
+    equipment_owned: cleaner.equipment_owned ?? [],
+    equipment_ownership: cleaner.equipment_ownership ?? "",
+    equipment_transport: cleaner.equipment_transport ?? "",
+    experience_band: cleaner.experience_band ?? "",
     full_name: profile.full_name,
     headshot_url: cleaner.headshot_url ?? "",
     id_document_url: cleaner.id_document_url ?? "",
+    insurance_certificate_url: cleaner.insurance_certificate_url ?? "",
+    insurance_cover_amount: cleaner.insurance_cover_amount ?? "",
+    insurance_expiry_date: cleaner.insurance_expiry_date ?? "",
+    insurance_path: (cleaner.insurance_path as InsurancePath | null) ?? null,
+    insurance_policy_number: cleaner.insurance_policy_number ?? "",
+    insurance_provider: cleaner.insurance_provider ?? "",
     location_tracking_consent_accepted: Boolean(
       cleaner.location_tracking_consent_at,
     ),
@@ -394,19 +622,37 @@ export function OnboardingWizard({
     payout_confirmed: false,
     payout_preference: cleaner.payout_preference,
     phone: profile.phone ?? "",
+    ppe_owned: cleaner.ppe_owned ?? [],
+    prior_work_duration: cleaner.prior_work_duration ?? "",
+    prior_work_employer: cleaner.prior_work_employer ?? "",
+    prior_work_summary: cleaner.prior_work_summary ?? "",
+    prior_work_type: cleaner.prior_work_type ?? "",
+    products_owned: cleaner.products_owned ?? [],
+    products_ownership: cleaner.products_ownership ?? "",
+    safety_acknowledged: Boolean(cleaner.safety_acknowledged_at),
     services: [] as string[],
     skills_exam_answers: {},
+    specialised_equipment: cleaner.specialised_equipment ?? [],
+    specialised_training: cleaner.specialised_training ?? "",
     training_agreements: CHARTER_AGREEMENTS.map(() => false),
+    transport_mode: cleaner.transport_mode ?? "",
+    utr_clarity_confirmed: false,
+    utr_document_url: cleaner.utr_document_url ?? "",
     utr_number: cleaner.utr_number ?? "",
+    utr_path: (cleaner.utr_path as UtrPath | null) ?? null,
+    verification_flags:
+      cleaner.verification_flags &&
+      typeof cleaner.verification_flags === "object"
+        ? { ...cleaner.verification_flags }
+        : {},
     home_base: "",
     home_base_lat: null,
     home_base_lng: null,
     working_areas: [] as string[],
-    working_radius_miles: Math.min(
-      MAX_RADIUS_MILES,
-      Math.max(
-        1,
-        Math.round((cleaner.working_radius_km ?? DEFAULT_RADIUS_MILES * 1.609344) / 1.609344),
+    working_radius_miles: snapToRadiusPreset(
+      Math.round(
+        (cleaner.working_radius_km ?? DEFAULT_RADIUS_MILES * 1.609344) /
+          1.609344,
       ),
     ),
     years_experience: cleaner.years_experience ?? 0,
@@ -450,6 +696,15 @@ export function OnboardingWizard({
     });
   }, [profile.full_name, profile.phone]);
 
+  useEffect(
+    () => () => {
+      if (advanceTimer.current != null) {
+        window.clearTimeout(advanceTimer.current);
+      }
+    },
+    [],
+  );
+
   function update<Key extends keyof OnboardingData>(
     key: Key,
     value: OnboardingData[Key],
@@ -457,22 +712,34 @@ export function OnboardingWizard({
     setNotice(null);
     setFieldIssue(null);
     setPreviewNote(null);
+    setSavedNote(null);
+    setStepSuccess(null);
     setData((current) => ({ ...current, [key]: value }));
     setSaveFlash(true);
     window.setTimeout(() => setSaveFlash(false), 1600);
   }
 
   function toggleStep(stepId: StepId) {
+    if (advanceTimer.current != null) {
+      window.clearTimeout(advanceTimer.current);
+      advanceTimer.current = null;
+    }
     setNotice(null);
     setFieldIssue(null);
+    setStepSuccess(null);
+    setSavedNote(null);
     setExpanded(stepId);
   }
 
-  function documentField(kind: "dbs" | "id" | "headshot") {
-    return kind === "headshot" ? "headshot_url" : (`${kind}_document_url` as const);
+  function documentField(kind: DocKind) {
+    if (kind === "headshot") return "headshot_url" as const;
+    if (kind === "utr") return "utr_document_url" as const;
+    if (kind === "insurance") return "insurance_certificate_url" as const;
+    if (kind === "training") return "training_certificate_url" as const;
+    return `${kind}_document_url` as const;
   }
 
-  function documentBucket(kind: "dbs" | "id" | "headshot") {
+  function documentBucket(kind: DocKind) {
     return kind === "headshot" ? "avatars" : "cleaner-documents";
   }
 
@@ -500,9 +767,9 @@ export function OnboardingWizard({
   }
 
   async function resolveDocPreview(
-    kind: "dbs" | "id" | "headshot",
+    kind: DocKind,
     reference: string,
-    side: 0 | 1 = 0,
+    side = 0,
   ) {
     const slot = docSlotKey(kind, side);
     if (!reference) {
@@ -534,19 +801,43 @@ export function OnboardingWizard({
 
   useEffect(() => {
     const idUrls = parseDocumentUrls(data.id_document_url);
-    const dbsUrls = parseDocumentUrls(data.dbs_document_url);
+    const dbsUrls = parseDocumentList(data.dbs_document_url);
     void resolveDocPreview("id", idUrls[0] ?? "", 0);
     void resolveDocPreview("id", idUrls[1] ?? "", 1);
-    void resolveDocPreview("dbs", dbsUrls[0] ?? "", 0);
-    void resolveDocPreview("dbs", dbsUrls[1] ?? "", 1);
+    dbsUrls.forEach((url, index) => {
+      void resolveDocPreview("dbs", url, index);
+    });
+    // Drop stale DBS preview slots after removals.
+    setDocPreviews((current) => {
+      const next = { ...current };
+      let changed = false;
+      for (const key of Object.keys(next)) {
+        if (!key.startsWith("dbs:")) continue;
+        const index = Number(key.slice(4));
+        if (!Number.isInteger(index) || index < 0 || index >= dbsUrls.length) {
+          delete next[key as DocSlotKey];
+          changed = true;
+        }
+      }
+      return changed ? next : current;
+    });
+    void resolveDocPreview("utr", data.utr_document_url, 0);
+    void resolveDocPreview("insurance", data.insurance_certificate_url, 0);
+    void resolveDocPreview("training", data.training_certificate_url, 0);
     void resolveDocPreview("headshot", data.headshot_url);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resolve when stored refs change
-  }, [data.id_document_url, data.dbs_document_url, data.headshot_url, preview, profile.id]);
+  }, [
+    data.id_document_url,
+    data.dbs_document_url,
+    data.utr_document_url,
+    data.insurance_certificate_url,
+    data.training_certificate_url,
+    data.headshot_url,
+    preview,
+    profile.id,
+  ]);
 
-  async function discardDraftFile(
-    kind: "dbs" | "id" | "headshot",
-    reference: string,
-  ) {
+  async function discardDraftFile(kind: DocKind, reference: string) {
     if (!reference) return;
     if (reference.startsWith("blob:")) {
       URL.revokeObjectURL(reference);
@@ -558,25 +849,60 @@ export function OnboardingWizard({
     await createBrowserClient().storage.from(documentBucket(kind)).remove([path]);
   }
 
-  async function uploadDocument(
-    kind: "dbs" | "id" | "headshot",
-    file: File,
-    side: 0 | 1 = 0,
-  ) {
+  async function uploadDocument(kind: DocKind, file: File, side = 0) {
     setNotice(null);
     setFieldIssue(null);
     const field = documentField(kind);
     const slot = docSlotKey(kind, side);
-    const previous =
-      kind === "headshot"
-        ? data[field]
-        : parseDocumentUrls(data[field])[side] ?? "";
+    const previous = isSingleDocKind(kind)
+      ? data[field]
+      : isListDocKind(kind)
+        ? (parseDocumentList(data[field])[side] ?? "")
+        : (parseDocumentUrls(data[field])[side] ?? "");
     if (kind === "headshot" && !file.type.startsWith("image/")) {
       setNotice({
         message: "Choose a JPEG, PNG, or WebP.",
         title: "Couldn’t upload that file",
       });
       return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setNotice({
+        message: "Files must be 10 MB or smaller.",
+        title: "Couldn’t upload that file",
+      });
+      return;
+    }
+
+    if (kind === "utr" || kind === "insurance" || kind === "dbs") {
+      const quality = assessDocumentFile(file);
+      if (!quality.ok) {
+        setData((current) => ({
+          ...current,
+          verification_flags: mergeVerificationFlags(current.verification_flags, {
+            unreadable_doc: true,
+            unreadable_doc_hint:
+              quality.reason === "too_small"
+                ? "Upload looks unusually small — may be blank or corrupted."
+                : "Upload looked empty.",
+            unreadable_doc_kind: kind,
+          }),
+        }));
+        setNotice({
+          message:
+            "That file looks too small or empty. Upload a clearer copy — we’ll also flag it for review.",
+          title: "Document may be unreadable",
+        });
+      } else if (kind === "utr") {
+        setData((current) => ({
+          ...current,
+          verification_flags: mergeVerificationFlags(current.verification_flags, {
+            unreadable_doc: false,
+            unreadable_doc_hint: null,
+            unreadable_doc_kind: null,
+          }),
+        }));
+      }
     }
 
     const localPreview = URL.createObjectURL(file);
@@ -591,10 +917,9 @@ export function OnboardingWizard({
         if (previous) await discardDraftFile(kind, previous);
         setData((current) => ({
           ...current,
-          [field]:
-            kind === "headshot"
-              ? localPreview
-              : withDocumentSide(current[field], side, localPreview),
+          [field]: isSingleDocKind(kind)
+            ? localPreview
+            : setMultiDocValue(kind, current[field], side, localPreview),
         }));
         setUploadProgress(100);
         return;
@@ -618,7 +943,11 @@ export function OnboardingWizard({
         return;
       }
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80);
-      const sideTag = kind === "headshot" ? kind : `${kind}-${side === 0 ? "front" : "back"}`;
+      const sideTag = isSingleDocKind(kind)
+        ? kind
+        : isListDocKind(kind)
+          ? `${kind}-page-${side + 1}`
+          : `${kind}-${side === 0 ? "front" : "back"}`;
       const path = `${user.id}/${sideTag}-${Date.now()}-${safeName}`;
       const bucket = documentBucket(kind);
       try {
@@ -656,10 +985,9 @@ export function OnboardingWizard({
       setPreviewNote(null);
       setData((current) => ({
         ...current,
-        [field]:
-          kind === "headshot"
-            ? nextValue
-            : withDocumentSide(current[field], side, nextValue),
+        [field]: isSingleDocKind(kind)
+          ? nextValue
+          : setMultiDocValue(kind, current[field], side, nextValue),
       }));
       setSaveFlash(true);
       window.setTimeout(() => setSaveFlash(false), 1600);
@@ -679,16 +1007,14 @@ export function OnboardingWizard({
     }
   }
 
-  async function removeDocument(
-    kind: "dbs" | "id" | "headshot",
-    side: 0 | 1 = 0,
-  ) {
+  async function removeDocument(kind: DocKind, side = 0) {
     const field = documentField(kind);
     const slot = docSlotKey(kind, side);
-    const current =
-      kind === "headshot"
-        ? data[field]
-        : parseDocumentUrls(data[field])[side] ?? "";
+    const current = isSingleDocKind(kind)
+      ? data[field]
+      : isListDocKind(kind)
+        ? (parseDocumentList(data[field])[side] ?? "")
+        : (parseDocumentUrls(data[field])[side] ?? "");
     if (!current) return;
     setNotice(null);
     setFieldIssue(null);
@@ -713,10 +1039,9 @@ export function OnboardingWizard({
     setFieldIssue(null);
     setData((current) => ({
       ...current,
-      [field]:
-        kind === "headshot"
-          ? ""
-          : withDocumentSide(current[field], side, ""),
+      [field]: isSingleDocKind(kind)
+        ? ""
+        : setMultiDocValue(kind, current[field], side, ""),
     }));
     setSaveFlash(true);
     window.setTimeout(() => setSaveFlash(false), 1600);
@@ -795,7 +1120,10 @@ export function OnboardingWizard({
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });
-      const result = (await parseJsonResponse(response)) as { error?: string };
+      const result = (await parseJsonResponse(response)) as {
+        application_reference?: string;
+        error?: string;
+      };
 
       if (!response.ok) {
         setFieldIssue(null);
@@ -808,10 +1136,8 @@ export function OnboardingWizard({
 
       window.localStorage.removeItem("mundoria-cleaner-onboarding");
       window.localStorage.removeItem(draftKey);
+      setApplicationReference(result.application_reference ?? null);
       setSubmitted(true);
-      window.setTimeout(() => {
-        router.refresh();
-      }, 2200);
     } catch (submitError) {
       setFieldIssue(null);
       setNotice({
@@ -836,8 +1162,8 @@ export function OnboardingWizard({
   ).reduce((sum, step) => sum + step.minutes, 0);
   const progressPercent = Math.round((completedCount / STEPS.length) * 100);
 
-  function continueFromStep() {
-    const validationError = validateStep(activeStep.id, data);
+  function continueFromStep(source: OnboardingData = data) {
+    const validationError = validateStep(activeStep.id, source);
     if (validationError) {
       setFieldIssue(validationError);
       setNotice(null);
@@ -845,13 +1171,59 @@ export function OnboardingWizard({
     }
     setFieldIssue(null);
     setNotice(null);
+    setSavedNote(null);
     const index = STEPS.findIndex((step) => step.id === activeStep.id);
     const next = STEPS[index + 1];
+    const successMessage = stepSuccessMessage(activeStep.id, source);
+    if (next && successMessage) {
+      // Show the confirmation banner briefly, then advance.
+      setStepSuccess(successMessage);
+      if (advanceTimer.current != null) {
+        window.clearTimeout(advanceTimer.current);
+      }
+      advanceTimer.current = window.setTimeout(() => {
+        advanceTimer.current = null;
+        toggleStep(next.id);
+      }, 900);
+      return;
+    }
     if (next) {
       toggleStep(next.id);
       return;
     }
     void submit();
+  }
+
+  /** "I'll do this later" on UTR / DBS / insurance: soft path, then move on. */
+  function deferStep(stepId: "utr" | "dbs" | "insurance") {
+    const patch: Partial<OnboardingData> = {};
+    if (stepId === "utr" && (!data.utr_path || data.utr_path === "have")) {
+      patch.utr_path = "none";
+    }
+    if (stepId === "dbs" && (!data.dbs_path || data.dbs_path === "have")) {
+      patch.dbs_path = "apply";
+    }
+    if (
+      stepId === "insurance" &&
+      (!data.insurance_path || data.insurance_path === "have")
+    ) {
+      patch.insurance_path = "none";
+    }
+    const nextData = { ...data, ...patch };
+    if (Object.keys(patch).length > 0) setData(nextData);
+    continueFromStep(nextData);
+  }
+
+  function saveAndFinishLater() {
+    setNotice(null);
+    setFieldIssue(null);
+    setSaveFlash(true);
+    window.setTimeout(() => setSaveFlash(false), 1600);
+    setSavedNote(
+      preview
+        ? "Preview only — nothing is saved."
+        : "Your progress is saved on this device. You can log out and come back to finish later.",
+    );
   }
 
   async function logout() {
@@ -864,13 +1236,17 @@ export function OnboardingWizard({
   const appointmentActive = activeStep.id === "appointment";
   const isLastStep = stepIndex >= STEPS.length;
   const allComplete = completedCount >= STEPS.length;
+  const submitsDocs =
+    (activeStep.id === "utr" && data.utr_path === "have") ||
+    (activeStep.id === "dbs" && data.dbs_path === "have") ||
+    (activeStep.id === "insurance" && data.insurance_path === "have");
   const continueLabel = submitting
     ? "Submitting…"
     : isLastStep
-      ? allComplete
-        ? "Submit application"
-        : "Finish remaining steps"
-      : "Save and continue";
+      ? "Submit my application"
+      : submitsDocs
+        ? "Submit & continue"
+        : "Save and continue";
 
   function goBack() {
     const previous = STEPS[stepIndex - 2];
@@ -891,28 +1267,111 @@ export function OnboardingWizard({
   }
 
   if (submitted) {
+    const outstanding = [
+      data.utr_path !== "have" ? "UTR number and proof" : null,
+      data.dbs_path !== "have" ? "Basic DBS certificate" : null,
+      data.insurance_path !== "have" ? "Public Liability insurance" : null,
+    ].filter((item): item is string => Boolean(item));
     return (
       <main
         className={cn(
-          "flex min-h-screen items-center justify-center px-4 text-[#1c133b]",
+          "flex min-h-screen items-center justify-center px-4 py-10 text-[#1c133b]",
           ONBOARDING_PAGE_BG,
         )}
       >
-        <div className="w-full max-w-lg rounded-2xl border border-[#e5e1ea] bg-white p-8 text-center shadow-sm">
-          <p className="text-sm font-semibold text-[#e67e22]">Application sent</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[#312c79]">
-            Thanks — we’re reviewing your application
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-            Keep your interview appointment. We’ll email you when your account
-            is approved and jobs can appear in your feed. This usually takes a
-            few working days.
-          </p>
+        <div className="w-full max-w-lg rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-6 shadow-sm sm:p-8">
+          <div className="text-center">
+            <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#1c133b] bg-[#efe8fa]">
+              <Check className="h-6 w-6 text-[#312c79]" strokeWidth={3} />
+            </span>
+            <h1 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#312c79]">
+              Application Submitted!
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+              Thanks — we’re reviewing your application. This usually takes a
+              few working days.
+            </p>
+          </div>
+
+          {applicationReference ? (
+            <div className="mt-5 rounded-xl border-2 border-[#1c133b]/25 bg-[#f3eee4] px-4 py-3 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+                Application reference
+              </p>
+              <p className="mt-1 text-lg font-semibold tracking-wide text-[#1c133b]">
+                {applicationReference}
+              </p>
+            </div>
+          ) : null}
+
           {data.interview_scheduled_at ? (
-            <p className="mt-5 rounded-xl bg-[#faf6f0] px-4 py-3 text-sm font-medium text-[#1c133b]">
-              Interview booked: {formatAppointmentSummary(data.interview_scheduled_at)}
+            <p className="mt-4 rounded-xl bg-[#f3eee4] px-4 py-3 text-center text-sm font-medium text-[#1c133b]">
+              Interview booked:{" "}
+              {formatAppointmentSummary(data.interview_scheduled_at)}
             </p>
           ) : null}
+
+          <h2 className="mt-6 text-sm font-semibold text-[#1c133b]">
+            What&apos;s next?
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+            Once your application has been submitted:
+          </p>
+          <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm leading-6 text-[#5a5470]">
+            <li>
+              <span className="font-medium text-[#1c133b]">
+                Application review:
+              </span>{" "}
+              Our team checks the information and documents you&apos;ve
+              provided.
+            </li>
+            <li>
+              <span className="font-medium text-[#1c133b]">Verification:</span>{" "}
+              We confirm your identity, required checks and eligibility for
+              your selected cleaning services
+              {data.interview_scheduled_at
+                ? ", including your booked online interview"
+                : ""}
+              .
+              {outstanding.length > 0
+                ? ` Still to add from your dashboard: ${outstanding.join(", ")}.`
+                : ""}
+            </li>
+            <li>
+              <span className="font-medium text-[#1c133b]">
+                Additional information:
+              </span>{" "}
+              If anything is missing, we&apos;ll contact you and explain what
+              to do.
+            </li>
+            <li>
+              <span className="font-medium text-[#1c133b]">Approval:</span> Once
+              approved, your cleaner profile will be activated for eligible
+              services.
+            </li>
+            <li>
+              <span className="font-medium text-[#1c133b]">
+                Start receiving bookings:
+              </span>{" "}
+              You&apos;ll be able to view suitable cleaning opportunities
+              through Mundoria.
+            </li>
+          </ol>
+          <p className="mt-3 text-xs leading-5 text-[#8b8798]">
+            You can track your progress at any time through your cleaner
+            dashboard.
+          </p>
+
+          <Button
+            className="mt-6 w-full rounded-xl bg-[#312c79] hover:bg-[#271f5c]"
+            onClick={() => {
+              router.push("/cleaner/dashboard");
+              router.refresh();
+            }}
+            size="lg"
+          >
+            View My Application
+          </Button>
         </div>
       </main>
     );
@@ -1167,10 +1626,13 @@ export function OnboardingWizard({
               }
               onRemove={(kind, side) => void removeDocument(kind, side)}
               onUpdate={update}
+              onDefer={deferStep}
+              onEditStep={toggleStep}
               onSchedule={(startsAt) =>
                 update("interview_scheduled_at", startsAt)
               }
               stepId={activeStep.id}
+              stepSuccess={stepSuccess}
               takenSlots={takenSlots}
               uploadProgress={uploadProgress}
               uploadingSlot={uploadingSlot}
@@ -1187,6 +1649,14 @@ export function OnboardingWizard({
               {previewNote}
             </p>
           ) : null}
+          {savedNote ? (
+            <p
+              className="mt-4 hidden rounded-xl border-2 border-[#1c133b]/25 bg-[#f3eee4] p-3 text-sm text-[#1c133b] md:block"
+              role="status"
+            >
+              {savedNote}
+            </p>
+          ) : null}
 
           <div className="mt-8 hidden items-center justify-between gap-3 md:flex">
             <button
@@ -1197,14 +1667,24 @@ export function OnboardingWizard({
             >
               Back
             </button>
-            <Button
-              className="rounded-xl bg-[#312c79] px-6 hover:bg-[#271f5c]"
-              disabled={submitting}
-              onClick={goContinue}
-              size="lg"
-            >
-              {continueLabel}
-            </Button>
+            <div className="flex items-center gap-4">
+              <button
+                className="text-sm font-semibold text-[#312c79] underline-offset-2 hover:underline disabled:opacity-40"
+                disabled={submitting}
+                onClick={saveAndFinishLater}
+                type="button"
+              >
+                Save &amp; finish later
+              </button>
+              <Button
+                className="rounded-xl bg-[#312c79] px-6 hover:bg-[#271f5c]"
+                disabled={submitting}
+                onClick={goContinue}
+                size="lg"
+              >
+                {continueLabel}
+              </Button>
+            </div>
           </div>
           {isLastStep && !allComplete ? (
             <p className="mt-3 hidden text-right text-xs text-[#8b8798] md:block">
@@ -1234,6 +1714,19 @@ export function OnboardingWizard({
             {continueLabel}
           </Button>
         </div>
+        <button
+          className="mx-auto mt-2 block text-xs font-semibold text-[#312c79] touch-manipulation disabled:opacity-40"
+          disabled={submitting}
+          onClick={saveAndFinishLater}
+          type="button"
+        >
+          Save &amp; finish later
+        </button>
+        {savedNote ? (
+          <p className="mx-auto mt-1 max-w-[1200px] text-center text-[11px] leading-4 text-[#5a5470]">
+            {savedNote}
+          </p>
+        ) : null}
         {isLastStep && !allComplete ? (
           <p className="mx-auto mt-2 max-w-[1200px] text-center text-[11px] leading-4 text-[#8b8798]">
             Complete every step before you submit.
@@ -1250,11 +1743,14 @@ function StepBody({
   docPreviews,
   issue,
   onConnectStripe,
+  onDefer,
+  onEditStep,
   onFile,
   onRemove,
   onSchedule,
   onUpdate,
   stepId,
+  stepSuccess,
   takenSlots,
   uploadProgress,
   uploadingSlot,
@@ -1264,18 +1760,17 @@ function StepBody({
   docPreviews: Partial<Record<DocSlotKey, { isPdf: boolean; url: string }>>;
   issue: FieldIssue | null;
   onConnectStripe: () => void;
-  onFile: (
-    kind: "dbs" | "id" | "headshot",
-    file: File,
-    side?: 0 | 1,
-  ) => void;
-  onRemove: (kind: "dbs" | "id" | "headshot", side?: 0 | 1) => void;
+  onDefer: (stepId: "utr" | "dbs" | "insurance") => void;
+  onEditStep: (stepId: StepId) => void;
+  onFile: (kind: DocKind, file: File, side?: number) => void;
+  onRemove: (kind: DocKind, side?: number) => void;
   onSchedule: (startsAt: string) => void;
   onUpdate: <Key extends keyof OnboardingData>(
     key: Key,
     value: OnboardingData[Key],
   ) => void;
   stepId: StepId;
+  stepSuccess: string | null;
   takenSlots: string[];
   uploadProgress: number;
   uploadingSlot: DocSlotKey | null;
@@ -1306,35 +1801,57 @@ function StepBody({
 
   if (stepId === "hours") {
     return (
-      <HoursPicker
-        error={issueFor("hours")}
-        onChange={(next) => onUpdate("availability", next)}
-        value={data.availability}
-      />
+      <div>
+        <HoursPicker
+          error={issueFor("hours") ?? issueFor("preferred_hours")}
+          onChange={(next) => onUpdate("availability", next)}
+          onPreferredHours={(next) => onUpdate("preferred_hours_band", next)}
+          preferredHoursBand={data.preferred_hours_band}
+          value={data.availability}
+        />
+        <InfoCallout>
+          Going on holiday or need time off? Once you’re approved you can block
+          dates in your Diary so you won’t be offered jobs on those days.
+        </InfoCallout>
+      </div>
     );
   }
 
   if (stepId === "coverage") {
     return (
-      <CoverageStep
-        areas={data.working_areas}
-        error={
-          issueFor("home_base") ??
-          issueFor("radius") ??
-          issueFor("areas")
-        }
-        homeBase={data.home_base}
-        homeBaseLat={data.home_base_lat}
-        homeBaseLng={data.home_base_lng}
-        onAreas={(next) => onUpdate("working_areas", next)}
-        onHomeBase={(next) => onUpdate("home_base", next)}
-        onHomeCoords={(lat, lng) => {
-          onUpdate("home_base_lat", lat);
-          onUpdate("home_base_lng", lng);
-        }}
-        onRadiusMiles={(next) => onUpdate("working_radius_miles", next)}
-        radiusMiles={data.working_radius_miles}
-      />
+      <div>
+        <CoverageStep
+          areas={data.working_areas}
+          error={
+            issueFor("home_base") ??
+            issueFor("radius") ??
+            issueFor("areas") ??
+            issueFor("transport")
+          }
+          homeBase={data.home_base}
+          homeBaseLat={data.home_base_lat}
+          homeBaseLng={data.home_base_lng}
+          onAreas={(next) => onUpdate("working_areas", next)}
+          onHomeBase={(next) => onUpdate("home_base", next)}
+          onHomeCoords={(lat, lng) => {
+            onUpdate("home_base_lat", lat);
+            onUpdate("home_base_lng", lng);
+          }}
+          onRadiusMiles={(next) => onUpdate("working_radius_miles", next)}
+          radiusMiles={data.working_radius_miles}
+        />
+        <LocationExtras
+          bookingPreferences={data.booking_preferences}
+          canTransportEquipment={data.can_transport_equipment}
+          error={issueFor("transport")}
+          onBookingPreferences={(next) =>
+            onUpdate("booking_preferences", next)
+          }
+          onCanTransport={(next) => onUpdate("can_transport_equipment", next)}
+          onTransportMode={(next) => onUpdate("transport_mode", next)}
+          transportMode={data.transport_mode}
+        />
+      </div>
     );
   }
 
@@ -1352,10 +1869,39 @@ function StepBody({
 
   if (stepId === "utr") {
     return (
-      <UtrStep
+      <UtrComplianceStep
+        clarityConfirmed={data.utr_clarity_confirmed}
         error={issueFor("utr")}
-        onChange={(next) => onUpdate("utr_number", next)}
-        value={data.utr_number}
+        onClarityConfirmed={(next) => onUpdate("utr_clarity_confirmed", next)}
+        onDefer={() => onDefer("utr")}
+        onPath={(next) => {
+          onUpdate("utr_path", next);
+          if (next === "none") onUpdate("utr_number", "");
+        }}
+        onProofFile={(file) => onFile("utr", file, 0)}
+        onProofRemove={() => onRemove("utr", 0)}
+        onUtrChange={(next) => onUpdate("utr_number", next)}
+        onWaiting={(waiting) =>
+          onUpdate("utr_path", waiting ? "waiting" : "none")
+        }
+        path={data.utr_path}
+        proofPreview={docPreviews["utr:0"]}
+        proofQualityWarning={
+          data.verification_flags.unreadable_doc
+            ? String(
+                data.verification_flags.unreadable_doc_hint ??
+                  "This upload may be hard to read. Prefer a clearer scan or photo.",
+              )
+            : null
+        }
+        proofUploaded={Boolean(
+          docPreviews["utr:0"]?.url || data.utr_document_url,
+        )}
+        proofUploading={uploadingSlot === "utr:0"}
+        successMessage={stepSuccess}
+        uploadProgress={uploadProgress}
+        utrNumber={data.utr_number}
+        waitingRegistered={data.utr_path === "waiting"}
       />
     );
   }
@@ -1377,15 +1923,151 @@ function StepBody({
 
   if (stepId === "dbs") {
     return (
-      <DbsStep
-        issue={issueFor("dbs")}
+      <DbsComplianceStep
+        certificateNumber={data.dbs_certificate_number}
+        error={issueFor("dbs")}
+        issuedOn={data.dbs_issued_on}
+        onCertificateNumber={(next) =>
+          onUpdate("dbs_certificate_number", next)
+        }
         onFile={(file, slot) => onFile("dbs", file, slot)}
+        onDefer={() => onDefer("dbs")}
+        onIssuedOn={(next) => onUpdate("dbs_issued_on", next)}
+        onPath={(next) => onUpdate("dbs_path", next)}
         onRemove={(slot) => onRemove("dbs", slot)}
-        page1Preview={docPreviews["dbs:0"]}
-        page2Preview={docPreviews["dbs:1"]}
-        urls={parseDocumentUrls(data.dbs_document_url)}
+        pagePreviews={docPreviews}
+        path={data.dbs_path}
+        successMessage={stepSuccess}
         uploadProgress={uploadProgress}
         uploadingSlot={uploadingSlot}
+        urls={parseDocumentList(data.dbs_document_url)}
+      />
+    );
+  }
+
+  if (stepId === "insurance") {
+    return (
+      <InsuranceComplianceStep
+        activityConfirmed={data.insurance_activity_confirmed}
+        coverAmount={data.insurance_cover_amount}
+        error={issueFor("insurance")}
+        expiryDate={data.insurance_expiry_date}
+        insuredName={data.insurance_insured_name}
+        onActivityConfirmed={(next) =>
+          onUpdate("insurance_activity_confirmed", next)
+        }
+        onCoverAmount={(next) => onUpdate("insurance_cover_amount", next)}
+        onDefer={() => onDefer("insurance")}
+        onExpiryDate={(next) => onUpdate("insurance_expiry_date", next)}
+        onFile={(file) => onFile("insurance", file, 0)}
+        onInsuredName={(next) => onUpdate("insurance_insured_name", next)}
+        onPath={(next) => onUpdate("insurance_path", next)}
+        onPolicyNumber={(next) => onUpdate("insurance_policy_number", next)}
+        onProvider={(next) => onUpdate("insurance_provider", next)}
+        onRemove={() => onRemove("insurance", 0)}
+        path={data.insurance_path}
+        policyNumber={data.insurance_policy_number}
+        preview={docPreviews["insurance:0"]}
+        provider={data.insurance_provider}
+        successMessage={stepSuccess}
+        uploaded={Boolean(
+          docPreviews["insurance:0"]?.url || data.insurance_certificate_url,
+        )}
+        uploading={uploadingSlot === "insurance:0"}
+        uploadProgress={uploadProgress}
+      />
+    );
+  }
+
+  if (stepId === "equipment") {
+    return (
+      <EquipmentComplianceStep
+        equipmentCondition={data.equipment_condition}
+        equipmentOther={data.equipment_other}
+        equipmentOwned={data.equipment_owned}
+        equipmentOwnership={data.equipment_ownership}
+        equipmentTransport={data.equipment_transport}
+        onEquipmentCondition={(next) => onUpdate("equipment_condition", next)}
+        onEquipmentOther={(next) => onUpdate("equipment_other", next)}
+        onEquipmentOwned={(next) => onUpdate("equipment_owned", next)}
+        onEquipmentOwnership={(next) => onUpdate("equipment_ownership", next)}
+        onEquipmentTransport={(next) => onUpdate("equipment_transport", next)}
+        onPpeOther={(next) => onUpdate("ppe_other", next)}
+        onPpeOwned={(next) => onUpdate("ppe_owned", next)}
+        onProductsOther={(next) => onUpdate("products_other", next)}
+        onProductsOwned={(next) => onUpdate("products_owned", next)}
+        onProductsOwnership={(next) => onUpdate("products_ownership", next)}
+        onSpecialised={(next) => onUpdate("specialised_equipment", next)}
+        onSpecialisedOther={(next) => onUpdate("specialised_other", next)}
+        onSpecialisedTraining={(next) =>
+          onUpdate("specialised_training", next)
+        }
+        ppeOther={data.ppe_other}
+        ppeOwned={data.ppe_owned}
+        productsOther={data.products_other}
+        productsOwned={data.products_owned}
+        productsOwnership={data.products_ownership}
+        specialised={data.specialised_equipment}
+        specialisedOther={data.specialised_other}
+        specialisedTraining={data.specialised_training}
+      />
+    );
+  }
+
+  if (stepId === "emergency") {
+    return (
+      <EmergencyContactStep
+        altPhone={data.emergency_alt_phone}
+        country={data.emergency_country}
+        email={data.emergency_email}
+        error={issueFor("emergency")}
+        informed={data.emergency_informed}
+        mobile={data.emergency_mobile}
+        name={data.emergency_name}
+        onAltPhone={(next) => onUpdate("emergency_alt_phone", next)}
+        onCountry={(next) => onUpdate("emergency_country", next)}
+        onEmail={(next) => onUpdate("emergency_email", next)}
+        onInformed={(next) => onUpdate("emergency_informed", next)}
+        onMobile={(next) => onUpdate("emergency_mobile", next)}
+        onName={(next) => onUpdate("emergency_name", next)}
+        onRelationship={(next) => onUpdate("emergency_relationship", next)}
+        onRelationshipOther={(next) =>
+          onUpdate("emergency_relationship_other", next)
+        }
+        onSafetyAck={(next) => onUpdate("safety_acknowledged", next)}
+        relationship={data.emergency_relationship}
+        relationshipOther={data.emergency_relationship_other}
+        safetyAck={data.safety_acknowledged}
+        successMessage={stepSuccess}
+      />
+    );
+  }
+
+  if (stepId === "agreements") {
+    return (
+      <AgreementsReviewStep
+        acceptedKeys={data.agreement_keys}
+        accuracyConfirmed={data.accuracy_confirmed}
+        error={issueFor("agreements")}
+        marketingConsent={data.marketing_consent}
+        onAccuracyConfirmed={(next) => onUpdate("accuracy_confirmed", next)}
+        onEditStep={(next) => onEditStep(next as StepId)}
+        onMarketingConsent={(next) => onUpdate("marketing_consent", next)}
+        onToggle={(key, next) => {
+          const set = new Set(data.agreement_keys);
+          if (next) set.add(key);
+          else set.delete(key);
+          onUpdate("agreement_keys", Array.from(set));
+        }}
+        summaryRows={STEPS.filter((step) => step.id !== "agreements").map(
+          (step) => ({
+            label: SUMMARY_LABELS[step.id as StepId] ?? step.label,
+            status: isStepComplete(step.id, data)
+              ? "Complete"
+              : "Needs attention",
+            stepId: step.id,
+          }),
+        )}
       />
     );
   }
@@ -1407,25 +2089,25 @@ function StepBody({
   if (stepId === "about") {
     return (
       <div className="space-y-4">
-        <div className="space-y-1.5">
-          <p className="text-sm font-medium text-[#1c133b]">Full name</p>
-          <p
-            className={cn(
-              "rounded-xl px-3.5 py-3 text-sm text-[#291845]",
-              ONBOARDING_FIELD_CLASS,
-            )}
-          >
-            {data.full_name || "—"}
-          </p>
-          {issueFor("full_name") ? (
-            <FieldError message={issueFor("full_name")!} />
-          ) : null}
-        </div>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          <div className="w-full shrink-0 sm:w-[17.5rem]">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+          <div className="min-w-0 space-y-1.5">
+            <p className="text-sm font-medium text-[#1c133b]">Full name</p>
+            <p
+              className={cn(
+                "flex min-h-11 w-full items-center rounded-xl px-3.5 text-[15px] text-[#291845]",
+                ONBOARDING_FIELD_CLASS,
+              )}
+            >
+              {data.full_name || "—"}
+            </p>
+            {issueFor("full_name") ? (
+              <FieldError message={issueFor("full_name")!} />
+            ) : null}
+          </div>
+          <div className="min-w-0">
             {askForPhone ? (
               <AuthPhoneField
-                className={ONBOARDING_FIELD_CLASS}
+                className={cn(ONBOARDING_FIELD_CLASS, "min-h-11 w-full")}
                 error={
                   issueFor("phone")
                     ? { type: "manual", message: issueFor("phone") }
@@ -1444,10 +2126,12 @@ function StepBody({
               />
             ) : (
               <div className="space-y-1.5">
-                <p className="text-sm font-medium text-[#1c133b]">Phone number</p>
+                <p className="text-sm font-medium text-[#1c133b]">
+                  Phone number
+                </p>
                 <p
                   className={cn(
-                    "flex min-h-11 w-full items-center gap-2 rounded-xl px-3.5 text-sm text-[#291845]",
+                    "flex min-h-11 w-full items-center gap-2 rounded-xl px-3.5 text-[15px] text-[#291845]",
                     ONBOARDING_FIELD_CLASS,
                   )}
                 >
@@ -1456,15 +2140,6 @@ function StepBody({
                 </p>
               </div>
             )}
-          </div>
-          <div className="flex flex-1 justify-center sm:px-4">
-            <div className="space-y-2 text-sm font-medium">
-              <span className="block">Years of experience</span>
-              <ExperienceStepper
-                onChange={(years) => onUpdate("years_experience", years)}
-                value={data.years_experience}
-              />
-            </div>
           </div>
         </div>
         <p className="text-xs leading-5 text-[#8b8798]">
@@ -1479,7 +2154,7 @@ function StepBody({
           </a>
           .
         </p>
-        <Field error={issueFor("bio")} label="Bio">
+        <Field error={issueFor("bio")} label="Tell us about yourself">
           <textarea
             className={cn(
               "min-h-28 w-full rounded-md p-3 text-sm text-[#1c133b] outline-none ring-offset-white focus-visible:ring-2",
@@ -1487,9 +2162,66 @@ function StepBody({
               issueFor("bio") ? invalidControlClass : undefined,
             )}
             onChange={(event) => onUpdate("bio", event.target.value)}
+            placeholder="A few lines about you, how you clean, and what customers can expect."
             value={data.bio}
           />
         </Field>
+        <ExperienceExtras
+          cleaningSkills={data.cleaning_skills}
+          cleaningSkillsOther={data.cleaning_skills_other}
+          error={issueFor("experience_band")}
+          experienceBand={data.experience_band}
+          onCleaningSkills={(next) => onUpdate("cleaning_skills", next)}
+          onCleaningSkillsOther={(next) =>
+            onUpdate("cleaning_skills_other", next)
+          }
+          onExperienceBand={(next) => {
+            onUpdate("experience_band", next);
+            onUpdate("years_experience", yearsFromExperienceBand(next));
+          }}
+          onPriorDuration={(next) => onUpdate("prior_work_duration", next)}
+          onPriorEmployer={(next) => onUpdate("prior_work_employer", next)}
+          onPriorSummary={(next) => onUpdate("prior_work_summary", next)}
+          onPriorType={(next) => onUpdate("prior_work_type", next)}
+          onReferenceCompany={(next) => onUpdate("reference_company", next)}
+          onReferenceContactOk={(next) =>
+            onUpdate("reference_contact_ok", next)
+          }
+          onReferenceEmail={(next) => onUpdate("reference_email", next)}
+          onReferenceName={(next) => onUpdate("reference_name", next)}
+          onReferencePhone={(next) => onUpdate("reference_phone", next)}
+          onReferenceRelationship={(next) =>
+            onUpdate("reference_relationship", next)
+          }
+          onTrainingCertFile={(file) => onFile("training", file, 0)}
+          onTrainingCertRemove={() => onRemove("training", 0)}
+          onTrainingCompleted={(next) => onUpdate("training_completed", next)}
+          onTrainingPath={(next) => {
+            onUpdate("training_path", next);
+            if (next === "no") {
+              onUpdate("training_completed", []);
+              if (data.training_certificate_url) onRemove("training", 0);
+            }
+          }}
+          priorDuration={data.prior_work_duration}
+          priorEmployer={data.prior_work_employer}
+          priorSummary={data.prior_work_summary}
+          priorType={data.prior_work_type}
+          referenceCompany={data.reference_company}
+          referenceContactOk={data.reference_contact_ok}
+          referenceEmail={data.reference_email}
+          referenceName={data.reference_name}
+          referencePhone={data.reference_phone}
+          referenceRelationship={data.reference_relationship}
+          trainingCertPreview={docPreviews["training:0"]}
+          trainingCertProgress={uploadProgress}
+          trainingCertUploaded={Boolean(
+            docPreviews["training:0"]?.url || data.training_certificate_url,
+          )}
+          trainingCertUploading={uploadingSlot === "training:0"}
+          trainingCompleted={data.training_completed}
+          trainingPath={data.training_path}
+        />
       </div>
     );
   }
@@ -1507,39 +2239,48 @@ function StepBody({
   }
 
   return (
-    <PayoutStep
-      confirmed={data.payout_confirmed}
-      error={issueFor("payout")}
-      onConnectStripe={onConnectStripe}
-      onPreference={(preference) => {
-        onUpdate("payout_preference", preference);
-        onUpdate("payout_confirmed", true);
-      }}
-      preference={data.payout_preference}
-    />
+    <div className="space-y-6">
+      <PayoutStep
+        confirmed={data.payout_confirmed}
+        error={issueFor("payout")}
+        onConfirm={(next) => onUpdate("payout_confirmed", next)}
+        onConnectStripe={onConnectStripe}
+        onPreference={(preference) =>
+          onUpdate("payout_preference", preference)
+        }
+        preference={data.payout_preference}
+      />
+      <PayoutFaqs />
+    </div>
   );
 }
 
 const PAYOUT_GUIDE_TIPS = [
   {
-    body: "Mundoria pays you for completed jobs through Stripe. Customers never send money directly to you.",
-    title: "How you’re paid",
+    body: "Once you complete an eligible cleaning booking, your earnings are recorded in your Mundoria account. You can view completed bookings, earnings, payment history and any applicable adjustments.",
+    title: "How payments work",
   },
   {
-    body: "Choose weekly for faster, regular payouts, or monthly for one consolidated transfer.",
-    title: "Weekly or monthly",
+    body: "Payments go to your verified Stripe bank account on Mundoria’s published payment schedule. Your actual payout schedule is confirmed in your cleaner agreement.",
+    title: "When you get paid",
+  },
+  {
+    body: "We may need Stripe to verify your bank details before your first payout. If more checks are needed, Stripe will guide you through them.",
+    title: "Keeping your payments secure",
   },
 ] as const;
 
 function PayoutStep({
   confirmed,
   error,
+  onConfirm,
   onConnectStripe,
   onPreference,
   preference,
 }: {
   confirmed: boolean;
   error?: string;
+  onConfirm: (next: boolean) => void;
   onConnectStripe: () => void;
   onPreference: (preference: "weekly" | "monthly") => void;
   preference: "weekly" | "monthly";
@@ -1564,7 +2305,7 @@ function PayoutStep({
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {(["weekly", "monthly"] as const).map((value) => {
-            const selected = confirmed && preference === value;
+            const selected = preference === value;
             return (
               <button
                 className={cn(
@@ -1587,26 +2328,72 @@ function PayoutStep({
             );
           })}
         </div>
-        {error ? <FieldError message={error} /> : null}
       </div>
 
-      <div className="space-y-2 border-t border-[#e8e0d0] pt-5">
+      <div className="space-y-3 border-t border-[#e8e0d0] pt-5">
         <p className="text-sm font-medium text-[#291845]">
-          Bank details{" "}
-          <span className="font-normal text-[#8b8798]">(optional)</span>
+          Where should we send your payments?
+        </p>
+        <p className="text-sm leading-6 text-[#5a5470]">
+          Add your UK bank details securely through Stripe Connect Express so
+          we know where to send your earnings. We never ask for your sort code
+          or account number inside Mundoria — bank details stay with Stripe.
         </p>
         <Button
-          className="h-11 rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] px-5 font-semibold text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
+          className="h-11 rounded-xl border-2 border-[#1c133b] bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]"
           onClick={onConnectStripe}
           type="button"
-          variant="outline"
         >
           Connect Stripe Express
         </Button>
         <p className="text-xs leading-5 text-[#8b8798]">
-          Optional for now. You can connect later from your profile before your
-          first payout.
+          You can connect later from your profile before your first payout.
+          Please double-check your details in Stripe to avoid payment delays.
+          Your bank details are only used for payment-related purposes.
         </p>
+      </div>
+
+      <div className="space-y-3 border-t border-[#e8e0d0] pt-5">
+        <p className="text-sm font-medium text-[#291845]">How payments work</p>
+        <p className="text-sm leading-6 text-[#5a5470]">
+          Once you complete an eligible cleaning booking, your earnings will be
+          recorded in your Mundoria account. You&apos;ll be able to view your
+          completed bookings, earnings, payment history and any applicable
+          adjustments.
+        </p>
+        <p className="text-sm leading-6 text-[#5a5470]">
+          Payments will be sent to your verified bank account according to
+          Mundoria&apos;s published payment schedule.
+        </p>
+        <p className="text-xs leading-5 text-[#8b8798]">
+          Your actual payout schedule will be confirmed in your cleaner
+          agreement.
+        </p>
+      </div>
+
+      <div className="space-y-3 border-t border-[#e8e0d0] pt-5">
+        <p className="text-sm font-medium text-[#291845]">
+          Keeping your payments secure
+        </p>
+        <p className="text-sm leading-6 text-[#5a5470]">
+          We may need to verify your bank details before your first payout. If
+          additional verification is required, Stripe will guide you through
+          the process.
+        </p>
+        <p className="text-sm font-medium text-[#1c133b]">
+          Do you confirm that the payment details you provide are correct?
+        </p>
+        <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+          <OnboardingCheckbox
+            checked={confirmed}
+            onCheckedChange={onConfirm}
+          />
+          <span>
+            I confirm that the bank details I provide in Stripe are accurate and
+            that I am authorised to receive payments into this account.
+          </span>
+        </label>
+        {error ? <FieldError message={error} /> : null}
       </div>
 
       {guideOpen ? (
@@ -1845,23 +2632,7 @@ function ConsentStep({
   return (
     <div className="space-y-4">
       <label className="flex cursor-pointer items-start gap-3 text-[#1c133b]">
-        <input
-          checked={accepted}
-          className="sr-only"
-          onChange={(event) => onAccepted(event.target.checked)}
-          type="checkbox"
-        />
-        <span
-          aria-hidden
-          className={cn(
-            "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition",
-            accepted
-              ? "border-[#312c79] bg-[#312c79] text-white"
-              : "border-[#1c133b] bg-transparent",
-          )}
-        >
-          {accepted ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
-        </span>
+        <OnboardingCheckbox checked={accepted} onCheckedChange={onAccepted} />
         <span className="text-sm font-medium leading-6">
           I agree to GPS capture at check-in and check-out only. We do not track
           you otherwise.
@@ -1869,212 +2640,6 @@ function ConsentStep({
       </label>
 
       {error ? <FieldError message={error} /> : null}
-    </div>
-  );
-}
-
-const UTR_GUIDE_TIPS = [
-  {
-    body: "Your Unique Taxpayer Reference is a 10-digit number from HMRC. Enter it exactly as shown, with no spaces.",
-    title: "10-digit number",
-  },
-  {
-    body: "You’ll find it on HMRC letters or in your personal tax account online. It’s usually labelled Unique Taxpayer Reference or UTR.",
-    title: "Where to find it",
-  },
-  {
-    body: "We use it to confirm you’re set up as self-employed. We never share it with customers.",
-    title: "Kept private",
-  },
-] as const;
-
-function UtrStep({
-  error,
-  onChange,
-  value,
-}: {
-  error?: string;
-  onChange: (next: string) => void;
-  value: string;
-}) {
-  const [guideOpen, setGuideOpen] = useState(false);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <button
-          className="inline-flex h-9 items-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
-          onClick={() => setGuideOpen(true)}
-          type="button"
-        >
-          UTR tips
-        </button>
-      </div>
-      <Field error={error} label="UTR number (10 digits)">
-        <Input
-          className={cn(
-            ONBOARDING_FIELD_CLASS,
-            error ? invalidControlClass : undefined,
-          )}
-          inputMode="numeric"
-          maxLength={10}
-          onChange={(event) =>
-            onChange(event.target.value.replace(/\D/g, "").slice(0, 10))
-          }
-          placeholder="1234567890"
-          value={value}
-        />
-      </Field>
-      {guideOpen ? (
-        <AppModal
-          backdrop="blur"
-          className="max-w-lg border-[#e8e0d0] bg-[#f9f6ef] text-[#1c133b] shadow-[0_24px_60px_rgba(28,19,59,0.18)]"
-          closeClassName="h-9 w-9 rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
-          description="A quick guide to your Unique Taxpayer Reference."
-          onClose={() => setGuideOpen(false)}
-          title="UTR tips"
-        >
-          <ul className="mt-1 space-y-3">
-            {UTR_GUIDE_TIPS.map((tip) => (
-              <li
-                className="rounded-2xl border border-[#e8e0d0] bg-[#f3eee4] px-4 py-3"
-                key={tip.title}
-              >
-                <h3 className="text-sm font-semibold text-[#291845]">
-                  {tip.title}
-                </h3>
-                <p className="mt-1 text-xs leading-5 text-[#5a5470]">
-                  {tip.body}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-5 flex justify-end">
-            <Button
-              className="h-11 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-6 font-semibold text-white hover:border-[#312c79] hover:bg-[#312c79]"
-              onClick={() => setGuideOpen(false)}
-              type="button"
-            >
-              Got it
-            </Button>
-          </div>
-        </AppModal>
-      ) : null}
-    </div>
-  );
-}
-
-const DBS_GUIDE_TIPS = [
-  {
-    body: "Paper certificates usually need every page — upload page 1 and page 2 so nothing is missing.",
-    image: "/images/marketing/onboarding/dbs-tip-pages.svg",
-    title: "Both pages",
-  },
-  {
-    body: "A multi-page PDF is fine in either slot if both pages are included and the text is clear.",
-    image: "/images/marketing/onboarding/dbs-tip-pdf.svg",
-    title: "PDF is fine",
-  },
-] as const;
-
-function DbsStep({
-  issue,
-  onFile,
-  onRemove,
-  page1Preview,
-  page2Preview,
-  urls,
-  uploadProgress,
-  uploadingSlot,
-}: {
-  issue?: string;
-  onFile: (file: File, slot: 0 | 1) => void;
-  onRemove: (slot: 0 | 1) => void;
-  page1Preview?: { isPdf?: boolean; url?: string };
-  page2Preview?: { isPdf?: boolean; url?: string };
-  urls: string[];
-  uploadProgress: number;
-  uploadingSlot: string | null;
-}) {
-  const [guideOpen, setGuideOpen] = useState(false);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <button
-          className="inline-flex h-9 items-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
-          onClick={() => setGuideOpen(true)}
-          type="button"
-        >
-          DBS tips
-        </button>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <DocumentUpload
-          error={issue}
-          label="Page 1"
-          onFile={(file) => onFile(file, 0)}
-          onRemove={() => onRemove(0)}
-          previewIsPdf={page1Preview?.isPdf}
-          previewUrl={page1Preview?.url}
-          progress={uploadingSlot === "dbs:0" ? uploadProgress : undefined}
-          uploaded={Boolean(page1Preview?.url || urls[0])}
-          uploading={uploadingSlot === "dbs:0"}
-        />
-        <DocumentUpload
-          label="Page 2"
-          onFile={(file) => onFile(file, 1)}
-          onRemove={() => onRemove(1)}
-          previewIsPdf={page2Preview?.isPdf}
-          previewUrl={page2Preview?.url}
-          progress={uploadingSlot === "dbs:1" ? uploadProgress : undefined}
-          uploaded={Boolean(page2Preview?.url || urls[1])}
-          uploading={uploadingSlot === "dbs:1"}
-        />
-      </div>
-      {guideOpen ? (
-        <AppModal
-          backdrop="blur"
-          className="max-w-2xl border-[#e8e0d0] bg-[#f9f6ef] text-[#1c133b] shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:max-w-3xl"
-          closeClassName="h-9 w-9 rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
-          description="What we need so we can review your DBS certificate quickly."
-          onClose={() => setGuideOpen(false)}
-          title="DBS certificate tips"
-        >
-          <div className={guideTipGridClass(DBS_GUIDE_TIPS.length)}>
-            {DBS_GUIDE_TIPS.map((tip) => (
-              <article
-                className="overflow-hidden rounded-2xl border border-[#e8e0d0] bg-[#f3eee4]"
-                key={tip.title}
-              >
-                <div className="flex h-24 items-center justify-center bg-[#f9f6ef] px-4 py-3 sm:h-28">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- local tip illustrations */}
-                  <img
-                    alt=""
-                    className="h-full w-auto max-h-16 object-contain sm:max-h-20"
-                    src={tip.image}
-                  />
-                </div>
-                <div className="space-y-1.5 p-3.5">
-                  <h3 className="text-sm font-semibold text-[#291845]">
-                    {tip.title}
-                  </h3>
-                  <p className="text-xs leading-5 text-[#5a5470]">{tip.body}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="mt-5 flex justify-end">
-            <Button
-              className="h-11 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-6 font-semibold text-white hover:border-[#312c79] hover:bg-[#312c79]"
-              onClick={() => setGuideOpen(false)}
-              type="button"
-            >
-              Got it
-            </Button>
-          </div>
-        </AppModal>
-      ) : null}
     </div>
   );
 }
@@ -2218,7 +2783,7 @@ const COVERAGE_GUIDE_TIPS = [
     title: "Working radius",
   },
   {
-    body: "Optionally tap extra Birmingham districts you cover. Your home base is already included.",
+    body: "Home base and radius cover most bookings. Optionally search and add a few extra districts if you work further afield.",
     title: "Extra districts",
   },
 ] as const;
@@ -2237,11 +2802,26 @@ function OnboardingSelect({
   value: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const selected = options.find((option) => option.value === value);
+  const searchable = options.length > 10;
+  const normalisedQuery = query.trim().toLowerCase();
+  const filtered = normalisedQuery
+    ? options.filter(
+        (option) =>
+          option.label.toLowerCase().includes(normalisedQuery) ||
+          option.value.toLowerCase().includes(normalisedQuery),
+      )
+    : options;
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setQuery("");
+      return;
+    }
+    window.requestAnimationFrame(() => searchRef.current?.focus());
     function onPointerDown(event: MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     }
@@ -2282,38 +2862,220 @@ function OnboardingSelect({
         />
       </button>
       {open ? (
-        <ul
-          className="absolute z-30 mt-2 max-h-64 w-full overflow-auto rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-1.5 shadow-[0_18px_40px_rgba(28,19,59,0.14)]"
-          role="listbox"
-        >
-          {options.map((option) => {
-            const isSelected = option.value === value;
+        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
+          {searchable ? (
+            <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
+              <Search className="h-4 w-4 shrink-0 text-[#8b8798]" strokeWidth={2.5} />
+              <input
+                className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search districts…"
+                ref={searchRef}
+                type="search"
+                value={query}
+              />
+            </div>
+          ) : null}
+          <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2.5 text-sm text-[#8b8798]">
+                No districts match that search.
+              </li>
+            ) : (
+              filtered.map((option) => {
+                const isSelected = option.value === value;
+                return (
+                  <li key={option.value}>
+                    <button
+                      className={cn(
+                        "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition",
+                        isSelected
+                          ? "bg-[#312c79] text-white"
+                          : "text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                      )}
+                      onClick={() => {
+                        onChange(option.value);
+                        setOpen(false);
+                      }}
+                      role="option"
+                      type="button"
+                    >
+                      <span>{option.label}</span>
+                      {isSelected ? (
+                        <Check className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ExtraDistrictsPicker({
+  compact = false,
+  homePrefix,
+  onChange,
+  selected,
+}: {
+  compact?: boolean;
+  homePrefix: string;
+  onChange: (next: string[]) => void;
+  selected: string[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const selectedExtras = selected.filter((prefix) => prefix !== homePrefix);
+  const available = COVERAGE_SHORTCUTS.filter(
+    (item) => item.prefix !== homePrefix && !selectedExtras.includes(item.prefix),
+  );
+  const normalisedQuery = query.trim().toLowerCase();
+  const filtered = normalisedQuery
+    ? available.filter(
+        (item) =>
+          item.label.toLowerCase().includes(normalisedQuery) ||
+          item.prefix.toLowerCase().includes(normalisedQuery),
+      )
+    : available;
+
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+      return;
+    }
+    window.requestAnimationFrame(() => searchRef.current?.focus());
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  function addDistrict(prefix: string) {
+    if (prefix === homePrefix || selectedExtras.includes(prefix)) return;
+    onChange([...selectedExtras, prefix]);
+    setQuery("");
+    setOpen(false);
+  }
+
+  function removeDistrict(prefix: string) {
+    onChange(selectedExtras.filter((item) => item !== prefix));
+  }
+
+  return (
+    <div className="space-y-2">
+      <div>
+        <p className="text-sm font-medium text-[#291845]">
+          Extra districts{" "}
+          <span className="font-normal text-[#8b8798]">(optional)</span>
+        </p>
+        {!compact ? (
+          <p className="mt-1 text-xs leading-5 text-[#8b8798]">
+            Home base and radius cover most jobs. Add districts only if you
+            regularly work outside that circle.
+          </p>
+        ) : null}
+      </div>
+
+      {selectedExtras.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {selectedExtras.map((prefix) => {
+            const label =
+              COVERAGE_SHORTCUTS.find((item) => item.prefix === prefix)
+                ?.label ?? prefix;
             return (
-              <li key={option.value}>
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-3 py-1.5 text-xs font-semibold text-white"
+                key={prefix}
+              >
+                {label}
                 <button
-                  className={cn(
-                    "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition",
-                    isSelected
-                      ? "bg-[#312c79] text-white"
-                      : "text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
-                  )}
-                  onClick={() => {
-                    onChange(option.value);
-                    setOpen(false);
-                  }}
-                  role="option"
+                  aria-label={`Remove ${label}`}
+                  className="rounded-full p-0.5 transition hover:bg-white/20"
+                  onClick={() => removeDistrict(prefix)}
                   type="button"
                 >
-                  <span>{option.label}</span>
-                  {isSelected ? (
-                    <Check className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-                  ) : null}
+                  <X className="h-3 w-3" strokeWidth={2.75} />
                 </button>
-              </li>
+              </span>
             );
           })}
-        </ul>
+        </div>
       ) : null}
+
+      <div className="relative w-full" ref={rootRef}>
+        <button
+          aria-expanded={open}
+          className={cn(
+            "flex h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#1c133b]",
+            ONBOARDING_FIELD_CLASS,
+            open && "ring-2 ring-[#1c133b]",
+          )}
+          onClick={() => setOpen((current) => !current)}
+          type="button"
+        >
+          <span className="inline-flex min-w-0 items-center gap-2 text-[#8b8798]">
+            <Search className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+            <span className="truncate">Add a district…</span>
+          </span>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 shrink-0 text-[#1c133b] transition",
+              open && "rotate-180",
+            )}
+            strokeWidth={2.5}
+          />
+        </button>
+        {open ? (
+          <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
+            <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
+              <Search className="h-4 w-4 shrink-0 text-[#8b8798]" strokeWidth={2.5} />
+              <input
+                className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search by name or postcode…"
+                ref={searchRef}
+                type="search"
+                value={query}
+              />
+            </div>
+            <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
+              {filtered.length === 0 ? (
+                <li className="px-3 py-2.5 text-sm text-[#8b8798]">
+                  {available.length === 0
+                    ? "Every available district is already added."
+                    : "No districts match that search."}
+                </li>
+              ) : (
+                filtered.map((item) => (
+                  <li key={item.prefix}>
+                    <button
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                      onClick={() => addDistrict(item.prefix)}
+                      type="button"
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -2343,10 +3105,7 @@ function CoverageStep({
 }) {
   const [guideOpen, setGuideOpen] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
-  const miles = Math.min(
-    MAX_RADIUS_MILES,
-    Math.max(1, Math.round(radiusMiles) || DEFAULT_RADIUS_MILES),
-  );
+  const miles = snapToRadiusPreset(radiusMiles || DEFAULT_RADIUS_MILES);
   const homePrefix = ukOutwardCode(homeBase);
   const mapCenter =
     homeBaseLat != null && homeBaseLng != null
@@ -2380,16 +3139,15 @@ function CoverageStep({
       controller.abort();
       window.clearTimeout(timeout);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- geocode when home base text changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- geocode when home base changes
   }, [homeBase]);
 
-  function toggleShortcut(prefix: string) {
-    if (prefix === homePrefix) return;
-    if (areas.includes(prefix)) {
-      onAreas(areas.filter((item) => item !== prefix));
-      return;
+  function setHomeBase(next: string) {
+    onHomeBase(next);
+    const nextPrefix = ukOutwardCode(next);
+    if (nextPrefix && areas.includes(nextPrefix)) {
+      onAreas(areas.filter((item) => item !== nextPrefix));
     }
-    onAreas([...areas, prefix]);
   }
 
   return (
@@ -2404,16 +3162,13 @@ function CoverageStep({
         </button>
       </div>
 
-      <div className="flex flex-col gap-6 sm:gap-12">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          <div className="w-full shrink-0 space-y-2 sm:w-[17.5rem]">
+      <div className="flex flex-col gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-4">
+          <div className="min-w-0 space-y-2">
             <p className="text-sm font-medium text-[#291845]">Home base</p>
             <OnboardingSelect
-              error={
-                error?.toLowerCase().includes("home") ||
-                error?.toLowerCase().includes("postcode")
-              }
-              onChange={onHomeBase}
+              error={error?.toLowerCase().includes("home")}
+              onChange={setHomeBase}
               options={COVERAGE_SHORTCUTS.map((item) => ({
                 label: item.label,
                 value: item.prefix,
@@ -2427,68 +3182,45 @@ function CoverageStep({
               </p>
             ) : null}
           </div>
-          <div className="flex flex-1 justify-center sm:px-4">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-[#291845]">
-                Working radius
-              </p>
-              <div className="flex items-center gap-3">
-                <button
-                  aria-label="Decrease radius"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={miles <= 1}
-                  onClick={() => onRadiusMiles(miles - 1)}
-                  type="button"
-                >
-                  <Minus className="h-4 w-4" strokeWidth={2.5} />
-                </button>
-                <div className="min-w-[5.5rem] text-center">
-                  <p className="text-lg font-semibold tabular-nums text-[#291845]">
-                    {miles}
-                  </p>
-                  <p className="text-xs font-medium text-[#8b8798]">
-                    {miles === 1 ? "mile" : "miles"}
-                  </p>
-                </div>
-                <button
-                  aria-label="Increase radius"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={miles >= MAX_RADIUS_MILES}
-                  onClick={() => onRadiusMiles(miles + 1)}
-                  type="button"
-                >
-                  <Plus className="h-4 w-4" strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
+          <div className="min-w-0">
+            <ExtraDistrictsPicker
+              compact
+              homePrefix={homePrefix}
+              onChange={onAreas}
+              selected={areas}
+            />
           </div>
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-medium text-[#291845]">
-            Extra districts{" "}
-            <span className="font-normal text-[#8b8798]">(optional)</span>
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {COVERAGE_SHORTCUTS.map((shortcut) => {
-              const selected = areas.includes(shortcut.prefix);
-              const isHome = shortcut.prefix === homePrefix;
+          <div>
+            <p className="text-sm font-medium text-[#291845]">
+              How far are you willing to travel?
+            </p>
+            <p className="mt-1 text-xs leading-5 text-[#8b8798]">
+              Mundoria normally searches within about 15 miles of a booking.
+              Choose what works for you.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {RADIUS_PRESETS.map((preset) => {
+              const selected = miles === preset.value;
               return (
                 <button
+                  aria-pressed={selected}
                   className={cn(
-                    "rounded-full border-2 px-3 py-1.5 text-xs font-semibold transition",
-                    isHome
-                      ? "cursor-default border-[#8b8798] bg-[#f3eee4] text-[#8b8798]"
-                      : selected
-                        ? "border-[#312c79] bg-[#312c79] text-white"
-                        : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                    "rounded-2xl border-2 bg-[#f9f6ef] p-4 text-left transition touch-manipulation",
+                    selected
+                      ? "border-[#1c133b] bg-white"
+                      : "border-[#1c133b]/35 hover:border-[#1c133b]",
                   )}
-                  disabled={isHome}
-                  key={shortcut.prefix}
-                  onClick={() => toggleShortcut(shortcut.prefix)}
+                  key={preset.value}
+                  onClick={() => onRadiusMiles(preset.value)}
                   type="button"
                 >
-                  {shortcut.label}
+                  <p className="font-semibold text-[#1c133b]">
+                    {preset.label}
+                  </p>
                 </button>
               );
             })}
@@ -2672,51 +3404,6 @@ function sameMinute(left: string | null, right: string | null) {
   );
 }
 
-const EXPERIENCE_MAX = 60;
-
-function ExperienceStepper({
-  onChange,
-  value,
-}: {
-  onChange: (years: number) => void;
-  value: number;
-}) {
-  const years = Number.isFinite(value)
-    ? Math.min(EXPERIENCE_MAX, Math.max(0, Math.round(value)))
-    : 0;
-
-  return (
-    <div className="flex items-center gap-3">
-      <button
-        aria-label="Decrease years of experience"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-        disabled={years <= 0}
-        onClick={() => onChange(years - 1)}
-        type="button"
-      >
-        <Minus className="h-4 w-4" strokeWidth={2.5} />
-      </button>
-      <div className="min-w-[4.5rem] text-center">
-        <p className="text-lg font-semibold tabular-nums tracking-[-0.02em] text-[#291845]">
-          {years}
-        </p>
-        <p className="text-xs font-medium text-[#8b8798]">
-          {years === 1 ? "year" : "years"}
-        </p>
-      </div>
-      <button
-        aria-label="Increase years of experience"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-        disabled={years >= EXPERIENCE_MAX}
-        onClick={() => onChange(years + 1)}
-        type="button"
-      >
-        <Plus className="h-4 w-4" strokeWidth={2.5} />
-      </button>
-    </div>
-  );
-}
-
 function Field({
   children,
   error,
@@ -2767,35 +3454,33 @@ function isWithinWorkingWindow(start: string, end: string) {
   );
 }
 
-function hoursAreUniform(daysList: AvailabilityDay[]) {
-  const active = daysList.filter((day) => day.is_available);
-  if (active.length <= 1) return true;
-  const start = active[0].start_time;
-  const end = active[0].end_time;
-  return active.every(
-    (day) => day.start_time === start && day.end_time === end,
-  );
-}
-
 function HoursPicker({
   error,
   onChange,
+  onPreferredHours,
+  preferredHoursBand,
   value,
 }: {
   error?: string;
   onChange: (next: AvailabilityDay[]) => void;
+  onPreferredHours: (next: string) => void;
+  preferredHoursBand: string;
   value: AvailabilityDay[];
 }) {
-  const [customiseByDay, setCustomiseByDay] = useState(
-    () => !hoursAreUniform(value),
-  );
   const active = value.filter((day) => day.is_available);
-  const [sharedStart, setSharedStart] = useState(() =>
-    clampWorkingTime(active[0]?.start_time || DEFAULT_START),
+  const [secondOpen, setSecondOpen] = useState<number[]>(() =>
+    value
+      .filter((day) => day.is_available && (day.start_time_2 || day.end_time_2))
+      .map((day) => day.day_of_week),
   );
-  const [sharedEnd, setSharedEnd] = useState(() =>
-    clampWorkingTime(active[0]?.end_time || DEFAULT_END),
-  );
+
+  function defaultTimes() {
+    const sample = active[0];
+    return {
+      end: clampWorkingTime(sample?.end_time || DEFAULT_END),
+      start: clampWorkingTime(sample?.start_time || DEFAULT_START),
+    };
+  }
 
   function patchDays(
     updater: (day: AvailabilityDay, index: number) => AvailabilityDay,
@@ -2804,16 +3489,20 @@ function HoursPicker({
   }
 
   function toggleDay(dayOfWeek: number) {
+    const { end, start } = defaultTimes();
     patchDays((day) => {
       if (day.day_of_week !== dayOfWeek) return day;
-      const nextAvailable = !day.is_available;
-      if (!nextAvailable) return { ...day, is_available: false };
-      if (customiseByDay) return { ...day, is_available: true };
+      if (day.is_available) {
+        setSecondOpen((current) => current.filter((item) => item !== dayOfWeek));
+        return { ...day, is_available: false };
+      }
       return {
         ...day,
-        end_time: sharedEnd,
+        end_time: end,
+        end_time_2: "",
         is_available: true,
-        start_time: sharedStart,
+        start_time: start,
+        start_time_2: "",
       };
     });
   }
@@ -2825,46 +3514,49 @@ function HoursPicker({
         : preset === "weekends"
           ? HOURS_WEEKENDS
           : null;
+    const { end, start } = defaultTimes();
     patchDays((day) => {
       const on = selected ? selected.has(day.day_of_week) : true;
       if (!on) return { ...day, is_available: false };
-      if (customiseByDay) return { ...day, is_available: true };
+      if (day.is_available) return { ...day, is_available: true };
       return {
         ...day,
-        end_time: sharedEnd,
+        end_time: end,
+        end_time_2: "",
         is_available: true,
-        start_time: sharedStart,
+        start_time: start,
+        start_time_2: "",
       };
     });
   }
 
-  function setSharedHours(start: string, end: string) {
-    const nextStart = clampWorkingTime(start);
-    const nextEnd = clampWorkingTime(end);
-    setSharedStart(nextStart);
-    setSharedEnd(nextEnd);
-    patchDays((day) =>
-      day.is_available
-        ? { ...day, end_time: nextEnd, start_time: nextStart }
-        : day,
-    );
-  }
-
   function setDayHours(dayOfWeek: number, start: string, end: string) {
-    const nextStart = clampWorkingTime(start);
-    const nextEnd = clampWorkingTime(end);
     patchDays((day) =>
       day.day_of_week === dayOfWeek
-        ? { ...day, end_time: nextEnd, start_time: nextStart }
+        ? {
+            ...day,
+            end_time: clampWorkingTime(end),
+            start_time: clampWorkingTime(start),
+          }
         : day,
     );
   }
 
-  function enableCustomise(next: boolean) {
-    setCustomiseByDay(next);
-    if (!next) {
-      setSharedHours(sharedStart, sharedEnd);
-    }
+  function setDaySecond(dayOfWeek: number, start: string, end: string) {
+    patchDays((day) =>
+      day.day_of_week === dayOfWeek
+        ? {
+            ...day,
+            end_time_2: end ? clampWorkingTime(end) : "",
+            start_time_2: start ? clampWorkingTime(start) : "",
+          }
+        : day,
+    );
+  }
+
+  function removeDaySecond(dayOfWeek: number) {
+    setSecondOpen((current) => current.filter((item) => item !== dayOfWeek));
+    setDaySecond(dayOfWeek, "", "");
   }
 
   const presets = [
@@ -2893,26 +3585,27 @@ function HoursPicker({
     <div className="space-y-6">
       {error ? <FieldError message={error} /> : null}
 
-      <div className="flex flex-wrap gap-2">
-        {presets.map((preset) => (
-          <button
-            className={cn(
-              "rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold transition",
-              preset.active
-                ? "border-[#312c79] bg-[#312c79] text-white"
-                : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
-            )}
-            key={preset.id}
-            onClick={() => applyPreset(preset.id)}
-            type="button"
-          >
-            {preset.label}
-          </button>
-        ))}
-      </div>
-
       <div>
-        <p className="mb-3 text-sm font-medium text-[#291845]">Days you work</p>
+        <p className="mb-3 text-sm font-medium text-[#291845]">
+          Which days are you available?
+        </p>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {presets.map((preset) => (
+            <button
+              className={cn(
+                "rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold transition",
+                preset.active
+                  ? "border-[#312c79] bg-[#312c79] text-white"
+                  : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+              )}
+              key={preset.id}
+              onClick={() => applyPreset(preset.id)}
+              type="button"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
         <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {HOURS_DAY_ORDER.map((dayOfWeek) => {
             const day = value.find((item) => item.day_of_week === dayOfWeek);
@@ -2920,7 +3613,7 @@ function HoursPicker({
             const label = HOURS_DAY_SHORT[dayOfWeek];
             return (
               <button
-                aria-label={label}
+                aria-label={days[dayOfWeek]}
                 aria-pressed={selected}
                 className={cn(
                   "flex aspect-square flex-col items-center justify-center rounded-xl border-2 text-[10px] font-semibold transition sm:rounded-2xl sm:text-xs",
@@ -2940,57 +3633,29 @@ function HoursPicker({
         </div>
       </div>
 
-      {!customiseByDay ? (
-        <div>
-          <p className="mb-3 text-sm font-medium text-[#291845]">
-            Available hours
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-[#291845]">
+          Start and end times
+        </p>
+        {active.length === 0 ? (
+          <p className="text-sm text-[#8b8798]">
+            Select at least one day to set your hours.
           </p>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <Input
-              aria-label="Start time"
-              className={ONBOARDING_FIELD_CLASS}
-              max={WORKING_HOURS_MAX}
-              min={WORKING_HOURS_MIN}
-              onChange={(event) =>
-                setSharedHours(event.target.value, sharedEnd)
-              }
-              type="time"
-              value={sharedStart}
-            />
-            <span className="text-sm text-[#8b8798]">to</span>
-            <Input
-              aria-label="End time"
-              className={ONBOARDING_FIELD_CLASS}
-              max={WORKING_HOURS_MAX}
-              min={WORKING_HOURS_MIN}
-              onChange={(event) =>
-                setSharedHours(sharedStart, event.target.value)
-              }
-              type="time"
-              value={sharedEnd}
-            />
-          </div>
-          <p className="mt-2 text-xs text-[#8b8798]">
-            Applies to every day you select. Jobs run between{" "}
-            {WORKING_HOURS_MIN} and {WORKING_HOURS_MAX}.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-[#291845]">Hours by day</p>
-          {active.length === 0 ? (
-            <p className="text-sm text-[#8b8798]">Select at least one day first.</p>
-          ) : (
-            HOURS_DAY_ORDER.map((dayOfWeek) => {
-              const day = value.find((item) => item.day_of_week === dayOfWeek);
-              if (!day?.is_available) return null;
-              return (
-                <div
-                  className="grid grid-cols-[2.75rem_1fr_auto_1fr] items-center gap-2 sm:grid-cols-[4.5rem_1fr_auto_1fr]"
-                  key={dayOfWeek}
-                >
-                  <span className="text-sm font-medium text-[#291845]">
-                    {HOURS_DAY_SHORT[dayOfWeek]}
+        ) : (
+          HOURS_DAY_ORDER.map((dayOfWeek) => {
+            const day = value.find((item) => item.day_of_week === dayOfWeek);
+            if (!day?.is_available) return null;
+            const showSecond =
+              secondOpen.includes(dayOfWeek) ||
+              Boolean(day.start_time_2 || day.end_time_2);
+            return (
+              <div
+                className="space-y-2 rounded-2xl border border-[#e8e0d0] bg-[#f3eee4]/60 px-3 py-3"
+                key={dayOfWeek}
+              >
+                <div className="grid grid-cols-[minmax(4.5rem,auto)_1fr_auto_1fr] items-center gap-2">
+                  <span className="text-sm font-semibold text-[#291845]">
+                    {days[dayOfWeek]}
                   </span>
                   <Input
                     aria-label={`${days[dayOfWeek]} start`}
@@ -3020,32 +3685,85 @@ function HoursPicker({
                     value={day.end_time}
                   />
                 </div>
-              );
-            })
-          )}
-        </div>
-      )}
+                {showSecond ? (
+                  <div className="grid grid-cols-[minmax(4.5rem,auto)_1fr_auto_1fr_auto] items-center gap-2">
+                    <span className="text-xs font-medium text-[#8b8798]">
+                      and
+                    </span>
+                    <Input
+                      aria-label={`${days[dayOfWeek]} second start`}
+                      className={ONBOARDING_FIELD_CLASS}
+                      max={WORKING_HOURS_MAX}
+                      min={WORKING_HOURS_MIN}
+                      onChange={(event) =>
+                        setDaySecond(
+                          dayOfWeek,
+                          event.target.value,
+                          day.end_time_2 ?? "",
+                        )
+                      }
+                      type="time"
+                      value={day.start_time_2 ?? ""}
+                    />
+                    <span className="text-sm text-[#8b8798]">to</span>
+                    <Input
+                      aria-label={`${days[dayOfWeek]} second end`}
+                      className={ONBOARDING_FIELD_CLASS}
+                      max={WORKING_HOURS_MAX}
+                      min={WORKING_HOURS_MIN}
+                      onChange={(event) =>
+                        setDaySecond(
+                          dayOfWeek,
+                          day.start_time_2 ?? "",
+                          event.target.value,
+                        )
+                      }
+                      type="time"
+                      value={day.end_time_2 ?? ""}
+                    />
+                    <button
+                      aria-label={`Remove ${days[dayOfWeek]} second window`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#1c133b] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                      onClick={() => removeDaySecond(dayOfWeek)}
+                      type="button"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    className="text-xs font-semibold text-[#312c79] underline-offset-2 hover:underline"
+                    onClick={() =>
+                      setSecondOpen((current) => [...current, dayOfWeek])
+                    }
+                    type="button"
+                  >
+                    + Add a second window
+                  </button>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
 
-      <label className="flex cursor-pointer items-center gap-3 text-sm text-[#1c133b]">
-        <input
-          checked={customiseByDay}
-          className="sr-only"
-          onChange={(event) => enableCustomise(event.target.checked)}
-          type="checkbox"
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-[#291845]">
+          How many hours would you prefer to work per day?
+        </p>
+        <p className="text-xs text-[#8b8798]">
+          Guides how many hours we typically offer — not a hard cap.
+        </p>
+        <BranchChoice
+          columns={2}
+          onChange={onPreferredHours}
+          options={PREFERRED_HOURS_BANDS.map((item) => ({
+            label: item.label,
+            value: item.value,
+          }))}
+          value={preferredHoursBand || null}
         />
-        <span
-          aria-hidden
-          className={cn(
-            "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition",
-            customiseByDay
-              ? "border-[#312c79] bg-[#312c79] text-white"
-              : "border-[#d8d0e5] bg-white",
-          )}
-        >
-          {customiseByDay ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
-        </span>
-        <span>Different hours on some days</span>
-      </label>
+      </div>
     </div>
   );
 }
@@ -3138,34 +3856,13 @@ function ServicesPicker({
                     className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-sm text-[#1c133b] transition hover:bg-[#fbf9ff] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#312c79]/30"
                     key={service.value}
                   >
-                    <input
+                    <OnboardingCheckbox
                       checked={isSelected}
-                      className="sr-only"
-                      onChange={(event) =>
-                        toggleService(service.value, event.target.checked)
+                      className="mt-0"
+                      onCheckedChange={(next) =>
+                        toggleService(service.value, next)
                       }
-                      type="checkbox"
                     />
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition",
-                        !isSelected && "border-[#d8d0e5] bg-white",
-                      )}
-                      style={
-                        isSelected
-                          ? {
-                              backgroundColor: theme.accent,
-                              borderColor: theme.accent,
-                              color: "#ffffff",
-                            }
-                          : undefined
-                      }
-                    >
-                      {isSelected ? (
-                        <Check className="h-3 w-3" strokeWidth={3} />
-                      ) : null}
-                    </span>
                     <ServiceIcon
                       aria-hidden
                       className="h-4 w-4 shrink-0 text-[#8b8798]"
@@ -3179,163 +3876,6 @@ function ServicesPicker({
           </section>
         );
       })}
-    </div>
-  );
-}
-
-function DocumentUpload({
-  accept = ".pdf,image/*",
-  error,
-  label,
-  onFile,
-  onRemove,
-  previewIsPdf = false,
-  previewUrl,
-  progress,
-  uploaded,
-  uploading = false,
-}: {
-  accept?: string;
-  error?: string;
-  label: string;
-  onFile: (file: File) => void;
-  onRemove?: () => void;
-  previewIsPdf?: boolean;
-  previewUrl?: string;
-  progress?: number;
-  uploaded: boolean;
-  uploading?: boolean;
-}) {
-  const imageOnly = accept.includes("image") && !accept.includes("pdf");
-  const looksLikePdf = Boolean(previewUrl) && previewIsPdf;
-  const showImagePreview = Boolean(previewUrl) && !looksLikePdf;
-  const percent =
-    typeof progress === "number"
-      ? Math.max(0, Math.min(100, Math.round(progress)))
-      : null;
-
-  return (
-    <div className="space-y-3">
-      <p className="text-sm font-medium text-[#291845]">{label}</p>
-      {showImagePreview || looksLikePdf || uploading ? (
-        <div className="relative pt-3">
-          {!uploading && (uploaded || previewUrl) && onRemove ? (
-            <button
-              aria-label={`Remove ${label}`}
-              className="absolute right-2 top-0 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#d4694a] bg-[#fff4ee] text-[#d4694a] shadow-sm transition hover:bg-[#d4694a] hover:text-white"
-              onClick={onRemove}
-              type="button"
-            >
-              <X className="h-4 w-4" strokeWidth={2.75} />
-            </button>
-          ) : null}
-          <div className="overflow-hidden rounded-2xl border border-[#e5e1ea] bg-[#faf8ff]">
-            <div className="relative flex min-h-[12rem] items-center justify-center bg-[#f3f0f8]">
-              {showImagePreview ? (
-                // eslint-disable-next-line @next/next/no-img-element -- signed/blob preview URLs
-                <img
-                  alt={`${label} preview`}
-                  className="max-h-72 w-full object-contain"
-                  src={previewUrl}
-                />
-              ) : looksLikePdf ? (
-                <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#efe8fa] text-[#6a45b8]">
-                    <FileBadge className="h-6 w-6" strokeWidth={2} />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-[#291845]">
-                      PDF ready
-                    </p>
-                    <a
-                      className="mt-1 inline-block text-sm font-medium text-[#6a45b8] hover:underline"
-                      href={previewUrl}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      Open preview
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3 px-6 py-10 text-[#6a45b8]">
-                  <span className="h-9 w-9 animate-spin rounded-full border-2 border-[#d8ccee] border-t-[#6a45b8]" />
-                  <p className="text-sm font-medium">Preparing preview…</p>
-                </div>
-              )}
-              {uploading ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#291845]/55 backdrop-blur-[2px]">
-                  <div className="relative flex h-16 w-16 items-center justify-center">
-                    <span className="absolute inset-0 rounded-full border-2 border-white/25" />
-                    <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-white" />
-                    <span className="text-sm font-semibold tabular-nums text-white">
-                      {percent ?? 0}%
-                    </span>
-                  </div>
-                  <p className="text-sm font-semibold text-white">
-                    Uploading… {percent ?? 0}%
-                  </p>
-                </div>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#ebe6f2] bg-white px-4 py-3">
-              <p className="text-sm font-medium text-[#291845]">
-                {uploading
-                  ? `Uploading… ${percent ?? 0}%`
-                  : uploaded
-                    ? "Uploaded"
-                    : "Choose a file"}
-              </p>
-              <label className="inline-flex cursor-pointer items-center rounded-lg border border-[#e5e1ea] bg-white px-3 py-2 text-sm font-semibold text-[#291845] hover:bg-[#faf8ff]">
-                {uploaded || previewUrl ? "Replace" : "Choose file"}
-                <input
-                  accept={accept}
-                  className="hidden"
-                  disabled={uploading}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) onFile(file);
-                    event.target.value = "";
-                  }}
-                  type="file"
-                />
-              </label>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <label
-          className={cn(
-            "flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed bg-[#f9f6ef] p-8 text-center transition",
-            error
-              ? "border-[#d4694a] hover:border-[#d4694a]"
-              : "border-[#1c133b]/55 hover:border-[#1c133b]",
-            uploading && "pointer-events-none opacity-70",
-          )}
-        >
-          <FileUp className="h-8 w-8 text-[#1c133b]" strokeWidth={2.25} />
-          <b className="mt-3 text-sm text-[#291845]">Choose file</b>
-          <span className="mt-1 text-xs text-[#8b8798]">
-            {imageOnly ? "JPEG, PNG or WebP" : "PDF, JPEG, PNG or WebP"}
-          </span>
-          <input
-            accept={accept}
-            className="hidden"
-            disabled={uploading}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) onFile(file);
-              event.target.value = "";
-            }}
-            type="file"
-          />
-        </label>
-      )}
-      {error ? (
-        <div>
-          <FieldError message={error} />
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -3365,21 +3905,105 @@ function sanitizeExamAnswers(
   return next;
 }
 
+function stringList(value: unknown) {
+  return (Array.isArray(value) ? value : [])
+    .map((item) => String(item ?? "").trim())
+    .filter(Boolean);
+}
+
 function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
+  const utrPath =
+    value.utr_path === "have" ||
+    value.utr_path === "none" ||
+    value.utr_path === "unsure" ||
+    value.utr_path === "waiting"
+      ? value.utr_path
+      : null;
+  const dbsPath =
+    value.dbs_path === "have" ||
+    value.dbs_path === "apply" ||
+    value.dbs_path === "waiting"
+      ? value.dbs_path
+      : null;
+  const insurancePath =
+    value.insurance_path === "have" ||
+    value.insurance_path === "none" ||
+    value.insurance_path === "unsure"
+      ? value.insurance_path
+      : null;
+
+  const trainingPath =
+    value.training_path === "yes" || value.training_path === "no"
+      ? value.training_path
+      : "";
+
   return {
     ...value,
+    accuracy_confirmed: Boolean(value.accuracy_confirmed),
+    agreement_keys: stringList(value.agreement_keys),
+    cleaning_skills_other: String(value.cleaning_skills_other ?? "").trim(),
+    emergency_relationship_other: String(
+      value.emergency_relationship_other ?? "",
+    ).trim(),
+    equipment_other: String(value.equipment_other ?? "").trim(),
+    insurance_activity_confirmed: Boolean(value.insurance_activity_confirmed),
+    insurance_insured_name: String(value.insurance_insured_name ?? "").trim(),
+    marketing_consent: Boolean(value.marketing_consent),
+    ppe_other: String(value.ppe_other ?? "").trim(),
+    preferred_hours_band: String(value.preferred_hours_band ?? "").trim(),
+    products_other: String(value.products_other ?? "").trim(),
+    reference_company: String(value.reference_company ?? "").trim(),
+    reference_contact_ok: Boolean(value.reference_contact_ok),
+    reference_email: String(value.reference_email ?? "").trim(),
+    reference_name: String(value.reference_name ?? "").trim(),
+    reference_phone: String(value.reference_phone ?? "").trim(),
+    reference_relationship: String(value.reference_relationship ?? "").trim(),
+    specialised_other: String(value.specialised_other ?? "").trim(),
+    training_certificate_url: String(
+      value.training_certificate_url ?? "",
+    ).trim(),
+    training_completed: stringList(value.training_completed),
+    training_path: trainingPath,
     interview_scheduled_at: toIso(value.interview_scheduled_at),
     availability: (value.availability ?? []).map((day) => ({
       day_of_week: Number(day.day_of_week),
       end_time: String(day.end_time ?? "").trim(),
+      end_time_2: String(day.end_time_2 ?? "").trim(),
       is_available: Boolean(day.is_available),
       start_time: String(day.start_time ?? "").trim(),
+      start_time_2: String(day.start_time_2 ?? "").trim(),
     })),
     bio: String(value.bio ?? "").trim(),
+    booking_preferences: stringList(value.booking_preferences),
+    can_transport_equipment: String(value.can_transport_equipment ?? "").trim(),
+    cleaning_skills: stringList(value.cleaning_skills),
+    dbs_certificate_number: String(value.dbs_certificate_number ?? "").trim(),
     dbs_document_url: String(value.dbs_document_url ?? "").trim(),
+    dbs_issued_on: String(value.dbs_issued_on ?? "").trim(),
+    dbs_path: dbsPath,
+    emergency_alt_phone: String(value.emergency_alt_phone ?? "").trim(),
+    emergency_country: String(value.emergency_country ?? "").trim() || "United Kingdom",
+    emergency_email: String(value.emergency_email ?? "").trim(),
+    emergency_informed: String(value.emergency_informed ?? "").trim(),
+    emergency_mobile: String(value.emergency_mobile ?? "").trim(),
+    emergency_name: String(value.emergency_name ?? "").trim(),
+    emergency_relationship: String(value.emergency_relationship ?? "").trim(),
+    equipment_condition: String(value.equipment_condition ?? "").trim(),
+    equipment_owned: stringList(value.equipment_owned),
+    equipment_ownership: String(value.equipment_ownership ?? "").trim(),
+    equipment_transport: String(value.equipment_transport ?? "").trim(),
+    experience_band: String(value.experience_band ?? "").trim(),
     full_name: String(value.full_name ?? "").trim(),
     headshot_url: String(value.headshot_url ?? "").trim(),
     id_document_url: String(value.id_document_url ?? "").trim(),
+    insurance_certificate_url: String(
+      value.insurance_certificate_url ?? "",
+    ).trim(),
+    insurance_cover_amount: String(value.insurance_cover_amount ?? "").trim(),
+    insurance_expiry_date: String(value.insurance_expiry_date ?? "").trim(),
+    insurance_path: insurancePath,
+    insurance_policy_number: String(value.insurance_policy_number ?? "").trim(),
+    insurance_provider: String(value.insurance_provider ?? "").trim(),
     location_tracking_consent_accepted: Boolean(
       value.location_tracking_consent_accepted,
     ),
@@ -3391,16 +4015,36 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     payout_preference:
       value.payout_preference === "monthly" ? "monthly" : "weekly",
     phone: String(value.phone ?? "").trim(),
+    ppe_owned: stringList(value.ppe_owned),
+    prior_work_duration: String(value.prior_work_duration ?? "").trim(),
+    prior_work_employer: String(value.prior_work_employer ?? "").trim(),
+    prior_work_summary: String(value.prior_work_summary ?? "").trim(),
+    prior_work_type: String(value.prior_work_type ?? "").trim(),
+    products_owned: stringList(value.products_owned),
+    products_ownership: String(value.products_ownership ?? "").trim(),
+    safety_acknowledged: Boolean(value.safety_acknowledged),
     services: (value.services ?? [])
       .map((service) => service.trim())
       .filter(Boolean),
     skills_exam_answers: sanitizeExamAnswers(value.skills_exam_answers),
+    specialised_equipment: stringList(value.specialised_equipment),
+    specialised_training: String(value.specialised_training ?? "").trim(),
     training_agreements: CHARTER_AGREEMENTS.map(
       (_, index) => Boolean(value.training_agreements?.[index]),
     ),
+    transport_mode: String(value.transport_mode ?? "").trim(),
+    utr_clarity_confirmed: Boolean(value.utr_clarity_confirmed),
+    utr_document_url: String(value.utr_document_url ?? "").trim(),
     utr_number: String(value.utr_number ?? "")
       .replace(/\D/g, "")
       .slice(0, 10),
+    utr_path: utrPath,
+    verification_flags:
+      value.verification_flags &&
+      typeof value.verification_flags === "object" &&
+      !Array.isArray(value.verification_flags)
+        ? { ...value.verification_flags }
+        : {},
     home_base: String(value.home_base ?? "").trim().toUpperCase(),
     home_base_lat:
       typeof value.home_base_lat === "number" &&
@@ -3415,14 +4059,12 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     working_areas: (value.working_areas ?? [])
       .map((area) => ukOutwardCode(area))
       .filter(Boolean),
-    working_radius_miles: (() => {
-      const miles = Number(value.working_radius_miles);
-      if (!Number.isFinite(miles)) return DEFAULT_RADIUS_MILES;
-      return Math.min(MAX_RADIUS_MILES, Math.max(1, Math.round(miles)));
-    })(),
-    years_experience: Number.isFinite(value.years_experience)
-      ? value.years_experience
-      : 0,
+    working_radius_miles: snapToRadiusPreset(
+      Number(value.working_radius_miles),
+    ),
+    years_experience: yearsFromExperienceBand(
+      String(value.experience_band ?? "").trim(),
+    ),
   };
 }
 
@@ -3446,6 +4088,12 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     if (availableDays.length === 0) {
       return issue("hours", "Choose at least one day you are available.");
     }
+    if (!data.preferred_hours_band) {
+      return issue(
+        "preferred_hours",
+        "Choose how many hours you’d prefer to work per day.",
+      );
+    }
     if (availableDays.some((day) => !day.start_time || !day.end_time)) {
       return issue("hours", "Set a start and end time for each available day.");
     }
@@ -3465,6 +4113,29 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
         `Set hours between ${WORKING_HOURS_MIN} and ${WORKING_HOURS_MAX}.`,
       );
     }
+    for (const day of availableDays) {
+      const start2 = day.start_time_2 ?? "";
+      const end2 = day.end_time_2 ?? "";
+      if (!start2 && !end2) continue;
+      if (!start2 || !end2) {
+        return issue(
+          "hours",
+          "Finish or remove the second time window on each day.",
+        );
+      }
+      if (!isWithinWorkingWindow(start2, end2)) {
+        return issue(
+          "hours",
+          `Set second windows between ${WORKING_HOURS_MIN} and ${WORKING_HOURS_MAX}, with the end after the start.`,
+        );
+      }
+      if (start2 < day.end_time) {
+        return issue(
+          "hours",
+          "A second time window must start after your first one ends.",
+        );
+      }
+    }
   }
 
   if (stepId === "coverage") {
@@ -3481,6 +4152,15 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
       return issue(
         "radius",
         `Choose a working radius between 1 and ${MAX_RADIUS_MILES} miles.`,
+      );
+    }
+    if (
+      transportModeBand(data.transport_mode) === "other" &&
+      transportModeOtherText(data.transport_mode).length < 2
+    ) {
+      return issue(
+        "transport",
+        "Describe how you usually travel to cleaning jobs.",
       );
     }
   }
@@ -3503,16 +4183,152 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     }
   }
 
-  if (stepId === "utr" && !/^\d{10}$/.test(data.utr_number)) {
-    return issue("utr", "Enter your 10-digit UTR number.");
+  if (stepId === "utr") {
+    if (!data.utr_path) {
+      return issue("utr", "Choose whether you already have a UTR.");
+    }
+    if (data.utr_path === "have") {
+      if (!isValidUtr(data.utr_number)) {
+        return issue("utr", "Enter your 10-digit UTR number.");
+      }
+      if (!data.utr_document_url) {
+        return issue("utr", "Upload a document showing your UTR.");
+      }
+      if (!data.utr_clarity_confirmed) {
+        return issue(
+          "utr",
+          "Confirm your name and UTR are clearly visible on the document.",
+        );
+      }
+    }
   }
 
   if (stepId === "identity" && !hasBothDocumentSides(data.id_document_url)) {
     return issue("id", "Upload the front and back of your ID.");
   }
 
-  if (stepId === "dbs" && !hasBothDocumentSides(data.dbs_document_url)) {
-    return issue("dbs", "Upload page 1 and page 2 of your DBS certificate.");
+  if (stepId === "dbs") {
+    if (!data.dbs_path) {
+      return issue("dbs", "Choose your DBS certificate status.");
+    }
+    if (data.dbs_path === "have") {
+      if (!data.dbs_certificate_number.trim()) {
+        return issue("dbs", "Enter your DBS certificate number.");
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(data.dbs_issued_on)) {
+        return issue("dbs", "Enter the DBS issue date.");
+      }
+      if (!hasAnyDocument(data.dbs_document_url)) {
+        return issue(
+          "dbs",
+          "Upload at least one page of your DBS certificate.",
+        );
+      }
+    }
+  }
+
+  if (stepId === "insurance") {
+    if (!data.insurance_path) {
+      return issue("insurance", "Choose your insurance status.");
+    }
+    if (data.insurance_path === "have") {
+      if (!data.insurance_provider) {
+        return issue("insurance", "Enter your insurance provider.");
+      }
+      if (!data.insurance_policy_number) {
+        return issue("insurance", "Enter your policy number.");
+      }
+      if (!data.insurance_insured_name) {
+        return issue("insurance", "Enter the name on your insurance policy.");
+      }
+      if (!isAcceptableInsuranceCover(data.insurance_cover_amount)) {
+        return issue(
+          "insurance",
+          data.insurance_cover_amount === "other" ||
+            !data.insurance_cover_amount
+            ? "Enter your cover amount (minimum £1 million)."
+            : "Cover must be at least £1 million Public Liability.",
+        );
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(data.insurance_expiry_date)) {
+        return issue("insurance", "Enter the policy expiry date.");
+      }
+      if (isPastDateIso(data.insurance_expiry_date)) {
+        return issue(
+          "insurance",
+          "Insurance expiry must be today or in the future.",
+        );
+      }
+      if (!data.insurance_certificate_url) {
+        return issue("insurance", "Upload your insurance certificate.");
+      }
+      if (!data.insurance_activity_confirmed) {
+        return issue(
+          "insurance",
+          "Confirm your policy covers professional cleaning work.",
+        );
+      }
+    }
+  }
+
+  if (stepId === "equipment") {
+    if (!data.equipment_ownership) {
+      return issue("equipment", "Tell us whether you have cleaning equipment.");
+    }
+    if (!data.products_ownership) {
+      return issue("equipment", "Tell us whether you have cleaning products.");
+    }
+    if (!data.equipment_transport) {
+      return issue("equipment", "Tell us how you transport equipment.");
+    }
+    if (data.ppe_owned.length === 0) {
+      return issue("equipment", "Select your PPE, or “None of the above”.");
+    }
+  }
+
+  if (stepId === "emergency") {
+    if (data.emergency_name.length < 2) {
+      return issue("emergency", "Enter your emergency contact’s full name.");
+    }
+    if (!data.emergency_relationship) {
+      return issue("emergency", "Choose their relationship to you.");
+    }
+    if (
+      data.emergency_relationship === "other" &&
+      data.emergency_relationship_other.length < 2
+    ) {
+      return issue("emergency", "Describe their relationship to you.");
+    }
+    if (data.emergency_mobile.length < 7) {
+      return issue("emergency", "Enter a valid mobile number.");
+    }
+    if (!data.emergency_informed) {
+      return issue(
+        "emergency",
+        "Confirm whether they’ve been told they’re listed.",
+      );
+    }
+    if (!data.safety_acknowledged) {
+      return issue("emergency", "Acknowledge the safety reporting note.");
+    }
+  }
+
+  if (stepId === "agreements") {
+    const missing = CLEANER_AGREEMENT_DOCS.filter(
+      (doc) => !data.agreement_keys.includes(doc.key),
+    );
+    if (missing.length > 0) {
+      return issue(
+        "agreements",
+        "Accept every agreement before submitting.",
+      );
+    }
+    if (!data.accuracy_confirmed) {
+      return issue(
+        "agreements",
+        "Confirm that the information in your application is accurate.",
+      );
+    }
   }
 
   if (stepId === "photo" && !data.headshot_url) {
@@ -3527,7 +4343,16 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
       return issue("phone", "Enter a valid phone number.");
     }
     if (data.bio.length < 20) {
-      return issue("bio", "Bio must be at least 20 characters.");
+      return issue(
+        "bio",
+        "Write a little more about yourself (at least 20 characters).",
+      );
+    }
+    if (!data.experience_band) {
+      return issue(
+        "experience_band",
+        "Choose how much professional cleaning experience you have.",
+      );
     }
   }
 
@@ -3536,9 +4361,30 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
   }
 
   if (stepId === "payout" && !data.payout_confirmed) {
-    return issue("payout", "Choose weekly or monthly payouts.");
+    return issue(
+      "payout",
+      "Confirm that your payment details are accurate before continuing.",
+    );
   }
 
+  return null;
+}
+
+/** Banner shown briefly when a step is saved and the cleaner moves on. */
+function stepSuccessMessage(stepId: StepId, value: OnboardingData) {
+  if (stepId === "utr" && value.utr_path === "have") {
+    return "UTR submitted successfully!";
+  }
+  if (stepId === "dbs" && value.dbs_path === "have") {
+    return "DBS certificate submitted successfully!";
+  }
+  if (stepId === "insurance" && value.insurance_path === "have") {
+    return "Insurance submitted successfully!";
+  }
+  if (stepId === "payout") {
+    return "Your payment details have been saved successfully! You're one step closer to getting started with Mundoria.";
+  }
+  if (stepId === "emergency") return "Emergency contact saved!";
   return null;
 }
 
@@ -3573,7 +4419,15 @@ function CoverageMap({
 }) {
   const radiusMeters = Math.max(1, radiusMiles) * MILES_TO_METRES;
   const zoom =
-    radiusMiles <= 3 ? 12 : radiusMiles <= 8 ? 11 : radiusMiles <= 12 ? 10 : 9;
+    radiusMiles <= 3
+      ? 12
+      : radiusMiles <= 8
+        ? 11
+        : radiusMiles <= 12
+          ? 10
+          : radiusMiles <= 20
+            ? 9
+            : 8;
 
   return (
     <GeoapifyMapView

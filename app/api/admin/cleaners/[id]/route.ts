@@ -1,8 +1,18 @@
+import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
+import {
+  mergeVerificationFlags,
+  reasonSuggestsUnreadableDoc,
+} from "@/lib/cleaner/onboarding-compliance";
+import { sendBrandedEmail } from "@/lib/email/send-email";
+import {
+  createInAppNotification,
+  sendOneSignalNotification,
+} from "@/lib/notifications/send";
 
 const schema = z.object({
   action: z.enum([
@@ -13,7 +23,10 @@ const schema = z.object({
     "set_tier",
     "complete_interview",
     "fail_interview",
+    "approve_skills",
+    "request_info",
   ]),
+  flag_unreadable_doc: z.boolean().optional().default(false),
   reason: z.string().trim().min(3),
   tier: z.enum(["bronze", "silver", "gold", "rose_gold", "elite"]).optional(),
 });
@@ -35,12 +48,12 @@ export async function POST(
       { status: 400 },
     );
   }
-  const { action, reason, tier } = parsed.data;
+  const { action, flag_unreadable_doc, reason, tier } = parsed.data;
 
   const { data: current } = await auth.admin
     .from("cleaner_profiles")
     .select(
-      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,utr_number,dbs_document_url,id_document_url",
+      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,utr_number,dbs_document_url,id_document_url,verification_flags",
     )
     .eq("id", params.id)
     .single();
@@ -113,17 +126,38 @@ export async function POST(
     updates.dbs_document_status = "verified";
     updates.id_document_status = "verified";
     updates.headshot_status = "verified";
+    updates.utr_document_status = "verified";
+    updates.insurance_status = "verified";
     updates.certification_passed = true;
     updates.certification_notes = reason;
     updates.certification_assessed_by = auth.user.id;
     updates.certification_assessed_at = new Date().toISOString();
     updates.tier = "silver";
   }
-  if (action === "reject") {
-    updates.certification_passed = false;
-    updates.certification_notes = reason;
-    updates.certification_assessed_by = auth.user.id;
-    updates.certification_assessed_at = new Date().toISOString();
+  if (action === "reject" || action === "request_info") {
+    if (action === "reject") {
+      updates.certification_passed = false;
+      updates.certification_notes = reason;
+      updates.certification_assessed_by = auth.user.id;
+      updates.certification_assessed_at = new Date().toISOString();
+    }
+    if (
+      flag_unreadable_doc ||
+      reasonSuggestsUnreadableDoc(reason)
+    ) {
+      updates.verification_flags = mergeVerificationFlags(
+        (current?.verification_flags as Record<string, unknown> | null) ?? {},
+        {
+          unreadable_doc: true,
+          unreadable_doc_hint: reason,
+          unreadable_doc_flagged_at: new Date().toISOString(),
+        },
+      );
+    }
+  }
+  if (action === "approve_skills") {
+    updates.skills_assessment_status = "approved";
+    updates.specialist_review_required = false;
   }
   if (action === "set_tier") {
     if (!tier) return NextResponse.json({ error: "Tier required" }, { status: 400 });
@@ -141,11 +175,13 @@ export async function POST(
       total_score: current?.performance_score ?? 0,
     });
   }
-  const { error } = await auth.admin
-    .from("cleaner_profiles")
-    .update(updates)
-    .eq("id", params.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (Object.keys(updates).length > 0) {
+    const { error } = await auth.admin
+      .from("cleaner_profiles")
+      .update(updates)
+      .eq("id", params.id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  }
 
   if (action === "approve" || action === "reject") {
     await auth.admin.from("cleaner_medallion_events").insert({
@@ -174,6 +210,10 @@ export async function POST(
       ? "You are approved and can now receive cleaning jobs."
       : action === "reject"
         ? "Your application is on hold. Mundoria will follow up if more is needed."
+        : action === "request_info"
+          ? "We need a little more information to finish reviewing your application. Check your email for details."
+          : action === "approve_skills"
+            ? "Your specialist skills have been reviewed and approved."
         : action === "complete_interview"
           ? "Your phone interview is complete. Mundoria will finish document review shortly."
           : action === "fail_interview"
@@ -189,19 +229,70 @@ export async function POST(
       ? "You're approved"
       : action === "reject"
         ? "Application on hold"
+        : action === "request_info"
+          ? "More information needed"
+          : action === "approve_skills"
+            ? "Specialist skills approved"
         : action === "complete_interview"
           ? "Interview complete"
           : action === "fail_interview"
             ? "Interview update"
             : "Account update";
 
-  await auth.admin.from("notifications").insert({
-    body: notificationBody,
-    data: {},
-    title: notificationTitle,
-    type: `cleaner_${action}`,
-    user_id: params.id,
-  });
+  await createInAppNotification(
+    params.id,
+    `cleaner_${action}`,
+    notificationTitle,
+    notificationBody,
+    { action, reason },
+  );
+
+  try {
+    const { data: recipient } = await auth.admin
+      .from("profiles")
+      .select("email,full_name,onesignal_player_id,notification_preferences")
+      .eq("id", params.id)
+      .maybeSingle();
+    const preferences = recipient?.notification_preferences as
+      | { push?: boolean }
+      | undefined;
+    if (preferences?.push !== false) {
+      await sendOneSignalNotification({
+        body: notificationBody,
+        data: { action },
+        playerId: (recipient?.onesignal_player_id as string | null) ?? null,
+        title: notificationTitle,
+      });
+    }
+
+    if (
+      (action === "approve" ||
+        action === "reject" ||
+        action === "request_info") &&
+      recipient?.email
+    ) {
+      const fullName = (recipient.full_name as string | null) ?? "";
+      await sendBrandedEmail({
+        data: {
+          appUrl:
+            process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin,
+          firstName: fullName.split(" ")[0] || undefined,
+          fullName: fullName || undefined,
+          reason,
+          tier: action === "approve" ? "Silver" : undefined,
+        },
+        template:
+          action === "approve"
+            ? "cleaner.application_approved"
+            : action === "reject"
+              ? "cleaner.application_rejected"
+              : "cleaner.application_needs_info",
+        to: recipient.email as string,
+      });
+    }
+  } catch (notifyError) {
+    Sentry.captureException(notifyError);
+  }
 
   revalidatePath(`/admin/cleaners/${params.id}`);
   revalidatePath(`/admin/cleaner/${params.id}`);

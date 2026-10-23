@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { OnboardingCheckbox } from "@/components/cleaner/onboarding-primitives";
 import { FieldError } from "@/components/shared/action-error";
 import {
   CHARTER_AGREEMENTS,
@@ -11,6 +12,7 @@ import {
   type SkillsExamAnswer,
   type SkillsExamQuestion,
 } from "@/lib/cleaner/skills-exam";
+import { cn } from "@/lib/utils";
 
 export function TrainingSurvey({
   agreements,
@@ -189,10 +191,13 @@ function QuestionField({
           ? selected.includes(optionIndex)
           : answer === optionIndex;
         return (
-          <label className="flex items-start gap-2 text-sm text-[#3d3654]" key={option}>
+          <label
+            className="flex cursor-pointer items-start gap-3 text-sm text-[#3d3654]"
+            key={option}
+          >
             <input
               checked={checked}
-              className="mt-1"
+              className="sr-only"
               name={multi ? undefined : question.id}
               onChange={() => {
                 if (!multi) {
@@ -207,6 +212,17 @@ function QuestionField({
               type={multi ? "checkbox" : "radio"}
               value={optionIndex}
             />
+            <span
+              aria-hidden
+              className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] bg-transparent"
+            >
+              <span
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full bg-[#1c133b] transition",
+                  checked ? "scale-100 opacity-100" : "scale-0 opacity-0",
+                )}
+              />
+            </span>
             <span>{option}</span>
           </label>
         );
@@ -235,18 +251,16 @@ function Charter({
       </p>
       <div className="space-y-3">
         {CHARTER_AGREEMENTS.map((label, index) => (
-          <label className="flex items-start gap-2" key={label}>
-            <input
+          <label className="flex cursor-pointer items-start gap-3" key={label}>
+            <OnboardingCheckbox
               checked={Boolean(agreements[index])}
-              className="mt-1"
-              onChange={(event) => {
+              onCheckedChange={(checked) => {
                 const next = CHARTER_AGREEMENTS.map(
                   (_, item) => agreements[item] ?? false,
                 );
-                next[index] = event.target.checked;
+                next[index] = checked;
                 onChange(next);
               }}
-              type="checkbox"
             />
             <span>{label}</span>
           </label>

@@ -16,6 +16,7 @@ import { TierBadge } from "@/components/cleaner/tier-badge";
 import { CLEANER_ACCOUNT_MENU } from "@/components/shared/account-menu";
 import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
+import { applicationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
 import { formatInterviewSlot } from "@/lib/cleaner/interview-slots";
 import type { Profile } from "@/types/auth";
 import type { CleanerProfile } from "@/types/cleaner";
@@ -25,6 +26,7 @@ const nav = [
   { href: "/cleaner/jobs", icon: BriefcaseBusiness, label: "Jobs" },
   { href: "/cleaner/diary", icon: CalendarDays, label: "Diary" },
   { href: "/cleaner/earnings", icon: Banknote, label: "Earnings" },
+  { href: "/cleaner/incidents", icon: ShieldAlert, label: "Incidents" },
   { href: "/cleaner/messages", icon: MessageCircle, label: "Messages" },
   { href: "/cleaner/profile", icon: UserRound, label: "Profile" },
 ];
@@ -68,19 +70,22 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
   if (cleaner.status === "pending" || cleaner.status === "in_training") {
     const awaitingInterview = cleaner.interview_status === "awaiting";
     const interviewFailed = cleaner.interview_status === "failed";
+    const lifecycle = applicationLifecycleLabel(cleaner);
     const title = interviewFailed
       ? "Interview needs a follow-up"
       : awaitingInterview
-        ? "Phone interview coming up"
+        ? "Online interview coming up"
         : cleaner.status === "in_training"
-          ? "Application on hold"
-          : "Application under review";
+          ? "Action required"
+          : lifecycle === "Action Required"
+            ? "Action required"
+            : "Application under review";
     const body = interviewFailed
-      ? "Your phone interview didn’t pass this time. Mundoria will follow up with next steps. You can still update your profile and finish Stripe setup."
+      ? "Your online interview didn’t pass this time. Mundoria will follow up with next steps. You can still update your profile and finish Stripe setup."
       : awaitingInterview
         ? cleaner.interview_scheduled_at
           ? `Your 30-minute online interview is booked for ${formatInterviewSlot(cleaner.interview_scheduled_at)}. We’ll use the phone number on your profile.`
-          : "Thanks for submitting. We’ll call you on the number in your profile for a short interview before you can take live jobs. Keep an eye on your phone."
+          : "Thanks for submitting. Keep your interview time free — we’ll use the phone number on your profile."
         : cleaner.status === "in_training"
           ? "Mundoria has put your application on hold. You can still update your profile and finish Stripe setup. Job offers appear after you’re approved."
           : "You can explore your dashboard, update your profile, and connect Stripe now. New job offers will appear after Mundoria approves your application.";
@@ -91,6 +96,9 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
           <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#312c79]" />
           <div>
             <p className="font-semibold">{title}</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#8b8798]">
+              Status: {lifecycle}
+            </p>
             <p className="mt-1 text-sm leading-6 text-[#6b6588] dark:text-muted-foreground">
               {body}
             </p>
@@ -110,7 +118,9 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
       <div className="flex gap-3">
         <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
         <div>
-          <p className="font-semibold">Account {cleaner.status}</p>
+          <p className="font-semibold">
+            Account {applicationLifecycleLabel(cleaner)}
+          </p>
           <p className="mt-1 text-sm">
             Your cleaner account cannot receive job offers right now. Contact
             Mundoria support if you think this is a mistake.

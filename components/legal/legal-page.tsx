@@ -4,6 +4,7 @@ import {
   BrandedPageWash,
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
+import { PrintButton } from "@/components/legal/print-button";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 
@@ -28,6 +29,7 @@ export async function LegalPage({
 }) {
   return (
     <MarketingShell>
+      <style>{`@media print { header, nav, footer { display: none !important; } body { background: #fff !important; } }`}</style>
       <BrandedPageWash underNav>
         <section
           className="relative px-4 pb-6 sm:px-8 sm:pb-8 lg:px-12"
@@ -43,6 +45,9 @@ export async function LegalPage({
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/75 sm:text-base sm:leading-8">
               {intro}
             </p>
+            <div className="mt-6">
+              <PrintButton />
+            </div>
           </div>
         </section>
 
@@ -73,7 +78,7 @@ export async function LegalPage({
 
             {children ? <div className="pt-2">{children}</div> : null}
 
-            <div className="flex justify-center pt-6">
+            <div className="flex justify-center pt-6 print:hidden">
               <Link
                 className="inline-flex h-11 items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
                 href="/"

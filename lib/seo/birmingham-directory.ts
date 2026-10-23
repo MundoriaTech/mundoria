@@ -101,7 +101,11 @@ function areaNameForPrefix(prefix: string) {
     (item) => item.prefix.toUpperCase() === prefix.toUpperCase(),
   );
   if (!match) return null;
-  return BIRMINGHAM_AREAS.find((area) => area.slug === match.areaSlug)?.name ?? null;
+  return (
+    match.name ||
+    BIRMINGHAM_AREAS.find((area) => area.slug === match.areaSlug)?.name ||
+    null
+  );
 }
 
 function areaSlugForPrefixes(prefixes: string[]) {
