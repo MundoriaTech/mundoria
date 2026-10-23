@@ -164,13 +164,6 @@ export const INSURANCE_FAQS = [
   },
 ] as const;
 
-export const EXPERIENCE_FAQS = [
-  {
-    a: "Optional but useful. Certificates (for example COSHH awareness) help us verify readiness.",
-    q: "Do I need training certificates?",
-  },
-] as const;
-
 export const LOCATION_FAQS = [
   {
     a: "Your home district plus working radius is the main match signal. Extra districts are optional for areas you cover beyond that circle.",
@@ -302,22 +295,17 @@ export const EMERGENCY_FAQS = [
   },
 ] as const;
 
-export const TRAINING_OPTIONS = [
-  "COSHH awareness",
-  "Manual handling",
-  "Infection control / hygiene",
-  "Working at height (basic)",
-  "First aid awareness",
-  "Customer service / professional cleaning course",
-] as const;
-
 /** Preferred weekly volume (guides matching — not a hard cap). */
 export const PREFERRED_HOURS_BANDS = [
-  { label: "Up to 10 hours a week", value: "up_to_10" },
-  { label: "10–20 hours a week", value: "10_20" },
-  { label: "20–30 hours a week", value: "20_30" },
-  { label: "30+ hours a week", value: "30_plus" },
-  { label: "Flexible", value: "flexible" },
+  { label: "Up to 10 hours", value: "up_to_10" },
+  { label: "10–20 hours", value: "10_20" },
+  { label: "20–30 hours", value: "20_30" },
+  { label: "30+ hours", value: "30_plus" },
+  {
+    description: "Happy with whatever fits my diary.",
+    label: "Flexible",
+    value: "flexible",
+  },
 ] as const;
 
 export const UTR_PROOF_TYPES = [

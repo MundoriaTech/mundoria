@@ -51,7 +51,6 @@ import {
   DbsComplianceStep,
   EmergencyContactStep,
   EquipmentComplianceStep,
-  ExperienceExtras,
   InsuranceComplianceStep,
   LocationExtras,
   PayoutFaqs,
@@ -2164,26 +2163,6 @@ function StepBody({
             value={data.bio}
           />
         </Field>
-        <ExperienceExtras
-          onTrainingCertFile={(file) => onFile("training", file, 0)}
-          onTrainingCertRemove={() => onRemove("training", 0)}
-          onTrainingCompleted={(next) => onUpdate("training_completed", next)}
-          onTrainingPath={(next) => {
-            onUpdate("training_path", next);
-            if (next === "no") {
-              onUpdate("training_completed", []);
-              if (data.training_certificate_url) onRemove("training", 0);
-            }
-          }}
-          trainingCertPreview={docPreviews["training:0"]}
-          trainingCertProgress={uploadProgress}
-          trainingCertUploaded={Boolean(
-            docPreviews["training:0"]?.url || data.training_certificate_url,
-          )}
-          trainingCertUploading={uploadingSlot === "training:0"}
-          trainingCompleted={data.training_completed}
-          trainingPath={data.training_path}
-        />
       </div>
     );
   }
@@ -3758,20 +3737,19 @@ function HoursPicker({
         )}
       </div>
 
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-[#291845]">
-          How many hours would you prefer to work per week?
-        </p>
-        <p className="text-xs text-[#8b8798]">
-          Guides how much work we typically offer each week — not a hard cap.
-        </p>
+      <div className="space-y-3 border-t border-[#e8e0d0] pt-8">
+        <div className="mb-1">
+          <h3 className="text-lg font-bold tracking-[-0.02em] text-[#1c133b]">
+            How many hours would you prefer to work per week?
+          </h3>
+          <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">
+            Guides how much work we typically offer each week — not a hard cap.
+          </p>
+        </div>
         <BranchChoice
           columns={2}
           onChange={onPreferredHours}
-          options={PREFERRED_HOURS_BANDS.map((item) => ({
-            label: item.label,
-            value: item.value,
-          }))}
+          options={[...PREFERRED_HOURS_BANDS]}
           value={preferredHoursBand || null}
         />
       </div>

@@ -24,6 +24,9 @@ const IMG = {
   prepare: "/images/mag/prepare-home.jpg",
   recovery: "/images/mag/recovery.jpg",
   recurring: "/images/mag/recurring.jpg",
+  regularBirminghamCover: "/images/mag/regular-birmingham-cover.jpg",
+  regularBirminghamHome: "/images/mag/regular-birmingham-home.jpg",
+  regularBirminghamVetted: "/images/mag/regular-birmingham-vetted.jpg",
   roomDeep: "/images/mag/room-deep-clean.jpg",
   sameDay: "/images/mag/same-day.jpg",
   shortlet: "/images/mag/shortlet.jpg",
@@ -1104,6 +1107,130 @@ Set recurring cleaning, keep the notes honest, and let the scrambles become rare
     slug: "recurring-cleans-beat-scrambles",
     title: "Why recurring cleans beat last-minute scrambles",
   },
+  {
+    author_name: "Mundoria Team",
+    category: "Local Life",
+    content: `It’s another weekend afternoon, the sun is out, and you’re on your knees scrubbing the bath. Again.
+
+If you’re searching for [regular cleaning in Birmingham](/cleaning/regular-cleaning), you probably already know the feeling. Nobody looks back on their life wishing they’d spent more Saturdays mopping, yet most of us keep doing it, because a dirty home feels worse.
+
+There’s a better option: a regular house cleaner who keeps your home fresh while you get your time back. This guide covers how regular cleaning works, how often you actually need it, and what to check before a stranger walks through your front door.
+
+## The Maths Nobody Does
+
+Say a proper clean of your home takes you two hours. That’s conservative once you count the kitchen, bathroom, floors and dusting.
+
+- Cleaning fortnightly yourself: about **52 hours a year**, more than six working days.
+- Cleaning weekly yourself: about **104 hours a year**, more than thirteen working days.
+
+That’s a fortnight’s holiday, spent holding a mop. Handing it over isn’t laziness. It’s deciding where your hours go.
+
+## Weekly or Fortnightly House Cleaning: How Often Do You Need It?
+
+Most guides say “it depends”. Here’s something you can use:
+
+| Your home | What usually works |
+| --- | --- |
+| Family with children or pets | Weekly cleaning |
+| Working from home, or a busy shared house | Weekly or fortnightly |
+| Couple or professionals out all day | Fortnightly cleaning |
+| One or two people who tidy as they go | Fortnightly or monthly |
+
+Not sure? Start fortnightly. If the kitchen and bathroom feel grubby by day ten, go weekly. If it still looks fresh on day fourteen, you’ve found your rhythm.
+
+## What Regular Cleaning Does That a One-Off Clean Can’t
+
+A one-off clean fixes a bad week. Regular cleaning stops the bad week happening.
+
+When grime is wiped away every seven or fourteen days, it never gets the chance to bake on. Limescale doesn’t build up around taps, the shower doesn’t get that grey film, and the floors never reach the point where you apologise to guests. Each visit also stays quicker and lighter, because your cleaner is maintaining a clean home, not rescuing a neglected one.
+
+If your home needs a proper reset first, start with a [deep clean](/cleaning/deep-cleaning) and then move to regular upkeep. If you only need a helping hand once, our [one-off cleaning](/cleaning/one-off-cleaning) is made for that.
+
+## The Real Worry: Letting a Stranger Into Your Home
+
+![A Mundoria cleaner on the way — you should know who’s coming before they arrive.](/images/mag/regular-birmingham-vetted.jpg "Vetted cleaners and live booking status take the guesswork out of who is coming.")
+
+This is what most people don’t say out loud. You’re not only wondering whether the oven gets cleaned. You’re wondering who is coming into your home.
+
+Whichever domestic cleaners in Birmingham you consider, ours included, ask:
+
+- Do they tell you who is coming? You should know your cleaner before they arrive.
+- Can you see what’s happening? Live booking status beats wondering whether anyone is on the way.
+- Is there a checklist? “We cleaned it” is a claim. A completed checklist is evidence.
+- When do you pay? If you pay before you’ve seen the result, you carry all the risk.
+- Do you know the price first? A clear estimate before you confirm is the minimum you should expect.
+
+## How Regular Cleaning Works with Mundoria
+
+We built Mundoria around one idea: a home service should come with a visible standard.
+
+1. **Choose.** Pick regular cleaning, enter your address and tell us about your home.
+2. **See your estimate.** You’ll see a clear starting price before you confirm anything.
+3. **Get matched.** Your booking is matched with a vetted cleaner. You can follow the booking, your cleaner’s assignment and your messages in one place.
+4. **Confirm.** After the visit, review the checklist. Payment is captured only once you’ve reviewed it.
+
+You can book a single visit or set up a repeating schedule. The time and your notes stay with the booking, so you never explain your preferences twice.
+
+## Regular House Cleaning Across Birmingham
+
+We’re serving Birmingham neighbourhood by neighbourhood, with regular house cleaning in Harborne, Edgbaston, Moseley, Kings Heath, Selly Oak and the Jewellery Quarter. Enter your address when you book and we’ll confirm we cover your area.
+
+## Need More Than Regular Cleaning?
+
+Some homes need a different kind of clean, so Mundoria covers the full range:
+
+- [Deep cleaning](/cleaning/deep-cleaning) for built-up dirt and overlooked areas, ideal before you start a regular schedule
+- [End of tenancy cleaning](/cleaning/end-of-tenancy-cleaning) to landlord and agent standards, so you get your deposit back
+- [Airbnb cleaning](/cleaning/airbnb-shortlet-cleaning) for fast, guest-ready turnovers, plus [holiday let cleaning](/cleaning/holiday-let-cleaning)
+- [Move-in / move-out cleaning](/cleaning/move-in-move-out-cleaning) so you’re ready to leave or ready to arrive
+- [One-off cleaning](/cleaning/one-off-cleaning) when your home needs a reset
+- [Office cleaning](/cleaning/office-cleaning) for workplaces and studios across Birmingham
+
+Ready to go? You can [book regular cleaning](/booking/new?service=regular), a [deep clean](/booking/new?service=deep_clean), an [end of tenancy clean](/booking/new?service=end_of_tenancy) or a [one-off clean](/booking/new?service=one_off) directly.
+
+## Regular Cleaning in Birmingham: Your Questions Answered
+
+### How much does regular cleaning cost in Birmingham?
+
+It depends on the size of your home and how long the visit takes. You’ll see a clear estimate before you confirm anything, so there are no surprises.
+
+### Is fortnightly cleaning enough?
+
+For most homes, yes. A quick wipe of the kitchen between visits covers the gap.
+
+### Do I need to be home?
+
+That depends on what suits you. You can leave notes with the booking about access and preferences.
+
+### Should I tidy before the cleaner arrives?
+
+A quick clear of surfaces and floors lets your cleaner spend the time cleaning instead of moving things.
+
+### What if I want something more thorough first?
+
+Book a [deep clean](/cleaning/deep-cleaning) to reset the home, then move to regular upkeep.
+
+### Can I try it once before committing?
+
+Yes. You can book a single visit and decide afterwards whether a schedule suits you.
+
+## Get Your Weekends Back
+
+![A calm, tidy home — the point of regular cleaning is getting your Saturdays back.](/images/mag/regular-birmingham-home.jpg "A clean home shouldn’t cost you your Saturdays.")
+
+A clean home shouldn’t cost you your Saturdays.
+
+Tell us where, pick a time, and see your estimate before you commit. We’ll match you with a vetted cleaner, you can follow the visit, and you only pay once you’ve seen the finished job.
+
+[Book your regular clean with Mundoria](/booking/new?service=regular)`,
+    cover_url: IMG.regularBirminghamCover,
+    excerpt:
+      "How regular cleaning in Birmingham works, how often you need it, and what to check before a cleaner walks through your door.",
+    published: true,
+    published_at: daysAgo(0),
+    slug: "regular-cleaning-birmingham-get-your-weekends-back",
+    title: "Regular cleaning in Birmingham: get your weekends back",
+  },
 ];
 
 /** Marketing service slugs each Mag post should rank for on money pages. */
@@ -1149,6 +1276,15 @@ export const MAG_RELATED_SERVICES_BY_SLUG = {
   "office-clutter-and-wellbeing": ["office-cleaning"],
   "prepare-your-home-before-a-clean": ["regular-cleaning", "one-off-cleaning"],
   "recurring-cleans-beat-scrambles": ["regular-cleaning"],
+  "regular-cleaning-birmingham-get-your-weekends-back": [
+    "regular-cleaning",
+    "deep-cleaning",
+    "one-off-cleaning",
+    "end-of-tenancy-cleaning",
+    "airbnb-shortlet-cleaning",
+    "move-in-move-out-cleaning",
+    "office-cleaning",
+  ],
   "room-by-room-deep-cleaning-guide": [
     "deep-cleaning",
     "regular-cleaning",

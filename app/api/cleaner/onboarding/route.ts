@@ -660,13 +660,9 @@ export async function POST(request: Request) {
       starting_postcode: null,
       status: "pending",
       stripe_onboarding_complete: stripeOnboardingComplete,
-      training_certificate_url:
-        value.training_path === "yes"
-          ? value.training_certificate_url || null
-          : null,
-      training_completed:
-        value.training_path === "yes" ? value.training_completed : [],
-      training_path: value.training_path || null,
+      training_certificate_url: null,
+      training_completed: [],
+      training_path: null,
       transport_mode: value.transport_mode || null,
       utr_document_status: reviewStatusForSubmitted(utrSubmitted),
       utr_document_url:

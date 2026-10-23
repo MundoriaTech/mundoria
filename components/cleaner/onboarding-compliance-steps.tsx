@@ -14,7 +14,6 @@ import {
   EMERGENCY_FAQS,
   EQUIPMENT_FAQS,
   EQUIPMENT_ITEMS,
-  EXPERIENCE_FAQS,
   FINAL_REVIEW_FAQS,
   HMRC_FIND_UTR_URL,
   HMRC_REGISTER_URL,
@@ -25,7 +24,6 @@ import {
   PPE_ITEMS,
   PRODUCT_ITEMS,
   SAFETY_GUIDELINES,
-  TRAINING_OPTIONS,
   UTR_FAQS,
   UTR_PROOF_TYPES,
   TRANSPORT_MODE_OPTIONS,
@@ -711,67 +709,6 @@ export function InsuranceComplianceStep({
 
       {error ? <FieldError message={error} /> : null}
       <FaqAccordion items={INSURANCE_FAQS} />
-    </div>
-  );
-}
-
-export function ExperienceExtras({
-  onTrainingCertFile,
-  onTrainingCertRemove,
-  onTrainingCompleted,
-  onTrainingPath,
-  trainingCertPreview,
-  trainingCertUploaded,
-  trainingCertUploading,
-  trainingCertProgress,
-  trainingCompleted,
-  trainingPath,
-}: {
-  onTrainingCertFile: (file: File) => void;
-  onTrainingCertRemove: () => void;
-  onTrainingCompleted: (next: string[]) => void;
-  onTrainingPath: (next: string) => void;
-  trainingCertPreview?: { isPdf?: boolean; url?: string };
-  trainingCertUploaded: boolean;
-  trainingCertUploading: boolean;
-  trainingCertProgress: number;
-  trainingCompleted: string[];
-  trainingPath: string;
-}) {
-  return (
-    <div className="mt-8 space-y-6 border-t border-[#e8e0d0] pt-8">
-      <SectionHeading subtitle="Optional — certificates help verification.">
-        Training &amp; qualifications
-      </SectionHeading>
-      <BranchChoice
-        onChange={onTrainingPath}
-        options={[
-          { label: "Yes, I've completed training", value: "yes" },
-          { label: "No formal training yet", value: "no" },
-        ]}
-        value={trainingPath || null}
-      />
-      {trainingPath === "yes" ? (
-        <div className="space-y-4">
-          <ChipMultiSelect
-            onChange={onTrainingCompleted}
-            options={TRAINING_OPTIONS}
-            selected={trainingCompleted}
-          />
-          <DocumentUpload
-            label="Upload a training certificate (optional)"
-            onFile={onTrainingCertFile}
-            onRemove={onTrainingCertRemove}
-            previewIsPdf={trainingCertPreview?.isPdf}
-            previewUrl={trainingCertPreview?.url}
-            progress={trainingCertUploading ? trainingCertProgress : undefined}
-            uploaded={trainingCertUploaded}
-            uploading={trainingCertUploading}
-          />
-        </div>
-      ) : null}
-
-      <FaqAccordion items={EXPERIENCE_FAQS} />
     </div>
   );
 }

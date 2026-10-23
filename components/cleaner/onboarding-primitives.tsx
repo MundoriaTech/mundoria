@@ -54,7 +54,7 @@ export function BranchChoice({
     <div
       className={cn(
         "grid gap-3",
-        columns === 2 && "grid-cols-2",
+        columns === 2 && "md:grid-cols-2",
       )}
     >
       {options.map((option) => {
@@ -108,7 +108,7 @@ export function BranchMultiChoice({
     <div
       className={cn(
         "grid gap-3",
-        columns === 2 && "grid-cols-2",
+        columns === 2 && "md:grid-cols-2",
       )}
     >
       {options.map((option) => {
