@@ -67,15 +67,12 @@ import { TrainingSurvey } from "@/components/cleaner/training-survey";
 import {
   CLEANER_AGREEMENT_DOCS,
   PREFERRED_HOURS_BANDS,
-  RADIUS_PRESETS,
   assessDocumentFile,
   isAcceptableInsuranceCover,
   isPastDateIso,
   isValidUtr,
   mergeVerificationFlags,
-  snapToRadiusPreset,
-  transportModeBand,
-  transportModeOtherText,
+  parseTransportModes,
   type DbsPath,
   type InsurancePath,
   type UtrPath,
@@ -113,9 +110,8 @@ import type { CleanerProfile } from "@/types/cleaner";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
 const BIRMINGHAM_CENTER = { lat: 52.4862, lng: -1.8904 };
-const MAX_RADIUS_MILES = 25;
-/** Pack default sits on the “up to 15 miles” preset. */
-const DEFAULT_RADIUS_MILES = 15;
+const MAX_RADIUS_MILES = 15;
+const DEFAULT_RADIUS_MILES = 8;
 const MILES_TO_METRES = 1609.344;
 
 const COVERAGE_SHORTCUTS = birminghamPostcodesForPicker().map((item) => ({
@@ -650,10 +646,14 @@ export function OnboardingWizard({
     home_base_lat: null,
     home_base_lng: null,
     working_areas: [] as string[],
-    working_radius_miles: snapToRadiusPreset(
-      Math.round(
-        (cleaner.working_radius_km ?? DEFAULT_RADIUS_MILES * 1.609344) /
-          1.609344,
+    working_radius_miles: Math.min(
+      MAX_RADIUS_MILES,
+      Math.max(
+        1,
+        Math.round(
+          (cleaner.working_radius_km ?? DEFAULT_RADIUS_MILES * 1.609344) /
+            1.609344,
+        ),
       ),
     ),
     years_experience: cleaner.years_experience ?? 0,
@@ -1842,12 +1842,8 @@ function StepBody({
           radiusMiles={data.working_radius_miles}
         />
         <LocationExtras
-          bookingPreferences={data.booking_preferences}
           canTransportEquipment={data.can_transport_equipment}
           error={issueFor("transport")}
-          onBookingPreferences={(next) =>
-            onUpdate("booking_preferences", next)
-          }
           onCanTransport={(next) => onUpdate("can_transport_equipment", next)}
           onTransportMode={(next) => onUpdate("transport_mode", next)}
           transportMode={data.transport_mode}
@@ -1998,19 +1994,11 @@ function StepBody({
         onProductsOther={(next) => onUpdate("products_other", next)}
         onProductsOwned={(next) => onUpdate("products_owned", next)}
         onProductsOwnership={(next) => onUpdate("products_ownership", next)}
-        onSpecialised={(next) => onUpdate("specialised_equipment", next)}
-        onSpecialisedOther={(next) => onUpdate("specialised_other", next)}
-        onSpecialisedTraining={(next) =>
-          onUpdate("specialised_training", next)
-        }
         ppeOther={data.ppe_other}
         ppeOwned={data.ppe_owned}
         productsOther={data.products_other}
         productsOwned={data.products_owned}
         productsOwnership={data.products_ownership}
-        specialised={data.specialised_equipment}
-        specialisedOther={data.specialised_other}
-        specialisedTraining={data.specialised_training}
       />
     );
   }
@@ -3093,7 +3081,10 @@ function CoverageStep({
 }) {
   const [guideOpen, setGuideOpen] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
-  const miles = snapToRadiusPreset(radiusMiles || DEFAULT_RADIUS_MILES);
+  const miles = Math.min(
+    MAX_RADIUS_MILES,
+    Math.max(1, Math.round(radiusMiles) || DEFAULT_RADIUS_MILES),
+  );
   const homePrefix = ukOutwardCode(homeBase);
   const mapCenter =
     homeBaseLat != null && homeBaseLng != null
@@ -3180,38 +3171,39 @@ function CoverageStep({
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div>
-            <p className="text-sm font-medium text-[#291845]">
-              How far are you willing to travel?
-            </p>
-            <p className="mt-1 text-xs leading-5 text-[#8b8798]">
-              Mundoria normally searches within about 15 miles of a booking.
-              Choose what works for you.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {RADIUS_PRESETS.map((preset) => {
-              const selected = miles === preset.value;
-              return (
-                <button
-                  aria-pressed={selected}
-                  className={cn(
-                    "rounded-2xl border-2 bg-[#f9f6ef] p-4 text-left transition touch-manipulation",
-                    selected
-                      ? "border-[#1c133b] bg-white"
-                      : "border-[#1c133b]/35 hover:border-[#1c133b]",
-                  )}
-                  key={preset.value}
-                  onClick={() => onRadiusMiles(preset.value)}
-                  type="button"
-                >
-                  <p className="font-semibold text-[#1c133b]">
-                    {preset.label}
-                  </p>
-                </button>
-              );
-            })}
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-[#291845]">Working radius</p>
+          <p className="text-xs leading-5 text-[#8b8798]">
+            How far you’re willing to travel from your home base — up to{" "}
+            {MAX_RADIUS_MILES} miles.
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              aria-label="Decrease radius"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={miles <= 1}
+              onClick={() => onRadiusMiles(miles - 1)}
+              type="button"
+            >
+              <Minus className="h-4 w-4" strokeWidth={2.5} />
+            </button>
+            <div className="min-w-[5.5rem] text-center">
+              <p className="text-lg font-semibold tabular-nums text-[#291845]">
+                {miles}
+              </p>
+              <p className="text-xs font-medium text-[#8b8798]">
+                {miles === 1 ? "mile" : "miles"}
+              </p>
+            </div>
+            <button
+              aria-label="Increase radius"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={miles >= MAX_RADIUS_MILES}
+              onClick={() => onRadiusMiles(miles + 1)}
+              type="button"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.5} />
+            </button>
           </div>
         </div>
 
@@ -4092,9 +4084,11 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     working_areas: (value.working_areas ?? [])
       .map((area) => ukOutwardCode(area))
       .filter(Boolean),
-    working_radius_miles: snapToRadiusPreset(
-      Number(value.working_radius_miles),
-    ),
+    working_radius_miles: (() => {
+      const miles = Number(value.working_radius_miles);
+      if (!Number.isFinite(miles)) return DEFAULT_RADIUS_MILES;
+      return Math.min(MAX_RADIUS_MILES, Math.max(1, Math.round(miles)));
+    })(),
     years_experience: Number.isFinite(value.years_experience)
       ? Math.min(60, Math.max(0, Math.round(Number(value.years_experience))))
       : 0,
@@ -4187,14 +4181,20 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
         `Choose a working radius between 1 and ${MAX_RADIUS_MILES} miles.`,
       );
     }
-    if (
-      transportModeBand(data.transport_mode) === "other" &&
-      transportModeOtherText(data.transport_mode).length < 2
-    ) {
-      return issue(
-        "transport",
-        "Describe how you usually travel to cleaning jobs.",
-      );
+    {
+      const travel = parseTransportModes(data.transport_mode);
+      if (travel.modes.length === 0) {
+        return issue(
+          "transport",
+          "Select at least one way you usually travel to cleaning jobs.",
+        );
+      }
+      if (travel.modes.includes("other") && travel.otherText.length < 2) {
+        return issue(
+          "transport",
+          "Describe how else you usually travel to cleaning jobs.",
+        );
+      }
     }
   }
 

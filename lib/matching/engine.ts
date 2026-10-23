@@ -1,5 +1,6 @@
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 
+import { parseTransportModes } from "@/lib/cleaner/onboarding-compliance";
 import { formatServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
@@ -209,9 +210,18 @@ export async function runMatchingEngine(
       specialistService &&
       cleanerProfile.specialist_review_required === true &&
       cleanerProfile.skills_assessment_status !== "approved";
-    const transportMode = cleanerProfile.transport_mode as string | null;
+    const travelModes = parseTransportModes(
+      (cleanerProfile.transport_mode as string | null) ?? "",
+    ).modes;
+    const hasFasterTransport = travelModes.some(
+      (mode) => mode === "car" || mode === "public" || mode === "other",
+    );
+    const slowTransportOnly =
+      travelModes.length > 0 &&
+      !hasFasterTransport &&
+      travelModes.every((mode) => mode === "walk" || mode === "bike");
     const slowTransportLongTrip =
-      (transportMode === "walk" || transportMode === "bike") &&
+      slowTransportOnly &&
       Number.isFinite(distance) &&
       distance > LONG_TRAVEL_METRES;
     const equipmentGap =

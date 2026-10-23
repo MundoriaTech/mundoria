@@ -84,6 +84,61 @@ export function BranchChoice({
   );
 }
 
+/** Same card style as BranchChoice, but toggles multiple values. */
+export function BranchMultiChoice({
+  columns = 1,
+  options,
+  values,
+  onChange,
+}: {
+  columns?: 1 | 2;
+  options: { description?: string; label: string; value: string }[];
+  values: string[];
+  onChange: (next: string[]) => void;
+}) {
+  function toggle(value: string) {
+    onChange(
+      values.includes(value)
+        ? values.filter((item) => item !== value)
+        : [...values, value],
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "grid gap-3",
+        columns === 2 && "grid-cols-2",
+      )}
+    >
+      {options.map((option) => {
+        const active = values.includes(option.value);
+        return (
+          <button
+            aria-pressed={active}
+            className={cn(
+              "rounded-2xl border-2 bg-[#f9f6ef] p-4 text-left transition touch-manipulation",
+              active
+                ? "border-[#1c133b] bg-white"
+                : "border-[#1c133b]/35 hover:border-[#1c133b]",
+            )}
+            key={option.value}
+            onClick={() => toggle(option.value)}
+            type="button"
+          >
+            <p className="font-semibold text-[#1c133b]">{option.label}</p>
+            {option.description ? (
+              <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+                {option.description}
+              </p>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function FaqAccordion({
   items,
 }: {

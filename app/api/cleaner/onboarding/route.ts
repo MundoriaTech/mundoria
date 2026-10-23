@@ -16,8 +16,7 @@ import {
   isPastDateIso,
   isValidUtr,
   namesLikelyMatch,
-  transportModeBand,
-  transportModeOtherText,
+  parseTransportModes,
 } from "@/lib/cleaner/onboarding-compliance";
 import {
   CHARTER_AGREEMENTS,
@@ -62,7 +61,7 @@ function ukOutwardCode(value: string) {
   return match?.[1] ?? cleaned;
 }
 
-const MAX_RADIUS_MILES = 25;
+const MAX_RADIUS_MILES = 15;
 
 const schema = z
   .object({
@@ -321,15 +320,24 @@ const schema = z
       });
     }
 
-    if (
-      transportModeBand(value.transport_mode ?? "") === "other" &&
-      transportModeOtherText(value.transport_mode ?? "").length < 2
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Describe how you usually travel to cleaning jobs",
-        path: ["transport_mode"],
-      });
+    {
+      const travel = parseTransportModes(value.transport_mode ?? "");
+      if (travel.modes.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Select at least one way you usually travel to cleaning jobs",
+          path: ["transport_mode"],
+        });
+      } else if (
+        travel.modes.includes("other") &&
+        travel.otherText.length < 2
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Describe how else you usually travel to cleaning jobs",
+          path: ["transport_mode"],
+        });
+      }
     }
 
     const missingAgreements = CLEANER_AGREEMENT_DOCS.filter(
@@ -540,16 +548,14 @@ export async function POST(request: Request) {
   )
     ? ("update_required" as const)
     : ("complete" as const);
-  const specialistReviewRequired = value.specialised_equipment.some(
-    (item) => item !== "None of the above",
-  );
+  const specialistReviewRequired = false;
   const referenceProvided = Boolean(
     value.reference_name || value.reference_email || value.reference_phone,
   );
   const baseUpdate = {
       agreement_acceptances: agreementAcceptances,
       bio: value.bio,
-      booking_preferences: value.booking_preferences,
+      booking_preferences: [],
       can_transport_equipment: value.can_transport_equipment || null,
       cleaning_skills: value.cleaning_skills,
       cleaning_skills_other: value.cleaning_skills.some((item) =>
@@ -651,12 +657,9 @@ export async function POST(request: Request) {
       skills_exam_passed: true,
       skills_assessment_status: skillsAssessmentStatus,
       skills_exam_score: exam.score,
-      specialised_equipment: value.specialised_equipment,
-      specialised_other: otherText(
-        value.specialised_equipment,
-        value.specialised_other,
-      ),
-      specialised_training: value.specialised_training || null,
+      specialised_equipment: [],
+      specialised_other: null,
+      specialised_training: null,
       specialist_review_required: specialistReviewRequired,
       starting_postcode: null,
       status: "pending",

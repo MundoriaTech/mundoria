@@ -166,20 +166,16 @@ export const INSURANCE_FAQS = [
 
 export const EXPERIENCE_FAQS = [
   {
-    a: "Be honest. New cleaners can join; Mundoria may ask for extra training or an assessment before approving specialist services.",
+    a: "Be honest. New cleaners can join; Mundoria may ask for extra training or an assessment before activation.",
     q: "What if I’m new to professional cleaning?",
   },
   {
-    a: "Skills help matching. Selecting a skill doesn’t auto-approve specialist work — oven, end-of-tenancy and similar services may need review.",
+    a: "Skills help matching you to suitable bookings. Selecting a skill doesn’t automatically mean every related job will be offered.",
     q: "Do selected skills auto-approve me for those jobs?",
   },
   {
     a: "Optional but useful. Certificates (for example COSHH awareness) help us verify readiness.",
     q: "Do I need training certificates?",
-  },
-  {
-    a: "Optional. If you share a reference, tick that we may contact them. We only use details for verification.",
-    q: "Are professional references required?",
   },
 ] as const;
 
@@ -193,7 +189,7 @@ export const LOCATION_FAQS = [
     q: "Why ask for a starting postcode?",
   },
   {
-    a: "Choose a radius you’ll reliably travel. You can go up to 20 miles, or more than 20 if you drive longer distances.",
+    a: "Choose a radius you’ll reliably travel, up to 15 miles from your home base. Jobs outside that circle won’t be offered.",
     q: "How far should my radius be?",
   },
 ] as const;
@@ -206,10 +202,6 @@ export const EQUIPMENT_FAQS = [
   {
     a: "Products (sprays, liquids) and equipment (vacuum, mop) are tracked separately because bookings often specify one or both.",
     q: "Why separate products and equipment?",
-  },
-  {
-    a: "Specialised kit (carpet machines, steamers) may need training confirmation and admin review before those jobs are offered.",
-    q: "What about specialised equipment?",
   },
   {
     a: "You can update kit later from your profile. Mundoria may mark “equipment update required” if details look incomplete.",
@@ -336,31 +328,6 @@ export const PREFERRED_HOURS_BANDS = [
   { label: "Flexible", value: "flexible" },
 ] as const;
 
-export const RADIUS_PRESETS = [
-  { label: "Up to 5 miles", value: 5 },
-  { label: "Up to 10 miles", value: 10 },
-  { label: "Up to 15 miles", value: 15 },
-  { label: "Up to 20 miles", value: 20 },
-  { label: "More than 20 miles", value: 25 },
-] as const;
-
-type RadiusPresetValue = (typeof RADIUS_PRESETS)[number]["value"];
-
-/** Snap any mile value onto the nearest pack radius preset. */
-export function snapToRadiusPreset(miles: number): RadiusPresetValue {
-  if (!Number.isFinite(miles) || miles <= 0) return 15;
-  let best: RadiusPresetValue = RADIUS_PRESETS[0].value;
-  let bestDelta = Math.abs(miles - best);
-  for (const preset of RADIUS_PRESETS) {
-    const delta = Math.abs(miles - preset.value);
-    if (delta < bestDelta) {
-      best = preset.value;
-      bestDelta = delta;
-    }
-  }
-  return best;
-}
-
 export const UTR_PROOF_TYPES = [
   "HMRC confirmation letter or welcome letter",
   "Screenshot from HMRC Personal Tax Account or app",
@@ -445,23 +412,6 @@ export const PPE_ITEMS = [
   "Eye protection",
 ] as const;
 
-export const SPECIALISED_EQUIPMENT = [
-  "Carpet cleaning machine",
-  "Upholstery cleaning machine",
-  "Steam cleaner",
-  "Floor polishing or scrubbing machine",
-  "Commercial vacuum cleaner",
-] as const;
-
-export const BOOKING_PREFERENCE_OPTIONS = [
-  { label: "Regular recurring bookings", value: "recurring" },
-  { label: "One-off bookings", value: "one_off" },
-  { label: "Short-notice bookings", value: "short_notice" },
-  { label: "Weekend bookings", value: "weekend" },
-  { label: "Early morning bookings", value: "early" },
-  { label: "Evening bookings", value: "evening" },
-] as const;
-
 export const HMRC_REGISTER_URL =
   "https://www.gov.uk/become-sole-trader/register-sole-trader";
 export const HMRC_FIND_UTR_URL = "https://www.gov.uk/find-utr-number";
@@ -473,6 +423,14 @@ export const TRANSPORT_MODE_PRESETS = [
   "public",
   "bike",
   "walk",
+] as const;
+
+export const TRANSPORT_MODE_OPTIONS = [
+  { label: "I drive and have my own car", value: "car" },
+  { label: "Public transport", value: "public" },
+  { label: "Bicycle", value: "bike" },
+  { label: "Walking", value: "walk" },
+  { label: "Other", value: "other" },
 ] as const;
 
 export function digitsOnly(value: string, max = 10) {
@@ -536,24 +494,74 @@ export function insuranceCoverOtherText(value: string) {
 }
 
 export function transportModeBand(value: string) {
-  const trimmed = value.trim();
-  if ((TRANSPORT_MODE_PRESETS as readonly string[]).includes(trimmed)) {
-    return trimmed;
-  }
-  if (trimmed) return "other";
+  const { modes } = parseTransportModes(value);
+  if (modes.length === 1) return modes[0] ?? null;
+  if (modes.length > 1) return modes.includes("other") ? "other" : modes[0]!;
   return null;
 }
 
 export function transportModeOtherText(value: string) {
+  return parseTransportModes(value).otherText;
+}
+
+/** Parse stored transport_mode (single legacy value or comma-separated multi). */
+export function parseTransportModes(value: string): {
+  modes: string[];
+  otherText: string;
+} {
   const trimmed = value.trim();
-  if (
-    !trimmed ||
-    trimmed === "other" ||
-    (TRANSPORT_MODE_PRESETS as readonly string[]).includes(trimmed)
-  ) {
-    return "";
+  if (!trimmed) return { modes: [], otherText: "" };
+
+  if ((TRANSPORT_MODE_PRESETS as readonly string[]).includes(trimmed)) {
+    return { modes: [trimmed], otherText: "" };
   }
-  return trimmed;
+  if (trimmed === "other") return { modes: ["other"], otherText: "" };
+  if (trimmed.startsWith("other:")) {
+    return { modes: ["other"], otherText: trimmed.slice(6).trim() };
+  }
+  if (!trimmed.includes(",")) {
+    return { modes: ["other"], otherText: trimmed };
+  }
+
+  const modes: string[] = [];
+  let otherText = "";
+  for (const part of trimmed.split(",").map((item) => item.trim()).filter(Boolean)) {
+    if (part.startsWith("other:")) {
+      modes.push("other");
+      otherText = part.slice(6).trim();
+      continue;
+    }
+    if (part === "other") {
+      modes.push("other");
+      continue;
+    }
+    if ((TRANSPORT_MODE_PRESETS as readonly string[]).includes(part)) {
+      modes.push(part);
+      continue;
+    }
+    modes.push("other");
+    otherText = otherText ? `${otherText}, ${part}` : part;
+  }
+  return { modes: Array.from(new Set(modes)), otherText };
+}
+
+export function serializeTransportModes(
+  modes: string[],
+  otherText: string,
+): string {
+  const unique = Array.from(new Set(modes.filter(Boolean)));
+  const parts: string[] = [];
+  for (const mode of unique) {
+    if (mode === "other") {
+      const text = otherText.trim();
+      parts.push(text ? `other:${text}` : "other");
+      continue;
+    }
+    if ((TRANSPORT_MODE_PRESETS as readonly string[]).includes(mode)) {
+      parts.push(mode);
+    }
+  }
+  return parts.join(",");
 }
 
 export function isPastDateIso(value: string) {

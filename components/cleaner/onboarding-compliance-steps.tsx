@@ -7,7 +7,6 @@ import { FieldError, invalidControlClass } from "@/components/shared/action-erro
 import { Input } from "@/components/ui/input";
 import { MAX_DBS_DOCUMENT_PAGES } from "@/lib/cleaner/document-urls";
 import {
-  BOOKING_PREFERENCE_OPTIONS,
   CLEANING_SKILLS,
   CLEANER_AGREEMENT_DOCS,
   DBS_APPLY_URL,
@@ -27,15 +26,15 @@ import {
   PPE_ITEMS,
   PRODUCT_ITEMS,
   SAFETY_GUIDELINES,
-  SPECIALISED_EQUIPMENT,
   TRAINING_OPTIONS,
   UTR_FAQS,
   UTR_PROOF_TYPES,
+  TRANSPORT_MODE_OPTIONS,
   digitsOnly,
   insuranceCoverBand,
   insuranceCoverOtherText,
-  transportModeBand,
-  transportModeOtherText,
+  parseTransportModes,
+  serializeTransportModes,
   type DbsPath,
   type InsurancePath,
   type UtrPath,
@@ -44,6 +43,7 @@ import { cn } from "@/lib/utils";
 
 import {
   BranchChoice,
+  BranchMultiChoice,
   ChipMultiSelect,
   DocumentUpload,
   ExternalCta,
@@ -771,7 +771,7 @@ export function ExperienceExtras({
 
   return (
     <div className="mt-8 space-y-6 border-t border-[#e8e0d0] pt-8">
-      <SectionHeading subtitle="Select the tasks you’re confident carrying out. Specialist services usually pay more — they still need Mundoria review before you can take those jobs.">
+      <SectionHeading subtitle="Select the tasks you’re confident carrying out.">
         Cleaning skills
       </SectionHeading>
       <ChipMultiSelect
@@ -870,58 +870,50 @@ export function ExperienceExtras({
 }
 
 export function LocationExtras({
-  bookingPreferences,
   canTransportEquipment,
   error,
-  onBookingPreferences,
   onCanTransport,
   onTransportMode,
   transportMode,
 }: {
-  bookingPreferences: string[];
   canTransportEquipment: string;
   error?: string;
-  onBookingPreferences: (next: string[]) => void;
   onCanTransport: (next: string) => void;
   onTransportMode: (next: string) => void;
   transportMode: string;
 }) {
   return (
     <div className="mt-8 space-y-6 border-t border-[#e8e0d0] pt-8">
-      <SectionHeading>How do you usually travel to cleaning jobs?</SectionHeading>
-      <BranchChoice
+      <SectionHeading subtitle="Select every option that applies.">
+        How do you usually travel to cleaning jobs?
+      </SectionHeading>
+      <BranchMultiChoice
         columns={2}
-        onChange={(next) => {
-          if (next === "other") {
-            const existing = transportModeOtherText(transportMode);
-            onTransportMode(existing || "other");
-            return;
-          }
-          onTransportMode(next);
+        onChange={(modes) => {
+          const { otherText } = parseTransportModes(transportMode);
+          onTransportMode(serializeTransportModes(modes, otherText));
         }}
-        options={[
-          { label: "I drive and have my own car", value: "car" },
-          { label: "Public transport", value: "public" },
-          { label: "Bicycle", value: "bike" },
-          { label: "Walking", value: "walk" },
-          { label: "Other", value: "other" },
-        ]}
-        value={transportModeBand(transportMode)}
+        options={[...TRANSPORT_MODE_OPTIONS]}
+        values={parseTransportModes(transportMode).modes}
       />
-      {transportModeBand(transportMode) === "other" ? (
+      {parseTransportModes(transportMode).modes.includes("other") ? (
         <label className="block space-y-2 text-sm font-medium">
-          <span>How do you usually travel?</span>
+          <span>How else do you travel?</span>
           <Input
             className={cn(FIELD, error ? invalidControlClass : undefined)}
             onChange={(event) => {
-              const next = event.target.value;
-              onTransportMode(next.trim() ? next : "other");
+              const { modes } = parseTransportModes(transportMode);
+              onTransportMode(
+                serializeTransportModes(modes, event.target.value),
+              );
             }}
             placeholder="e.g. Motorbike, lifts with a colleague"
-            value={transportModeOtherText(transportMode)}
+            value={parseTransportModes(transportMode).otherText}
           />
           {error ? <FieldError message={error} /> : null}
         </label>
+      ) : error ? (
+        <FieldError message={error} />
       ) : null}
 
       <SectionHeading>
@@ -935,15 +927,6 @@ export function LocationExtras({
           { label: "Depends on the equipment", value: "depends" },
         ]}
         value={canTransportEquipment || null}
-      />
-
-      <SectionHeading subtitle="Preferences help matching — they don't guarantee bookings.">
-        Booking preferences
-      </SectionHeading>
-      <ChipMultiSelect
-        onChange={onBookingPreferences}
-        options={BOOKING_PREFERENCE_OPTIONS}
-        selected={bookingPreferences}
       />
 
       <FaqAccordion items={LOCATION_FAQS} />
@@ -984,17 +967,11 @@ export function EquipmentComplianceStep({
   onProductsOther,
   onProductsOwned,
   onProductsOwnership,
-  onSpecialised,
-  onSpecialisedOther,
-  onSpecialisedTraining,
   ppeOther,
   ppeOwned,
   productsOther,
   productsOwned,
   productsOwnership,
-  specialised,
-  specialisedOther,
-  specialisedTraining,
 }: {
   equipmentCondition: string;
   equipmentOther: string;
@@ -1011,17 +988,11 @@ export function EquipmentComplianceStep({
   onProductsOther: (next: string) => void;
   onProductsOwned: (next: string[]) => void;
   onProductsOwnership: (next: string) => void;
-  onSpecialised: (next: string[]) => void;
-  onSpecialisedOther: (next: string) => void;
-  onSpecialisedTraining: (next: string) => void;
   ppeOther: string;
   ppeOwned: string[];
   productsOther: string;
   productsOwned: string[];
   productsOwnership: string;
-  specialised: string[];
-  specialisedOther: string;
-  specialisedTraining: string;
 }) {
   const showEquipmentList =
     equipmentOwnership === "yes" || equipmentOwnership === "some";
@@ -1119,40 +1090,6 @@ export function EquipmentComplianceStep({
         ]}
         value={equipmentTransport || null}
       />
-
-      <SectionHeading>
-        Specialised cleaning equipment
-      </SectionHeading>
-      <ChipMultiSelect
-        onChange={onSpecialised}
-        options={[...SPECIALISED_EQUIPMENT, OTHER, "None of the above"]}
-        selected={specialised}
-      />
-      {specialised.includes(OTHER) ? (
-        <OtherSpecify onChange={onSpecialisedOther} value={specialisedOther} />
-      ) : null}
-      {specialised.some(
-        (item) => item !== "None of the above" && item !== OTHER,
-      ) || specialised.includes(OTHER) ? (
-        <>
-          <SectionHeading>
-            Have you been trained to use the specialised equipment selected?
-          </SectionHeading>
-          <BranchChoice
-            onChange={onSpecialisedTraining}
-            options={[
-              { label: "Yes", value: "yes" },
-              { label: "No", value: "no" },
-              { label: "Not applicable", value: "na" },
-            ]}
-            value={specialisedTraining || null}
-          />
-          <InfoCallout>
-            Specialised kit doesn&apos;t auto-approve specialist bookings —
-            Mundoria reviews these before offers go live.
-          </InfoCallout>
-        </>
-      ) : null}
 
       <FaqAccordion items={EQUIPMENT_FAQS} />
     </div>
