@@ -20,6 +20,7 @@ import {
 import {
   BOOKING_CHECKOUT_RETURN_PATH,
   markBookingAuthReturn,
+  rememberBookingCheckoutStep,
 } from "@/lib/customer/booking-auth-return";
 import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
@@ -191,8 +192,9 @@ export function BookingAuthPrompt({
           return;
         }
         markBookingAuthReturn();
-        // Hard resume checkout so the auth gate unmounts with a fresh session.
-        router.replace(RETURN_PATH);
+        // Refresh session in place — avoid replace/remount that rebuilds the
+        // wizard history stack and can drop the customer back mid-funnel.
+        rememberBookingCheckoutStep();
         router.refresh();
         return;
       }
@@ -242,7 +244,7 @@ export function BookingAuthPrompt({
       }
 
       markBookingAuthReturn();
-      router.replace(RETURN_PATH);
+      rememberBookingCheckoutStep();
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to sign in.");

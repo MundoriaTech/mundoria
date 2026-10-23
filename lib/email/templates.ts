@@ -536,35 +536,39 @@ function resolveTemplate(
       };
     case "admin.cleaner_application_submitted":
       return {
-        body: `${string(data.cleanerName) || "A cleaner"} submitted identity documents and is ready for admin review.`,
+        body: `${string(data.cleanerName) || "A cleaner"} submitted an application and booked an interview. Review documents and readiness in admin before approving.`,
         buttonHref: string(data.cleanerUrl) || `${appUrl}/admin/cleaners`,
-        buttonLabel: "Review cleaner",
+        buttonLabel: "Review application",
         cards: [
           { label: "Cleaner", value: data.cleanerName },
           { label: "Email", value: data.cleanerEmail },
           { label: "Interview", value: data.interviewWhen },
           { label: "Experience", value: data.yearsExperience },
+          { label: "Reference", value: data.applicationReference },
         ],
-        preview: "A new cleaner application needs review.",
-        subject: `New cleaner application${data.cleanerName ? `: ${data.cleanerName}` : ""}`,
-        title: "New cleaner application",
+        preview: "Cleaner application ready for admin review.",
+        subject: `Review cleaner application${data.cleanerName ? `: ${data.cleanerName}` : ""}`,
+        title: "Cleaner application to review",
         tone: "admin",
       };
     case "admin.user_signed_up": {
       const roleLabel =
         string(data.role) === "cleaner" ? "Cleaner" : "Customer";
       return {
-        body: `${string(data.userName) || "Someone"} just signed up as a ${roleLabel.toLowerCase()} on Mundoria.`,
+        body:
+          roleLabel === "Cleaner"
+            ? `${string(data.userName) || "Someone"} created a cleaner account. Open the profile if you need to track onboarding progress.`
+            : `${string(data.userName) || "Someone"} created a customer account. Open the profile if you need account details or booking context.`,
         buttonHref: string(data.profileUrl) || `${appUrl}/admin/customers`,
-        buttonLabel: "Open profile",
+        buttonLabel: "Open in admin",
         cards: [
           { label: "Name", value: data.userName },
           { label: "Email", value: data.userEmail },
           { label: "Role", value: roleLabel },
         ],
-        preview: `New ${roleLabel.toLowerCase()} signup.`,
-        subject: `New ${roleLabel.toLowerCase()} signup${data.userName ? `: ${data.userName}` : ""}`,
-        title: `New ${roleLabel.toLowerCase()} signup`,
+        preview: `New ${roleLabel.toLowerCase()} account created.`,
+        subject: `[Admin] New ${roleLabel.toLowerCase()}: ${string(data.userName) || string(data.userEmail) || "signup"}`,
+        title: `New ${roleLabel.toLowerCase()} account`,
         tone: "admin",
       };
     }
@@ -576,12 +580,12 @@ function resolveTemplate(
     case "admin.daily_summary":
     case "admin.alert":
       return {
-        body: string(data.body) || "An admin event needs review in Mundoria.",
+        body: string(data.body) || "An ops event needs attention in the Mundoria admin panel.",
         buttonHref: string(data.actionUrl) || `${appUrl}/admin/dashboard`,
         buttonLabel: "Open admin panel",
         cards: adminCards(data),
         preview: string(data.preview) || "Mundoria admin alert.",
-        subject: string(data.subject) || `[Mundoria] ${string(data.title) || "Admin alert"}`,
+        subject: string(data.subject) || `[Admin] ${string(data.title) || "Alert"}`,
         title: string(data.title) || "Admin alert",
         tone: "admin",
       };
@@ -592,12 +596,18 @@ function resolveTemplate(
         buttonHref: string(data.actionUrl),
         buttonLabel: string(data.actionLabel) || "Open Mundoria",
         cards: Object.entries(data)
-          .filter(([key]) => !["body", "actionUrl", "actionLabel", "subject", "title"].includes(key))
+          .filter(
+            ([key]) =>
+              !["body", "actionUrl", "actionLabel", "subject", "title", "tone"].includes(
+                key,
+              ),
+          )
           .map(([label, value]) => ({ label: humanize(label), value })),
         preview: string(data.preview) || string(data.subject) || "Mundoria notification.",
         subject: string(data.subject) || "Mundoria notification",
         title: string(data.title) || string(data.subject) || "Mundoria notification",
-        tone: "admin",
+        // Callers can pass tone: "admin" for ops mail; default stays customer-facing.
+        tone: string(data.tone) === "admin" ? "admin" : "customer",
       };
   }
 }
@@ -636,11 +646,22 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const appUrl =
     string(data.appUrl) || process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_SITE_URL;
   const supportEmail = resolveSupportEmail();
+  const isAdmin = context.tone === "admin";
   const hasIntro = Boolean(context.intro?.trim());
   // Frameless letter: greeting leads; title only when there is no intro.
   const lead = hasIntro
     ? `<p class="email-intro" style="margin:0 0 16px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">${escapeHtml(context.intro!)}</p>`
     : `<h1 class="email-title" style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;font-weight:500;letter-spacing:-0.02em;color:#1c133b;">${escapeHtml(context.title)}</h1>`;
+  const signoff = isAdmin
+    ? `<p class="email-signoff" style="margin:28px 0 0;font-size:14px;line-height:1.6;color:#8a8498;">Mundoria ops alert · internal use only</p>`
+    : `<p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">See you soon — the Mundoria team</p>`;
+  const footerPrimary = isAdmin
+    ? `<p style="margin:0 0 14px;">Review this in the <a href="${escapeAttribute(appUrl)}/admin/dashboard" style="color:#b8894e;font-weight:600;text-decoration:underline;">admin panel</a>. Do not forward to customers.</p>`
+    : `<p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a> or visit <a href="${escapeAttribute(appUrl)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>`;
+  const footerSocial = isAdmin ? "" : renderSocialLinks();
+  const footerLegal = isAdmin
+    ? `<p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · admin notification</p>`
+    : `<p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>`;
 
   const html = `<!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -696,14 +717,14 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
                 }
                 ${renderRelatedLinks(context.relatedLinks)}
                 ${renderSecurityNote(data)}
-                <p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">See you soon — the Mundoria team</p>
+                ${signoff}
               </td>
             </tr>
             <tr>
               <td class="email-footer" align="center" style="padding:36px 28px 40px;color:#8a8498;font-size:12px;line-height:1.7;text-align:center;">
-                <p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a> or visit <a href="${escapeAttribute(appUrl)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>
-                ${renderSocialLinks()}
-                <p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>
+                ${footerPrimary}
+                ${footerSocial}
+                ${footerLegal}
               </td>
             </tr>
           </table>
@@ -717,7 +738,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
     html,
     preview: context.preview,
     subject: context.subject,
-    text: renderText(context, cards, supportEmail),
+    text: renderText(context, cards, supportEmail, appUrl),
   };
 }
 
@@ -829,7 +850,9 @@ function renderText(
   context: TemplateContext,
   cards: Array<{ label: string; value?: unknown }>,
   supportEmail: string,
+  appUrl: string,
 ) {
+  const isAdmin = context.tone === "admin";
   return [
     "Mundoria",
     context.intro || context.title,
@@ -844,10 +867,16 @@ function renderText(
     ...(context.relatedLinks ?? []).map(
       (link) => `${link.label}: ${link.href}`,
     ),
-    "See you soon — the Mundoria team",
-    `Questions? ${supportEmail}`,
-    "Follow us: Facebook, Instagram, TikTok, LinkedIn",
-    "Mundoria · trusted cleaning, clearly managed",
+    isAdmin
+      ? "Mundoria ops alert · internal use only"
+      : "See you soon — the Mundoria team",
+    isAdmin
+      ? `Review in admin: ${appUrl}/admin/dashboard · Do not forward to customers.`
+      : `Questions? ${supportEmail}`,
+    isAdmin ? "" : "Follow us: Facebook, Instagram, TikTok, LinkedIn",
+    isAdmin
+      ? "Mundoria · admin notification"
+      : "Mundoria · trusted cleaning, clearly managed",
   ]
     .filter(Boolean)
     .join("\n\n");

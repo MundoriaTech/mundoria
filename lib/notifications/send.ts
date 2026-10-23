@@ -94,6 +94,7 @@ export async function sendEmail(
       subject,
       templateName,
       title: subject,
+      tone: "admin",
       type: templateName,
     },
     subject,

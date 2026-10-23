@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { safeInternalPath } from "@/components/auth/email-sent-panel";
@@ -32,14 +32,20 @@ export default function EmailConfirmedPage({
 
       <div className="flex flex-1 items-center justify-center px-5 py-12 sm:py-16">
         <div className="w-full max-w-md text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e7f6ee]">
-            <Check aria-hidden className="h-7 w-7 text-[#1f7a45]" strokeWidth={2.5} />
-          </div>
+          <Image
+            alt=""
+            aria-hidden
+            className="mx-auto h-20 w-20"
+            height={80}
+            priority
+            src="/images/marketing/icons/account-validated.svg"
+            width={80}
+          />
           <h1 className="mt-6 text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
             Your account has been validated
           </h1>
           <p className="mt-3 text-base leading-7 text-[#5a5470]">
-            Welcome — you’re ready to book and manage cleans with Mundoria.
+            Welcome! You’re ready to book and manage cleans with Mundoria.
           </p>
           <div className="mt-8 flex justify-center">
             <Button

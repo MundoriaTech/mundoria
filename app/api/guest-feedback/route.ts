@@ -87,6 +87,7 @@ async function notifyAdmins(
           preview: `${reviewer} left a review.`,
           subject: `Review from ${subjectName}`,
           title: "New client review",
+          tone: "admin",
         },
         subject: `Review from ${subjectName}`,
         template: "system.generic",

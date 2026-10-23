@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Mundoria circular highlight: navy ring, soft lavender fill -->
+  <circle cx="32" cy="32" r="22" fill="#EBE4F5" stroke="#1C133B" stroke-width="2.75"/>
+  <!-- Gold disc behind the check -->
+  <circle cx="32" cy="32" r="12.5" fill="#C79C66" stroke="#1C133B" stroke-width="2.5"/>
+  <!-- Check -->
+  <path
+    d="M25.5 32.4l5 5 11-12"
+    stroke="#1C133B"
+    stroke-width="2.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Small navy dash accents -->
+  <path d="M10 18h4" stroke="#1C133B" stroke-width="2.25" stroke-linecap="round"/>
+  <path d="M50 46h4" stroke="#1C133B" stroke-width="2.25" stroke-linecap="round"/>
+  <path d="M48 16l2.5 2.5" stroke="#1C133B" stroke-width="2.25" stroke-linecap="round"/>
+</svg>

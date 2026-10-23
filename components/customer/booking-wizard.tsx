@@ -76,6 +76,7 @@ import {
   type BookingFlowStepId,
 } from "@/lib/customer/booking-flow";
 import {
+  BOOKING_STEP_STORAGE_KEY,
   clearBookingAuthReturn,
   isBookingAuthReturnPath,
 } from "@/lib/customer/booking-auth-return";
@@ -161,7 +162,7 @@ const blankDraft: BookingDraft = {
 };
 
 const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
-const BOOKING_STEP_KEY = "mundoria-booking-step-v5";
+const BOOKING_STEP_KEY = BOOKING_STEP_STORAGE_KEY;
 /** Address alone — never cleared when the basket/draft is wiped. */
 const BOOKING_ADDRESS_KEY = "mundoria-booking-address-v1";
 
@@ -924,6 +925,23 @@ export function BookingWizard({
       }
 
       const idx = Math.min(stepIndex, Math.max(0, flowSteps.length - 1));
+      const urlStep = new URL(window.location.href).searchParams.get("step");
+      // Deep resume (auth → checkout, or refreshed mid-funnel): do not rebuild
+      // the stack from step 0. That replace/push thrash can leave the URL on an
+      // earlier step after signup/sign-in.
+      if (idx > 0 && isBookingFlowStepId(urlStep ?? "") && urlStep === stepId) {
+        writeStep("replace", stepId);
+        funnelDepthRef.current = idx;
+        historyWriteModeRef.current = null;
+        bookingHistoryBootstrap = {
+          at: now,
+          index: idx,
+          path: window.location.pathname,
+          stepId,
+        };
+        return;
+      }
+
       const entryId = flowSteps[0]!;
       writeStep("replace", entryId);
       for (let i = 1; i <= idx; i += 1) {

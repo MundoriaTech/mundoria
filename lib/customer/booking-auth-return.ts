@@ -1,6 +1,18 @@
 /** Resume booking checkout after signup / sign-in / Google OAuth. */
 export const BOOKING_CHECKOUT_RETURN_PATH = "/booking/new?step=checkout";
 
+/** Must match the wizard’s localStorage step key. */
+export const BOOKING_STEP_STORAGE_KEY = "mundoria-booking-step-v5";
+
+/** Pin the saved funnel step to checkout before a session refresh. */
+export function rememberBookingCheckoutStep() {
+  try {
+    window.localStorage.setItem(BOOKING_STEP_STORAGE_KEY, "checkout");
+  } catch {
+    // Ignore private mode / blocked storage.
+  }
+}
+
 /**
  * Map a booking redirectTo into wizard checkout sign-in (keeps booking chrome).
  * Returns null when redirectTo is not a booking path.
