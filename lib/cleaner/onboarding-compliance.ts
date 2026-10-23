@@ -327,10 +327,12 @@ export const TRAINING_OPTIONS = [
   "Customer service / professional cleaning course",
 ] as const;
 
+/** Preferred weekly volume (guides matching — not a hard cap). */
 export const PREFERRED_HOURS_BANDS = [
-  { label: "Up to 4 hours", value: "up_to_4" },
-  { label: "4–6 hours", value: "4_6" },
-  { label: "6–8 hours", value: "6_8" },
+  { label: "Up to 10 hours a week", value: "up_to_10" },
+  { label: "10–20 hours a week", value: "10_20" },
+  { label: "20–30 hours a week", value: "20_30" },
+  { label: "30+ hours a week", value: "30_plus" },
   { label: "Flexible", value: "flexible" },
 ] as const;
 
@@ -397,34 +399,6 @@ export const INCIDENT_CATEGORIES = [
   { label: "Customer behaviour", value: "customer_behaviour" },
   { label: "Other", value: "other" },
 ] as const;
-
-export const EXPERIENCE_BANDS = [
-  { label: "Less than 6 months", value: "lt_6m" },
-  { label: "6 months – 1 year", value: "6m_1y" },
-  { label: "1–2 years", value: "1_2y" },
-  { label: "2–5 years", value: "2_5y" },
-  { label: "More than 5 years", value: "gt_5y" },
-  { label: "I'm new to professional cleaning", value: "new" },
-] as const;
-
-/** Approximate whole years for legacy `years_experience` (profile, admin, SEO). */
-export function yearsFromExperienceBand(band: string): number {
-  switch (band) {
-    case "new":
-    case "lt_6m":
-      return 0;
-    case "6m_1y":
-      return 1;
-    case "1_2y":
-      return 2;
-    case "2_5y":
-      return 3;
-    case "gt_5y":
-      return 6;
-    default:
-      return 0;
-  }
-}
 
 export const CLEANING_SKILLS = [
   "Kitchen cleaning and degreasing",

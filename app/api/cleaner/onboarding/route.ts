@@ -18,7 +18,6 @@ import {
   namesLikelyMatch,
   transportModeBand,
   transportModeOtherText,
-  yearsFromExperienceBand,
 } from "@/lib/cleaner/onboarding-compliance";
 import {
   CHARTER_AGREEMENTS,
@@ -112,7 +111,7 @@ const schema = z
     equipment_owned: optionalStringList,
     equipment_ownership: requiredString("Equipment ownership"),
     equipment_transport: requiredString("Equipment transport"),
-    experience_band: requiredString("Professional cleaning experience"),
+    experience_band: z.string().trim().optional().default(""),
     full_name: z.string().trim().min(2, "Full name is required"),
     headshot_url: requiredString("Profile headshot"),
     home_base: z
@@ -532,11 +531,10 @@ export async function POST(request: Request) {
       "Cleaner did not confirm document clarity.";
   }
 
-  const skillsAssessmentStatus = ["new", "lt_6m"].includes(
-    value.experience_band,
-  )
-    ? ("additional_assessment" as const)
-    : ("not_required" as const);
+  const skillsAssessmentStatus =
+    value.years_experience < 1
+      ? ("additional_assessment" as const)
+      : ("not_required" as const);
   const equipmentStatus = ["replace", "unsure"].includes(
     value.equipment_condition,
   )
@@ -680,7 +678,7 @@ export async function POST(request: Request) {
       verification_flags: verificationFlags,
       working_radius_km:
         Math.round(value.working_radius_miles * 1.609344 * 100) / 100,
-      years_experience: yearsFromExperienceBand(value.experience_band),
+      years_experience: value.years_experience,
   };
 
   let applicationReference = generateApplicationReference();
@@ -840,7 +838,7 @@ export async function POST(request: Request) {
           applicationReference,
           cleanerUrl: `${appUrl}/admin/cleaners/${user.id}`,
           interviewWhen,
-          yearsExperience: yearsFromExperienceBand(value.experience_band),
+          yearsExperience: value.years_experience,
         },
         template: "admin.cleaner_application_submitted",
         to: resolveAdminNotificationEmail(),
@@ -854,7 +852,7 @@ export async function POST(request: Request) {
     eventName: "cleaner_onboarding_submitted",
     metadata: {
       interviewScheduledAt: value.interview_scheduled_at,
-      yearsExperience: yearsFromExperienceBand(value.experience_band),
+      yearsExperience: value.years_experience,
     },
     path: "/cleaner/onboarding",
     userId: user.id,

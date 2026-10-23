@@ -16,7 +16,6 @@ import {
   EMERGENCY_FAQS,
   EQUIPMENT_FAQS,
   EQUIPMENT_ITEMS,
-  EXPERIENCE_BANDS,
   EXPERIENCE_FAQS,
   FINAL_REVIEW_FAQS,
   HMRC_FIND_UTR_URL,
@@ -720,21 +719,12 @@ export function InsuranceComplianceStep({
 export function ExperienceExtras({
   cleaningSkills,
   cleaningSkillsOther,
-  error,
-  experienceBand,
   onCleaningSkills,
   onCleaningSkillsOther,
-  onExperienceBand,
   onPriorType,
   onPriorEmployer,
   onPriorDuration,
   onPriorSummary,
-  onReferenceCompany,
-  onReferenceContactOk,
-  onReferenceEmail,
-  onReferenceName,
-  onReferencePhone,
-  onReferenceRelationship,
   onTrainingCertFile,
   onTrainingCertRemove,
   onTrainingCompleted,
@@ -743,12 +733,6 @@ export function ExperienceExtras({
   priorEmployer,
   priorSummary,
   priorType,
-  referenceCompany,
-  referenceContactOk,
-  referenceEmail,
-  referenceName,
-  referencePhone,
-  referenceRelationship,
   trainingCertPreview,
   trainingCertUploaded,
   trainingCertUploading,
@@ -758,21 +742,12 @@ export function ExperienceExtras({
 }: {
   cleaningSkills: string[];
   cleaningSkillsOther: string;
-  error?: string;
-  experienceBand: string;
   onCleaningSkills: (next: string[]) => void;
   onCleaningSkillsOther: (next: string) => void;
-  onExperienceBand: (next: string) => void;
   onPriorType: (next: string) => void;
   onPriorEmployer: (next: string) => void;
   onPriorDuration: (next: string) => void;
   onPriorSummary: (next: string) => void;
-  onReferenceCompany: (next: string) => void;
-  onReferenceContactOk: (next: boolean) => void;
-  onReferenceEmail: (next: string) => void;
-  onReferenceName: (next: string) => void;
-  onReferencePhone: (next: string) => void;
-  onReferenceRelationship: (next: string) => void;
   onTrainingCertFile: (file: File) => void;
   onTrainingCertRemove: () => void;
   onTrainingCompleted: (next: string[]) => void;
@@ -781,12 +756,6 @@ export function ExperienceExtras({
   priorEmployer: string;
   priorSummary: string;
   priorType: string;
-  referenceCompany: string;
-  referenceContactOk: boolean;
-  referenceEmail: string;
-  referenceName: string;
-  referencePhone: string;
-  referenceRelationship: string;
   trainingCertPreview?: { isPdf?: boolean; url?: string };
   trainingCertUploaded: boolean;
   trainingCertUploading: boolean;
@@ -802,19 +771,7 @@ export function ExperienceExtras({
 
   return (
     <div className="mt-8 space-y-6 border-t border-[#e8e0d0] pt-8">
-      <SectionHeading>How much professional cleaning experience do you have?</SectionHeading>
-      <BranchChoice
-        columns={2}
-        onChange={onExperienceBand}
-        options={EXPERIENCE_BANDS.map((item) => ({
-          label: item.label,
-          value: item.value,
-        }))}
-        value={experienceBand || null}
-      />
-      {error ? <FieldError message={error} /> : null}
-
-      <SectionHeading subtitle="Select tasks you're confident carrying out. Specialist services still need Mundoria review.">
+      <SectionHeading subtitle="Select the tasks you’re confident carrying out. Specialist services usually pay more — they still need Mundoria review before you can take those jobs.">
         Cleaning skills
       </SectionHeading>
       <ChipMultiSelect
@@ -906,52 +863,6 @@ export function ExperienceExtras({
           />
         </div>
       ) : null}
-
-      <SectionHeading subtitle="Optional — one professional reference helps if you have prior work.">
-        Professional reference
-      </SectionHeading>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Input
-          className={FIELD}
-          onChange={(event) => onReferenceName(event.target.value)}
-          placeholder="Full name"
-          value={referenceName}
-        />
-        <Input
-          className={FIELD}
-          onChange={(event) => onReferenceCompany(event.target.value)}
-          placeholder="Company"
-          value={referenceCompany}
-        />
-        <Input
-          className={FIELD}
-          onChange={(event) => onReferenceRelationship(event.target.value)}
-          placeholder="Relationship (e.g. supervisor)"
-          value={referenceRelationship}
-        />
-        <Input
-          className={FIELD}
-          onChange={(event) => onReferenceEmail(event.target.value)}
-          placeholder="Email"
-          type="email"
-          value={referenceEmail}
-        />
-        <Input
-          className={FIELD}
-          onChange={(event) => onReferencePhone(event.target.value)}
-          placeholder="Phone"
-          value={referencePhone}
-        />
-      </div>
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
-        <OnboardingCheckbox
-          checked={referenceContactOk}
-          onCheckedChange={onReferenceContactOk}
-        />
-        <span>
-          I confirm Mundoria may contact this person about my cleaning work.
-        </span>
-      </label>
 
       <FaqAccordion items={EXPERIENCE_FAQS} />
     </div>

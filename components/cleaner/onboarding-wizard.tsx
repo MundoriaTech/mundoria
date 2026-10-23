@@ -5,7 +5,9 @@ import {
   Check,
   ChevronDown,
   Clock3,
+  Minus,
   Monitor,
+  Plus,
   Search,
   X,
 } from "lucide-react";
@@ -74,7 +76,6 @@ import {
   snapToRadiusPreset,
   transportModeBand,
   transportModeOtherText,
-  yearsFromExperienceBand,
   type DbsPath,
   type InsurancePath,
   type UtrPath,
@@ -2089,22 +2090,22 @@ function StepBody({
   if (stepId === "about") {
     return (
       <div className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-          <div className="min-w-0 space-y-1.5">
-            <p className="text-sm font-medium text-[#1c133b]">Full name</p>
-            <p
-              className={cn(
-                "flex min-h-11 w-full items-center rounded-xl px-3.5 text-[15px] text-[#291845]",
-                ONBOARDING_FIELD_CLASS,
-              )}
-            >
-              {data.full_name || "—"}
-            </p>
-            {issueFor("full_name") ? (
-              <FieldError message={issueFor("full_name")!} />
-            ) : null}
-          </div>
-          <div className="min-w-0">
+        <div className="space-y-1.5">
+          <p className="text-sm font-medium text-[#1c133b]">Full name</p>
+          <p
+            className={cn(
+              "flex min-h-11 w-full items-center rounded-xl px-3.5 text-[15px] text-[#291845]",
+              ONBOARDING_FIELD_CLASS,
+            )}
+          >
+            {data.full_name || "—"}
+          </p>
+          {issueFor("full_name") ? (
+            <FieldError message={issueFor("full_name")!} />
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <div className="w-full shrink-0 sm:w-[17.5rem]">
             {askForPhone ? (
               <AuthPhoneField
                 className={cn(ONBOARDING_FIELD_CLASS, "min-h-11 w-full")}
@@ -2141,6 +2142,15 @@ function StepBody({
               </div>
             )}
           </div>
+          <div className="flex flex-1 justify-center sm:px-4">
+            <div className="space-y-2 text-sm font-medium">
+              <span className="block">Years of experience</span>
+              <ExperienceStepper
+                onChange={(years) => onUpdate("years_experience", years)}
+                value={data.years_experience}
+              />
+            </div>
+          </div>
         </div>
         <p className="text-xs leading-5 text-[#8b8798]">
           {askForPhone
@@ -2169,30 +2179,14 @@ function StepBody({
         <ExperienceExtras
           cleaningSkills={data.cleaning_skills}
           cleaningSkillsOther={data.cleaning_skills_other}
-          error={issueFor("experience_band")}
-          experienceBand={data.experience_band}
           onCleaningSkills={(next) => onUpdate("cleaning_skills", next)}
           onCleaningSkillsOther={(next) =>
             onUpdate("cleaning_skills_other", next)
           }
-          onExperienceBand={(next) => {
-            onUpdate("experience_band", next);
-            onUpdate("years_experience", yearsFromExperienceBand(next));
-          }}
           onPriorDuration={(next) => onUpdate("prior_work_duration", next)}
           onPriorEmployer={(next) => onUpdate("prior_work_employer", next)}
           onPriorSummary={(next) => onUpdate("prior_work_summary", next)}
           onPriorType={(next) => onUpdate("prior_work_type", next)}
-          onReferenceCompany={(next) => onUpdate("reference_company", next)}
-          onReferenceContactOk={(next) =>
-            onUpdate("reference_contact_ok", next)
-          }
-          onReferenceEmail={(next) => onUpdate("reference_email", next)}
-          onReferenceName={(next) => onUpdate("reference_name", next)}
-          onReferencePhone={(next) => onUpdate("reference_phone", next)}
-          onReferenceRelationship={(next) =>
-            onUpdate("reference_relationship", next)
-          }
           onTrainingCertFile={(file) => onFile("training", file, 0)}
           onTrainingCertRemove={() => onRemove("training", 0)}
           onTrainingCompleted={(next) => onUpdate("training_completed", next)}
@@ -2207,12 +2201,6 @@ function StepBody({
           priorEmployer={data.prior_work_employer}
           priorSummary={data.prior_work_summary}
           priorType={data.prior_work_type}
-          referenceCompany={data.reference_company}
-          referenceContactOk={data.reference_contact_ok}
-          referenceEmail={data.reference_email}
-          referenceName={data.reference_name}
-          referencePhone={data.reference_phone}
-          referenceRelationship={data.reference_relationship}
           trainingCertPreview={docPreviews["training:0"]}
           trainingCertProgress={uploadProgress}
           trainingCertUploaded={Boolean(
@@ -3404,6 +3392,51 @@ function sameMinute(left: string | null, right: string | null) {
   );
 }
 
+const EXPERIENCE_MAX = 60;
+
+function ExperienceStepper({
+  onChange,
+  value,
+}: {
+  onChange: (years: number) => void;
+  value: number;
+}) {
+  const years = Number.isFinite(value)
+    ? Math.min(EXPERIENCE_MAX, Math.max(0, Math.round(value)))
+    : 0;
+
+  return (
+    <div className="flex items-center gap-3">
+      <button
+        aria-label="Decrease years of experience"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={years <= 0}
+        onClick={() => onChange(years - 1)}
+        type="button"
+      >
+        <Minus className="h-4 w-4" strokeWidth={2.5} />
+      </button>
+      <div className="min-w-[4.5rem] text-center">
+        <p className="text-lg font-semibold tabular-nums tracking-[-0.02em] text-[#291845]">
+          {years}
+        </p>
+        <p className="text-xs font-medium text-[#8b8798]">
+          {years === 1 ? "year" : "years"}
+        </p>
+      </div>
+      <button
+        aria-label="Increase years of experience"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={years >= EXPERIENCE_MAX}
+        onClick={() => onChange(years + 1)}
+        type="button"
+      >
+        <Plus className="h-4 w-4" strokeWidth={2.5} />
+      </button>
+    </div>
+  );
+}
+
 function Field({
   children,
   error,
@@ -3749,10 +3782,10 @@ function HoursPicker({
 
       <div className="space-y-3">
         <p className="text-sm font-medium text-[#291845]">
-          How many hours would you prefer to work per day?
+          How many hours would you prefer to work per week?
         </p>
         <p className="text-xs text-[#8b8798]">
-          Guides how many hours we typically offer — not a hard cap.
+          Guides how much work we typically offer each week — not a hard cap.
         </p>
         <BranchChoice
           columns={2}
@@ -4062,9 +4095,9 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     working_radius_miles: snapToRadiusPreset(
       Number(value.working_radius_miles),
     ),
-    years_experience: yearsFromExperienceBand(
-      String(value.experience_band ?? "").trim(),
-    ),
+    years_experience: Number.isFinite(value.years_experience)
+      ? Math.min(60, Math.max(0, Math.round(Number(value.years_experience))))
+      : 0,
   };
 }
 
@@ -4091,7 +4124,7 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     if (!data.preferred_hours_band) {
       return issue(
         "preferred_hours",
-        "Choose how many hours you’d prefer to work per day.",
+        "Choose how many hours you’d prefer to work per week.",
       );
     }
     if (availableDays.some((day) => !day.start_time || !day.end_time)) {
@@ -4346,12 +4379,6 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
       return issue(
         "bio",
         "Write a little more about yourself (at least 20 characters).",
-      );
-    }
-    if (!data.experience_band) {
-      return issue(
-        "experience_band",
-        "Choose how much professional cleaning experience you have.",
       );
     }
   }
