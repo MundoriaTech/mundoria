@@ -116,14 +116,14 @@ function resolveTemplate(
     case "auth.signup_confirmation":
       return {
         body:
-          "Confirm your email address to activate your account and get the most from Mundoria. This link is only for you — if you did not sign up, you can safely ignore this email.",
+          "Confirm your email address to activate your account and take full advantage of our services! This link will remain active for 2 days. If you did not sign up, you can safely ignore this email.",
         buttonHref: string(data.confirmUrl),
         buttonLabel: "Confirm my email",
         intro: firstName
           ? `Hello ${firstName}, welcome to Mundoria!`
           : "Hello, welcome to Mundoria!",
-        preview: "Confirm your Mundoria email address.",
-        subject: "Confirm your Mundoria email",
+        preview: "Confirm your Mundoria account.",
+        subject: "Confirm your Mundoria account",
         title: "Confirm your email",
         tone: "security",
       };

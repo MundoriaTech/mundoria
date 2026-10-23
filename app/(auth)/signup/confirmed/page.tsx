@@ -6,7 +6,7 @@ import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Email confirmed",
+  title: "Account validated",
 };
 
 export default function EmailConfirmedPage({
@@ -16,12 +16,11 @@ export default function EmailConfirmedPage({
 }) {
   const next = safeInternalPath(searchParams.next);
   const continueHref = next ?? "/dashboard";
-  const fromBooking = continueHref.startsWith("/booking");
-  const continueLabel = fromBooking
-    ? "Continue booking"
-    : continueHref.startsWith("/cleaner")
-      ? "Continue onboarding"
-      : "Continue";
+  const continueLabel = continueHref.startsWith("/cleaner")
+    ? "Continue onboarding"
+    : continueHref.startsWith("/booking")
+      ? "Continue booking"
+      : "Go to my account";
 
   return (
     <main className="flex min-h-screen flex-col bg-[#f9f6ef]">
@@ -37,12 +36,10 @@ export default function EmailConfirmedPage({
             <Check aria-hidden className="h-7 w-7 text-[#1f7a45]" strokeWidth={2.5} />
           </div>
           <h1 className="mt-6 text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-            Email confirmed
+            Your account has been validated
           </h1>
           <p className="mt-3 text-base leading-7 text-[#5a5470]">
-            {fromBooking
-              ? "You’re all set. Pick up where you left off and finish your booking."
-              : "You’re all set. Your Mundoria account is ready to use."}
+            Welcome — you’re ready to book and manage cleans with Mundoria.
           </p>
           <div className="mt-8 flex justify-center">
             <Button
@@ -52,13 +49,11 @@ export default function EmailConfirmedPage({
               <Link href={continueHref}>{continueLabel}</Link>
             </Button>
           </div>
-          {!fromBooking ? (
-            <p className="mt-6 text-sm text-[#8a8498]">
-              <Link className="font-medium text-[#1c133b] hover:underline" href="/">
-                Back to home
-              </Link>
-            </p>
-          ) : null}
+          <p className="mt-6 text-sm text-[#8a8498]">
+            <Link className="font-medium text-[#1c133b] hover:underline" href="/">
+              Browse all services
+            </Link>
+          </p>
         </div>
       </div>
     </main>

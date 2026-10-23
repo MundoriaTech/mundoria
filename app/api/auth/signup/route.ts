@@ -10,7 +10,6 @@ import {
 } from "@/lib/auth/send-auth-link-email";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
-import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -41,13 +40,17 @@ export async function POST(request: Request) {
   const requestedNext =
     typeof body.next === "string" ? body.next : null;
   const nextPath = safeRedirectPath(requestedNext, defaultNext);
-  /** Checkout signup must not block on email confirmation. */
+  /** Checkout signup: confirm email off to the side — never block booking. */
   const bookingCheckoutSignup =
     role === "customer" && nextPath.startsWith("/booking");
-  const emailRedirectTo = `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(nextPath)}`;
+  /** Confirm-link landing stays out of the booking funnel (Wecasa-style). */
+  const confirmNextPath = bookingCheckoutSignup ? "/dashboard" : nextPath;
+  const emailRedirectTo = `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(confirmNextPath)}`;
 
   const { data: created, error } = await admin.auth.admin.createUser({
     email,
+    // Booking: sign-in ready immediately so checkout never waits on email.
+    // Everyone else confirms via the signup link before signing in.
     email_confirm: bookingCheckoutSignup,
     password,
     user_metadata: {
@@ -56,6 +59,9 @@ export async function POST(request: Request) {
       marketing_opt_in: Boolean(marketing_opt_in),
       phone: phone.trim(),
       role,
+      ...(bookingCheckoutSignup
+        ? { send_welcome_on_email_link: true }
+        : {}),
     },
   });
 
@@ -110,34 +116,19 @@ export async function POST(request: Request) {
     }
   }
 
-  if (bookingCheckoutSignup) {
-    // Never block checkout on mail — send welcome in the background.
-    void sendAccountWelcomeIfNeeded({
-      actionLabel: "Continue your booking",
-      actionUrl: `${appUrl}${nextPath.startsWith("/") ? nextPath : `/${nextPath}`}`,
+  try {
+    await sendAuthLinkEmail({
       appUrl,
       email,
-      emailConfirmedAt: user.email_confirmed_at ?? new Date().toISOString(),
-      fullName: full_name,
-      metadata: user.user_metadata,
-      profileExisted: false,
-      role: "customer",
-      userId: user.id,
-    }).catch((welcomeError) => {
-      Sentry.captureException(welcomeError);
+      firstName: full_name.split(/\s+/)[0],
+      password,
+      redirectTo: emailRedirectTo,
+      // Already confirmed for checkout — magic link still lands on “validated”.
+      type: bookingCheckoutSignup ? "magiclink" : "signup",
     });
-  } else {
-    try {
-      await sendAuthLinkEmail({
-        appUrl,
-        email,
-        firstName: full_name.split(/\s+/)[0],
-        password,
-        redirectTo: emailRedirectTo,
-        type: "signup",
-      });
-    } catch (emailError) {
-      Sentry.captureException(emailError);
+  } catch (emailError) {
+    Sentry.captureException(emailError);
+    if (!bookingCheckoutSignup) {
       return NextResponse.json(
         {
           code: "signup_email_failed",
@@ -147,6 +138,7 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
+    // Booking: keep checkout moving even if the confirm mail fails.
   }
 
   await trackUserActivity({

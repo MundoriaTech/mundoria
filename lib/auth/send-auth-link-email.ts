@@ -2,16 +2,19 @@ import { sendBrandedEmail } from "@/lib/email/send-email";
 import type { EmailTemplateId } from "@/lib/email/templates";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-type AuthLinkType = "recovery" | "signup";
+type AuthLinkType = "recovery" | "signup" | "magiclink";
 
 const TEMPLATE_BY_TYPE: Record<AuthLinkType, EmailTemplateId> = {
   recovery: "auth.password_reset",
   signup: "auth.signup_confirmation",
+  /** Same branded confirm copy — used when the account is already sign-in ready. */
+  magiclink: "auth.signup_confirmation",
 };
 
 const LINK_FIELD_BY_TYPE: Record<AuthLinkType, "resetUrl" | "confirmUrl"> = {
   recovery: "resetUrl",
   signup: "confirmUrl",
+  magiclink: "confirmUrl",
 };
 
 /**
@@ -86,11 +89,17 @@ export async function sendAuthLinkEmail({
           password: password!,
           type: "signup",
         }
-      : {
-          email,
-          options: { redirectTo },
-          type: "recovery",
-        },
+      : type === "magiclink"
+        ? {
+            email,
+            options: { redirectTo },
+            type: "magiclink",
+          }
+        : {
+            email,
+            options: { redirectTo },
+            type: "recovery",
+          },
   );
 
   if (error) throw error;

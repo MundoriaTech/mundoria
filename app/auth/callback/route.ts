@@ -102,11 +102,15 @@ export async function GET(request: Request) {
       }
     }
 
-    if (
-      user &&
-      requestUrl.searchParams.get("type") === "signup" &&
-      !isPasswordReset
-    ) {
+    const authLinkType = requestUrl.searchParams.get("type");
+    const pendingAccountValidation =
+      user?.user_metadata?.send_welcome_on_email_link === true;
+    const showAccountValidated =
+      !isPasswordReset &&
+      (authLinkType === "signup" ||
+        (authLinkType === "magiclink" && pendingAccountValidation));
+
+    if (user && showAccountValidated) {
       await trackUserActivity({
         eventName: "email_confirmed",
         metadata: { role: profile?.role ?? null },
@@ -151,17 +155,13 @@ export async function GET(request: Request) {
     ) {
       const completionUrl = new URL("/complete-profile", requestUrl.origin);
       completionUrl.searchParams.set("next", next);
-      return finishAuthRedirect(
-        requestUrl,
-        completionUrl,
-        requestUrl.searchParams.get("type") === "signup",
-      );
+      return finishAuthRedirect(requestUrl, completionUrl, showAccountValidated);
     }
 
     return finishAuthRedirect(
       requestUrl,
       new URL(next, requestUrl.origin),
-      requestUrl.searchParams.get("type") === "signup" && !isPasswordReset,
+      showAccountValidated,
     );
   }
 

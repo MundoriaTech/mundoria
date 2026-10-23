@@ -42,7 +42,14 @@ export async function sendAccountWelcomeIfNeeded({
 }) {
   if (role !== "customer" && role !== "cleaner") return false;
   if (metadata?.welcome_email_sent === true) return false;
-  if (profileExisted && !emailConfirmedJustNow(emailConfirmedAt)) return false;
+  const pendingLinkWelcome = metadata?.send_welcome_on_email_link === true;
+  if (
+    profileExisted &&
+    !pendingLinkWelcome &&
+    !emailConfirmedJustNow(emailConfirmedAt)
+  ) {
+    return false;
+  }
   if (!process.env.RESEND_API_KEY || !email) return false;
 
   const sent = await sendBrandedEmail({
@@ -66,6 +73,7 @@ export async function sendAccountWelcomeIfNeeded({
     await createAdminClient().auth.admin.updateUserById(userId, {
       user_metadata: {
         ...metadata,
+        send_welcome_on_email_link: false,
         welcome_email_sent: true,
       },
     });
