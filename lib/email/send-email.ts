@@ -65,3 +65,12 @@ function defaultReplyTo() {
   if (/cleanscape/i.test(raw)) return "hello@mundoria.co.uk";
   return raw;
 }
+
+/** Ops inbox for signup / application alerts. Prefer ADMIN_NOTIFICATION_EMAIL. */
+export function resolveAdminNotificationEmail() {
+  const dedicated = process.env.ADMIN_NOTIFICATION_EMAIL?.trim();
+  if (dedicated) return dedicated;
+  const support = process.env.SUPPORT_EMAIL?.trim();
+  if (support && !/cleanscape/i.test(support)) return support;
+  return "hello@mundoria.co.uk";
+}

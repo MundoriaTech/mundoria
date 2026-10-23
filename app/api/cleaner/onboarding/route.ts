@@ -28,7 +28,10 @@ import {
 } from "@/lib/cleaner/skills-exam";
 import { hasAnyDocument } from "@/lib/cleaner/document-urls";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
-import { sendBrandedEmail } from "@/lib/email/send-email";
+import {
+  resolveAdminNotificationEmail,
+  sendBrandedEmail,
+} from "@/lib/email/send-email";
 import {
   createInAppNotification,
   sendOneSignalNotification,
@@ -826,7 +829,7 @@ export async function POST(request: Request) {
       });
     }
 
-    if (process.env.RESEND_API_KEY && process.env.ADMIN_NOTIFICATION_EMAIL) {
+    if (process.env.RESEND_API_KEY) {
       const appUrl =
         process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
       await sendBrandedEmail({
@@ -840,7 +843,7 @@ export async function POST(request: Request) {
           yearsExperience: yearsFromExperienceBand(value.experience_band),
         },
         template: "admin.cleaner_application_submitted",
-        to: process.env.ADMIN_NOTIFICATION_EMAIL,
+        to: resolveAdminNotificationEmail(),
       });
     }
   } catch (emailError) {
