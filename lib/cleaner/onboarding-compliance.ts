@@ -342,10 +342,12 @@ export const RADIUS_PRESETS = [
   { label: "More than 20 miles", value: 25 },
 ] as const;
 
+type RadiusPresetValue = (typeof RADIUS_PRESETS)[number]["value"];
+
 /** Snap any mile value onto the nearest pack radius preset. */
-export function snapToRadiusPreset(miles: number) {
+export function snapToRadiusPreset(miles: number): RadiusPresetValue {
   if (!Number.isFinite(miles) || miles <= 0) return 15;
-  let best = RADIUS_PRESETS[0]!.value;
+  let best: RadiusPresetValue = RADIUS_PRESETS[0].value;
   let bestDelta = Math.abs(miles - best);
   for (const preset of RADIUS_PRESETS) {
     const delta = Math.abs(miles - preset.value);
