@@ -24,6 +24,7 @@ import {
   nationalFromPhone,
   storedPhone,
 } from "@/lib/auth/uk-phone";
+import { createBrowserClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/types/auth";
 
 interface SignupResponse {
@@ -120,13 +121,14 @@ export function SignupForm({
         throw new Error(result.error ?? "Unable to create your account");
       }
 
+      if (result.referralPromoCode) {
+        window.sessionStorage.setItem(
+          "mundoria-welcome-promo",
+          result.referralPromoCode,
+        );
+      }
+
       if (result.requiresEmailConfirmation) {
-        if (result.referralPromoCode) {
-          window.sessionStorage.setItem(
-            "mundoria-welcome-promo",
-            result.referralPromoCode,
-          );
-        }
         rememberSignupEmail(values.email.trim());
         router.replace(
           signupPendingLoginPath(role, {
@@ -136,13 +138,23 @@ export function SignupForm({
         return;
       }
 
-      const accountRole = result.role ?? role;
-      if (result.referralPromoCode) {
-        window.sessionStorage.setItem(
-          "mundoria-welcome-promo",
-          result.referralPromoCode,
-        );
+      // Soft confirm (customers): sign in immediately; confirm mail is out-of-band.
+      const supabase = createBrowserClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email.trim().toLowerCase(),
+        password: values.password,
+      });
+      if (signInError) {
+        rememberSignupEmail(values.email.trim());
+        const params = new URLSearchParams();
+        if (nextPath) params.set("redirectTo", nextPath);
+        const base = role === "cleaner" ? "/login/cleaner" : "/login";
+        const query = params.toString();
+        router.replace(query ? `${base}?${query}` : base);
+        return;
       }
+
+      const accountRole = result.role ?? role;
       const destination =
         accountRole === "customer" && nextPath
           ? nextPath

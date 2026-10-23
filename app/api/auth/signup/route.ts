@@ -40,18 +40,20 @@ export async function POST(request: Request) {
   const requestedNext =
     typeof body.next === "string" ? body.next : null;
   const nextPath = safeRedirectPath(requestedNext, defaultNext);
-  /** Checkout signup: confirm email off to the side — never block booking. */
   const bookingCheckoutSignup =
     role === "customer" && nextPath.startsWith("/booking");
-  /** Confirm-link landing stays out of the booking funnel (Wecasa-style). */
+  /**
+   * Customers (booking + standalone): Wecasa-style soft confirm — sign-in ready
+   * immediately; confirm mail stays out-of-band. Cleaners still hard-confirm.
+   */
+  const softEmailConfirm = role === "customer";
+  /** Confirm-link landing stays out of the booking funnel. */
   const confirmNextPath = bookingCheckoutSignup ? "/dashboard" : nextPath;
   const emailRedirectTo = `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(confirmNextPath)}`;
 
   const { data: created, error } = await admin.auth.admin.createUser({
     email,
-    // Booking: sign-in ready immediately so checkout never waits on email.
-    // Everyone else confirms via the signup link before signing in.
-    email_confirm: bookingCheckoutSignup,
+    email_confirm: softEmailConfirm,
     password,
     user_metadata: {
       avatar_url: avatarUrl,
@@ -59,9 +61,7 @@ export async function POST(request: Request) {
       marketing_opt_in: Boolean(marketing_opt_in),
       phone: phone.trim(),
       role,
-      ...(bookingCheckoutSignup
-        ? { send_welcome_on_email_link: true }
-        : {}),
+      ...(softEmailConfirm ? { send_welcome_on_email_link: true } : {}),
     },
   });
 
@@ -123,12 +123,12 @@ export async function POST(request: Request) {
       firstName: full_name.split(/\s+/)[0],
       password,
       redirectTo: emailRedirectTo,
-      // Already confirmed for checkout — magic link still lands on “validated”.
-      type: bookingCheckoutSignup ? "magiclink" : "signup",
+      // Soft-confirm accounts are already sign-in ready — magic link still lands on “validated”.
+      type: softEmailConfirm ? "magiclink" : "signup",
     });
   } catch (emailError) {
     Sentry.captureException(emailError);
-    if (!bookingCheckoutSignup) {
+    if (!softEmailConfirm) {
       return NextResponse.json(
         {
           code: "signup_email_failed",
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
-    // Booking: keep checkout moving even if the confirm mail fails.
+    // Soft confirm: account is usable even if the confirm mail fails.
   }
 
   await trackUserActivity({
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
     email,
     hasSession: false,
     referralPromoCode,
-    requiresEmailConfirmation: !bookingCheckoutSignup,
+    requiresEmailConfirmation: !softEmailConfirm,
     role,
     welcomeEmailSent: false,
   });
