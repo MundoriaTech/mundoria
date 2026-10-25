@@ -3,14 +3,15 @@
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { FormField } from "@/components/auth/form-field";
 import { FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { Input } from "@/components/ui/input";
+import type { InputProps } from "@/components/ui/input";
 import { MAX_DBS_DOCUMENT_PAGES } from "@/lib/cleaner/document-urls";
 import {
   CLEANER_AGREEMENT_DOCS,
   DBS_APPLY_URL,
   DBS_FAQS,
-  EMERGENCY_COUNTRIES,
   EMERGENCY_FAQS,
   EQUIPMENT_FAQS,
   EQUIPMENT_ITEMS,
@@ -36,23 +37,51 @@ import {
   type InsurancePath,
   type UtrPath,
 } from "@/lib/cleaner/onboarding-compliance";
+import { WORLD_COUNTRY_SELECT_OPTIONS } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
 import {
-  BranchChoice,
-  BranchMultiChoice,
+  ChoiceMultiPills,
+  DecisionStrip,
   ChipMultiSelect,
   DocumentUpload,
   ExternalCta,
   FaqAccordion,
   InfoCallout,
   OnboardingCheckbox,
+  OnboardingDateField,
+  OnboardingSelect,
   SoftDeferButton,
   SuccessBanner,
 } from "@/components/cleaner/onboarding-primitives";
 
-const FIELD =
-  "border-2 border-[#1c133b] bg-[#f9f6ef] focus-visible:ring-[#1c133b]";
+/** Floating-label field matching signup / booking (`placeholder=" "`). */
+function OnboardingField({
+  error,
+  hint,
+  id,
+  label,
+  ...inputProps
+}: {
+  error?: string;
+  hint?: string;
+  id: string;
+  label: string;
+} & Omit<InputProps, "id" | "placeholder" | "className">) {
+  return (
+    <div className="space-y-1.5">
+      <FormField compact hint={hint} htmlFor={id} label={label} plain>
+        <Input
+          className={error ? invalidControlClass : undefined}
+          id={id}
+          placeholder=" "
+          {...inputProps}
+        />
+      </FormField>
+      {error ? <FieldError message={error} /> : null}
+    </div>
+  );
+}
 
 function SectionHeading({
   children,
@@ -116,19 +145,31 @@ export function UtrComplianceStep({
     <div className="space-y-6">
       {successMessage ? <SuccessBanner>{successMessage}</SuccessBanner> : null}
       <p className="text-sm leading-6 text-[#5a5470]">
-        A Unique Taxpayer Reference (UTR) is a 10-digit number issued by HMRC.
         If you&apos;re registered for Self Assessment, you&apos;ll have one. As
         part of joining Mundoria as a self-employed cleaner, we&apos;ll need
         your UTR to verify your tax registration details.
       </p>
 
       <SectionHeading>Do you already have a UTR number?</SectionHeading>
-      <BranchChoice
+      <DecisionStrip
+        label="Do you already have a UTR number?"
         onChange={(next) => onPath(next as UtrPath)}
         options={[
-          { label: "Yes, I have a UTR", value: "have" },
-          { label: "No, I don't have one yet", value: "none" },
-          { label: "I'm not sure", value: "unsure" },
+          {
+            hint: "Enter your 10-digit UTR and upload HMRC proof next.",
+            label: "Yes",
+            value: "have",
+          },
+          {
+            hint: "We’ll show you how to register with HMRC and come back later.",
+            label: "Not yet",
+            value: "none",
+          },
+          {
+            hint: "We’ll help you check whether you already have one.",
+            label: "Not sure",
+            value: "unsure",
+          },
         ]}
         value={path === "waiting" ? "none" : path}
       />
@@ -138,23 +179,16 @@ export function UtrComplianceStep({
           <SectionHeading subtitle="Enter your UTR and upload a document from HMRC showing your name and UTR.">
             Let&apos;s verify your UTR
           </SectionHeading>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>UTR number</span>
-            <Input
-              className={cn(FIELD, error ? invalidControlClass : undefined)}
-              inputMode="numeric"
-              maxLength={10}
-              onChange={(event) =>
-                onUtrChange(digitsOnly(event.target.value))
-              }
-              placeholder="Enter your 10-digit UTR"
-              value={utrNumber}
-            />
-            <p className="text-xs font-normal leading-5 text-[#8a8498]">
-              Your UTR is usually 10 digits. Find it on your HMRC account, app
-              or Self Assessment documents.
-            </p>
-          </label>
+          <OnboardingField
+            error={error}
+            hint="Your UTR is usually 10 digits. Find it on your HMRC account, app or Self Assessment documents."
+            id="onboarding-utr-number"
+            inputMode="numeric"
+            label="UTR number"
+            maxLength={10}
+            onChange={(event) => onUtrChange(digitsOnly(event.target.value))}
+            value={utrNumber}
+          />
           <div className="rounded-2xl border-2 border-[#1c133b]/25 bg-[#f3eee4] px-4 py-3">
             <p className="text-sm font-semibold text-[#1c133b]">
               Accepted proof (one of the following)
@@ -218,11 +252,20 @@ export function UtrComplianceStep({
           <SectionHeading>
             Have you already registered with HMRC and are waiting for your UTR?
           </SectionHeading>
-          <BranchChoice
+          <DecisionStrip
+            label="Waiting for UTR"
             onChange={(next) => onWaiting(next === "yes")}
             options={[
-              { label: "Yes, I'm waiting for my UTR", value: "yes" },
-              { label: "No, I haven't registered yet", value: "no" },
+              {
+                hint: "You’re registered and waiting for HMRC to send your UTR.",
+                label: "Yes, waiting",
+                value: "yes",
+              },
+              {
+                hint: "Register for Self Assessment first, then come back with your UTR.",
+                label: "Not yet",
+                value: "no",
+              },
             ]}
             value={waitingRegistered ? "yes" : path === "waiting" ? "yes" : "no"}
           />
@@ -331,18 +374,27 @@ export function DbsComplianceStep({
   return (
     <div className="space-y-6">
       {successMessage ? <SuccessBanner>{successMessage}</SuccessBanner> : null}
-      <p className="text-sm leading-6 text-[#5a5470]">
-        To help keep customers and cleaners safe, we require a Basic DBS check.
-        It shows any unspent convictions and conditional cautions.
-      </p>
 
       <SectionHeading>Do you already have a Basic DBS certificate?</SectionHeading>
-      <BranchChoice
+      <DecisionStrip
+        label="Do you already have a Basic DBS certificate?"
         onChange={(next) => onPath(next as DbsPath)}
         options={[
-          { label: "Yes, I have one", value: "have" },
-          { label: "No, I need to apply", value: "apply" },
-          { label: "I've applied and I'm waiting", value: "waiting" },
+          {
+            hint: "Enter your certificate details and upload the pages next.",
+            label: "Yes",
+            value: "have",
+          },
+          {
+            hint: "We’ll show you how to apply for a Basic DBS on GOV.UK.",
+            label: "Need to apply",
+            value: "apply",
+          },
+          {
+            hint: "Continue onboarding now and upload the certificate when it arrives.",
+            label: "Waiting",
+            value: "waiting",
+          },
         ]}
         value={path}
       />
@@ -352,24 +404,22 @@ export function DbsComplianceStep({
           <SectionHeading>
             Great! Let&apos;s verify your DBS.
           </SectionHeading>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>Certificate number</span>
-            <Input
-              className={cn(FIELD, error ? invalidControlClass : undefined)}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+            <OnboardingField
+              error={error}
+              id="onboarding-dbs-certificate"
+              label="Certificate number"
               onChange={(event) => onCertificateNumber(event.target.value)}
-              placeholder="Certificate number"
               value={certificateNumber}
             />
-          </label>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>Date issued</span>
-            <Input
-              className={cn(FIELD, error ? invalidControlClass : undefined)}
-              onChange={(event) => onIssuedOn(event.target.value)}
-              type="date"
+            <OnboardingDateField
+              id="onboarding-dbs-issued"
+              label="Date issued"
+              maxDate={new Date().toISOString().slice(0, 10)}
+              onChange={onIssuedOn}
               value={issuedOn}
             />
-          </label>
+          </div>
           <div className="space-y-3">
             <p className="text-sm font-medium text-[#1c133b]">
               Certificate pages
@@ -378,7 +428,7 @@ export function DbsComplianceStep({
               Upload a PDF or clear photos. One page is enough for most Basic
               DBS certificates — add more only if you need to.
             </p>
-            <div className="flex flex-wrap items-start gap-3 sm:gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               {Array.from({ length: slotCount }, (_, index) => {
                 const slotKey = `dbs:${index}`;
                 const preview = pagePreviews[slotKey];
@@ -423,16 +473,14 @@ export function DbsComplianceStep({
                 );
               })}
               {showAddPage ? (
-                <div className="flex flex-col pt-[1.75rem]">
-                  <button
-                    aria-label="Add another page"
-                    className="inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
-                    onClick={() => setAwaitingNextPage(true)}
-                    type="button"
-                  >
-                    <Plus className="h-5 w-5" strokeWidth={2.5} />
-                  </button>
-                </div>
+                <button
+                  aria-label="Add another page"
+                  className="inline-flex h-12 w-12 shrink-0 items-center justify-center self-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                  onClick={() => setAwaitingNextPage(true)}
+                  type="button"
+                >
+                  <Plus className="h-5 w-5" strokeWidth={2.5} />
+                </button>
               ) : null}
             </div>
           </div>
@@ -538,105 +586,161 @@ export function InsuranceComplianceStep({
   uploading: boolean;
   uploadProgress: number;
 }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const expiryMax = (() => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 15);
+    return date.toISOString().slice(0, 10);
+  })();
+
   return (
     <div className="space-y-6">
       {successMessage ? <SuccessBanner>{successMessage}</SuccessBanner> : null}
-      <p className="text-sm leading-6 text-[#5a5470]">
-        Accidents can happen, even when you&apos;re careful. Public Liability
-        Insurance helps protect you if someone is injured or property is
-        damaged because of your cleaning work, subject to the policy.
-      </p>
       <InfoCallout>{INSURANCE_COVER_MODEL_COPY}</InfoCallout>
 
-      <SectionHeading>Do you currently have Public Liability Insurance?</SectionHeading>
-      <BranchChoice
+      <SectionHeading>
+        Do you currently have Public Liability Insurance?
+      </SectionHeading>
+      <DecisionStrip
+        label="Do you currently have Public Liability Insurance?"
         onChange={(next) => onPath(next as InsurancePath)}
         options={[
-          { label: "Yes, I have insurance", value: "have" },
-          { label: "No, I don't have insurance yet", value: "none" },
-          { label: "I'm not sure", value: "unsure" },
+          {
+            hint: "Enter your policy details and upload the certificate next.",
+            label: "Yes",
+            value: "have",
+          },
+          {
+            hint: "We’ll outline how to arrange cover before activation.",
+            label: "Not yet",
+            value: "none",
+          },
+          {
+            hint: "We’ll help you check what your policy actually covers.",
+            label: "Not sure",
+            value: "unsure",
+          },
         ]}
         value={path}
       />
 
       {path === "have" ? (
-        <div className="space-y-4">
-          <SectionHeading>Great! Let&apos;s verify your insurance.</SectionHeading>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>Insurance provider</span>
-            <Input
-              className={cn(FIELD, error ? invalidControlClass : undefined)}
+        <div className="space-y-5">
+          <SectionHeading subtitle="Use the details exactly as they appear on your certificate.">
+            Let&apos;s verify your insurance
+          </SectionHeading>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+            <OnboardingField
+              id="onboarding-insurance-provider"
+              label="Insurance provider"
               onChange={(event) => onProvider(event.target.value)}
-              placeholder="Enter your insurance company's name"
               value={provider}
             />
-          </label>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>Policy number</span>
-            <Input
-              className={cn(FIELD, error ? invalidControlClass : undefined)}
+            <OnboardingField
+              id="onboarding-insurance-policy"
+              label="Policy number"
               onChange={(event) => onPolicyNumber(event.target.value)}
-              placeholder="Enter your policy number"
               value={policyNumber}
             />
-          </label>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>Name on the policy</span>
-            <Input
-              className={cn(FIELD, error ? invalidControlClass : undefined)}
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 sm:items-start">
+            <OnboardingField
+              hint="Should match your legal name (or registered business name)."
+              id="onboarding-insurance-insured-name"
+              label="Name on the policy"
               onChange={(event) => onInsuredName(event.target.value)}
-              placeholder="As shown on your certificate"
               value={insuredName}
             />
-            <p className="text-xs font-normal leading-5 text-[#8a8498]">
-              Should match your legal name (or registered business name).
-              Mismatches are flagged for review.
-            </p>
-          </label>
-          <div className="space-y-3">
-            <p className="mb-2 text-sm font-medium">Coverage amount</p>
-            <BranchChoice
-              columns={2}
-              onChange={(next) => {
-                if (next === "other") {
-                  const existing = insuranceCoverOtherText(coverAmount);
-                  onCoverAmount(existing || "other");
-                  return;
-                }
-                onCoverAmount(next);
-              }}
-              options={[
-                { label: "£1 million", value: "1m" },
-                { label: "£2 million", value: "2m" },
-                { label: "£5 million", value: "5m" },
-                { label: "Other", value: "other" },
-              ]}
-              value={insuranceCoverBand(coverAmount)}
-            />
-            {insuranceCoverBand(coverAmount) === "other" ? (
-              <label className="block space-y-2 text-sm font-medium">
-                <span>Enter your cover amount (minimum £1 million)</span>
-                <Input
-                  className={cn(FIELD, error ? invalidControlClass : undefined)}
-                  onChange={(event) => {
-                    const next = event.target.value;
-                    onCoverAmount(next.trim() ? next : "other");
-                  }}
-                  placeholder="e.g. £1.5 million"
-                  value={insuranceCoverOtherText(coverAmount)}
-                />
-              </label>
-            ) : null}
-          </div>
-          <label className="block space-y-2 text-sm font-medium">
-            <span>Policy expiry date</span>
-            <Input
-              className={cn(FIELD, error ? invalidControlClass : undefined)}
-              onChange={(event) => onExpiryDate(event.target.value)}
-              type="date"
+            <OnboardingDateField
+              id="onboarding-insurance-expiry"
+              label="Policy expiry date"
+              maxDate={expiryMax}
+              minDate={today}
+              onChange={onExpiryDate}
               value={expiryDate}
             />
-          </label>
+          </div>
+
+          <div className="space-y-2">
+            <div
+              className={cn(
+                "flex flex-col gap-2 sm:flex-row sm:items-start",
+                insuranceCoverBand(coverAmount) === "other"
+                  ? "sm:max-w-md"
+                  : "sm:max-w-[13.5rem]",
+              )}
+            >
+              <div
+                className={cn(
+                  "min-w-0",
+                  insuranceCoverBand(coverAmount) === "other"
+                    ? "sm:w-[11.5rem] sm:shrink-0"
+                    : "w-full",
+                )}
+              >
+                <OnboardingSelect
+                  error={
+                    insuranceCoverBand(coverAmount) === "other"
+                      ? undefined
+                      : error
+                  }
+                  label="Coverage amount"
+                  onChange={(next) => {
+                    if (next === "other") {
+                      onCoverAmount(
+                        insuranceCoverOtherText(coverAmount) || "other",
+                      );
+                      return;
+                    }
+                    onCoverAmount(next);
+                  }}
+                  options={[
+                    { label: "£1 million", value: "1m" },
+                    { label: "£2 million", value: "2m" },
+                    { label: "£5 million", value: "5m" },
+                    { label: "Other", value: "other" },
+                  ]}
+                  value={insuranceCoverBand(coverAmount) ?? ""}
+                />
+              </div>
+              {insuranceCoverBand(coverAmount) === "other" ? (
+                <div
+                  className={cn(
+                    "flex h-11 min-w-0 flex-1 items-center gap-1.5 rounded-xl border-2 bg-transparent px-3.5 transition",
+                    error
+                      ? "border-[#d4694a] ring-2 ring-[#d4694a]"
+                      : "border-[#1c133b] focus-within:ring-2 focus-within:ring-[#1c133b]",
+                  )}
+                >
+                  <span className="text-[15px] font-medium text-[#1c133b]">
+                    £
+                  </span>
+                  <input
+                    aria-label="Other cover amount"
+                    autoFocus
+                    className="h-full w-full min-w-0 bg-transparent text-[15px] font-medium text-[#1c133b] outline-none placeholder:text-[#8a8498]"
+                    id="onboarding-insurance-cover-other"
+                    inputMode="decimal"
+                    onChange={(event) => {
+                      const next = event.target.value;
+                      onCoverAmount(next.trim() ? next : "other");
+                    }}
+                    placeholder="e.g. 1.5m"
+                    value={insuranceCoverOtherText(coverAmount)}
+                  />
+                </div>
+              ) : null}
+            </div>
+            <p className="text-xs leading-5 text-[#8a8498]">
+              Mundoria’s minimum is £1 million for standard domestic cleaning.
+            </p>
+            {error && insuranceCoverBand(coverAmount) === "other" ? (
+              <FieldError message={error} />
+            ) : null}
+          </div>
+
           <DocumentUpload
             label="Upload insurance certificate"
             onFile={onFile}
@@ -647,6 +751,7 @@ export function InsuranceComplianceStep({
             uploaded={uploaded}
             uploading={uploading}
           />
+
           <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
             <OnboardingCheckbox
               checked={activityConfirmed}
@@ -665,11 +770,23 @@ export function InsuranceComplianceStep({
           <SectionHeading subtitle="Arrange suitable cleaning business insurance before activation.">
             Let&apos;s help you get covered
           </SectionHeading>
-          <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[#5a5470]">
-            <li>Find a provider offering Public Liability for cleaners.</li>
-            <li>Check the policy covers the services you offer.</li>
-            <li>Choose cover that meets Mundoria&apos;s £1m minimum.</li>
-            <li>Return here to upload your certificate.</li>
+          <ol className="space-y-3">
+            {[
+              "Find a provider offering Public Liability for cleaners.",
+              "Check the policy covers the services you offer.",
+              "Choose cover that meets Mundoria’s £1m minimum.",
+              "Return here to upload your certificate.",
+            ].map((step, index) => (
+              <li
+                className="flex items-start gap-3 text-sm leading-6 text-[#5a5470]"
+                key={step}
+              >
+                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] text-xs font-bold text-[#1c133b]">
+                  {index + 1}
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
           </ol>
           <p className="text-xs leading-5 text-[#8a8498]">
             Starting points (not endorsements): Simply Business, PolicyBee,
@@ -680,21 +797,34 @@ export function InsuranceComplianceStep({
           ) : null}
           <InfoCallout>
             You can finish other onboarding steps while arranging insurance.
-            Your profile stays pending until cover is verified. Expired cover
-            blocks new bookings once you&apos;re live.
+            Your profile stays pending until cover is verified.
           </InfoCallout>
         </div>
       ) : null}
 
       {path === "unsure" ? (
         <div className="space-y-4">
-          <SectionHeading>
+          <SectionHeading subtitle="Two quick checks usually settle it.">
             Let&apos;s help you check
           </SectionHeading>
-          <p className="text-sm leading-6 text-[#5a5470]">
-            Check your certificate or contact your provider to confirm Public
-            Liability covers professional cleaning work.
-          </p>
+          <ul className="space-y-3">
+            {[
+              "Look for “Public Liability” on your certificate — not only home contents.",
+              "Confirm the policy covers professional domestic cleaning work.",
+              "If you’re still unsure, ask your provider before uploading.",
+            ].map((item) => (
+              <li
+                className="flex items-start gap-3 text-sm leading-6 text-[#5a5470]"
+                key={item}
+              >
+                <span
+                  aria-hidden
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1c133b]"
+                />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
           {onDefer ? (
             <SoftDeferButton
               label="I'll check my insurance"
@@ -726,36 +856,33 @@ export function LocationExtras({
   onTransportMode: (next: string) => void;
   transportMode: string;
 }) {
+  const travel = parseTransportModes(transportMode);
+
   return (
     <div className="mt-8 space-y-6 border-t border-[#e8e0d0] pt-8">
       <SectionHeading subtitle="Select every option that applies.">
         How do you usually travel to cleaning jobs?
       </SectionHeading>
-      <BranchMultiChoice
-        columns={2}
+      <ChoiceMultiPills
+        label="Travel modes"
         onChange={(modes) => {
-          const { otherText } = parseTransportModes(transportMode);
-          onTransportMode(serializeTransportModes(modes, otherText));
+          onTransportMode(serializeTransportModes(modes, travel.otherText));
         }}
         options={[...TRANSPORT_MODE_OPTIONS]}
-        values={parseTransportModes(transportMode).modes}
+        values={travel.modes}
       />
-      {parseTransportModes(transportMode).modes.includes("other") ? (
-        <label className="block space-y-2 text-sm font-medium">
-          <span>How else do you travel?</span>
-          <Input
-            className={cn(FIELD, error ? invalidControlClass : undefined)}
-            onChange={(event) => {
-              const { modes } = parseTransportModes(transportMode);
-              onTransportMode(
-                serializeTransportModes(modes, event.target.value),
-              );
-            }}
-            placeholder="e.g. Motorbike, lifts with a colleague"
-            value={parseTransportModes(transportMode).otherText}
-          />
-          {error ? <FieldError message={error} /> : null}
-        </label>
+      {travel.modes.includes("other") ? (
+        <OnboardingField
+          error={error}
+          id="onboarding-travel-other"
+          label="How else do you travel?"
+          onChange={(event) => {
+            onTransportMode(
+              serializeTransportModes(travel.modes, event.target.value),
+            );
+          }}
+          value={travel.otherText}
+        />
       ) : error ? (
         <FieldError message={error} />
       ) : null}
@@ -763,12 +890,25 @@ export function LocationExtras({
       <SectionHeading>
         Are you able to travel with cleaning equipment when required?
       </SectionHeading>
-      <BranchChoice
+      <DecisionStrip
+        label="Travel with cleaning equipment"
         onChange={onCanTransport}
         options={[
-          { label: "Yes", value: "yes" },
-          { label: "No", value: "no" },
-          { label: "Depends on the equipment", value: "depends" },
+          {
+            hint: "You’re happy to bring kit when a booking needs it.",
+            label: "Yes",
+            value: "yes",
+          },
+          {
+            hint: "Prefer bookings where equipment is already on site.",
+            label: "No",
+            value: "no",
+          },
+          {
+            hint: "It depends how much kit is needed for the visit.",
+            label: "Depends",
+            value: "depends",
+          },
         ]}
         value={canTransportEquipment || null}
       />
@@ -779,17 +919,19 @@ export function LocationExtras({
 }
 
 function OtherSpecify({
+  id = "onboarding-other-specify",
   onChange,
   value,
 }: {
+  id?: string;
   onChange: (next: string) => void;
   value: string;
 }) {
   return (
-    <Input
-      className={FIELD}
+    <OnboardingField
+      id={id}
+      label="Other (please specify)"
       onChange={(event) => onChange(event.target.value)}
-      placeholder="Other (please specify)"
       value={value}
     />
   );
@@ -851,12 +993,25 @@ export function EquipmentComplianceStep({
       </p>
 
       <SectionHeading>Do you have your own cleaning equipment?</SectionHeading>
-      <BranchChoice
+      <DecisionStrip
+        label="Own cleaning equipment"
         onChange={onEquipmentOwnership}
         options={[
-          { label: "Yes, I have my own equipment", value: "yes" },
-          { label: "I have some equipment", value: "some" },
-          { label: "No, I don't have any equipment yet", value: "none" },
+          {
+            hint: "You can bring a full kit to bookings when needed.",
+            label: "Yes",
+            value: "yes",
+          },
+          {
+            hint: "You have part of a kit — we’ll match with that in mind.",
+            label: "Some",
+            value: "some",
+          },
+          {
+            hint: "Prefer bookings where equipment is already on site for now.",
+            label: "None yet",
+            value: "none",
+          },
         ]}
         value={equipmentOwnership || null}
       />
@@ -870,15 +1025,32 @@ export function EquipmentComplianceStep({
             selected={equipmentOwned}
           />
           {equipmentOwned.includes(OTHER) ? (
-            <OtherSpecify onChange={onEquipmentOther} value={equipmentOther} />
+            <OtherSpecify
+              id="onboarding-equipment-other"
+              onChange={onEquipmentOther}
+              value={equipmentOther}
+            />
           ) : null}
           <SectionHeading>Is your equipment in good working condition?</SectionHeading>
-          <BranchChoice
+          <DecisionStrip
+            label="Equipment condition"
             onChange={onEquipmentCondition}
             options={[
-              { label: "Yes", value: "yes" },
-              { label: "Some equipment needs replacing", value: "replace" },
-              { label: "I'm not sure", value: "unsure" },
+              {
+                hint: "Ready to use on bookings.",
+                label: "Yes",
+                value: "yes",
+              },
+              {
+                hint: "Some items need replacing before you’re fully set.",
+                label: "Needs replacing",
+                value: "replace",
+              },
+              {
+                hint: "We’ll treat this as something to confirm later.",
+                label: "Not sure",
+                value: "unsure",
+              },
             ]}
             value={equipmentCondition || null}
           />
@@ -886,12 +1058,25 @@ export function EquipmentComplianceStep({
       ) : null}
 
       <SectionHeading>Do you have your own cleaning products?</SectionHeading>
-      <BranchChoice
+      <DecisionStrip
+        label="Own cleaning products"
         onChange={onProductsOwnership}
         options={[
-          { label: "Yes, I have my own cleaning products", value: "yes" },
-          { label: "I have some cleaning products", value: "some" },
-          { label: "No, I don't have any", value: "none" },
+          {
+            hint: "You’re set to bring products when a booking needs them.",
+            label: "Yes",
+            value: "yes",
+          },
+          {
+            hint: "You have some products — add details below if useful.",
+            label: "Some",
+            value: "some",
+          },
+          {
+            hint: "Prefer bookings where products are provided for now.",
+            label: "None",
+            value: "none",
+          },
         ]}
         value={productsOwnership || null}
       />
@@ -904,7 +1089,11 @@ export function EquipmentComplianceStep({
             selected={productsOwned}
           />
           {productsOwned.includes(OTHER) ? (
-            <OtherSpecify onChange={onProductsOther} value={productsOther} />
+            <OtherSpecify
+              id="onboarding-products-other"
+              onChange={onProductsOther}
+              value={productsOther}
+            />
           ) : null}
         </div>
       ) : null}
@@ -916,19 +1105,33 @@ export function EquipmentComplianceStep({
         selected={ppeOwned}
       />
       {ppeOwned.includes(OTHER) ? (
-        <OtherSpecify onChange={onPpeOther} value={ppeOther} />
+        <OtherSpecify
+          id="onboarding-ppe-other"
+          onChange={onPpeOther}
+          value={ppeOther}
+        />
       ) : null}
 
       <SectionHeading>
         Can you transport your equipment to cleaning bookings?
       </SectionHeading>
-      <BranchChoice
+      <DecisionStrip
+        label="Transport equipment to bookings"
         onChange={onEquipmentTransport}
         options={[
-          { label: "Yes, I can bring my equipment", value: "yes" },
-          { label: "I can bring smaller equipment only", value: "small" },
           {
-            label: "Prefer bookings where equipment is provided",
+            hint: "You can bring your kit to cleaning bookings.",
+            label: "Yes",
+            value: "yes",
+          },
+          {
+            hint: "Smaller items only — leave bulky kit for on-site supply.",
+            label: "Smaller only",
+            value: "small",
+          },
+          {
+            hint: "Match toward bookings where equipment is already there.",
+            label: "Prefer provided",
             value: "prefer_provided",
           },
         ]}
@@ -983,13 +1186,18 @@ export function EmergencyContactStep({
   safetyAck: boolean;
   successMessage?: string | null;
 }) {
-  const countryBand = EMERGENCY_COUNTRIES.includes(
-    country as (typeof EMERGENCY_COUNTRIES)[number],
-  )
-    ? country
-    : country
-      ? "Other"
-      : null;
+  const countryOptions = (() => {
+    if (
+      !country ||
+      WORLD_COUNTRY_SELECT_OPTIONS.some((option) => option.value === country)
+    ) {
+      return WORLD_COUNTRY_SELECT_OPTIONS;
+    }
+    return [
+      { flag: "🏳️", label: country, value: country },
+      ...WORLD_COUNTRY_SELECT_OPTIONS,
+    ];
+  })();
 
   return (
     <div className="space-y-6">
@@ -999,135 +1207,116 @@ export function EmergencyContactStep({
         Mundoria booking. This stays private and is only used when necessary.
       </p>
 
-      <label className="block space-y-2 text-sm font-medium">
-        <span>Full name</span>
-        <Input
-          className={cn(FIELD, error ? invalidControlClass : undefined)}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 sm:items-start">
+        <OnboardingField
+          error={error}
+          id="onboarding-emergency-name"
+          label="Full name"
           onChange={(event) => onName(event.target.value)}
-          placeholder="Enter their full name"
           value={name}
         />
-      </label>
-
-      <SectionHeading>Relationship to you</SectionHeading>
-      <BranchChoice
-        columns={2}
-        onChange={(next) => {
-          if (next === "other") {
-            onRelationship("other");
-            return;
+        <OnboardingSelect
+          label="Relationship to you"
+          onChange={(next) => {
+            if (next === "other") {
+              onRelationship("other");
+              return;
+            }
+            onRelationship(next);
+            onRelationshipOther("");
+          }}
+          options={[
+            { label: "Spouse / Partner", value: "partner" },
+            { label: "Parent", value: "parent" },
+            { label: "Sibling", value: "sibling" },
+            { label: "Relative", value: "relative" },
+            { label: "Friend", value: "friend" },
+            { label: "Other", value: "other" },
+          ]}
+          placeholder="Select relationship"
+          value={
+            ["partner", "parent", "sibling", "relative", "friend", "other"].includes(
+              relationship,
+            )
+              ? relationship
+              : relationship
+                ? "other"
+                : ""
           }
-          onRelationship(next);
-        }}
-        options={[
-          { label: "Spouse / Partner", value: "partner" },
-          { label: "Parent", value: "parent" },
-          { label: "Sibling", value: "sibling" },
-          { label: "Relative", value: "relative" },
-          { label: "Friend", value: "friend" },
-          { label: "Other", value: "other" },
-        ]}
-        value={
-          ["partner", "parent", "sibling", "relative", "friend", "other"].includes(
-            relationship,
-          )
-            ? relationship
-            : relationship
-              ? "other"
-              : null
-        }
-      />
+        />
+      </div>
       {relationship === "other" ||
       (Boolean(relationship) &&
         !["partner", "parent", "sibling", "relative", "friend", "other"].includes(
           relationship,
         )) ? (
-        <label className="block space-y-2 text-sm font-medium">
-          <span>Please specify relationship</span>
-          <Input
-            className={cn(FIELD, error ? invalidControlClass : undefined)}
-            onChange={(event) => {
-              const next = event.target.value;
-              onRelationship("other");
-              onRelationshipOther(next);
-            }}
-            placeholder="e.g. Colleague, neighbour"
-            value={
-              relationship === "other"
-                ? relationshipOther
-                : relationshipOther || relationship
-            }
-          />
-        </label>
-      ) : null}
-
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <label className="block min-w-0 space-y-2 text-sm font-medium">
-          <span>Mobile number</span>
-          <Input
-            className={cn(FIELD, error ? invalidControlClass : undefined)}
-            onChange={(event) => onMobile(event.target.value)}
-            placeholder="+44 7XXX XXXXXX"
-            value={mobile}
-          />
-        </label>
-        <label className="block min-w-0 space-y-2 text-sm font-medium">
-          <span>Alternative phone (optional)</span>
-          <Input
-            className={FIELD}
-            onChange={(event) => onAltPhone(event.target.value)}
-            placeholder="Another contact number"
-            value={altPhone}
-          />
-        </label>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <label className="block min-w-0 space-y-2 text-sm font-medium">
-          <span>Email (optional)</span>
-          <Input
-            className={FIELD}
-            onChange={(event) => onEmail(event.target.value)}
-            placeholder="Email address"
-            type="email"
-            value={email}
-          />
-        </label>
-        <label className="block min-w-0 space-y-2 text-sm font-medium">
-          <span>Country of residence</span>
-          <select
-            className={cn(
-              "flex h-10 w-full rounded-md px-3 text-sm outline-none focus-visible:ring-2",
-              FIELD,
-            )}
-            onChange={(event) => onCountry(event.target.value)}
-            value={countryBand ?? "United Kingdom"}
-          >
-            {EMERGENCY_COUNTRIES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      {countryBand === "Other" ? (
-        <Input
-          className={FIELD}
-          onChange={(event) => onCountry(event.target.value || "Other")}
-          placeholder="Enter country"
-          value={country === "Other" ? "" : country}
+        <OnboardingField
+          id="onboarding-emergency-relationship-other"
+          label="Please specify relationship"
+          onChange={(event) => {
+            const next = event.target.value;
+            onRelationship("other");
+            onRelationshipOther(next);
+          }}
+          value={
+            relationship === "other"
+              ? relationshipOther
+              : relationshipOther || relationship
+          }
         />
       ) : null}
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+        <OnboardingField
+          error={error}
+          id="onboarding-emergency-mobile"
+          label="Mobile number"
+          onChange={(event) => onMobile(event.target.value)}
+          value={mobile}
+        />
+        <OnboardingField
+          id="onboarding-emergency-alt-phone"
+          label="Alternative phone (optional)"
+          onChange={(event) => onAltPhone(event.target.value)}
+          value={altPhone}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+        <OnboardingField
+          id="onboarding-emergency-email"
+          label="Email (optional)"
+          onChange={(event) => onEmail(event.target.value)}
+          type="email"
+          value={email}
+        />
+        <OnboardingSelect
+          label="Country of residence"
+          onChange={onCountry}
+          options={countryOptions}
+          placeholder="Select country"
+          searchPlaceholder="Search countries…"
+          value={country || "United Kingdom"}
+        />
+      </div>
 
       <SectionHeading>
         Is this person aware you&apos;ve listed them?
       </SectionHeading>
-      <BranchChoice
+      <DecisionStrip
+        label="Emergency contact informed"
         onChange={onInformed}
         options={[
-          { label: "Yes", value: "yes" },
-          { label: "No, but I'll let them know", value: "later" },
+          {
+            hint: "They already know they may be contacted.",
+            label: "Yes",
+            value: "yes",
+          },
+          {
+            hint: "You’ll let them know before you submit.",
+            label: "I’ll tell them",
+            value: "later",
+          },
         ]}
         value={informed || null}
       />

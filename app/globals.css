@@ -96,16 +96,18 @@
   }
 
   /* Keep form controls light even when the OS is in dark mode.
-     `.auth-inset-input` sits inside a chrome wrapper — keep it transparent. */
+     Cream surface matches onboarding/booking; `.auth-inset-input` stays
+     transparent inside its chrome wrapper. */
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]):not(.auth-inset-input),
   textarea,
   select {
     color-scheme: light;
-    background-color: #ffffff;
+    background-color: #f9f6ef;
     color: #1c133b;
   }
 
-  input.auth-inset-input {
+  input.auth-inset-input,
+  textarea.auth-inset-input {
     color-scheme: light;
     background-color: transparent;
     color: #1c133b;
@@ -127,7 +129,7 @@
   select:-webkit-autofill:focus {
     -webkit-text-fill-color: #1c133b;
     caret-color: #1c133b;
-    box-shadow: 0 0 0 1000px #ffffff inset;
+    box-shadow: 0 0 0 1000px #f9f6ef inset;
     transition: background-color 99999s ease-out;
   }
 

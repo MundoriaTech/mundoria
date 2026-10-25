@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { FormField } from "@/components/auth/form-field";
 import {
   AuthPhoneField,
   UkFlag,
@@ -57,7 +58,7 @@ import {
   UtrComplianceStep,
 } from "@/components/cleaner/onboarding-compliance-steps";
 import {
-  BranchChoice,
+  ChoicePills,
   DocumentUpload,
   InfoCallout,
   OnboardingCheckbox,
@@ -273,7 +274,7 @@ const days = [
 const ONBOARDING_PAGE_BG = "bg-[#f9f6ef]";
 /** Fields sit on the page colour with a stronger ink border. */
 const ONBOARDING_FIELD_CLASS =
-  "border-2 border-[#1c133b] bg-[#f9f6ef] focus-visible:ring-[#1c133b]";
+  "border-2 border-[#1c133b] bg-[#f9f6ef] focus-visible:bg-[#f9f6ef] focus-visible:ring-[#1c133b]";
 
 /** Pack page headings in sentence case (not Title Case). Keep acronyms: UTR, DBS. */
 const STEPS = [
@@ -345,7 +346,7 @@ const STEP_WHY: Record<StepId, string> = {
   coverage:
     "Work where it suits you. Tell us which areas you’d like to cover so we can match suitable bookings.",
   identity: "We verify identity before any jobs go live.",
-  utr: "A Unique Taxpayer Reference (UTR) is a 10-digit number issued by HMRC. We’ll use it to verify your tax registration.",
+  utr: "We’ll use your UTR to verify your tax registration.",
   dbs: "To help keep customers and cleaners safe, we require a Basic DBS check as part of joining Mundoria.",
   insurance:
     "Public Liability Insurance helps protect you if someone is injured or property is damaged because of your cleaning work, subject to the policy.",
@@ -1404,7 +1405,7 @@ export function OnboardingWizard({
               />
             </div>
           </div>
-          <nav aria-label="Onboarding steps" className="mt-7 flex-1 space-y-7">
+          <nav aria-label="Onboarding steps" className="mt-7 space-y-7">
             {GROUPS.map((group) => {
               const steps = group.ids
                 .map((id) => STEPS.find((step) => step.id === id))
@@ -1472,6 +1473,25 @@ export function OnboardingWizard({
               );
             })}
           </nav>
+          {!preview ? (
+            <div className="mt-5 flex flex-col items-start gap-1.5">
+              <a
+                className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                href="/help"
+              >
+                Help
+              </a>
+              <button
+                className="text-left text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                onClick={() => void logout()}
+                type="button"
+              >
+                Log out
+              </button>
+            </div>
+          ) : (
+            <p className="mt-5 text-xs text-[#a39fb0]">Preview mode</p>
+          )}
           <p
             aria-live="polite"
             className={cn(
@@ -1481,49 +1501,11 @@ export function OnboardingWizard({
           >
             Progress saved
           </p>
-          {!preview ? (
-            <div className="mt-2 space-y-3">
-              <div className="flex flex-col items-start gap-1.5">
-                <a
-                  className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                  href="/help"
-                >
-                  Help
-                </a>
-                <button
-                  className="text-left text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                  onClick={() => void logout()}
-                  type="button"
-                >
-                  Log out
-                </button>
-              </div>
-            </div>
-          ) : (
-            <p className="mt-6 text-xs text-[#a39fb0]">Preview mode</p>
-          )}
         </aside>
 
         <div className="min-w-0 flex-1 px-4 py-5 pb-[calc(5.75rem+env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10 lg:px-12">
-          <div className="mb-5 flex items-center justify-between md:hidden">
+          <div className="mb-5 md:hidden">
             <LandingLogo href="/cleaner/dashboard" />
-            {!preview ? (
-              <div className="flex items-center gap-4">
-                <a
-                  className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                  href="/help"
-                >
-                  Help
-                </a>
-                <button
-                  className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                  onClick={() => void logout()}
-                  type="button"
-                >
-                  Log out
-                </button>
-              </div>
-            ) : null}
           </div>
 
           <div className="mb-5 md:hidden">
@@ -1568,6 +1550,23 @@ export function OnboardingWizard({
                 );
               })}
             </nav>
+            {!preview ? (
+              <div className="mt-3 flex items-center gap-4">
+                <a
+                  className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                  href="/help"
+                >
+                  Help
+                </a>
+                <button
+                  className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                  onClick={() => void logout()}
+                  type="button"
+                >
+                  Log out
+                </button>
+              </div>
+            ) : null}
             <p
               aria-live="polite"
               className={cn(
@@ -2151,18 +2150,25 @@ function StepBody({
           </a>
           .
         </p>
-        <Field error={issueFor("bio")} label="Tell us about yourself">
-          <textarea
-            className={cn(
-              "min-h-28 w-full rounded-md p-3 text-sm text-[#1c133b] outline-none ring-offset-white focus-visible:ring-2",
-              ONBOARDING_FIELD_CLASS,
-              issueFor("bio") ? invalidControlClass : undefined,
-            )}
-            onChange={(event) => onUpdate("bio", event.target.value)}
-            placeholder="A few lines about you, how you clean, and what customers can expect."
-            value={data.bio}
-          />
-        </Field>
+        <div className="space-y-1.5">
+          <FormField
+            htmlFor="onboarding-bio"
+            label="Tell us about yourself"
+            multiline
+            plain
+          >
+            <textarea
+              className={issueFor("bio") ? invalidControlClass : undefined}
+              id="onboarding-bio"
+              onChange={(event) => onUpdate("bio", event.target.value)}
+              placeholder=" "
+              value={data.bio}
+            />
+          </FormField>
+          {issueFor("bio") ? (
+            <FieldError message={issueFor("bio")!} />
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -3394,24 +3400,6 @@ function ExperienceStepper({
   );
 }
 
-function Field({
-  children,
-  error,
-  label,
-}: {
-  children: React.ReactNode;
-  error?: string;
-  label: string;
-}) {
-  return (
-    <label className="block space-y-2 text-sm font-medium">
-      <span>{label}</span>
-      {children}
-      {error ? <FieldError message={error} /> : null}
-    </label>
-  );
-}
-
 const HOURS_DAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const; // Mon → Sun
 const HOURS_DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const HOURS_WEEKDAYS = new Set([1, 2, 3, 4, 5]);
@@ -3743,11 +3731,11 @@ function HoursPicker({
             How many hours would you prefer to work per week?
           </h3>
           <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">
-            Guides how much work we typically offer each week — not a hard cap.
+            Guides how much work we typically offer each week.
           </p>
         </div>
-        <BranchChoice
-          columns={2}
+        <ChoicePills
+          label="Preferred hours per week"
           onChange={onPreferredHours}
           options={[...PREFERRED_HOURS_BANDS]}
           value={preferredHoursBand || null}

@@ -301,11 +301,7 @@ export const PREFERRED_HOURS_BANDS = [
   { label: "10–20 hours", value: "10_20" },
   { label: "20–30 hours", value: "20_30" },
   { label: "30+ hours", value: "30_plus" },
-  {
-    description: "Happy with whatever fits my diary.",
-    label: "Flexible",
-    value: "flexible",
-  },
+  { label: "Flexible", value: "flexible" },
 ] as const;
 
 export const UTR_PROOF_TYPES = [
@@ -323,19 +319,6 @@ export const SAFETY_GUIDELINES = [
   "Report accidents, near-misses, injuries and property damage to Mundoria promptly.",
   "In a life-threatening emergency dial 999. For non-emergencies you can also use 101.",
   "Keep emergency contact details up to date in your Mundoria profile.",
-] as const;
-
-export const EMERGENCY_COUNTRIES = [
-  "United Kingdom",
-  "Ireland",
-  "France",
-  "Spain",
-  "Portugal",
-  "Poland",
-  "Romania",
-  "Italy",
-  "Germany",
-  "Other",
 ] as const;
 
 export const INCIDENT_CATEGORIES = [
@@ -377,7 +360,7 @@ export const PPE_ITEMS = [
 ] as const;
 
 export const HMRC_REGISTER_URL =
-  "https://www.gov.uk/become-sole-trader/register-sole-trader";
+  "https://www.gov.uk/register-for-self-assessment";
 export const HMRC_FIND_UTR_URL = "https://www.gov.uk/find-utr-number";
 export const DBS_APPLY_URL = "https://www.gov.uk/request-copy-criminal-record";
 
@@ -390,7 +373,7 @@ export const TRANSPORT_MODE_PRESETS = [
 ] as const;
 
 export const TRANSPORT_MODE_OPTIONS = [
-  { label: "I drive and have my own car", value: "car" },
+  { label: "Car", value: "car" },
   { label: "Public transport", value: "public" },
   { label: "Bicycle", value: "bike" },
   { label: "Walking", value: "walk" },

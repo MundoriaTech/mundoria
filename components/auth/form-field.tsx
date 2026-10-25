@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
   children: React.ReactNode;
+  /** Match onboarding single-line chrome (`min-h-11`) instead of the taller auth shell. */
+  compact?: boolean;
   error?: HookFieldError;
   hint?: string;
   htmlFor: string;
@@ -41,6 +43,7 @@ function withNestedInputReset(children: React.ReactNode): React.ReactNode {
  */
 export function FormField({
   children,
+  compact = false,
   error,
   hint,
   htmlFor,
@@ -48,17 +51,19 @@ export function FormField({
   multiline = false,
   plain = false,
 }: FormFieldProps) {
+  const dense = compact && !multiline;
+
   return (
     <div className="space-y-1.5">
       <div
         className={cn(
           "group/field relative rounded-xl px-3.5 transition",
-          multiline ? "min-h-[7.5rem]" : "min-h-[3.25rem]",
+          multiline ? "min-h-[7.5rem]" : dense ? "h-11" : "min-h-[3.25rem]",
           // Booking / onboarding plain: thick ink border + thicker ink ring on focus (no purple).
           // Auth default: thin grey border, purple focus.
           plain
             ? "border-2 border-[#1c133b] bg-transparent focus-within:ring-2 focus-within:ring-[#1c133b] focus-within:ring-offset-0"
-            : "border border-[#e4e0eb] bg-[#f6f5f8] focus-within:border-[#6a45b8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
+            : "border border-[#e4e0eb] bg-[#f6f5f8] focus-within:border-[#6a45b8] focus-within:bg-[#f6f5f8] focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
           error &&
             (plain
               ? "border-[#d4694a] focus-within:ring-[#d4694a]"
@@ -83,7 +88,8 @@ export function FormField({
       >
         <label
           className={cn(
-            "pointer-events-none absolute left-3.5 right-3.5 top-2.5 z-[1]",
+            "pointer-events-none absolute left-3.5 right-3.5 z-[1]",
+            dense ? "top-1.5" : "top-2.5",
             "origin-left text-[11px] font-semibold leading-none text-[#5a5470]",
             "transition-all duration-150",
             error && "text-[#d4694a]",
@@ -97,9 +103,11 @@ export function FormField({
         </label>
         <div
           className={cn(
-            "pt-5 pb-2",
+            dense ? "pb-1 pt-3.5" : "pb-2 pt-5",
             "has-[.password-toggle]:pr-9",
-            "[&_input]:h-7 [&_input]:rounded-none [&_input]:px-0 [&_input]:py-0",
+            dense
+              ? "[&_input]:h-6 [&_input]:rounded-none [&_input]:px-0 [&_input]:py-0"
+              : "[&_input]:h-7 [&_input]:rounded-none [&_input]:px-0 [&_input]:py-0",
             "[&_input]:text-[15px]",
             "[&_input]:placeholder:text-transparent",
             "[&_textarea]:min-h-[5.5rem] [&_textarea]:w-full [&_textarea]:resize-none",
