@@ -9,7 +9,7 @@ export const MIN_PUBLIC_LIABILITY_COVER = "1m" as const;
 export const INSURANCE_COVER_MODEL = "cleaner_provided" as const;
 
 export const INSURANCE_COVER_MODEL_COPY =
-  "Mundoria requires you to arrange your own Public Liability Insurance (minimum £1 million for standard domestic cleaning). Mundoria does not currently provide this cover for cleaners.";
+  "Mundoria requires you to arrange your own Public Liability Insurance (minimum £1 million for standard domestic cleaning).";
 
 /** Minimum upload size before we flag a document as possibly unreadable. */
 export const MIN_PROOF_BYTES = 8 * 1024; // 8 KB — tiny files are usually blank/corrupt
@@ -166,15 +166,11 @@ export const INSURANCE_FAQS = [
 
 export const LOCATION_FAQS = [
   {
-    a: "Your home district plus working radius is the main match signal. Extra districts are optional for areas you cover beyond that circle.",
+    a: "Your first district is the home base (map centre). You can add up to 6 districts in total from the same list. Matching uses home base + radius, plus any extra districts you added.",
     q: "How does coverage matching work?",
   },
   {
-    a: "A full starting postcode (for example B15 2TT) helps place your home base accurately on the map. Your district still defines the SEO/area label.",
-    q: "Why ask for a starting postcode?",
-  },
-  {
-    a: "Choose a radius you’ll reliably travel, up to 15 miles from your home base. Jobs outside that circle won’t be offered.",
+    a: "Choose a radius you’ll reliably travel, up to 15 miles from your home base. Jobs outside that circle won’t be offered unless they’re in an extra district you added.",
     q: "How far should my radius be?",
   },
 ] as const;
@@ -313,7 +309,7 @@ export const UTR_PROOF_TYPES = [
 
 export const SAFETY_GUIDELINES = [
   "Check booking details, address and access notes before you travel.",
-  "Only use products and equipment you understand — follow labels and PPE guidance.",
+  "Only use products and equipment you understand — follow the labels.",
   "If a property feels unsafe, leave and contact Mundoria support immediately.",
   "Do not confront anyone about theft, aggression or disputes — prioritise your safety.",
   "Report accidents, near-misses, injuries and property damage to Mundoria promptly.",
@@ -350,13 +346,6 @@ export const PRODUCT_ITEMS = [
   "Disinfectant",
   "Descaler",
   "Oven cleaner",
-] as const;
-
-export const PPE_ITEMS = [
-  "Protective gloves",
-  "Non-slip footwear",
-  "Protective apron",
-  "Eye protection",
 ] as const;
 
 export const HMRC_REGISTER_URL =

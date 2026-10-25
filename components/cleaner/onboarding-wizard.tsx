@@ -112,6 +112,8 @@ import type { ServiceCategory, ServiceType } from "@/types/customer";
 const BIRMINGHAM_CENTER = { lat: 52.4862, lng: -1.8904 };
 const MAX_RADIUS_MILES = 15;
 const DEFAULT_RADIUS_MILES = 8;
+/** Home base + extras from the districts picker. */
+const MAX_WORKING_DISTRICTS = 6;
 const MILES_TO_METRES = 1609.344;
 
 const COVERAGE_SHORTCUTS = birminghamPostcodesForPicker().map((item) => ({
@@ -1977,23 +1979,15 @@ function StepBody({
   if (stepId === "equipment") {
     return (
       <EquipmentComplianceStep
-        equipmentCondition={data.equipment_condition}
         equipmentOther={data.equipment_other}
         equipmentOwned={data.equipment_owned}
         equipmentOwnership={data.equipment_ownership}
-        equipmentTransport={data.equipment_transport}
-        onEquipmentCondition={(next) => onUpdate("equipment_condition", next)}
         onEquipmentOther={(next) => onUpdate("equipment_other", next)}
         onEquipmentOwned={(next) => onUpdate("equipment_owned", next)}
         onEquipmentOwnership={(next) => onUpdate("equipment_ownership", next)}
-        onEquipmentTransport={(next) => onUpdate("equipment_transport", next)}
-        onPpeOther={(next) => onUpdate("ppe_other", next)}
-        onPpeOwned={(next) => onUpdate("ppe_owned", next)}
         onProductsOther={(next) => onUpdate("products_other", next)}
         onProductsOwned={(next) => onUpdate("products_owned", next)}
         onProductsOwnership={(next) => onUpdate("products_ownership", next)}
-        ppeOther={data.ppe_other}
-        ppeOwned={data.ppe_owned}
         productsOther={data.products_other}
         productsOwned={data.products_owned}
         productsOwnership={data.products_ownership}
@@ -2722,165 +2716,33 @@ function IdentityStep({
 
 const COVERAGE_GUIDE_TIPS = [
   {
-    body: "Choose the Birmingham district you usually start from. We use this as the centre of your coverage map.",
-    title: "Home base",
+    body: `Pick the Birmingham district you usually start from — that becomes your home base and the centre of the map. You can add up to ${MAX_WORKING_DISTRICTS} districts in total from the same list.`,
+    title: "Districts",
   },
   {
-    body: `Set how far you’re willing to travel, up to ${MAX_RADIUS_MILES} miles. Jobs outside that circle won’t be offered.`,
+    body: `Set how far you’re willing to travel from your home base, up to ${MAX_RADIUS_MILES} miles. Jobs outside that circle won’t be offered unless they’re in an extra district you added.`,
     title: "Working radius",
-  },
-  {
-    body: "Home base and radius cover most bookings. Optionally search and add a few extra districts if you work further afield.",
-    title: "Extra districts",
   },
 ] as const;
 
-function OnboardingSelect({
+function HomeDistrictsPicker({
+  atLimit,
   error,
-  onChange,
-  options,
-  placeholder,
-  value,
-}: {
-  error?: boolean;
-  onChange: (value: string) => void;
-  options: ReadonlyArray<{ label: string; value: string }>;
-  placeholder: string;
-  value: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const rootRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const selected = options.find((option) => option.value === value);
-  const searchable = options.length > 10;
-  const normalisedQuery = query.trim().toLowerCase();
-  const filtered = normalisedQuery
-    ? options.filter(
-        (option) =>
-          option.label.toLowerCase().includes(normalisedQuery) ||
-          option.value.toLowerCase().includes(normalisedQuery),
-      )
-    : options;
-
-  useEffect(() => {
-    if (!open) {
-      setQuery("");
-      return;
-    }
-    window.requestAnimationFrame(() => searchRef.current?.focus());
-    function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  return (
-    <div className="relative" ref={rootRef}>
-      <button
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        className={cn(
-          "flex h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#1c133b]",
-          ONBOARDING_FIELD_CLASS,
-          error ? invalidControlClass : undefined,
-          open && "ring-2 ring-[#1c133b]",
-        )}
-        onClick={() => setOpen((current) => !current)}
-        type="button"
-      >
-        <span className={cn(selected ? "font-medium text-[#1c133b]" : "text-[#8b8798]")}>
-          {selected?.label ?? placeholder}
-        </span>
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 shrink-0 text-[#1c133b] transition",
-            open && "rotate-180",
-          )}
-          strokeWidth={2.5}
-        />
-      </button>
-      {open ? (
-        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
-          {searchable ? (
-            <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
-              <Search className="h-4 w-4 shrink-0 text-[#8b8798]" strokeWidth={2.5} />
-              <input
-                className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search districts…"
-                ref={searchRef}
-                type="search"
-                value={query}
-              />
-            </div>
-          ) : null}
-          <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
-            {filtered.length === 0 ? (
-              <li className="px-3 py-2.5 text-sm text-[#8b8798]">
-                No districts match that search.
-              </li>
-            ) : (
-              filtered.map((option) => {
-                const isSelected = option.value === value;
-                return (
-                  <li key={option.value}>
-                    <button
-                      className={cn(
-                        "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition",
-                        isSelected
-                          ? "bg-[#312c79] text-white"
-                          : "text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
-                      )}
-                      onClick={() => {
-                        onChange(option.value);
-                        setOpen(false);
-                      }}
-                      role="option"
-                      type="button"
-                    >
-                      <span>{option.label}</span>
-                      {isSelected ? (
-                        <Check className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-                      ) : null}
-                    </button>
-                  </li>
-                );
-              })
-            )}
-          </ul>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function ExtraDistrictsPicker({
-  compact = false,
-  homePrefix,
-  onChange,
+  onAdd,
   selected,
 }: {
-  compact?: boolean;
-  homePrefix: string;
-  onChange: (next: string[]) => void;
+  atLimit: boolean;
+  error?: boolean;
+  onAdd: (prefix: string) => void;
   selected: string[];
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const selectedExtras = selected.filter((prefix) => prefix !== homePrefix);
+  const selectedSet = new Set(selected);
   const available = COVERAGE_SHORTCUTS.filter(
-    (item) => item.prefix !== homePrefix && !selectedExtras.includes(item.prefix),
+    (item) => !selectedSet.has(item.prefix),
   );
   const normalisedQuery = query.trim().toLowerCase();
   const filtered = normalisedQuery
@@ -2911,118 +2773,86 @@ function ExtraDistrictsPicker({
     };
   }, [open]);
 
-  function addDistrict(prefix: string) {
-    if (prefix === homePrefix || selectedExtras.includes(prefix)) return;
-    onChange([...selectedExtras, prefix]);
-    setQuery("");
-    setOpen(false);
-  }
-
-  function removeDistrict(prefix: string) {
-    onChange(selectedExtras.filter((item) => item !== prefix));
-  }
-
   return (
-    <div className="space-y-2">
-      <div>
-        <p className="text-sm font-medium text-[#291845]">
-          Extra districts{" "}
-          <span className="font-normal text-[#8b8798]">(optional)</span>
-        </p>
-        {!compact ? (
-          <p className="mt-1 text-xs leading-5 text-[#8b8798]">
-            Home base and radius cover most jobs. Add districts only if you
-            regularly work outside that circle.
-          </p>
-        ) : null}
-      </div>
-
-      {selectedExtras.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {selectedExtras.map((prefix) => {
-            const label =
-              COVERAGE_SHORTCUTS.find((item) => item.prefix === prefix)
-                ?.label ?? prefix;
-            return (
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-3 py-1.5 text-xs font-semibold text-white"
-                key={prefix}
-              >
-                {label}
-                <button
-                  aria-label={`Remove ${label}`}
-                  className="rounded-full p-0.5 transition hover:bg-white/20"
-                  onClick={() => removeDistrict(prefix)}
-                  type="button"
-                >
-                  <X className="h-3 w-3" strokeWidth={2.75} />
-                </button>
-              </span>
-            );
-          })}
+    <div className="relative w-full" ref={rootRef}>
+      <button
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className={cn(
+          "flex h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#1c133b]",
+          ONBOARDING_FIELD_CLASS,
+          error ? invalidControlClass : undefined,
+          open && "ring-2 ring-[#1c133b]",
+        )}
+        disabled={atLimit}
+        onClick={() => {
+          if (atLimit) return;
+          setOpen((current) => !current);
+        }}
+        type="button"
+      >
+        <span className="inline-flex min-w-0 items-center gap-2 text-[#8b8798]">
+          <Search className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <span className="truncate">
+            {atLimit
+              ? `Maximum ${MAX_WORKING_DISTRICTS} districts`
+              : selected.length === 0
+                ? "Choose your home district…"
+                : "Add another district…"}
+          </span>
+        </span>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-[#1c133b] transition",
+            open && "rotate-180",
+          )}
+          strokeWidth={2.5}
+        />
+      </button>
+      {open && !atLimit ? (
+        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
+          <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
+            <Search
+              className="h-4 w-4 shrink-0 text-[#8b8798]"
+              strokeWidth={2.5}
+            />
+            <input
+              className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search districts…"
+              ref={searchRef}
+              type="search"
+              value={query}
+            />
+          </div>
+          <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2.5 text-sm text-[#8b8798]">
+                {available.length === 0
+                  ? "Every available district is already added."
+                  : "No districts match that search."}
+              </li>
+            ) : (
+              filtered.map((item) => (
+                <li key={item.prefix}>
+                  <button
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                    onClick={() => {
+                      onAdd(item.prefix);
+                      setQuery("");
+                      setOpen(false);
+                    }}
+                    role="option"
+                    type="button"
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
         </div>
       ) : null}
-
-      <div className="relative w-full" ref={rootRef}>
-        <button
-          aria-expanded={open}
-          className={cn(
-            "flex h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#1c133b]",
-            ONBOARDING_FIELD_CLASS,
-            open && "ring-2 ring-[#1c133b]",
-          )}
-          onClick={() => setOpen((current) => !current)}
-          type="button"
-        >
-          <span className="inline-flex min-w-0 items-center gap-2 text-[#8b8798]">
-            <Search className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-            <span className="truncate">Add a district…</span>
-          </span>
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 shrink-0 text-[#1c133b] transition",
-              open && "rotate-180",
-            )}
-            strokeWidth={2.5}
-          />
-        </button>
-        {open ? (
-          <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
-            <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
-              <Search className="h-4 w-4 shrink-0 text-[#8b8798]" strokeWidth={2.5} />
-              <input
-                className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by name or postcode…"
-                ref={searchRef}
-                type="search"
-                value={query}
-              />
-            </div>
-            <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
-              {filtered.length === 0 ? (
-                <li className="px-3 py-2.5 text-sm text-[#8b8798]">
-                  {available.length === 0
-                    ? "Every available district is already added."
-                    : "No districts match that search."}
-                </li>
-              ) : (
-                filtered.map((item) => (
-                  <li key={item.prefix}>
-                    <button
-                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
-                      onClick={() => addDistrict(item.prefix)}
-                      type="button"
-                    >
-                      {item.label}
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        ) : null}
-      </div>
     </div>
   );
 }
@@ -3057,13 +2887,15 @@ function CoverageStep({
     Math.max(1, Math.round(radiusMiles) || DEFAULT_RADIUS_MILES),
   );
   const homePrefix = ukOutwardCode(homeBase);
+  const extras = areas
+    .map((item) => ukOutwardCode(item))
+    .filter((item) => item && item !== homePrefix);
+  const selectedDistricts = homePrefix ? [homePrefix, ...extras] : extras;
   const mapCenter =
     homeBaseLat != null && homeBaseLng != null
       ? { lat: homeBaseLat, lng: homeBaseLng }
       : BIRMINGHAM_CENTER;
   const mapReady = homeBaseLat != null && homeBaseLng != null;
-  const homeBaseValue =
-    COVERAGE_SHORTCUTS.find((item) => item.prefix === homePrefix)?.prefix ?? "";
 
   useEffect(() => {
     const query = homeBase.trim();
@@ -3092,12 +2924,31 @@ function CoverageStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- geocode when home base changes
   }, [homeBase]);
 
-  function setHomeBase(next: string) {
-    onHomeBase(next);
-    const nextPrefix = ukOutwardCode(next);
-    if (nextPrefix && areas.includes(nextPrefix)) {
-      onAreas(areas.filter((item) => item !== nextPrefix));
-    }
+  function applyDistricts(next: string[]) {
+    const unique = Array.from(
+      new Set(next.map((item) => ukOutwardCode(item)).filter(Boolean)),
+    ).slice(0, MAX_WORKING_DISTRICTS);
+    onHomeBase(unique[0] ?? "");
+    onAreas(unique.slice(1));
+  }
+
+  function addDistrict(prefix: string) {
+    const code = ukOutwardCode(prefix);
+    if (!code || selectedDistricts.includes(code)) return;
+    if (selectedDistricts.length >= MAX_WORKING_DISTRICTS) return;
+    applyDistricts([...selectedDistricts, code]);
+  }
+
+  function removeDistrict(prefix: string) {
+    applyDistricts(selectedDistricts.filter((item) => item !== prefix));
+  }
+
+  function makeHome(prefix: string) {
+    if (prefix === homePrefix) return;
+    applyDistricts([
+      prefix,
+      ...selectedDistricts.filter((item) => item !== prefix),
+    ]);
   }
 
   return (
@@ -3113,70 +2964,106 @@ function CoverageStep({
       </div>
 
       <div className="flex flex-col gap-6 sm:gap-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-4">
-          <div className="min-w-0 space-y-2">
-            <p className="text-sm font-medium text-[#291845]">Home base</p>
-            <OnboardingSelect
+        <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-2">
+            <p className="text-sm font-medium text-[#291845]">Districts</p>
+            <p className="text-xs leading-5 text-[#8b8798]">
+              First pick is your home base. Up to {MAX_WORKING_DISTRICTS}{" "}
+              districts.
+            </p>
+            <HomeDistrictsPicker
+              atLimit={selectedDistricts.length >= MAX_WORKING_DISTRICTS}
               error={error?.toLowerCase().includes("home")}
-              onChange={setHomeBase}
-              options={COVERAGE_SHORTCUTS.map((item) => ({
-                label: item.label,
-                value: item.prefix,
-              }))}
-              placeholder="Choose your home district…"
-              value={homeBaseValue}
-            />
-            {geocoding ? (
-              <p className="text-xs text-[#8b8798]">
-                Finding that area on the map…
-              </p>
-            ) : null}
-          </div>
-          <div className="min-w-0">
-            <ExtraDistrictsPicker
-              compact
-              homePrefix={homePrefix}
-              onChange={onAreas}
-              selected={areas}
+              onAdd={addDistrict}
+              selected={selectedDistricts}
             />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-[#291845]">Working radius</p>
-          <p className="text-xs leading-5 text-[#8b8798]">
-            How far you’re willing to travel from your home base — up to{" "}
-            {MAX_RADIUS_MILES} miles.
-          </p>
-          <div className="flex items-center gap-3">
-            <button
-              aria-label="Decrease radius"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={miles <= 1}
-              onClick={() => onRadiusMiles(miles - 1)}
-              type="button"
-            >
-              <Minus className="h-4 w-4" strokeWidth={2.5} />
-            </button>
-            <div className="min-w-[5.5rem] text-center">
-              <p className="text-lg font-semibold tabular-nums text-[#291845]">
-                {miles}
-              </p>
-              <p className="text-xs font-medium text-[#8b8798]">
-                {miles === 1 ? "mile" : "miles"}
-              </p>
+          <div className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-2">
+            <p className="text-sm font-medium text-[#291845]">Working radius</p>
+            <p className="text-xs leading-5 text-[#8b8798]">
+              Travel from home base — up to {MAX_RADIUS_MILES} miles.
+            </p>
+            <div className="flex h-11 items-center gap-3">
+              <button
+                aria-label="Decrease radius"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={miles <= 1}
+                onClick={() => onRadiusMiles(miles - 1)}
+                type="button"
+              >
+                <Minus className="h-4 w-4" strokeWidth={2.5} />
+              </button>
+              <div className="min-w-[5.5rem] text-center">
+                <p className="text-lg font-semibold leading-none tabular-nums text-[#291845]">
+                  {miles}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-[#8b8798]">
+                  {miles === 1 ? "mile" : "miles"}
+                </p>
+              </div>
+              <button
+                aria-label="Increase radius"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={miles >= MAX_RADIUS_MILES}
+                onClick={() => onRadiusMiles(miles + 1)}
+                type="button"
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.5} />
+              </button>
             </div>
-            <button
-              aria-label="Increase radius"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={miles >= MAX_RADIUS_MILES}
-              onClick={() => onRadiusMiles(miles + 1)}
-              type="button"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
-            </button>
           </div>
         </div>
+        {geocoding ? (
+          <p className="-mt-4 text-xs text-[#8b8798]">
+            Finding that area on the map…
+          </p>
+        ) : null}
+
+        {selectedDistricts.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {selectedDistricts.map((prefix) => {
+              const label =
+                COVERAGE_SHORTCUTS.find((item) => item.prefix === prefix)
+                  ?.label ?? prefix;
+              const isHome = prefix === homePrefix;
+              return (
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-semibold",
+                    isHome
+                      ? "border-[#312c79] bg-[#312c79] text-white"
+                      : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b]",
+                  )}
+                  key={prefix}
+                >
+                  {isHome ? (
+                    <span className="opacity-90">Home · {label}</span>
+                  ) : (
+                    <button
+                      className="text-left"
+                      onClick={() => makeHome(prefix)}
+                      title="Set as home base"
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  )}
+                  <button
+                    aria-label={`Remove ${label}`}
+                    className={cn(
+                      "rounded-full p-0.5 transition",
+                      isHome ? "hover:bg-white/20" : "hover:bg-[#1c133b]/10",
+                    )}
+                    onClick={() => removeDistrict(prefix)}
+                    type="button"
+                  >
+                    <X className="h-3 w-3" strokeWidth={2.75} />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
 
         <CoverageMap
           center={mapCenter}
@@ -3627,10 +3514,7 @@ function HoursPicker({
               secondOpen.includes(dayOfWeek) ||
               Boolean(day.start_time_2 || day.end_time_2);
             return (
-              <div
-                className="space-y-2 rounded-2xl border border-[#e8e0d0] bg-[#f3eee4]/60 px-3 py-3"
-                key={dayOfWeek}
-              >
+              <div className="space-y-2" key={dayOfWeek}>
                 <div className="grid grid-cols-[minmax(4.5rem,auto)_1fr_auto_1fr] items-center gap-2">
                   <span className="text-sm font-semibold text-[#291845]">
                     {days[dayOfWeek]}
@@ -3926,7 +3810,7 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     insurance_activity_confirmed: Boolean(value.insurance_activity_confirmed),
     insurance_insured_name: String(value.insurance_insured_name ?? "").trim(),
     marketing_consent: Boolean(value.marketing_consent),
-    ppe_other: String(value.ppe_other ?? "").trim(),
+    ppe_other: "",
     preferred_hours_band: String(value.preferred_hours_band ?? "").trim(),
     products_other: String(value.products_other ?? "").trim(),
     reference_company: String(value.reference_company ?? "").trim(),
@@ -3952,7 +3836,10 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     })),
     bio: String(value.bio ?? "").trim(),
     booking_preferences: stringList(value.booking_preferences),
-    can_transport_equipment: String(value.can_transport_equipment ?? "").trim(),
+    can_transport_equipment: (() => {
+      const next = String(value.can_transport_equipment ?? "").trim();
+      return next === "yes" || next === "no" ? next : "";
+    })(),
     cleaning_skills: stringList(value.cleaning_skills),
     dbs_certificate_number: String(value.dbs_certificate_number ?? "").trim(),
     dbs_document_url: String(value.dbs_document_url ?? "").trim(),
@@ -3965,10 +3852,10 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     emergency_mobile: String(value.emergency_mobile ?? "").trim(),
     emergency_name: String(value.emergency_name ?? "").trim(),
     emergency_relationship: String(value.emergency_relationship ?? "").trim(),
-    equipment_condition: String(value.equipment_condition ?? "").trim(),
+    equipment_condition: "",
     equipment_owned: stringList(value.equipment_owned),
     equipment_ownership: String(value.equipment_ownership ?? "").trim(),
-    equipment_transport: String(value.equipment_transport ?? "").trim(),
+    equipment_transport: "",
     experience_band: String(value.experience_band ?? "").trim(),
     full_name: String(value.full_name ?? "").trim(),
     headshot_url: String(value.headshot_url ?? "").trim(),
@@ -3992,7 +3879,7 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     payout_preference:
       value.payout_preference === "monthly" ? "monthly" : "weekly",
     phone: String(value.phone ?? "").trim(),
-    ppe_owned: stringList(value.ppe_owned),
+    ppe_owned: [],
     prior_work_duration: String(value.prior_work_duration ?? "").trim(),
     prior_work_employer: String(value.prior_work_employer ?? "").trim(),
     prior_work_summary: String(value.prior_work_summary ?? "").trim(),
@@ -4035,7 +3922,8 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
         : null,
     working_areas: (value.working_areas ?? [])
       .map((area) => ukOutwardCode(area))
-      .filter(Boolean),
+      .filter(Boolean)
+      .slice(0, Math.max(0, MAX_WORKING_DISTRICTS - 1)),
     working_radius_miles: (() => {
       const miles = Number(value.working_radius_miles);
       if (!Number.isFinite(miles)) return DEFAULT_RADIUS_MILES;
@@ -4124,6 +4012,20 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
         "Enter your home postcode or area, for example B15.",
       );
     }
+    {
+      const home = ukOutwardCode(data.home_base);
+      const total = new Set(
+        [home, ...data.working_areas.map((item) => ukOutwardCode(item))].filter(
+          Boolean,
+        ),
+      ).size;
+      if (total > MAX_WORKING_DISTRICTS) {
+        return issue(
+          "areas",
+          `Choose up to ${MAX_WORKING_DISTRICTS} districts in total.`,
+        );
+      }
+    }
     if (
       data.working_radius_miles < 1 ||
       data.working_radius_miles > MAX_RADIUS_MILES
@@ -4145,6 +4047,15 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
         return issue(
           "transport",
           "Describe how else you usually travel to cleaning jobs.",
+        );
+      }
+      if (
+        data.can_transport_equipment !== "yes" &&
+        data.can_transport_equipment !== "no"
+      ) {
+        return issue(
+          "transport",
+          "Tell us whether you can travel with cleaning equipment when required.",
         );
       }
     }
@@ -4262,12 +4173,6 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     }
     if (!data.products_ownership) {
       return issue("equipment", "Tell us whether you have cleaning products.");
-    }
-    if (!data.equipment_transport) {
-      return issue("equipment", "Tell us how you transport equipment.");
-    }
-    if (data.ppe_owned.length === 0) {
-      return issue("equipment", "Select your PPE, or “None of the above”.");
     }
   }
 

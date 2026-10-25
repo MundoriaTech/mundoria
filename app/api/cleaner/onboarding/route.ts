@@ -62,6 +62,7 @@ function ukOutwardCode(value: string) {
 }
 
 const MAX_RADIUS_MILES = 15;
+const MAX_WORKING_DISTRICTS = 6;
 
 const schema = z
   .object({
@@ -109,7 +110,7 @@ const schema = z
     equipment_other: z.string().trim().optional().default(""),
     equipment_owned: optionalStringList,
     equipment_ownership: requiredString("Equipment ownership"),
-    equipment_transport: requiredString("Equipment transport"),
+    equipment_transport: z.string().trim().optional().default(""),
     experience_band: z.string().trim().optional().default(""),
     full_name: z.string().trim().min(2, "Full name is required"),
     headshot_url: requiredString("Profile headshot"),
@@ -145,7 +146,7 @@ const schema = z
     payout_preference: z.enum(["weekly", "monthly"]),
     phone: z.string().trim().min(7, "Enter a valid phone number"),
     ppe_other: z.string().trim().optional().default(""),
-    ppe_owned: requiredStringList("Select your PPE, or None of the above"),
+    ppe_owned: optionalStringList,
     preferred_hours_band: z.string().trim().optional().default(""),
     prior_work_duration: z.string().trim().optional().default(""),
     prior_work_employer: z.string().trim().optional().default(""),
@@ -189,6 +190,7 @@ const schema = z
     verification_flags: z.record(z.unknown()).optional().default({}),
     working_areas: z
       .array(z.string().trim())
+      .max(MAX_WORKING_DISTRICTS - 1)
       .transform((items) =>
         items.map((item) => item.toUpperCase()).filter(Boolean),
       ),
@@ -543,11 +545,7 @@ export async function POST(request: Request) {
     value.years_experience < 1
       ? ("additional_assessment" as const)
       : ("not_required" as const);
-  const equipmentStatus = ["replace", "unsure"].includes(
-    value.equipment_condition,
-  )
-    ? ("update_required" as const)
-    : ("complete" as const);
+  const equipmentStatus = "complete" as const;
   const specialistReviewRequired = false;
   const referenceProvided = Boolean(
     value.reference_name || value.reference_email || value.reference_phone,
@@ -582,12 +580,12 @@ export async function POST(request: Request) {
             ? value.emergency_relationship_other
             : "",
       },
-      equipment_condition: value.equipment_condition || null,
+      equipment_condition: null,
       equipment_other: otherText(value.equipment_owned, value.equipment_other),
       equipment_owned: value.equipment_owned,
       equipment_ownership: value.equipment_ownership,
       equipment_status: equipmentStatus,
-      equipment_transport: value.equipment_transport,
+      equipment_transport: null,
       experience_band: value.experience_band || null,
       headshot_status: "pending",
       headshot_url: value.headshot_url,
@@ -630,8 +628,8 @@ export async function POST(request: Request) {
       marketing_consent_at: value.marketing_consent ? now : null,
       onboarding_complete: true,
       payout_preference: value.payout_preference,
-      ppe_other: otherText(value.ppe_owned, value.ppe_other),
-      ppe_owned: value.ppe_owned,
+      ppe_other: null,
+      ppe_owned: [],
       preferred_hours_band: value.preferred_hours_band || null,
       prior_work_duration: null,
       prior_work_employer: null,

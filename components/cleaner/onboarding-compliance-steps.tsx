@@ -22,7 +22,6 @@ import {
   INSURANCE_FAQS,
   LOCATION_FAQS,
   PAYOUT_FAQS,
-  PPE_ITEMS,
   PRODUCT_ITEMS,
   SAFETY_GUIDELINES,
   UTR_FAQS,
@@ -904,13 +903,12 @@ export function LocationExtras({
             label: "No",
             value: "no",
           },
-          {
-            hint: "It depends how much kit is needed for the visit.",
-            label: "Depends",
-            value: "depends",
-          },
         ]}
-        value={canTransportEquipment || null}
+        value={
+          canTransportEquipment === "yes" || canTransportEquipment === "no"
+            ? canTransportEquipment
+            : null
+        }
       />
 
       <FaqAccordion items={LOCATION_FAQS} />
@@ -938,44 +936,28 @@ function OtherSpecify({
 }
 
 export function EquipmentComplianceStep({
-  equipmentCondition,
   equipmentOther,
   equipmentOwned,
   equipmentOwnership,
-  equipmentTransport,
-  onEquipmentCondition,
   onEquipmentOther,
   onEquipmentOwned,
   onEquipmentOwnership,
-  onEquipmentTransport,
-  onPpeOther,
-  onPpeOwned,
   onProductsOther,
   onProductsOwned,
   onProductsOwnership,
-  ppeOther,
-  ppeOwned,
   productsOther,
   productsOwned,
   productsOwnership,
 }: {
-  equipmentCondition: string;
   equipmentOther: string;
   equipmentOwned: string[];
   equipmentOwnership: string;
-  equipmentTransport: string;
-  onEquipmentCondition: (next: string) => void;
   onEquipmentOther: (next: string) => void;
   onEquipmentOwned: (next: string[]) => void;
   onEquipmentOwnership: (next: string) => void;
-  onEquipmentTransport: (next: string) => void;
-  onPpeOther: (next: string) => void;
-  onPpeOwned: (next: string[]) => void;
   onProductsOther: (next: string) => void;
   onProductsOwned: (next: string[]) => void;
   onProductsOwnership: (next: string) => void;
-  ppeOther: string;
-  ppeOwned: string[];
   productsOther: string;
   productsOwned: string[];
   productsOwnership: string;
@@ -991,71 +973,6 @@ export function EquipmentComplianceStep({
         supplies. Tell us what you have so we can match you well. Products
         (liquids/sprays) and equipment (vacuum, mop) are tracked separately.
       </p>
-
-      <SectionHeading>Do you have your own cleaning equipment?</SectionHeading>
-      <DecisionStrip
-        label="Own cleaning equipment"
-        onChange={onEquipmentOwnership}
-        options={[
-          {
-            hint: "You can bring a full kit to bookings when needed.",
-            label: "Yes",
-            value: "yes",
-          },
-          {
-            hint: "You have part of a kit — we’ll match with that in mind.",
-            label: "Some",
-            value: "some",
-          },
-          {
-            hint: "Prefer bookings where equipment is already on site for now.",
-            label: "None yet",
-            value: "none",
-          },
-        ]}
-        value={equipmentOwnership || null}
-      />
-
-      {showEquipmentList ? (
-        <div className="space-y-4">
-          <SectionHeading>What cleaning equipment do you own?</SectionHeading>
-          <ChipMultiSelect
-            onChange={onEquipmentOwned}
-            options={[...EQUIPMENT_ITEMS, OTHER]}
-            selected={equipmentOwned}
-          />
-          {equipmentOwned.includes(OTHER) ? (
-            <OtherSpecify
-              id="onboarding-equipment-other"
-              onChange={onEquipmentOther}
-              value={equipmentOther}
-            />
-          ) : null}
-          <SectionHeading>Is your equipment in good working condition?</SectionHeading>
-          <DecisionStrip
-            label="Equipment condition"
-            onChange={onEquipmentCondition}
-            options={[
-              {
-                hint: "Ready to use on bookings.",
-                label: "Yes",
-                value: "yes",
-              },
-              {
-                hint: "Some items need replacing before you’re fully set.",
-                label: "Needs replacing",
-                value: "replace",
-              },
-              {
-                hint: "We’ll treat this as something to confirm later.",
-                label: "Not sure",
-                value: "unsure",
-              },
-            ]}
-            value={equipmentCondition || null}
-          />
-        </div>
-      ) : null}
 
       <SectionHeading>Do you have your own cleaning products?</SectionHeading>
       <DecisionStrip
@@ -1098,45 +1015,47 @@ export function EquipmentComplianceStep({
         </div>
       ) : null}
 
-      <SectionHeading>Personal protective equipment (PPE)</SectionHeading>
-      <ChipMultiSelect
-        onChange={onPpeOwned}
-        options={[...PPE_ITEMS, OTHER, "None of the above"]}
-        selected={ppeOwned}
-      />
-      {ppeOwned.includes(OTHER) ? (
-        <OtherSpecify
-          id="onboarding-ppe-other"
-          onChange={onPpeOther}
-          value={ppeOther}
-        />
-      ) : null}
-
-      <SectionHeading>
-        Can you transport your equipment to cleaning bookings?
-      </SectionHeading>
+      <SectionHeading>Do you have your own cleaning equipment?</SectionHeading>
       <DecisionStrip
-        label="Transport equipment to bookings"
-        onChange={onEquipmentTransport}
+        label="Own cleaning equipment"
+        onChange={onEquipmentOwnership}
         options={[
           {
-            hint: "You can bring your kit to cleaning bookings.",
+            hint: "You can bring a full kit to bookings when needed.",
             label: "Yes",
             value: "yes",
           },
           {
-            hint: "Smaller items only — leave bulky kit for on-site supply.",
-            label: "Smaller only",
-            value: "small",
+            hint: "You have part of a kit — we’ll match with that in mind.",
+            label: "Some",
+            value: "some",
           },
           {
-            hint: "Match toward bookings where equipment is already there.",
-            label: "Prefer provided",
-            value: "prefer_provided",
+            hint: "Prefer bookings where equipment is already on site for now.",
+            label: "None yet",
+            value: "none",
           },
         ]}
-        value={equipmentTransport || null}
+        value={equipmentOwnership || null}
       />
+
+      {showEquipmentList ? (
+        <div className="space-y-4">
+          <SectionHeading>What cleaning equipment do you own?</SectionHeading>
+          <ChipMultiSelect
+            onChange={onEquipmentOwned}
+            options={[...EQUIPMENT_ITEMS, OTHER]}
+            selected={equipmentOwned}
+          />
+          {equipmentOwned.includes(OTHER) ? (
+            <OtherSpecify
+              id="onboarding-equipment-other"
+              onChange={onEquipmentOther}
+              value={equipmentOther}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       <FaqAccordion items={EQUIPMENT_FAQS} />
     </div>
