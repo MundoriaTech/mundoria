@@ -203,8 +203,15 @@ export function ServiceCategoriesSection({
                       type="button"
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#2a2158] sm:text-[17px]">
-                          {item.label}
+                        <span className="flex items-start justify-between gap-3">
+                          <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#2a2158] sm:text-[17px]">
+                            {item.label}
+                          </span>
+                          {service?.fromPrice ? (
+                            <span className="shrink-0 pt-0.5 text-sm font-semibold tabular-nums text-[#2a2158] sm:text-[15px]">
+                              From {service.fromPrice}
+                            </span>
+                          ) : null}
                         </span>
                         <span className="mt-1 block max-w-sm text-sm leading-5 text-[#5c5670]">
                           {item.description}

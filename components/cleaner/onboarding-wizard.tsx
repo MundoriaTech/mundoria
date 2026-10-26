@@ -4,6 +4,8 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   Minus,
   Monitor,
@@ -523,6 +525,8 @@ export function OnboardingWizard({
 }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState<StepId | null>("about");
+  const [desktopNavCollapsed, setDesktopNavCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [saveFlash, setSaveFlash] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [uploadingSlot, setUploadingSlot] = useState<DocSlotKey | null>(null);
@@ -724,6 +728,7 @@ export function OnboardingWizard({
     setStepSuccess(null);
     setSavedNote(null);
     setExpanded(stepId);
+    setMobileNavOpen(false);
   }
 
   function documentField(kind: DocKind) {
@@ -1337,124 +1342,150 @@ export function OnboardingWizard({
       <div className="mx-auto flex min-h-screen w-full max-w-[1200px]">
         <aside
           className={cn(
-            "hidden w-[260px] shrink-0 flex-col border-r border-[#e8e0d0]/80 px-6 py-7 md:flex lg:w-[280px]",
+            "sticky top-0 z-20 hidden h-[100dvh] shrink-0 flex-col border-r border-[#e8e0d0]/80 transition-[width] duration-200 md:flex",
             ONBOARDING_PAGE_BG,
+            desktopNavCollapsed ? "w-[3.75rem]" : "w-[260px] lg:w-[280px]",
           )}
         >
-          <LandingLogo href="/cleaner/dashboard" />
-          <h1 className="mt-8 text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b]">
-            Your onboarding
-          </h1>
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#8b8798]">
-              <span>
-                {completedCount} of {STEPS.length} done
-              </span>
-              <span>~{Math.max(minutesLeft, 1)} min left</span>
-            </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
-              <div
-                className="h-full rounded-full bg-[#1c133b] transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-          <nav aria-label="Onboarding steps" className="mt-7 space-y-7">
-            {GROUPS.map((group) => {
-              const steps = group.ids
-                .map((id) => STEPS.find((step) => step.id === id))
-                .filter(
-                  (step): step is (typeof STEPS)[number] => Boolean(step),
-                );
-              const groupDone = steps.every((step) =>
-                isStepComplete(step.id, data),
-              );
-              return (
-                <section key={group.title}>
-                  <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
-                    {group.title}
-                    {groupDone ? " · Done" : ""}
-                  </h2>
-                  <ol className="mt-3.5 space-y-0.5">
-                    {steps.map((step) => {
-                      const complete = isStepComplete(step.id, data);
-                      const isOpen = expanded === step.id;
-                      return (
-                        <li key={step.id}>
-                          <button
-                            className={cn(
-                              "flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition",
-                              isOpen
-                                ? "bg-[#f3eee4]"
-                                : "hover:bg-[#f3eee4]/70",
-                            )}
-                            onClick={() => toggleStep(step.id)}
-                            type="button"
-                          >
-                            <span
-                              aria-hidden
-                              className={cn(
-                                "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
-                                isOpen
-                                  ? "border-[#1c133b] bg-[#1c133b]"
-                                  : complete
-                                    ? "border-[#312c79] bg-[#312c79] text-white"
-                                    : "border-[#1c133b]/35 bg-[#f9f6ef]",
-                              )}
-                            >
-                              {complete && !isOpen ? (
-                                <Check className="h-3 w-3" strokeWidth={3} />
-                              ) : null}
-                            </span>
-                            <span
-                              className={cn(
-                                "min-w-0 flex-1 text-[15px] leading-snug",
-                                isOpen
-                                  ? "font-semibold text-[#1c133b]"
-                                  : complete
-                                    ? "font-medium text-[#291845]"
-                                    : "font-medium text-[#8b8798]",
-                              )}
-                            >
-                              {step.label}
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </section>
-              );
-            })}
-          </nav>
-          {!preview ? (
-            <div className="mt-5 flex flex-col items-start gap-1.5">
-              <a
-                className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                href="/help"
-              >
-                Help
-              </a>
+          <div className="flex h-full flex-col">
+            <div
+              className={cn(
+                "flex shrink-0 items-start gap-2 border-b border-[#e8e0d0]/60 py-5",
+                desktopNavCollapsed ? "justify-center px-2" : "px-5 lg:px-6",
+              )}
+            >
+              {!desktopNavCollapsed ? (
+                <div className="min-w-0 flex-1 pt-0.5">
+                  <LandingLogo href="/cleaner/dashboard" />
+                </div>
+              ) : null}
               <button
-                className="text-left text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                onClick={() => void logout()}
+                aria-expanded={!desktopNavCollapsed}
+                aria-label={
+                  desktopNavCollapsed
+                    ? "Expand onboarding steps"
+                    : "Collapse onboarding steps"
+                }
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b]/25 text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f3eee4]"
+                onClick={() => setDesktopNavCollapsed((open) => !open)}
                 type="button"
               >
-                Log out
+                {desktopNavCollapsed ? (
+                  <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
+                )}
               </button>
             </div>
-          ) : (
-            <p className="mt-5 text-xs text-[#a39fb0]">Preview mode</p>
-          )}
-          <p
-            aria-live="polite"
-            className={cn(
-              "mt-4 text-xs font-medium transition",
-              saveFlash ? "text-[#312c79]" : "text-transparent",
+
+            {desktopNavCollapsed ? (
+              <div className="flex flex-1 flex-col items-center gap-3 overflow-y-auto overscroll-contain px-2 py-4">
+                <p className="text-center text-[10px] font-semibold tabular-nums text-[#8b8798]">
+                  {completedCount}/{STEPS.length}
+                </p>
+                <div
+                  aria-hidden
+                  className="h-16 w-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
+                >
+                  <div
+                    className="w-full rounded-full bg-[#1c133b] transition-all duration-300"
+                    style={{ height: `${progressPercent}%` }}
+                  />
+                </div>
+                {STEPS.map((step, index) => {
+                  const complete = isStepComplete(step.id, data);
+                  const isOpen = expanded === step.id;
+                  return (
+                    <button
+                      aria-current={isOpen ? "step" : undefined}
+                      aria-label={step.label}
+                      className={cn(
+                        "inline-flex h-8 w-8 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition",
+                        isOpen
+                          ? "border-[#1c133b] bg-[#1c133b] text-white"
+                          : complete
+                            ? "border-[#312c79] bg-[#312c79] text-white"
+                            : "border-[#1c133b]/35 bg-[#f9f6ef] text-[#8b8798]",
+                      )}
+                      key={step.id}
+                      onClick={() => toggleStep(step.id)}
+                      title={step.label}
+                      type="button"
+                    >
+                      {complete && !isOpen ? (
+                        <Check className="h-3 w-3" strokeWidth={3} />
+                      ) : (
+                        index + 1
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="shrink-0 px-5 pt-5 lg:px-6">
+                  <h1 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b]">
+                    Your onboarding
+                  </h1>
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-[#8b8798]">
+                      <span>
+                        {completedCount} of {STEPS.length} done
+                      </span>
+                      <span>~{Math.max(minutesLeft, 1)} min left</span>
+                    </div>
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
+                      <div
+                        className="h-full rounded-full bg-[#1c133b] transition-all duration-300"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <nav
+                  aria-label="Onboarding steps"
+                  className="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-4 lg:px-6"
+                  tabIndex={0}
+                >
+                  <OnboardingStepList
+                    activeId={expanded}
+                    data={data}
+                    onSelect={toggleStep}
+                  />
+                </nav>
+                <div className="shrink-0 border-t border-[#e8e0d0]/60 px-5 py-4 lg:px-6">
+                  {!preview ? (
+                    <div className="flex flex-col items-start gap-1.5">
+                      <a
+                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        href="/help"
+                      >
+                        Help
+                      </a>
+                      <button
+                        className="text-left text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        onClick={() => void logout()}
+                        type="button"
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#a39fb0]">Preview mode</p>
+                  )}
+                  <p
+                    aria-live="polite"
+                    className={cn(
+                      "mt-3 text-xs font-medium transition",
+                      saveFlash ? "text-[#312c79]" : "text-transparent",
+                    )}
+                  >
+                    Progress saved
+                  </p>
+                </div>
+              </div>
             )}
-          >
-            Progress saved
-          </p>
+          </div>
         </aside>
 
         <div className="min-w-0 flex-1 px-4 py-5 pb-[calc(5.75rem+env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10 lg:px-12">
@@ -1475,52 +1506,63 @@ export function OnboardingWizard({
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <nav
-              aria-label="Onboarding steps"
-              className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {STEPS.map((step) => {
-                const complete = isStepComplete(step.id, data);
-                const isOpen = expanded === step.id;
-                return (
-                  <button
-                    className={cn(
-                      "inline-flex shrink-0 items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-semibold transition",
-                      isOpen
-                        ? "border-[#1c133b] bg-[#1c133b] text-white"
-                        : complete
-                          ? "border-[#312c79] bg-[#efe8fa] text-[#312c79]"
-                          : "border-[#1c133b]/25 bg-[#f9f6ef] text-[#8b8798]",
-                    )}
-                    key={step.id}
-                    onClick={() => toggleStep(step.id)}
-                    type="button"
-                  >
-                    {complete && !isOpen ? (
-                      <Check className="h-3 w-3" strokeWidth={3} />
-                    ) : null}
-                    {step.label}
-                  </button>
-                );
-              })}
-            </nav>
-            {!preview ? (
-              <div className="mt-3 flex items-center gap-4">
-                <a
-                  className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                  href="/help"
+
+            <div className="mt-3 rounded-2xl border-2 border-[#1c133b]/20 bg-[#f9f6ef]">
+              <button
+                aria-controls="mobile-onboarding-steps"
+                aria-expanded={mobileNavOpen}
+                className="flex w-full items-center gap-3 px-3.5 py-3 text-left touch-manipulation"
+                onClick={() => setMobileNavOpen((open) => !open)}
+                type="button"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+                    Steps · {stepIndex} of {STEPS.length}
+                  </span>
+                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#1c133b]">
+                    {activeStep.label}
+                  </span>
+                </span>
+                <ChevronDown
+                  aria-hidden
+                  className={cn(
+                    "h-4 w-4 shrink-0 text-[#1c133b] transition",
+                    mobileNavOpen && "rotate-180",
+                  )}
+                  strokeWidth={2.25}
+                />
+              </button>
+              {mobileNavOpen ? (
+                <div
+                  className="max-h-[min(55dvh,24rem)] overflow-y-auto overscroll-contain border-t border-[#e8e0d0] px-2.5 py-3"
+                  id="mobile-onboarding-steps"
                 >
-                  Help
-                </a>
-                <button
-                  className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
-                  onClick={() => void logout()}
-                  type="button"
-                >
-                  Log out
-                </button>
-              </div>
-            ) : null}
+                  <OnboardingStepList
+                    activeId={expanded}
+                    data={data}
+                    onSelect={toggleStep}
+                  />
+                  {!preview ? (
+                    <div className="mt-3 flex items-center gap-4 border-t border-[#e8e0d0] px-1 pt-3">
+                      <a
+                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        href="/help"
+                      >
+                        Help
+                      </a>
+                      <button
+                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        onClick={() => void logout()}
+                        type="button"
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+
             <p
               aria-live="polite"
               className={cn(
@@ -1686,6 +1728,83 @@ export function OnboardingWizard({
         ) : null}
       </div>
     </main>
+  );
+}
+
+function OnboardingStepList({
+  activeId,
+  data,
+  onSelect,
+}: {
+  activeId: StepId | null;
+  data: OnboardingData;
+  onSelect: (stepId: StepId) => void;
+}) {
+  return (
+    <div className="space-y-7">
+      {GROUPS.map((group) => {
+        const steps = group.ids
+          .map((id) => STEPS.find((step) => step.id === id))
+          .filter((step): step is (typeof STEPS)[number] => Boolean(step));
+        const groupDone = steps.every((step) =>
+          isStepComplete(step.id, data),
+        );
+        return (
+          <section key={group.title}>
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+              {group.title}
+              {groupDone ? " · Done" : ""}
+            </h2>
+            <ol className="mt-3.5 space-y-0.5">
+              {steps.map((step) => {
+                const complete = isStepComplete(step.id, data);
+                const isOpen = activeId === step.id;
+                return (
+                  <li key={step.id}>
+                    <button
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition touch-manipulation",
+                        isOpen ? "bg-[#f3eee4]" : "hover:bg-[#f3eee4]/70",
+                      )}
+                      onClick={() => onSelect(step.id)}
+                      type="button"
+                    >
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+                          isOpen
+                            ? "border-[#1c133b] bg-[#1c133b]"
+                            : complete
+                              ? "border-[#312c79] bg-[#312c79] text-white"
+                              : "border-[#1c133b]/35 bg-[#f9f6ef]",
+                        )}
+                      >
+                        {complete && !isOpen ? (
+                          <Check className="h-3 w-3" strokeWidth={3} />
+                        ) : null}
+                      </span>
+                      <span
+                        className={cn(
+                          "min-w-0 flex-1 text-[15px] leading-snug",
+                          isOpen
+                            ? "font-semibold text-[#1c133b]"
+                            : complete
+                              ? "font-medium text-[#291845]"
+                              : "font-medium text-[#8b8798]",
+                        )}
+                      >
+                        {step.label}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        );
+      })}
+    </div>
   );
 }
 

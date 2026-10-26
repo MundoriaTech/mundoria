@@ -888,11 +888,74 @@ function fileNameFromUrl(url?: string) {
   }
 }
 
+export type DocumentUploadFileRow = {
+  key: string;
+  name: string;
+  onRemove?: () => void;
+  progress?: number;
+  uploading?: boolean;
+};
+
+function DocumentFileRow({
+  name,
+  onRemove,
+  progress,
+  removeLabel,
+  uploading = false,
+}: {
+  name: string;
+  onRemove?: () => void;
+  progress?: number;
+  removeLabel: string;
+  uploading?: boolean;
+}) {
+  const percent =
+    typeof progress === "number"
+      ? Math.max(0, Math.min(100, Math.round(progress)))
+      : null;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#1c133b]">{name}</p>
+          <p className="mt-0.5 text-xs text-[#8b8798]">
+            {uploading ? `Uploading… ${percent ?? 0}%` : "Uploaded"}
+          </p>
+        </div>
+        {!uploading && onRemove ? (
+          <button
+            aria-label={removeLabel}
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+            onClick={onRemove}
+            type="button"
+          >
+            <X className="h-3.5 w-3.5" strokeWidth={2.75} />
+          </button>
+        ) : null}
+      </div>
+      {uploading ? (
+        <div
+          aria-hidden
+          className="h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
+        >
+          <div
+            className="h-full rounded-full bg-[#312c79] transition-[width] duration-200"
+            style={{ width: `${percent ?? 0}%` }}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function DocumentUpload({
   accept = ".pdf,image/*",
   error,
   fileName: fileNameProp,
+  files,
   label,
+  maxFiles,
   onFile,
   onRemove,
   previewIsPdf: _previewIsPdf = false,
@@ -905,7 +968,14 @@ export function DocumentUpload({
   error?: string;
   /** Optional display name when the parent already knows the file. */
   fileName?: string;
+  /**
+   * Multi-file mode: one dropzone, uploaded files listed underneath.
+   * Choosing a file always adds (append); each row can remove itself.
+   */
+  files?: DocumentUploadFileRow[];
   label: string;
+  /** Cap for multi-file mode. Dropzone disables once reached. */
+  maxFiles?: number;
   onFile: (file: File) => void;
   onRemove?: () => void;
   /** @deprecated Preview UI removed; kept for call-site compatibility. */
@@ -918,26 +988,42 @@ export function DocumentUpload({
   const inputId = useId();
   const [dragActive, setDragActive] = useState(false);
   const [pickedName, setPickedName] = useState<string | null>(null);
-  const imageOnly = accept.includes("image") && !accept.includes(".pdf") && !accept.includes("pdf");
-  const percent =
-    typeof progress === "number"
-      ? Math.max(0, Math.min(100, Math.round(progress)))
-      : null;
+  const multi = Array.isArray(files);
+  const imageOnly =
+    accept.includes("image") &&
+    !accept.includes(".pdf") &&
+    !accept.includes("pdf");
+  const atMax =
+    multi &&
+    typeof maxFiles === "number" &&
+    files.length >= maxFiles &&
+    !uploading;
   const hasFile = uploaded || Boolean(previewUrl) || Boolean(pickedName);
   const displayName =
     fileNameProp?.trim() ||
     pickedName ||
     fileNameFromUrl(previewUrl) ||
     (hasFile ? "Uploaded file" : null);
+  const chooseLabel = multi
+    ? files.length > 0
+      ? "Add another file"
+      : "Choose file"
+    : hasFile
+      ? "Replace file"
+      : "Choose file";
 
   useEffect(() => {
+    if (multi) {
+      if (!uploading) setPickedName(null);
+      return;
+    }
     if (!uploaded && !previewUrl && !uploading) {
       setPickedName(null);
     }
-  }, [previewUrl, uploaded, uploading]);
+  }, [multi, previewUrl, uploaded, uploading]);
 
   function takeFile(file: File | undefined | null) {
-    if (!file || uploading) return;
+    if (!file || uploading || atMax) return;
     setPickedName(file.name);
     onFile(file);
   }
@@ -945,13 +1031,13 @@ export function DocumentUpload({
   function onDragEnter(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault();
     event.stopPropagation();
-    if (!uploading) setDragActive(true);
+    if (!uploading && !atMax) setDragActive(true);
   }
 
   function onDragOver(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault();
     event.stopPropagation();
-    if (!uploading) setDragActive(true);
+    if (!uploading && !atMax) setDragActive(true);
   }
 
   function onDragLeave(event: DragEvent<HTMLLabelElement>) {
@@ -967,6 +1053,12 @@ export function DocumentUpload({
     takeFile(event.dataTransfer.files?.[0]);
   }
 
+  const pendingMultiUpload =
+    multi &&
+    uploading &&
+    pickedName &&
+    !files.some((row) => row.uploading);
+
   return (
     <div className="mx-auto w-full max-w-sm space-y-3">
       <p className="text-sm font-medium text-[#291845]">{label}</p>
@@ -978,7 +1070,7 @@ export function DocumentUpload({
             : dragActive
               ? "border-[#1c133b] bg-[#f3eee4]"
               : "border-[#1c133b]/55 hover:border-[#1c133b]",
-          uploading && "pointer-events-none opacity-70",
+          (uploading || atMax) && "pointer-events-none opacity-70",
         )}
         htmlFor={inputId}
         onDragEnter={onDragEnter}
@@ -988,7 +1080,7 @@ export function DocumentUpload({
       >
         <FileUp className="h-8 w-8 text-[#1c133b]" strokeWidth={2.25} />
         <b className="mt-3 text-sm text-[#291845]">
-          {hasFile ? "Replace file" : "Choose file"}
+          {atMax ? "Upload limit reached" : chooseLabel}
         </b>
         <span className="mt-1 text-xs text-[#8b8798]">
           {dragActive
@@ -1000,7 +1092,7 @@ export function DocumentUpload({
         <input
           accept={accept}
           className="hidden"
-          disabled={uploading}
+          disabled={uploading || atMax}
           id={inputId}
           onChange={(event) => {
             takeFile(event.target.files?.[0]);
@@ -1010,49 +1102,49 @@ export function DocumentUpload({
         />
       </label>
 
-      {displayName || uploading ? (
-        <div className="space-y-2 rounded-xl border border-[#e8e0d0] bg-[#f3eee4]/70 px-3 py-2.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              {displayName ? (
-                <p className="truncate text-sm font-medium text-[#1c133b]">
-                  {displayName}
-                </p>
-              ) : null}
-              <p className="mt-0.5 text-xs text-[#8b8798]">
-                {uploading
-                  ? `Uploading… ${percent ?? 0}%`
-                  : uploaded || previewUrl
-                    ? "Uploaded"
-                    : "Ready to upload"}
-              </p>
-            </div>
-            {!uploading && hasFile && onRemove ? (
-              <button
-                aria-label={`Remove ${label}`}
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
-                onClick={() => {
-                  setPickedName(null);
-                  onRemove();
-                }}
-                type="button"
-              >
-                <X className="h-3.5 w-3.5" strokeWidth={2.75} />
-              </button>
-            ) : null}
-          </div>
-          {uploading ? (
-            <div
-              aria-hidden
-              className="h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
-            >
-              <div
-                className="h-full rounded-full bg-[#312c79] transition-[width] duration-200"
-                style={{ width: `${percent ?? 0}%` }}
-              />
-            </div>
+      {multi ? (
+        <div className="space-y-2">
+          {files.map((row) => (
+            <DocumentFileRow
+              key={row.key}
+              name={row.name}
+              onRemove={
+                row.onRemove
+                  ? () => {
+                      setPickedName(null);
+                      row.onRemove?.();
+                    }
+                  : undefined
+              }
+              progress={row.progress}
+              removeLabel={`Remove ${row.name}`}
+              uploading={row.uploading}
+            />
+          ))}
+          {pendingMultiUpload ? (
+            <DocumentFileRow
+              name={pickedName}
+              progress={progress}
+              removeLabel={`Remove ${pickedName}`}
+              uploading
+            />
           ) : null}
         </div>
+      ) : displayName || uploading ? (
+        <DocumentFileRow
+          name={displayName || "Uploading…"}
+          onRemove={
+            onRemove
+              ? () => {
+                  setPickedName(null);
+                  onRemove();
+                }
+              : undefined
+          }
+          progress={progress}
+          removeLabel={`Remove ${label}`}
+          uploading={uploading}
+        />
       ) : null}
 
       {error ? (

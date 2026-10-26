@@ -1,8 +1,5 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
-
 import { FormField } from "@/components/auth/form-field";
 import { FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { Input } from "@/components/ui/input";
@@ -349,25 +346,6 @@ export function DbsComplianceStep({
   urls: string[];
 }) {
   const pages = urls.filter(Boolean);
-  const [awaitingNextPage, setAwaitingNextPage] = useState(false);
-
-  useEffect(() => {
-    if (pages.length === 0) setAwaitingNextPage(false);
-  }, [pages.length]);
-
-  // One empty starter slot, or all uploaded pages (+ one empty only after Add).
-  const slotCount =
-    pages.length === 0
-      ? 1
-      : Math.min(
-          MAX_DBS_DOCUMENT_PAGES,
-          pages.length + (awaitingNextPage ? 1 : 0),
-        );
-  const showAddPage =
-    path === "have" &&
-    pages.length >= 1 &&
-    !awaitingNextPage &&
-    pages.length < MAX_DBS_DOCUMENT_PAGES;
 
   return (
     <div className="space-y-6">
@@ -419,68 +397,49 @@ export function DbsComplianceStep({
             />
           </div>
           <div className="space-y-3">
-            <p className="text-sm font-medium text-[#1c133b]">
-              Certificate pages
-            </p>
             <p className="text-xs leading-5 text-[#8b8798]">
-              Upload a PDF or clear photos. One page is enough for most Basic
-              DBS certificates — add more only if you need to.
+              Upload a PDF or clear photos. One file is enough for most Basic
+              DBS certificates — add more below if you photographed each page
+              separately.
             </p>
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              {Array.from({ length: slotCount }, (_, index) => {
+            <DocumentUpload
+              files={pages.map((url, index) => {
                 const slotKey = `dbs:${index}`;
                 const preview = pagePreviews[slotKey];
-                const hasFile = Boolean(pages[index]);
-                const isNextEmpty =
-                  index === pages.length &&
-                  (pages.length === 0 || awaitingNextPage);
-                const uploadTarget = hasFile ? index : pages.length;
-                const isUploadingHere =
-                  uploadingSlot === `dbs:${uploadTarget}`;
-                return (
-                  <div
-                    className="w-full min-w-0 space-y-2 sm:w-[calc(50%-0.5rem)] sm:max-w-sm"
-                    key={slotKey}
-                  >
-                    <DocumentUpload
-                      label={`Certificate page ${index + 1}`}
-                      onFile={(file) => {
-                        if (!hasFile && !isNextEmpty) return;
-                        onFile(file, uploadTarget);
-                        if (!hasFile) setAwaitingNextPage(false);
-                      }}
-                      onRemove={
-                        hasFile ? () => onRemove(index) : undefined
-                      }
-                      previewIsPdf={preview?.isPdf}
-                      previewUrl={hasFile ? preview?.url : undefined}
-                      progress={isUploadingHere ? uploadProgress : undefined}
-                      uploaded={hasFile}
-                      uploading={isUploadingHere}
-                    />
-                    {isNextEmpty && pages.length > 0 ? (
-                      <button
-                        className="text-sm font-semibold text-[#d4694a] hover:underline"
-                        onClick={() => setAwaitingNextPage(false)}
-                        type="button"
-                      >
-                        Remove page
-                      </button>
-                    ) : null}
-                  </div>
-                );
+                const nameFromPreview = preview?.url
+                  ? preview.url.split("/").filter(Boolean).pop()
+                  : null;
+                const nameFromStored = url.split("/").filter(Boolean).pop();
+                const rawName = nameFromPreview || nameFromStored || "";
+                let displayName = `Page ${index + 1}`;
+                try {
+                  displayName = decodeURIComponent(rawName) || displayName;
+                } catch {
+                  displayName = rawName || displayName;
+                }
+                const isUploadingHere = uploadingSlot === slotKey;
+                return {
+                  key: slotKey,
+                  name: displayName,
+                  onRemove: () => onRemove(index),
+                  progress: isUploadingHere ? uploadProgress : undefined,
+                  uploading: isUploadingHere,
+                };
               })}
-              {showAddPage ? (
-                <button
-                  aria-label="Add another page"
-                  className="inline-flex h-12 w-12 shrink-0 items-center justify-center self-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
-                  onClick={() => setAwaitingNextPage(true)}
-                  type="button"
-                >
-                  <Plus className="h-5 w-5" strokeWidth={2.5} />
-                </button>
-              ) : null}
-            </div>
+              label="Certificate pages"
+              maxFiles={MAX_DBS_DOCUMENT_PAGES}
+              onFile={(file) => {
+                if (pages.length >= MAX_DBS_DOCUMENT_PAGES) return;
+                onFile(file, pages.length);
+              }}
+              progress={
+                uploadingSlot === `dbs:${pages.length}`
+                  ? uploadProgress
+                  : undefined
+              }
+              uploaded={pages.length > 0}
+              uploading={uploadingSlot === `dbs:${pages.length}`}
+            />
           </div>
         </div>
       ) : null}
