@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
+import { alertAdmins } from "@/lib/notifications/admin";
 import { getStripe } from "@/lib/stripe/server";
 
 export async function POST() {
@@ -34,9 +35,17 @@ export async function POST() {
         .eq("id", payout.id);
       results.push({ id: payout.id, status: "paid" });
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Transfer failed";
       await auth.admin.from("payouts").update({ status: "failed" }).eq("id", payout.id);
+      await alertAdmins(
+        "payout_failed",
+        "Cleaner transfer failed",
+        `Payout ${payout.id.slice(0, 8)} could not be transferred to Stripe.`,
+        { error: message, payout_id: payout.id },
+      );
       results.push({
-        error: error instanceof Error ? error.message : "Transfer failed",
+        error: message,
         id: payout.id,
         status: "failed",
       });

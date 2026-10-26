@@ -6,18 +6,41 @@ import { alertAdmins } from "@/lib/notifications/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
+function webhookSecrets() {
+  return [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_WEBHOOK_SECRET_CONNECT,
+  ].filter((value): value is string => Boolean(value?.trim()));
+}
+
+function constructStripeEvent(payload: string, signature: string) {
+  const stripe = getStripe();
+  const secrets = webhookSecrets();
+  if (secrets.length === 0) {
+    throw new Error("STRIPE_WEBHOOK_SECRET is not configured.");
+  }
+  let lastError: unknown;
+  for (const secret of secrets) {
+    try {
+      return stripe.webhooks.constructEvent(payload, signature, secret);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Invalid webhook signature");
+}
+
 export async function POST(request: Request) {
   const signature = headers().get("stripe-signature");
-  if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) {
+  const secrets = webhookSecrets();
+  if (!signature || secrets.length === 0) {
     return NextResponse.json({ error: "Webhook signature missing" }, { status: 400 });
   }
   let event: Stripe.Event;
   try {
-    event = getStripe().webhooks.constructEvent(
-      await request.text(),
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET,
-    );
+    event = constructStripeEvent(await request.text(), signature);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Invalid signature" },
@@ -25,20 +48,9 @@ export async function POST(request: Request) {
     );
   }
   const admin = createAdminClient();
-  if ((event.type as string) === "transfer.failed") {
-    const transfer = event.data.object as Stripe.Transfer;
-    await admin
-      .from("payouts")
-      .update({ status: "failed" })
-      .eq("stripe_transfer_id", transfer.id);
-    await alertAdmins(
-      "payout_failed",
-      "Cleaner transfer failed",
-      `Stripe transfer ${transfer.id} failed.`,
-      { stripe_transfer_id: transfer.id },
-    );
-    return NextResponse.json({ received: true });
-  }
+  // Note: `transfer.failed` was removed by Stripe (API ≥ 2017-04-06). Connect
+  // transfers succeed or throw synchronously in our payout routes; async bank
+  // failures arrive as `payout.failed` on connected accounts.
   switch (event.type) {
     case "payment_intent.amount_capturable_updated": {
       const intent = event.data.object;
