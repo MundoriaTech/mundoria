@@ -2,6 +2,7 @@ import { BriefcaseBusiness, CalendarCheck } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ConnectPayoutCard } from "@/components/cleaner/connect-payout-card";
 import { CleanerHeroStage } from "@/components/cleaner/hero-stage";
 import { CleanerOfferHighlight } from "@/components/cleaner/offer-highlight";
 import { TierBadge } from "@/components/cleaner/tier-badge";
@@ -131,6 +132,14 @@ export default async function CleanerDashboardPage() {
           <HeroStat label="Next job" value={nextLabel} />
         </dl>
       </section>
+
+      {(cleaner.status === "certified" || cleaner.status === "active") &&
+      !cleaner.stripe_onboarding_complete ? (
+        <ConnectPayoutCard
+          hasStripeAccount={Boolean(profile.stripe_account_id)}
+          stripeComplete={cleaner.stripe_onboarding_complete}
+        />
+      ) : null}
 
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
       <DashboardSection

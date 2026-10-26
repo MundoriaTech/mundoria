@@ -54,7 +54,6 @@ import {
   EquipmentComplianceStep,
   InsuranceComplianceStep,
   LocationExtras,
-  PayoutFaqs,
   UtrComplianceStep,
 } from "@/components/cleaner/onboarding-compliance-steps";
 import {
@@ -301,7 +300,6 @@ const STEPS = [
   { id: "quiz", label: "Quiz", minutes: 5 },
   { id: "consent", label: "Location consent", minutes: 1 },
   { id: "appointment", label: "Your appointment with Mundoria", minutes: 3 },
-  { id: "payout", label: "Let's get you paid", minutes: 2 },
   { id: "emergency", label: "Your emergency contact", minutes: 2 },
   { id: "agreements", label: "You're almost there!", minutes: 2 },
 ] as const;
@@ -315,7 +313,6 @@ const SUMMARY_LABELS: Partial<Record<StepId, string>> = {
   equipment: "Cleaning equipment & supplies",
   hours: "Work location & availability (hours)",
   identity: "Identity & right to work",
-  payout: "Bank details",
   photo: "Personal information & profile photo",
   utr: "UTR verification",
 };
@@ -332,9 +329,9 @@ const GROUPS: { ids: StepId[]; title: string; blurb: string }[] = [
     blurb: "ID, tax, DBS, insurance, kit and training",
   },
   {
-    ids: ["consent", "appointment", "payout", "emergency", "agreements"],
+    ids: ["consent", "appointment", "emergency", "agreements"],
     title: "Finish",
-    blurb: "Consent, interview, payouts, safety and agreements",
+    blurb: "Consent, interview, safety and agreements",
   },
 ];
 
@@ -357,8 +354,6 @@ const STEP_WHY: Record<StepId, string> = {
   quiz: "A quick check that you know how Mundoria jobs work.",
   consent: "GPS is only used when you check in and check out of an active job.",
   appointment: "A short online chat so we can approve your account.",
-  payout:
-    "You’ve done the hard work, so getting paid should be simple. Add your bank details securely so we know where to send your earnings from completed Mundoria bookings.",
   emergency:
     "Provide someone we can contact in an emergency while you’re on a Mundoria booking.",
   agreements:
@@ -379,7 +374,6 @@ const STEP_HEADER_ICONS: Record<StepId, string> = {
   quiz: "/images/marketing/icons/quiz-mark.svg",
   consent: "/images/marketing/icons/consent-mark.svg",
   appointment: "/images/marketing/icons/appointment-mark.svg",
-  payout: "/images/marketing/icons/payout-mark.svg",
   emergency: "/images/marketing/icons/consent-mark.svg",
   agreements: "/images/marketing/icons/onboarding-mark.svg",
 };
@@ -485,7 +479,6 @@ type OnboardingData = {
   insurance_provider: string;
   location_tracking_consent_accepted: boolean;
   location_tracking_consent_version: string;
-  payout_confirmed: boolean;
   payout_preference: "weekly" | "monthly";
   phone: string;
   ppe_owned: string[];
@@ -618,8 +611,7 @@ export function OnboardingWizard({
       cleaner.location_tracking_consent_at,
     ),
     location_tracking_consent_version: "cleaner-location-consent-v1",
-    payout_confirmed: false,
-    payout_preference: cleaner.payout_preference,
+    payout_preference: cleaner.payout_preference || "weekly",
     phone: profile.phone ?? "",
     ppe_owned: cleaner.ppe_owned ?? [],
     prior_work_duration: cleaner.prior_work_duration ?? "",
@@ -1050,43 +1042,6 @@ export function OnboardingWizard({
     window.setTimeout(() => setSaveFlash(false), 1600);
   }
 
-  async function connectStripe() {
-    setNotice(null);
-    setFieldIssue(null);
-    if (preview) {
-      setPreviewNote("Stripe Connect is skipped in this preview.");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/cleaner/stripe-connect", {
-        method: "POST",
-      });
-      const result = (await parseJsonResponse(response)) as {
-        error?: string;
-        url?: string;
-      };
-
-      if (result.url) {
-        window.location.assign(result.url);
-        return;
-      }
-
-      setNotice({
-        message: result.error ?? "Try again in a moment.",
-        title: "Couldn’t connect Stripe",
-      });
-    } catch (stripeError) {
-      setNotice({
-        message:
-          stripeError instanceof Error
-            ? stripeError.message
-            : "Try again in a moment.",
-        title: "Couldn’t connect Stripe",
-      });
-    }
-  }
-
   async function submit() {
     const normalized = sanitizeOnboardingData(data);
 
@@ -1115,11 +1070,8 @@ export function OnboardingWizard({
     setSubmitting(true);
 
     try {
-      const payload = Object.fromEntries(
-        Object.entries(normalized).filter(([key]) => key !== "payout_confirmed"),
-      );
       const response = await fetch("/api/cleaner/onboarding", {
-        body: JSON.stringify(payload),
+        body: JSON.stringify(normalized),
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });
@@ -1620,7 +1572,6 @@ export function OnboardingWizard({
               askForPhone={(profile.phone ?? "").trim().length < 7}
               data={data}
               docPreviews={docPreviews}
-              onConnectStripe={() => void connectStripe()}
               issue={fieldIssue}
               onFile={(kind, file, side) =>
                 void uploadDocument(kind, file, side)
@@ -1743,7 +1694,6 @@ function StepBody({
   data,
   docPreviews,
   issue,
-  onConnectStripe,
   onDefer,
   onEditStep,
   onFile,
@@ -1760,7 +1710,6 @@ function StepBody({
   data: OnboardingData;
   docPreviews: Partial<Record<DocSlotKey, { isPdf: boolean; url: string }>>;
   issue: FieldIssue | null;
-  onConnectStripe: () => void;
   onDefer: (stepId: "utr" | "dbs" | "insurance") => void;
   onEditStep: (stepId: StepId) => void;
   onFile: (kind: DocKind, file: File, side?: number) => void;
@@ -2179,201 +2128,7 @@ function StepBody({
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <PayoutStep
-        confirmed={data.payout_confirmed}
-        error={issueFor("payout")}
-        onConfirm={(next) => onUpdate("payout_confirmed", next)}
-        onConnectStripe={onConnectStripe}
-        onPreference={(preference) =>
-          onUpdate("payout_preference", preference)
-        }
-        preference={data.payout_preference}
-      />
-      <PayoutFaqs />
-    </div>
-  );
-}
-
-const PAYOUT_GUIDE_TIPS = [
-  {
-    body: "Once you complete an eligible cleaning booking, your earnings are recorded in your Mundoria account. You can view completed bookings, earnings, payment history and any applicable adjustments.",
-    title: "How payments work",
-  },
-  {
-    body: "Payments go to your verified Stripe bank account on Mundoria’s published payment schedule. Your actual payout schedule is confirmed in your cleaner agreement.",
-    title: "When you get paid",
-  },
-  {
-    body: "We may need Stripe to verify your bank details before your first payout. If more checks are needed, Stripe will guide you through them.",
-    title: "Keeping your payments secure",
-  },
-] as const;
-
-function PayoutStep({
-  confirmed,
-  error,
-  onConfirm,
-  onConnectStripe,
-  onPreference,
-  preference,
-}: {
-  confirmed: boolean;
-  error?: string;
-  onConfirm: (next: boolean) => void;
-  onConnectStripe: () => void;
-  onPreference: (preference: "weekly" | "monthly") => void;
-  preference: "weekly" | "monthly";
-}) {
-  const [guideOpen, setGuideOpen] = useState(false);
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-end">
-        <button
-          className="inline-flex h-9 items-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
-          onClick={() => setGuideOpen(true)}
-          type="button"
-        >
-          Payout tips
-        </button>
-      </div>
-
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-[#1c133b]">
-          How often should we pay you?
-        </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {(["weekly", "monthly"] as const).map((value) => {
-            const selected = preference === value;
-            return (
-              <button
-                className={cn(
-                  "rounded-xl border-2 bg-[#f9f6ef] p-5 text-left text-[#1c133b] outline-none transition ring-offset-white",
-                  selected
-                    ? "border-[#1c133b] ring-2 ring-[#1c133b]"
-                    : "border-[#1c133b]/35 hover:border-[#1c133b]",
-                )}
-                key={value}
-                onClick={() => onPreference(value)}
-                type="button"
-              >
-                <p className="text-base font-semibold capitalize">{value}</p>
-                <p className="mt-1.5 text-sm leading-5 text-[#8b8798]">
-                  {value === "weekly"
-                    ? "Faster, regular payouts."
-                    : "One consolidated monthly payout."}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="space-y-3 border-t border-[#e8e0d0] pt-5">
-        <p className="text-sm font-medium text-[#291845]">
-          Where should we send your payments?
-        </p>
-        <p className="text-sm leading-6 text-[#5a5470]">
-          Add your UK bank details securely through Stripe Connect Express so
-          we know where to send your earnings. We never ask for your sort code
-          or account number inside Mundoria — bank details stay with Stripe.
-        </p>
-        <Button
-          className="h-11 rounded-xl border-2 border-[#1c133b] bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]"
-          onClick={onConnectStripe}
-          type="button"
-        >
-          Connect Stripe Express
-        </Button>
-        <p className="text-xs leading-5 text-[#8b8798]">
-          You can connect later from your profile before your first payout.
-          Please double-check your details in Stripe to avoid payment delays.
-          Your bank details are only used for payment-related purposes.
-        </p>
-      </div>
-
-      <div className="space-y-3 border-t border-[#e8e0d0] pt-5">
-        <p className="text-sm font-medium text-[#291845]">How payments work</p>
-        <p className="text-sm leading-6 text-[#5a5470]">
-          Once you complete an eligible cleaning booking, your earnings will be
-          recorded in your Mundoria account. You&apos;ll be able to view your
-          completed bookings, earnings, payment history and any applicable
-          adjustments.
-        </p>
-        <p className="text-sm leading-6 text-[#5a5470]">
-          Payments will be sent to your verified bank account according to
-          Mundoria&apos;s published payment schedule.
-        </p>
-        <p className="text-xs leading-5 text-[#8b8798]">
-          Your actual payout schedule will be confirmed in your cleaner
-          agreement.
-        </p>
-      </div>
-
-      <div className="space-y-3 border-t border-[#e8e0d0] pt-5">
-        <p className="text-sm font-medium text-[#291845]">
-          Keeping your payments secure
-        </p>
-        <p className="text-sm leading-6 text-[#5a5470]">
-          We may need to verify your bank details before your first payout. If
-          additional verification is required, Stripe will guide you through
-          the process.
-        </p>
-        <p className="text-sm font-medium text-[#1c133b]">
-          Do you confirm that the payment details you provide are correct?
-        </p>
-        <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
-          <OnboardingCheckbox
-            checked={confirmed}
-            onCheckedChange={onConfirm}
-          />
-          <span>
-            I confirm that the bank details I provide in Stripe are accurate and
-            that I am authorised to receive payments into this account.
-          </span>
-        </label>
-        {error ? <FieldError message={error} /> : null}
-      </div>
-
-      {guideOpen ? (
-        <AppModal
-          backdrop="blur"
-          className="max-w-lg border-[#e8e0d0] bg-[#f9f6ef] text-[#1c133b] shadow-[0_24px_60px_rgba(28,19,59,0.18)]"
-          closeClassName="h-9 w-9 rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
-          description="How payouts work on Mundoria."
-          onClose={() => setGuideOpen(false)}
-          title="Getting paid tips"
-        >
-          <ul className="mt-1 space-y-3">
-            {PAYOUT_GUIDE_TIPS.map((tip) => (
-              <li
-                className="rounded-2xl border border-[#e8e0d0] bg-[#f3eee4] px-4 py-3"
-                key={tip.title}
-              >
-                <h3 className="text-sm font-semibold text-[#291845]">
-                  {tip.title}
-                </h3>
-                <p className="mt-1 text-xs leading-5 text-[#5a5470]">
-                  {tip.body}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-5 flex justify-end">
-            <Button
-              className="h-11 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-6 font-semibold text-white hover:border-[#312c79] hover:bg-[#312c79]"
-              onClick={() => setGuideOpen(false)}
-              type="button"
-            >
-              Got it
-            </Button>
-          </div>
-        </AppModal>
-      ) : null}
-    </div>
-  );
+  return null;
 }
 
 function AppointmentPicker({
@@ -3875,7 +3630,6 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
       value.location_tracking_consent_version ??
         "cleaner-location-consent-v1",
     ).trim(),
-    payout_confirmed: Boolean(value.payout_confirmed),
     payout_preference:
       value.payout_preference === "monthly" ? "monthly" : "weekly",
     phone: String(value.phone ?? "").trim(),
@@ -4244,13 +3998,6 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     return issue("consent", "Accept location consent before submitting.");
   }
 
-  if (stepId === "payout" && !data.payout_confirmed) {
-    return issue(
-      "payout",
-      "Confirm that your payment details are accurate before continuing.",
-    );
-  }
-
   return null;
 }
 
@@ -4264,9 +4011,6 @@ function stepSuccessMessage(stepId: StepId, value: OnboardingData) {
   }
   if (stepId === "insurance" && value.insurance_path === "have") {
     return "Insurance submitted successfully!";
-  }
-  if (stepId === "payout") {
-    return "Your payment details have been saved successfully! You're one step closer to getting started with Mundoria.";
   }
   if (stepId === "emergency") return "Emergency contact saved!";
   return null;

@@ -4,13 +4,19 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
-  FileBadge,
   FileUp,
   Info,
   Search,
   X,
 } from "lucide-react";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type DragEvent,
+  type ReactNode,
+} from "react";
 
 import { FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { cn } from "@/lib/utils";
@@ -870,13 +876,26 @@ export function ChipMultiSelect({
   );
 }
 
+function fileNameFromUrl(url?: string) {
+  if (!url) return null;
+  try {
+    const path = new URL(url, "https://local.invalid").pathname;
+    const base = path.split("/").filter(Boolean).pop();
+    if (!base) return null;
+    return decodeURIComponent(base);
+  } catch {
+    return null;
+  }
+}
+
 export function DocumentUpload({
   accept = ".pdf,image/*",
   error,
+  fileName: fileNameProp,
   label,
   onFile,
   onRemove,
-  previewIsPdf = false,
+  previewIsPdf: _previewIsPdf = false,
   previewUrl,
   progress,
   uploaded,
@@ -884,140 +903,158 @@ export function DocumentUpload({
 }: {
   accept?: string;
   error?: string;
+  /** Optional display name when the parent already knows the file. */
+  fileName?: string;
   label: string;
   onFile: (file: File) => void;
   onRemove?: () => void;
+  /** @deprecated Preview UI removed; kept for call-site compatibility. */
   previewIsPdf?: boolean;
   previewUrl?: string;
   progress?: number;
   uploaded: boolean;
   uploading?: boolean;
 }) {
-  const imageOnly = accept.includes("image") && !accept.includes("pdf");
-  const looksLikePdf = Boolean(previewUrl) && previewIsPdf;
-  const showImagePreview = Boolean(previewUrl) && !looksLikePdf;
+  const inputId = useId();
+  const [dragActive, setDragActive] = useState(false);
+  const [pickedName, setPickedName] = useState<string | null>(null);
+  const imageOnly = accept.includes("image") && !accept.includes(".pdf") && !accept.includes("pdf");
   const percent =
     typeof progress === "number"
       ? Math.max(0, Math.min(100, Math.round(progress)))
       : null;
+  const hasFile = uploaded || Boolean(previewUrl) || Boolean(pickedName);
+  const displayName =
+    fileNameProp?.trim() ||
+    pickedName ||
+    fileNameFromUrl(previewUrl) ||
+    (hasFile ? "Uploaded file" : null);
+
+  useEffect(() => {
+    if (!uploaded && !previewUrl && !uploading) {
+      setPickedName(null);
+    }
+  }, [previewUrl, uploaded, uploading]);
+
+  function takeFile(file: File | undefined | null) {
+    if (!file || uploading) return;
+    setPickedName(file.name);
+    onFile(file);
+  }
+
+  function onDragEnter(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!uploading) setDragActive(true);
+  }
+
+  function onDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!uploading) setDragActive(true);
+  }
+
+  function onDragLeave(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+  }
+
+  function onDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+    takeFile(event.dataTransfer.files?.[0]);
+  }
 
   return (
     <div className="mx-auto w-full max-w-sm space-y-3">
       <p className="text-sm font-medium text-[#291845]">{label}</p>
-      {showImagePreview || looksLikePdf || uploading || uploaded ? (
-        <div className="relative pt-3">
-          {!uploading && (uploaded || previewUrl) && onRemove ? (
-            <button
-              aria-label={`Remove ${label}`}
-              className="absolute right-2 top-0 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#d4694a] bg-[#fff4ee] text-[#d4694a] shadow-sm transition hover:bg-[#d4694a] hover:text-white"
-              onClick={onRemove}
-              type="button"
-            >
-              <X className="h-4 w-4" strokeWidth={2.75} />
-            </button>
-          ) : null}
-          <div className="overflow-hidden rounded-2xl border border-[#e5e1ea] bg-[#faf8ff]">
-            <div className="relative flex h-48 items-center justify-center overflow-hidden bg-[#f3f0f8]">
-              {showImagePreview ? (
-                // eslint-disable-next-line @next/next/no-img-element -- signed/blob preview URLs
-                <img
-                  alt={`${label} preview`}
-                  className="h-full w-full object-contain"
-                  src={previewUrl}
-                />
-              ) : looksLikePdf ? (
-                <div className="flex flex-col items-center gap-3 px-6 text-center">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#efe8fa] text-[#6a45b8]">
-                    <FileBadge className="h-6 w-6" strokeWidth={2} />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-[#291845]">
-                      PDF ready
-                    </p>
-                    <a
-                      className="mt-1 inline-block text-sm font-medium text-[#6a45b8] hover:underline"
-                      href={previewUrl}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      Open preview
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3 px-6 text-[#6a45b8]">
-                  <span className="h-9 w-9 animate-spin rounded-full border-2 border-[#d8ccee] border-t-[#6a45b8]" />
-                  <p className="text-sm font-medium">Preparing preview…</p>
-                </div>
-              )}
-              {uploading ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#291845]/55 backdrop-blur-[2px]">
-                  <div className="relative flex h-16 w-16 items-center justify-center">
-                    <span className="absolute inset-0 rounded-full border-2 border-white/25" />
-                    <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-white" />
-                    <span className="text-sm font-semibold tabular-nums text-white">
-                      {percent ?? 0}%
-                    </span>
-                  </div>
-                  <p className="text-sm font-semibold text-white">
-                    Uploading… {percent ?? 0}%
-                  </p>
-                </div>
+      <label
+        className={cn(
+          "flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed bg-[#f9f6ef] p-8 text-center transition",
+          error
+            ? "border-[#d4694a] hover:border-[#d4694a]"
+            : dragActive
+              ? "border-[#1c133b] bg-[#f3eee4]"
+              : "border-[#1c133b]/55 hover:border-[#1c133b]",
+          uploading && "pointer-events-none opacity-70",
+        )}
+        htmlFor={inputId}
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+      >
+        <FileUp className="h-8 w-8 text-[#1c133b]" strokeWidth={2.25} />
+        <b className="mt-3 text-sm text-[#291845]">
+          {hasFile ? "Replace file" : "Choose file"}
+        </b>
+        <span className="mt-1 text-xs text-[#8b8798]">
+          {dragActive
+            ? "Drop to upload"
+            : imageOnly
+              ? "Drag and drop, or browse · JPEG, PNG or WebP"
+              : "Drag and drop, or browse · PDF, JPEG, PNG or WebP"}
+        </span>
+        <input
+          accept={accept}
+          className="hidden"
+          disabled={uploading}
+          id={inputId}
+          onChange={(event) => {
+            takeFile(event.target.files?.[0]);
+            event.target.value = "";
+          }}
+          type="file"
+        />
+      </label>
+
+      {displayName || uploading ? (
+        <div className="space-y-2 rounded-xl border border-[#e8e0d0] bg-[#f3eee4]/70 px-3 py-2.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              {displayName ? (
+                <p className="truncate text-sm font-medium text-[#1c133b]">
+                  {displayName}
+                </p>
               ) : null}
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#ebe6f2] bg-white px-4 py-3">
-              <p className="text-sm font-medium text-[#291845]">
+              <p className="mt-0.5 text-xs text-[#8b8798]">
                 {uploading
                   ? `Uploading… ${percent ?? 0}%`
-                  : uploaded
+                  : uploaded || previewUrl
                     ? "Uploaded"
-                    : "Choose a file"}
+                    : "Ready to upload"}
               </p>
-              <label className="inline-flex cursor-pointer items-center rounded-lg border border-[#e5e1ea] bg-white px-3 py-2 text-sm font-semibold text-[#291845] hover:bg-[#faf8ff]">
-                {uploaded || previewUrl ? "Replace" : "Choose file"}
-                <input
-                  accept={accept}
-                  className="hidden"
-                  disabled={uploading}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) onFile(file);
-                    event.target.value = "";
-                  }}
-                  type="file"
-                />
-              </label>
             </div>
+            {!uploading && hasFile && onRemove ? (
+              <button
+                aria-label={`Remove ${label}`}
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                onClick={() => {
+                  setPickedName(null);
+                  onRemove();
+                }}
+                type="button"
+              >
+                <X className="h-3.5 w-3.5" strokeWidth={2.75} />
+              </button>
+            ) : null}
           </div>
+          {uploading ? (
+            <div
+              aria-hidden
+              className="h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
+            >
+              <div
+                className="h-full rounded-full bg-[#312c79] transition-[width] duration-200"
+                style={{ width: `${percent ?? 0}%` }}
+              />
+            </div>
+          ) : null}
         </div>
-      ) : (
-        <label
-          className={cn(
-            "flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed bg-[#f9f6ef] p-8 text-center transition",
-            error
-              ? "border-[#d4694a] hover:border-[#d4694a]"
-              : "border-[#1c133b]/55 hover:border-[#1c133b]",
-            uploading && "pointer-events-none opacity-70",
-          )}
-        >
-          <FileUp className="h-8 w-8 text-[#1c133b]" strokeWidth={2.25} />
-          <b className="mt-3 text-sm text-[#291845]">Choose file</b>
-          <span className="mt-1 text-xs text-[#8b8798]">
-            {imageOnly ? "JPEG, PNG or WebP" : "PDF, JPEG, PNG or WebP"}
-          </span>
-          <input
-            accept={accept}
-            className="hidden"
-            disabled={uploading}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) onFile(file);
-              event.target.value = "";
-            }}
-            type="file"
-          />
-        </label>
-      )}
+      ) : null}
+
       {error ? (
         <div>
           <FieldError message={error} />

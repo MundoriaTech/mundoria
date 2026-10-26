@@ -81,14 +81,14 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
             ? "Action required"
             : "Application under review";
     const body = interviewFailed
-      ? "Your online interview didn’t pass this time. Mundoria will follow up with next steps. You can still update your profile and finish Stripe setup."
+      ? "Your online interview didn’t pass this time. Mundoria will follow up with next steps. You can still update your profile."
       : awaitingInterview
         ? cleaner.interview_scheduled_at
           ? `Your 30-minute online interview is booked for ${formatInterviewSlot(cleaner.interview_scheduled_at)}. We’ll use the phone number on your profile.`
           : "Thanks for submitting. Keep your interview time free — we’ll use the phone number on your profile."
         : cleaner.status === "in_training"
-          ? "Mundoria has put your application on hold. You can still update your profile and finish Stripe setup. Job offers appear after you’re approved."
-          : "You can explore your dashboard, update your profile, and connect Stripe now. New job offers will appear after Mundoria approves your application.";
+          ? "Mundoria has put your application on hold. You can still update your profile. Job offers appear after you’re approved."
+          : "You can explore your dashboard and update your profile. New job offers will appear after Mundoria approves your application. Payout setup opens on your dashboard once you’re approved.";
 
     return (
       <div className="mb-6 rounded-[1.5rem] border border-[#e8e0f5] bg-white p-5 text-[#1c133b] shadow-sm dark:border-border dark:bg-card dark:text-foreground">
@@ -102,11 +102,6 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
             <p className="mt-1 text-sm leading-6 text-[#6b6588] dark:text-muted-foreground">
               {body}
             </p>
-            {!cleaner.stripe_onboarding_complete ? (
-              <p className="mt-2 text-xs text-[#6b6588] dark:text-muted-foreground">
-                Payout setup is incomplete. You can finish it later from Profile.
-              </p>
-            ) : null}
           </div>
         </div>
       </div>

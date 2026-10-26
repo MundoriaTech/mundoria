@@ -377,7 +377,7 @@ export function isValidUtr(value: string) {
   return /^\d{10}$/.test(digitsOnly(value));
 }
 
-/** Parse a cover amount string into pounds (supports 1m / £1.5 million / 1500000). */
+/** Parse a cover amount string into pounds (supports 1m / £1.5 million / 1500000 / 2.5k). */
 export function parseCoverPounds(value: string): number | null {
   const raw = value.trim().toLowerCase().replace(/,/g, "").replace(/£/g, "");
   if (!raw || raw === "other") return null;
@@ -389,6 +389,13 @@ export function parseCoverPounds(value: string): number | null {
   if (millionMatch) {
     const amount = Number(millionMatch[1]);
     return Number.isFinite(amount) ? amount * 1_000_000 : null;
+  }
+
+  // "24.1k" / "2500k" mean thousands of pounds — never treat as millions.
+  const thousandMatch = raw.match(/^(\d+(?:\.\d+)?)\s*k\b/);
+  if (thousandMatch) {
+    const amount = Number(thousandMatch[1]);
+    return Number.isFinite(amount) ? amount * 1_000 : null;
   }
 
   const numeric = Number(raw.replace(/[^\d.]/g, ""));
@@ -406,6 +413,18 @@ export function isAcceptableInsuranceCover(value: string) {
   }
   const pounds = parseCoverPounds(value);
   return pounds != null && pounds >= 1_000_000;
+}
+
+/** Canonical storage: presets or whole pounds as a digit string (never "24.1k"). */
+export function normalizeInsuranceCoverAmount(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "other") return null;
+  if ((INSURANCE_COVER_PRESETS as readonly string[]).includes(trimmed)) {
+    return trimmed;
+  }
+  const pounds = parseCoverPounds(trimmed);
+  if (pounds == null || pounds < 1_000_000) return null;
+  return String(Math.round(pounds));
 }
 
 export function insuranceCoverBand(value: string) {

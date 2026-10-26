@@ -21,7 +21,6 @@ import {
   INSURANCE_COVER_MODEL_COPY,
   INSURANCE_FAQS,
   LOCATION_FAQS,
-  PAYOUT_FAQS,
   PRODUCT_ITEMS,
   SAFETY_GUIDELINES,
   UTR_FAQS,
@@ -1265,10 +1264,6 @@ export function EmergencyContactStep({
       <FaqAccordion items={EMERGENCY_FAQS} />
     </div>
   );
-}
-
-export function PayoutFaqs() {
-  return <FaqAccordion items={PAYOUT_FAQS} />;
 }
 
 export function AgreementsReviewStep({

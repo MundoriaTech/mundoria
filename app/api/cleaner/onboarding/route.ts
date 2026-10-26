@@ -16,6 +16,7 @@ import {
   isPastDateIso,
   isValidUtr,
   namesLikelyMatch,
+  normalizeInsuranceCoverAmount,
   parseTransportModes,
 } from "@/lib/cleaner/onboarding-compliance";
 import {
@@ -143,7 +144,7 @@ const schema = z
       .trim()
       .default("cleaner-location-consent-v1"),
     marketing_consent: z.boolean().optional().default(false),
-    payout_preference: z.enum(["weekly", "monthly"]),
+    payout_preference: z.enum(["weekly", "monthly"]).optional().default("weekly"),
     phone: z.string().trim().min(7, "Enter a valid phone number"),
     ppe_other: z.string().trim().optional().default(""),
     ppe_owned: optionalStringList,
@@ -602,7 +603,7 @@ export async function POST(request: Request) {
           : null,
       insurance_cover_amount:
         value.insurance_path === "have"
-          ? value.insurance_cover_amount || null
+          ? normalizeInsuranceCoverAmount(value.insurance_cover_amount ?? "")
           : null,
       insurance_expiry_date:
         value.insurance_path === "have" && value.insurance_expiry_date
@@ -669,8 +670,11 @@ export async function POST(request: Request) {
       utr_path: value.utr_path,
       utr_verified: false,
       verification_flags: verificationFlags,
-      working_radius_km:
-        Math.round(value.working_radius_miles * 1.609344 * 100) / 100,
+      // Column is integer km; fractional values make Postgres reject the whole update.
+      working_radius_km: Math.max(
+        1,
+        Math.round(value.working_radius_miles * 1.609344),
+      ),
       years_experience: value.years_experience,
   };
 

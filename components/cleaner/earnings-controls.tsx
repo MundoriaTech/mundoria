@@ -50,7 +50,9 @@ export function EarningsControls({
   async function openDashboard() {
     setOpening(true);
     try {
-      const response = await fetch("/api/cleaner/stripe-dashboard", {
+      const response = await fetch("/api/cleaner/stripe-connect", {
+        body: JSON.stringify({ returnTo: "/cleaner/earnings" }),
+        headers: { "Content-Type": "application/json" },
         method: "POST",
       });
       const json = (await response.json()) as { url?: string; error?: string };

@@ -446,16 +446,22 @@ export function CleanerProfileForm({
         <Panel eyebrow="Money" title="Payouts">
           <StatusRow label="Stripe" value={stripeLabel} />
           <p className="text-sm leading-6 text-[#5c5670]">
-            You can connect after approval. Pay is sent once Stripe Express is complete.
+            {cleaner.status === "certified" || cleaner.status === "active"
+              ? "Pay is sent once Stripe Express is complete. You can also connect from your dashboard."
+              : "Connect Stripe after Mundoria approves your application. You’ll see a payout setup card on your dashboard."}
           </p>
-          <Button
-            className="h-11 w-full rounded-full border-[#e6e0f2] text-[#1c133b]"
-            onClick={() => void connectStripe()}
-            variant="outline"
-          >
-            <CreditCard className="mr-2 h-4 w-4" />
-            {profile.stripe_account_id ? "Open Stripe Express" : "Connect Stripe Express"}
-          </Button>
+          {cleaner.status === "certified" || cleaner.status === "active" ? (
+            <Button
+              className="h-11 w-full rounded-full border-[#e6e0f2] text-[#1c133b]"
+              onClick={() => void connectStripe()}
+              variant="outline"
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              {profile.stripe_account_id
+                ? "Open Stripe Express"
+                : "Connect Stripe Express"}
+            </Button>
+          ) : null}
           {stripeError ? (
             <ActionError message={stripeError} title="Couldn’t open Stripe" />
           ) : null}

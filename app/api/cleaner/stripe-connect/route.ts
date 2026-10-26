@@ -9,11 +9,31 @@ export async function POST(request: Request) {
   const { user } = await getRequestUser(request);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const admin = createAdminClient();
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("email, stripe_account_id")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { data: cleaner }] = await Promise.all([
+    admin
+      .from("profiles")
+      .select("email, stripe_account_id")
+      .eq("id", user.id)
+      .single(),
+    admin
+      .from("cleaner_profiles")
+      .select("onboarding_complete, status")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
+
+  if (
+    !cleaner?.onboarding_complete ||
+    (cleaner.status !== "certified" && cleaner.status !== "active")
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Connect Stripe after Mundoria approves your application. You’ll see payout setup on your dashboard.",
+      },
+      { status: 403 },
+    );
+  }
 
   let stripe;
   try {
@@ -50,11 +70,25 @@ export async function POST(request: Request) {
       .eq("id", user.id);
   }
 
+  let returnTo = "/cleaner/profile";
+  try {
+    const body = (await request.json()) as { returnTo?: string };
+    if (
+      body.returnTo === "/cleaner/dashboard" ||
+      body.returnTo === "/cleaner/earnings" ||
+      body.returnTo === "/cleaner/profile"
+    ) {
+      returnTo = body.returnTo;
+    }
+  } catch {
+    // Optional body — default return path is profile.
+  }
+
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
   const link = await stripe.accountLinks.create({
     account: accountId,
-    refresh_url: `${origin}/cleaner/profile?stripe=refresh`,
-    return_url: `${origin}/cleaner/profile?stripe=complete`,
+    refresh_url: `${origin}${returnTo}?stripe=refresh`,
+    return_url: `${origin}${returnTo}?stripe=complete`,
     type: "account_onboarding",
   });
   return NextResponse.json({ url: link.url });
