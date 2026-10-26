@@ -38,7 +38,6 @@ import {
 } from "@/lib/auth/uk-phone";
 import {
   hasAnyDocument,
-  hasBothDocumentSides,
   parseDocumentList,
   parseDocumentUrls,
   removeDocumentAt,
@@ -246,8 +245,10 @@ function isSingleDocKind(kind: DocKind) {
 }
 
 function isListDocKind(kind: DocKind) {
-  return kind === "dbs";
+  return kind === "dbs" || kind === "id";
 }
+
+const MAX_ID_DOCUMENT_PAGES = 2;
 
 function setMultiDocValue(
   kind: DocKind,
@@ -800,21 +801,28 @@ export function OnboardingWizard({
   }
 
   useEffect(() => {
-    const idUrls = parseDocumentUrls(data.id_document_url);
+    const idUrls = parseDocumentList(data.id_document_url);
     const dbsUrls = parseDocumentList(data.dbs_document_url);
-    void resolveDocPreview("id", idUrls[0] ?? "", 0);
-    void resolveDocPreview("id", idUrls[1] ?? "", 1);
+    idUrls.forEach((url, index) => {
+      void resolveDocPreview("id", url, index);
+    });
     dbsUrls.forEach((url, index) => {
       void resolveDocPreview("dbs", url, index);
     });
-    // Drop stale DBS preview slots after removals.
+    // Drop stale list preview slots after removals.
     setDocPreviews((current) => {
       const next = { ...current };
       let changed = false;
       for (const key of Object.keys(next)) {
-        if (!key.startsWith("dbs:")) continue;
-        const index = Number(key.slice(4));
-        if (!Number.isInteger(index) || index < 0 || index >= dbsUrls.length) {
+        const listKind = key.startsWith("dbs:")
+          ? "dbs"
+          : key.startsWith("id:")
+            ? "id"
+            : null;
+        if (!listKind) continue;
+        const urls = listKind === "dbs" ? dbsUrls : idUrls;
+        const index = Number(key.slice(listKind.length + 1));
+        if (!Number.isInteger(index) || index < 0 || index >= urls.length) {
           delete next[key as DocSlotKey];
           changed = true;
         }
@@ -1974,12 +1982,11 @@ function StepBody({
   if (stepId === "identity") {
     return (
       <IdentityStep
-        backPreview={docPreviews["id:1"]}
-        frontPreview={docPreviews["id:0"]}
-        idUrls={parseDocumentUrls(data.id_document_url)}
+        idUrls={parseDocumentList(data.id_document_url)}
         issue={issueFor("id")}
         onFile={(file, slot) => onFile("id", file, slot)}
         onRemove={(slot) => onRemove("id", slot)}
+        pagePreviews={docPreviews}
         uploadProgress={uploadProgress}
         uploadingSlot={uploadingSlot}
       />
@@ -2475,25 +2482,28 @@ const IDENTITY_GUIDE_TIPS = [
 ] as const;
 
 function IdentityStep({
-  backPreview,
-  frontPreview,
   idUrls,
   issue,
   onFile,
   onRemove,
+  pagePreviews,
   uploadProgress,
   uploadingSlot,
 }: {
-  backPreview?: { isPdf?: boolean; url?: string };
-  frontPreview?: { isPdf?: boolean; url?: string };
   idUrls: string[];
   issue?: string;
-  onFile: (file: File, slot: 0 | 1) => void;
-  onRemove: (slot: 0 | 1) => void;
+  onFile: (file: File, slot: number) => void;
+  onRemove: (slot: number) => void;
+  pagePreviews: Partial<
+    Record<string, { isPdf?: boolean; url?: string }>
+  >;
   uploadProgress: number;
   uploadingSlot: string | null;
 }) {
   const [guideOpen, setGuideOpen] = useState(false);
+  const pages = idUrls.filter(Boolean);
+  const sideLabel = (index: number) =>
+    index === 0 ? "Front" : index === 1 ? "Back" : `Page ${index + 1}`;
 
   return (
     <div className="space-y-4">
@@ -2506,29 +2516,48 @@ function IdentityStep({
           ID tips
         </button>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <DocumentUpload
-          error={issue}
-          label="Front"
-          onFile={(file) => onFile(file, 0)}
-          onRemove={() => onRemove(0)}
-          previewIsPdf={frontPreview?.isPdf}
-          previewUrl={frontPreview?.url}
-          progress={uploadingSlot === "id:0" ? uploadProgress : undefined}
-          uploaded={Boolean(frontPreview?.url || idUrls[0])}
-          uploading={uploadingSlot === "id:0"}
-        />
-        <DocumentUpload
-          label="Back"
-          onFile={(file) => onFile(file, 1)}
-          onRemove={() => onRemove(1)}
-          previewIsPdf={backPreview?.isPdf}
-          previewUrl={backPreview?.url}
-          progress={uploadingSlot === "id:1" ? uploadProgress : undefined}
-          uploaded={Boolean(backPreview?.url || idUrls[1])}
-          uploading={uploadingSlot === "id:1"}
-        />
-      </div>
+      <p className="text-xs leading-5 text-[#8b8798]">
+        Passport photo page is usually enough. For a driving licence or BRP,
+        add front and back.
+      </p>
+      <DocumentUpload
+        error={issue}
+        files={pages.map((url, index) => {
+          const slotKey = `id:${index}`;
+          const preview = pagePreviews[slotKey];
+          const nameFromPreview = preview?.url
+            ? preview.url.split("/").filter(Boolean).pop()
+            : null;
+          const nameFromStored = url.split("/").filter(Boolean).pop();
+          const rawName = nameFromPreview || nameFromStored || "";
+          let fileName = sideLabel(index);
+          try {
+            const decoded = decodeURIComponent(rawName);
+            if (decoded) fileName = `${sideLabel(index)} · ${decoded}`;
+          } catch {
+            if (rawName) fileName = `${sideLabel(index)} · ${rawName}`;
+          }
+          const isUploadingHere = uploadingSlot === slotKey;
+          return {
+            key: slotKey,
+            name: fileName,
+            onRemove: () => onRemove(index),
+            progress: isUploadingHere ? uploadProgress : undefined,
+            uploading: isUploadingHere,
+          };
+        })}
+        label="Identity document"
+        maxFiles={MAX_ID_DOCUMENT_PAGES}
+        onFile={(file) => {
+          if (pages.length >= MAX_ID_DOCUMENT_PAGES) return;
+          onFile(file, pages.length);
+        }}
+        progress={
+          uploadingSlot === `id:${pages.length}` ? uploadProgress : undefined
+        }
+        uploaded={pages.length > 0}
+        uploading={uploadingSlot === `id:${pages.length}`}
+      />
       {guideOpen ? (
         <AppModal
           backdrop="blur"
@@ -3972,8 +4001,8 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     }
   }
 
-  if (stepId === "identity" && !hasBothDocumentSides(data.id_document_url)) {
-    return issue("id", "Upload the front and back of your ID.");
+  if (stepId === "identity" && !hasAnyDocument(data.id_document_url)) {
+    return issue("id", "Upload your government-issued ID.");
   }
 
   if (stepId === "dbs") {
