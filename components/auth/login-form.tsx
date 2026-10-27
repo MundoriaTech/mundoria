@@ -164,10 +164,11 @@ export function LoginForm({
           className={cn(
             "h-12 w-full rounded-xl bg-[#291845] text-base font-semibold text-white hover:bg-[#291845]/90",
           )}
-          disabled={isSubmitting}
+          loading={isSubmitting}
+          loadingLabel="Signing in…"
           type="submit"
         >
-          {isSubmitting ? "Signing in…" : "Log in"}
+          Log in
         </Button>
       </form>
     </div>

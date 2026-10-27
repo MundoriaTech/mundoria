@@ -71,8 +71,13 @@ export function ForgotPasswordForm({
           {...register("email")}
         />
       </FormField>
-      <Button className="w-full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Sending reset link…" : "Send reset link"}
+      <Button
+        className="w-full"
+        loading={isSubmitting}
+        loadingLabel="Sending reset link…"
+        type="submit"
+      >
+        Send reset link
       </Button>
     </form>
   );

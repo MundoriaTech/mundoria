@@ -53,13 +53,14 @@ export function OAuthButton({
     <div>
       <Button
         className={cn("w-full", className)}
-        disabled={isLoading}
+        loading={isLoading}
+        loadingLabel="Opening Google…"
         onClick={signInWithGoogle}
         type="button"
         variant="outline"
       >
         <GoogleMark />
-        {isLoading ? "Opening Google…" : label}
+        {label}
       </Button>
       {error ? (
         <div className="mt-3">
