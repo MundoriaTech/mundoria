@@ -29,6 +29,7 @@ export type ParentBooking = {
   service_type: string;
   special_attention_areas: string[] | null;
   special_instructions: string | null;
+  stripe_payment_method_id?: string | null;
 };
 
 /** How many unpaid future visits to keep queued ahead of the latest booking. */
@@ -73,6 +74,7 @@ function followOnRow(
     is_recurring: true,
     parent_booking_id: parent.id,
     payment_status: "unpaid" as const,
+    stripe_payment_method_id: parent.stripe_payment_method_id ?? null,
     prefer_same_cleaner: parent.prefer_same_cleaner ?? false,
     preferred_cleaner_id: parent.preferred_cleaner_id ?? null,
     property_condition: parent.property_condition,
@@ -146,7 +148,7 @@ export async function ensureUpcomingRecurringFollowOns(
   const { data: parents, error } = await admin
     .from("bookings")
     .select(
-      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,commercial_spaces,customer_id,estimated_duration_hours,pause_ends_on,pause_starts_on,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions",
+      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,commercial_spaces,customer_id,estimated_duration_hours,pause_ends_on,pause_starts_on,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions,stripe_payment_method_id",
     )
     .eq("is_recurring", true)
     .is("parent_booking_id", null)
@@ -208,11 +210,13 @@ export async function ensureUpcomingRecurringFollowOns(
       .single();
     if (!insertError && inserted?.id) {
       created += 1;
-      try {
-        const { runMatchingEngine } = await import("@/lib/matching/engine");
-        await runMatchingEngine(inserted.id);
-      } catch {
-        // The visit exists. Matching can be retried from admin.
+      if (parent.stripe_payment_method_id) {
+        try {
+          const { runMatchingEngine } = await import("@/lib/matching/engine");
+          await runMatchingEngine(inserted.id);
+        } catch {
+          // The visit exists. Matching can be retried from admin.
+        }
       }
     }
   }

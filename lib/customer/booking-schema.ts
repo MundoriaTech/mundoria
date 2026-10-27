@@ -118,5 +118,6 @@ export const bookingDraftSchema = z.object({
 });
 
 export const createBookingSchema = bookingDraftSchema.extend({
-  paymentIntentId: z.string().min(1),
+  /** Stripe SetupIntent id — card saved at book; hold happens later. */
+  setupIntentId: z.string().min(1),
 });

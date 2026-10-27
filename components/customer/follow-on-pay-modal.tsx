@@ -49,19 +49,17 @@ function PayForm({
         error?: string;
       };
       if (!intentRes.ok || !intentJson.client_secret) {
-        throw new Error(intentJson.error ?? "Could not start payment.");
+        throw new Error(intentJson.error ?? "Could not start card save.");
       }
 
-      const result = await stripe.confirmCardPayment(intentJson.client_secret, {
+      const result = await stripe.confirmCardSetup(intentJson.client_secret, {
         payment_method: { card },
-        return_url: window.location.href,
       });
       if (result.error) {
-        throw new Error(result.error.message ?? "Payment failed.");
+        throw new Error(result.error.message ?? "Could not save card.");
       }
-      const status = result.paymentIntent?.status;
-      if (status !== "requires_capture" && status !== "succeeded") {
-        throw new Error("Payment was not authorised. Please try again.");
+      if (result.setupIntent?.status !== "succeeded") {
+        throw new Error("Card was not saved. Please try again.");
       }
 
       const confirmRes = await fetch(
@@ -70,7 +68,7 @@ function PayForm({
       );
       const confirmJson = (await confirmRes.json()) as { error?: string };
       if (!confirmRes.ok) {
-        throw new Error(confirmJson.error ?? "Could not confirm payment.");
+        throw new Error(confirmJson.error ?? "Could not confirm payment method.");
       }
 
       onPaid();
@@ -84,11 +82,12 @@ function PayForm({
   return (
     <form className="space-y-4" onSubmit={(e) => void onSubmit(e)}>
       <p className="text-sm leading-6 text-muted-foreground">
-        Authorise a hold of{" "}
+        Save a card for{" "}
         <span className="font-semibold text-foreground">
           {formatMoney(amount)}
         </span>
-        . You’re only charged after the clean.{" "}
+        . We place a hold about 24 hours before your clean, then charge the next
+        day after it’s done.{" "}
         <Link
           className="font-medium text-primary underline-offset-2 hover:underline"
           href={PAYMENT_HELP_HREF}
@@ -110,7 +109,7 @@ function PayForm({
         />
       </div>
       {error ? (
-        <ActionError message={error} title="Couldn’t take payment" />
+        <ActionError message={error} title="Couldn’t save card" />
       ) : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button
@@ -122,7 +121,7 @@ function PayForm({
           Cancel
         </Button>
         <Button disabled={processing || !stripe} type="submit">
-          {processing ? "Authorising…" : "Authorise payment"}
+          {processing ? "Saving…" : "Save card"}
         </Button>
       </div>
     </form>
@@ -144,7 +143,7 @@ export function FollowOnPayModal({
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
         <div className="w-full max-w-md rounded-t-2xl bg-background p-5 sm:rounded-2xl">
-          <h2 className="text-lg font-semibold">Authorise payment</h2>
+          <h2 className="text-lg font-semibold">Save payment card</h2>
           <p className="mt-3 text-sm text-muted-foreground">
             Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable card payments.
           </p>
@@ -159,7 +158,7 @@ export function FollowOnPayModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
       <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-background p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl sm:rounded-2xl sm:pb-5">
-        <h2 className="text-lg font-semibold">Authorise payment</h2>
+        <h2 className="text-lg font-semibold">Save payment card</h2>
         <div className="mt-4">
           <Elements stripe={stripePromise}>
             <PayForm

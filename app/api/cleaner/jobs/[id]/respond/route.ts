@@ -9,6 +9,7 @@ import {
   notifyCustomerCleanerChanged,
 } from "@/lib/matching/emergency-list";
 import { sendPushNotification } from "@/lib/notifications/send";
+import { maybeAuthorizeBookingIfDue } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({ response: z.enum(["accepted", "declined"]) });
@@ -85,6 +86,9 @@ export async function POST(
       decision: "offer_accepted",
       reasons: { source: "cleaner_job_feed" },
     });
+
+    // If the visit is already inside the pre-auth window, hold now.
+    await maybeAuthorizeBookingIfDue(bookingId).catch(() => undefined);
 
     const { data: onList } = await admin
       .from("booking_emergency_list")

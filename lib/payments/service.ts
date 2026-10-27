@@ -148,7 +148,10 @@ export async function captureBookingPayment(bookingId: string) {
   }
   await admin
     .from("bookings")
-    .update({ payment_status: "released" })
+    .update({
+      payment_captured_at: new Date().toISOString(),
+      payment_status: "released",
+    })
     .eq("id", bookingId);
   let payoutId: string | null = null;
   try {

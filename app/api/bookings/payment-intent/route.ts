@@ -5,6 +5,7 @@ import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { estimatePrice } from "@/lib/customer/services";
+import { createBookingSetupIntent } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import type { Address } from "@/types/customer";
@@ -127,7 +128,7 @@ export async function POST(request: Request) {
   }
 
   const idempotencyKey = [
-    "book",
+    "setup",
     user.id,
     parsed.data.addressId,
     parsed.data.serviceType,
@@ -137,29 +138,26 @@ export async function POST(request: Request) {
     parsed.data.selectedAddOns.slice().sort().join("-") || "none",
   ].join("_");
 
-  const paymentIntent = await stripe.paymentIntents.create(
-    {
-      amount,
-      capture_method: "manual",
-      currency: "gbp",
-      customer: stripeCustomerId,
-      metadata: {
-        address_id: parsed.data.addressId,
-        cleaning_standard: parsed.data.cleaningStandard,
-        promo_code_id: promo?.id ?? "",
-        selected_add_ons: parsed.data.selectedAddOns.join(","),
-        service_type: parsed.data.serviceType,
-        supabase_user_id: user.id,
-      },
-      setup_future_usage: "off_session",
+  const setupIntent = await createBookingSetupIntent({
+    amount,
+    customerId: user.id,
+    idempotencyKey,
+    metadata: {
+      address_id: parsed.data.addressId,
+      cleaning_standard: parsed.data.cleaningStandard,
+      promo_code_id: promo?.id ?? "",
+      scheduled_date: parsed.data.scheduledDate,
+      scheduled_time: parsed.data.scheduledTime,
+      selected_add_ons: parsed.data.selectedAddOns.join(","),
+      service_type: parsed.data.serviceType,
     },
-    { idempotencyKey: idempotencyKey.slice(0, 255) },
-  );
+    stripeCustomerId,
+  });
 
   return NextResponse.json({
     amount,
-    clientSecret: paymentIntent.client_secret,
-    paymentIntentId: paymentIntent.id,
+    clientSecret: setupIntent.client_secret,
     promoCodeId: promo?.id ?? null,
+    setupIntentId: setupIntent.id,
   });
 }

@@ -28,7 +28,7 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Your earnings are the booking price less Mundoria’s service fee, as shown on the offer and in your Earnings page.",
-      "Customer payment is authorised at booking and captured after the visit is completed and checked out.",
+      "Customer cards are saved at booking. Payment is pre-authorised about 24 hours before the visit once a cleaner has confirmed, and captured the next calendar day after checkout.",
       "Earnings may change if the agreed scope is changed by the customer before or during the visit. Any change will be shown in the app.",
       "Tips, where offered, are passed on to you in full, subject to payment provider fees.",
     ],

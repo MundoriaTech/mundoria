@@ -3520,7 +3520,7 @@ function CheckoutStep({
   const [processing, setProcessing] = useState(false);
   const payingRef = useRef(false);
   const [paymentPhase, setPaymentPhase] = useState<
-    "idle" | "saving" | "authorising" | "confirming"
+    "idle" | "saving" | "saving_card" | "confirming"
   >("idle");
   const [cardOpen, setCardOpen] = useState(false);
   const [cardFocused, setCardFocused] = useState(false);
@@ -3637,26 +3637,23 @@ function CheckoutStep({
         specialInstructions: composeBookingNotes(draft),
       };
 
-      setPaymentPhase("authorising");
-      const authorizationResponse = await fetch(
-        "/api/bookings/payment-intent",
-        {
-          body: JSON.stringify(payload),
-          headers: { "Content-Type": "application/json" },
-          method: "POST",
-        },
-      );
-      const authorization = (await authorizationResponse.json()) as {
+      setPaymentPhase("saving_card");
+      const setupResponse = await fetch("/api/bookings/payment-intent", {
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const setup = (await setupResponse.json()) as {
         clientSecret?: string;
         error?: string;
-        paymentIntentId?: string;
+        setupIntentId?: string;
       };
-      if (!authorizationResponse.ok || !authorization.clientSecret) {
-        throw new Error(authorization.error ?? "Unable to authorise payment.");
+      if (!setupResponse.ok || !setup.clientSecret) {
+        throw new Error(setup.error ?? "Unable to save your card.");
       }
 
-      const { error: stripeError, paymentIntent } =
-        await stripe.confirmCardPayment(authorization.clientSecret, {
+      const { error: stripeError, setupIntent } =
+        await stripe.confirmCardSetup(setup.clientSecret, {
           payment_method: {
             card,
             billing_details: {
@@ -3668,23 +3665,19 @@ function CheckoutStep({
               },
             },
           },
-          return_url: window.location.href,
         });
-      if (stripeError || !paymentIntent) {
-        throw new Error(stripeError?.message ?? "Card payment failed.");
+      if (stripeError || !setupIntent) {
+        throw new Error(stripeError?.message ?? "Card could not be saved.");
       }
-      if (
-        paymentIntent.status !== "requires_capture" &&
-        paymentIntent.status !== "succeeded"
-      ) {
-        throw new Error("Payment was not authorised. Please try again.");
+      if (setupIntent.status !== "succeeded") {
+        throw new Error("Card was not saved. Please try again.");
       }
 
       setPaymentPhase("confirming");
       const bookingResponse = await fetch("/api/bookings", {
         body: JSON.stringify({
           ...payload,
-          paymentIntentId: paymentIntent.id,
+          setupIntentId: setupIntent.id,
         }),
         headers: { "Content-Type": "application/json" },
         method: "POST",
@@ -3788,10 +3781,10 @@ function CheckoutStep({
                 />
               </div>
               <p className="mt-3 text-xs leading-5 text-[#7a7198]">
-                By providing your card information, you allow Mundoria to
-                authorise a hold on your card for this booking in accordance
-                with our terms. The charge is captured after the clean is
-                completed.
+                By providing your card information, you allow Mundoria to save
+                it for this booking, place a hold about 24 hours before your
+                clean (once a cleaner is confirmed), and capture payment the
+                next day after the clean — in accordance with our terms.
               </p>
             </div>
           ) : null}
@@ -3827,8 +3820,9 @@ function CheckoutStep({
       </div>
 
       <p className="mt-5 text-sm leading-6 text-[#5b5478]">
-        We authorise (hold) your card when you confirm. The payment is captured
-        after the clean, not upfront as a final charge.{" "}
+        We save your card when you book — no charge yet. About 24 hours before
+        your clean (once a cleaner is confirmed), we place a hold. Payment is
+        captured the next day after the clean.{" "}
         <a
           className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
           href={FAQ_LINKS.whenCharged}
@@ -3850,15 +3844,15 @@ function CheckoutStep({
           detail={
             paymentPhase === "saving"
               ? "Saving your address securely."
-              : paymentPhase === "authorising"
-                ? "Placing a hold on your card — not the final charge."
+              : paymentPhase === "saving_card"
+                ? "Saving your card securely — no charge yet."
                 : "Almost done — creating your booking."
           }
           label={
             paymentPhase === "saving"
               ? "Saving…"
-              : paymentPhase === "authorising"
-                ? "Authorising payment…"
+              : paymentPhase === "saving_card"
+                ? "Saving card…"
                 : "Confirming booking…"
           }
         />
@@ -3869,7 +3863,7 @@ function CheckoutStep({
           {(
             [
               { id: "saving", label: "Saving your address" },
-              { id: "authorising", label: "Authorising card hold" },
+              { id: "saving_card", label: "Saving your card" },
               { id: "confirming", label: "Confirming your booking" },
             ] as const
           ).map((step, index, list) => {
@@ -3917,7 +3911,7 @@ function CheckoutStep({
 
       {error ? (
         <div className="mt-4">
-          <ActionError message={error} title="Couldn’t take payment" />
+          <ActionError message={error} title="Couldn’t complete booking" />
         </div>
       ) : null}
 
@@ -3932,8 +3926,8 @@ function CheckoutStep({
             <BookingSpinner size="sm" tone="inverse" />
             {paymentPhase === "saving"
               ? "Saving…"
-              : paymentPhase === "authorising"
-                ? "Authorising payment…"
+              : paymentPhase === "saving_card"
+                ? "Saving card…"
                 : "Confirming booking…"}
           </span>
         ) : (

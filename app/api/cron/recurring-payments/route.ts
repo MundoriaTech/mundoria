@@ -8,14 +8,13 @@ import {
   createInAppNotification,
   sendPushNotification,
 } from "@/lib/notifications/send";
-import { createManualPaymentIntent } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatServiceName } from "@/lib/customer/services";
 import { getSiteUrl } from "@/lib/seo/site";
 
 /**
  * Rolls forward the next unpaid recurring visit when needed, then reminds
- * customers and prepares PaymentIntents for visits in the T−7…T−2 window.
+ * customers who still need a saved card for visits in the T−7…T−2 window.
  */
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
@@ -28,7 +27,7 @@ export async function GET(request: Request) {
   try {
     rolled = await ensureUpcomingRecurringFollowOns(admin);
   } catch {
-    // Payment prep should still run even if roll-forward fails.
+    // Reminders should still run even if roll-forward fails.
   }
 
   const today = new Date();
@@ -38,10 +37,11 @@ export async function GET(request: Request) {
   const { data: bookings, error } = await admin
     .from("bookings")
     .select(
-      "id,customer_id,service_type,scheduled_date,scheduled_start_time,amount_total,stripe_payment_intent_id,parent_booking_id,payment_status,status",
+      "id,customer_id,service_type,scheduled_date,scheduled_start_time,amount_total,stripe_payment_method_id,parent_booking_id,payment_status,status",
     )
     .not("parent_booking_id", "is", null)
     .eq("payment_status", "unpaid")
+    .is("stripe_payment_method_id", null)
     .neq("status", "cancelled")
     .gte("scheduled_date", from)
     .lte("scheduled_date", to)
@@ -51,7 +51,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  let prepared = 0;
   let reminded = 0;
   const failures: string[] = [];
 
@@ -59,29 +58,13 @@ export async function GET(request: Request) {
     try {
       const { data: profile } = await admin
         .from("profiles")
-        .select("email,full_name,stripe_customer_id")
+        .select("email,full_name")
         .eq("id", booking.customer_id)
         .single();
 
       if (!profile?.email) {
         failures.push(booking.id);
         continue;
-      }
-
-      const amount = Number(booking.amount_total ?? 0);
-      if (amount < 100) {
-        failures.push(booking.id);
-        continue;
-      }
-
-      if (!booking.stripe_payment_intent_id) {
-        await createManualPaymentIntent({
-          amount,
-          bookingId: booking.id,
-          customerId: booking.customer_id,
-          stripeCustomerId: profile.stripe_customer_id,
-        });
-        prepared += 1;
       }
 
       const serviceLabel = formatServiceName(booking.service_type);
@@ -91,23 +74,23 @@ export async function GET(request: Request) {
       await createInAppNotification(
         booking.customer_id,
         "recurring_payment_due",
-        "Upcoming visit payment",
-        `Your ${serviceLabel} on ${when} still needs payment authorisation.`,
+        "Upcoming visit needs a card",
+        `Save a card for your ${serviceLabel} on ${when}.`,
         { booking_id: booking.id },
       );
       await sendPushNotification(
         booking.customer_id,
-        "Upcoming visit payment",
-        `Authorise payment for your ${serviceLabel} on ${when}.`,
+        "Upcoming visit needs a card",
+        `Save a card for your ${serviceLabel} on ${when}.`,
         { booking_id: booking.id },
       );
       await sendBrandedEmail({
         data: {
-          actionLabel: "Pay for this visit",
+          actionLabel: "Save card for this visit",
           actionUrl: payHref,
-          body: `Hi ${profile.full_name.split(" ")[0] ?? "there"}, your recurring ${serviceLabel} on ${when} needs payment authorisation before we match a cleaner.`,
-          subject: `Payment due for your Mundoria clean on ${booking.scheduled_date}`,
-          title: "Upcoming visit payment",
+          body: `Hi ${profile.full_name.split(" ")[0] ?? "there"}, your recurring ${serviceLabel} on ${when} still needs a saved card before we match a cleaner.`,
+          subject: `Card needed for your Mundoria clean on ${booking.scheduled_date}`,
+          title: "Save a card for your next visit",
         },
         template: "system.generic",
         to: profile.email,
@@ -120,7 +103,6 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     failures: failures.length,
-    prepared,
     reminded,
     rolledForward: rolled.created,
     scanned: bookings?.length ?? 0,

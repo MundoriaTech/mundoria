@@ -1614,7 +1614,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "When will I be charged?",
         answer:
-          "When you book, Mundoria authorises your card for the booking amount. That holds the funds but does not take the final payment yet.\n\nPayment is captured after the clean is completed.\n\nIf the booking is cancelled under the free-cancellation window, the authorisation is released. If a cancellation fee applies, that is handled according to the cancellation terms.",
+          "When you book, Mundoria saves your card — there is no charge and no hold at that moment.\n\nAbout 24 hours before your clean (once a cleaner has confirmed), we place a hold for the booking amount. That reserves the funds but is not the final charge yet.\n\nPayment is captured the next calendar day after the clean is completed.\n\nIf the booking is cancelled under the free-cancellation window, any authorisation is released. If a cancellation fee applies, that is handled according to the cancellation terms.",
       },
       {
         question: "Can I get a receipt or invoice?",
@@ -1629,7 +1629,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What happens if my payment fails?",
         answer:
-          "If a payment cannot be completed, the booking may not be confirmed until the payment issue is resolved.\n\nThat could happen because a card has expired, the bank declines the transaction, there are insufficient funds or additional authentication is required.\n\nIf a payment fails, you should be able to try again or use another available payment method.\n\nWe do not want a cleaner travelling to a booking that has not been properly confirmed.",
+          "If a payment cannot be completed, the booking may be paused until the payment issue is resolved.\n\nThat could happen when we try to place the pre-clean hold — for example because a card has expired, the bank declines the transaction, there are insufficient funds or additional authentication is required.\n\nIf a payment fails, you should be able to update your card on the booking and try again.\n\nWe do not want a cleaner travelling to a booking that has not been properly authorised.",
       },
       {
         question: "Can I update my payment method?",
@@ -1644,7 +1644,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I get a refund if my booking is cancelled?",
         answer:
-          "That depends on when the booking is cancelled and who cancelled it.\n\nIf you cancel:\n\n• 48 hours or more before the start time: no cancellation fee, and the payment authorisation is released\n• Between 24 and 48 hours before the start time: a 50% cancellation fee applies\n• Less than 24 hours before the start time: the full booking amount is retained\n\nIf Mundoria or the assigned professional cannot fulfil the booking and no suitable replacement is arranged, the payment is handled under the cancellation and replacement process rather than leaving you without a clear next step.\n\nThe same notice windows are shown in the booking and cancellation journey.",
+          "That depends on when the booking is cancelled and who cancelled it.\n\nIf you cancel:\n\n• 48 hours or more before the start time: no cancellation fee, and any payment authorisation is released\n• Between 24 and 48 hours before the start time: a 50% cancellation fee applies\n• Less than 24 hours before the start time: the full booking amount is retained\n\nIf Mundoria or the assigned professional cannot fulfil the booking and no suitable replacement is arranged, the payment is handled under the cancellation and replacement process rather than leaving you without a clear next step.\n\nThe same notice windows are shown in the booking and cancellation journey.",
       },
     ],
   },

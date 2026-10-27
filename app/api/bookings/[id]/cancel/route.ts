@@ -98,11 +98,17 @@ export async function POST(
     hoursUntilStart: hoursLeft,
   });
   const refundAmount = Math.max(0, total - fee);
+  let paymentStatus: "unpaid" | "held" | "released" | "refunded" =
+    booking.payment_status;
 
   if (booking.stripe_payment_intent_id) {
     try {
-      if (refundAmount > 0) {
+      if (fee <= 0) {
+        await refundBookingPayment(params.id);
+        paymentStatus = "refunded";
+      } else if (refundAmount > 0) {
         await refundBookingPayment(params.id, refundAmount);
+        paymentStatus = fee >= total ? "released" : "refunded";
       } else if (fee >= total && total > 0) {
         // Keep full amount: capture held auth, or leave succeeded charge as-is.
         const stripe = getStripe();
@@ -112,8 +118,10 @@ export async function POST(
         if (intent.status === "requires_capture") {
           await stripe.paymentIntents.capture(intent.id);
         }
+        paymentStatus = "released";
       } else {
         await refundBookingPayment(params.id);
+        paymentStatus = "refunded";
       }
     } catch {
       return NextResponse.json(
@@ -121,10 +129,52 @@ export async function POST(
         { status: 400 },
       );
     }
+  } else if (fee > 0 && booking.stripe_payment_method_id) {
+    // No hold yet — charge the cancellation fee off-session from the saved card.
+    try {
+      const adminClient = createAdminClient();
+      const { data: profile } = await adminClient
+        .from("profiles")
+        .select("stripe_customer_id")
+        .eq("id", user.id)
+        .single();
+      if (!profile?.stripe_customer_id) {
+        throw new Error("Missing Stripe customer");
+      }
+      const intent = await getStripe().paymentIntents.create(
+        {
+          amount: fee,
+          confirm: true,
+          currency: "gbp",
+          customer: profile.stripe_customer_id,
+          metadata: {
+            booking_id: params.id,
+            cancellation_fee: "true",
+            supabase_user_id: user.id,
+          },
+          off_session: true,
+          payment_method: booking.stripe_payment_method_id,
+        },
+        { idempotencyKey: `cancel_fee_${params.id}_${fee}`.slice(0, 255) },
+      );
+      if (intent.status !== "succeeded") {
+        throw new Error(`Cancellation fee status ${intent.status}`);
+      }
+      paymentStatus = "released";
+      await adminClient
+        .from("bookings")
+        .update({ stripe_payment_intent_id: intent.id })
+        .eq("id", params.id);
+    } catch {
+      return NextResponse.json(
+        { error: "Unable to process cancellation payment." },
+        { status: 400 },
+      );
+    }
+  } else if (fee <= 0) {
+    paymentStatus =
+      booking.payment_status === "held" ? "refunded" : booking.payment_status;
   }
-
-  const paymentStatus =
-    fee >= total && total > 0 ? "released" : "refunded";
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -145,7 +195,9 @@ export async function POST(
     body:
       fee > 0
         ? `Cancelled. Cancellation fee £${(fee / 100).toFixed(2)}; £${(refundAmount / 100).toFixed(2)} refunded.`
-        : "Your payment has been refunded in full.",
+        : booking.stripe_payment_intent_id
+          ? "Your payment has been refunded in full."
+          : "Your booking was cancelled. No charge was taken.",
     data: {
       booking_id: params.id,
       cancellation_fee_pence: fee,

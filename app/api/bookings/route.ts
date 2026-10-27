@@ -63,34 +63,41 @@ export async function POST(request: Request) {
   }
 
   const stripe = getStripe();
-  const paymentIntent = await stripe.paymentIntents.retrieve(
-    parsed.data.paymentIntentId,
+  const setupIntent = await stripe.setupIntents.retrieve(
+    parsed.data.setupIntentId,
+    { expand: ["payment_method"] },
   );
-  const metadataAddOns = (paymentIntent.metadata.selected_add_ons ?? "")
+  const metadata = setupIntent.metadata ?? {};
+  const metadataAddOns = (metadata.selected_add_ons ?? "")
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean)
     .sort()
     .join(",");
   const requestAddOns = [...parsed.data.selectedAddOns].sort().join(",");
+  const amountPence = Number(metadata.amount_pence ?? 0);
+  const paymentMethodId =
+    typeof setupIntent.payment_method === "string"
+      ? setupIntent.payment_method
+      : setupIntent.payment_method?.id ?? null;
 
   if (
-    paymentIntent.metadata.supabase_user_id !== user.id ||
-    paymentIntent.metadata.address_id !== parsed.data.addressId ||
-    paymentIntent.metadata.service_type !== parsed.data.serviceType ||
-    (paymentIntent.metadata.cleaning_standard &&
-      paymentIntent.metadata.cleaning_standard !== parsed.data.cleaningStandard) ||
-    (paymentIntent.metadata.selected_add_ons !== undefined &&
+    metadata.supabase_user_id !== user.id ||
+    metadata.address_id !== parsed.data.addressId ||
+    metadata.service_type !== parsed.data.serviceType ||
+    (metadata.cleaning_standard &&
+      metadata.cleaning_standard !== parsed.data.cleaningStandard) ||
+    (metadata.selected_add_ons !== undefined &&
       metadataAddOns !== requestAddOns) ||
-    !["requires_capture", "succeeded"].includes(paymentIntent.status)
+    setupIntent.status !== "succeeded" ||
+    !paymentMethodId ||
+    amountPence < 100
   ) {
     return NextResponse.json(
-      { error: "Payment could not be verified." },
+      { error: "Payment method could not be verified." },
       { status: 400 },
     );
   }
-
-  const paymentHeld = paymentIntent.status === "requires_capture";
 
   const [{ data: address }, { data: profile }] = await Promise.all([
     admin
@@ -113,8 +120,8 @@ export async function POST(request: Request) {
   const selectedAddOnDefs = SERVICE_ADD_ONS.filter((addOn) =>
     parsed.data.selectedAddOns.includes(addOn.id),
   );
-  const platformAmount = Math.round(paymentIntent.amount * 0.2);
-  const cleanerAmount = paymentIntent.amount - platformAmount;
+  const platformAmount = Math.round(amountPence * 0.2);
+  const cleanerAmount = amountPence - platformAmount;
   const officeQuote =
     parsed.data.serviceType === "office" && parsed.data.officeSpaces.length
       ? calculateOfficeQuote(
@@ -137,11 +144,11 @@ export async function POST(request: Request) {
     }
   }
 
-  // Idempotent: same PaymentIntent must never create a second booking.
+  // Idempotent: same SetupIntent must never create a second booking.
   const { data: existingBooking } = await admin
     .from("bookings")
     .select("id")
-    .eq("stripe_payment_intent_id", paymentIntent.id)
+    .eq("stripe_setup_intent_id", setupIntent.id)
     .eq("customer_id", user.id)
     .maybeSingle();
   if (existingBooking) {
@@ -159,15 +166,15 @@ export async function POST(request: Request) {
       allocated_cleaners: officeQuote?.allocatedCleaners ?? 1,
       amount_cleaner: cleanerAmount,
       amount_platform: platformAmount,
-      amount_total: paymentIntent.amount,
+      amount_total: amountPence,
       cleaner_hours: officeQuote?.cleanerHours ?? null,
       cleaning_standard: parsed.data.cleaningStandard,
       commercial_spaces: officeQuote ? parsed.data.officeSpaces : null,
       customer_id: user.id,
       estimated_duration_hours: parsed.data.estimatedDurationHours,
       is_recurring: parsed.data.isRecurring,
-      payment_status: paymentHeld ? "held" : "released",
-      promo_code_id: paymentIntent.metadata.promo_code_id || null,
+      payment_status: "unpaid",
+      promo_code_id: metadata.promo_code_id || null,
       prefer_same_cleaner: Boolean(preferredCleanerId),
       preferred_cleaner_id: preferredCleanerId,
       property_condition: parsed.data.propertyCondition,
@@ -185,17 +192,17 @@ export async function POST(request: Request) {
       special_attention_areas: parsed.data.specialAttentionAreas,
       special_instructions: parsed.data.specialInstructions || null,
       status: "pending_match",
-      stripe_payment_intent_id: paymentIntent.id,
+      stripe_payment_method_id: paymentMethodId,
+      stripe_setup_intent_id: setupIntent.id,
     })
     .select()
     .single();
 
   if (error) {
-    // Race: another request inserted first — return that booking, do not cancel PI.
     const { data: raced } = await admin
       .from("bookings")
       .select("id")
-      .eq("stripe_payment_intent_id", paymentIntent.id)
+      .eq("stripe_setup_intent_id", setupIntent.id)
       .eq("customer_id", user.id)
       .maybeSingle();
     if (raced) {
@@ -204,15 +211,6 @@ export async function POST(request: Request) {
         matching: { matched: false },
         reused: true,
       });
-    }
-
-    if (paymentIntent.status === "succeeded") {
-      await stripe.refunds.create({
-        payment_intent: paymentIntent.id,
-        reason: "requested_by_customer",
-      });
-    } else if (!["canceled", "succeeded"].includes(paymentIntent.status)) {
-      await stripe.paymentIntents.cancel(paymentIntent.id);
     }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -268,14 +266,6 @@ export async function POST(request: Request) {
     if (addOnError) {
       Sentry.captureException(addOnError);
       await admin.from("bookings").delete().eq("id", booking.id);
-      if (paymentIntent.status === "succeeded") {
-        await stripe.refunds.create({
-          payment_intent: paymentIntent.id,
-          reason: "requested_by_customer",
-        });
-      } else if (!["canceled", "succeeded"].includes(paymentIntent.status)) {
-        await stripe.paymentIntents.cancel(paymentIntent.id);
-      }
       return NextResponse.json(
         {
           error:
@@ -295,22 +285,22 @@ export async function POST(request: Request) {
     user_id: user.id,
   });
 
-  if (paymentIntent.metadata.promo_code_id) {
+  if (metadata.promo_code_id) {
     const { data: promo } = await admin
       .from("promo_codes")
       .select("uses_count")
-      .eq("id", paymentIntent.metadata.promo_code_id)
+      .eq("id", metadata.promo_code_id)
       .single();
     if (promo) {
       await admin
         .from("promo_codes")
         .update({ uses_count: promo.uses_count + 1 })
-        .eq("id", paymentIntent.metadata.promo_code_id);
+        .eq("id", metadata.promo_code_id);
     }
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. We’ve authorised a hold of ${formatMoney(paymentIntent.amount)} — charged after the clean.`;
+  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Card saved for ${formatMoney(amountPence)} — we hold funds about 24 hours before your clean, then charge the next day after it’s done.`;
   const preferences = profile.notification_preferences as {
     email?: boolean;
     sms?: boolean;
@@ -321,7 +311,7 @@ export async function POST(request: Request) {
       await sendBrandedEmail({
         data: {
           address: `${address.address_line_1}, ${address.city}, ${address.postcode}`,
-          amount: formatMoney(paymentIntent.amount),
+          amount: formatMoney(amountPence),
           appUrl,
           bookingId: booking.id,
           bookingUrl: `${appUrl}/booking/${booking.id}`,

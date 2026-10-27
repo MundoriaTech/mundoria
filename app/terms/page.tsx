@@ -41,7 +41,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "Mundoria may authorise a customer’s payment method at booking and capture payment after the job is completed. Stripe processes payment details. Mundoria does not store full card numbers. For cleaners, payouts are managed through Stripe Connect and may be subject to verification, platform commission, dispute holds, refunds, reversals or payout schedules.",
+      "Mundoria may save a customer’s payment method at booking, pre-authorise it before the visit once a cleaner is confirmed, and capture payment the next calendar day after the job is completed. Stripe processes payment details. Mundoria does not store full card numbers. For cleaners, payouts are managed through Stripe Connect and may be subject to verification, platform commission, dispute holds, refunds, reversals or payout schedules.",
     title: "Payments and payouts",
   },
   {

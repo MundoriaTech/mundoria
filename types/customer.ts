@@ -160,6 +160,9 @@ export interface Booking {
   special_instructions: string | null;
   cancellation_reason: string | null;
   stripe_payment_intent_id: string | null;
+  stripe_payment_method_id?: string | null;
+  stripe_setup_intent_id?: string | null;
+  payment_capture_scheduled_for?: string | null;
   amount_total: number | null;
   amount_cleaner: number | null;
   amount_platform: number | null;

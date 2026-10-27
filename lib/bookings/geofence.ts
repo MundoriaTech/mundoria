@@ -4,7 +4,7 @@ import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
-import { captureBookingPayment } from "@/lib/payments/service";
+import { scheduleNextDayCapture } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function validateBookingGeofence({
@@ -134,7 +134,6 @@ export async function validateBookingGeofence({
     );
     await sendCustomerGeofenceEmail("customer.cleaner_checked_in");
   } else {
-    await captureBookingPayment(bookingId);
     await admin
       .from("bookings")
       .update({
@@ -143,10 +142,29 @@ export async function validateBookingGeofence({
         checkout_latitude: latitude,
         checkout_longitude: longitude,
         checkout_verified: true,
-        payment_status: "released",
         status: "awaiting_customer_confirmation",
       })
       .eq("id", bookingId);
+    // Keep the hold; capture runs next UK calendar day via cron.
+    if (booking.payment_status === "held") {
+      try {
+        await scheduleNextDayCapture(bookingId);
+      } catch {
+        await alertAdmins(
+          "payment_failed",
+          "Could not schedule next-day capture",
+          `Checkout succeeded but capture scheduling failed for ${bookingId}.`,
+          { booking_id: bookingId },
+        );
+      }
+    } else if (booking.payment_status === "unpaid") {
+      await alertAdmins(
+        "payment_failed",
+        "Checkout without payment hold",
+        `Booking ${bookingId} checked out while payment was still unpaid.`,
+        { booking_id: bookingId },
+      );
+    }
     const { data: cleaner } = await admin
       .from("cleaner_profiles")
       .select("total_jobs")

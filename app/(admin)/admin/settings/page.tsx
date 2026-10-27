@@ -13,8 +13,8 @@ export default async function AdminSettingsPage() {
   return (
     <div className="space-y-7">
       <p className="max-w-2xl text-sm leading-6 text-[#5a5470] sm:text-base">
-        Fees, matching defaults, and other platform rules. Manage admin accounts
-        on the{" "}
+        Fees, payment timing, matching defaults, and other platform rules.
+        Manage admin accounts on the{" "}
         <Link className="font-semibold text-[#6a45b8]" href="/admin/team">
           Team
         </Link>{" "}

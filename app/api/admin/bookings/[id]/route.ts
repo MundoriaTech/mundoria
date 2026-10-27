@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 import { runMatchingEngine } from "@/lib/matching/engine";
+import { maybeAuthorizeBookingIfDue } from "@/lib/payments/lifecycle";
 
 const schema = z.object({
   action: z.enum(["reassign", "status", "rematch", "assignTeam"]),
@@ -24,7 +25,7 @@ const schema = z.object({
     .optional(),
 });
 
-const REMATCHABLE_PAYMENTS = new Set(["held", "released"]);
+const REMATCHABLE_PAYMENTS = new Set(["unpaid", "held", "released"]);
 
 export async function POST(
   request: Request,
@@ -41,7 +42,7 @@ export async function POST(
   const { data: booking } = await auth.admin
     .from("bookings")
     .select(
-      "id,status,payment_status,cleaner_id,allocated_cleaners,checkin_verified,actual_start_time",
+      "id,status,payment_status,cleaner_id,allocated_cleaners,checkin_verified,actual_start_time,stripe_payment_method_id",
     )
     .eq("id", params.id)
     .maybeSingle();
@@ -99,11 +100,15 @@ export async function POST(
       reasons: { note },
     });
   } else if (action === "rematch") {
-    if (!REMATCHABLE_PAYMENTS.has(booking.payment_status)) {
+    const canRematch =
+      REMATCHABLE_PAYMENTS.has(booking.payment_status) &&
+      (booking.payment_status !== "unpaid" ||
+        Boolean(booking.stripe_payment_method_id));
+    if (!canRematch) {
       return NextResponse.json(
         {
           error:
-            "Only paid bookings can be rematched. Refunded or unpaid bookings cannot re-enter matching.",
+            "Only bookings with a saved card or active payment can be rematched. Refunded bookings cannot re-enter matching.",
         },
         { status: 400 },
       );
@@ -151,6 +156,14 @@ export async function POST(
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+  }
+
+  if (
+    action === "status" &&
+    status &&
+    ["confirmed", "cleaner_en_route", "in_progress"].includes(status)
+  ) {
+    await maybeAuthorizeBookingIfDue(params.id).catch(() => undefined);
   }
 
   let matchResult: unknown = null;

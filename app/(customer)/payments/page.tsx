@@ -22,6 +22,7 @@ export default async function CustomerPaymentsPage() {
         .select("*, address:addresses(city, postcode)")
         .eq("customer_id", user!.id)
         .eq("payment_status", "unpaid")
+        .is("stripe_payment_method_id", null)
         .neq("status", "cancelled")
         .order("scheduled_date", { ascending: true }),
       supabase
@@ -54,8 +55,8 @@ export default async function CustomerPaymentsPage() {
           Payments & receipts
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Authorise unpaid visits here, then find receipts after a clean when
-          payment is captured.{" "}
+          Save a card for visits that still need one, then find receipts after
+          payment is captured the day after a clean.{" "}
           <Link
             className="font-medium text-primary underline-offset-2 hover:underline"
             href="/help/article/why-pay-in-advance"

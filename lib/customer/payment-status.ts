@@ -2,8 +2,11 @@ import type { Booking } from "@/types/customer";
 
 export type CustomerPaymentStatus = Booking["payment_status"];
 
-/** Customer-facing payment progress labels (hold → capture model). */
-export function paymentStatusLabel(status: CustomerPaymentStatus) {
+/** Customer-facing payment progress labels (save → hold → capture). */
+export function paymentStatusLabel(
+  status: CustomerPaymentStatus,
+  options?: { hasPaymentMethod?: boolean },
+) {
   switch (status) {
     case "held":
       return "Payment held";
@@ -13,21 +16,26 @@ export function paymentStatusLabel(status: CustomerPaymentStatus) {
       return "Refunded";
     case "unpaid":
     default:
-      return "Payment due";
+      return options?.hasPaymentMethod ? "Card on file" : "Payment due";
   }
 }
 
-export function paymentStatusDescription(status: CustomerPaymentStatus) {
+export function paymentStatusDescription(
+  status: CustomerPaymentStatus,
+  options?: { hasPaymentMethod?: boolean },
+) {
   switch (status) {
     case "held":
-      return "Your card is authorised. We’ll capture the charge after the clean is completed.";
+      return "Your card is authorised. We’ll capture the charge the next day after the clean.";
     case "released":
       return "Payment has been captured. Your receipt is ready.";
     case "refunded":
       return "This payment was refunded to the original card.";
     case "unpaid":
     default:
-      return "Payment still needs to be completed for this booking.";
+      return options?.hasPaymentMethod
+        ? "Your card is saved. We’ll place a hold about 24 hours before the clean once a cleaner is confirmed."
+        : "Save a card for this visit so we can match a cleaner.";
   }
 }
 

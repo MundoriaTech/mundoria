@@ -115,9 +115,10 @@ export function BookingDetail({
       }),
     [booking],
   );
+  const hasPaymentMethod = Boolean(booking.stripe_payment_method_id);
   const needsPayment =
-    booking.service_type !== "regular" &&
     booking.payment_status === "unpaid" &&
+    !hasPaymentMethod &&
     booking.status !== "cancelled";
   const canChangePro =
     canCancel &&
@@ -417,10 +418,12 @@ export function BookingDetail({
       {needsPayment ? (
         <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
           <p className="font-semibold">
-            {paymentStatusLabel(booking.payment_status)}
+            {paymentStatusLabel(booking.payment_status, { hasPaymentMethod })}
           </p>
           <p className="mt-1 leading-6">
-            {paymentStatusDescription(booking.payment_status)}{" "}
+            {paymentStatusDescription(booking.payment_status, {
+              hasPaymentMethod,
+            })}{" "}
             <Link
               className="font-semibold underline-offset-2 hover:underline"
               href={PAYMENT_HELP_HREF}
@@ -433,7 +436,7 @@ export function BookingDetail({
             onClick={() => setShowPay(true)}
             size="sm"
           >
-            Authorise {formatMoney(booking.amount_total ?? 0)}
+            Save card for {formatMoney(booking.amount_total ?? 0)}
           </Button>
         </div>
       ) : null}
@@ -499,11 +502,15 @@ export function BookingDetail({
               <div className="flex items-center justify-between gap-3 text-[#1c133b]">
                 <span className="font-semibold">Payment</span>
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8b6bc4]">
-                  {paymentStatusLabel(booking.payment_status)}
+                  {paymentStatusLabel(booking.payment_status, {
+                    hasPaymentMethod,
+                  })}
                 </span>
               </div>
               <p className="mt-2 leading-6">
-                {paymentStatusDescription(booking.payment_status)}{" "}
+                {paymentStatusDescription(booking.payment_status, {
+                  hasPaymentMethod,
+                })}{" "}
                 <Link
                   className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
                   href={PAYMENT_HELP_HREF}
@@ -528,8 +535,8 @@ export function BookingDetail({
                 </div>
               ) : booking.payment_status === "held" ? (
                 <p className="mt-2 text-xs text-[#8b8798]">
-                  Your receipt becomes available after the clean when payment is
-                  captured.
+                  Your receipt becomes available the day after the clean when
+                  payment is captured.
                 </p>
               ) : null}
             </div>
@@ -844,7 +851,7 @@ export function BookingDetail({
             setShowPay(false);
             success({
               kind: "sent",
-              title: "Payment authorised",
+              title: "Card saved",
               note: "We’re looking for your cleaner — you’ll see confirmation once they accept.",
             });
             router.refresh();
