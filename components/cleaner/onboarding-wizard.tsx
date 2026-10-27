@@ -13,9 +13,12 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+
+import { slideStep, SPRING } from "@/lib/motion";
 
 import { FormField } from "@/components/auth/form-field";
 import {
@@ -1201,6 +1204,12 @@ export function OnboardingWizard({
   }
 
   const stepIndex = STEPS.findIndex((item) => item.id === activeStep.id) + 1;
+  // Forward steps slide in from the right, earlier steps from the left.
+  const lastStepIndexRef = useRef(stepIndex);
+  const stepDirection: 1 | -1 = stepIndex >= lastStepIndexRef.current ? 1 : -1;
+  useEffect(() => {
+    lastStepIndexRef.current = stepIndex;
+  }, [stepIndex]);
   const appointmentActive = activeStep.id === "appointment";
   const isLastStep = stepIndex >= STEPS.length;
   const allComplete = completedCount >= STEPS.length;
@@ -1395,9 +1404,11 @@ export function OnboardingWizard({
                   aria-hidden
                   className="h-16 w-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
                 >
-                  <div
-                    className="w-full rounded-full bg-[#1c133b] transition-all duration-300"
-                    style={{ height: `${progressPercent}%` }}
+                  <motion.div
+                    animate={{ height: `${progressPercent}%` }}
+                    className="w-full rounded-full bg-[#1c133b]"
+                    initial={false}
+                    transition={SPRING.snappy}
                   />
                 </div>
                 {STEPS.map((step, index) => {
@@ -1421,7 +1432,14 @@ export function OnboardingWizard({
                       type="button"
                     >
                       {complete && !isOpen ? (
-                        <Check className="h-3 w-3" strokeWidth={3} />
+                        <motion.span
+                            animate={{ rotate: 0, scale: 1 }}
+                            className="inline-flex"
+                            initial={{ rotate: -45, scale: 0 }}
+                            transition={SPRING.lively}
+                          >
+                            <Check className="h-3 w-3" strokeWidth={3} />
+                          </motion.span>
                       ) : (
                         index + 1
                       )}
@@ -1443,9 +1461,11 @@ export function OnboardingWizard({
                       <span>~{Math.max(minutesLeft, 1)} min left</span>
                     </div>
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
-                      <div
-                        className="h-full rounded-full bg-[#1c133b] transition-all duration-300"
-                        style={{ width: `${progressPercent}%` }}
+                      <motion.div
+                        animate={{ width: `${progressPercent}%` }}
+                        className="h-full rounded-full bg-[#1c133b]"
+                        initial={false}
+                        transition={SPRING.snappy}
                       />
                     </div>
                   </div>
@@ -1509,9 +1529,11 @@ export function OnboardingWizard({
               <span>~{Math.max(minutesLeft, 1)} min left</span>
             </div>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
-              <div
-                className="h-full rounded-full bg-[#1c133b] transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
+              <motion.div
+                animate={{ width: `${progressPercent}%` }}
+                className="h-full rounded-full bg-[#1c133b]"
+                initial={false}
+                transition={SPRING.snappy}
               />
             </div>
 
@@ -1548,6 +1570,7 @@ export function OnboardingWizard({
                   <OnboardingStepList
                     activeId={expanded}
                     data={data}
+                    indicatorId="onboarding-step-active-mobile"
                     onSelect={toggleStep}
                   />
                   {!preview ? (
@@ -1582,6 +1605,15 @@ export function OnboardingWizard({
             </p>
           </div>
 
+          <AnimatePresence custom={stepDirection} initial={false} mode="wait">
+          <motion.div
+            animate="center"
+            custom={stepDirection}
+            exit="exit"
+            initial="enter"
+            key={activeStep.id}
+            variants={slideStep}
+          >
           <header className="mb-1">
             <div className="flex min-w-0 items-center gap-3 sm:gap-5">
               <Image
@@ -1640,6 +1672,8 @@ export function OnboardingWizard({
               uploadingSlot={uploadingSlot}
             />
           </div>
+          </motion.div>
+          </AnimatePresence>
 
           {notice ? (
             <div className="mt-4">
@@ -1742,9 +1776,12 @@ export function OnboardingWizard({
 function OnboardingStepList({
   activeId,
   data,
+  indicatorId = "onboarding-step-active",
   onSelect,
 }: {
   activeId: StepId | null;
+  /** Unique per rendered list so desktop and mobile lists animate independently. */
+  indicatorId?: string;
   data: OnboardingData;
   onSelect: (stepId: StepId) => void;
 }) {
@@ -1771,16 +1808,24 @@ function OnboardingStepList({
                   <li key={step.id}>
                     <button
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition touch-manipulation",
-                        isOpen ? "bg-[#f3eee4]" : "hover:bg-[#f3eee4]/70",
+                        "relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition touch-manipulation",
+                        !isOpen && "hover:bg-[#f3eee4]/70",
                       )}
                       onClick={() => onSelect(step.id)}
                       type="button"
                     >
+                      {isOpen ? (
+                        <motion.span
+                          aria-hidden
+                          className="absolute inset-0 rounded-xl bg-[#f3eee4]"
+                          layoutId={indicatorId}
+                          transition={SPRING.snappy}
+                        />
+                      ) : null}
                       <span
                         aria-hidden
                         className={cn(
-                          "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+                          "relative inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
                           isOpen
                             ? "border-[#1c133b] bg-[#1c133b]"
                             : complete
@@ -1789,12 +1834,19 @@ function OnboardingStepList({
                         )}
                       >
                         {complete && !isOpen ? (
-                          <Check className="h-3 w-3" strokeWidth={3} />
+                          <motion.span
+                            animate={{ rotate: 0, scale: 1 }}
+                            className="inline-flex"
+                            initial={{ rotate: -45, scale: 0 }}
+                            transition={SPRING.lively}
+                          >
+                            <Check className="h-3 w-3" strokeWidth={3} />
+                          </motion.span>
                         ) : null}
                       </span>
                       <span
                         className={cn(
-                          "min-w-0 flex-1 text-[15px] leading-snug",
+                          "relative min-w-0 flex-1 text-[15px] leading-snug",
                           isOpen
                             ? "font-semibold text-[#1c133b]"
                             : complete

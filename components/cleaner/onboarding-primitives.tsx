@@ -18,7 +18,10 @@ import {
   type ReactNode,
 } from "react";
 
+import { motion } from "motion/react";
+
 import { FieldError, invalidControlClass } from "@/components/shared/action-error";
+import { SPRING } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type OnboardingSelectOption = {
@@ -824,12 +827,23 @@ export function SoftDeferButton({
 
 export function SuccessBanner({ children }: { children: ReactNode }) {
   return (
-    <div
+    <motion.div
+      animate={{ opacity: 1, scale: 1, y: 0 }}
       aria-live="polite"
-      className="rounded-2xl border-2 border-emerald-700/30 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+      className="flex items-center gap-2.5 rounded-2xl border-2 border-emerald-700/30 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+      initial={{ opacity: 0, scale: 0.97, y: -10 }}
+      transition={SPRING.lively}
     >
-      {children}
-    </div>
+      <motion.span
+        animate={{ rotate: 0, scale: 1 }}
+        className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white"
+        initial={{ rotate: -45, scale: 0 }}
+        transition={{ ...SPRING.lively, delay: 0.12 }}
+      >
+        <Check className="h-3 w-3" strokeWidth={3} />
+      </motion.span>
+      <span>{children}</span>
+    </motion.div>
   );
 }
 
@@ -939,9 +953,11 @@ function DocumentFileRow({
           aria-hidden
           className="h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
         >
-          <div
-            className="h-full rounded-full bg-[#312c79] transition-[width] duration-200"
-            style={{ width: `${percent ?? 0}%` }}
+          <motion.div
+            animate={{ width: `${percent ?? 0}%` }}
+            className="h-full rounded-full bg-[#312c79]"
+            initial={{ width: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
           />
         </div>
       ) : null}
