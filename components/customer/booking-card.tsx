@@ -2,6 +2,7 @@ import { ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
 
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
+import { StaggerItem } from "@/components/shared/motion-primitives";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import type { Booking } from "@/types/customer";
 
@@ -29,10 +30,15 @@ export function BookingCard({
   const person = booking.cleaner?.full_name?.split(" ")[0] ?? null;
 
   return (
-    <li className="border-b border-[#ece8f3] last:border-b-0 dark:border-border">
+    <StaggerItem
+      as="li"
+      className="border-b border-[#ece8f3] last:border-b-0"
+      distance={14}
+      from="left"
+    >
       <div className="flex items-start gap-3 py-4 sm:gap-4 sm:py-5">
         <Link
-          className="group flex min-w-0 flex-1 items-start gap-3 sm:gap-4"
+          className="group flex min-w-0 flex-1 items-start gap-3 rounded-xl transition-transform duration-200 active:scale-[0.995] sm:gap-4"
           href={`/booking/${booking.id}`}
         >
           <div className="flex w-12 shrink-0 flex-col items-center pt-0.5 leading-none">
@@ -66,7 +72,7 @@ export function BookingCard({
             ) : null}
           </div>
 
-          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-[#c4bfd4] transition group-hover:text-[#6a45b8]" />
+          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-[#c4bfd4] transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#6a45b8]" />
         </Link>
 
         {showRebook ? (
@@ -79,6 +85,6 @@ export function BookingCard({
           </Link>
         ) : null}
       </div>
-    </li>
+    </StaggerItem>
   );
 }

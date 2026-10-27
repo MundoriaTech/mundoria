@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { BookingCard } from "@/components/customer/booking-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Stagger } from "@/components/shared/motion-primitives";
 import {
   ClientPagination,
   usePagedItems,
@@ -77,7 +78,7 @@ export function BookingsList({
 
       {filtered.length ? (
         <>
-          <ul className="mt-1">
+          <Stagger as="ul" className="mt-1" gap={0.05} key={`${tab}-${page}`}>
             {pageItems.map((booking) => (
               <BookingCard
                 booking={booking}
@@ -85,7 +86,7 @@ export function BookingsList({
                 showRebook={tab === "past" || tab === "cancelled"}
               />
             ))}
-          </ul>
+          </Stagger>
           <ClientPagination
             className="mt-6"
             onPageChange={setPage}

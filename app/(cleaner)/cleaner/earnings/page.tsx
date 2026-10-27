@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 
 import { EarningsControls } from "@/components/cleaner/earnings-controls";
 import { AppPage } from "@/components/shared/app-page";
+import {
+  CountUp,
+  directionFor,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
@@ -45,11 +51,11 @@ export default async function CleanerEarningsPage() {
       title="Earnings"
     >
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card label="This week" value={formatMoney(sum(7))} />
-        <Card label="This month" value={formatMoney(sum(31))} />
-        <Card label="All time" value={formatMoney(all)} />
-      </div>
+      <Stagger className="grid gap-4 sm:grid-cols-3" gap={0.08}>
+        <Card index={0} label="This week" value={formatMoney(sum(7))} />
+        <Card index={1} label="This month" value={formatMoney(sum(31))} />
+        <Card index={2} label="All time" value={formatMoney(all)} />
+      </Stagger>
 
       <EarningsControls preference={ctx.cleanerProfile.payout_preference} />
 
@@ -177,12 +183,26 @@ export default async function CleanerEarningsPage() {
   );
 }
 
-function Card({ label, value }: { label: string; value: string }) {
+function Card({
+  index,
+  label,
+  value,
+}: {
+  index: number;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="rounded-xl border bg-background p-5">
+    <StaggerItem
+      className="rounded-xl border bg-background p-5"
+      from={directionFor(index, 3)}
+      lift
+    >
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
-    </div>
+      <p className="mt-1 text-2xl font-bold">
+        <CountUp value={value} />
+      </p>
+    </StaggerItem>
   );
 }
 

@@ -9,6 +9,11 @@ import {
   usePagedItems,
 } from "@/components/shared/pagination-controls";
 import { EmptyState } from "@/components/shared/empty-state";
+import {
+  directionFor,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { Button } from "@/components/ui/button";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
@@ -103,8 +108,8 @@ export function JobFeed({
           Repeated declines affect your reliability score.
         </div>
       ) : null}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {pageItems.map((job) => {
+      <Stagger className="grid gap-4 lg:grid-cols-2" key={`${tab}-${page}`}>
+        {pageItems.map((job, index) => {
           const teamSlot = tab === "available" && isTeamSlot(job);
           const share =
             teamSlot && job.amount_cleaner && job.allocated_cleaners
@@ -119,9 +124,12 @@ export function JobFeed({
             job.address?.postcode?.split(" ")[0] ??
             "Local area";
           return (
-            <article
+            <StaggerItem
+              as="article"
               className="rounded-xl border bg-background p-5 shadow-sm"
+              from={directionFor(index, 2)}
               key={job.id}
+              lift
             >
               <div className="flex justify-between gap-3">
                 <div className="min-w-0">
@@ -204,10 +212,10 @@ export function JobFeed({
                   </Button>
                 )}
               </div>
-            </article>
+            </StaggerItem>
           );
         })}
-      </div>
+      </Stagger>
       {!jobs.length ? (
         <EmptyState
           icon={BriefcaseBusiness}

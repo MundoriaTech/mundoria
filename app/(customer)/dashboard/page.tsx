@@ -8,6 +8,7 @@ import {
   DashboardWelcomeBanner,
 } from "@/components/shared/dashboard-panels";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import { Button } from "@/components/ui/button";
 import {
@@ -325,18 +326,26 @@ function NextCleanCard({ booking }: { booking: Booking }) {
           {formatServiceName(booking.service_type)}
         </h3>
       </div>
-      <dl className="mt-5 grid grid-cols-2 gap-px border-y border-[#efe6ff] bg-[#efe6ff] sm:grid-cols-4">
+      <Stagger
+        as="dl"
+        className="mt-5 grid grid-cols-2 gap-px border-y border-[#efe6ff] bg-[#efe6ff] sm:grid-cols-4"
+        delay={0.15}
+      >
         {facts.map((fact) => (
-          <div className="bg-white px-5 py-3.5 sm:px-6" key={fact.label}>
+          <StaggerItem
+            className="bg-white px-5 py-3.5 sm:px-6"
+            distance={10}
+            key={fact.label}
+          >
             <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
               {fact.label}
             </dt>
             <dd className="mt-1 truncate text-sm font-semibold tracking-tight text-[#1c133b]">
               {fact.value}
             </dd>
-          </div>
+          </StaggerItem>
         ))}
-      </dl>
+      </Stagger>
       <div className="flex flex-col gap-2 p-5 sm:flex-row sm:flex-wrap sm:items-center sm:px-6">
         <Link
           className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"

@@ -8,6 +8,7 @@ import {
   ClientPagination,
   usePagedItems,
 } from "@/components/shared/pagination-controls";
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { Input } from "@/components/ui/input";
 import { formatMoney } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
@@ -161,9 +162,14 @@ export function CustomersTable({
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <Stagger as="tbody" gap={0.03}>
             {pageItems.map((customer) => (
-              <tr className="border-t" key={customer.id}>
+              <StaggerItem
+                as="tr"
+                className="border-t"
+                distance={6}
+                key={customer.id}
+              >
                 <td className="p-3">
                   <b>{customer.full_name}</b>
                   <small className="block text-muted-foreground">
@@ -191,7 +197,7 @@ export function CustomersTable({
                     View
                   </Link>
                 </td>
-              </tr>
+              </StaggerItem>
             ))}
             {!filtered.length ? (
               <tr>
@@ -205,7 +211,7 @@ export function CustomersTable({
                 </td>
               </tr>
             ) : null}
-          </tbody>
+          </Stagger>
         </table>
       </div>
 

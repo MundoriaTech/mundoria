@@ -9,6 +9,7 @@ import {
   ClientPagination,
   usePagedItems,
 } from "@/components/shared/pagination-controls";
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Input } from "@/components/ui/input";
 import { PAGE_SIZES } from "@/lib/pagination";
@@ -232,11 +233,16 @@ export function CleanersTable({
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <Stagger as="tbody" gap={0.03}>
             {pageItems.map((cleaner) => {
               const areas = areasLabel(workingAreas[cleaner.id]);
               return (
-                <tr className="border-t" key={cleaner.id}>
+                <StaggerItem
+                  as="tr"
+                  className="border-t"
+                  distance={6}
+                  key={cleaner.id}
+                >
                   <td className="p-3">
                     <div className="flex items-center gap-3">
                       <UserAvatar
@@ -294,7 +300,7 @@ export function CleanersTable({
                       Review
                     </Link>
                   </td>
-                </tr>
+                </StaggerItem>
               );
             })}
             {!filtered.length ? (
@@ -309,7 +315,7 @@ export function CleanersTable({
                 </td>
               </tr>
             ) : null}
-          </tbody>
+          </Stagger>
         </table>
       </div>
 
