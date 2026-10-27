@@ -958,7 +958,6 @@ export function DocumentUpload({
   maxFiles,
   onFile,
   onRemove,
-  previewIsPdf: _previewIsPdf = false,
   previewUrl,
   progress,
   uploaded,
