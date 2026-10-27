@@ -36,6 +36,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { AnimatePresence, motion } from "motion/react";
+
+import { slideStep, SPRING } from "@/lib/motion";
 
 import { FormField } from "@/components/auth/form-field";
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
@@ -397,6 +400,12 @@ export function BookingWizard({
     [draft, flowOptions, historySuggestion],
   );
   const stepId = flowSteps[Math.min(stepIndex, flowSteps.length - 1)]!;
+  // Which way the next step slides in: forward from the right, back from the left.
+  const lastStepIndexRef = useRef(stepIndex);
+  const stepDirection: 1 | -1 = stepIndex >= lastStepIndexRef.current ? 1 : -1;
+  useEffect(() => {
+    lastStepIndexRef.current = stepIndex;
+  }, [stepIndex]);
   flowStepsRef.current = flowSteps;
   stepIdRef.current = stepId;
   stepIndexRef.current = stepIndex;
@@ -1683,12 +1692,29 @@ export function BookingWizard({
       >
         <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-start lg:gap-0">
           <div className="flex min-w-0 w-full flex-col lg:min-h-[calc(100vh-9.5rem)] lg:w-[49.13%]">
-            <div className="min-w-0">{stepBody}</div>
+            <div className="min-w-0 overflow-x-clip">
+              <AnimatePresence
+                custom={stepDirection}
+                initial={false}
+                mode="wait"
+              >
+                <motion.div
+                  animate="center"
+                  custom={stepDirection}
+                  exit="exit"
+                  initial="enter"
+                  key={stepId}
+                  variants={slideStep}
+                >
+                  {stepBody}
+                </motion.div>
+              </AnimatePresence>
+            </div>
             {/* Desktop: Next pinned to the bottom of the content column. */}
             {stepId !== "checkout" ? (
               <div className="mt-10 hidden lg:mt-auto lg:block lg:pt-10 lg:pb-2">
                 <button
-                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
+                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
                   disabled={!canContinue()}
                   onClick={goNext}
                   type="button"
@@ -1714,7 +1740,15 @@ export function BookingWizard({
               onClick={() => setBasketOpen((open) => !open)}
               type="button"
             >
-              {priceLabel ?? "My basket"}
+              <motion.span
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block"
+                initial={{ opacity: 0, y: 8 }}
+                key={priceLabel ?? "basket"}
+                transition={SPRING.snappy}
+              >
+                {priceLabel ?? "My basket"}
+              </motion.span>
             </button>
             <button
               aria-expanded={basketOpen}
@@ -1731,7 +1765,7 @@ export function BookingWizard({
             </button>
             {stepId !== "checkout" ? (
               <button
-                className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
+                className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
                 disabled={!canContinue()}
                 onClick={goNext}
                 type="button"
@@ -3885,22 +3919,30 @@ function CheckoutStep({
                 )}
                 key={step.id}
               >
-                <span
+                <motion.span
+                  animate={{ scale: active ? 1.12 : 1 }}
                   className={cn(
                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
                     active || done
                       ? "bg-[#6a45b8] text-white"
                       : "bg-[#efe6ff] text-[#6a45b8]",
                   )}
+                  transition={SPRING.lively}
                 >
                   {active ? (
                     <BookingSpinner size="sm" tone="inverse" />
                   ) : done ? (
-                    "✓"
+                    <motion.span
+                      animate={{ rotate: 0, scale: 1 }}
+                      initial={{ rotate: -40, scale: 0 }}
+                      transition={SPRING.lively}
+                    >
+                      ✓
+                    </motion.span>
                   ) : (
                     index + 1
                   )}
-                </span>
+                </motion.span>
                 {step.label}
                 {active ? "…" : null}
               </li>
