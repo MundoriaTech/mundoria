@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TierBadge } from "@/components/cleaner/tier-badge";
@@ -121,7 +122,9 @@ export function CleanerReviewPanel({
     const result = (await response.json()) as { error?: string };
     setBusy(false);
     if (!response.ok) {
-      setMessage(result.error ?? "Check the note and try again.");
+      toast.error("Couldn’t update this cleaner", {
+        description: result.error ?? "Check the note and try again.",
+      });
       return;
     }
 

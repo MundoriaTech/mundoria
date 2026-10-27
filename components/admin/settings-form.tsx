@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -28,11 +28,9 @@ export function SettingsForm({ initial }: { initial: Settings }) {
     platform_commission_percent: initial.platform_commission_percent,
     support_email: initial.support_email,
   });
-  const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function save() {
-    setSaveError(null);
     setSaving(true);
     const response = await fetch("/api/admin/settings", {
       body: JSON.stringify(settings),
@@ -43,7 +41,9 @@ export function SettingsForm({ initial }: { initial: Settings }) {
     setSaving(false);
 
     if (!response.ok) {
-      setSaveError(result.error ?? "Check the values and try again.");
+      toast.error("Couldn’t save settings", {
+        description: result.error ?? "Check the values and try again.",
+      });
       return;
     }
 
@@ -169,11 +169,8 @@ export function SettingsForm({ initial }: { initial: Settings }) {
         </div>
       </div>
 
-      {saveError ? (
-        <ActionError message={saveError} title="Couldn’t save settings" />
-      ) : null}
-      <Button disabled={saving} onClick={() => void save()}>
-        {saving ? "Saving…" : "Save settings"}
+      <Button loading={saving} loadingLabel="Saving…" onClick={() => void save()}>
+        Save settings
       </Button>
     </section>
   );

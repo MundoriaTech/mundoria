@@ -14,6 +14,7 @@ import { FormField } from "@/components/auth/form-field";
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { PageHeader } from "@/components/shared/page-header";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -418,14 +419,18 @@ export function AddressForm({
       setSaving(false);
 
       if (!response.ok || !result.address) {
-        setError(result.error ?? "Could not save address.");
+        toast.error("Couldn’t save this address", {
+          description: result.error ?? "Could not save address.",
+        });
         return;
       }
 
       onSaved(result.address);
     } catch {
       setSaving(false);
-      setError("Could not save address. Check your connection and try again.");
+      toast.error("Couldn’t save this address", {
+        description: "Check your connection and try again.",
+      });
     }
   }
 

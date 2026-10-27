@@ -4,7 +4,7 @@ import { CardElement, Elements, useElements, useStripe } from "@stripe/react-str
 import { loadStripe } from "@stripe/stripe-js";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/customer/services";
 
@@ -24,7 +24,6 @@ function TipForm({
   const stripe = useStripe();
   const elements = useElements();
   const [amount, setAmount] = useState(500);
-  const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
 
   async function pay(event: React.FormEvent) {
@@ -33,7 +32,6 @@ function TipForm({
     const card = elements.getElement(CardElement);
     if (!card) return;
     setWorking(true);
-    setError(null);
     try {
       const intentRes = await fetch(`/api/bookings/${bookingId}/tip`, {
         body: JSON.stringify({ amountPence: amount }),
@@ -64,7 +62,10 @@ function TipForm({
       }
       onTipped();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to send the tip.");
+      toast.error("Tip not taken", {
+        description:
+          err instanceof Error ? err.message : "Unable to send the tip.",
+      });
     } finally {
       setWorking(false);
     }
@@ -91,9 +92,13 @@ function TipForm({
       <div className="rounded-xl border bg-white p-3">
         <CardElement />
       </div>
-      {error ? <ActionError message={error} title="Tip not taken" /> : null}
-      <Button disabled={working || !stripe} type="submit">
-        {working ? "Sending tip…" : `Tip ${formatMoney(amount)}`}
+      <Button
+        disabled={!stripe}
+        loading={working}
+        loadingLabel="Sending tip…"
+        type="submit"
+      >
+        Tip {formatMoney(amount)}
       </Button>
     </form>
   );

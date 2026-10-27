@@ -6,12 +6,13 @@ import { useState } from "react";
 
 import { ChangeEmailForm } from "@/components/auth/change-email-form";
 import { PhoneVerifyPanel } from "@/components/cleaner/phone-verify-panel";
-import { ActionError, FieldError, invalidControlClass } from "@/components/shared/action-error";
+import { FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { toast } from "@/lib/feedback/toast";
 import { normalizePhone } from "@/lib/auth/phone-verify";
 import { SERVICES } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -40,7 +41,6 @@ export function CleanerProfileForm({
   const router = useRouter();
   const { success } = useFeedback();
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [stripeError, setStripeError] = useState<string | null>(null);
   const [profile, setProfile] = useState(initialProfile);
   const [verifiedPhone, setVerifiedPhone] = useState(() =>
     initialProfile.phone_verified_at
@@ -150,7 +150,6 @@ export function CleanerProfileForm({
   }
 
   async function connectStripe() {
-    setStripeError(null);
     setStatus("Opening Stripe…");
 
     try {
@@ -170,12 +169,15 @@ export function CleanerProfileForm({
         return;
       }
 
-      setStripeError(result.error ?? "Try again in a moment.");
+      toast.error("Couldn’t open Stripe", {
+        description: result.error ?? "Try again in a moment.",
+      });
       setStatus(null);
     } catch (error) {
-      setStripeError(
-        error instanceof Error ? error.message : "Try again in a moment.",
-      );
+      toast.error("Couldn’t open Stripe", {
+        description:
+          error instanceof Error ? error.message : "Try again in a moment.",
+      });
       setStatus(null);
     }
   }
@@ -461,9 +463,6 @@ export function CleanerProfileForm({
                 ? "Open Stripe Express"
                 : "Connect Stripe Express"}
             </Button>
-          ) : null}
-          {stripeError ? (
-            <ActionError message={stripeError} title="Couldn’t open Stripe" />
           ) : null}
         </Panel>
 

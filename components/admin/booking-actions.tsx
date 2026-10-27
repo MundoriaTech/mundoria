@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -27,7 +27,6 @@ export function BookingActions({
   const [teamIds, setTeamIds] = useState<string[]>(teamMemberIds);
   const [status, setStatus] = useState(currentStatus);
   const [note, setNote] = useState("");
-  const [message, setMessage] = useState("");
   const needsTeam = allocatedCleaners > 1;
 
   async function act(
@@ -58,11 +57,12 @@ export function BookingActions({
     const result = (await response.json()) as { error?: string };
 
     if (!response.ok) {
-      setMessage(result.error ?? "Check the details and try again.");
+      toast.error("Couldn’t update this booking", {
+        description: result.error ?? "Check the details and try again.",
+      });
       return;
     }
 
-    setMessage("");
     success({
       kind: "updated",
       title:
@@ -196,11 +196,6 @@ export function BookingActions({
       >
         Find Replacement
       </Button>
-      {message ? (
-        <div className="mt-3">
-          <ActionError message={message} title="Couldn’t update this booking" />
-        </div>
-      ) : null}
     </section>
   );
 }

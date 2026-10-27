@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { DISPUTE_OPTIONS, type DisputeOption } from "@/lib/disputes/options";
 
@@ -67,7 +68,9 @@ export function GuidedDisputeForm({
     setSubmitting(false);
 
     if (!response.ok) {
-      setError(result.error ?? "Unable to submit dispute.");
+      toast.error("Couldn’t submit this dispute", {
+        description: result.error ?? "Unable to submit dispute.",
+      });
       return;
     }
 

@@ -3,8 +3,8 @@
 import { CreditCard } from "lucide-react";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/feedback/toast";
 
 export function ConnectPayoutCard({
   hasStripeAccount,
@@ -14,13 +14,11 @@ export function ConnectPayoutCard({
   stripeComplete: boolean;
 }) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   if (stripeComplete) return null;
 
   async function connect() {
     setBusy(true);
-    setError(null);
     try {
       const response = await fetch(
         hasStripeAccount
@@ -40,9 +38,16 @@ export function ConnectPayoutCard({
         window.location.assign(result.url);
         return;
       }
-      setError(result.error ?? "Try again in a moment.");
+      toast.error("Couldn’t open Stripe", {
+        action: { label: "Try again", onClick: () => void connect() },
+        description: result.error ?? "Try again in a moment.",
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Try again in a moment.");
+      toast.error("Couldn’t open Stripe", {
+        action: { label: "Try again", onClick: () => void connect() },
+        description:
+          err instanceof Error ? err.message : "Try again in a moment.",
+      });
     } finally {
       setBusy(false);
     }
@@ -63,22 +68,14 @@ export function ConnectPayoutCard({
       </p>
       <Button
         className="mt-5 h-11 rounded-full bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]"
-        disabled={busy}
+        loading={busy}
+        loadingLabel="Opening Stripe…"
         onClick={() => void connect()}
         type="button"
       >
         <CreditCard className="mr-2 h-4 w-4" />
-        {busy
-          ? "Opening Stripe…"
-          : hasStripeAccount
-            ? "Finish Stripe setup"
-            : "Connect Stripe Express"}
+        {hasStripeAccount ? "Finish Stripe setup" : "Connect Stripe Express"}
       </Button>
-      {error ? (
-        <div className="mt-4">
-          <ActionError message={error} title="Couldn’t open Stripe" />
-        </div>
-      ) : null}
     </section>
   );
 }

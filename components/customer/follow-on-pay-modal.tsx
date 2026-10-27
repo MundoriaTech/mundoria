@@ -4,7 +4,7 @@ import { CardElement, Elements, useElements, useStripe } from "@stripe/react-str
 import { loadStripe } from "@stripe/stripe-js";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/customer/services";
 import { PAYMENT_HELP_HREF } from "@/lib/customer/payment-status";
@@ -28,11 +28,9 @@ function PayForm({
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setError(null);
     if (!stripe || !elements) return;
     const card = elements.getElement(CardElement);
     if (!card) return;
@@ -73,7 +71,9 @@ function PayForm({
 
       onPaid();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Payment failed.");
+      toast.error("Couldn’t save card", {
+        description: err instanceof Error ? err.message : "Payment failed.",
+      });
     } finally {
       setProcessing(false);
     }
@@ -108,9 +108,6 @@ function PayForm({
           }}
         />
       </div>
-      {error ? (
-        <ActionError message={error} title="Couldn’t save card" />
-      ) : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button
           disabled={processing}
