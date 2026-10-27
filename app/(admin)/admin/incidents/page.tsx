@@ -1,6 +1,8 @@
+import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 import { AppPage } from "@/components/shared/app-page";
+import { EmptyState } from "@/components/shared/empty-state";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cn } from "@/lib/utils";
 
@@ -57,8 +59,13 @@ export default async function AdminIncidentsPage() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td className="px-4 py-8 text-muted-foreground" colSpan={6}>
-                  No incidents reported yet.
+                <td className="p-4" colSpan={6}>
+                  <EmptyState
+                    compact
+                    icon={ShieldCheck}
+                    message="Reports from cleaners will show here with severity and RIDDOR flags."
+                    title="No incidents reported yet"
+                  />
                 </td>
               </tr>
             ) : (

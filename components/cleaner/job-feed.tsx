@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Clock3, MapPin } from "lucide-react";
+import { AlertTriangle, BriefcaseBusiness, Clock3, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -8,6 +8,7 @@ import {
   ClientPagination,
   usePagedItems,
 } from "@/components/shared/pagination-controls";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
@@ -208,9 +209,15 @@ export function JobFeed({
         })}
       </div>
       {!jobs.length ? (
-        <div className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-          No {tab} jobs right now.
-        </div>
+        <EmptyState
+          icon={BriefcaseBusiness}
+          message={
+            tab === "available"
+              ? "New offers land here the moment a booking matches your services and areas."
+              : "Jobs you accept will appear here with the date, time and address."
+          }
+          title={`No ${tab} jobs right now`}
+        />
       ) : (
         <ClientPagination
           className="mt-6"

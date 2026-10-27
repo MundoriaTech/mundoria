@@ -1,5 +1,7 @@
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { cn } from "@/lib/utils";
 
@@ -25,17 +27,12 @@ export function ConversationList({
 }) {
   if (!items.length) {
     return (
-      <div className="mt-10 px-2 py-12 text-center">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-          Inbox
-        </p>
-        <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground">
-          {emptyTitle}
-        </h3>
-        <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-6 text-[#5a5470] dark:text-muted-foreground">
-          {emptyBody}
-        </p>
-      </div>
+      <EmptyState
+        eyebrow="Inbox"
+        icon={MessageCircle}
+        message={emptyBody}
+        title={emptyTitle}
+      />
     );
   }
 

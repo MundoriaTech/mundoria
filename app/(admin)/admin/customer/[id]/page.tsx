@@ -1,3 +1,4 @@
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -6,6 +7,7 @@ import {
   type UserActivityRow,
 } from "@/components/admin/user-activity-timeline";
 import { AppPage } from "@/components/shared/app-page";
+import { EmptyState } from "@/components/shared/empty-state";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -141,7 +143,12 @@ export default async function AdminCustomerPage({
             </Link>
           ))}
           {!jobs.length ? (
-            <p className="text-sm text-muted-foreground">No bookings yet.</p>
+            <EmptyState
+              compact
+              icon={CalendarDays}
+              message="This customer has not booked a clean yet."
+              title="No bookings yet"
+            />
           ) : null}
         </div>
         <div className="mt-4 hidden overflow-x-auto md:block">
@@ -185,11 +192,13 @@ export default async function AdminCustomerPage({
               ))}
               {!jobs.length ? (
                 <tr>
-                  <td
-                    className="p-6 text-center text-muted-foreground"
-                    colSpan={7}
-                  >
-                    No bookings yet.
+                  <td className="p-4" colSpan={7}>
+                    <EmptyState
+                      compact
+                      icon={CalendarDays}
+                      message="This customer has not booked a clean yet."
+                      title="No bookings yet"
+                    />
                   </td>
                 </tr>
               ) : null}

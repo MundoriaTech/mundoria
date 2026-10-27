@@ -1,9 +1,11 @@
 "use client";
 
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { BookingCard } from "@/components/customer/booking-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   ClientPagination,
   usePagedItems,
@@ -93,33 +95,35 @@ export function BookingsList({
           />
         </>
       ) : (
-        <div className="mt-10 px-2 py-12 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            Sessions
-          </p>
-          <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground">
-            {tab === "cancelled"
-              ? "No cancelled sessions"
-              : tab === "past"
-                ? "No completed sessions"
-                : "Nothing scheduled"}
-          </h3>
-          <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-6 text-[#5a5470] dark:text-muted-foreground">
-            {tab === "cancelled"
+        <EmptyState
+          action={
+            tab === "upcoming" ? (
+              <Link
+                className="inline-flex h-11 items-center rounded-full bg-brand-ink px-5 text-sm font-semibold text-white transition hover:bg-brand-indigo"
+                href="/booking/new?fresh=1&returnTo=/bookings"
+              >
+                Book a session
+              </Link>
+            ) : null
+          }
+          className="mt-6"
+          eyebrow="Sessions"
+          icon={CalendarDays}
+          message={
+            tab === "cancelled"
               ? "Cancelled sessions will show here."
               : tab === "past"
                 ? "Completed cleans will show here."
-                : "Book a clean and your upcoming sessions will appear here."}
-          </p>
-          {tab === "upcoming" ? (
-            <Link
-              className="mt-5 inline-flex h-11 items-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
-              href="/booking/new?fresh=1&returnTo=/bookings"
-            >
-              Book a session
-            </Link>
-          ) : null}
-        </div>
+                : "Book a clean and your upcoming sessions will appear here."
+          }
+          title={
+            tab === "cancelled"
+              ? "No cancelled sessions"
+              : tab === "past"
+                ? "No completed sessions"
+                : "Nothing scheduled"
+          }
+        />
       )}
     </div>
   );
