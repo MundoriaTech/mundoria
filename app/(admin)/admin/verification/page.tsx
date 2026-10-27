@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cn } from "@/lib/utils";
 
@@ -27,11 +27,17 @@ export default async function AdminVerificationQueuePage() {
   const rows = data ?? [];
 
   return (
-    <div className="min-w-0 space-y-6">
-      <AdminPageIntro>
-        Cleaners with a UTR, DBS or insurance document waiting for review.
-        Oldest updates first. {rows.length} in the queue.
-      </AdminPageIntro>
+    <AppPage
+      className="space-y-6"
+      description={
+        <>
+          Cleaners with a UTR, DBS or insurance document waiting for review.
+          Oldest updates first. {rows.length} in the queue.
+        </>
+      }
+      eyebrow="People"
+      title="Verification"
+    >
 
       <div className="overflow-x-auto rounded-xl border bg-card">
         <table className="w-full text-left text-sm">
@@ -122,6 +128,6 @@ export default async function AdminVerificationQueuePage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </AppPage>
   );
 }

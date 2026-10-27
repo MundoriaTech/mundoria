@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cn } from "@/lib/utils";
 
@@ -30,11 +30,17 @@ export default async function AdminIncidentsPage() {
   ).length;
 
   return (
-    <div className="min-w-0 space-y-6">
-      <AdminPageIntro>
-        Incidents reported by cleaners. {open} open. Flag anything that may need
-        RIDDOR reporting.
-      </AdminPageIntro>
+    <AppPage
+      className="space-y-6"
+      description={
+        <>
+          Incidents reported by cleaners. {open} open. Flag anything that may
+          need RIDDOR reporting.
+        </>
+      }
+      eyebrow="Operations"
+      title="Incidents"
+    >
 
       <div className="overflow-x-auto rounded-xl border bg-card">
         <table className="w-full text-left text-sm">
@@ -116,6 +122,6 @@ export default async function AdminIncidentsPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </AppPage>
   );
 }

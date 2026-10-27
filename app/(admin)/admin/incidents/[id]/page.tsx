@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { IncidentActions } from "@/components/admin/incident-actions";
+import { AppPage } from "@/components/shared/app-page";
 import { formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -36,18 +37,12 @@ export default async function AdminIncidentDetailPage({
       : "—";
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-primary">
-          Cleaner incident
-        </p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-          {incident.title}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Reported {fmt(incident.created_at)}
-        </p>
-      </div>
+    <AppPage
+      className="space-y-6"
+      description={`Reported ${fmt(incident.created_at)}`}
+      eyebrow="Cleaner incident"
+      title={incident.title}
+    >
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
@@ -143,6 +138,6 @@ export default async function AdminIncidentDetailPage({
           status={incident.status}
         />
       </div>
-    </div>
+    </AppPage>
   );
 }

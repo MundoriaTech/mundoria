@@ -1,4 +1,5 @@
 import { ProcessPayoutsButton } from "@/components/admin/process-payouts-button";
+import { AppPage } from "@/components/shared/app-page";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -27,17 +28,13 @@ export default async function AdminPayoutsPage() {
     .reduce((sum, item) => sum + item.net_amount, 0);
 
   return (
-    <div className="min-w-0">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <p className="max-w-xl text-sm leading-6 text-[#5a5470] sm:text-base">
-          Review and process cleaner transfers.
-        </p>
-        <div className="w-full sm:w-auto">
-          <ProcessPayoutsButton />
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-3 sm:mt-7 sm:grid-cols-2 sm:gap-4">
+    <AppPage
+      actions={<ProcessPayoutsButton />}
+      description="Review and process cleaner transfers."
+      eyebrow="Money & coverage"
+      title="Payouts"
+    >
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
         <Card label="Due this week" value={formatMoney(week)} />
         <Card label="This month" value={formatMoney(month)} />
       </div>
@@ -115,7 +112,7 @@ export default async function AdminPayoutsPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </AppPage>
   );
 }
 

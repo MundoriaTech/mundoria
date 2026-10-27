@@ -1,4 +1,4 @@
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import {
   formatGuestFeedbackDate,
   guestFeedbackMoodLabel,
@@ -27,11 +27,11 @@ export default async function AdminFeedbackPage() {
   const rows = (data ?? []) as GuestFeedbackRow[];
 
   return (
-    <div className="min-w-0">
-      <AdminPageIntro>
-        Written reviews from the public page. These do not appear on the
-        website and do not change a cleaner’s score.
-      </AdminPageIntro>
+    <AppPage
+      description="Written reviews from the public page. These do not appear on the website and do not change a cleaner’s score."
+      eyebrow="Operations"
+      title="Feedback"
+    >
       {error ? (
         <p className="text-sm text-[#9a3412]">
           Feedback could not be loaded yet. Apply the latest database migration
@@ -76,6 +76,6 @@ export default async function AdminFeedbackPage() {
           ))}
         </ul>
       )}
-    </div>
+    </AppPage>
   );
 }

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
 import { MatchingDecisionLog } from "@/components/admin/matching-decision-log";
+import { AppPage } from "@/components/shared/app-page";
 import { loadMatchingList } from "@/lib/matching/emergency-list";
 import { formatMoney, formatServiceName, standardLabel } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -66,15 +67,16 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     payment = { id: intent.id, status: intent.status, amount: intent.amount, amount_capturable: intent.amount_capturable };
   }
   return (
-    <div className="min-w-0 space-y-5 sm:space-y-6">
-      <div>
-        <p className="break-all font-mono text-xs text-primary sm:text-sm">
+    <AppPage
+      className="space-y-5 sm:space-y-6"
+      description={
+        <span className="break-all font-mono text-xs text-brand-purple sm:text-sm">
           {booking.id}
-        </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-          {formatServiceName(booking.service_type)}
-        </h1>
-      </div>
+        </span>
+      }
+      eyebrow="Booking"
+      title={formatServiceName(booking.service_type)}
+    >
       <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1fr_.6fr]">
         <section className="rounded-xl border bg-card p-4 sm:p-5">
           <h2 className="font-semibold">Booking information</h2>
@@ -144,7 +146,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       />
       <SimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "—"])} />
       <SimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [item.created_at, item.sender?.full_name ?? "Unknown", item.content])} />
-    </div>
+    </AppPage>
   );
 }
 

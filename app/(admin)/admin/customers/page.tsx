@@ -1,5 +1,5 @@
 import { CustomersTable } from "@/components/admin/customers-table";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = { title: "Customers" };
@@ -94,11 +94,12 @@ export default async function AdminCustomersPage() {
   });
 
   return (
-    <div className="min-w-0">
-      <AdminPageIntro>
-        Customer accounts and spend. Cleaners are managed separately.
-      </AdminPageIntro>
+    <AppPage
+      description="Customer accounts and spend. Cleaners are managed separately."
+      eyebrow="People"
+      title="Customers"
+    >
       <CustomersTable customers={customers} />
-    </div>
+    </AppPage>
   );
 }

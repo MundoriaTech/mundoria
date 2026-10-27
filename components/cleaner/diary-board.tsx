@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
@@ -295,28 +296,31 @@ export function DiaryBoard() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            Your time
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-            Diary
-          </h1>
-          <p className="mt-1 max-w-xl text-sm leading-6 text-[#5c5670]">
-            Mundoria visits, plans of your own, and days you are away.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => setPanel(panel === "plan" ? null : "plan")} type="button" variant="outline">
-            Add a plan
-          </Button>
-          <Button onClick={() => setPanel(panel === "away" ? null : "away")} type="button">
-            Take time off
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-8 pb-4">
+      <PageHeader
+        actions={
+          <>
+            <Button
+              className="rounded-full"
+              onClick={() => setPanel(panel === "plan" ? null : "plan")}
+              type="button"
+              variant="outline"
+            >
+              Add a plan
+            </Button>
+            <Button
+              className="rounded-full"
+              onClick={() => setPanel(panel === "away" ? null : "away")}
+              type="button"
+            >
+              Take time off
+            </Button>
+          </>
+        }
+        description="Mundoria visits, plans of your own, and days you are away."
+        eyebrow="Your time"
+        title="Diary"
+      />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Summary

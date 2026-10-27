@@ -5,6 +5,7 @@ import {
   UserActivityTimeline,
   type UserActivityRow,
 } from "@/components/admin/user-activity-timeline";
+import { AppPage } from "@/components/shared/app-page";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -55,18 +56,17 @@ export default async function AdminCustomerPage({
     .reduce((sum, booking) => sum + (booking.amount_total ?? 0), 0);
 
   return (
-    <div className="min-w-0 space-y-5 sm:space-y-6">
-      <div>
-        <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
-          {profile.full_name}
-        </h1>
-        <p className="break-all text-sm text-muted-foreground sm:text-base">
+    <AppPage
+      className="space-y-5 sm:space-y-6"
+      description={
+        <span className="break-all">
           {profile.email}
-        </p>
-        {profile.phone ? (
-          <p className="text-sm text-muted-foreground">{profile.phone}</p>
-        ) : null}
-      </div>
+          {profile.phone ? ` · ${profile.phone}` : ""}
+        </span>
+      }
+      eyebrow="Customer"
+      title={profile.full_name}
+    >
 
       <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
         <Metric label="Bookings" value={String(jobs.length)} />
@@ -197,7 +197,7 @@ export default async function AdminCustomerPage({
           </table>
         </div>
       </section>
-    </div>
+    </AppPage>
   );
 }
 

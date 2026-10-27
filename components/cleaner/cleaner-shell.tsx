@@ -14,21 +14,28 @@ import {
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { CLEANER_ACCOUNT_MENU } from "@/components/shared/account-menu";
-import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
+import {
+  AppDashboardShell,
+  type AppShellNavGroup,
+} from "@/components/shared/app-dashboard-shell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
 import { applicationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
 import { formatInterviewSlot } from "@/lib/cleaner/interview-slots";
 import type { Profile } from "@/types/auth";
 import type { CleanerProfile } from "@/types/cleaner";
 
-const nav = [
-  { exact: true, href: "/cleaner/dashboard", icon: Gauge, label: "Dashboard" },
-  { href: "/cleaner/jobs", icon: BriefcaseBusiness, label: "Jobs" },
-  { href: "/cleaner/diary", icon: CalendarDays, label: "Diary" },
-  { href: "/cleaner/earnings", icon: Banknote, label: "Earnings" },
-  { href: "/cleaner/incidents", icon: ShieldAlert, label: "Incidents" },
-  { href: "/cleaner/messages", icon: MessageCircle, label: "Messages" },
-  { href: "/cleaner/profile", icon: UserRound, label: "Profile" },
+const NAV_GROUPS: AppShellNavGroup[] = [
+  {
+    items: [
+      { exact: true, href: "/cleaner/dashboard", icon: Gauge, label: "Dashboard" },
+      { href: "/cleaner/jobs", icon: BriefcaseBusiness, label: "Jobs" },
+      { href: "/cleaner/diary", icon: CalendarDays, label: "Diary" },
+      { href: "/cleaner/messages", icon: MessageCircle, label: "Messages" },
+      { href: "/cleaner/earnings", icon: Banknote, label: "Earnings" },
+      { href: "/cleaner/incidents", icon: ShieldAlert, label: "Incidents" },
+      { href: "/cleaner/profile", icon: UserRound, label: "Profile" },
+    ],
+  },
 ];
 
 export function CleanerShell({
@@ -48,12 +55,9 @@ export function CleanerShell({
         accountMenuItems={CLEANER_ACCOUNT_MENU}
         brandHref="/cleaner/dashboard"
         brandLabel="Pro"
-        headerExtra={
-          <TierBadge className="hidden min-[380px]:inline-flex" size="sm" tier={cleaner.tier} />
-        }
-        navItems={nav}
+        headerActions={<TierBadge size="sm" tier={cleaner.tier} />}
+        navGroups={NAV_GROUPS}
         profile={profile}
-        roleLabel="Cleaner"
         topSlot={
           cleaner.status !== "certified" && cleaner.status !== "active" ? (
             <CleanerAccountBanner cleaner={cleaner} />
@@ -91,17 +95,15 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
           : "You can explore your dashboard and update your profile. New job offers will appear after Mundoria approves your application. Payout setup opens on your dashboard once you’re approved.";
 
     return (
-      <div className="mb-6 rounded-[1.5rem] border border-[#e8e0f5] bg-white p-5 text-[#1c133b] shadow-sm dark:border-border dark:bg-card dark:text-foreground">
+      <div className="mb-6 rounded-[1.5rem] border border-brand-lavender bg-white p-5 text-brand-ink shadow-sm">
         <div className="flex gap-3">
-          <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#312c79]" />
+          <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-brand-indigo" />
           <div>
             <p className="font-semibold">{title}</p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#8b8798]">
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-brand-subtle">
               Status: {lifecycle}
             </p>
-            <p className="mt-1 text-sm leading-6 text-[#6b6588] dark:text-muted-foreground">
-              {body}
-            </p>
+            <p className="mt-1 text-sm leading-6 text-brand-muted">{body}</p>
           </div>
         </div>
       </div>

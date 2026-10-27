@@ -1,5 +1,5 @@
 import { BookingsTable } from "@/components/admin/bookings-table";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { OPS_REFRESH_MS } from "@/lib/dashboard/live-refresh";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -11,12 +11,13 @@ export default async function AdminBookingsPage() {
     .select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name),cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)")
     .order("created_at", { ascending: false });
   return (
-    <div className="min-w-0">
+    <AppPage
+      description="Search, inspect, and resolve booking edge cases."
+      eyebrow="Operations"
+      title="Bookings"
+    >
       <LiveDashboardRefresh intervalMs={OPS_REFRESH_MS} scope="admin-bookings" />
-      <AdminPageIntro>
-        Search, inspect, and resolve booking edge cases.
-      </AdminPageIntro>
       <BookingsTable bookings={(data ?? []) as AdminBooking[]} />
-    </div>
+    </AppPage>
   );
 }

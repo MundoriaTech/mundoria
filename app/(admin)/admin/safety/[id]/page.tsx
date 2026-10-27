@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SafetyAlertActions } from "@/components/admin/safety-alert-actions";
+import { AppPage } from "@/components/shared/app-page";
 import {
   SAFETY_REASON_LABELS,
   type SafetyAlertReason,
@@ -31,22 +32,15 @@ export default async function AdminSafetyDetailPage({
     : alert.raised_by_profile;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-primary">
-          Safety alert
-        </p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-          Case #{alert.id.slice(0, 8)}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Raised{" "}
-          {new Date(alert.created_at).toLocaleString("en-GB", {
-            dateStyle: "medium",
-            timeStyle: "short",
-          })}
-        </p>
-      </div>
+    <AppPage
+      className="space-y-6"
+      description={`Raised ${new Date(alert.created_at).toLocaleString("en-GB", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })}`}
+      eyebrow="Safety alert"
+      title={`Case #${alert.id.slice(0, 8)}`}
+    >
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-4 rounded-xl border bg-card p-5">
@@ -138,6 +132,6 @@ export default async function AdminSafetyDetailPage({
           <SafetyAlertActions alertId={alert.id} status={alert.status} />
         </div>
       </div>
-    </div>
+    </AppPage>
   );
 }

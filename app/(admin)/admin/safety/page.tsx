@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { SAFETY_REASON_LABELS } from "@/lib/bookings/safety-alert-shared";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cn } from "@/lib/utils";
@@ -17,10 +17,12 @@ export default async function AdminSafetyPage() {
   const rows = data ?? [];
 
   return (
-    <div className="min-w-0 space-y-6">
-      <AdminPageIntro>
-        Urgent in-session Safety alerts. Acknowledge open cases quickly.
-      </AdminPageIntro>
+    <AppPage
+      className="space-y-6"
+      description="Urgent in-session Safety alerts. Acknowledge open cases quickly."
+      eyebrow="Operations"
+      title="Safety"
+    >
 
       <div className="overflow-hidden rounded-xl border bg-card">
         <table className="w-full text-left text-sm">
@@ -111,6 +113,6 @@ export default async function AdminSafetyPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </AppPage>
   );
 }

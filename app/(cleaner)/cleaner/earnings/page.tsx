@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { EarningsControls } from "@/components/cleaner/earnings-controls";
+import { AppPage } from "@/components/shared/app-page";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
@@ -38,16 +39,11 @@ export default async function CleanerEarningsPage() {
   const payoutRows = (payouts ?? []) as Payout[];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Earnings
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Card holds are authorised at booking and captured after the clean.
-          Your share then lands in the next payout window.
-        </p>
-      </div>
+    <AppPage
+      description="Card holds are authorised at booking and captured after the clean. Your share then lands in the next payout window."
+      eyebrow="Money"
+      title="Earnings"
+    >
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card label="This week" value={formatMoney(sum(7))} />
@@ -177,7 +173,7 @@ export default async function CleanerEarningsPage() {
           </p>
         )}
       </section>
-    </div>
+    </AppPage>
   );
 }
 

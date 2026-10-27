@@ -1,4 +1,5 @@
 import { SettingsForm } from "@/components/admin/settings-form";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 
@@ -11,16 +12,21 @@ export default async function AdminSettingsPage() {
     .single();
 
   return (
-    <div className="space-y-7">
-      <p className="max-w-2xl text-sm leading-6 text-[#5a5470] sm:text-base">
-        Fees, payment timing, matching defaults, and other platform rules.
-        Manage admin accounts on the{" "}
-        <Link className="font-semibold text-[#6a45b8]" href="/admin/team">
-          Team
-        </Link>{" "}
-        page.
-      </p>
+    <AppPage
+      description={
+        <>
+          Fees, payment timing, matching defaults, and other platform rules.
+          Manage admin accounts on the{" "}
+          <Link className="font-semibold text-brand-purple" href="/admin/team">
+            Team
+          </Link>{" "}
+          page.
+        </>
+      }
+      eyebrow="Content"
+      title="Settings"
+    >
       <SettingsForm initial={settings} />
-    </div>
+    </AppPage>
   );
 }

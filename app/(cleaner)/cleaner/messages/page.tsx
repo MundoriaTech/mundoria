@@ -3,6 +3,7 @@ import {
   formatConversationTime,
   messagePreviewLabel,
 } from "@/components/shared/conversation-list";
+import { AppPage } from "@/components/shared/app-page";
 import { getCleanerJobs } from "@/lib/cleaner/server";
 import { formatServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
@@ -86,21 +87,16 @@ export default async function CleanerMessagesListPage() {
     );
 
   return (
-    <div className="pb-4">
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-        Inbox
-      </p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground sm:text-3xl">
-        Messages
-      </h1>
-      <p className="mt-2 max-w-xl text-sm font-light leading-6 text-[#5a5470] dark:text-muted-foreground">
-        Keep booking details and updates with your customers in one place.
-      </p>
+    <AppPage
+      description="Keep booking details and updates with your customers in one place."
+      eyebrow="Inbox"
+      title="Messages"
+    >
       <ConversationList
         emptyBody="Customer conversations appear here after you’re matched to a job."
         emptyTitle="No conversations yet"
         items={items}
       />
-    </div>
+    </AppPage>
   );
 }

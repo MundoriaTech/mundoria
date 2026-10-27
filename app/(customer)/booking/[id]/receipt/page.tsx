@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PrintReceiptButton } from "@/components/customer/print-receipt-button";
+import { AppPage } from "@/components/shared/app-page";
 import { BrandMark } from "@/components/shared/brand-mark";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,21 +63,19 @@ export default async function BookingReceiptPage({
   });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-        <div>
-          <p className="text-sm font-medium text-primary">Receipt</p>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Booking invoice
-          </h1>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
+    <AppPage
+      actions={
+        <>
+          <Button asChild className="rounded-full" variant="outline">
             <Link href={`/booking/${booking.id}`}>Back to booking</Link>
           </Button>
           <PrintReceiptButton />
-        </div>
-      </div>
+        </>
+      }
+      className="mx-auto max-w-3xl space-y-6 print:space-y-0 [&>header]:print:hidden"
+      eyebrow="Receipt"
+      title="Booking invoice"
+    >
 
       <ReceiptDocument
         addOns={(addOns ?? []) as BookingAddOn[]}
@@ -85,7 +84,7 @@ export default async function BookingReceiptPage({
         customerName={profile?.full_name ?? "Customer"}
         lines={lines}
       />
-    </div>
+    </AppPage>
   );
 }
 

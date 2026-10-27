@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
+import { PageHeader } from "@/components/shared/page-header";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
 import { safetyAlertAllowed } from "@/lib/bookings/safety-alert-shared";
@@ -269,20 +270,18 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap justify-between gap-3">
-        <div>
-          <p className="text-sm text-primary">Job #{job.id.slice(0, 8)}</p>
-          <h1 className="text-3xl font-semibold">
-            {formatServiceName(job.service_type)}
-          </h1>
-        </div>
-        <Button asChild variant="outline">
-          <Link href={`/cleaner/messages/${job.id}`}>
-            <MessageCircle className="mr-2 h-4 w-4" />
-            Message customer
-          </Link>
-        </Button>
-      </div>
+      <PageHeader
+        actions={
+          <Button asChild className="rounded-full" variant="outline">
+            <Link href={`/cleaner/messages/${job.id}`}>
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Message customer
+            </Link>
+          </Button>
+        }
+        eyebrow={`Job #${job.id.slice(0, 8)}`}
+        title={formatServiceName(job.service_type)}
+      />
 
       {job.safety_hold_at ? (
         <section className="rounded-xl border border-[#f0c4b8] bg-[#fff7f2] p-5 text-sm text-[#7a3b28]">

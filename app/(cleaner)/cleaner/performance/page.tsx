@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { RatingDisputeList } from "@/components/cleaner/rating-dispute-list";
+import { AppPage } from "@/components/shared/app-page";
 import { getCleanerContext } from "@/lib/cleaner/server";
 import { nextTier, TIER_REQUIREMENTS } from "@/lib/cleaner/tier";
 import { createServerClient } from "@/lib/supabase/server";
@@ -35,8 +36,11 @@ export default async function CleanerPerformancePage() {
   const cancellationReliability = Math.max(0, 100 - cleaner.cancellation_count * 10);
 
   return (
-    <div className="space-y-7">
-      <h1 className="text-3xl font-semibold">Performance</h1>
+    <AppPage
+      description="Your tier, score, and the numbers behind them."
+      eyebrow="Progress"
+      title="Performance"
+    >
 
       <RatingDisputeList ratings={heldRatings ?? []} />
 
@@ -142,7 +146,7 @@ export default async function CleanerPerformancePage() {
           <b>{cleaner.no_show_count}</b>
         </p>
       </section>
-    </div>
+    </AppPage>
   );
 }
 

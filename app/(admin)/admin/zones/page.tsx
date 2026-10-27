@@ -1,5 +1,5 @@
 import { ZonesManager } from "@/components/admin/zones-manager";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminZonesPage() {
@@ -9,11 +9,12 @@ export default async function AdminZonesPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-w-0">
-      <AdminPageIntro>
-        Control postcode coverage and launches.
-      </AdminPageIntro>
+    <AppPage
+      description="Control postcode coverage and launches."
+      eyebrow="Money & coverage"
+      title="Zones"
+    >
       <ZonesManager zones={data ?? []} />
-    </div>
+    </AppPage>
   );
 }

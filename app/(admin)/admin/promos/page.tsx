@@ -1,5 +1,5 @@
 import { PromosManager } from "@/components/admin/promos-manager";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminPromosPage() {
@@ -9,11 +9,12 @@ export default async function AdminPromosPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-w-0">
-      <AdminPageIntro>
-        Create incentives and monitor redemption.
-      </AdminPageIntro>
+    <AppPage
+      description="Create incentives and monitor redemption."
+      eyebrow="Money & coverage"
+      title="Promos"
+    >
       <PromosManager promos={data ?? []} />
-    </div>
+    </AppPage>
   );
 }

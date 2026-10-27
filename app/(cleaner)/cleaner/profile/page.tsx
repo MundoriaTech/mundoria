@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { CleanerProfileForm } from "@/components/cleaner/cleaner-profile-form";
+import { AppPage } from "@/components/shared/app-page";
 import { getCleanerContext } from "@/lib/cleaner/server";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
@@ -15,18 +16,11 @@ export default async function CleanerProfilePage() {
   if (!context.cleanerProfile || !context.profile) redirect("/");
 
   return (
-    <div className="space-y-8 pb-4">
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-          Account
-        </p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-          Your profile
-        </h1>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c5670]">
-          How customers see you, the work you take, and how you get paid.
-        </p>
-      </div>
+    <AppPage
+      description="How customers see you, the work you take, and how you get paid."
+      eyebrow="Account"
+      title="Your profile"
+    >
       <CleanerProfileForm
         areas={context.areas}
         availability={context.availability}
@@ -34,6 +28,6 @@ export default async function CleanerProfilePage() {
         profile={context.profile as Profile}
         services={context.services}
       />
-    </div>
+    </AppPage>
   );
 }
