@@ -9,6 +9,8 @@ import {
   GoogleTagManagerNoscript,
 } from "@/components/analytics/gtm-scripts";
 import { FeedbackProvider } from "@/components/shared/feedback-provider";
+import { MotionProvider } from "@/components/shared/motion-provider";
+import { Toaster } from "@/components/shared/toaster";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
 import { PageTransition } from "@/components/shared/page-transition";
@@ -78,13 +80,16 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <GoogleTagManagerNoscript />
         <ThemeProvider>
-          <FeedbackProvider>
-            <AnalyticsProvider>
-              <AuthHashHandler />
-              <ScrollToTopOnLoad />
-              <PageTransition>{children}</PageTransition>
-            </AnalyticsProvider>
-          </FeedbackProvider>
+          <MotionProvider>
+            <FeedbackProvider>
+              <AnalyticsProvider>
+                <AuthHashHandler />
+                <ScrollToTopOnLoad />
+                <PageTransition>{children}</PageTransition>
+              </AnalyticsProvider>
+            </FeedbackProvider>
+            <Toaster />
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>
