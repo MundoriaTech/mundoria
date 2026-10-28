@@ -91,7 +91,7 @@ function ReviewCard({
 
   return (
     <article
-      className={`relative flex min-h-[280px] w-full flex-col overflow-hidden rounded-[8px] shadow-[0_12px_32px_rgba(28,19,59,0.12)] md:min-h-[300px] md:shadow-[0_14px_36px_rgba(28,19,59,0.14)] ${slot.offsetClass}`}
+      className={`relative flex min-h-[280px] w-full flex-col overflow-hidden rounded-[8px] shadow-[0_12px_32px_rgba(28,19,59,0.12)] transition duration-300 [@media(hover:hover)]:hover:-translate-y-1 [@media(hover:hover)]:hover:shadow-[0_18px_40px_rgba(28,19,59,0.18)] md:min-h-[300px] md:shadow-[0_14px_36px_rgba(28,19,59,0.14)] ${slot.offsetClass}`}
       style={{ backgroundColor: REVIEW_CARD_BG }}
     >
       <div className="flex flex-1 flex-col px-6 pb-6 pt-7 sm:px-7">

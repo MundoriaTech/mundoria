@@ -243,11 +243,30 @@
   }
 
   .reviews-carousel-enter {
-    animation: reviews-carousel-enter 2s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: reviews-carousel-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .reviews-carousel-exit {
-    animation: reviews-carousel-exit 2s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: reviews-carousel-exit 0.5s cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  /* FAQ answers ease open; <details> cannot animate height, so fade + lift. */
+  @keyframes faq-open {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    details[open] > .faq-answer {
+      animation: faq-open 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
   }
 
   @keyframes cookie-bob {

@@ -1,5 +1,10 @@
 import Image from "next/image";
 
+import {
+  directionFor,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 
 const STEPS = [
@@ -44,10 +49,13 @@ export function HowMundoriaWorksSection() {
           </p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-3 sm:gap-0">
+        <Stagger className="grid gap-8 sm:grid-cols-3 sm:gap-0" gap={0.14} inView>
           {STEPS.map((step, index) => (
-            <article
-              className="relative flex flex-col sm:px-5 lg:px-6"
+            <StaggerItem
+              as="article"
+              className="group relative flex flex-col sm:px-5 lg:px-6"
+              distance={32}
+              from={directionFor(index, 3)}
               key={step.title}
             >
               {index > 0 ? (
@@ -59,7 +67,7 @@ export function HowMundoriaWorksSection() {
               <div className="relative mx-auto h-28 w-28 shrink-0 overflow-hidden sm:mx-0 sm:h-32 sm:w-32">
                 <Image
                   alt=""
-                  className="object-contain object-center"
+                  className="image-ease object-contain object-center [@media(hover:hover)]:group-hover:scale-105"
                   fill
                   sizes="128px"
                   src={step.icon}
@@ -71,9 +79,9 @@ export function HowMundoriaWorksSection() {
               <p className="mt-2 text-center text-[13.5px] font-light leading-6 text-[#5a5470] sm:text-left">
                 {step.body}
               </p>
-            </article>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </ScrollReveal>
   );

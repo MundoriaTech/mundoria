@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 import { LazyImage } from "@/components/shared/lazy-image";
+import {
+  Reveal,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { Button } from "@/components/ui/button";
 
@@ -32,7 +37,12 @@ export function AboutSection({
         }}
       />
       <div className="relative mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-10">
-        <div className="relative mx-auto aspect-[4/5] w-full max-w-sm sm:max-w-md lg:mx-0 lg:max-w-lg">
+        <Reveal
+          className="relative mx-auto aspect-[4/5] w-full max-w-sm sm:max-w-md lg:mx-0 lg:max-w-lg"
+          distance={40}
+          from="left"
+          inView
+        >
           <LazyImage
             alt="Mundoria brand illustration of a friendly cleaner"
             className="object-contain object-bottom"
@@ -40,23 +50,24 @@ export function AboutSection({
             sizes="(min-width: 1024px) 420px, 90vw"
             src="/images/marketing/landing/about-illustration.png"
           />
-        </div>
+        </Reveal>
 
-        <div>
-          <h2 className="max-w-md text-balance text-[1.75rem] font-bold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
-            Home services with a visible standard.
-          </h2>
+        <Stagger gap={0.1} inView>
+          <StaggerItem distance={24} from="right">
+            <h2 className="max-w-md text-balance text-[1.75rem] font-bold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
+              Home services with a visible standard.
+            </h2>
+          </StaggerItem>
           <div className="mt-6 max-w-lg divide-y divide-[#1c133b]/20 border-y border-[#1c133b]/20">
             {points.map((item) => (
-              <p
-                className="py-4 text-pretty text-[13px] font-light leading-6 text-[#1c133b]/85 sm:leading-7"
-                key={item}
-              >
-                {item}
-              </p>
+              <StaggerItem distance={20} from="right" key={item}>
+                <p className="py-4 text-pretty text-[13px] font-light leading-6 text-[#1c133b]/85 sm:leading-7">
+                  {item}
+                </p>
+              </StaggerItem>
             ))}
           </div>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <StaggerItem className="mt-8 flex flex-col gap-3 sm:flex-row" distance={16}>
             <Button
               asChild
               className="h-11 rounded-full bg-[#1c133b] px-5 text-[13px] font-semibold text-[#e6e5f3] hover:bg-[#1c133b]/90 sm:h-[33px] sm:text-[12px]"
@@ -69,8 +80,8 @@ export function AboutSection({
             >
               <Link href={cleanerHref}>Become a cleaner</Link>
             </Button>
-          </div>
-        </div>
+          </StaggerItem>
+        </Stagger>
       </div>
     </ScrollReveal>
   );

@@ -130,7 +130,7 @@ export function LandingNavbar({
     <header
       className={cn(
         "pointer-events-none sticky top-0 z-50 bg-transparent px-4 sm:px-8 lg:px-14 xl:px-20",
-        "transition-transform duration-300 ease-out motion-reduce:transition-none",
+        "transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
         hidden && "-translate-y-[calc(100%+0.75rem)]",
       )}
       style={{ paddingTop: LANDING_NAV_TOP }}
