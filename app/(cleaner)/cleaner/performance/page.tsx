@@ -3,6 +3,11 @@ import { redirect } from "next/navigation";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { RatingDisputeList } from "@/components/cleaner/rating-dispute-list";
 import { AppPage } from "@/components/shared/app-page";
+import {
+  AnimatedBar,
+  CountUp,
+  Reveal,
+} from "@/components/shared/motion-primitives";
 import { getCleanerContext } from "@/lib/cleaner/server";
 import { nextTier, TIER_REQUIREMENTS } from "@/lib/cleaner/tier";
 import { createServerClient } from "@/lib/supabase/server";
@@ -160,15 +165,17 @@ function Metric({
   const width = value === null ? 0 : Math.min(100, value);
 
   return (
-    <div className="rounded-xl border bg-background p-5">
+    <Reveal className="rounded-xl border bg-background p-5" inView>
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-2 text-2xl font-bold">
-        {value === null ? "Not enough data" : `${Number(value).toFixed(1)}%`}
+        {value === null ? (
+          "Not enough data"
+        ) : (
+          <CountUp value={`${Number(value).toFixed(1)}%`} />
+        )}
       </p>
-      <div className="mt-3 h-2 rounded bg-muted">
-        <div className="h-2 rounded bg-primary" style={{ width: `${width}%` }} />
-      </div>
-    </div>
+      <AnimatedBar className="rounded" trackClassName="mt-3 rounded" value={width} />
+    </Reveal>
   );
 }
 

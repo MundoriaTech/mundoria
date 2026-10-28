@@ -1,5 +1,10 @@
 import Image from "next/image";
 
+import {
+  directionFor,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 
 const cards = [
@@ -39,11 +44,19 @@ export function HowItWorksSection() {
           A better way to get it sorted
         </h2>
 
-        <div className="mt-10 grid items-stretch gap-x-12 gap-y-8 px-6 sm:mt-12 sm:grid-cols-3 sm:gap-x-16 sm:px-8">
-          {cards.map(({ body, icon, title }) => (
-            <article
+        <Stagger
+          className="mt-10 grid items-stretch gap-x-12 gap-y-8 px-6 sm:mt-12 sm:grid-cols-3 sm:gap-x-16 sm:px-8"
+          gap={0.12}
+          inView
+        >
+          {cards.map(({ body, icon, title }, index) => (
+            <StaggerItem
+              as="article"
               className="relative flex h-full items-center rounded-[1.5rem] bg-[#f5ede3] py-6 pl-11 pr-5 sm:pl-12 sm:pr-6"
+              distance={36}
+              from={directionFor(index, 3)}
               key={title}
+              lift
             >
               <Image
                 alt=""
@@ -60,9 +73,9 @@ export function HowItWorksSection() {
                   {body}
                 </p>
               </div>
-            </article>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </ScrollReveal>
   );

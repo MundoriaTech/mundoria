@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { RematchButton } from "@/components/admin/rematch-button";
 import { DashboardStatTiles } from "@/components/shared/dashboard-stat-tiles";
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { Skeleton, SkeletonCard } from "@/components/shared/skeleton";
 
 // Recharts and MapLibre are the two heaviest client bundles in the app.
@@ -225,7 +226,7 @@ export default async function AdminDashboardPage() {
         <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
           Recent activity
         </h2>
-        <div className="mt-4 divide-y divide-[#efe8f8]">
+        <Stagger className="mt-4 divide-y divide-[#efe8f8]" gap={0.04} inView>
           {[
             ...all.slice(0, 7).map((booking) => ({
               date: booking.created_at,
@@ -239,8 +240,10 @@ export default async function AdminDashboardPage() {
             .sort((a, b) => b.date.localeCompare(a.date))
             .slice(0, 10)
             .map((item, index) => (
-              <div
+              <StaggerItem
                 className="flex flex-col gap-1 py-3 text-sm last:border-0 sm:flex-row sm:justify-between sm:gap-4"
+                distance={10}
+                from="left"
                 key={`${item.date}-${index}`}
               >
                 <span className="min-w-0 font-medium text-[#1c133b]">
@@ -249,9 +252,9 @@ export default async function AdminDashboardPage() {
                 <span className="shrink-0 text-[#5a5470]">
                   {new Date(item.date).toLocaleString("en-GB")}
                 </span>
-              </div>
+              </StaggerItem>
             ))}
-        </div>
+        </Stagger>
       </section>
     </div>
   );

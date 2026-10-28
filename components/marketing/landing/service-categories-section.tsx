@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { marketingServiceBySlug } from "@/lib/seo/marketing";
 import { cn } from "@/lib/utils";
 
@@ -181,7 +182,12 @@ export function ServiceCategoriesSection({
             <p className="max-w-md text-sm leading-6 text-[#3d3a48] sm:text-[15px]">
               {active.intro}
             </p>
-            <ul className="mt-4 divide-y divide-[#eadfce] border-b border-[#eadfce] sm:mt-6">
+            <Stagger
+              as="ul"
+              className="mt-4 divide-y divide-[#eadfce] border-b border-[#eadfce] sm:mt-6"
+              gap={0.05}
+              key={active.id}
+            >
               {active.items.map((item) => {
                 const open = openLabel === item.label;
                 const slug = item.href.replace(/^\/cleaning\//, "").split("/")[0] ?? "";
@@ -190,7 +196,7 @@ export function ServiceCategoriesSection({
                   setupOnly || !service ? bookingHref : service.bookingHref;
                 const panelId = `category-actions-${slug}`;
                 return (
-                  <li key={item.label}>
+                  <StaggerItem as="li" distance={16} from="left" key={item.label}>
                     <button
                       aria-controls={panelId}
                       aria-expanded={open}
@@ -242,10 +248,10 @@ export function ServiceCategoriesSection({
                         </Link>
                       </div>
                     ) : null}
-                  </li>
+                  </StaggerItem>
                 );
               })}
-            </ul>
+            </Stagger>
           </div>
         </div>
       </div>

@@ -2,6 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import {
+  CountUp,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { FEMALE_AVATAR_SRC } from "@/lib/avatars/default-pack";
 import { cn } from "@/lib/utils";
 
@@ -58,18 +63,22 @@ export function DashboardWelcomeBanner({
         </div>
       </div>
       {stats?.length ? (
-        <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 sm:mt-8 sm:grid-cols-4 sm:gap-6">
+        <Stagger
+          as="dl"
+          className="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 sm:mt-8 sm:grid-cols-4 sm:gap-6"
+          delay={0.2}
+        >
           {stats.map((stat) => (
-            <div className="min-w-0" key={stat.label}>
+            <StaggerItem className="min-w-0" distance={12} key={stat.label}>
               <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#c79c66]">
                 {stat.label}
               </dt>
               <dd className="mt-1 truncate text-base font-semibold tracking-tight text-[#1c133b] sm:text-lg">
-                {stat.value}
+                <CountUp value={stat.value} />
               </dd>
-            </div>
+            </StaggerItem>
           ))}
-        </dl>
+        </Stagger>
       ) : null}
     </section>
   );
@@ -214,11 +223,16 @@ export function DashboardHistoryList({
 
   return (
     <div className="space-y-3">
-      <ul className="space-y-3">
-        {rows.map((row) => (
-          <li key={row.href}>
+      <Stagger as="ul" className="space-y-3" inView>
+        {rows.map((row, index) => (
+          <StaggerItem
+            as="li"
+            from={index % 2 === 0 ? "left" : "right"}
+            key={row.href}
+            lift
+          >
             <Link
-              className="group flex flex-col gap-3 rounded-[1.35rem] border border-[#e8def8]/80 bg-white/90 p-4 shadow-[0_10px_28px_rgba(49,44,121,0.06)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(49,44,121,0.12)] sm:flex-row sm:items-center sm:justify-between sm:px-5 dark:border-border dark:bg-card"
+              className="group flex flex-col gap-3 rounded-[1.35rem] border border-[#e8def8]/80 bg-white/90 p-4 shadow-[0_10px_28px_rgba(49,44,121,0.06)] transition duration-300 hover:shadow-[0_14px_32px_rgba(49,44,121,0.12)] sm:flex-row sm:items-center sm:justify-between sm:px-5"
               href={row.href}
             >
               <div className="min-w-0">
@@ -239,9 +253,9 @@ export function DashboardHistoryList({
                 </span>
               </div>
             </Link>
-          </li>
+          </StaggerItem>
         ))}
-      </ul>
+      </Stagger>
       {actionHref && actionLabel ? (
         <div className="flex justify-end pt-1">
           <Link

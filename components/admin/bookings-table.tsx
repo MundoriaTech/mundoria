@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import {
   ClientPagination,
   usePagedItems,
@@ -114,12 +115,12 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
         />
       </div>
 
-      <div className="mt-5 space-y-3 lg:hidden">
+      <Stagger className="mt-5 space-y-3 lg:hidden" gap={0.04}>
         {pageItems.map((booking) => (
+          <StaggerItem distance={12} key={booking.id}>
           <Link
             className="block rounded-xl border border-border bg-card p-4 transition active:bg-muted/40"
             href={`/admin/booking/${booking.id}`}
-            key={booking.id}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -145,6 +146,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
               </span>
             </div>
           </Link>
+          </StaggerItem>
         ))}
         {!filtered.length ? (
           <EmptyState
@@ -154,7 +156,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
             title="No bookings match these filters"
           />
         ) : null}
-      </div>
+      </Stagger>
 
       <div className="mt-5 hidden overflow-x-auto rounded-xl border bg-card lg:block">
         <table className="w-full min-w-[900px] text-sm">
@@ -170,9 +172,14 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
               <th>Payment</th>
             </tr>
           </thead>
-          <tbody>
+          <Stagger as="tbody" gap={0.03}>
             {pageItems.map((booking) => (
-              <tr className="border-t" key={booking.id}>
+              <StaggerItem
+                as="tr"
+                className="border-t"
+                distance={6}
+                key={booking.id}
+              >
                 <td className="p-3">
                   <Link
                     className="font-mono text-primary"
@@ -192,9 +199,9 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
                   <PriceDisplay amount={booking.amount_total} />
                 </td>
                 <td className="capitalize">{booking.payment_status}</td>
-              </tr>
+              </StaggerItem>
             ))}
-          </tbody>
+          </Stagger>
         </table>
       </div>
 

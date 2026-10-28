@@ -12,6 +12,12 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 
+import {
+  CountUp,
+  directionFor,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { cn } from "@/lib/utils";
 
 const ICON_STICKER =
@@ -50,19 +56,21 @@ export function DashboardStatTiles({
   }>;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      {items.map((item) => {
+    <Stagger className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" gap={0.08}>
+      {items.map((item, index) => {
         const Glyph: Icon = ICONS[item.icon];
         return (
-          <div
+          <StaggerItem
             className="relative overflow-hidden rounded-[1.5rem] bg-[#efe6ff] p-5 shadow-[0_12px_28px_rgba(49,44,121,0.06)]"
+            from={directionFor(index, 4)}
             key={item.label}
+            lift
           >
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#823fb2]">
               {item.label}
             </p>
             <p className="mt-2 pr-14 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-              {item.value}
+              <CountUp value={item.value} />
             </p>
             <Glyph
               aria-hidden
@@ -73,9 +81,9 @@ export function DashboardStatTiles({
               )}
               weight="duotone"
             />
-          </div>
+          </StaggerItem>
         );
       })}
-    </div>
+    </Stagger>
   );
 }
