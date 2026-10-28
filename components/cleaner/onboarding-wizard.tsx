@@ -2792,6 +2792,7 @@ function HomeDistrictsPicker({
                 <li key={item.prefix}>
                   <button
                     className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                    aria-selected={false}
                     onClick={() => {
                       onAdd(item.prefix);
                       setQuery("");

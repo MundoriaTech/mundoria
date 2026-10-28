@@ -33,7 +33,7 @@ export function ChatMessage({
             "overflow-hidden rounded-[1.25rem] text-sm",
             isOwn
               ? "rounded-br-md bg-[#1c133b] text-white"
-              : "rounded-bl-md bg-white text-[#1c133b] shadow-[0_8px_20px_rgba(28,19,59,0.06)] ring-1 ring-[#ece8f3] dark:bg-card dark:text-foreground dark:ring-border",
+              : "rounded-bl-md bg-white text-[#1c133b] shadow-[0_8px_20px_rgba(28,19,59,0.06)] ring-1 ring-[#ece8f3]",
           )}
         >
           {attachments.length ? (

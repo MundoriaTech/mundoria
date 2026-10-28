@@ -41,7 +41,7 @@ export function ConversationList({
       {items.map((item) => (
         <li key={item.bookingId}>
           <Link
-            className="group flex items-center gap-3 border-b border-[#ece8f3] py-3.5 transition hover:bg-[#f7f4fc]/70 dark:border-border dark:hover:bg-muted/30 sm:gap-4 sm:py-4"
+            className="group flex items-center gap-3 border-b border-[#ece8f3] py-3.5 transition hover:bg-[#f7f4fc]/70 sm:gap-4 sm:py-4"
             href={item.href}
           >
             <UserAvatar
@@ -53,7 +53,7 @@ export function ConversationList({
               <div className="flex items-baseline justify-between gap-3">
                 <p
                   className={cn(
-                    "truncate text-sm font-semibold text-[#1c133b] dark:text-foreground",
+                    "truncate text-sm font-semibold text-[#1c133b]",
                     item.unread && "font-bold",
                   )}
                 >
@@ -70,8 +70,8 @@ export function ConversationList({
               </p>
               <p
                 className={cn(
-                  "mt-1 truncate text-sm text-[#5a5470] dark:text-muted-foreground",
-                  item.unread && "font-medium text-[#1c133b] dark:text-foreground",
+                  "mt-1 truncate text-sm text-[#5a5470]",
+                  item.unread && "font-medium text-[#1c133b]",
                 )}
               >
                 {item.preview}

@@ -118,7 +118,7 @@ export function AccountMenu({
       <button
         aria-expanded={open}
         aria-haspopup="menu"
-        className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-1.5 transition hover:bg-[#f3eef8] dark:hover:bg-muted sm:pr-2.5"
+        className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-1.5 transition hover:bg-[#f3eef8] sm:pr-2.5"
         onClick={() => {
           if (canHover) {
             if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -135,7 +135,7 @@ export function AccountMenu({
           size="sm"
           url={profile.avatar_url}
         />
-        <span className="hidden max-w-[7rem] truncate text-sm font-medium tracking-tight text-[#1c133b] sm:inline dark:text-foreground">
+        <span className="hidden max-w-[7rem] truncate text-sm font-medium tracking-tight text-[#1c133b] sm:inline">
           {firstName}
         </span>
         <ChevronDown
@@ -158,15 +158,15 @@ export function AccountMenu({
             role="menu"
             variants={popIn}
           >
-          <div className="border-b border-[#efe8f8] px-3.5 py-2.5 dark:border-border">
-            <p className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground">
+          <div className="border-b border-[#efe8f8] px-3.5 py-2.5">
+            <p className="truncate text-sm font-semibold text-[#1c133b]">
               {profile.full_name}
             </p>
             <p className="mt-0.5 text-[11px] text-[#8b8798]">Your account</p>
           </div>
           {items.map((item) => (
             <Link
-              className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-[#1c133b] transition hover:bg-[#f7f4fb] dark:text-foreground dark:hover:bg-muted"
+              className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-[#1c133b] transition hover:bg-[#f7f4fb]"
               href={item.href}
               key={item.href}
               onClick={() => setOpen(false)}

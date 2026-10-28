@@ -48,7 +48,7 @@ export function BookingsList({
 
   return (
     <div>
-      <div className="flex gap-1 border-b border-[#ece8f3] dark:border-border">
+      <div className="flex gap-1 border-b border-[#ece8f3]">
         {TABS.map((item) => {
           const label =
             item.id === "cancelled" && cancelledCount > 0
@@ -60,7 +60,7 @@ export function BookingsList({
               className={cn(
                 "relative px-3 pb-3 pt-1 text-sm font-semibold transition sm:px-4",
                 active
-                  ? "text-[#1c133b] dark:text-foreground"
+                  ? "text-[#1c133b]"
                   : "text-[#8b8798] hover:text-[#5a5470]",
               )}
               key={item.id}

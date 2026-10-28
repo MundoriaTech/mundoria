@@ -104,7 +104,7 @@ export function DashboardSection({
               {eyebrow}
             </p>
           ) : null}
-          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground">
+          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
             {title}
           </h2>
         </div>
@@ -133,7 +133,7 @@ export function SessionHighlightCard({
   title: string;
 }) {
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-[#e8def8]/90 bg-white shadow-[0_16px_40px_rgba(28,19,59,0.08)] dark:border-border dark:bg-card">
+    <article className="overflow-hidden rounded-[1.75rem] border border-[#e8def8]/90 bg-white shadow-[0_16px_40px_rgba(28,19,59,0.08)]">
       <div className="relative h-44 w-full overflow-hidden sm:h-52">
         <Image
           alt=""
@@ -163,13 +163,13 @@ export function SessionHighlightCard({
         </div>
       </div>
 
-      <div className="grid gap-px border-t border-[#efe6ff] bg-[#efe6ff]/80 sm:grid-cols-2 lg:grid-cols-4 dark:border-border dark:bg-border">
+      <div className="grid gap-px border-t border-[#efe6ff] bg-[#efe6ff]/80 sm:grid-cols-2 lg:grid-cols-4">
         {meta.map((row) => (
-          <div className="bg-white px-4 py-3.5 dark:bg-card" key={row.label}>
+          <div className="bg-white px-4 py-3.5" key={row.label}>
             <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
               {row.label}
             </p>
-            <p className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+            <p className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
               {row.value}
             </p>
           </div>
@@ -177,7 +177,7 @@ export function SessionHighlightCard({
       </div>
 
       {actions ? (
-        <div className="flex flex-col gap-2 border-t border-[#efe6ff] bg-white p-4 dark:border-border dark:bg-card sm:flex-row sm:flex-wrap sm:p-5">
+        <div className="flex flex-col gap-2 border-t border-[#efe6ff] bg-white p-4 sm:flex-row sm:flex-wrap sm:p-5">
           {actions}
         </div>
       ) : null}
@@ -236,10 +236,10 @@ export function DashboardHistoryList({
               href={row.href}
             >
               <div className="min-w-0">
-                <p className="font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+                <p className="font-semibold tracking-tight text-[#1c133b]">
                   {row.service}
                 </p>
-                <p className="mt-1 text-sm font-light text-[#5a5470] dark:text-muted-foreground">
+                <p className="mt-1 text-sm font-light text-[#5a5470]">
                   {row.date}
                   {row.person !== "—" ? ` · ${row.person}` : ""}
                 </p>
@@ -248,7 +248,7 @@ export function DashboardHistoryList({
                 <span className="rounded-full bg-[#f3efe6] px-2.5 py-1 text-[11px] font-semibold capitalize text-[#312c79]">
                   {row.status}
                 </span>
-                <span className="text-sm font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+                <span className="text-sm font-semibold tracking-tight text-[#1c133b]">
                   {row.amount}
                 </span>
               </div>

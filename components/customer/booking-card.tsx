@@ -45,14 +45,14 @@ export function BookingCard({
             <span className="text-[10px] font-medium uppercase tracking-wide text-[#8b8798]">
               {month}
             </span>
-            <span className="mt-0.5 text-xl font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+            <span className="mt-0.5 text-xl font-semibold tracking-tight text-[#1c133b]">
               {day}
             </span>
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground sm:text-[15px]">
+              <h3 className="truncate text-sm font-semibold text-[#1c133b] sm:text-[15px]">
                 {formatServiceName(booking.service_type)}
               </h3>
               <BookingStatusBadge
@@ -60,13 +60,13 @@ export function BookingCard({
                 status={booking.status}
               />
             </div>
-            <p className="mt-1 truncate text-xs text-[#5a5470] dark:text-muted-foreground sm:text-sm">
+            <p className="mt-1 truncate text-xs text-[#5a5470] sm:text-sm">
               {weekday} · {time}
               {person ? ` · ${person}` : ""}
               {place ? ` · ${place}` : ""}
             </p>
             {booking.amount_total ? (
-              <p className="mt-1.5 text-sm font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+              <p className="mt-1.5 text-sm font-semibold tracking-tight text-[#1c133b]">
                 {formatMoney(booking.amount_total)}
               </p>
             ) : null}
@@ -77,7 +77,7 @@ export function BookingCard({
 
         {showRebook ? (
           <Link
-            className="mt-0.5 inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-[#e4dcf2] bg-white px-3 text-xs font-semibold text-[#312c79] transition hover:bg-[#f7f2ea] dark:border-border dark:bg-card"
+            className="mt-0.5 inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-[#e4dcf2] bg-white px-3 text-xs font-semibold text-[#312c79] transition hover:bg-[#f7f2ea]"
             href={`/booking/new?rebook=${booking.id}`}
           >
             <RotateCcw className="h-3.5 w-3.5" />
