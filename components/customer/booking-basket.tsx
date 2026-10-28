@@ -3,9 +3,11 @@
 import type { ReactNode } from "react";
 import { Clock, MapPin, ShoppingCart } from "@phosphor-icons/react";
 import { ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
+import { DURATION, EASE, sheetUp } from "@/lib/motion";
 import { formatBookingDate } from "@/lib/customer/booking-flow";
 import { formatHourlyRate, formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
@@ -540,14 +542,19 @@ export function BookingBasketSheet({
     };
   }, [onClose, open]);
 
-  if (!open) return null;
-
   return (
-    <div
+    <AnimatePresence>
+      {open ? (
+    <motion.div
+      animate={{ opacity: 1 }}
       aria-labelledby={titleId}
       aria-modal="true"
       className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] top-0 z-[60] flex items-end justify-center bg-black/40 lg:hidden"
+      exit={{ opacity: 0, transition: { duration: DURATION.base, ease: EASE.in } }}
+      initial={{ opacity: 0 }}
+      key="basket-sheet"
       role="dialog"
+      transition={{ duration: DURATION.base, ease: EASE.out }}
     >
       <button
         aria-label="Close basket"
@@ -555,10 +562,14 @@ export function BookingBasketSheet({
         onClick={onClose}
         type="button"
       />
-      <div
+      <motion.div
+        animate="visible"
         className="relative flex max-h-[min(78dvh,34rem)] w-full flex-col overflow-hidden rounded-t-[1.25rem] border border-transparent bg-[#fffefb] outline-none"
+        exit="exit"
+        initial="hidden"
         ref={panelRef}
         tabIndex={-1}
+        variants={sheetUp}
       >
         <div className="flex shrink-0 flex-col items-center px-4 pb-4 pt-2">
           <button
@@ -579,7 +590,9 @@ export function BookingBasketSheet({
         <div className="overflow-y-auto overscroll-contain border-t border-[#e8e8eb] px-3 pb-3 pt-3">
           <BasketPanel {...props} showHeader={false} />
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

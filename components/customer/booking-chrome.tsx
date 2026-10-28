@@ -2,9 +2,11 @@
 
 import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
+import { DURATION, EASE, SPRING } from "@/lib/motion";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
@@ -84,8 +86,23 @@ export function BookingChrome({
         {progressPct != null ? (
           <div>
             {progressLabel ? (
-              <p className="mx-auto w-full max-w-[1140px] px-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8a8498] md:px-5">
-                {progressLabel}
+              <p className="mx-auto w-full max-w-[1140px] overflow-hidden px-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8a8498] md:px-5">
+                <AnimatePresence initial={false} mode="popLayout">
+                  <motion.span
+                    animate={{ opacity: 1, y: 0 }}
+                    className="inline-block"
+                    exit={{
+                      opacity: 0,
+                      transition: { duration: DURATION.fast, ease: EASE.in },
+                      y: -8,
+                    }}
+                    initial={{ opacity: 0, y: 8 }}
+                    key={progressLabel}
+                    transition={{ duration: DURATION.base, ease: EASE.out }}
+                  >
+                    {progressLabel}
+                  </motion.span>
+                </AnimatePresence>
               </p>
             ) : null}
             <div
@@ -100,9 +117,11 @@ export function BookingChrome({
               className="h-1.5 w-full bg-[#e8e0d0]"
               role="progressbar"
             >
-              <div
-                className="h-full bg-[#6a45b8] transition-[width] duration-300 ease-out"
-                style={{ width: `${progressPct}%` }}
+              <motion.div
+                animate={{ width: `${progressPct}%` }}
+                className="h-full rounded-r-full bg-[#6a45b8]"
+                initial={false}
+                transition={SPRING.snappy}
               />
             </div>
           </div>
