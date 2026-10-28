@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatMoney } from "@/lib/customer/services";
@@ -22,7 +22,6 @@ interface Promo {
 
 export function PromosManager({ promos }: { promos: Promo[] }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     code: "",
     discount_type: "percentage",
@@ -33,7 +32,6 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
   });
 
   async function save(payload: Record<string, unknown>) {
-    setError(null);
     const response = await fetch("/api/admin/promos", {
       body: JSON.stringify(payload),
       headers: { "Content-Type": "application/json" },
@@ -43,9 +41,12 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
       error?: string;
     };
     if (!response.ok) {
-      setError(result.error ?? "Could not save promo.");
+      toast.error("Couldn’t save this promo", {
+        description: result.error ?? "Could not save promo.",
+      });
       return;
     }
+    toast.success("Promo saved");
     setForm({
       code: "",
       discount_type: "percentage",
@@ -61,11 +62,6 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
     <div>
       <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Create promo code</h2>
-        {error ? (
-          <div className="mt-3">
-            <ActionError message={error} title="Couldn’t save this promo" />
-          </div>
-        ) : null}
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <Input
             onChange={(e) =>

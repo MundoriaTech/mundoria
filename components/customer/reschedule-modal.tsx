@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { BookingCalendar } from "@/components/customer/booking-calendar";
-import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import {
   TimeSlotPicker,
   slotsFinishingByWindowEnd,
@@ -33,14 +33,12 @@ export function RescheduleModal({
   const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(initialTime.slice(0, 5));
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const slots = useMemo(
     () => slotsFinishingByWindowEnd(durationHours || 2),
     [durationHours],
   );
 
   async function save() {
-    setError(null);
     setSaving(true);
     try {
       const response = await fetch(`/api/bookings/${bookingId}/reschedule`, {
@@ -57,7 +55,10 @@ export function RescheduleModal({
       }
       onSaved({ date, time });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not reschedule.");
+      toast.error("Couldn’t reschedule this visit", {
+        description:
+          err instanceof Error ? err.message : "Could not reschedule.",
+      });
     } finally {
       setSaving(false);
     }
@@ -90,11 +91,6 @@ export function RescheduleModal({
               value={time}
             />
           </div>
-          {error ? (
-            <div className="mt-3">
-              <ActionError message={error} title="Couldn’t reschedule this visit" />
-            </div>
-          ) : null}
         </div>
         <div className="flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end">
           <Button disabled={saving} onClick={onClose} variant="outline">

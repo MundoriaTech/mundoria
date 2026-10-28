@@ -3,17 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/feedback/toast";
 
 export function RematchButton({ bookingId }: { bookingId: string }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function rematch() {
     setBusy(true);
-    setError(null);
     const response = await fetch(`/api/admin/bookings/${bookingId}`, {
       body: JSON.stringify({
         action: "rematch",
@@ -25,27 +23,27 @@ export function RematchButton({ bookingId }: { bookingId: string }) {
     const result = (await response.json()) as { error?: string };
     setBusy(false);
     if (!response.ok) {
-      setError(result.error ?? "Rematch failed");
+      toast.error("Couldn’t find a replacement", {
+        action: { label: "Try again", onClick: () => void rematch() },
+        description: result.error ?? "Rematch failed",
+      });
       return;
     }
+    toast.success("Looking for a replacement", {
+      description: "The matching engine is searching again.",
+    });
     router.refresh();
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <Button
-        disabled={busy}
-        onClick={() => void rematch()}
-        size="sm"
-        variant="destructive"
-      >
-        {busy ? "Matching…" : "Find Replacement"}
-      </Button>
-      {error ? (
-        <div className="mt-2 max-w-xs">
-          <ActionError message={error} title="Couldn’t find a replacement" />
-        </div>
-      ) : null}
-    </div>
+    <Button
+      loading={busy}
+      loadingLabel="Matching…"
+      onClick={() => void rematch()}
+      size="sm"
+      variant="destructive"
+    >
+      Find Replacement
+    </Button>
   );
 }

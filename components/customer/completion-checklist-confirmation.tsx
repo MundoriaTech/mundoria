@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import type { BookingChecklistItem } from "@/types/customer";
 
@@ -56,7 +57,9 @@ export function CompletionChecklistConfirmation({
     setSubmitting(false);
 
     if (!response.ok) {
-      setError(result.error ?? "Unable to confirm completion.");
+      toast.error("Couldn’t confirm this clean", {
+        description: result.error ?? "Unable to confirm completion.",
+      });
       return;
     }
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ChatEmojiPicker } from "@/components/customer/chat-emoji-picker";
 import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { ChatMessage } from "@/components/shared/chat-message";
 import { ownStoragePath } from "@/lib/storage/own-object";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -218,7 +219,10 @@ export function Chat({
     setSending(false);
 
     if (!response.ok || !result.message) {
-      setError(result.error ?? "Unable to send message.");
+      toast.error("Couldn’t send that", {
+        action: { label: "Retry", onClick: () => void sendMessage() },
+        description: result.error ?? "Unable to send message.",
+      });
       return;
     }
 

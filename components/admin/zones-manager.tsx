@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,10 +22,8 @@ export function ZonesManager({ zones }: { zones: Zone[] }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [prefixes, setPrefixes] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   async function save(payload: Record<string, unknown>) {
-    setError(null);
     const response = await fetch("/api/admin/zones", {
       body: JSON.stringify(payload),
       headers: { "Content-Type": "application/json" },
@@ -35,9 +33,12 @@ export function ZonesManager({ zones }: { zones: Zone[] }) {
       error?: string;
     };
     if (!response.ok) {
-      setError(result.error ?? "Could not save zone.");
+      toast.error("Couldn’t save this zone", {
+        description: result.error ?? "Could not save zone.",
+      });
       return;
     }
+    toast.success(payload.action === "create" ? "Zone added" : "Zone updated");
     if (payload.action === "create") {
       setName("");
       setPrefixes("");
@@ -50,11 +51,6 @@ export function ZonesManager({ zones }: { zones: Zone[] }) {
       <div className="space-y-4">
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Add zone</h2>
-          {error ? (
-            <div className="mt-3">
-              <ActionError message={error} title="Couldn’t save this zone" />
-            </div>
-          ) : null}
           <Input
             className="mt-4"
             onChange={(event) => setName(event.target.value)}

@@ -17,7 +17,7 @@ import { TipPanel } from "@/components/customer/tip-panel";
 import { RatingForm } from "@/components/customer/rating-form";
 import { RescheduleModal } from "@/components/customer/reschedule-modal";
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
-import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
@@ -83,7 +83,6 @@ export function BookingDetail({
   const [pauseEnd, setPauseEnd] = useState("");
   const [showPause, setShowPause] = useState(false);
   const [showSafety, setShowSafety] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const canCancel = useMemo(
     () =>
       canCustomerChangeSchedule({
@@ -208,7 +207,6 @@ export function BookingDetail({
   }, [booking.id, booking.status, router]);
 
   async function cancelBooking() {
-    setError(null);
     const response = await fetch(`/api/bookings/${booking.id}/cancel`, {
       body: JSON.stringify({ reason, scope: cancelScope }),
       headers: { "Content-Type": "application/json" },
@@ -216,7 +214,9 @@ export function BookingDetail({
     });
     const result = (await response.json()) as { error?: string };
     if (!response.ok) {
-      setError(result.error ?? "Unable to cancel booking.");
+      toast.error("Couldn’t cancel this booking", {
+        description: result.error ?? "Unable to cancel booking.",
+      });
       return;
     }
 
@@ -231,13 +231,14 @@ export function BookingDetail({
   }
 
   async function changePro() {
-    setError(null);
     const response = await fetch(`/api/bookings/${booking.id}/change-pro`, {
       method: "POST",
     });
     const result = (await response.json()) as { error?: string };
     if (!response.ok) {
-      setError(result.error ?? "Unable to change pro.");
+      toast.error("Couldn’t change pro", {
+        description: result.error ?? "Unable to change pro.",
+      });
       return;
     }
     success({
@@ -251,7 +252,6 @@ export function BookingDetail({
   }
 
   async function pauseSeries() {
-    setError(null);
     const response = await fetch(`/api/bookings/${booking.id}/pause`, {
       body: JSON.stringify({ endsOn: pauseEnd, startsOn: pauseStart }),
       headers: { "Content-Type": "application/json" },
@@ -259,7 +259,9 @@ export function BookingDetail({
     });
     const result = (await response.json()) as { error?: string };
     if (!response.ok) {
-      setError(result.error ?? "Unable to pause this regular clean.");
+      toast.error("Couldn’t pause this clean", {
+        description: result.error ?? "Unable to pause this regular clean.",
+      });
       return;
     }
     setShowPause(false);
@@ -272,7 +274,6 @@ export function BookingDetail({
   }
 
   async function confirmStart() {
-    setError(null);
     const response = await fetch(`/api/bookings/${booking.id}/start`, {
       body: JSON.stringify({ role: "customer" }),
       headers: { "Content-Type": "application/json" },
@@ -284,7 +285,9 @@ export function BookingDetail({
       started?: boolean;
     };
     if (!response.ok) {
-      setError(result.error ?? "Unable to confirm the start.");
+      toast.error("Couldn’t confirm the start", {
+        description: result.error ?? "Unable to confirm the start.",
+      });
       return;
     }
     success({
@@ -386,10 +389,6 @@ export function BookingDetail({
           </div>
         </div>
       </header>
-
-      {error && !showCancel && !showPause ? (
-        <ActionError message={error} title="Something went wrong" />
-      ) : null}
 
       {onSafetyHold ? (
         <div className="rounded-[1.25rem] border border-[#f0c4b8] bg-[#fff7f2] px-5 py-4 text-sm text-[#7a3b28]">
@@ -765,11 +764,6 @@ export function BookingDetail({
               />
             </label>
           </div>
-          {error ? (
-            <div className="mt-2">
-              <ActionError message={error} title="Couldn’t pause this clean" />
-            </div>
-          ) : null}
         </ConfirmModal>
       ) : null}
 
@@ -834,11 +828,6 @@ export function BookingDetail({
             placeholder="Cancellation reason. Write “I want another pro” to search again instead of cancelling a one-off."
             value={reason}
           />
-          {error ? (
-            <div className="mt-2">
-              <ActionError message={error} title="Couldn’t cancel this booking" />
-            </div>
-          ) : null}
         </ConfirmModal>
       ) : null}
 

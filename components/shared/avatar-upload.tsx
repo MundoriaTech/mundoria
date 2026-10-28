@@ -3,7 +3,7 @@
 import { Check, UserRound } from "lucide-react";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import {
   FileUpload,
   type FileUploadResult,
@@ -35,7 +35,6 @@ export function AvatarUpload({
 }) {
   const [url, setUrl] = useState(currentUrl);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const selectedDefaultId = mundoriaCharacter(url);
 
   async function persistAvatar(nextUrl: string) {
@@ -75,22 +74,21 @@ export function AvatarUpload({
   }
 
   async function completeUpload(result: FileUploadResult) {
-    setError(null);
     await persistAvatar(result.publicUrl);
   }
 
   async function selectDefault(src: string) {
     if (saving || url === src) return;
     setSaving(true);
-    setError(null);
     try {
       await persistAvatar(src);
     } catch (selectError) {
-      setError(
-        selectError instanceof Error
-          ? selectError.message
-          : "Couldn’t update avatar.",
-      );
+      toast.error("Couldn’t update your photo", {
+        description:
+          selectError instanceof Error
+            ? selectError.message
+            : "Couldn’t update avatar.",
+      });
     } finally {
       setSaving(false);
     }
@@ -175,11 +173,6 @@ export function AvatarUpload({
         <p className="mt-2 text-xs text-muted-foreground">
           JPEG, PNG or WebP · max 5 MB
         </p>
-        {error ? (
-          <div className="mt-2">
-            <ActionError message={error} title="Couldn’t update your photo" />
-          </div>
-        ) : null}
       </div>
     </div>
   );

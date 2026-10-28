@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { RatingMood } from "@/types/cleaner";
@@ -86,7 +87,9 @@ export function RatingForm({
     setSubmitting(false);
 
     if (!response.ok) {
-      setError(result.error ?? "Unable to submit rating.");
+      toast.error("Couldn’t save this rating", {
+        description: result.error ?? "Unable to submit rating.",
+      });
       return;
     }
 

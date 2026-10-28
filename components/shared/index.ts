@@ -16,7 +16,6 @@ export * from "@/components/shared/price-display";
 export * from "@/components/shared/recurring-toggle";
 export * from "@/components/shared/skeleton";
 export * from "@/components/shared/star-rating";
-export * from "@/components/shared/success-modal";
 export * from "@/components/shared/tier-badge";
 export * from "@/components/shared/time-slot-picker";
 export * from "@/components/shared/user-avatar";

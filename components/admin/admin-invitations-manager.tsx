@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -28,10 +28,6 @@ export function AdminInvitationsManager({
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [invitations, setInvitations] = useState(initialInvitations);
-  const [actionError, setActionError] = useState<{
-    message: string;
-    title: string;
-  } | null>(null);
   const [message, setMessage] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +40,6 @@ export function AdminInvitationsManager({
 
   async function inviteAdmin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setActionError(null);
     setMessage("");
     setInviteLink("");
     setIsSubmitting(true);
@@ -90,9 +85,8 @@ export function AdminInvitationsManager({
         inviteError instanceof Error
           ? inviteError.message
           : "Unable to send invitation.";
-      setActionError({
-        message: errorMessage,
-        title: "Couldn’t send this invitation",
+      toast.error("Couldn’t send this invitation", {
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -108,7 +102,6 @@ export function AdminInvitationsManager({
     });
     if (!ok) return;
 
-    setActionError(null);
     setMessage("");
     const response = await fetch(`/api/admin/invitations/${id}/revoke`, {
       method: "POST",
@@ -116,9 +109,8 @@ export function AdminInvitationsManager({
     const result = (await response.json()) as { error?: string };
 
     if (!response.ok || result.error) {
-      setActionError({
-        message: result.error ?? "Try again in a moment.",
-        title: "Couldn’t revoke this invitation",
+      toast.error("Couldn’t revoke this invitation", {
+        description: result.error ?? "Try again in a moment.",
       });
       return;
     }
@@ -175,11 +167,6 @@ export function AdminInvitationsManager({
         </Button>
       </form>
 
-      {actionError ? (
-        <div className="mt-4">
-          <ActionError message={actionError.message} title={actionError.title} />
-        </div>
-      ) : null}
       {message ? <p className="mt-4 text-sm">{message}</p> : null}
       {inviteLink ? (
         <div className="mt-3 rounded-xl border border-dashed bg-muted/40 p-3">

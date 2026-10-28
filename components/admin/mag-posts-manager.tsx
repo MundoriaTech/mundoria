@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/feedback/toast";
 import type { MagPostAdminRow } from "@/lib/content/mag-admin";
 import { cn } from "@/lib/utils";
 
@@ -22,22 +22,14 @@ function formatDate(iso: string | null) {
 export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MagPostAdminRow | null>(
     null,
   );
-  const [toast, setToast] = useState<string | null>(null);
 
   const publishedCount = posts.filter((post) => post.published).length;
   const draftCount = posts.length - publishedCount;
 
-  function showToast(message: string) {
-    setToast(message);
-    window.setTimeout(() => setToast(null), 2800);
-  }
-
   async function runAction(payload: Record<string, unknown>, success: string) {
-    setError(null);
     const id = typeof payload.id === "string" ? payload.id : null;
     setBusyId(id);
     try {
@@ -50,10 +42,12 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
         error?: string;
       };
       if (!response.ok) {
-        setError(result.error ?? "Something went wrong.");
+        toast.error("Couldn’t update Mag", {
+          description: result.error ?? "Something went wrong.",
+        });
         return;
       }
-      showToast(success);
+      toast.success(success);
       setDeleteTarget(null);
       router.refresh();
     } finally {
@@ -103,12 +97,6 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
           ))}
         </div>
       </div>
-
-      {error ? (
-        <div className="mt-4">
-          <ActionError message={error} title="Couldn’t update Mag" />
-        </div>
-      ) : null}
 
       {posts.length === 0 ? (
         <div className="mt-6 rounded-[1.5rem] border border-dashed border-[#d9ccef] bg-white px-6 py-16 text-center">
@@ -303,12 +291,6 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
               </Button>
             </div>
           </div>
-        </div>
-      ) : null}
-
-      {toast ? (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#1c133b] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
-          {toast}
         </div>
       ) : null}
     </div>
