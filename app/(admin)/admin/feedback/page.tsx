@@ -1,4 +1,7 @@
+import { MessageSquare } from "lucide-react";
+
 import { AppPage } from "@/components/shared/app-page";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   formatGuestFeedbackDate,
   guestFeedbackMoodLabel,
@@ -38,7 +41,11 @@ export default async function AdminFeedbackPage() {
           and refresh this page.
         </p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-[#5a5470]">No feedback yet.</p>
+        <EmptyState
+          icon={MessageSquare}
+          message="Written reviews submitted on the public feedback page will appear here."
+          title="No feedback yet"
+        />
       ) : (
         <ul className="grid gap-4">
           {rows.map((row) => (

@@ -1,5 +1,8 @@
+import { Banknote } from "lucide-react";
+
 import { ProcessPayoutsButton } from "@/components/admin/process-payouts-button";
 import { AppPage } from "@/components/shared/app-page";
+import { EmptyState } from "@/components/shared/empty-state";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -72,9 +75,12 @@ export default async function AdminPayoutsPage() {
           </div>
         ))}
         {!payouts.length ? (
-          <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-            No payouts yet.
-          </p>
+          <EmptyState
+            compact
+            icon={Banknote}
+            message="Payout batches appear here once completed cleans are captured."
+            title="No payouts yet"
+          />
         ) : null}
       </div>
 

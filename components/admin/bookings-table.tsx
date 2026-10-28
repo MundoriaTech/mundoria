@@ -1,10 +1,11 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, SearchX } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   ClientPagination,
   usePagedItems,
@@ -146,9 +147,12 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           </Link>
         ))}
         {!filtered.length ? (
-          <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-            No bookings match these filters.
-          </p>
+          <EmptyState
+            compact
+            icon={SearchX}
+            message="Try a wider date range or clear a filter."
+            title="No bookings match these filters"
+          />
         ) : null}
       </div>
 

@@ -7,6 +7,7 @@ import {
   type UserActivityRow,
 } from "@/components/admin/user-activity-timeline";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { EmptyState } from "@/components/shared/empty-state";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
 import { verificationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
@@ -422,7 +423,11 @@ function DataTable({
         </table>
       </div>
       {!rows.length ? (
-        <p className="py-4 text-sm text-muted-foreground">Nothing here yet.</p>
+        <EmptyState
+          className="mt-3"
+          compact
+          message="Entries will show here as they are recorded."
+        />
       ) : null}
     </section>
   );

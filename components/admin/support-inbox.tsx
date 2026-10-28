@@ -1,7 +1,10 @@
 "use client";
 
+import { Inbox } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+
+import { EmptyState } from "@/components/shared/empty-state";
 
 import {
   formatMessagePreview,
@@ -83,7 +86,12 @@ export function SupportInboxList({
       </div>
 
       {items.length === 0 ? (
-        <p className="text-sm text-[#5a5470]">No conversations yet.</p>
+        <EmptyState
+          compact
+          icon={Inbox}
+          message="Messages sent through the site messenger will appear here."
+          title="No conversations yet"
+        />
       ) : (
         <ul className="grid gap-3">
           {items.map((item) => (

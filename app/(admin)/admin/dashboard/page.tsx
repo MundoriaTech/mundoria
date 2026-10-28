@@ -2,12 +2,23 @@ import {
   AlertTriangle,
   Star,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { OperationsMap } from "@/components/admin/operations-map";
 import { RematchButton } from "@/components/admin/rematch-button";
-import { RevenueChart } from "@/components/admin/revenue-chart";
 import { DashboardStatTiles } from "@/components/shared/dashboard-stat-tiles";
+import { Skeleton, SkeletonCard } from "@/components/shared/skeleton";
+
+// Recharts and MapLibre are the two heaviest client bundles in the app.
+// Loading them on demand lets the desk paint before they arrive.
+const RevenueChart = dynamic(
+  () => import("@/components/admin/revenue-chart").then((m) => m.RevenueChart),
+  { loading: () => <SkeletonCard className="min-h-[22rem]" lines={4} /> },
+);
+const OperationsMap = dynamic(
+  () => import("@/components/admin/operations-map").then((m) => m.OperationsMap),
+  { loading: () => <Skeleton className="h-64 rounded-2xl sm:h-96" /> },
+);
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { OPS_REFRESH_MS } from "@/lib/dashboard/live-refresh";
 import { formatMoney } from "@/lib/customer/services";
