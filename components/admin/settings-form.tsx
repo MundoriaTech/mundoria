@@ -11,7 +11,6 @@ import {
   ADMIN_PRICING_SERVICES,
   DEFAULT_SERVICE_PRICING,
   normalizeServicePricing,
-  type HourlyBand,
   type ServicePricingConfig,
 } from "@/lib/customer/pricing-config";
 import type { ServiceType } from "@/types/customer";
@@ -56,24 +55,16 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
 
   const serviceRows = useMemo(() => ADMIN_PRICING_SERVICES, []);
 
-  function bandFor(service: ServiceType): HourlyBand {
+  function rateFor(service: ServiceType) {
     return pricing.hourly[service] ?? pricing.defaults;
   }
 
-  function setBand(
-    service: ServiceType,
-    key: keyof HourlyBand,
-    pounds: string,
-  ) {
-    const current = bandFor(service);
+  function setRate(service: ServiceType, pounds: string) {
     setPricing((prev) => ({
       ...prev,
       hourly: {
         ...prev.hourly,
-        [service]: {
-          ...current,
-          [key]: poundsInputToPence(pounds),
-        },
+        [service]: poundsInputToPence(pounds),
       },
     }));
   }
@@ -169,53 +160,37 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           Service hourly rates (£/h)
         </h2>
         <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          Two labour bands per service. Standard is the everyday rate; deep is
-          used for heavier cleans. Amounts are pounds per cleaner-hour.
+          One labour rate per service. Heavier jobs still cost more when they
+          take longer.
         </p>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="border-b text-[#5a5470]">
                 <th className="py-2 pr-3 font-medium">Service</th>
-                <th className="py-2 pr-3 font-medium">Standard</th>
-                <th className="py-2 font-medium">Deep</th>
+                <th className="py-2 font-medium">£/h</th>
               </tr>
             </thead>
             <tbody>
-              {serviceRows.map((service) => {
-                const band = bandFor(service.value);
-                return (
-                  <tr className="border-b border-border/60" key={service.value}>
-                    <td className="py-2.5 pr-3 font-medium text-[#1c133b]">
-                      {service.label}
-                    </td>
-                    <td className="py-2.5 pr-3">
-                      <Input
-                        className="h-9 w-24"
-                        min={0}
-                        onChange={(event) =>
-                          setBand(service.value, "standard", event.target.value)
-                        }
-                        step="0.01"
-                        type="number"
-                        value={penceToPoundsInput(band.standard)}
-                      />
-                    </td>
-                    <td className="py-2.5">
-                      <Input
-                        className="h-9 w-24"
-                        min={0}
-                        onChange={(event) =>
-                          setBand(service.value, "deep", event.target.value)
-                        }
-                        step="0.01"
-                        type="number"
-                        value={penceToPoundsInput(band.deep)}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
+              {serviceRows.map((service) => (
+                <tr className="border-b border-border/60" key={service.value}>
+                  <td className="py-2.5 pr-3 font-medium text-[#1c133b]">
+                    {service.label}
+                  </td>
+                  <td className="py-2.5">
+                    <Input
+                      className="h-9 w-24"
+                      min={0}
+                      onChange={(event) =>
+                        setRate(service.value, event.target.value)
+                      }
+                      step="0.01"
+                      type="number"
+                      value={penceToPoundsInput(rateFor(service.value))}
+                    />
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

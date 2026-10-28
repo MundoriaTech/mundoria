@@ -5,18 +5,12 @@ import type {
   ServiceType,
 } from "@/types/customer";
 
-type RateCardLevel = "standard" | "deep";
-
-function rateCardLevel(standard: CleaningStandard): RateCardLevel {
-  return standard === "essential" ? "standard" : "deep";
-}
-
-export type HourlyBand = { deep: number; standard: number };
-
 export type ServicePricingConfig = {
   addOns: Record<string, number>;
-  defaults: HourlyBand;
-  hourly: Partial<Record<ServiceType, HourlyBand>>;
+  /** Fallback £/h (pence) when a service has no explicit rate. */
+  defaults: number;
+  /** One labour rate per service (pence per hour). */
+  hourly: Partial<Record<ServiceType, number>>;
   schedule: {
     early: number;
     evening: number;
@@ -31,30 +25,33 @@ export type ServicePricingConfig = {
   };
 };
 
-/** In-code defaults — match historic rate-card / add-on / schedule values. */
+/**
+ * In-code defaults — one rate per service.
+ * Heavier products (deep clean, move-in, etc.) use a higher £/h than routine regular.
+ */
 export const DEFAULT_SERVICE_PRICING: ServicePricingConfig = {
-  defaults: { standard: 2200, deep: 2600 },
+  defaults: 2200,
   hourly: {
-    regular: { standard: 2200, deep: 2600 },
-    deep_clean: { standard: 2200, deep: 2600 },
-    one_off: { standard: 2600, deep: 2600 },
-    same_day: { standard: 2600, deep: 2600 },
-    move_in: { standard: 2600, deep: 2600 },
-    move_out: { standard: 2600, deep: 2600 },
-    end_of_tenancy: { standard: 2600, deep: 2600 },
-    airbnb_turnover: { standard: 2200, deep: 2600 },
-    holiday_let: { standard: 2200, deep: 2600 },
-    serviced_accommodation: { standard: 2200, deep: 2600 },
-    office: { standard: 2200, deep: 2600 },
-    retail_hospitality: { standard: 2200, deep: 2600 },
-    educational_facility: { standard: 2200, deep: 2600 },
-    communal_area: { standard: 2200, deep: 2600 },
-    pregnancy_support: { standard: 2300, deep: 2700 },
-    postpartum: { standard: 2300, deep: 2700 },
-    illness_recovery: { standard: 2300, deep: 2700 },
-    post_injury: { standard: 2300, deep: 2700 },
-    hospital_discharge: { standard: 2300, deep: 2700 },
-    bereavement_support: { standard: 2300, deep: 2700 },
+    regular: 2200,
+    deep_clean: 2600,
+    one_off: 2600,
+    same_day: 2600,
+    move_in: 2600,
+    move_out: 2600,
+    end_of_tenancy: 2600,
+    airbnb_turnover: 2600,
+    holiday_let: 2600,
+    serviced_accommodation: 2600,
+    office: 2200,
+    retail_hospitality: 2200,
+    educational_facility: 2600,
+    communal_area: 2600,
+    pregnancy_support: 2700,
+    postpartum: 2700,
+    illness_recovery: 2700,
+    post_injury: 2700,
+    hospital_discharge: 2700,
+    bereavement_support: 2700,
   },
   supply: {
     productsResidential: 200,
@@ -100,13 +97,17 @@ function asMultiplier(value: unknown, fallback: number) {
   return Math.round(n * 1000) / 1000;
 }
 
-function asBand(value: unknown, fallback: HourlyBand): HourlyBand {
-  if (!value || typeof value !== "object") return fallback;
-  const row = value as Record<string, unknown>;
-  return {
-    standard: asPositiveInt(row.standard, fallback.standard),
-    deep: asPositiveInt(row.deep, fallback.deep),
-  };
+/** Accept a plain pence number, or legacy `{ standard, deep }` band (uses standard). */
+function asHourlyRate(value: unknown, fallback: number): number {
+  if (typeof value === "number" || typeof value === "string") {
+    return asPositiveInt(value, fallback);
+  }
+  if (value && typeof value === "object") {
+    const row = value as Record<string, unknown>;
+    if (row.standard != null) return asPositiveInt(row.standard, fallback);
+    if (row.deep != null) return asPositiveInt(row.deep, fallback);
+  }
+  return fallback;
 }
 
 /** Merge partial admin JSON over code defaults. */
@@ -115,18 +116,18 @@ export function normalizeServicePricing(raw: unknown): ServicePricingConfig {
   if (!raw || typeof raw !== "object") return structuredClone(base);
   const input = raw as Record<string, unknown>;
 
-  const defaults = asBand(input.defaults, base.defaults);
+  const defaults = asHourlyRate(input.defaults, base.defaults);
   const hourlyIn =
     input.hourly && typeof input.hourly === "object"
       ? (input.hourly as Record<string, unknown>)
       : {};
   const hourly: ServicePricingConfig["hourly"] = { ...base.hourly };
   for (const key of Object.keys(base.hourly) as ServiceType[]) {
-    hourly[key] = asBand(hourlyIn[key], base.hourly[key] ?? defaults);
+    hourly[key] = asHourlyRate(hourlyIn[key], base.hourly[key] ?? defaults);
   }
   for (const [key, value] of Object.entries(hourlyIn)) {
     if (!(key in hourly)) {
-      hourly[key as ServiceType] = asBand(value, defaults);
+      hourly[key as ServiceType] = asHourlyRate(value, defaults);
     }
   }
 
@@ -209,26 +210,24 @@ export async function loadServicePricing(): Promise<ServicePricingConfig> {
   }
 }
 
-export function bandForService(
+export function hourlyRateForService(
   pricing: ServicePricingConfig,
   serviceType: ServiceType,
-): HourlyBand {
+) {
   return pricing.hourly[serviceType] ?? pricing.defaults;
 }
 
 export function hourlyRateFromPricing(
   pricing: ServicePricingConfig,
   serviceType: ServiceType,
-  standard: CleaningStandard,
+  _standard?: CleaningStandard,
 ) {
   const envCommercial = process.env.COMMERCIAL_HOURLY_RATE_PENCE;
   if (envCommercial && COMMERCIAL_TYPES.includes(serviceType)) {
     const parsed = Number(envCommercial);
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
   }
-  const band = bandForService(pricing, serviceType);
-  const level: RateCardLevel = rateCardLevel(standard);
-  return band[level];
+  return hourlyRateForService(pricing, serviceType);
 }
 
 export function productSupplyFromPricing(
