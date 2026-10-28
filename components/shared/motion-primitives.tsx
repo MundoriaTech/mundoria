@@ -101,17 +101,9 @@ export function StaggerItem({
   );
 }
 
-/**
- * Picks an entrance direction for the n-th item in a row so neighbouring
- * cards arrive from slightly different angles.
- */
-export function directionFor(index: number, columns = 3): EnterFrom {
-  const column = index % columns;
-  if (columns === 1) return "up";
-  if (column === 0) return "up-right";
-  if (column === columns - 1) return "up-left";
-  return "up";
-}
+// `directionFor` lives in lib/motion so server components can import it
+// without pulling a client-module reference. Re-exported here for client code.
+export { directionFor } from "@/lib/motion";
 
 /**
  * Hover-lift, press-squash card wrapper. Use around any clickable surface

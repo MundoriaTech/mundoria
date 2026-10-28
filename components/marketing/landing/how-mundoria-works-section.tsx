@@ -1,11 +1,8 @@
 import Image from "next/image";
 
-import {
-  directionFor,
-  Stagger,
-  StaggerItem,
-} from "@/components/shared/motion-primitives";
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
+import { directionFor } from "@/lib/motion";
 
 const STEPS = [
   {

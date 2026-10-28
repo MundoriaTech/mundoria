@@ -80,6 +80,19 @@ export function enterOffset(from: EnterFrom, distance = 24) {
 }
 
 /**
+ * Picks an entrance direction for the n-th item in a row so neighbouring
+ * cards arrive from slightly different angles. Plain function (no React),
+ * so server components can call it when laying out a grid.
+ */
+export function directionFor(index: number, columns = 3): EnterFrom {
+  const column = index % columns;
+  if (columns === 1) return "up";
+  if (column === 0) return "up-right";
+  if (column === columns - 1) return "up-left";
+  return "up";
+}
+
+/**
  * Fade + travel variants. Pair with `initial="hidden" animate="visible"`
  * (or `whileInView="visible"`) on a `motion` element.
  */
