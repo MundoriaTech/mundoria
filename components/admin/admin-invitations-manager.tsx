@@ -162,8 +162,13 @@ export function AdminInvitationsManager({
           placeholder="Full name"
           value={fullName}
         />
-        <Button className="w-full md:w-auto" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Sending…" : "Send invite"}
+        <Button
+          className="w-full md:w-auto"
+          loading={isSubmitting}
+          loadingLabel="Sending…"
+          type="submit"
+        >
+          Send invite
         </Button>
       </form>
 

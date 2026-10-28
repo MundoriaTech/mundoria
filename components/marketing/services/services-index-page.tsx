@@ -171,7 +171,7 @@ const POPULAR_VALUES: ServiceType[] = [
 ];
 
 const POPULAR_TINTS = [
-  "bg-[#efe6ff]",
+  "bg-brand-lavender-light",
   "bg-[#f7f0d8]",
   "bg-[#f8e4d4]",
   "bg-[#f0e4f8]",
@@ -194,7 +194,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
 
   return (
     <div
-      className="relative overflow-hidden bg-[#faf8ff]"
+      className="relative overflow-hidden bg-brand-haze"
       style={{ marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` }}
     >
       <div
@@ -211,22 +211,22 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
         style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 3.5rem)` }}
       >
         <div className="mx-auto max-w-6xl">
-          <h1 className="max-w-2xl text-balance text-[2.35rem] font-semibold leading-[1.05] tracking-[-0.04em] text-[#1c133b] sm:text-5xl lg:text-[3.35rem]">
+          <h1 className="max-w-2xl text-balance text-[2.35rem] font-semibold leading-[1.05] tracking-[-0.04em] text-brand-ink sm:text-5xl lg:text-[3.35rem]">
             Cleaning services, clearly laid out.
           </h1>
-          <p className="mt-4 max-w-lg text-pretty text-[15px] font-normal leading-6 text-[#5a5470] sm:text-base sm:leading-7">
+          <p className="mt-4 max-w-lg text-pretty text-[15px] font-normal leading-6 text-brand-muted sm:text-base sm:leading-7">
             Jump straight into a service, or browse by category below. Each one
             opens its own page, with a clear estimate before you book.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
-              className="inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-7 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-brand-purple px-7 text-sm font-semibold text-white transition hover:bg-brand-purple-deep"
               href={bookingHref}
             >
               Book a clean
             </Link>
             <Link
-              className="inline-flex h-12 items-center justify-center rounded-full border border-[#d9ccef] bg-white/80 px-7 text-sm font-semibold text-[#312c79] backdrop-blur-sm transition hover:border-[#6a45b8]/40 hover:bg-white"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-[#d9ccef] bg-white/80 px-7 text-sm font-semibold text-brand-indigo backdrop-blur-sm transition hover:border-brand-purple/40 hover:bg-white"
               href={bookingHref}
             >
               Get a quote
@@ -238,10 +238,10 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
       <section className="relative px-4 py-12 sm:px-8 sm:py-14 lg:px-12">
         <div className="mx-auto max-w-6xl">
           <ScrollReveal>
-            <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+            <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-brand-ink sm:text-2xl">
               Popular right now
             </h2>
-            <p className="mt-1.5 max-w-lg text-sm text-[#5a5470]">
+            <p className="mt-1.5 max-w-lg text-sm text-brand-muted">
               A quick path into the services people book most.
             </p>
           </ScrollReveal>
@@ -266,16 +266,16 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[15px] font-semibold leading-snug text-[#1c133b]">
+                    <p className="text-[15px] font-semibold leading-snug text-brand-ink">
                       {service.label}
                     </p>
-                    <p className="mt-1 line-clamp-2 text-[12.5px] leading-5 text-[#5a5470]">
+                    <p className="mt-1 line-clamp-2 text-[12.5px] leading-5 text-brand-muted">
                       {service.description}
                     </p>
                   </div>
                   <ArrowRight
                     aria-hidden
-                    className="h-4 w-4 shrink-0 text-[#6a45b8] opacity-0 transition group-hover:opacity-100"
+                    className="h-4 w-4 shrink-0 text-brand-purple opacity-0 transition group-hover:opacity-100"
                   />
                 </Link>
               </ScrollReveal>
@@ -289,7 +289,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
           {groups.map((group, groupIndex) => (
             <ScrollReveal delay={groupIndex * 40} key={group.label}>
               <section
-                className="overflow-hidden rounded-[1.75rem] border border-[#e4daf5]/80 bg-white/80 shadow-[0_12px_40px_rgba(49,44,121,0.06)] backdrop-blur-sm"
+                className="overflow-hidden rounded-[1.75rem] border border-brand-lavender/80 bg-white/80 shadow-[0_12px_40px_rgba(49,44,121,0.06)] backdrop-blur-sm"
                 id={slugify(group.label)}
               >
                 <div
@@ -297,15 +297,15 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
                   style={{ backgroundColor: group.soft }}
                 >
                   <div className="max-w-xl">
-                    <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-[1.6rem]">
+                    <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-brand-ink sm:text-[1.6rem]">
                       {group.label}
                     </h2>
-                    <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">
+                    <p className="mt-1.5 text-sm leading-6 text-brand-muted">
                       {group.description}
                     </p>
                   </div>
                   <Link
-                    className="inline-flex items-center gap-1.5 self-start rounded-full bg-[#1c133b] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#312c79] sm:self-auto"
+                    className="inline-flex items-center gap-1.5 self-start rounded-full bg-brand-ink px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-indigo sm:self-auto"
                     href={group.href}
                   >
                     Explore
@@ -330,7 +330,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-[#1c133b] transition group-hover:text-[#6a45b8]">
+                          <p className="font-semibold text-brand-ink transition group-hover:text-brand-purple">
                             {service.label}
                           </p>
                           <p className="mt-0.5 text-sm leading-5 text-[#6b6580]">
@@ -339,7 +339,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
                         </div>
                         <ArrowRight
                           aria-hidden
-                          className="mt-1 h-4 w-4 shrink-0 text-[#b5a8d4] transition group-hover:translate-x-0.5 group-hover:text-[#6a45b8] sm:mt-0"
+                          className="mt-1 h-4 w-4 shrink-0 text-[#b5a8d4] transition group-hover:translate-x-0.5 group-hover:text-brand-purple sm:mt-0"
                         />
                       </Link>
                     </li>
@@ -351,14 +351,14 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
         </div>
       </div>
 
-      <section className="relative overflow-hidden bg-[#1c133b] px-4 py-14 text-white sm:px-8 sm:py-16">
+      <section className="relative overflow-hidden bg-brand-ink px-4 py-14 text-white sm:px-8 sm:py-16">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-16 top-0 h-56 w-56 rounded-full bg-[#823fb2]/35 blur-3xl"
+          className="pointer-events-none absolute -right-16 top-0 h-56 w-56 rounded-full bg-brand-violet/35 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-[#d4694a]/25 blur-3xl"
+          className="pointer-events-none absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-brand-terracotta/25 blur-3xl"
         />
         <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <div>
@@ -371,7 +371,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
             </p>
           </div>
           <Link
-            className="inline-flex h-12 items-center justify-center rounded-full bg-white px-7 text-sm font-semibold text-[#1c133b] transition hover:bg-[#e8e0f9]"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-white px-7 text-sm font-semibold text-brand-ink transition hover:bg-[#e8e0f9]"
             href={bookingHref}
           >
             Book a clean

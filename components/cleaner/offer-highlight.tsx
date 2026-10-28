@@ -54,13 +54,13 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
   }
 
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-[#e6e0f2] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
+    <article className="overflow-hidden rounded-[1.75rem] border border-brand-line bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
       <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
             Waiting for you
           </p>
-          <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+          <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
             {formatServiceName(job.service_type)}
           </h3>
           <p className="mt-1 text-sm leading-6 text-[#5c5670]">
@@ -72,7 +72,7 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
         </p>
       </div>
 
-      <dl className="mt-5 grid grid-cols-2 gap-px border-y border-[#efe6ff] bg-[#efe6ff] sm:grid-cols-3">
+      <dl className="mt-5 grid grid-cols-2 gap-px border-y border-brand-lavender-light bg-brand-lavender-light sm:grid-cols-3">
         <Fact label="When" value={`${when} · ${time}`} />
         <Fact label="Area" value={area} />
         <Fact
@@ -89,7 +89,7 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
 
       <div className="flex flex-col gap-2 p-5 sm:flex-row sm:flex-wrap sm:items-center sm:px-6">
         <button
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79] disabled:opacity-50"
+          className="inline-flex h-11 items-center justify-center rounded-full bg-brand-ink px-5 text-sm font-semibold text-white transition hover:bg-brand-indigo disabled:opacity-50"
           disabled={busy || closed}
           onClick={() => void respond("accepted")}
           type="button"
@@ -97,7 +97,7 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
           Accept
         </button>
         <button
-          className="inline-flex h-11 items-center justify-center rounded-full border border-[#e6e0f2] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea] disabled:opacity-50"
+          className="inline-flex h-11 items-center justify-center rounded-full border border-brand-line bg-white px-5 text-sm font-semibold text-brand-ink transition hover:bg-[#f7f2ea] disabled:opacity-50"
           disabled={busy || closed}
           onClick={() => void respond("declined")}
           type="button"
@@ -105,7 +105,7 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
           Decline
         </button>
         <Link
-          className="inline-flex h-11 items-center justify-center rounded-full px-3 text-sm font-semibold text-[#312c79]"
+          className="inline-flex h-11 items-center justify-center rounded-full px-3 text-sm font-semibold text-brand-indigo"
           href={`/cleaner/job/${job.id}`}
         >
           See details
@@ -118,10 +118,10 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white px-5 py-3.5 sm:px-6">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-violet">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
+      <dd className="mt-1 text-sm font-semibold tracking-tight text-brand-ink">
         {value}
       </dd>
     </div>

@@ -360,7 +360,7 @@ export function CleanerReviewPanel({
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <select
-              className="h-11 w-full flex-1 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
+              className="h-11 w-full flex-1 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
               onChange={(event) => setTier(event.target.value as CleanerTier)}
               value={tier}
             >

@@ -39,7 +39,7 @@ export function RecurringToggle({
       {value.enabled ? (
         <select
           aria-label="Recurring frequency"
-          className="h-11 w-full rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
+          className="h-11 w-full rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
           onChange={(event) =>
             onChange({
               ...value,

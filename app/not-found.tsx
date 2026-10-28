@@ -22,7 +22,7 @@ export default async function NotFoundPage() {
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-[#efe6ff] blur-3xl"
+          className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-brand-lavender-light blur-3xl"
         />
         <div
           aria-hidden
@@ -30,14 +30,14 @@ export default async function NotFoundPage() {
         />
 
         <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#6a45b8]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-brand-purple">
             Error 404
           </p>
 
           <div className="relative mt-6">
             <p
               aria-hidden
-              className="select-none text-[7.5rem] font-bold leading-none tracking-[-0.08em] text-[#1c133b]/10 sm:text-[10rem]"
+              className="select-none text-[7.5rem] font-bold leading-none tracking-[-0.08em] text-brand-ink/10 sm:text-[10rem]"
             >
               404
             </p>
@@ -55,11 +55,11 @@ export default async function NotFoundPage() {
             </div>
           </div>
 
-          <h1 className="mt-4 max-w-xl text-balance text-[1.85rem] font-bold tracking-[-0.04em] text-[#1c133b] sm:text-[2.5rem] sm:leading-[1.1]">
+          <h1 className="mt-4 max-w-xl text-balance text-[1.85rem] font-bold tracking-[-0.04em] text-brand-ink sm:text-[2.5rem] sm:leading-[1.1]">
             This page got a deep clean…
-            <span className="block text-[#6a45b8]">and vanished.</span>
+            <span className="block text-brand-purple">and vanished.</span>
           </h1>
-          <p className="mt-4 max-w-md text-pretty text-base leading-7 text-[#5a5470] sm:text-lg">
+          <p className="mt-4 max-w-md text-pretty text-base leading-7 text-brand-muted sm:text-lg">
             Our astronaut checked under the sofa, behind the fridge, and in the
             vacuum bag. Still no page. Shall we get you somewhere that actually
             exists?
@@ -67,23 +67,23 @@ export default async function NotFoundPage() {
 
           <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
-              className="inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-6 text-base font-semibold text-white transition hover:bg-[#5a38a3] touch-manipulation"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-brand-purple px-6 text-base font-semibold text-white transition hover:bg-brand-purple-deep touch-manipulation"
               href={homeHref}
             >
               Beam me home
             </Link>
             <Link
-              className="inline-flex h-12 items-center justify-center rounded-full border border-[#1c133b] bg-white px-6 text-base font-semibold text-[#1c133b] transition hover:bg-[#efe6ff] touch-manipulation"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-brand-ink bg-white px-6 text-base font-semibold text-brand-ink transition hover:bg-brand-lavender-light touch-manipulation"
               href={bookingHref}
             >
               Book a clean instead
             </Link>
           </div>
 
-          <p className="mt-8 text-sm text-[#8b8798]">
+          <p className="mt-8 text-sm text-brand-subtle">
             Or try{" "}
             <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="font-semibold text-brand-purple underline-offset-2 hover:underline"
               href="/help"
             >
               Help
@@ -91,7 +91,7 @@ export default async function NotFoundPage() {
             {" "}
             or{" "}
             <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="font-semibold text-brand-purple underline-offset-2 hover:underline"
               href="/cleaning"
             >
               Services

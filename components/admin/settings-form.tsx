@@ -57,7 +57,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
   return (
     <section className="max-w-2xl space-y-6">
       <div className="rounded-xl border bg-card p-4 sm:p-6">
-        <h2 className="text-base font-semibold text-[#1c133b]">Platform</h2>
+        <h2 className="text-base font-semibold text-brand-ink">Platform</h2>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
           <Field label="Platform commission (%)">
             <Input
@@ -115,10 +115,10 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       </div>
 
       <div className="rounded-xl border bg-card p-4 sm:p-6">
-        <h2 className="text-base font-semibold text-[#1c133b]">
+        <h2 className="text-base font-semibold text-brand-ink">
           Customer payments
         </h2>
-        <p className="mt-1 text-sm leading-6 text-[#5a5470]">
+        <p className="mt-1 text-sm leading-6 text-brand-muted">
           Card is saved at booking. Pre-authorisation runs once a cleaner is
           confirmed and the visit is inside this window. Capture runs the next
           UK calendar day after checkout, at the time below.

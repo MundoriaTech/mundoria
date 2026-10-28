@@ -51,19 +51,19 @@ export function LocationStickyBookBar({
             <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 print:hidden">
               <motion.div
                 animate={{ y: 0 }}
-                className="pointer-events-auto rounded-t-[1.5rem] border border-b-0 border-[#e4daf5] bg-white px-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_32px_rgba(28,19,59,0.12)]"
+                className="pointer-events-auto rounded-t-[1.5rem] border border-b-0 border-brand-lavender bg-white px-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_32px_rgba(28,19,59,0.12)]"
                 initial={{ y: "110%" }}
                 transition={{ ...SPRING.gentle, delay: 0.4 }}
               >
                 <div className="mx-auto max-w-lg">
                   <Link
-                    className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#1c133b] text-sm font-semibold text-white transition hover:bg-[#1c133b]/90"
+                    className="inline-flex h-12 w-full items-center justify-center rounded-full bg-brand-ink text-sm font-semibold text-white transition hover:bg-brand-ink/90"
                     href={bookingHref}
                   >
                     {label}
                   </Link>
                   {secondary ? (
-                    <p className="mt-2 text-center text-[12px] font-medium text-[#1c133b]/55">
+                    <p className="mt-2 text-center text-[12px] font-medium text-brand-ink/55">
                       {secondary}
                     </p>
                   ) : null}

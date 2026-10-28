@@ -87,23 +87,23 @@ export function BookingCalendar({
       <div className="mb-4 flex items-center justify-between">
         <button
           aria-label="Previous month"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-brand-ink touch-manipulation"
           onClick={() => shiftMonth(-1)}
           type="button"
         >
           ‹
         </button>
-        <p className="font-semibold text-[#1c133b]">{monthLabel}</p>
+        <p className="font-semibold text-brand-ink">{monthLabel}</p>
         <button
           aria-label="Next month"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-brand-ink touch-manipulation"
           onClick={() => shiftMonth(1)}
           type="button"
         >
           ›
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-[#8b8798]">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-brand-subtle">
         {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
           <span key={day}>{day}</span>
         ))}
@@ -117,8 +117,8 @@ export function BookingCalendar({
           return (
             <button
               className={cn(
-                "mx-auto flex h-9 w-9 items-center justify-center rounded-full text-[#1c133b] touch-manipulation",
-                isSelected && "bg-[#6a45b8] font-bold text-white",
+                "mx-auto flex h-9 w-9 items-center justify-center rounded-full text-brand-ink touch-manipulation",
+                isSelected && "bg-brand-purple font-bold text-white",
                 disabled && "opacity-30",
                 !isSelected && !disabled && "hover:bg-white",
               )}

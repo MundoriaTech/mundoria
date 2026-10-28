@@ -54,14 +54,14 @@ export function AboutSection({
 
         <Stagger gap={0.1} inView>
           <StaggerItem distance={24} from="right">
-            <h2 className="max-w-md text-balance text-[1.75rem] font-bold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
+            <h2 className="max-w-md text-balance text-[1.75rem] font-bold leading-[1.15] tracking-[-0.03em] text-brand-ink sm:text-[2.35rem]">
               Home services with a visible standard.
             </h2>
           </StaggerItem>
-          <div className="mt-6 max-w-lg divide-y divide-[#1c133b]/20 border-y border-[#1c133b]/20">
+          <div className="mt-6 max-w-lg divide-y divide-brand-ink/20 border-y border-brand-ink/20">
             {points.map((item) => (
               <StaggerItem distance={20} from="right" key={item}>
-                <p className="py-4 text-pretty text-[13px] font-light leading-6 text-[#1c133b]/85 sm:leading-7">
+                <p className="py-4 text-pretty text-[13px] font-light leading-6 text-brand-ink/85 sm:leading-7">
                   {item}
                 </p>
               </StaggerItem>
@@ -70,13 +70,13 @@ export function AboutSection({
           <StaggerItem className="mt-8 flex flex-col gap-3 sm:flex-row" distance={16}>
             <Button
               asChild
-              className="h-11 rounded-full bg-[#1c133b] px-5 text-[13px] font-semibold text-[#e6e5f3] hover:bg-[#1c133b]/90 sm:h-[33px] sm:text-[12px]"
+              className="h-11 rounded-full bg-brand-ink px-5 text-[13px] font-semibold text-[#e6e5f3] hover:bg-brand-ink/90 sm:h-[33px] sm:text-[12px]"
             >
               <Link href={customerHref}>Book a clean</Link>
             </Button>
             <Button
               asChild
-              className="h-11 rounded-full bg-[#c79c66] px-5 text-[13px] font-semibold text-[#1c133b] hover:bg-[#c79c66]/90 sm:h-[33px] sm:text-[12px]"
+              className="h-11 rounded-full bg-brand-gold px-5 text-[13px] font-semibold text-brand-ink hover:bg-brand-gold/90 sm:h-[33px] sm:text-[12px]"
             >
               <Link href={cleanerHref}>Become a cleaner</Link>
             </Button>

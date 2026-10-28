@@ -11,17 +11,17 @@ export function ServiceCityCoverage({ service }: { service: MarketingService }) 
 
   return (
     <BrandedSection>
-      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
         {label} in your city
       </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">
         Mundoria is live in {LAUNCH_CITY.name}. Open the local page for coverage
         and a clear estimate before you book.
       </p>
       <ul className="mt-5 flex flex-wrap gap-3">
         <li>
           <Link
-            className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
+            className="inline-flex rounded-full border border-brand-lavender bg-white px-4 py-2 text-sm font-semibold text-brand-ink transition hover:text-brand-purple"
             href={cityHref}
           >
             {label} in {LAUNCH_CITY.name}

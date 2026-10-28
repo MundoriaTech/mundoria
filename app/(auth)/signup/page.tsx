@@ -24,12 +24,12 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
       footer={
         <>
           Already have an account?{" "}
-          <Link className="font-semibold text-[#291845] hover:underline" href={loginHref}>
+          <Link className="font-semibold text-brand-plum hover:underline" href={loginHref}>
             Sign in
           </Link>
           <span className="mt-2 block text-sm text-muted-foreground">
             Want to work as a cleaner?{" "}
-            <Link className="font-semibold text-[#291845] hover:underline" href="/signup/cleaner">
+            <Link className="font-semibold text-brand-plum hover:underline" href="/signup/cleaner">
               Create a cleaner account
             </Link>
           </span>

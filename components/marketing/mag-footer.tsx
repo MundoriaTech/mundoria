@@ -60,10 +60,10 @@ export function MagFooter({
         <div className="grid gap-8 border-b border-border pb-10 sm:grid-cols-2 sm:gap-10 sm:pb-12 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link
-              className="text-[1.35rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.55rem]"
+              className="text-[1.35rem] font-black tracking-[-0.06em] text-brand-ink sm:text-[1.55rem]"
               href="/blog"
             >
-              Mundoria <span className="text-[#d4694a]">Mag</span>
+              Mundoria <span className="text-brand-terracotta">Mag</span>
             </Link>
             <p className="mt-5 max-w-xl text-pretty text-sm font-light leading-7 text-muted-foreground sm:mt-6">
               Cleaning & home magazine — practical guides, host tips and
@@ -71,7 +71,7 @@ export function MagFooter({
             </p>
             <div className="mt-5 sm:mt-6">
               <ContactSupportButton
-                className="text-sm font-semibold text-[#6a45b8] transition hover:text-[#5a38a3]"
+                className="text-sm font-semibold text-brand-purple transition hover:text-brand-purple-deep"
                 label="Start a chat"
                 tab="home"
               />
@@ -87,7 +87,7 @@ export function MagFooter({
                 {section.links.map(([label, href]) => {
                   const link = (
                     <Link
-                      className="text-sm font-medium text-muted-foreground transition hover:text-[#312c79]"
+                      className="text-sm font-medium text-muted-foreground transition hover:text-brand-indigo"
                       href={href}
                     >
                       {label}
@@ -106,7 +106,7 @@ export function MagFooter({
                 {section.title === "Guides" ? (
                   <li>
                     <ContactSupportButton
-                      className="text-sm font-medium text-muted-foreground transition hover:text-[#312c79]"
+                      className="text-sm font-medium text-muted-foreground transition hover:text-brand-indigo"
                       label="Start a chat"
                       tab="home"
                     />
@@ -126,16 +126,16 @@ export function MagFooter({
             </p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-3">
-            <Link className="transition hover:text-[#312c79]" href="/privacy">
+            <Link className="transition hover:text-brand-indigo" href="/privacy">
               Privacy
             </Link>
-            <Link className="transition hover:text-[#312c79]" href="/cookies">
+            <Link className="transition hover:text-brand-indigo" href="/cookies">
               Cookie policy
             </Link>
-            <CookieSettingsLink className="transition hover:text-[#312c79]">
+            <CookieSettingsLink className="transition hover:text-brand-indigo">
               Manage cookies
             </CookieSettingsLink>
-            <Link className="transition hover:text-[#312c79]" href="/terms">
+            <Link className="transition hover:text-brand-indigo" href="/terms">
               Terms
             </Link>
           </div>

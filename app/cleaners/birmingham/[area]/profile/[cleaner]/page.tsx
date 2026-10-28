@@ -26,7 +26,7 @@ function RatingStars({ score }: { score: number | null }) {
   return (
     <span
       aria-label={score == null ? "No rating" : `${score.toFixed(1)} out of 5`}
-      className="inline-flex gap-0.5 text-[#c79c66]"
+      className="inline-flex gap-0.5 text-brand-gold"
     >
       {Array.from({ length: 5 }, (_, index) => (
         <Star
@@ -141,17 +141,17 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
           style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 1.5rem)` }}
         >
           <div className="mx-auto max-w-5xl">
-            <nav aria-label="Breadcrumb" className="text-sm text-[#5a5470]">
+            <nav aria-label="Breadcrumb" className="text-sm text-brand-muted">
               <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <li>
-                  <Link className="hover:text-[#1c133b]" href="/">
+                  <Link className="hover:text-brand-ink" href="/">
                     Home
                   </Link>
                 </li>
                 <li aria-hidden>/</li>
                 <li>
                   <Link
-                    className="hover:text-[#1c133b]"
+                    className="hover:text-brand-ink"
                     href={`/cleaners/${LAUNCH_CITY.slug}`}
                   >
                     Birmingham
@@ -159,12 +159,12 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                 </li>
                 <li aria-hidden>/</li>
                 <li>
-                  <Link className="hover:text-[#1c133b]" href={areaHref}>
+                  <Link className="hover:text-brand-ink" href={areaHref}>
                     {area.name}
                   </Link>
                 </li>
                 <li aria-hidden>/</li>
-                <li className="font-medium text-[#1c133b]">{cleaner.name}</li>
+                <li className="font-medium text-brand-ink">{cleaner.name}</li>
               </ol>
             </nav>
 
@@ -178,23 +178,23 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                     src={cleaner.avatarUrl}
                   />
                 ) : (
-                  <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-[#f3f4f6] text-3xl font-semibold text-[#1c133b] sm:h-36 sm:w-36">
+                  <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-[#f3f4f6] text-3xl font-semibold text-brand-ink sm:h-36 sm:w-36">
                     {initials}
                   </div>
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d4694a]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-terracotta">
                     Independent cleaner · {area.name}
                   </p>
-                  <h1 className="mt-2 text-[2.4rem] font-semibold leading-none tracking-[-0.045em] text-[#1c133b] sm:text-5xl">
+                  <h1 className="mt-2 text-[2.4rem] font-semibold leading-none tracking-[-0.045em] text-brand-ink sm:text-5xl">
                     {cleaner.name}
                   </h1>
-                  <p className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-[#5a5470]">
-                    <span className="inline-flex items-center gap-1 font-semibold text-[#1c133b]">
+                  <p className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-brand-muted">
+                    <span className="inline-flex items-center gap-1 font-semibold text-brand-ink">
                       <Star
                         aria-hidden
-                        className="size-4 fill-[#c79c66] text-[#c79c66]"
+                        className="size-4 fill-brand-gold text-brand-gold"
                       />
                       {ratingLabel}
                     </span>
@@ -205,11 +205,11 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                     <span aria-hidden>·</span>
                     <span>Covers {cleaner.areas}</span>
                   </p>
-                  <p className="mt-4 max-w-xl text-base leading-7 text-[#5a5470]">
+                  <p className="mt-4 max-w-xl text-base leading-7 text-brand-muted">
                     {cleaner.bio}
                   </p>
                   <Link
-                    className="mt-7 hidden h-12 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#312c79] md:inline-flex"
+                    className="mt-7 hidden h-12 items-center justify-center rounded-full bg-brand-ink px-6 text-sm font-semibold text-white transition hover:bg-brand-indigo md:inline-flex"
                     href={bookWithHref}
                   >
                     Book with {cleaner.name}
@@ -219,13 +219,13 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
 
               {cleaner.services.length ? (
                 <div className="border-t border-[#efeaf8] px-6 py-6 sm:px-10">
-                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b8798]">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-subtle">
                     Services
                   </h2>
                   <ul className="mt-3 flex flex-wrap gap-2">
                     {cleaner.services.map((service) => (
                       <li
-                        className="rounded-full border border-[#e4daf5] bg-[#faf8ff] px-3 py-1.5 text-sm font-medium text-[#1c133b]"
+                        className="rounded-full border border-brand-lavender bg-brand-haze px-3 py-1.5 text-sm font-medium text-brand-ink"
                         key={service}
                       >
                         {service}
@@ -238,7 +238,7 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
 
             {reviews?.length ? (
               <section className="mt-14">
-                <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-brand-ink sm:text-2xl">
                   Reviews for {cleaner.name}
                 </h2>
                 <ul className="mt-6 grid gap-4">
@@ -251,13 +251,13 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                       <p className="mt-3 text-base leading-7 text-[#3d3a48]">
                         “{review.body}”
                       </p>
-                      <p className="mt-4 text-sm text-[#5a5470]">
-                        <span className="font-semibold text-[#1c133b]">
+                      <p className="mt-4 text-sm text-brand-muted">
+                        <span className="font-semibold text-brand-ink">
                           {review.author}
                         </span>
                         {review.when ? ` · ${review.when}` : ""}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#d4694a]">
+                      <p className="mt-1 text-xs font-medium text-brand-terracotta">
                         {review.service}
                       </p>
                     </li>
@@ -268,10 +268,10 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
 
             {pros.length ? (
               <section className="mt-16">
-                <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-brand-ink sm:text-2xl">
                   Discover other pros
                 </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">
                   Other independent cleaners covering {area.name}.
                 </p>
                 <FeaturedCleanerCards bookingHref={bookingHref} cleaners={pros} />

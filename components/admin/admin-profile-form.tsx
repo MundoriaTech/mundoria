@@ -94,8 +94,13 @@ export function AdminProfileForm({
       </div>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Button className="w-full sm:w-auto" disabled={saving} type="submit">
-          {saving ? "Saving…" : "Save profile"}
+        <Button
+          className="w-full sm:w-auto"
+          loading={saving}
+          loadingLabel="Saving…"
+          type="submit"
+        >
+          Save profile
         </Button>
         {status ? (
           <p className="text-sm text-muted-foreground">{status}</p>

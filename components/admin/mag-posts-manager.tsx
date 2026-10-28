@@ -57,10 +57,10 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
 
   return (
     <div className="min-w-0">
-      <div className="overflow-hidden rounded-[1.5rem] bg-[#1c133b] px-5 py-6 text-white sm:px-7 sm:py-8">
+      <div className="overflow-hidden rounded-[1.5rem] bg-brand-ink px-5 py-6 text-white sm:px-7 sm:py-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#f0a888]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-peach">
               Mundoria Mag
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -73,7 +73,7 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
           </div>
           <Button
             asChild
-            className="rounded-full bg-[#d4694a] text-white hover:bg-[#c45a3c]"
+            className="rounded-full bg-brand-terracotta text-white hover:bg-[#c45a3c]"
           >
             <Link href="/admin/mag/new">
               <Plus className="mr-1.5 h-4 w-4" />
@@ -100,11 +100,11 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
 
       {posts.length === 0 ? (
         <div className="mt-6 rounded-[1.5rem] border border-dashed border-[#d9ccef] bg-white px-6 py-16 text-center">
-          <Newspaper className="mx-auto h-10 w-10 text-[#6a45b8]/50" />
-          <p className="mt-4 text-lg font-semibold text-[#1c133b]">
+          <Newspaper className="mx-auto h-10 w-10 text-brand-purple/50" />
+          <p className="mt-4 text-lg font-semibold text-brand-ink">
             No Mag posts yet
           </p>
-          <p className="mt-2 text-sm text-[#5a5470]">
+          <p className="mt-2 text-sm text-brand-muted">
             Write your first guide and publish it to Mundoria Mag.
           </p>
           <Button asChild className="mt-6 rounded-full">
@@ -128,7 +128,7 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
                 {posts.map((post) => (
                   <tr className="border-b last:border-0" key={post.id}>
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-[#1c133b]">{post.title}</p>
+                      <p className="font-semibold text-brand-ink">{post.title}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         /blog/{post.slug}
                       </p>
@@ -167,14 +167,14 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Link
-                          className="rounded-full border px-3 py-1.5 text-xs font-semibold text-[#1c133b] hover:bg-muted"
+                          className="rounded-full border px-3 py-1.5 text-xs font-semibold text-brand-ink hover:bg-muted"
                           href={`/admin/mag/${post.id}`}
                         >
                           Edit
                         </Link>
                         {post.published ? (
                           <a
-                            className="rounded-full border px-3 py-1.5 text-xs font-semibold text-[#6a45b8] hover:bg-muted"
+                            className="rounded-full border px-3 py-1.5 text-xs font-semibold text-brand-purple hover:bg-muted"
                             href={`/blog/${post.slug}`}
                             rel="noreferrer"
                             target="_blank"
@@ -206,7 +206,7 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold text-[#1c133b]">{post.title}</p>
+                    <p className="font-semibold text-brand-ink">{post.title}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {post.category} · {formatDate(post.updated_at)}
                     </p>
@@ -261,10 +261,10 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
               <Trash2 className="h-5 w-5" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-[#1c133b]">
+            <h3 className="mt-4 text-lg font-semibold text-brand-ink">
               Delete this post?
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+            <p className="mt-2 text-sm leading-6 text-brand-muted">
               “{deleteTarget.title}” will be permanently removed from Mundoria
               Mag.
             </p>

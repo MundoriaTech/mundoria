@@ -16,7 +16,7 @@ export function AuthSignupLegal({
   return (
     <div className="space-y-3">
       <label
-        className="flex cursor-pointer items-start gap-3.5 text-sm leading-6 text-[#5a5470]"
+        className="flex cursor-pointer items-start gap-3.5 text-sm leading-6 text-brand-muted"
         htmlFor={id}
       >
         <span className="relative mt-0.5 inline-flex size-8 shrink-0">
@@ -31,7 +31,7 @@ export function AuthSignupLegal({
             aria-hidden
             className={cn(
               "pointer-events-none flex size-8 items-center justify-center rounded-lg border bg-white transition",
-              "border-[#cfc8d8] peer-focus-visible:ring-2 peer-focus-visible:ring-[#6a45b8]/35",
+              "border-[#cfc8d8] peer-focus-visible:ring-2 peer-focus-visible:ring-brand-purple/35",
               "peer-checked:border-[#d4a017] peer-checked:bg-[#d4a017]",
             )}
           >
@@ -58,13 +58,13 @@ export function AuthSignupLegal({
           I agree to receive Mundoria’s offers and news by email and SMS.
         </span>
       </label>
-      <p className="text-xs leading-5 text-[#8b8798]">
+      <p className="text-xs leading-5 text-brand-subtle">
         By creating an account, you accept Mundoria’s{" "}
-        <Link className="underline underline-offset-2 hover:text-[#1c133b]" href="/terms">
+        <Link className="underline underline-offset-2 hover:text-brand-ink" href="/terms">
           terms of service
         </Link>{" "}
         and{" "}
-        <Link className="underline underline-offset-2 hover:text-[#1c133b]" href="/privacy">
+        <Link className="underline underline-offset-2 hover:text-brand-ink" href="/privacy">
           privacy policy
         </Link>
         .

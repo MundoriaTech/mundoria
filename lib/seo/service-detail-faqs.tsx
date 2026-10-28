@@ -13,7 +13,7 @@ import type { ServiceType } from "@/types/customer";
 type FaqPoint = { description: ReactNode; name: string };
 
 const linkClass =
-  "font-semibold text-[#6a45b8] underline-offset-2 hover:underline";
+  "font-semibold text-brand-purple underline-offset-2 hover:underline";
 
 function FaqLink({
   children,

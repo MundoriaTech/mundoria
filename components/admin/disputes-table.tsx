@@ -36,7 +36,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
     <div className="min-w-0">
       <div className="grid gap-3 sm:grid-cols-3">
         <select
-          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-[#1c133b]"
+          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-brand-ink"
           onChange={(event) => setType(event.target.value)}
           value={type}
         >
@@ -48,7 +48,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
           ))}
         </select>
         <select
-          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-[#1c133b]"
+          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-brand-ink"
           onChange={(event) => setStatus(event.target.value)}
           value={status}
         >

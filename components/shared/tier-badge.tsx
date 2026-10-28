@@ -29,7 +29,7 @@ export function TierBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-[#e4daf5] bg-white shadow-[0_4px_12px_rgba(28,19,59,0.06)]",
+        "inline-flex items-center rounded-full border border-brand-lavender bg-white shadow-[0_4px_12px_rgba(28,19,59,0.06)]",
         dims.badge,
         className,
       )}
@@ -37,7 +37,7 @@ export function TierBadge({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="" aria-hidden className={cn("shrink-0", dims.icon)} src={iconSrc} />
-      <span className="font-semibold tracking-wide text-[#1c133b]">{label}</span>
+      <span className="font-semibold tracking-wide text-brand-ink">{label}</span>
     </span>
   );
 }

@@ -43,7 +43,7 @@ export function CoverageSection() {
                 {group.links.map((item) => (
                   <li key={item.href}>
                     <Link
-                      className="break-words text-[13px] font-normal leading-[1.45] text-white/90 transition hover:text-[#c79c66]"
+                      className="break-words text-[13px] font-normal leading-[1.45] text-white/90 transition hover:text-brand-gold"
                       href={item.href}
                     >
                       {item.label}

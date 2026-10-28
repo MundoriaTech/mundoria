@@ -128,7 +128,7 @@ export function ServiceCategoriesSection({
       id="services"
     >
       <div className="mx-auto max-w-6xl rounded-[1.35rem] bg-[#f6f1e7] px-4 py-5 shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:rounded-[2rem] sm:px-8 sm:py-9 lg:px-10 lg:py-10">
-        <h2 className="text-balance text-[1.45rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        <h2 className="text-balance text-[1.45rem] font-semibold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
           A clean for every kind of day.
         </h2>
 
@@ -145,8 +145,8 @@ export function ServiceCategoriesSection({
                 className={cn(
                   "flex min-h-11 items-center justify-center rounded-full border px-2 text-center text-[13px] font-semibold leading-tight transition sm:min-h-12 sm:px-4 sm:text-sm",
                   selected
-                    ? "border-[#1c133b] bg-[#1c133b] text-white"
-                    : "border-[#1c133b]/25 bg-transparent text-[#1c133b] hover:border-[#1c133b] hover:bg-white",
+                    ? "border-brand-ink bg-brand-ink text-white"
+                    : "border-brand-ink/25 bg-transparent text-brand-ink hover:border-brand-ink hover:bg-white",
                 )}
                 key={group.id}
                 onClick={() => selectGroup(group.id)}

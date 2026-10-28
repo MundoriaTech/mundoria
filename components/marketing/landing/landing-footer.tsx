@@ -26,7 +26,7 @@ export function LandingFooter({
   const popularSeoServices = popularMarketingServices(4);
 
   const linkClass =
-    "text-base font-medium text-muted-foreground transition hover:text-[#312c79]";
+    "text-base font-medium text-muted-foreground transition hover:text-brand-indigo";
 
   const footerSections: {
     title: string;
@@ -128,16 +128,16 @@ export function LandingFooter({
             </p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-3">
-            <Link className="transition hover:text-[#312c79]" href="/privacy">
+            <Link className="transition hover:text-brand-indigo" href="/privacy">
               Privacy
             </Link>
-            <Link className="transition hover:text-[#312c79]" href="/cookies">
+            <Link className="transition hover:text-brand-indigo" href="/cookies">
               Cookie policy
             </Link>
-            <CookieSettingsLink className="transition hover:text-[#312c79]">
+            <CookieSettingsLink className="transition hover:text-brand-indigo">
               Manage cookies
             </CookieSettingsLink>
-            <Link className="transition hover:text-[#312c79]" href="/terms">
+            <Link className="transition hover:text-brand-indigo" href="/terms">
               Terms
             </Link>
           </div>
@@ -184,7 +184,7 @@ const SOCIAL = [
 function FooterSocial() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-end">
-      <p className="text-base font-bold text-[#1c133b]">Follow us</p>
+      <p className="text-base font-bold text-brand-ink">Follow us</p>
       <ul className="flex gap-3">
         {SOCIAL.map(({ Icon, className, href, label }) => (
           <li key={label}>
@@ -195,7 +195,7 @@ function FooterSocial() {
               rel="noreferrer"
               target="_blank"
             >
-              <span className="absolute inset-0 bg-[#1c133b] transition-opacity group-hover:opacity-0" />
+              <span className="absolute inset-0 bg-brand-ink transition-opacity group-hover:opacity-0" />
               <span
                 className={`absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100 ${className}`}
               />
@@ -219,7 +219,7 @@ const PAYMENT_METHODS = [
 function FooterPayments() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-5 border-b border-border py-5 lg:flex-nowrap lg:justify-start lg:gap-24 lg:py-10">
-      <p className="text-base font-bold text-[#1c133b]">Accepted payment methods</p>
+      <p className="text-base font-bold text-brand-ink">Accepted payment methods</p>
       <ul className="flex flex-wrap items-center justify-center gap-6 lg:gap-10">
         {PAYMENT_METHODS.map((method) => (
           <li key={method.alt}>

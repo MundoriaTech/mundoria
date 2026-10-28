@@ -36,7 +36,7 @@ export function ActionError({
     >
       <CircleAlert
         aria-hidden
-        className="mt-0.5 h-5 w-5 shrink-0 text-[#d4694a]"
+        className="mt-0.5 h-5 w-5 shrink-0 text-brand-terracotta"
       />
       <div>
         <p className="text-sm font-semibold text-[#221f50]">{title}</p>
@@ -65,7 +65,7 @@ export function FieldError({ message }: { message: string }) {
     >
       <CircleAlert
         aria-hidden
-        className="mt-0.5 h-4 w-4 shrink-0 text-[#d4694a]"
+        className="mt-0.5 h-4 w-4 shrink-0 text-brand-terracotta"
       />
       <span>{message}</span>
     </motion.p>
@@ -74,8 +74,8 @@ export function FieldError({ message }: { message: string }) {
 
 /** Terracotta border for the control that failed. */
 export const invalidControlClass =
-  "border-[#d4694a] focus-visible:ring-[#d4694a]";
+  "border-brand-terracotta focus-visible:ring-brand-terracotta";
 
 /** Apply when an input or textarea is nested inside the wrapper. */
 export const invalidControlWrap =
-  "[&_input]:border-[#d4694a] [&_input]:focus-visible:ring-[#d4694a] [&_textarea]:border-[#d4694a] [&_textarea]:focus-visible:ring-[#d4694a]";
+  "[&_input]:border-brand-terracotta [&_input]:focus-visible:ring-brand-terracotta [&_textarea]:border-brand-terracotta [&_textarea]:focus-visible:ring-brand-terracotta";

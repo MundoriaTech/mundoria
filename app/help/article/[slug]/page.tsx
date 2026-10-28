@@ -73,11 +73,11 @@ export default async function HelpArticlePage({ params }: PageProps) {
               Help
             </p>
           )}
-          <h1 className="mt-3 text-[2.1rem] font-semibold tracking-[-0.045em] text-[#1c133b] sm:text-4xl">
+          <h1 className="mt-3 text-[2.1rem] font-semibold tracking-[-0.045em] text-brand-ink sm:text-4xl">
             {article.title}
           </h1>
           {article.summary ? (
-            <p className="mt-4 text-sm leading-7 text-[#5a5470]">
+            <p className="mt-4 text-sm leading-7 text-brand-muted">
               {article.summary}
             </p>
           ) : null}
@@ -93,10 +93,10 @@ export default async function HelpArticlePage({ params }: PageProps) {
             panel,
           )}
         >
-          <p className="text-sm font-semibold text-[#1c133b]">
+          <p className="text-sm font-semibold text-brand-ink">
             Didn’t find what you need?
           </p>
-          <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+          <p className="mt-2 text-sm leading-6 text-brand-muted">
             Try the{" "}
             <Link
               className="font-semibold underline-offset-2 hover:underline"
@@ -114,7 +114,7 @@ export default async function HelpArticlePage({ params }: PageProps) {
               style={{ backgroundColor: accent }}
             />
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-full border border-[#d9ccef] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-white/80"
+              className="inline-flex h-11 items-center justify-center rounded-full border border-[#d9ccef] bg-white px-5 text-sm font-semibold text-brand-ink transition hover:bg-white/80"
               href="/faq"
             >
               Browse FAQ

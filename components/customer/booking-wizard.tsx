@@ -273,37 +273,37 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
   balcony_patio: {
     Icon: Plant,
     className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#b8d4c8] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#b8d4c8] [&_path:last-child]:!fill-brand-indigo",
   },
   extra_bathroom_detail: {
     Icon: Drop,
     className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#8ec5e8] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#8ec5e8] [&_path:last-child]:!fill-brand-indigo",
   },
   inside_cabinets: {
     Icon: Door,
     className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-indigo",
   },
   inside_fridge: {
     Icon: CookingPot,
     className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-lavender-light [&_path:last-child]:!fill-brand-indigo",
   },
   inside_oven: {
     Icon: Fire,
     className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#d4694a]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-terracotta",
   },
   linen_change: {
     Icon: Bed,
     className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#efe6ff] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-lavender-light [&_path:last-child]:!fill-brand-indigo",
   },
   recovery_priority: {
     Icon: Heart,
     className:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a8c0] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a8c0] [&_path:last-child]:!fill-brand-indigo",
   },
 };
 
@@ -1655,7 +1655,7 @@ export function BookingWizard({
             />
           </Elements>
         ) : (
-          <p className="rounded-2xl bg-white p-4 text-sm text-[#5a5470]">
+          <p className="rounded-2xl bg-white p-4 text-sm text-brand-muted">
             Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure payment.
           </p>
         )
@@ -1714,7 +1714,7 @@ export function BookingWizard({
             {stepId !== "checkout" ? (
               <div className="mt-10 hidden lg:mt-auto lg:block lg:pt-10 lg:pb-2">
                 <button
-                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
+                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-brand-purple text-base font-semibold text-white transition hover:bg-brand-purple-deep active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-brand-ink/25 disabled:text-white touch-manipulation"
                   disabled={!canContinue()}
                   onClick={goNext}
                   type="button"
@@ -1731,12 +1731,12 @@ export function BookingWizard({
       </div>
 
       {stepId !== "checkout" || needsAuth ? (
-        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8e0d0]/80 bg-[#f9f6ef]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:px-5 lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-brand-sand/80 bg-brand-cream/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:px-5 lg:hidden">
           <div className="relative mx-auto flex w-full max-w-[1140px] items-center">
             <button
               aria-expanded={basketOpen}
               aria-label={basketOpen ? "Close basket" : "Open basket"}
-              className="min-w-0 flex-1 truncate text-left text-base font-bold tabular-nums text-[#1c133b] touch-manipulation"
+              className="min-w-0 flex-1 truncate text-left text-base font-bold tabular-nums text-brand-ink touch-manipulation"
               onClick={() => setBasketOpen((open) => !open)}
               type="button"
             >
@@ -1753,7 +1753,7 @@ export function BookingWizard({
             <button
               aria-expanded={basketOpen}
               aria-label={basketOpen ? "Close basket" : "Open basket"}
-              className="absolute left-1/2 top-1/2 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[#1c133b] touch-manipulation"
+              className="absolute left-1/2 top-1/2 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-brand-ink touch-manipulation"
               onClick={() => setBasketOpen((open) => !open)}
               type="button"
             >
@@ -1765,7 +1765,7 @@ export function BookingWizard({
             </button>
             {stepId !== "checkout" ? (
               <button
-                className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3] active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
+                className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-brand-purple px-8 text-base font-semibold text-white transition hover:bg-brand-purple-deep active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-brand-ink/25 disabled:text-white touch-manipulation"
                 disabled={!canContinue()}
                 onClick={goNext}
                 type="button"
@@ -1780,7 +1780,7 @@ export function BookingWizard({
       ) : null}
 
       {tooFarOpen && requestedPro ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#1c133b]/40 px-4">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-brand-ink/40 px-4">
           <div
             aria-labelledby="too-far-title"
             aria-modal="true"
@@ -1789,7 +1789,7 @@ export function BookingWizard({
           >
             <button
               aria-label="Close"
-              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e6ea] text-[#1c133b]"
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e6ea] text-brand-ink"
               onClick={() => {
                 dismissedFarPostcodeRef.current = addressPostcode;
                 setTooFarOpen(false);
@@ -1799,17 +1799,17 @@ export function BookingWizard({
               <X className="h-4 w-4" />
             </button>
             <h2
-              className="text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c133b]"
+              className="text-[1.35rem] font-bold tracking-[-0.03em] text-brand-ink"
               id="too-far-title"
             >
               {requestedPro} doesn’t cover this address
             </h2>
-            <p className="mt-4 text-sm leading-6 text-[#5a5470]">
+            <p className="mt-4 text-sm leading-6 text-brand-muted">
               This address is outside {requestedPro}’s area. You can still
               book, and Mundoria will match another cleaner who covers it.
             </p>
             <button
-              className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3]"
+              className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-brand-purple px-8 text-base font-semibold text-white transition hover:bg-brand-purple-deep"
               onClick={() => {
                 dismissedFarPostcodeRef.current = addressPostcode;
                 setTooFarOpen(false);
@@ -1858,10 +1858,10 @@ function CheckoutAuthGate({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         {title}
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">{subtitle}</p>
+      <p className="mt-3 text-sm leading-6 text-brand-muted">{subtitle}</p>
       <div className="mt-8 max-w-md">
         <BookingAuthPrompt
           hideTitle
@@ -1900,10 +1900,10 @@ function KnownCleanersStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         Request a cleaner you already know?
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         These cleaners have finished a visit for you. We’ll try your choice
         first, and match someone else if they’re not free.
       </p>
@@ -1921,13 +1921,13 @@ function KnownCleanersStep({
             <button
               className={cn(
                 "flex items-center gap-4 rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
-                selectedId === cleaner.id && "border-[#6a45b8] bg-white",
+                selectedId === cleaner.id && "border-brand-purple bg-white",
               )}
               key={cleaner.id}
               onClick={() => onSelect(cleaner.id)}
               type="button"
             >
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3eef9] text-lg font-bold text-[#6a45b8]">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3eef9] text-lg font-bold text-brand-purple">
                 {cleaner.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -1942,10 +1942,10 @@ function KnownCleanersStep({
                 )}
               </div>
               <div className="min-w-0">
-                <p className="truncate font-semibold text-[#1c133b]">
+                <p className="truncate font-semibold text-brand-ink">
                   Continue with {firstName}
                 </p>
-                <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+                <p className="mt-1 text-sm leading-5 text-brand-muted">
                   {cleaner.visitCount > 0
                     ? `${cleaner.visitCount} completed visit${cleaner.visitCount === 1 ? "" : "s"}${when ? ` · last ${when}` : ""}`
                     : `From the booking you’re repeating${when ? ` · ${when}` : ""}`}
@@ -1961,13 +1961,13 @@ function KnownCleanersStep({
         <button
           className={cn(
             "rounded-2xl border-2 border-transparent bg-white px-5 py-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation",
-            selectingNew && "border-[#6a45b8] bg-white",
+            selectingNew && "border-brand-purple bg-white",
           )}
           onClick={() => onSelect(null)}
           type="button"
         >
-          <p className="font-semibold text-[#1c133b]">Match someone new</p>
-          <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+          <p className="font-semibold text-brand-ink">Match someone new</p>
+          <p className="mt-1 text-sm leading-5 text-brand-muted">
             Find any suitable Mundoria cleaner for this booking.
           </p>
         </button>
@@ -1985,10 +1985,10 @@ function CategoryStep({
 }) {
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         What do you need?
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         Choose the kind of cleaning you need.
       </p>
       <div className="mt-8 grid gap-3">
@@ -1999,7 +1999,7 @@ function CategoryStep({
             <button
               className={cn(
                 "rounded-2xl border-2 border-transparent bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
-                active && "border-[#6a45b8] bg-white",
+                active && "border-brand-purple bg-white",
               )}
               key={category.value}
               onClick={() => select(category.value)}
@@ -2016,10 +2016,10 @@ function CategoryStep({
                   />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-[#1c133b]">
+                  <p className="font-semibold text-brand-ink">
                     {category.label}
                   </p>
-                  <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+                  <p className="mt-1 text-sm leading-5 text-brand-muted">
                     {category.description}
                   </p>
                 </div>
@@ -2066,10 +2066,10 @@ function ServiceStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         Choose your cleaning session
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         {category
           ? `Pick a service within ${categoryDefinition(category).label}.`
           : "Pick the service that fits."}
@@ -2083,14 +2083,14 @@ function ServiceStep({
             <button
               className={cn(
                 "relative rounded-2xl border-2 border-transparent bg-white p-3 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:p-4",
-                active && "border-[#6a45b8] bg-white",
+                active && "border-brand-purple bg-white",
               )}
               key={item.value}
               onClick={() => select(item.value)}
               type="button"
             >
               {popular ? (
-                <span className="absolute right-3 top-3 z-10 rounded bg-[#c79c66] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c133b]">
+                <span className="absolute right-3 top-3 z-10 rounded bg-brand-gold px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-ink">
                   Popular
                 </span>
               ) : null}
@@ -2106,20 +2106,20 @@ function ServiceStep({
                 </span>
                 <div className={cn("min-w-0 flex-1", popular && "pr-16")}>
                   <div className="flex items-start justify-between gap-3">
-                    <p className="font-semibold text-[#1c133b]">{item.label}</p>
-                    <p className="shrink-0 text-sm font-bold tabular-nums text-[#1c133b]">
+                    <p className="font-semibold text-brand-ink">{item.label}</p>
+                    <p className="shrink-0 text-sm font-bold tabular-nums text-brand-ink">
                       {formatHourlyRate(indicativeHourlyRatePence(item.value))}
                     </p>
                   </div>
                   {active ? (
-                    <ul className="mt-2 space-y-1 text-sm text-[#5a5470]">
+                    <ul className="mt-2 space-y-1 text-sm text-brand-muted">
                       <li>· {item.description}</li>
                       {index === 0 ? (
                         <li>· Clear estimate before you confirm</li>
                       ) : null}
                     </ul>
                   ) : (
-                    <p className="mt-1 text-sm leading-5 text-[#5a5470] line-clamp-2">
+                    <p className="mt-1 text-sm leading-5 text-brand-muted line-clamp-2">
                       {item.description}
                     </p>
                   )}
@@ -2210,39 +2210,39 @@ function HistorySuggestionStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         Based on your last clean here
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         {suggestion.message}
       </p>
       <button
-        className="mt-8 w-full rounded-2xl border-2 border-[#6a45b8] bg-white p-5 text-left transition hover:bg-[#f8f5ff] touch-manipulation"
+        className="mt-8 w-full rounded-2xl border-2 border-brand-purple bg-white p-5 text-left transition hover:bg-[#f8f5ff] touch-manipulation"
         onClick={onAccept}
         type="button"
       >
-        <p className="font-semibold text-[#1c133b]">{service.label}</p>
+        <p className="font-semibold text-brand-ink">{service.label}</p>
         {suggestion.isRecurring && suggestion.recurrencePattern ? (
-          <p className="mt-1 text-sm capitalize text-[#5a5470]">
+          <p className="mt-1 text-sm capitalize text-brand-muted">
             {suggestion.recurrencePattern.replaceAll("_", " ")}
           </p>
         ) : null}
         {addOns.length ? (
-          <p className="mt-3 text-sm text-[#5a5470]">
+          <p className="mt-3 text-sm text-brand-muted">
             Usual extras: {addOns.map((item) => item.label).join(", ")}
           </p>
         ) : null}
         {suggestion.specialAttentionAreas.length ? (
-          <p className="mt-2 text-sm text-[#5a5470]">
+          <p className="mt-2 text-sm text-brand-muted">
             Special attention: {suggestion.specialAttentionAreas.join(", ")}
           </p>
         ) : null}
-        <p className="mt-4 text-sm font-semibold text-[#6a45b8]">
+        <p className="mt-4 text-sm font-semibold text-brand-purple">
           Use this suggestion
         </p>
       </button>
       <button
-        className="mt-4 text-sm font-semibold text-[#5a38a3] underline-offset-2 hover:underline"
+        className="mt-4 text-sm font-semibold text-brand-purple-deep underline-offset-2 hover:underline"
         onClick={onDecline}
         type="button"
       >
@@ -2298,19 +2298,19 @@ function AddressStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         {proName
           ? `Where should ${proName} clean?`
           : "Where will your cleaning take place?"}
       </h2>
-      <p className="mt-2 flex items-start gap-2 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-2 flex items-start gap-2 text-sm leading-6 text-brand-muted">
         <MapPin
           aria-hidden
-          className="mt-0.5 h-4 w-4 shrink-0 text-[#6a45b8]"
+          className="mt-0.5 h-4 w-4 shrink-0 text-brand-purple"
         />
         <span>
           Enter as{" "}
-          <strong className="font-semibold text-[#1c133b]">number</strong>,
+          <strong className="font-semibold text-brand-ink">number</strong>,
           street, city, postcode — then pick a suggestion.
         </span>
       </p>
@@ -2326,14 +2326,14 @@ function AddressStep({
       </div>
 
       {guestAsAddress && localOnly ? (
-        <div className="mt-6 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
+        <div className="mt-6 rounded-2xl border-2 border-brand-purple bg-white p-4">
           <div className="flex gap-3">
-            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-purple" />
             <div className="min-w-0">
-              <p className="font-semibold text-[#1c133b]">
+              <p className="font-semibold text-brand-ink">
                 {guestAsAddress.label ?? "Your address"}
               </p>
-              <p className="mt-1 break-words text-sm text-[#5a5470]">
+              <p className="mt-1 break-words text-sm text-brand-muted">
                 {guestAsAddress.address_line_1}, {guestAsAddress.city},{" "}
                 {guestAsAddress.postcode}
               </p>
@@ -2353,24 +2353,24 @@ function AddressStep({
               type="button"
             >
               <span className="min-w-0">
-                <span className="block text-base font-semibold text-[#1c133b] sm:text-[1.05rem]">
+                <span className="block text-base font-semibold text-brand-ink sm:text-[1.05rem]">
                   {savedOpen
                     ? "My saved addresses"
                     : "View my saved addresses"}
                 </span>
-                <span className="mt-0.5 block text-sm text-[#5a5470]">
+                <span className="mt-0.5 block text-sm text-brand-muted">
                   {addresses.length}{" "}
                   {addresses.length === 1 ? "place" : "places"}
                 </span>
               </span>
               {savedOpen ? (
-                <ChevronUp className="h-5 w-5 shrink-0 text-[#6a45b8]" />
+                <ChevronUp className="h-5 w-5 shrink-0 text-brand-purple" />
               ) : (
-                <ChevronDown className="h-5 w-5 shrink-0 text-[#6a45b8]" />
+                <ChevronDown className="h-5 w-5 shrink-0 text-brand-purple" />
               )}
             </button>
           ) : (
-            <p className="mb-3 text-sm font-semibold text-[#1c133b]">
+            <p className="mb-3 text-sm font-semibold text-brand-ink">
               Saved address
             </p>
           )}
@@ -2387,7 +2387,7 @@ function AddressStep({
                     className={cn(
                       "rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]",
                       active &&
-                        "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
+                        "border-2 border-brand-purple bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
                     )}
                     key={address.id}
                     onClick={() => {
@@ -2396,15 +2396,15 @@ function AddressStep({
                     }}
                     type="button"
                   >
-                    <p className="font-semibold text-[#1c133b]">
+                    <p className="font-semibold text-brand-ink">
                       {address.label ?? "Saved address"}
                       {address.is_default ? (
-                        <span className="ml-2 text-xs font-medium text-[#6a45b8]">
+                        <span className="ml-2 text-xs font-medium text-brand-purple">
                           Default
                         </span>
                       ) : null}
                     </p>
-                    <p className="mt-1 break-words text-sm text-[#5a5470]">
+                    <p className="mt-1 break-words text-sm text-brand-muted">
                       {address.address_line_1}, {address.city},{" "}
                       {address.postcode}
                     </p>
@@ -2418,21 +2418,21 @@ function AddressStep({
 
       {proName ? (
         <div className="mt-10 border-t border-[#eeeef1] pt-8">
-          <h3 className="text-lg font-bold tracking-[-0.02em] text-[#1c133b]">
+          <h3 className="text-lg font-bold tracking-[-0.02em] text-brand-ink">
             Is this your first time booking?
           </h3>
-          <ol className="mt-4 space-y-4 text-sm leading-6 text-[#5a5470]">
+          <ol className="mt-4 space-y-4 text-sm leading-6 text-brand-muted">
             <li>
-              <span className="font-semibold text-[#1c133b]">1. </span>
+              <span className="font-semibold text-brand-ink">1. </span>
               Choose the service and a time that suits you.
             </li>
             <li>
-              <span className="font-semibold text-[#1c133b]">2. </span>
+              <span className="font-semibold text-brand-ink">2. </span>
               {proName} receives the request. The visit is confirmed when{" "}
               {proName} accepts.
             </li>
             <li>
-              <span className="font-semibold text-[#1c133b]">3. </span>
+              <span className="font-semibold text-brand-ink">3. </span>
               {proName} arrives with what they need for the clean.
             </li>
           </ol>
@@ -2525,10 +2525,10 @@ function OfficeSpacesStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         How big is the office?
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         Tell us how many rooms and toilets there are, and roughly how big the
         work area is. Mundoria uses that to work out the time.
       </p>
@@ -2546,10 +2546,10 @@ function OfficeSpacesStep({
         />
       </div>
 
-      <p className="mt-6 text-sm font-semibold text-[#1c133b]">
+      <p className="mt-6 text-sm font-semibold text-brand-ink">
         Size of the work area
       </p>
-      <p className="mt-1 text-sm text-[#5a5470]">
+      <p className="mt-1 text-sm text-brand-muted">
         Size guide: small is up to 25 m², medium is 26–60 m², large is 61–100 m².
       </p>
       <div className="mt-3 grid gap-2">
@@ -2559,7 +2559,7 @@ function OfficeSpacesStep({
             <button
               className={cn(
                 "rounded-2xl border-2 border-transparent bg-white px-4 py-3 text-left",
-                active && "border-[#6a45b8] bg-white",
+                active && "border-brand-purple bg-white",
               )}
               key={option.value}
               onClick={() =>
@@ -2567,15 +2567,15 @@ function OfficeSpacesStep({
               }
               type="button"
             >
-              <span className="font-semibold text-[#1c133b]">{option.label}</span>
-              <span className="ml-2 text-sm text-[#5a5470]">{option.hint}</span>
+              <span className="font-semibold text-brand-ink">{option.label}</span>
+              <span className="ml-2 text-sm text-brand-muted">{option.hint}</span>
             </button>
           );
         })}
       </div>
 
       <button
-        className="mt-6 text-sm font-semibold text-[#5a38a3] underline-offset-2 hover:underline"
+        className="mt-6 text-sm font-semibold text-brand-purple-deep underline-offset-2 hover:underline"
         onClick={() => setAddingRoom((current) => !current)}
         type="button"
       >
@@ -2607,7 +2607,7 @@ function CountField({
   value: number;
 }) {
   return (
-    <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
+    <label className="block space-y-2 text-sm font-medium text-brand-ink">
       <span>{label}</span>
       <select
         className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
@@ -2637,15 +2637,15 @@ function RoomsStep({
 }) {
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         Tell us about the rooms
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         This helps size duration and price — separate from your address.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
+        <label className="block space-y-2 text-sm font-medium text-brand-ink">
           <span>Bedrooms</span>
           <select
             className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
@@ -2662,7 +2662,7 @@ function RoomsStep({
             ))}
           </select>
         </label>
-        <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
+        <label className="block space-y-2 text-sm font-medium text-brand-ink">
           <span>Toilets</span>
           <select
             className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
@@ -2737,10 +2737,10 @@ function AddOnsStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         Do you have any other needs?
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         Optional extras for this clean — skip if you don’t need any.
       </p>
       {addOns.length ? (
@@ -2753,7 +2753,7 @@ function AddOnsStep({
               <button
                 className={cn(
                   "rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
-                  selected && "border-[#6a45b8] bg-white",
+                  selected && "border-brand-purple bg-white",
                 )}
                 key={addOn.id}
                 onClick={() => toggleAddOn(addOn.id)}
@@ -2778,13 +2778,13 @@ function AddOnsStep({
                     </span>
                   ) : null}
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-[#1c133b]">{addOn.label}</p>
-                    <p className="mt-0.5 text-sm leading-5 text-[#5a5470]">
+                    <p className="font-semibold text-brand-ink">{addOn.label}</p>
+                    <p className="mt-0.5 text-sm leading-5 text-brand-muted">
                       {addOn.description}
                     </p>
                     {addOn.detail ? (
                       <span
-                        className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#6a45b8]"
+                        className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-purple"
                         onClick={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
@@ -2801,7 +2801,7 @@ function AddOnsStep({
                       >
                         <span
                           aria-hidden
-                          className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#6a45b8]/40 text-[0.65rem] leading-none"
+                          className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-brand-purple/40 text-[0.65rem] leading-none"
                         >
                           i
                         </span>
@@ -2809,7 +2809,7 @@ function AddOnsStep({
                       </span>
                     ) : null}
                   </div>
-                  <p className="shrink-0 text-right text-sm font-bold text-[#1c133b]">
+                  <p className="shrink-0 text-right text-sm font-bold text-brand-ink">
                     {(() => {
                       if (addOn.hourly && addOnPriceContext) {
                         return `+${formatHourlyRate(
@@ -2829,7 +2829,7 @@ function AddOnsStep({
           })}
         </div>
       ) : (
-        <p className="mt-8 text-sm text-[#5a5470]">
+        <p className="mt-8 text-sm text-brand-muted">
           No extras for this service.
         </p>
       )}
@@ -2838,14 +2838,14 @@ function AddOnsStep({
           onClose={() => setDetailAddOnId(null)}
           title={detailAddOn.label}
         >
-          <div className="mt-4 space-y-3 text-sm leading-6 text-[#5a5470]">
+          <div className="mt-4 space-y-3 text-sm leading-6 text-brand-muted">
             {detailAddOn.detail.split("\n\n").map((paragraph) => (
               <p key={paragraph.slice(0, 48)}>{paragraph}</p>
             ))}
           </div>
           <div className="mt-6">
             <Button
-              className="min-h-11 w-full rounded-xl bg-[#291845] text-white hover:bg-[#291845]/90"
+              className="min-h-11 w-full rounded-xl bg-brand-plum text-white hover:bg-brand-plum/90"
               onClick={() => setDetailAddOnId(null)}
               type="button"
             >
@@ -2857,10 +2857,10 @@ function AddOnsStep({
       {draft.serviceType &&
       serviceDefinition(draft.serviceType).category !== "commercial" ? (
         <>
-          <h3 className="mt-10 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+          <h3 className="mt-10 text-[1.35rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-2xl">
             Do you have any pets?
           </h3>
-          <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+          <p className="mt-2 text-sm leading-6 text-brand-muted">
             Some cleaners have allergies or prefer not to work around animals —
             this helps us match you well.
           </p>
@@ -2876,7 +2876,7 @@ function AddOnsStep({
                 <button
                   className={cn(
                     "rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
-                    active && "border-[#6a45b8] bg-white",
+                    active && "border-brand-purple bg-white",
                   )}
                   key={label}
                   onClick={() => {
@@ -2898,7 +2898,7 @@ function AddOnsStep({
                       }
                       width={512}
                     />
-                    <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
+                    <p className="min-w-0 flex-1 font-semibold text-brand-ink">
                       {label}
                     </p>
                   </div>
@@ -2908,8 +2908,8 @@ function AddOnsStep({
           </div>
         </>
       ) : null}
-      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
-        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
+      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-brand-lavender-light px-4 py-3 text-sm text-[#3b3358]">
+        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-purple text-[11px] font-bold text-white">
           i
         </span>
         <p>
@@ -2949,7 +2949,7 @@ function RecoveryPreferencesStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+      <h2 className="text-xl font-bold text-brand-ink sm:text-2xl">
         Recovery preferences
       </h2>
       <p className="mt-2 text-sm text-[#5b5478]">
@@ -2957,7 +2957,7 @@ function RecoveryPreferencesStep({
         priority rooms. This is cleaning support, not healthcare.
       </p>
 
-      <p className="mt-6 text-sm font-semibold text-[#1c133b]">
+      <p className="mt-6 text-sm font-semibold text-brand-ink">
         Priority areas
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -2968,8 +2968,8 @@ function RecoveryPreferencesStep({
             className={cn(
                 "rounded-full border px-3.5 py-2 text-sm font-semibold touch-manipulation",
                 active
-                  ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                  : "border-transparent bg-white text-[#1c133b]",
+                  ? "border-brand-purple bg-brand-purple text-white"
+                  : "border-transparent bg-white text-brand-ink",
               )}
               key={area}
               onClick={() => toggleArea(area)}
@@ -2981,7 +2981,7 @@ function RecoveryPreferencesStep({
         })}
       </div>
 
-      <p className="mt-6 text-sm font-semibold text-[#1c133b]">
+      <p className="mt-6 text-sm font-semibold text-brand-ink">
         Getting into the home
       </p>
       <p className="mt-1 text-sm text-[#5b5478]">
@@ -3002,8 +3002,8 @@ function RecoveryPreferencesStep({
               className={cn(
                 "rounded-2xl border px-4 py-3 text-left text-sm font-semibold touch-manipulation",
                 active
-                  ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                  : "border-transparent bg-white text-[#1c133b]",
+                  ? "border-brand-purple bg-brand-purple text-white"
+                  : "border-transparent bg-white text-brand-ink",
               )}
               key={value}
               onClick={() => update("propertyCondition", value)}
@@ -3016,11 +3016,11 @@ function RecoveryPreferencesStep({
         </div>
 
       <label className="mt-6 block">
-        <span className="text-sm font-semibold text-[#1c133b]">
+        <span className="text-sm font-semibold text-brand-ink">
           Products, fragrance & other notes
         </span>
         <textarea
-          className="mt-2 min-h-[110px] w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] focus:ring-2"
+          className="mt-2 min-h-[110px] w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm text-brand-ink outline-none ring-brand-purple focus:ring-2"
           onChange={(event) => update("specialInstructions", event.target.value)}
           placeholder="e.g. fragrance-free only, avoid bleach, leave bedroom door closed…"
           value={draft.specialInstructions}
@@ -3097,10 +3097,10 @@ function FrequencyStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         How often do you want your session to happen?
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         {mode === "required_recurring" || !allowsOneOff
           ? "Choose a rhythm, or build your own calendar of visits."
           : "One-off, a set cadence, or customize your own calendar."}
@@ -3112,20 +3112,20 @@ function FrequencyStep({
             <button
               className={cn(
                 "relative rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
-                active && "border-[#6a45b8] bg-white",
+                active && "border-brand-purple bg-white",
               )}
               key={option.value}
               onClick={() => selectFrequency(option.value)}
               type="button"
             >
               {option.popular ? (
-                <span className="absolute right-3 top-3 z-10 rounded bg-[#c79c66] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c133b]">
+                <span className="absolute right-3 top-3 z-10 rounded bg-brand-gold px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-ink">
                   Popular
                 </span>
               ) : null}
               <p
                 className={cn(
-                  "font-semibold text-[#1c133b]",
+                  "font-semibold text-brand-ink",
                   option.popular && "pr-16",
                 )}
               >
@@ -3138,7 +3138,7 @@ function FrequencyStep({
 
       {draft.recurrencePattern === "custom" ? (
         <div className="mt-5">
-          <p className="text-sm text-[#5a5470]">
+          <p className="text-sm text-brand-muted">
             Tap the dates you want cleaned. Pick at least two upcoming visits.
           </p>
           <BookingCalendar
@@ -3149,7 +3149,7 @@ function FrequencyStep({
             selectedDates={draft.customRecurrenceDates}
           />
           {draft.customRecurrenceDates.length ? (
-            <p className="mt-3 text-sm text-[#5a5470]">
+            <p className="mt-3 text-sm text-brand-muted">
               {draft.customRecurrenceDates.length} date
               {draft.customRecurrenceDates.length === 1 ? "" : "s"} selected
             </p>
@@ -3189,7 +3189,7 @@ function DurationStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         How long?
       </h2>
       <div className="mt-8 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
@@ -3200,8 +3200,8 @@ function DurationStep({
           return (
             <button
               className={cn(
-                "relative inline-flex h-12 items-center justify-center rounded-xl border-2 border-transparent bg-white text-sm font-semibold text-[#1c133b] transition touch-manipulation",
-                active && "border-2 border-[#6a45b8] bg-white",
+                "relative inline-flex h-12 items-center justify-center rounded-xl border-2 border-transparent bg-white text-sm font-semibold text-brand-ink transition touch-manipulation",
+                active && "border-2 border-brand-purple bg-white",
                 !active && isRecommended && "ring-1 ring-[#c9b8ef]",
               )}
               key={option}
@@ -3210,7 +3210,7 @@ function DurationStep({
             >
               {labelFor(option)}
               {isRecommended ? (
-                <span className="absolute -top-1.5 right-1 rounded bg-[#efe6ff] px-1 text-[9px] font-bold uppercase tracking-wide text-[#6a45b8]">
+                <span className="absolute -top-1.5 right-1 rounded bg-brand-lavender-light px-1 text-[9px] font-bold uppercase tracking-wide text-brand-purple">
                   Rec
                 </span>
               ) : null}
@@ -3218,8 +3218,8 @@ function DurationStep({
           );
         })}
       </div>
-      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
-        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
+      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-brand-lavender-light px-4 py-3 text-sm text-[#3b3358]">
+        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-purple text-[11px] font-bold text-white">
           i
         </span>
         <p>
@@ -3262,7 +3262,7 @@ function DateStep({
     <div>
       {dateExpanded ? (
         <>
-          <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+          <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
             Date of your first appointment
           </h2>
           <BookingCalendar
@@ -3284,14 +3284,14 @@ function DateStep({
           type="button"
         >
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-[#6a45b8]">
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-brand-purple">
               Appointment date
             </p>
-            <p className="mt-0.5 truncate text-base font-semibold text-[#1c133b]">
+            <p className="mt-0.5 truncate text-base font-semibold text-brand-ink">
               {selectedLabel}
             </p>
           </div>
-          <span className="shrink-0 text-sm font-semibold text-[#6a45b8]">
+          <span className="shrink-0 text-sm font-semibold text-brand-purple">
             Change
           </span>
         </button>
@@ -3406,11 +3406,11 @@ function TimeStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
         {heading}
       </h2>
       {isSharedCustomDays ? (
-        <ul className="mt-3 space-y-1 text-sm font-medium text-[#1c133b]">
+        <ul className="mt-3 space-y-1 text-sm font-medium text-brand-ink">
           {customDates.map((date) => (
             <li key={date}>
               ·{" "}
@@ -3423,16 +3423,16 @@ function TimeStep({
           ))}
         </ul>
       ) : null}
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+      <p className="mt-3 text-sm leading-6 text-brand-muted">
         {isSharedCustomDays ? (
           <>
             These slots apply to every day you selected. Are you flexible? Select{" "}
-            <strong className="font-semibold text-[#1c133b]">several slots.</strong>
+            <strong className="font-semibold text-brand-ink">several slots.</strong>
           </>
         ) : (
           <>
             Are you flexible? Select{" "}
-            <strong className="font-semibold text-[#1c133b]">several slots.</strong>
+            <strong className="font-semibold text-brand-ink">several slots.</strong>
           </>
         )}
       </p>
@@ -3448,25 +3448,25 @@ function TimeStep({
         values={selectedSlots}
       />
       {selectedSlots.length > 0 ? (
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-[#5a5470]">
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-brand-muted">
           <span className="inline-flex items-center gap-2">
             <span
               aria-hidden
-              className="h-3 w-3 rounded-sm bg-[#c79c66]"
+              className="h-3 w-3 rounded-sm bg-brand-gold"
             />
             Preferred time
           </span>
           <span className="inline-flex items-center gap-2">
             <span
               aria-hidden
-              className="h-3 w-3 rounded-sm bg-[#6a45b8]"
+              className="h-3 w-3 rounded-sm bg-brand-purple"
             />
             Extra times
           </span>
         </div>
       ) : null}
       {slotLimitHint ? (
-        <p className="mt-3 text-sm font-medium text-[#5a5470]">
+        <p className="mt-3 text-sm font-medium text-brand-muted">
           You can select up to {maxTimeSlots} time slots. Deselect one to add
           another.
         </p>
@@ -3482,35 +3482,35 @@ function TimeStep({
           >
             <button
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#1c133b] touch-manipulation"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-brand-ink touch-manipulation"
               onClick={dismissFlexPrompt}
               type="button"
             >
               ×
             </button>
             <h3
-              className="pr-8 text-xl font-bold tracking-[-0.02em] text-[#1c133b]"
+              className="pr-8 text-xl font-bold tracking-[-0.02em] text-brand-ink"
               id="flex-prompt-title"
             >
               {isSharedCustomDays
                 ? "Flexible on other times too?"
                 : "Available at other times on the same day?"}
             </h3>
-            <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+            <p className="mt-3 text-sm leading-6 text-brand-muted">
               {isSharedCustomDays
                 ? "The more slots you add, the easier it will be for us to match a cleaner across all your dates."
                 : "The more slots you add, the easier it will be for us to find the ideal pro for you."}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
-                className="rounded-full border border-[#1c133b] bg-white px-4 py-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
+                className="rounded-full border border-brand-ink bg-white px-4 py-3 text-sm font-semibold text-brand-ink touch-manipulation"
                 onClick={dismissFlexPrompt}
                 type="button"
               >
                 No, keep going
               </button>
               <button
-                className="rounded-full bg-[#1c133b] px-4 py-3 text-sm font-semibold text-white touch-manipulation"
+                className="rounded-full bg-brand-ink px-4 py-3 text-sm font-semibold text-white touch-manipulation"
                 onClick={dismissFlexPrompt}
                 type="button"
               >
@@ -3746,7 +3746,7 @@ function CheckoutStep({
 
   return (
     <form onSubmit={pay}>
-      <h2 className="text-xl font-bold text-[#1c133b] sm:text-2xl">
+      <h2 className="text-xl font-bold text-brand-ink sm:text-2xl">
         {firstName
           ? `Ready to book your clean, ${firstName}?`
           : "Ready to book your clean?"}
@@ -3774,11 +3774,11 @@ function CheckoutStep({
       </div>
 
       <div className="mt-6">
-        <p className="font-semibold text-[#1c133b]">Your payment method</p>
+        <p className="font-semibold text-brand-ink">Your payment method</p>
         <div
           className={cn(
-            "mt-3 overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-transparent transition",
-            cardOpen && "ring-2 ring-[#1c133b] ring-offset-0",
+            "mt-3 overflow-hidden rounded-2xl border-2 border-brand-ink bg-transparent transition",
+            cardOpen && "ring-2 ring-brand-ink ring-offset-0",
           )}
         >
           <button
@@ -3787,15 +3787,15 @@ function CheckoutStep({
             onClick={() => setCardOpen((value) => !value)}
             type="button"
           >
-            <CreditCard className="h-5 w-5 shrink-0 text-[#1c133b]" />
-            <span className="font-semibold text-[#1c133b]">Card</span>
+            <CreditCard className="h-5 w-5 shrink-0 text-brand-ink" />
+            <span className="font-semibold text-brand-ink">Card</span>
           </button>
           {cardOpen ? (
             <div className="px-4 pb-4 pt-1">
               <div
                 className={cn(
-                  "rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] px-3 py-3 transition",
-                  cardFocused && "ring-2 ring-[#1c133b] ring-offset-0",
+                  "rounded-xl border-2 border-brand-ink bg-brand-cream px-3 py-3 transition",
+                  cardFocused && "ring-2 ring-brand-ink ring-offset-0",
                 )}
               >
                 <CardElement
@@ -3825,14 +3825,14 @@ function CheckoutStep({
         </div>
       </div>
 
-      <div className="mt-6 divide-y divide-[#e4daf5] border-y border-[#e4daf5]">
+      <div className="mt-6 divide-y divide-brand-lavender border-y border-brand-lavender">
         <TrustRow
           iconSrc="/images/marketing/icons/plain/free-cancellation.svg"
           subtitle={
             <>
               Free up to 48 hours before each session.{" "}
               <a
-                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="font-semibold text-brand-purple underline-offset-2 hover:underline"
                 href={FAQ_LINKS.cancellationFee}
               >
                 Fee details
@@ -3858,14 +3858,14 @@ function CheckoutStep({
         your clean (once a cleaner is confirmed), we place a hold. Payment is
         captured the next day after the clean.{" "}
         <a
-          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          className="font-semibold text-brand-purple underline-offset-2 hover:underline"
           href={FAQ_LINKS.whenCharged}
         >
           When am I charged?
         </a>{" "}
         ·{" "}
         <a
-          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          className="font-semibold text-brand-purple underline-offset-2 hover:underline"
           href="/help/article/why-pay-in-advance"
         >
           How payment works
@@ -3912,10 +3912,10 @@ function CheckoutStep({
                 className={cn(
                   "flex items-center gap-3",
                   active
-                    ? "font-semibold text-[#1c133b]"
+                    ? "font-semibold text-brand-ink"
                     : done
                       ? "text-[#5b5478]"
-                      : "text-[#8b8798]",
+                      : "text-brand-subtle",
                 )}
                 key={step.id}
               >
@@ -3924,8 +3924,8 @@ function CheckoutStep({
                   className={cn(
                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
                     active || done
-                      ? "bg-[#6a45b8] text-white"
-                      : "bg-[#efe6ff] text-[#6a45b8]",
+                      ? "bg-brand-purple text-white"
+                      : "bg-brand-lavender-light text-brand-purple",
                   )}
                   transition={SPRING.lively}
                 >
@@ -3958,7 +3958,7 @@ function CheckoutStep({
       ) : null}
 
       <Button
-        className="mt-6 min-h-12 w-full rounded-full bg-[#6a45b8] text-base touch-manipulation hover:bg-[#5a38a3]"
+        className="mt-6 min-h-12 w-full rounded-full bg-brand-purple text-base touch-manipulation hover:bg-brand-purple-deep"
         disabled={!stripe || processing}
         size="lg"
         type="submit"
@@ -3999,7 +3999,7 @@ function TrustRow({
         width={88}
       />
       <div>
-        <p className="font-semibold text-[#1c133b]">{title}</p>
+        <p className="font-semibold text-brand-ink">{title}</p>
         <p className="text-sm text-[#5b5478]">{subtitle}</p>
       </div>
     </div>

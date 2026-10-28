@@ -54,8 +54,8 @@ export default async function AdminTeamPage() {
       <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h2 className="font-semibold text-[#1c133b]">Administrators</h2>
-            <p className="mt-1 text-sm text-[#5a5470]">
+            <h2 className="font-semibold text-brand-ink">Administrators</h2>
+            <p className="mt-1 text-sm text-brand-muted">
               {admins?.length ?? 0} active account
               {(admins?.length ?? 0) === 1 ? "" : "s"}
             </p>

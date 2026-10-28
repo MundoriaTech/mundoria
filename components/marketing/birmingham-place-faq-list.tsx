@@ -17,7 +17,7 @@ import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
 
 const linkClass =
-  "font-semibold text-[#6a45b8] underline-offset-2 hover:underline";
+  "font-semibold text-brand-purple underline-offset-2 hover:underline";
 
 export function BirminghamPlaceFaqList({
   bookingHref,

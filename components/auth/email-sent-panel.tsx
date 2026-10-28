@@ -25,12 +25,12 @@ export function EmailSentPanel({
     <div>
       <Reveal distance={0} from="scale">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff1ea]">
-          <Mail aria-hidden className="h-7 w-7 text-[#d4694a]" />
+          <Mail aria-hidden className="h-7 w-7 text-brand-terracotta" />
         </div>
       </Reveal>
       {email ? (
         <Reveal
-          className="mt-5 break-all rounded-2xl border border-[#e8def8] bg-white px-4 py-3 text-sm font-semibold text-[#291845]"
+          className="mt-5 break-all rounded-2xl border border-[#e8def8] bg-white px-4 py-3 text-sm font-semibold text-brand-plum"
           delay={0.1}
           distance={12}
         >
@@ -41,12 +41,12 @@ export function EmailSentPanel({
         {steps.map((step, index) => (
           <StaggerItem
             as="li"
-            className="flex gap-3 text-sm leading-6 text-[#1c133b]"
+            className="flex gap-3 text-sm leading-6 text-brand-ink"
             distance={18}
             from="left"
             key={step}
           >
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#312c79] text-xs font-semibold text-white">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-indigo text-xs font-semibold text-white">
               {index + 1}
             </span>
             <span>{step}</span>

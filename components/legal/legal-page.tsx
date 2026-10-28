@@ -35,8 +35,8 @@ export async function LegalPage({
           className="relative px-4 pb-6 sm:px-8 sm:pb-8 lg:px-12"
           style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 3.5rem)` }}
         >
-          <div className="mx-auto max-w-4xl overflow-hidden rounded-[1.75rem] bg-[#1c133b] px-6 py-10 text-white shadow-[0_20px_50px_rgba(28,19,59,0.28)] sm:px-10 sm:py-12">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#f0a888]">
+          <div className="mx-auto max-w-4xl overflow-hidden rounded-[1.75rem] bg-brand-ink px-6 py-10 text-white shadow-[0_20px_50px_rgba(28,19,59,0.28)] sm:px-10 sm:py-12">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-brand-peach">
               Last updated {lastUpdated}
             </p>
             <h1 className="mt-4 text-[2.1rem] font-semibold tracking-[-0.045em] sm:text-5xl">
@@ -55,19 +55,19 @@ export async function LegalPage({
           <div className="mx-auto max-w-4xl space-y-4">
             {sections.map((section) => (
               <section
-                className="rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/90 p-6 shadow-[0_10px_28px_rgba(49,44,121,0.06)] sm:p-8"
+                className="rounded-[1.35rem] border border-brand-lavender/80 bg-white/90 p-6 shadow-[0_10px_28px_rgba(49,44,121,0.06)] sm:p-8"
                 key={section.title}
               >
-                <h2 className="text-xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                <h2 className="text-xl font-semibold tracking-[-0.03em] text-brand-ink sm:text-2xl">
                   {section.title}
                 </h2>
                 {section.body ? (
-                  <p className="mt-4 text-sm leading-7 text-[#5a5470] sm:text-[15px] sm:leading-8">
+                  <p className="mt-4 text-sm leading-7 text-brand-muted sm:text-[15px] sm:leading-8">
                     {section.body}
                   </p>
                 ) : null}
                 {section.bullets?.length ? (
-                  <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 text-[#5a5470]">
+                  <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 text-brand-muted">
                     {section.bullets.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -80,7 +80,7 @@ export async function LegalPage({
 
             <div className="flex justify-center pt-6 print:hidden">
               <Link
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-brand-purple px-6 text-sm font-semibold text-white transition hover:bg-brand-purple-deep"
                 href="/"
               >
                 Back to home

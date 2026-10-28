@@ -3,7 +3,7 @@ import Link from "next/link";
 import { placeServiceExplainerItems } from "@/lib/seo/place-service-explainer";
 
 const linkClass =
-  "font-semibold text-[#6a45b8] underline-offset-2 hover:underline";
+  "font-semibold text-brand-purple underline-offset-2 hover:underline";
 
 export function PlaceServiceExplainerList({ place }: { place: string }) {
   const items = placeServiceExplainerItems(place);

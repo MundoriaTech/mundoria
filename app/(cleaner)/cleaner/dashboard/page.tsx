@@ -99,23 +99,23 @@ export default async function CleanerDashboardPage() {
       <section>
         <div className="grid grid-cols-[minmax(0,1fr)_8.25rem] items-end gap-x-2 sm:grid-cols-[minmax(0,1fr)_16rem] sm:items-center sm:gap-x-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
           <div className="min-w-0 pb-1">
-            <h1 className="text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
+            <h1 className="text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-brand-ink sm:text-[2.35rem]">
               Welcome back,{" "}
-              <span className="font-normal text-[#d4694a]">{firstName}</span>.
+              <span className="font-normal text-brand-terracotta">{firstName}</span>.
             </h1>
             <p className="mt-2 max-w-md text-[13px] font-light leading-5 text-[#5c5670] sm:text-[15px] sm:leading-7">
               {heroLine(hero.moment, streak)}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-6">
               <Link
-                className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-xs font-semibold text-white transition hover:bg-[#312c79] sm:h-12 sm:px-6 sm:text-sm"
+                className="inline-flex h-9 items-center justify-center rounded-full bg-brand-ink px-3.5 text-xs font-semibold text-white transition hover:bg-brand-indigo sm:h-12 sm:px-6 sm:text-sm"
                 href="/cleaner/jobs"
               >
                 <BriefcaseBusiness className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
                 View jobs
               </Link>
               <Link
-                className="inline-flex h-9 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
+                className="inline-flex h-9 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-3.5 text-xs font-semibold text-brand-ink transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
                 href="/cleaner/earnings"
               >
                 <CalendarCheck className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
@@ -153,13 +153,13 @@ export default async function CleanerDashboardPage() {
             actions={
               <>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-brand-ink px-5 text-sm font-semibold text-white transition hover:bg-brand-indigo"
                   href={`/cleaner/job/${nextJob.id}`}
                 >
                   Open job
                 </Link>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-5 text-sm font-semibold text-brand-ink transition hover:bg-[#f7f2ea]"
                   href={`/cleaner/messages/${nextJob.id}`}
                 >
                   Message
@@ -212,10 +212,10 @@ export default async function CleanerDashboardPage() {
         )}
       </DashboardSection>
 
-      <section className="overflow-hidden rounded-[1.75rem] border border-[#e8e0d6]/80 bg-[#f3efe6] p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
+      <section className="overflow-hidden rounded-[1.75rem] border border-[#e8e0d6]/80 bg-brand-cream-deep p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
               Medallion
             </p>
             <div className="mt-2">
@@ -223,7 +223,7 @@ export default async function CleanerDashboardPage() {
             </div>
           </div>
           <Link
-            className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            className="text-sm font-semibold text-brand-purple underline-offset-2 hover:underline"
             href="/cleaner/performance"
           >
             View details
@@ -231,7 +231,7 @@ export default async function CleanerDashboardPage() {
         </div>
         <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/70">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#312c79] to-[#d4694a]"
+            className="h-full rounded-full bg-gradient-to-r from-brand-indigo to-brand-terracotta"
             style={{ width: `${tierProgress}%` }}
           />
         </div>
@@ -307,10 +307,10 @@ function heroLine(moment: CleanerHeroMoment, streak: number) {
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#c79c66]">
+      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-gold">
         {label}
       </dt>
-      <dd className="mt-1 truncate text-base font-semibold tracking-tight text-[#1c133b] sm:text-lg">
+      <dd className="mt-1 truncate text-base font-semibold tracking-tight text-brand-ink sm:text-lg">
         {value}
       </dd>
     </div>
@@ -336,10 +336,10 @@ function visitStreak(jobs: { scheduled_date: string; scheduled_start_time: strin
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[1.25rem] bg-white/70 px-4 py-3">
-      <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+      <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-violet">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
+      <p className="mt-1 text-sm font-semibold tracking-tight text-brand-ink">
         {value}
       </p>
     </div>

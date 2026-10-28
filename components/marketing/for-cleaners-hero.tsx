@@ -128,14 +128,14 @@ export function ForCleanersHero({
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row lg:items-start">
             <Link
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#c79c66] px-8 text-[15px] font-semibold text-[#1c133b] transition duration-200 hover:scale-[1.03] hover:bg-[#b8894e] active:scale-[0.98] sm:min-h-[3.25rem] sm:px-9"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-gold px-8 text-[15px] font-semibold text-brand-ink transition duration-200 hover:scale-[1.03] hover:bg-[#b8894e] active:scale-[0.98] sm:min-h-[3.25rem] sm:px-9"
               href={primaryHref}
             >
               {primaryLabel}
             </Link>
             {secondaryHref && secondaryLabel ? (
               <Link
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 px-8 text-[15px] font-semibold text-white transition hover:bg-white hover:text-[#1c133b] sm:min-h-[3.25rem] sm:px-9"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 px-8 text-[15px] font-semibold text-white transition hover:bg-white hover:text-brand-ink sm:min-h-[3.25rem] sm:px-9"
                 href={secondaryHref}
               >
                 {secondaryLabel}

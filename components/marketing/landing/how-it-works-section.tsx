@@ -34,10 +34,10 @@ export function HowItWorksSection() {
       }}
     >
       <div className="mx-auto max-w-6xl">
-        <p className="text-[13px] font-medium uppercase tracking-[0.28em] text-[#c79c66] sm:text-sm">
+        <p className="text-[13px] font-medium uppercase tracking-[0.28em] text-brand-gold sm:text-sm">
           Why Mundoria works
         </p>
-        <h2 className="mt-5 max-w-[16rem] text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
+        <h2 className="mt-5 max-w-[16rem] text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
           A better way to get it sorted
         </h2>
 
@@ -63,7 +63,7 @@ export function HowItWorksSection() {
                 width={512}
               />
               <div className="min-w-0">
-                <h3 className="text-[1.05rem] font-bold leading-snug tracking-[-0.01em] text-[#1c133b] sm:text-[1.12rem]">
+                <h3 className="text-[1.05rem] font-bold leading-snug tracking-[-0.01em] text-brand-ink sm:text-[1.12rem]">
                   {title}
                 </h3>
                 <p className="mt-2 text-[13px] font-normal leading-[1.5] text-[#4a4558] sm:text-[14px]">

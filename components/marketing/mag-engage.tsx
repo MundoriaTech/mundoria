@@ -69,19 +69,19 @@ export function MagEngageBand({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "border-y border-[#1c133b]/10 py-14 sm:py-20 lg:py-24",
+        "border-y border-brand-ink/10 py-14 sm:py-20 lg:py-24",
         className,
       )}
     >
       <div className="grid items-start gap-12 md:grid-cols-2 md:gap-16">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d4694a]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-terracotta">
             Social
           </p>
-          <h2 className="mt-3 text-[2.5rem] font-black leading-[0.95] tracking-[-0.05em] text-[#1c133b] sm:text-[3.25rem]">
+          <h2 className="mt-3 text-[2.5rem] font-black leading-[0.95] tracking-[-0.05em] text-brand-ink sm:text-[3.25rem]">
             Follow us
           </h2>
-          <p className="mt-4 max-w-md text-base leading-7 text-[#5a5470]">
+          <p className="mt-4 max-w-md text-base leading-7 text-brand-muted">
             Mag moments, home tips and Birmingham life — wherever you scroll.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
@@ -104,16 +104,16 @@ export function MagEngageBand({ className }: { className?: string }) {
         </div>
 
         <div>
-          <div className="inline-flex items-center gap-2 text-[#d4694a]">
+          <div className="inline-flex items-center gap-2 text-brand-terracotta">
             <EnvelopeSimple className="h-5 w-5" weight="duotone" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em]">
               Inbox
             </p>
           </div>
-          <h2 className="mt-3 text-[2.5rem] font-black leading-[0.95] tracking-[-0.05em] text-[#1c133b] sm:text-[3.25rem]">
+          <h2 className="mt-3 text-[2.5rem] font-black leading-[0.95] tracking-[-0.05em] text-brand-ink sm:text-[3.25rem]">
             Newsletters
           </h2>
-          <p className="mt-4 max-w-md text-base leading-7 text-[#5a5470]">
+          <p className="mt-4 max-w-md text-base leading-7 text-brand-muted">
             Receive our newsletters directly, and take advantage of our little
             tips &amp; advice!
           </p>
@@ -128,7 +128,7 @@ export function MagEngageBand({ className }: { className?: string }) {
                 Email address
               </label>
               <input
-                className="h-14 w-full rounded-2xl border border-[#eadfce] bg-white px-5 text-base text-[#1c133b] outline-none transition placeholder:text-[#5a5470]/50 focus:border-[#823fb2]"
+                className="h-14 w-full rounded-2xl border border-[#eadfce] bg-white px-5 text-base text-brand-ink outline-none transition placeholder:text-brand-muted/50 focus:border-brand-violet"
                 id="mag-newsletter-email"
                 onChange={(event) => {
                   setEmail(event.target.value);
@@ -139,7 +139,7 @@ export function MagEngageBand({ className }: { className?: string }) {
                 value={email}
               />
               <button
-                className="inline-flex h-14 items-center justify-center rounded-2xl bg-[#1c133b] px-7 text-base font-semibold text-white transition hover:bg-[#312c79]"
+                className="inline-flex h-14 items-center justify-center rounded-2xl bg-brand-ink px-7 text-base font-semibold text-white transition hover:bg-brand-indigo"
                 type="submit"
               >
                 Subscribe
@@ -147,7 +147,7 @@ export function MagEngageBand({ className }: { className?: string }) {
             </form>
           )}
           {status === "error" ? (
-            <p className="mt-2 text-sm text-[#d4694a]">
+            <p className="mt-2 text-sm text-brand-terracotta">
               Enter a valid email address.
             </p>
           ) : null}

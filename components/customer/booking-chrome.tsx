@@ -44,12 +44,12 @@ export function BookingChrome({
 
   return (
     <div
-      className={cn("flex min-h-screen flex-col bg-[#f9f6ef]", className)}
+      className={cn("flex min-h-screen flex-col bg-brand-cream", className)}
     >
-      <header className="sticky top-0 z-50 border-b border-[#e8e0d0]/80 bg-[#f9f6ef]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-brand-sand/80 bg-brand-cream/95 backdrop-blur-sm">
         <div className="relative mx-auto grid h-14 w-full max-w-[1140px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:h-16 md:px-5">
           <button
-            className="inline-flex items-center justify-self-start gap-0.5 text-sm font-medium text-[#1c133b] transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40 touch-manipulation"
+            className="inline-flex items-center justify-self-start gap-0.5 text-sm font-medium text-brand-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40 touch-manipulation"
             disabled={backDisabled}
             onClick={onBack}
             type="button"
@@ -76,7 +76,7 @@ export function BookingChrome({
             <span />
           ) : (
             <Link
-              className="inline-flex h-9 items-center justify-center justify-self-end rounded-full border border-[#1c133b] px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-white/70 touch-manipulation"
+              className="inline-flex h-9 items-center justify-center justify-self-end rounded-full border border-brand-ink px-4 text-sm font-semibold text-brand-ink transition hover:bg-white/70 touch-manipulation"
               href={authHref}
             >
               Sign in
@@ -114,12 +114,12 @@ export function BookingChrome({
               aria-valuemax={100}
               aria-valuemin={0}
               aria-valuenow={progressPct}
-              className="h-1.5 w-full bg-[#e8e0d0]"
+              className="h-1.5 w-full bg-brand-sand"
               role="progressbar"
             >
               <motion.div
                 animate={{ width: `${progressPct}%` }}
-                className="h-full rounded-r-full bg-[#6a45b8]"
+                className="h-full rounded-r-full bg-brand-purple"
                 initial={false}
                 transition={SPRING.snappy}
               />

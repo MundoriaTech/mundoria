@@ -13,10 +13,10 @@ export const HELP_COLLECTION_THEME: Record<
 > = {
   "for-customers": {
     accent: "#6a45b8",
-    eyebrow: "text-[#823fb2]",
-    hero: "bg-[#efe6ff]",
-    soft: "from-[#efe6ff] via-[#faf8ff] to-[#f3edff]",
-    defaultPanel: "bg-[#efe6ff]",
+    eyebrow: "text-brand-violet",
+    hero: "bg-brand-lavender-light",
+    soft: "from-brand-lavender-light via-brand-haze to-[#f3edff]",
+    defaultPanel: "bg-brand-lavender-light",
     topicPanels: {
       "Book a clean": "bg-[#ececef]",
       "Manage my account": "bg-[#e8f7f5]",
@@ -28,7 +28,7 @@ export const HELP_COLLECTION_THEME: Record<
     accent: "#2f6f6a",
     eyebrow: "text-[#2f6f6a]",
     hero: "bg-[#e8f7f5]",
-    soft: "from-[#e8f7f5] via-[#faf8ff] to-[#eef9f6]",
+    soft: "from-[#e8f7f5] via-brand-haze to-[#eef9f6]",
     defaultPanel: "bg-[#e8f7f5]",
     topicPanels: {
       "Getting started": "bg-[#e8f7f5]",
@@ -38,13 +38,13 @@ export const HELP_COLLECTION_THEME: Record<
     accent: "#312c79",
     eyebrow: "text-[#5b3d9e]",
     hero: "bg-[#e8f2ff]",
-    soft: "from-[#e8f2ff] via-[#faf8ff] to-[#f3f0ff]",
+    soft: "from-[#e8f2ff] via-brand-haze to-[#f3f0ff]",
     defaultPanel: "bg-[#e8f2ff]",
     topicPanels: {
       "Jobs & sessions": "bg-[#e8f2ff]",
       "Revenue & payouts": "bg-[#e8f7f5]",
       "Reputation & safety": "bg-[#eeecff]",
-      "App & account": "bg-[#efe6ff]",
+      "App & account": "bg-brand-lavender-light",
     },
   },
 };

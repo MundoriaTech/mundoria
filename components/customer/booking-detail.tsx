@@ -340,7 +340,7 @@ export function BookingDetail({
     <div className="min-w-0 space-y-6 sm:space-y-8">
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
             Booking
           </p>
           {!waitingForCleaner && booking.status !== "cancelled" ? (
@@ -349,10 +349,10 @@ export function BookingDetail({
         </div>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <h1 className="break-words text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-3xl">
+            <h1 className="break-words text-2xl font-semibold tracking-[-0.03em] text-brand-ink sm:text-3xl">
               {formatServiceName(booking.service_type)}
             </h1>
-            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+            <p className="mt-2 text-sm leading-6 text-brand-muted">
               {[whenLabel, placeLabel, `#${booking.id.slice(0, 8)}`]
                 .filter(Boolean)
                 .join(" · ")}
@@ -361,7 +361,7 @@ export function BookingDetail({
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             {needsPayment ? (
               <Button
-                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                className="min-h-11 rounded-full bg-brand-ink hover:bg-brand-indigo"
                 onClick={() => setShowPay(true)}
               >
                 Authorise payment
@@ -369,7 +369,7 @@ export function BookingDetail({
             ) : null}
             {needsStartConfirm ? (
               <Button
-                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                className="min-h-11 rounded-full bg-brand-ink hover:bg-brand-indigo"
                 onClick={() => void confirmStart()}
               >
                 Start cleaning
@@ -378,7 +378,7 @@ export function BookingDetail({
             {canMessage ? (
               <Button
                 asChild
-                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                className="min-h-11 rounded-full bg-brand-ink hover:bg-brand-indigo"
               >
                 <Link href={`/messages/${booking.id}`}>
                   <MessageCircle className="mr-2 h-4 w-4" />
@@ -497,8 +497,8 @@ export function BookingDetail({
           />
 
           {booking.status !== "cancelled" ? (
-            <div className="rounded-[1.25rem] border border-[#e8d4b0]/70 bg-[#fffefb] px-5 py-4 text-sm text-[#5a5470]">
-              <div className="flex items-center justify-between gap-3 text-[#1c133b]">
+            <div className="rounded-[1.25rem] border border-[#e8d4b0]/70 bg-[#fffefb] px-5 py-4 text-sm text-brand-muted">
+              <div className="flex items-center justify-between gap-3 text-brand-ink">
                 <span className="font-semibold">Payment</span>
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8b6bc4]">
                   {paymentStatusLabel(booking.payment_status, {
@@ -511,7 +511,7 @@ export function BookingDetail({
                   hasPaymentMethod,
                 })}{" "}
                 <Link
-                  className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                  className="font-semibold text-brand-purple underline-offset-2 hover:underline"
                   href={PAYMENT_HELP_HREF}
                 >
                   How payment works
@@ -533,7 +533,7 @@ export function BookingDetail({
                   </Button>
                 </div>
               ) : booking.payment_status === "held" ? (
-                <p className="mt-2 text-xs text-[#8b8798]">
+                <p className="mt-2 text-xs text-brand-subtle">
                   Your receipt becomes available the day after the clean when
                   payment is captured.
                 </p>
@@ -543,12 +543,12 @@ export function BookingDetail({
         </div>
 
         <aside className="space-y-4">
-          <section className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
-            <h2 className="text-base font-bold text-[#1c133b]">Your cleaner</h2>
+          <section className="overflow-hidden rounded-[1.25rem] border border-brand-lavender bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
+            <h2 className="text-base font-bold text-brand-ink">Your cleaner</h2>
             {cleanerVisible && booking.cleaner ? (
               <div className="mt-5 space-y-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#efe6ff] text-lg font-bold text-[#6a45b8]">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-lavender-light text-lg font-bold text-brand-purple">
                     {booking.cleaner.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -569,10 +569,10 @@ export function BookingDetail({
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-[#1c133b]">
+                    <p className="truncate font-semibold text-brand-ink">
                       {booking.cleaner.full_name}
                     </p>
-                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#5a5470]">
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-brand-muted">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         alt=""
@@ -597,19 +597,19 @@ export function BookingDetail({
                 ) : null}
               </div>
             ) : waitingForCleaner ? (
-              <p className="mt-4 text-sm leading-6 text-[#5a5470]">
+              <p className="mt-4 text-sm leading-6 text-brand-muted">
                 We’re looking for your cleaner. You’ll see their details once
                 your session is confirmed.
               </p>
             ) : (
-              <p className="mt-4 text-sm leading-6 text-[#5a5470]">
+              <p className="mt-4 text-sm leading-6 text-brand-muted">
                 Cleaner details will appear here once your session is confirmed.
               </p>
             )}
           </section>
 
-          <section className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
-            <h2 className="text-base font-bold text-[#1c133b]">Manage</h2>
+          <section className="overflow-hidden rounded-[1.25rem] border border-brand-lavender bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
+            <h2 className="text-base font-bold text-brand-ink">Manage</h2>
             <div className="mt-4 grid gap-2">
               {canReschedule ? (
                 <Button
@@ -804,17 +804,17 @@ export function BookingDetail({
               </label>
             </div>
           ) : null}
-          <p className="mb-3 text-sm leading-6 text-[#5a5470]">
+          <p className="mb-3 text-sm leading-6 text-brand-muted">
             Full policy:{" "}
             <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="font-semibold text-brand-purple underline-offset-2 hover:underline"
               href={FAQ_LINKS.cancellationFee}
             >
               cancellation fees
             </Link>
             {" · "}
             <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="font-semibold text-brand-purple underline-offset-2 hover:underline"
               href={FAQ_LINKS.refundOnCancel}
             >
               refunds
@@ -823,7 +823,7 @@ export function BookingDetail({
           </p>
           <textarea
             autoFocus
-            className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] placeholder:text-[#8b8798] focus:ring-2"
+            className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-brand-ink outline-none ring-brand-purple placeholder:text-brand-subtle focus:ring-2"
             onChange={(event) => setReason(event.target.value)}
             placeholder="Cancellation reason. Write “I want another pro” to search again instead of cancelling a one-off."
             value={reason}
@@ -948,11 +948,11 @@ function LookingForCleanerCard({
     <section className="overflow-hidden rounded-2xl border border-[#e6e8ee] bg-white">
       <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 text-sm font-semibold text-[#d4694a]">
-            <span className="h-2 w-2 rounded-full bg-[#d4694a]" />
+          <p className="flex items-center gap-2 text-sm font-semibold text-brand-terracotta">
+            <span className="h-2 w-2 rounded-full bg-brand-terracotta" />
             Finding your cleaner
           </p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#1c133b] sm:text-2xl">
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-brand-ink sm:text-2xl">
             We are looking for your cleaner
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c6570]">
@@ -961,10 +961,10 @@ function LookingForCleanerCard({
           </p>
         </div>
         <div className="rounded-2xl bg-[#f7f4fb] px-4 py-3.5 sm:px-5 lg:min-w-[17rem] lg:text-right">
-          <p className="text-xs font-medium text-[#8b8798]">
+          <p className="text-xs font-medium text-brand-subtle">
             {confirmByLabel ? "Confirmed no later than" : "Confirmation"}
           </p>
-          <p className="mt-1 text-base font-semibold leading-6 text-[#312c79] sm:text-lg">
+          <p className="mt-1 text-base font-semibold leading-6 text-brand-indigo sm:text-lg">
             {confirmByLabel ?? "We’ll email you as soon as a cleaner accepts."}
           </p>
         </div>
@@ -975,9 +975,9 @@ function LookingForCleanerCard({
             <span
               className={cn(
                 "mx-auto flex h-6 w-6 items-center justify-center rounded-full",
-                step.state === "done" && "bg-[#312c79] text-white",
+                step.state === "done" && "bg-brand-indigo text-white",
                 step.state === "current" &&
-                  "bg-[#fff1ea] text-[#d4694a] ring-2 ring-[#d4694a]",
+                  "bg-[#fff1ea] text-brand-terracotta ring-2 ring-brand-terracotta",
                 step.state === "next" && "bg-[#f3f4f6] text-[#9aa1ab]",
               )}
             >
@@ -990,7 +990,7 @@ function LookingForCleanerCard({
             <span
               className={cn(
                 "mt-2 block text-[11px] font-medium leading-4 sm:text-xs",
-                step.state === "next" ? "text-[#9aa1ab]" : "text-[#1c133b]",
+                step.state === "next" ? "text-[#9aa1ab]" : "text-brand-ink",
               )}
             >
               {step.label}

@@ -87,11 +87,11 @@ function SectionHeading({
 }) {
   return (
     <div className="mb-4">
-      <h3 className="text-lg font-bold tracking-[-0.02em] text-[#1c133b]">
+      <h3 className="text-lg font-bold tracking-[-0.02em] text-brand-ink">
         {children}
       </h3>
       {subtitle ? (
-        <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">{subtitle}</p>
+        <p className="mt-1.5 text-sm leading-6 text-brand-muted">{subtitle}</p>
       ) : null}
     </div>
   );
@@ -139,7 +139,7 @@ export function UtrComplianceStep({
   return (
     <div className="space-y-6">
       {successMessage ? <SuccessBanner>{successMessage}</SuccessBanner> : null}
-      <p className="text-sm leading-6 text-[#5a5470]">
+      <p className="text-sm leading-6 text-brand-muted">
         If you&apos;re registered for Self Assessment, you&apos;ll have one. As
         part of joining Mundoria as a self-employed cleaner, we&apos;ll need
         your UTR to verify your tax registration details.
@@ -184,11 +184,11 @@ export function UtrComplianceStep({
             onChange={(event) => onUtrChange(digitsOnly(event.target.value))}
             value={utrNumber}
           />
-          <div className="rounded-2xl border-2 border-[#1c133b]/25 bg-[#f3eee4] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1c133b]">
+          <div className="rounded-2xl border-2 border-brand-ink/25 bg-[#f3eee4] px-4 py-3">
+            <p className="text-sm font-semibold text-brand-ink">
               Accepted proof (one of the following)
             </p>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-[#5a5470]">
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-brand-muted">
               {UTR_PROOF_TYPES.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -211,7 +211,7 @@ export function UtrComplianceStep({
           {proofQualityWarning ? (
             <InfoCallout>{proofQualityWarning}</InfoCallout>
           ) : null}
-          <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+          <label className="flex cursor-pointer items-start gap-3 text-sm text-brand-ink">
             <OnboardingCheckbox
               checked={clarityConfirmed}
               onCheckedChange={onClarityConfirmed}
@@ -229,7 +229,7 @@ export function UtrComplianceStep({
           <SectionHeading subtitle="If you're new to self-employment, register with HMRC to receive your UTR.">
             No UTR? No problem.
           </SectionHeading>
-          <ol className="list-decimal space-y-3 pl-5 text-sm leading-6 text-[#5a5470]">
+          <ol className="list-decimal space-y-3 pl-5 text-sm leading-6 text-brand-muted">
             <li>
               Register as a sole trader for Self Assessment on GOV.UK.
               <div className="mt-2">
@@ -283,7 +283,7 @@ export function UtrComplianceStep({
           <SectionHeading subtitle="If you've registered for Self Assessment before, you may already have a UTR.">
             Let&apos;s help you find out
           </SectionHeading>
-          <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-[#5a5470]">
+          <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-brand-muted">
             <li>Your HMRC Personal Tax Account</li>
             <li>The HMRC mobile app</li>
             <li>Previous Self Assessment tax returns</li>
@@ -397,7 +397,7 @@ export function DbsComplianceStep({
             />
           </div>
           <div className="space-y-3">
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-xs leading-5 text-brand-subtle">
               Upload a PDF or clear photos. One file is enough for most Basic
               DBS certificates — add more below if you photographed each page
               separately.
@@ -449,10 +449,10 @@ export function DbsComplianceStep({
           <SectionHeading subtitle="Apply directly through the official UK government website.">
             Let&apos;s get your DBS sorted
           </SectionHeading>
-          <p className="text-sm font-semibold text-[#1c133b]">
+          <p className="text-sm font-semibold text-brand-ink">
             Application fee: £20
           </p>
-          <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[#5a5470]">
+          <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-brand-muted">
             <li>Visit GOV.UK and select Start now.</li>
             <li>Provide personal details, address history and ID.</li>
             <li>Pay the £20 fee.</li>
@@ -477,7 +477,7 @@ export function DbsComplianceStep({
           <SectionHeading>
             You&apos;re almost there!
           </SectionHeading>
-          <p className="text-sm leading-6 text-[#5a5470]">
+          <p className="text-sm leading-6 text-brand-muted">
             Continue onboarding while your DBS application is processed. Come
             back to upload the certificate when it arrives. We&apos;ll keep your
             status as Awaiting DBS until then.
@@ -667,17 +667,17 @@ export function InsuranceComplianceStep({
                   className={cn(
                     "flex h-11 min-w-0 flex-1 items-center gap-1.5 rounded-xl border-2 bg-transparent px-3.5 transition",
                     error
-                      ? "border-[#d4694a] ring-2 ring-[#d4694a]"
-                      : "border-[#1c133b] focus-within:ring-2 focus-within:ring-[#1c133b]",
+                      ? "border-brand-terracotta ring-2 ring-brand-terracotta"
+                      : "border-brand-ink focus-within:ring-2 focus-within:ring-brand-ink",
                   )}
                 >
-                  <span className="text-[15px] font-medium text-[#1c133b]">
+                  <span className="text-[15px] font-medium text-brand-ink">
                     £
                   </span>
                   <input
                     aria-label="Other cover amount"
                     autoFocus
-                    className="h-full w-full min-w-0 bg-transparent text-[15px] font-medium text-[#1c133b] outline-none placeholder:text-[#8a8498]"
+                    className="h-full w-full min-w-0 bg-transparent text-[15px] font-medium text-brand-ink outline-none placeholder:text-[#8a8498]"
                     id="onboarding-insurance-cover-other"
                     inputMode="decimal"
                     onChange={(event) => {
@@ -709,7 +709,7 @@ export function InsuranceComplianceStep({
             uploading={uploading}
           />
 
-          <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+          <label className="flex cursor-pointer items-start gap-3 text-sm text-brand-ink">
             <OnboardingCheckbox
               checked={activityConfirmed}
               onCheckedChange={onActivityConfirmed}
@@ -735,10 +735,10 @@ export function InsuranceComplianceStep({
               "Return here to upload your certificate.",
             ].map((step, index) => (
               <li
-                className="flex items-start gap-3 text-sm leading-6 text-[#5a5470]"
+                className="flex items-start gap-3 text-sm leading-6 text-brand-muted"
                 key={step}
               >
-                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] text-xs font-bold text-[#1c133b]">
+                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-brand-ink text-xs font-bold text-brand-ink">
                   {index + 1}
                 </span>
                 <span>{step}</span>
@@ -771,12 +771,12 @@ export function InsuranceComplianceStep({
               "If you’re still unsure, ask your provider before uploading.",
             ].map((item) => (
               <li
-                className="flex items-start gap-3 text-sm leading-6 text-[#5a5470]"
+                className="flex items-start gap-3 text-sm leading-6 text-brand-muted"
                 key={item}
               >
                 <span
                   aria-hidden
-                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1c133b]"
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-ink"
                 />
                 <span>{item}</span>
               </li>
@@ -816,7 +816,7 @@ export function LocationExtras({
   const travel = parseTransportModes(transportMode);
 
   return (
-    <div className="mt-8 space-y-6 border-t border-[#e8e0d0] pt-8">
+    <div className="mt-8 space-y-6 border-t border-brand-sand pt-8">
       <SectionHeading subtitle="Select every option that applies.">
         How do you usually travel to cleaning jobs?
       </SectionHeading>
@@ -926,7 +926,7 @@ export function EquipmentComplianceStep({
 
   return (
     <div className="space-y-6">
-      <p className="text-sm leading-6 text-[#5a5470]">
+      <p className="text-sm leading-6 text-brand-muted">
         Some bookings need you to bring equipment and products; others provide
         supplies. Tell us what you have so we can match you well. Products
         (liquids/sprays) and equipment (vacuum, mop) are tracked separately.
@@ -1079,7 +1079,7 @@ export function EmergencyContactStep({
   return (
     <div className="space-y-6">
       {successMessage ? <SuccessBanner>{successMessage}</SuccessBanner> : null}
-      <p className="text-sm leading-6 text-[#5a5470]">
+      <p className="text-sm leading-6 text-brand-muted">
         Provide someone we can contact in an emergency while you&apos;re on a
         Mundoria booking. This stays private and is only used when necessary.
       </p>
@@ -1199,7 +1199,7 @@ export function EmergencyContactStep({
       />
 
       <SectionHeading>Staying safe while you work</SectionHeading>
-      <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-[#5a5470]">
+      <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-brand-muted">
         {SAFETY_GUIDELINES.map((item) => (
           <li key={item}>{item}</li>
         ))}
@@ -1209,7 +1209,7 @@ export function EmergencyContactStep({
         account for injuries, damage and unsafe conditions. Dial 999 in an
         emergency, or 101 for non-emergencies.
       </InfoCallout>
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+      <label className="flex cursor-pointer items-start gap-3 text-sm text-brand-ink">
         <OnboardingCheckbox
           checked={safetyAck}
           onCheckedChange={onSafetyAck}
@@ -1248,25 +1248,25 @@ export function AgreementsReviewStep({
 }) {
   return (
     <div className="space-y-6">
-      <p className="text-sm leading-6 text-[#5a5470]">
+      <p className="text-sm leading-6 text-brand-muted">
         You&apos;re almost there. Check your application summary, then accept
         the agreements before submitting.
       </p>
 
-      <div className="rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-4">
-        <p className="font-semibold text-[#1c133b]">Application summary</p>
-        <ul className="mt-3 divide-y divide-[#e8e0d0]">
+      <div className="rounded-2xl border-2 border-brand-ink bg-brand-cream p-4">
+        <p className="font-semibold text-brand-ink">Application summary</p>
+        <ul className="mt-3 divide-y divide-brand-sand">
           {summaryRows.map((row) => (
             <li
               className="flex items-center justify-between gap-3 py-2.5 text-sm"
               key={row.stepId}
             >
               <div className="min-w-0">
-                <p className="font-medium text-[#1c133b]">{row.label}</p>
-                <p className="text-[#5a5470]">{row.status}</p>
+                <p className="font-medium text-brand-ink">{row.label}</p>
+                <p className="text-brand-muted">{row.status}</p>
               </div>
               <button
-                className="shrink-0 text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="shrink-0 text-sm font-semibold text-brand-purple underline-offset-2 hover:underline"
                 onClick={() => onEditStep(row.stepId)}
                 type="button"
               >
@@ -1280,22 +1280,22 @@ export function AgreementsReviewStep({
       <div className="space-y-3">
         {CLEANER_AGREEMENT_DOCS.map((doc) => (
           <div
-            className="rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-4"
+            className="rounded-2xl border-2 border-brand-ink bg-brand-cream p-4"
             key={doc.key}
           >
-            <p className="font-semibold text-[#1c133b]">{doc.label}</p>
-            <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+            <p className="font-semibold text-brand-ink">{doc.label}</p>
+            <p className="mt-1 text-sm leading-5 text-brand-muted">
               {doc.description}
             </p>
             <a
-              className="mt-2 inline-block text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="mt-2 inline-block text-sm font-semibold text-brand-purple underline-offset-2 hover:underline"
               href={doc.href}
               rel="noopener noreferrer"
               target="_blank"
             >
               Read {doc.label}
             </a>
-            <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+            <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm text-brand-ink">
               <OnboardingCheckbox
                 checked={acceptedKeys.includes(doc.key)}
                 onCheckedChange={(next) => onToggle(doc.key, next)}
@@ -1306,7 +1306,7 @@ export function AgreementsReviewStep({
         ))}
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+      <label className="flex cursor-pointer items-start gap-3 text-sm text-brand-ink">
         <OnboardingCheckbox
           checked={accuracyConfirmed}
           onCheckedChange={onAccuracyConfirmed}
@@ -1317,7 +1317,7 @@ export function AgreementsReviewStep({
         </span>
       </label>
 
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+      <label className="flex cursor-pointer items-start gap-3 text-sm text-brand-ink">
         <OnboardingCheckbox
           checked={marketingConsent}
           onCheckedChange={onMarketingConsent}

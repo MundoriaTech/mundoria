@@ -95,7 +95,7 @@ export function IncidentActions({
       <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm">
         <input
           checked={riddor}
-          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#1c133b]"
+          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-brand-ink"
           onChange={(event) => setRiddor(event.target.checked)}
           type="checkbox"
         />
@@ -108,8 +108,13 @@ export function IncidentActions({
         </span>
       </label>
 
-      <Button className="mt-5 min-h-11 w-full" disabled={pending} onClick={() => void save()}>
-        {pending ? "Saving…" : "Save changes"}
+      <Button
+        className="mt-5 min-h-11 w-full"
+        loading={pending}
+        loadingLabel="Saving…"
+        onClick={() => void save()}
+      >
+        Save changes
       </Button>
     </section>
   );

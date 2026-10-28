@@ -100,15 +100,15 @@ export default function ServiceGuidePage({ params }: PageProps) {
         <BrandedSection>
           {guide.paragraphs.map((paragraph) => (
             <p
-              className="mt-4 max-w-2xl text-sm leading-7 text-[#5a5470] first:mt-0"
+              className="mt-4 max-w-2xl text-sm leading-7 text-brand-muted first:mt-0"
               key={paragraph}
             >
               {paragraph}
             </p>
           ))}
-          <p className="mt-8 text-sm text-[#5a5470]">
+          <p className="mt-8 text-sm text-brand-muted">
             <Link
-              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="font-semibold text-brand-purple underline-offset-2 hover:underline"
               href={servicePlacePath(service.slug)}
             >
               {service.label} in Birmingham

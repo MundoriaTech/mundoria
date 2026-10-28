@@ -53,32 +53,32 @@ export function ConversationList({
               <div className="flex items-baseline justify-between gap-3">
                 <p
                   className={cn(
-                    "truncate text-sm font-semibold text-[#1c133b]",
+                    "truncate text-sm font-semibold text-brand-ink",
                     item.unread && "font-bold",
                   )}
                 >
                   {item.title}
                 </p>
                 {item.timeLabel ? (
-                  <span className="shrink-0 text-[11px] text-[#8b8798]">
+                  <span className="shrink-0 text-[11px] text-brand-subtle">
                     {item.timeLabel}
                   </span>
                 ) : null}
               </div>
-              <p className="mt-0.5 truncate text-xs text-[#8b8798]">
+              <p className="mt-0.5 truncate text-xs text-brand-subtle">
                 {item.subtitle}
               </p>
               <p
                 className={cn(
-                  "mt-1 truncate text-sm text-[#5a5470]",
-                  item.unread && "font-medium text-[#1c133b]",
+                  "mt-1 truncate text-sm text-brand-muted",
+                  item.unread && "font-medium text-brand-ink",
                 )}
               >
                 {item.preview}
               </p>
             </div>
             {item.unread ? (
-              <span className="h-2 w-2 shrink-0 rounded-full bg-[#d4694a]" />
+              <span className="h-2 w-2 shrink-0 rounded-full bg-brand-terracotta" />
             ) : null}
           </Link>
         </li>

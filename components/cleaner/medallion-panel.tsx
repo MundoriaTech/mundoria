@@ -63,19 +63,19 @@ export function CleanerMedallionPanel({
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8b8798]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-subtle">
               Activity insights
             </p>
-            <span className="rounded-full bg-[#f3f1f7] px-2 py-0.5 text-[11px] font-bold text-[#1c133b]">
+            <span className="rounded-full bg-[#f3f1f7] px-2 py-0.5 text-[11px] font-bold text-brand-ink">
               {label}
             </span>
           </div>
-          <p className="mt-0.5 text-sm font-bold text-[#1c133b]">
+          <p className="mt-0.5 text-sm font-bold text-brand-ink">
             {progressCopy}
           </p>
         </div>
         <Link
-          className="shrink-0 text-xs font-bold text-[#d4694a]"
+          className="shrink-0 text-xs font-bold text-brand-terracotta"
           href="/cleaner/performance"
         >
           View
@@ -84,7 +84,7 @@ export function CleanerMedallionPanel({
 
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#f0edf5]">
         <div
-          className="h-full rounded-full bg-[#d4694a] transition-[width] duration-500"
+          className="h-full rounded-full bg-brand-terracotta transition-[width] duration-500"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -117,7 +117,7 @@ function Metric({ label, value }: { label: string; value: string }) {
       <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#a8a3b5]">
         {label}
       </p>
-      <p className="mt-0.5 text-sm font-bold text-[#1c133b]">{value}</p>
+      <p className="mt-0.5 text-sm font-bold text-brand-ink">{value}</p>
     </div>
   );
 }

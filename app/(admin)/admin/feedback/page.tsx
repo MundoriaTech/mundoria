@@ -48,10 +48,10 @@ export default async function AdminFeedbackPage() {
         <ul className="grid gap-4">
           {rows.map((row) => (
             <li
-              className="rounded-2xl border border-[#e6e0f2] bg-white p-5"
+              className="rounded-2xl border border-brand-line bg-white p-5"
               key={row.id}
             >
-              <p className="text-sm font-semibold text-[#312c79]">
+              <p className="text-sm font-semibold text-brand-indigo">
                 {[
                   row.client_name.trim(),
                   row.mood ? guestFeedbackMoodLabel(row.mood) : "",
@@ -60,7 +60,7 @@ export default async function AdminFeedbackPage() {
                   .join(" · ")}
               </p>
               {row.service_label || row.service_date || row.invoice_number ? (
-                <p className="mt-1 text-sm text-[#5a5470]">
+                <p className="mt-1 text-sm text-brand-muted">
                   {[
                     row.service_label,
                     row.service_date
@@ -73,9 +73,9 @@ export default async function AdminFeedbackPage() {
                 </p>
               ) : null}
               {row.comment ? (
-                <p className="mt-3 text-sm leading-6 text-[#1c133b]">{row.comment}</p>
+                <p className="mt-3 text-sm leading-6 text-brand-ink">{row.comment}</p>
               ) : (
-                <p className="mt-3 text-sm text-[#5a5470]">No written comment.</p>
+                <p className="mt-3 text-sm text-brand-muted">No written comment.</p>
               )}
             </li>
           ))}

@@ -33,13 +33,13 @@ export function DashboardWelcomeBanner({
       <div className="grid grid-cols-[minmax(0,1fr)_8.25rem] items-end gap-x-2 sm:grid-cols-[minmax(0,1fr)_16rem] sm:items-center sm:gap-x-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="min-w-0 pb-1">
           {eyebrow ? (
-            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#c79c66] sm:text-[11px]">
+            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-brand-gold sm:text-[11px]">
               {eyebrow}
             </p>
           ) : null}
-          <h1 className={cn("text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]", eyebrow && "mt-2")}>
+          <h1 className={cn("text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-brand-ink sm:text-[2.35rem]", eyebrow && "mt-2")}>
             Welcome back,{" "}
-            <span className="font-normal text-[#d4694a]">{firstName}</span>.
+            <span className="font-normal text-brand-terracotta">{firstName}</span>.
           </h1>
           <p className="mt-2 max-w-md text-[13px] font-light leading-5 text-[#5c5670] sm:text-[15px] sm:leading-7">
             {subtitle}
@@ -70,10 +70,10 @@ export function DashboardWelcomeBanner({
         >
           {stats.map((stat) => (
             <StaggerItem className="min-w-0" distance={12} key={stat.label}>
-              <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#c79c66]">
+              <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-gold">
                 {stat.label}
               </dt>
-              <dd className="mt-1 truncate text-base font-semibold tracking-tight text-[#1c133b] sm:text-lg">
+              <dd className="mt-1 truncate text-base font-semibold tracking-tight text-brand-ink sm:text-lg">
                 <CountUp value={stat.value} />
               </dd>
             </StaggerItem>
@@ -100,11 +100,11 @@ export function DashboardSection({
       <div className="flex items-end justify-between gap-3">
         <div>
           {eyebrow ? (
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
               {eyebrow}
             </p>
           ) : null}
-          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-brand-ink">
             {title}
           </h2>
         </div>
@@ -142,14 +142,14 @@ export function SessionHighlightCard({
           sizes="(max-width: 768px) 100vw, 900px"
           src={photoSrc}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1c133b]/85 via-[#1c133b]/25 to-[#1c133b]/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/85 via-brand-ink/25 to-brand-ink/10" />
         <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
           <span
             className={cn(
               "inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-tight",
-              statusTone === "waiting" && "bg-[#e8bcac] text-[#1c133b]",
-              statusTone === "confirmed" && "bg-white/95 text-[#312c79]",
-              statusTone === "neutral" && "bg-white/85 text-[#1c133b]",
+              statusTone === "waiting" && "bg-[#e8bcac] text-brand-ink",
+              statusTone === "confirmed" && "bg-white/95 text-brand-indigo",
+              statusTone === "neutral" && "bg-white/85 text-brand-ink",
             )}
           >
             {statusLabel}
@@ -163,13 +163,13 @@ export function SessionHighlightCard({
         </div>
       </div>
 
-      <div className="grid gap-px border-t border-[#efe6ff] bg-[#efe6ff]/80 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-px border-t border-brand-lavender-light bg-brand-lavender-light/80 sm:grid-cols-2 lg:grid-cols-4">
         {meta.map((row) => (
           <div className="bg-white px-4 py-3.5" key={row.label}>
-            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-violet">
               {row.label}
             </p>
-            <p className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
+            <p className="mt-1 text-sm font-semibold tracking-tight text-brand-ink">
               {row.value}
             </p>
           </div>
@@ -177,7 +177,7 @@ export function SessionHighlightCard({
       </div>
 
       {actions ? (
-        <div className="flex flex-col gap-2 border-t border-[#efe6ff] bg-white p-4 sm:flex-row sm:flex-wrap sm:p-5">
+        <div className="flex flex-col gap-2 border-t border-brand-lavender-light bg-white p-4 sm:flex-row sm:flex-wrap sm:p-5">
           {actions}
         </div>
       ) : null}
@@ -207,11 +207,11 @@ export function DashboardHistoryList({
 }) {
   if (!rows.length) {
     return (
-      <div className="rounded-[1.75rem] bg-[#f3efe6] px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+      <div className="rounded-[1.75rem] bg-brand-cream-deep px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
           History
         </p>
-        <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+        <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
           {emptyTitle}
         </h3>
         <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-6 text-[#3d3a48]">
@@ -236,19 +236,19 @@ export function DashboardHistoryList({
               href={row.href}
             >
               <div className="min-w-0">
-                <p className="font-semibold tracking-tight text-[#1c133b]">
+                <p className="font-semibold tracking-tight text-brand-ink">
                   {row.service}
                 </p>
-                <p className="mt-1 text-sm font-light text-[#5a5470]">
+                <p className="mt-1 text-sm font-light text-brand-muted">
                   {row.date}
                   {row.person !== "—" ? ` · ${row.person}` : ""}
                 </p>
               </div>
               <div className="flex items-center justify-between gap-4 sm:justify-end">
-                <span className="rounded-full bg-[#f3efe6] px-2.5 py-1 text-[11px] font-semibold capitalize text-[#312c79]">
+                <span className="rounded-full bg-brand-cream-deep px-2.5 py-1 text-[11px] font-semibold capitalize text-brand-indigo">
                   {row.status}
                 </span>
-                <span className="text-sm font-semibold tracking-tight text-[#1c133b]">
+                <span className="text-sm font-semibold tracking-tight text-brand-ink">
                   {row.amount}
                 </span>
               </div>
@@ -259,7 +259,7 @@ export function DashboardHistoryList({
       {actionHref && actionLabel ? (
         <div className="flex justify-end pt-1">
           <Link
-            className="inline-flex h-11 items-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+            className="inline-flex h-11 items-center rounded-full bg-brand-ink px-5 text-sm font-semibold text-white transition hover:bg-brand-indigo"
             href={actionHref}
           >
             {actionLabel}
@@ -280,8 +280,8 @@ export function DashboardEmptyCard({
   title: string;
 }) {
   return (
-    <div className="rounded-[1.75rem] bg-[#f3efe6] px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
-      <h3 className="text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+    <div className="rounded-[1.75rem] bg-brand-cream-deep px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
+      <h3 className="text-xl font-semibold tracking-[-0.03em] text-brand-ink">
         {title}
       </h3>
       <p className="mx-auto mt-2 max-w-md text-sm font-light leading-6 text-[#3d3a48]">

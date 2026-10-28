@@ -195,7 +195,7 @@ export function MagPostEditor({
 
   return (
     <div className="min-h-[calc(100vh-6rem)] bg-[#f7f4fb]">
-      <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-30 border-b border-white/10 bg-[#1c133b] px-4 py-3 text-white sm:px-6">
+      <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-30 border-b border-white/10 bg-brand-ink px-4 py-3 text-white sm:px-6">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
           <div className="min-w-0">
             <Link
@@ -220,12 +220,13 @@ export function MagPostEditor({
               Save draft
             </Button>
             <Button
-              className="rounded-full bg-[#d4694a] text-white hover:bg-[#c45a3c]"
-              disabled={saving}
+              className="rounded-full bg-brand-terracotta text-white hover:bg-[#c45a3c]"
+              loading={saving}
+              loadingLabel="Saving…"
               onClick={() => save(true)}
               type="button"
             >
-              {saving ? "Saving…" : "Publish"}
+              Publish
             </Button>
           </div>
         </div>
@@ -241,13 +242,13 @@ export function MagPostEditor({
 
           <section className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-5 shadow-sm sm:p-6">
             <input
-              className="w-full border-0 bg-transparent text-2xl font-semibold tracking-tight text-[#1c133b] outline-none placeholder:text-[#c4bdd8] sm:text-3xl"
+              className="w-full border-0 bg-transparent text-2xl font-semibold tracking-tight text-brand-ink outline-none placeholder:text-[#c4bdd8] sm:text-3xl"
               onChange={(event) => handleTitle(event.target.value)}
               placeholder="Post title…"
               value={form.title}
             />
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-[#5a5470]">/blog/</span>
+              <span className="text-brand-muted">/blog/</span>
               <Input
                 className="h-9 max-w-xs font-mono text-xs"
                 onChange={(event) => {
@@ -257,7 +258,7 @@ export function MagPostEditor({
                 value={form.slug}
               />
               <button
-                className="text-xs font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="text-xs font-semibold text-brand-purple underline-offset-2 hover:underline"
                 onClick={() => {
                   setSlugLocked(false);
                   setField("slug", slugifyMagTitle(form.title));
@@ -281,8 +282,8 @@ export function MagPostEditor({
                   className={cn(
                     "flex-1 px-4 py-3 text-sm font-semibold transition",
                     tab === id
-                      ? "border-b-2 border-[#1c133b] text-[#1c133b]"
-                      : "text-[#5a5470] hover:text-[#1c133b]",
+                      ? "border-b-2 border-brand-ink text-brand-ink"
+                      : "text-brand-muted hover:text-brand-ink",
                   )}
                   key={id}
                   onClick={() => setTab(id)}
@@ -298,7 +299,7 @@ export function MagPostEditor({
                 <div className="mb-3 flex flex-wrap gap-1.5">
                   {HINTS.map((hint) => (
                     <button
-                      className="rounded-full border border-[#e0d6f0] bg-[#faf8fd] px-2.5 py-1 font-mono text-[11px] text-[#5a5470] hover:border-[#6a45b8]/40 hover:text-[#1c133b]"
+                      className="rounded-full border border-[#e0d6f0] bg-[#faf8fd] px-2.5 py-1 font-mono text-[11px] text-brand-muted hover:border-brand-purple/40 hover:text-brand-ink"
                       key={hint.label}
                       onClick={() => insertHint(hint.insert)}
                       type="button"
@@ -307,7 +308,7 @@ export function MagPostEditor({
                     </button>
                   ))}
                   <button
-                    className="rounded-full border border-[#c79c66]/50 bg-[#fff8ef] px-2.5 py-1 text-[11px] font-semibold text-[#1c133b] hover:border-[#c79c66]"
+                    className="rounded-full border border-brand-gold/50 bg-[#fff8ef] px-2.5 py-1 text-[11px] font-semibold text-brand-ink hover:border-brand-gold"
                     onClick={insertMoneyCta}
                     type="button"
                   >
@@ -315,7 +316,7 @@ export function MagPostEditor({
                   </button>
                 </div>
                 <textarea
-                  className="min-h-[26rem] w-full resize-y rounded-xl border border-[#e8e0f4] bg-[#fcfbfe] px-4 py-3 font-mono text-sm leading-6 text-[#1c133b] outline-none focus:border-[#6a45b8]/50"
+                  className="min-h-[26rem] w-full resize-y rounded-xl border border-[#e8e0f4] bg-[#fcfbfe] px-4 py-3 font-mono text-sm leading-6 text-brand-ink outline-none focus:border-brand-purple/50"
                   onChange={(event) => setField("content", event.target.value)}
                   placeholder="Write your Mag story in markdown…"
                   ref={textareaRef}
@@ -339,14 +340,14 @@ export function MagPostEditor({
           </section>
 
           <section className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-5 shadow-sm">
-            <label className="text-sm font-semibold text-[#1c133b]">
+            <label className="text-sm font-semibold text-brand-ink">
               Excerpt
             </label>
-            <p className="mt-1 text-xs text-[#5a5470]">
+            <p className="mt-1 text-xs text-brand-muted">
               Short blurb for the Mag listing and social previews.
             </p>
             <textarea
-              className="mt-3 min-h-[6rem] w-full rounded-xl border border-[#e8e0f4] px-3 py-2 text-sm leading-6 outline-none focus:border-[#6a45b8]/50"
+              className="mt-3 min-h-[6rem] w-full rounded-xl border border-[#e8e0f4] px-3 py-2 text-sm leading-6 outline-none focus:border-brand-purple/50"
               onChange={(event) => setField("excerpt", event.target.value)}
               placeholder="One or two sentences…"
               value={form.excerpt}
@@ -356,7 +357,7 @@ export function MagPostEditor({
 
         <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <section className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-5 shadow-sm">
-            <p className="text-sm font-semibold text-[#1c133b]">Status</p>
+            <p className="text-sm font-semibold text-brand-ink">Status</p>
             <button
               className={cn(
                 "mt-3 flex w-full items-center justify-between rounded-full px-4 py-2.5 text-sm font-semibold ring-1 transition",
@@ -373,11 +374,11 @@ export function MagPostEditor({
           </section>
 
           <section className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-5 shadow-sm">
-            <label className="text-sm font-semibold text-[#1c133b]">
+            <label className="text-sm font-semibold text-brand-ink">
               Category
             </label>
             <select
-              className="mt-2 w-full rounded-xl border border-[#e8e0f4] bg-white px-3 py-2.5 text-sm text-[#1c133b]"
+              className="mt-2 w-full rounded-xl border border-[#e8e0f4] bg-white px-3 py-2.5 text-sm text-brand-ink"
               onChange={(event) => setField("category", event.target.value)}
               value={form.category}
             >
@@ -388,10 +389,10 @@ export function MagPostEditor({
               ))}
             </select>
 
-            <label className="mt-4 block text-sm font-semibold text-[#1c133b]">
+            <label className="mt-4 block text-sm font-semibold text-brand-ink">
               Related services
             </label>
-            <p className="mt-1 text-xs leading-5 text-[#5a5470]">
+            <p className="mt-1 text-xs leading-5 text-brand-muted">
               Tag money pages this guide supports. Tagged posts rank first on
               those service and service+city Mag modules.
             </p>
@@ -400,7 +401,7 @@ export function MagPostEditor({
                 const checked = form.related_services.includes(service.slug);
                 return (
                   <label
-                    className="flex cursor-pointer items-start gap-2 rounded-lg px-1.5 py-1 text-sm text-[#1c133b] hover:bg-[#f7f2fc]"
+                    className="flex cursor-pointer items-start gap-2 rounded-lg px-1.5 py-1 text-sm text-brand-ink hover:bg-[#f7f2fc]"
                     key={service.slug}
                   >
                     <input
@@ -425,7 +426,7 @@ export function MagPostEditor({
               </p>
             ) : null}
 
-            <label className="mt-4 block text-sm font-semibold text-[#1c133b]">
+            <label className="mt-4 block text-sm font-semibold text-brand-ink">
               Author
             </label>
             <Input
@@ -436,10 +437,10 @@ export function MagPostEditor({
           </section>
 
           <section className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-5 shadow-sm">
-            <label className="text-sm font-semibold text-[#1c133b]">
+            <label className="text-sm font-semibold text-brand-ink">
               Cover image URL
             </label>
-            <p className="mt-1 text-xs text-[#5a5470]">
+            <p className="mt-1 text-xs text-brand-muted">
               Use a site path like `/images/mag/…` or a full URL.
             </p>
             <Input
@@ -478,7 +479,7 @@ export function MagPostEditor({
               Save draft
             </Button>
             <Button
-              className="flex-1 rounded-full bg-[#d4694a] hover:bg-[#c45a3c]"
+              className="flex-1 rounded-full bg-brand-terracotta hover:bg-[#c45a3c]"
               disabled={saving}
               onClick={() => save(true)}
               type="button"

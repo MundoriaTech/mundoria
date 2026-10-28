@@ -135,7 +135,7 @@ export function CleanersTable({
           />
         </label>
         <select
-          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
+          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
           onChange={(event) => setTier(event.target.value)}
           value={tier}
         >

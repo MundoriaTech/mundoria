@@ -28,7 +28,7 @@ export async function AdminAuthShell({
   const viewer = await getMarketingViewer();
 
   return (
-    <main className="min-h-screen bg-[#faf8ff] text-[#1c133b]">
+    <main className="min-h-screen bg-brand-haze text-brand-ink">
       <LandingNavbar customerHref={bookingHref} viewer={viewer} />
       <div
         className="flex items-center justify-center px-5 pb-10 sm:px-8"
@@ -39,7 +39,7 @@ export async function AdminAuthShell({
       >
         <div className="w-full max-w-md">
           <Reveal distance={8} from="left">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-violet">
               Operations
             </p>
           </Reveal>
@@ -51,7 +51,7 @@ export async function AdminAuthShell({
           >
             <Stagger delay={0.2} gap={0.08}>
               <StaggerItem distance={0} from="scale">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1c133b] text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-ink text-white">
                   <LockKeyhole className="h-5 w-5" />
                 </div>
               </StaggerItem>
@@ -61,7 +61,7 @@ export async function AdminAuthShell({
                 </h1>
               </StaggerItem>
               <StaggerItem distance={16} from="left">
-                <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+                <p className="mt-2 text-sm leading-6 text-brand-muted">
                   {description}
                 </p>
               </StaggerItem>
@@ -73,7 +73,7 @@ export async function AdminAuthShell({
 
           {footer ? (
             <Reveal
-              className="mt-7 text-center text-sm text-[#5a5470]"
+              className="mt-7 text-center text-sm text-brand-muted"
               delay={0.5}
               distance={10}
             >

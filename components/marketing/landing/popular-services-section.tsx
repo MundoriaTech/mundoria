@@ -104,7 +104,7 @@ function PopularServiceCard({
       aria-label={`Book ${label}`}
       className={cn(
         "group relative block h-[280px] w-[min(78vw,15.5rem)] shrink-0 overflow-hidden rounded-[1.15rem] outline-none transition sm:h-[300px] sm:w-[16.5rem] sm:rounded-[1.25rem]",
-        "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c133b]",
+        "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-ink",
         "active:brightness-[0.97] lg:h-[320px] lg:w-[17.5rem] lg:hover:-translate-y-0.5",
         className,
       )}
@@ -404,7 +404,7 @@ export function PopularServicesSection({
           <div className="mt-5 hidden justify-end gap-2 md:flex">
             <button
               aria-label="Previous popular services"
-              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
+              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-brand-ink shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
               onClick={() => scrollByCard("left")}
               type="button"
             >
@@ -412,7 +412,7 @@ export function PopularServicesSection({
             </button>
             <button
               aria-label="Next popular services"
-              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-[#1c133b] shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
+              className="flex size-[31px] items-center justify-center rounded-full bg-[#e8e0f9] text-brand-ink shadow-[0_4px_14px_rgba(28,19,59,0.25)] transition hover:bg-white"
               onClick={() => scrollByCard("right")}
               type="button"
             >

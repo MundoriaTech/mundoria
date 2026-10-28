@@ -24,10 +24,10 @@ function categoryBookHref(customerHref: string, category: string) {
 }
 
 const LINK_CLASS =
-  "block py-3 text-[15px] font-normal text-[#1c133b] underline decoration-[#1c133b]/25 underline-offset-[5px] touch-manipulation";
+  "block py-3 text-[15px] font-normal text-brand-ink underline decoration-brand-ink/25 underline-offset-[5px] touch-manipulation";
 
 const ROW_CLASS =
-  "flex min-h-12 w-full items-center justify-between gap-3 py-3 text-left text-[15px] font-normal text-[#1c133b] touch-manipulation";
+  "flex min-h-12 w-full items-center justify-between gap-3 py-3 text-left text-[15px] font-normal text-brand-ink touch-manipulation";
 
 /** WeCasa-style left off-canvas drawer: Services → My account → About us. */
 export function MarketingMobileMenuSheet({
@@ -118,7 +118,7 @@ export function MarketingMobileMenuSheet({
     <div className="fixed inset-0 z-[70]">
       <button
         aria-label="Close menu"
-        className="absolute inset-0 bg-[#1c133b]/40"
+        className="absolute inset-0 bg-brand-ink/40"
         onClick={onClose}
         type="button"
       />
@@ -147,11 +147,11 @@ export function MarketingMobileMenuSheet({
                 {variant === "mag" ? (
                   <Link
                     aria-label="Mundoria Mag home"
-                    className="inline-block text-[1.15rem] font-black tracking-[-0.06em] text-[#1c133b]"
+                    className="inline-block text-[1.15rem] font-black tracking-[-0.06em] text-brand-ink"
                     href="/blog"
                     onClick={onClose}
                   >
-                    Mundoria <span className="text-[#d4694a]">Mag</span>
+                    Mundoria <span className="text-brand-terracotta">Mag</span>
                   </Link>
                 ) : (
                   <LandingLogo className="h-7 w-auto" href="/" />
@@ -160,7 +160,7 @@ export function MarketingMobileMenuSheet({
 
               {variant === "mag" ? (
                 <section className="pb-6">
-                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                     Mag
                   </h2>
                   <ul className="mt-1">
@@ -207,7 +207,7 @@ export function MarketingMobileMenuSheet({
                 </section>
               ) : variant === "faq" && faqNav?.length ? (
                 <section className="pb-6">
-                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                     FAQ topics
                   </h2>
                   <ul className="mt-1">
@@ -240,7 +240,7 @@ export function MarketingMobileMenuSheet({
                 </section>
               ) : (
                 <section className="pb-6">
-                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                     Services
                   </h2>
                   <ul className="mt-1">
@@ -265,7 +265,7 @@ export function MarketingMobileMenuSheet({
               )}
 
               <section className="pb-6">
-                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                   My account
                 </h2>
                 <ul className="mt-1">
@@ -293,7 +293,7 @@ export function MarketingMobileMenuSheet({
 
               {variant === "marketing" ? (
                 <section>
-                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                     About us
                   </h2>
                   <ul className="mt-1">
@@ -356,7 +356,7 @@ export function MarketingMobileMenuSheet({
             >
               <div className="sticky top-0 z-10 bg-white px-3 py-2">
                 <button
-                  className="inline-flex min-h-11 items-center gap-1 px-2 text-[15px] font-semibold text-[#1c133b] touch-manipulation"
+                  className="inline-flex min-h-11 items-center gap-1 px-2 text-[15px] font-semibold text-brand-ink touch-manipulation"
                   onClick={() => onDrill?.()}
                   type="button"
                 >
@@ -368,7 +368,7 @@ export function MarketingMobileMenuSheet({
               {panel === "mag" && magTopics ? (
                 <>
                   <div className="px-6 pb-2">
-                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                       Mag topics
                     </h2>
                   </div>
@@ -387,7 +387,7 @@ export function MarketingMobileMenuSheet({
                               className="h-2.5 w-2.5 shrink-0 rounded-full"
                               style={{ backgroundColor: theme.accent }}
                             />
-                            <span className="text-[15px] text-[#1c133b]">
+                            <span className="text-[15px] text-brand-ink">
                               {topic.label}
                             </span>
                           </Link>
@@ -408,10 +408,10 @@ export function MarketingMobileMenuSheet({
               ) : activeFaqSection ? (
                 <>
                   <div className="px-6 pb-3">
-                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                       {activeFaqSection.label}
                     </h2>
-                    <p className="mt-1 text-[13px] leading-5 text-[#1c133b]/55">
+                    <p className="mt-1 text-[13px] leading-5 text-brand-ink/55">
                       {activeFaqSection.description}
                     </p>
                   </div>
@@ -419,7 +419,7 @@ export function MarketingMobileMenuSheet({
                     {activeFaqSection.items.map((item) => (
                       <li key={item.href}>
                         <Link
-                          className="block border-b border-[#1c133b]/08 py-3.5 text-[15px] font-medium leading-snug text-[#1c133b] touch-manipulation"
+                          className="block border-b border-brand-ink/08 py-3.5 text-[15px] font-medium leading-snug text-brand-ink touch-manipulation"
                           href={item.href}
                           onClick={onClose}
                         >
@@ -441,14 +441,14 @@ export function MarketingMobileMenuSheet({
               ) : activeCategory ? (
                 <>
                   <div className="px-6 pb-3">
-                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-[#1c133b]">
+                    <h2 className="text-[17px] font-bold tracking-[-0.02em] text-brand-ink">
                       {activeCategory.label}
                     </h2>
-                    <p className="mt-1 text-[13px] leading-5 text-[#1c133b]/55">
+                    <p className="mt-1 text-[13px] leading-5 text-brand-ink/55">
                       {activeCategory.description}
                     </p>
                     <Link
-                      className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#1c133b] px-3 text-sm font-semibold text-white touch-manipulation"
+                      className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-ink px-3 text-sm font-semibold text-white touch-manipulation"
                       href={categoryBookHref(
                         customerHref,
                         activeCategory.bookCategory,
@@ -462,14 +462,14 @@ export function MarketingMobileMenuSheet({
                     {activeCategory.items.map((item) => (
                       <li key={item.href}>
                         <Link
-                          className="block border-b border-[#1c133b]/08 py-3.5 touch-manipulation"
+                          className="block border-b border-brand-ink/08 py-3.5 touch-manipulation"
                           href={item.href}
                           onClick={onClose}
                         >
-                          <span className="block text-[15px] font-medium text-[#1c133b]">
+                          <span className="block text-[15px] font-medium text-brand-ink">
                             {item.label}
                           </span>
-                          <span className="mt-0.5 block text-[12px] font-normal text-[#1c133b]/55">
+                          <span className="mt-0.5 block text-[12px] font-normal text-brand-ink/55">
                             {item.description}
                           </span>
                         </Link>
@@ -487,7 +487,7 @@ export function MarketingMobileMenuSheet({
                   </div>
                 </>
               ) : (
-                <div className="px-6 text-sm text-[#1c133b]/50">
+                <div className="px-6 text-sm text-brand-ink/50">
                   Choose a category
                 </div>
               )}

@@ -10,7 +10,7 @@ import { INCIDENT_CATEGORIES } from "@/lib/cleaner/onboarding-compliance";
 import { cn } from "@/lib/utils";
 
 const FIELD_CLASS =
-  "border-2 border-[#1c133b] bg-[#f9f6ef] focus-visible:ring-[#1c133b]";
+  "border-2 border-brand-ink bg-brand-cream focus-visible:ring-brand-ink";
 
 const SEVERITIES = [
   { description: "No immediate risk", label: "Standard", value: "standard" },
@@ -94,18 +94,18 @@ export function IncidentReportForm({
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-6 text-center sm:p-8">
-        <CheckCircle2 className="mx-auto h-10 w-10 text-[#6a45b8]" />
-        <h2 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-[#1c133b]">
+      <div className="rounded-2xl border-2 border-brand-ink bg-brand-cream p-6 text-center sm:p-8">
+        <CheckCircle2 className="mx-auto h-10 w-10 text-brand-purple" />
+        <h2 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-brand-ink">
           Report sent
         </h2>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#5a5470]">
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-brand-muted">
           Thank you. Our team has been notified and will review your report.
           We’ll contact you if we need anything else. If anyone is in danger,
           call 999 now.
         </p>
         <Button
-          className="mt-6 h-11 rounded-full bg-[#1c133b] px-6 font-semibold text-white hover:bg-[#312c79]"
+          className="mt-6 h-11 rounded-full bg-brand-ink px-6 font-semibold text-white hover:bg-brand-indigo"
           onClick={reset}
           type="button"
         >
@@ -117,14 +117,14 @@ export function IncidentReportForm({
 
   return (
     <form
-      className="space-y-5 rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-5 sm:p-7"
+      className="space-y-5 rounded-2xl border-2 border-brand-ink bg-brand-cream p-5 sm:p-7"
       onSubmit={submit}
     >
-      <div className="flex items-start gap-3 rounded-xl border-2 border-[#1c133b] bg-white p-4">
-        <PhoneCall className="mt-0.5 h-5 w-5 shrink-0 text-[#d4694a]" />
-        <div className="text-sm leading-6 text-[#1c133b]">
+      <div className="flex items-start gap-3 rounded-xl border-2 border-brand-ink bg-white p-4">
+        <PhoneCall className="mt-0.5 h-5 w-5 shrink-0 text-brand-terracotta" />
+        <div className="text-sm leading-6 text-brand-ink">
           <p className="font-semibold">In danger or someone is hurt? Call 999.</p>
-          <p className="text-[#5a5470]">
+          <p className="text-brand-muted">
             For a crime or incident that is not an emergency, call 101. Report
             it here once you are safe.
           </p>
@@ -134,7 +134,7 @@ export function IncidentReportForm({
       <Field label="What type of incident?" htmlFor="incident-category">
         <select
           className={cn(
-            "h-11 w-full rounded-md px-3 text-sm text-[#1c133b] outline-none focus-visible:ring-2 [color-scheme:light]",
+            "h-11 w-full rounded-md px-3 text-sm text-brand-ink outline-none focus-visible:ring-2 [color-scheme:light]",
             FIELD_CLASS,
           )}
           id="incident-category"
@@ -150,7 +150,7 @@ export function IncidentReportForm({
       </Field>
 
       <fieldset>
-        <legend className="text-sm font-semibold text-[#1c133b]">
+        <legend className="text-sm font-semibold text-brand-ink">
           How serious is it?
         </legend>
         <div className="mt-2 grid gap-2 sm:grid-cols-3">
@@ -159,10 +159,10 @@ export function IncidentReportForm({
             return (
               <label
                 className={cn(
-                  "cursor-pointer rounded-xl border-2 border-[#1c133b] px-3 py-2.5 text-sm transition",
+                  "cursor-pointer rounded-xl border-2 border-brand-ink px-3 py-2.5 text-sm transition",
                   active
-                    ? "bg-[#1c133b] text-white"
-                    : "bg-[#f9f6ef] text-[#1c133b] hover:bg-white",
+                    ? "bg-brand-ink text-white"
+                    : "bg-brand-cream text-brand-ink hover:bg-white",
                 )}
                 key={item.value}
               >
@@ -178,7 +178,7 @@ export function IncidentReportForm({
                 <span
                   className={cn(
                     "block text-xs",
-                    active ? "text-white/75" : "text-[#5a5470]",
+                    active ? "text-white/75" : "text-brand-muted",
                   )}
                 >
                   {item.description}
@@ -191,10 +191,10 @@ export function IncidentReportForm({
 
       {category === "injury" || severity !== "standard" ? (
         <p
-          className="rounded-xl border-2 border-[#1c133b] bg-white px-4 py-3 text-sm leading-6 text-[#5a5470]"
+          className="rounded-xl border-2 border-brand-ink bg-white px-4 py-3 text-sm leading-6 text-brand-muted"
           role="note"
         >
-          <span className="font-semibold text-[#1c133b]">
+          <span className="font-semibold text-brand-ink">
             May need RIDDOR reporting.
           </span>{" "}
           Some work-related injuries must be reported to the HSE. Our team will
@@ -218,7 +218,7 @@ export function IncidentReportForm({
       <Field label="What happened?" htmlFor="incident-description">
         <textarea
           className={cn(
-            "min-h-32 w-full rounded-md px-3 py-2 text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798] focus-visible:ring-2 [color-scheme:light]",
+            "min-h-32 w-full rounded-md px-3 py-2 text-sm text-brand-ink outline-none placeholder:text-brand-subtle focus-visible:ring-2 [color-scheme:light]",
             FIELD_CLASS,
           )}
           id="incident-description"
@@ -258,7 +258,7 @@ export function IncidentReportForm({
         <Field label="Related booking (optional)" htmlFor="incident-booking">
           <select
             className={cn(
-              "h-11 w-full rounded-md px-3 text-sm text-[#1c133b] outline-none focus-visible:ring-2 [color-scheme:light]",
+              "h-11 w-full rounded-md px-3 text-sm text-brand-ink outline-none focus-visible:ring-2 [color-scheme:light]",
               FIELD_CLASS,
             )}
             id="incident-booking"
@@ -275,10 +275,10 @@ export function IncidentReportForm({
         </Field>
       ) : null}
 
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
+      <label className="flex cursor-pointer items-start gap-3 text-sm text-brand-ink">
         <input
           checked={emergencyContacted}
-          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-2 border-[#1c133b] accent-[#1c133b]"
+          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-2 border-brand-ink accent-brand-ink"
           onChange={(event) => setEmergencyContacted(event.target.checked)}
           type="checkbox"
         />
@@ -287,7 +287,7 @@ export function IncidentReportForm({
 
       {error ? (
         <p
-          className="rounded-xl border-2 border-[#d4694a] bg-white px-4 py-3 text-sm text-[#9b3a1f]"
+          className="rounded-xl border-2 border-brand-terracotta bg-white px-4 py-3 text-sm text-[#9b3a1f]"
           role="alert"
         >
           {error}
@@ -295,11 +295,12 @@ export function IncidentReportForm({
       ) : null}
 
       <Button
-        className="h-12 w-full rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white hover:bg-[#312c79] sm:w-auto"
-        disabled={submitting}
+        className="h-12 w-full rounded-full bg-brand-ink px-6 text-sm font-semibold text-white hover:bg-brand-indigo sm:w-auto"
+        loading={submitting}
+        loadingLabel="Sending…"
         type="submit"
       >
-        {submitting ? "Sending…" : "Send report"}
+        Send report
       </Button>
     </form>
   );
@@ -316,7 +317,7 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-semibold text-[#1c133b]" htmlFor={htmlFor}>
+      <label className="text-sm font-semibold text-brand-ink" htmlFor={htmlFor}>
         {label}
       </label>
       {children}

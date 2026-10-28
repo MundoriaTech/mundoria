@@ -34,7 +34,7 @@ export async function AuthShell({
   const viewer = await getMarketingViewer();
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#faf8ff]">
+    <main className="relative min-h-screen overflow-x-hidden bg-brand-haze">
       <LandingNavbar customerHref={bookingHref} viewer={viewer} />
       <section
         className="relative px-4 pb-10 sm:px-8 sm:pb-12"
@@ -49,7 +49,7 @@ export async function AuthShell({
             >
               <Stagger delay={0.12} gap={0.08}>
                 <StaggerItem distance={18} from="left">
-                  <h1 className="text-[1.65rem] font-bold tracking-[-0.04em] text-[#291845] sm:text-[2.15rem]">
+                  <h1 className="text-[1.65rem] font-bold tracking-[-0.04em] text-brand-plum sm:text-[2.15rem]">
                     {title}
                   </h1>
                 </StaggerItem>

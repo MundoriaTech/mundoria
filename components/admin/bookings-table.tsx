@@ -63,7 +63,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           />
         </label>
         <select
-          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
+          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
           onChange={(event) => setStatus(event.target.value)}
           value={status}
         >
@@ -86,7 +86,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           ))}
         </select>
         <select
-          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
+          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
           onChange={(event) => setService(event.target.value)}
           value={service}
         >

@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import type { Message, MessageAttachment } from "@/types/customer";
 
 const MAX_ATTACHMENTS = 4;
+/** Ids of messages shown before the server has confirmed them. */
+const OPTIMISTIC_PREFIX = "optimistic-";
 const IMAGE_MAX_MB = 10;
 const VIDEO_MAX_MB = 25;
 
@@ -195,30 +197,57 @@ export function Chat({
     event?.preventDefault();
     const text = content.trim();
     if (!text && !pending.length) return;
-    setSending(true);
-    setError(null);
     const attachments = pending.map(({ url, type, mime, name }) => ({
       mime,
       name,
       type,
       url,
     }));
-    const response = await fetch("/api/messages", {
-      body: JSON.stringify({
-        attachments,
-        bookingId,
-        content: text,
-      }),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-    const result = (await response.json()) as {
-      error?: string;
-      message?: Message;
+
+    // Optimistic: show the message straight away, then reconcile with the
+    // server copy (or roll back and restore the draft if it fails).
+    const draftContent = content;
+    const draftPending = pending;
+    const tempId = `${OPTIMISTIC_PREFIX}${Date.now()}`;
+    const optimistic: Message = {
+      attachments,
+      booking_id: bookingId,
+      content: text,
+      created_at: new Date().toISOString(),
+      id: tempId,
+      is_read: false,
+      receiver_id: "",
+      sender_id: currentUserId,
     };
+    setMessages((current) => [...current, optimistic]);
+    setContent("");
+    setPending([]);
+    setEmojiOpen(false);
+    setSending(true);
+    setError(null);
+
+    let response: Response | null = null;
+    let result: { error?: string; message?: Message } = {};
+    try {
+      response = await fetch("/api/messages", {
+        body: JSON.stringify({
+          attachments,
+          bookingId,
+          content: text,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      result = (await response.json()) as typeof result;
+    } catch {
+      result = { error: "Check your connection and try again." };
+    }
     setSending(false);
 
-    if (!response.ok || !result.message) {
+    if (!response?.ok || !result.message) {
+      setMessages((current) => current.filter((message) => message.id !== tempId));
+      setContent(draftContent);
+      setPending(draftPending);
       toast.error("Couldn’t send that", {
         action: { label: "Retry", onClick: () => void sendMessage() },
         description: result.error ?? "Unable to send message.",
@@ -226,14 +255,13 @@ export function Chat({
       return;
     }
 
-    setMessages((current) =>
-      current.some((message) => message.id === result.message!.id)
-        ? current
-        : [...current, result.message!],
-    );
-    setContent("");
-    setPending([]);
-    setEmojiOpen(false);
+    const saved = result.message;
+    setMessages((current) => {
+      const withoutTemp = current.filter((message) => message.id !== tempId);
+      return withoutTemp.some((message) => message.id === saved.id)
+        ? withoutTemp
+        : [...withoutTemp, saved];
+    });
   }
 
   function insertEmoji(emoji: string) {
@@ -258,10 +286,10 @@ export function Chat({
   return (
     <div className="flex h-[calc(100dvh-11rem-env(safe-area-inset-bottom))] min-h-[18rem] flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.08)] ring-1 ring-[#ece8f3] sm:h-[calc(100vh-12rem)] sm:min-h-[28rem]">
       <div className="border-b border-[#ece8f3] px-4 py-3.5 sm:px-5">
-        <h1 className="text-base font-semibold tracking-tight text-[#1c133b]">
+        <h1 className="text-base font-semibold tracking-tight text-brand-ink">
           {peerLabel ?? "Conversation"}
         </h1>
-        <p className="mt-0.5 text-xs text-[#8b8798]">
+        <p className="mt-0.5 text-xs text-brand-subtle">
           {subtitle ?? "Only you and your cleaner can see these messages."}
         </p>
       </div>
@@ -273,25 +301,34 @@ export function Chat({
         </div>
       ) : null}
 
-      <div className="flex-1 space-y-3 overflow-y-auto bg-[#faf8ff] px-3 py-4 sm:space-y-4 sm:px-5 sm:py-5">
+      <div className="flex-1 space-y-3 overflow-y-auto bg-brand-haze px-3 py-4 sm:space-y-4 sm:px-5 sm:py-5">
         {messages.length ? (
           messages.map((message) => {
             const mine = message.sender_id === currentUserId;
+            const optimistic = message.id.startsWith(OPTIMISTIC_PREFIX);
             return (
-              <ChatMessage
-                isOwn={mine}
+              <div
+                aria-busy={optimistic || undefined}
+                className={cn(
+                  "transition-opacity duration-300",
+                  optimistic && "opacity-60",
+                )}
                 key={message.id}
-                message={message}
-                senderName={names[message.sender_id]}
-              />
+              >
+                <ChatMessage
+                  isOwn={mine}
+                  message={message}
+                  senderName={names[message.sender_id]}
+                />
+              </div>
             );
           })
         ) : (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#c79c66]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-brand-gold">
               Messages
             </p>
-            <p className="mt-2 text-sm font-light text-[#5a5470]">
+            <p className="mt-2 text-sm font-light text-brand-muted">
               Say hello — share access notes, parking tips, or photos.
             </p>
           </div>
@@ -316,7 +353,7 @@ export function Chat({
           <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
             {pending.map((item) => (
               <div
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#f3efe6]"
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-brand-cream-deep"
                 key={item.id}
               >
                 {item.type === "video" ? (
@@ -368,7 +405,7 @@ export function Chat({
           />
           <button
             aria-label="Add photo or video"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#5a5470] transition hover:bg-[#f3efe6] disabled:opacity-50"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-brand-muted transition hover:bg-brand-cream-deep disabled:opacity-50"
             disabled={uploading || pending.length >= MAX_ATTACHMENTS}
             onClick={() => fileRef.current?.click()}
             type="button"
@@ -382,8 +419,8 @@ export function Chat({
           <button
             aria-label="Add emoji"
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#5a5470] transition hover:bg-[#f3efe6]",
-              emojiOpen && "bg-[#f3efe6] text-[#312c79]",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-brand-muted transition hover:bg-brand-cream-deep",
+              emojiOpen && "bg-brand-cream-deep text-brand-indigo",
             )}
             onClick={() => setEmojiOpen((open) => !open)}
             type="button"
@@ -391,7 +428,7 @@ export function Chat({
             <Smile className="h-5 w-5" />
           </button>
           <textarea
-            className="max-h-28 min-h-11 flex-1 resize-none rounded-[1.1rem] border border-[#e8e4f0] bg-[#faf8ff] px-3.5 py-2.5 text-sm text-[#1c133b] outline-none transition placeholder:text-[#8b8798] focus:border-[#c4b5e0]"
+            className="max-h-28 min-h-11 flex-1 resize-none rounded-[1.1rem] border border-[#e8e4f0] bg-brand-haze px-3.5 py-2.5 text-sm text-brand-ink outline-none transition placeholder:text-brand-subtle focus:border-[#c4b5e0]"
             onChange={(event) => setContent(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
@@ -406,7 +443,7 @@ export function Chat({
           />
           <button
             aria-label="Send"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1c133b] text-white transition hover:bg-[#312c79] disabled:opacity-40"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-ink text-white transition hover:bg-brand-indigo disabled:opacity-40"
             disabled={!canSend}
             type="submit"
           >

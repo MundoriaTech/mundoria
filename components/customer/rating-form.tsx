@@ -140,7 +140,7 @@ export function RatingForm({
       </div>
 
       <textarea
-        className="min-h-24 w-full rounded-md border border-[#e8e8eb] bg-white p-3 text-sm text-[#1c133b]"
+        className="min-h-24 w-full rounded-md border border-[#e8e8eb] bg-white p-3 text-sm text-brand-ink"
         onChange={(event) => setComment(event.target.value)}
         placeholder="Anything else you'd like us to know? (optional)"
         value={comment}
@@ -151,10 +151,11 @@ export function RatingForm({
       ) : null}
       <Button
         className="w-full"
-        disabled={submitting}
+        loading={submitting}
+        loadingLabel="Submitting…"
         onClick={() => void submit()}
       >
-        {submitting ? "Submitting…" : "Submit feedback"}
+        Submit feedback
       </Button>
     </div>
   );

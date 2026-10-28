@@ -69,7 +69,7 @@ export default async function HelpCentrePage() {
               cleans and cleaners joining the marketplace.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
-              <ContactSupportButton className="inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90" />
+              <ContactSupportButton className="inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand-ink transition hover:bg-white/90" />
               <Link
                 className="inline-flex h-11 items-center justify-center rounded-full border border-white/40 bg-white/10 px-6 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
                 href="/blog"
@@ -84,31 +84,31 @@ export default async function HelpCentrePage() {
       <BrandedPageWash>
         <BrandedSection>
           {!withArticles.length ? (
-            <p className="max-w-xl text-sm leading-7 text-[#5a5470]">
+            <p className="max-w-xl text-sm leading-7 text-brand-muted">
               Help collections will appear here once published.
             </p>
           ) : (
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {withArticles.map((collection) => (
                 <Link
-                  className="group relative flex min-h-[15rem] flex-col overflow-hidden rounded-[1.75rem] border border-[#e4daf5]/80 bg-[#f7f2ea] p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(49,44,121,0.12)]"
+                  className="group relative flex min-h-[15rem] flex-col overflow-hidden rounded-[1.75rem] border border-brand-lavender/80 bg-[#f7f2ea] p-6 shadow-[0_12px_32px_rgba(49,44,121,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(49,44,121,0.12)]"
                   href={`/help/${collection.slug}`}
                   key={collection.id}
                 >
-                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#823fb2]">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-brand-violet">
                     {collection.audience === "cleaners"
                       ? "For cleaners"
                       : collection.audience === "both"
                         ? "Everyone"
                         : "For customers"}
                   </p>
-                  <h2 className="mt-3 max-w-[14rem] text-xl font-semibold tracking-[-0.03em] text-[#1c133b] transition group-hover:text-[#6a45b8]">
+                  <h2 className="mt-3 max-w-[14rem] text-xl font-semibold tracking-[-0.03em] text-brand-ink transition group-hover:text-brand-purple">
                     {collection.title}
                   </h2>
-                  <p className="mt-2 max-w-[15rem] flex-1 text-sm leading-6 text-[#5a5470]">
+                  <p className="mt-2 max-w-[15rem] flex-1 text-sm leading-6 text-brand-muted">
                     {collection.description}
                   </p>
-                  <p className="mt-4 text-xs font-medium text-[#5a5470]">
+                  <p className="mt-4 text-xs font-medium text-brand-muted">
                     {collection.articles.length} article
                     {collection.articles.length === 1 ? "" : "s"}
                   </p>
@@ -118,14 +118,14 @@ export default async function HelpCentrePage() {
             </div>
           )}
 
-          <div className="mt-12 rounded-[1.5rem] bg-[#efe6ff] px-6 py-7 sm:px-8">
-            <h2 className="text-lg font-semibold text-[#1c133b]">
+          <div className="mt-12 rounded-[1.5rem] bg-brand-lavender-light px-6 py-7 sm:px-8">
+            <h2 className="text-lg font-semibold text-brand-ink">
               Still need a hand?
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">
               Browse the{" "}
               <Link
-                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="font-semibold text-brand-purple underline-offset-2 hover:underline"
                 href="/faq"
               >
                 FAQ
@@ -135,9 +135,9 @@ export default async function HelpCentrePage() {
               right people see the full context.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <ContactSupportButton className="inline-flex h-11 items-center justify-center rounded-full bg-[#6a45b8] px-5 text-sm font-semibold text-white transition hover:bg-[#5a38a3]" />
+              <ContactSupportButton className="inline-flex h-11 items-center justify-center rounded-full bg-brand-purple px-5 text-sm font-semibold text-white transition hover:bg-brand-purple-deep" />
               <Link
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[#d9ccef] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+                className="inline-flex h-11 items-center justify-center rounded-full border border-[#d9ccef] bg-white px-5 text-sm font-semibold text-brand-ink transition hover:bg-[#f7f2ea]"
                 href="/faq"
               >
                 Browse FAQ

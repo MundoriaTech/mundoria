@@ -286,8 +286,13 @@ export function BookingAuthPrompt({
                 value={email}
               />
             </FormField>
-            <Button className="h-11 w-full" disabled={busy} type="submit">
-              {busy ? "Checking…" : "Continue"}
+            <Button
+              className="h-11 w-full"
+              loading={busy}
+              loadingLabel="Checking…"
+              type="submit"
+            >
+              Continue
             </Button>
           </form>
 
@@ -361,10 +366,12 @@ export function BookingAuthPrompt({
           />
           <Button
             className="h-11 w-full"
-            disabled={busy || !passwordReady}
+            disabled={!passwordReady}
+            loading={busy}
+            loadingLabel="Saving…"
             type="submit"
           >
-            {busy ? "Saving…" : "Create account"}
+            Create account
           </Button>
           <button
             className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
@@ -406,8 +413,13 @@ export function BookingAuthPrompt({
               value={password}
             />
           </FormField>
-          <Button className="h-11 w-full" disabled={busy} type="submit">
-            {busy ? "Signing in…" : "Continue booking"}
+          <Button
+            className="h-11 w-full"
+            loading={busy}
+            loadingLabel="Signing in…"
+            type="submit"
+          >
+            Continue booking
           </Button>
           <div className="flex justify-between gap-3 text-sm text-muted-foreground">
             <Link

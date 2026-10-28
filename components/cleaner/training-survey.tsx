@@ -49,12 +49,12 @@ export function TrainingSurvey({
   return (
     <div>
       <div className="h-1.5 overflow-hidden rounded-full bg-[#f3eef8]">
-        <div className="h-full rounded-full bg-[#312c79]" style={{ width: `${progress}%` }} />
+        <div className="h-full rounded-full bg-brand-indigo" style={{ width: `${progress}%` }} />
       </div>
       <p className="mt-3 text-sm font-medium text-[#8b84a8]">
         {page + 1} of {TRAINING_PAGES.length}
       </p>
-      <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+      <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
         {current.title}
       </h3>
 
@@ -107,7 +107,7 @@ export function TrainingSurvey({
 
       <div className="mt-6 flex items-center gap-4">
         <button
-          className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b] disabled:opacity-40"
+          className="text-sm font-medium text-brand-subtle transition hover:text-brand-ink disabled:opacity-40"
           disabled={page === 0}
           onClick={() => {
             setPageError(null);
@@ -119,14 +119,14 @@ export function TrainingSurvey({
         </button>
         {page < TRAINING_PAGES.length - 1 ? (
           <button
-            className="ml-auto text-sm font-semibold text-[#312c79] transition hover:text-[#1c133b]"
+            className="ml-auto text-sm font-semibold text-brand-indigo transition hover:text-brand-ink"
             onClick={goNext}
             type="button"
           >
             Next →
           </button>
         ) : (
-          <p className="ml-auto text-sm text-[#8b8798]">
+          <p className="ml-auto text-sm text-brand-subtle">
             Tick every agreement, then submit your application below.
           </p>
         )}
@@ -180,7 +180,7 @@ function QuestionField({
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-medium text-[#1c133b]">
+      <legend className="text-sm font-medium text-brand-ink">
         {index + 1}. {question.prompt}
       </legend>
       {question.selectLabel ? (
@@ -214,11 +214,11 @@ function QuestionField({
             />
             <span
               aria-hidden
-              className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] bg-transparent"
+              className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-brand-ink bg-transparent"
             >
               <span
                 className={cn(
-                  "h-1.5 w-1.5 rounded-full bg-[#1c133b] transition",
+                  "h-1.5 w-1.5 rounded-full bg-brand-ink transition",
                   checked ? "scale-100 opacity-100" : "scale-0 opacity-0",
                 )}
               />
@@ -240,7 +240,7 @@ function Charter({
 }) {
   return (
     <div className="mt-5 space-y-4 text-sm leading-6 text-[#3d3654]">
-      <p className="font-medium text-[#1c133b]">Please read this carefully before you continue.</p>
+      <p className="font-medium text-brand-ink">Please read this carefully before you continue.</p>
       <p>
         Mundoria supports your work. Mundoria is not your employer. Mundoria
         finds customers, collects payment, and handles customer support. Job

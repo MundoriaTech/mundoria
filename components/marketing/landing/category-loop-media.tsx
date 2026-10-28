@@ -71,7 +71,7 @@ export function CategoryLoopMedia({
   const showMotion = canPlay && active && playing;
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#1c133b]/10">
+    <div className="absolute inset-0 overflow-hidden bg-brand-ink/10">
       <LazyImage
         alt={alt}
         className={cn(
@@ -106,7 +106,7 @@ export function CategoryLoopMedia({
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#1c133b]/20 via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-ink/20 via-transparent to-transparent"
       />
     </div>
   );

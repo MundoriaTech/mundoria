@@ -96,10 +96,10 @@ export async function PostcodeDistrictPage({ prefix }: { prefix: string }) {
           />
         ) : (
           <BrandedSection>
-            <p className="max-w-2xl text-sm leading-7 text-[#5a5470]">
+            <p className="max-w-2xl text-sm leading-7 text-brand-muted">
               Cleaners for {label} are listed with the rest of {area.name}.{" "}
               <Link
-                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="font-semibold text-brand-purple underline-offset-2 hover:underline"
                 href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
               >
                 View {area.name} cleaners

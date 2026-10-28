@@ -62,19 +62,19 @@ export function FormField({
           // Booking / onboarding plain: thick ink border + thicker ink ring on focus (no purple).
           // Auth default: thin grey border, purple focus.
           plain
-            ? "border-2 border-[#1c133b] bg-transparent focus-within:ring-2 focus-within:ring-[#1c133b] focus-within:ring-offset-0"
-            : "border border-[#e4e0eb] bg-[#f6f5f8] focus-within:border-[#6a45b8] focus-within:bg-[#f6f5f8] focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
+            ? "border-2 border-brand-ink bg-transparent focus-within:ring-2 focus-within:ring-brand-ink focus-within:ring-offset-0"
+            : "border border-[#e4e0eb] bg-[#f6f5f8] focus-within:border-brand-purple focus-within:bg-[#f6f5f8] focus-within:ring-2 focus-within:ring-brand-purple/20",
           error &&
             (plain
-              ? "border-[#d4694a] focus-within:ring-[#d4694a]"
-              : "border-[#d4694a]"),
+              ? "border-brand-terracotta focus-within:ring-brand-terracotta"
+              : "border-brand-terracotta"),
           // Empty + idle: label is the large in-field placeholder
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-[15px]",
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:font-normal",
-          "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-[#8b8798]",
+          "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-brand-subtle",
           "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-[15px]",
           "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:font-normal",
-          "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-[#8b8798]",
+          "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-brand-subtle",
           multiline
             ? cn(
                 "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:top-5",
@@ -90,12 +90,12 @@ export function FormField({
           className={cn(
             "pointer-events-none absolute left-3.5 right-3.5 z-[1]",
             dense ? "top-1.5" : "top-2.5",
-            "origin-left text-[11px] font-semibold leading-none text-[#5a5470]",
+            "origin-left text-[11px] font-semibold leading-none text-brand-muted",
             "transition-all duration-150",
-            error && "text-[#d4694a]",
+            error && "text-brand-terracotta",
             plain
-              ? "group-focus-within/field:text-[#1c133b]"
-              : "group-focus-within/field:text-[#6a45b8]",
+              ? "group-focus-within/field:text-brand-ink"
+              : "group-focus-within/field:text-brand-purple",
           )}
           htmlFor={htmlFor}
         >
@@ -113,7 +113,7 @@ export function FormField({
             "[&_textarea]:min-h-[5.5rem] [&_textarea]:w-full [&_textarea]:resize-none",
             "[&_textarea]:rounded-none [&_textarea]:border-0 [&_textarea]:bg-transparent",
             "[&_textarea]:px-0 [&_textarea]:py-0 [&_textarea]:text-[15px]",
-            "[&_textarea]:leading-6 [&_textarea]:text-[#1c133b]",
+            "[&_textarea]:leading-6 [&_textarea]:text-brand-ink",
             "[&_textarea]:outline-none [&_textarea]:ring-0",
             "[&_textarea]:placeholder:text-transparent",
             // Flatten PasswordInput shell so the toggle anchors to the field chrome
@@ -125,7 +125,7 @@ export function FormField({
         </div>
       </div>
       {hint ? (
-        <p className="px-0.5 text-xs leading-5 text-[#8b8798]">{hint}</p>
+        <p className="px-0.5 text-xs leading-5 text-brand-subtle">{hint}</p>
       ) : null}
       {error?.message ? <FieldError message={error.message} /> : null}
     </div>

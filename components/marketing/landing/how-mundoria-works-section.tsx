@@ -26,20 +26,20 @@ export function HowMundoriaWorksSection() {
   return (
     <ScrollReveal
       as="section"
-      className="bg-[#f3efe6] px-4 py-16 sm:px-8 sm:py-20"
+      className="bg-brand-cream-deep px-4 py-16 sm:px-8 sm:py-20"
       id="how-mundoria-works"
     >
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,2.1fr)] lg:items-start lg:gap-8 xl:gap-12">
         <div className="max-w-sm lg:pt-2">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-[#c79c66] sm:text-[13px]">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-brand-gold sm:text-[13px]">
             How Mundoria works
           </p>
-          <h2 className="mt-4 text-[1.85rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]">
+          <h2 className="mt-4 text-[1.85rem] font-semibold leading-[1.12] tracking-[-0.03em] text-brand-ink sm:text-[2.35rem]">
             <span className="font-medium text-[#3d3650]">Simple on the surface.</span>
             <br />
             Serious underneath.
           </h2>
-          <p className="mt-4 text-pretty text-[14px] font-light leading-6 text-[#5a5470] sm:text-[15px] sm:leading-7">
+          <p className="mt-4 text-pretty text-[14px] font-light leading-6 text-brand-muted sm:text-[15px] sm:leading-7">
             You shouldn’t have to manage the complicated parts. Mundoria keeps
             the booking, matching, updates and payment working quietly in the
             background.
@@ -70,10 +70,10 @@ export function HowMundoriaWorksSection() {
                   src={step.icon}
                 />
               </div>
-              <h3 className="mt-5 text-center text-[1.15rem] font-bold tracking-[-0.02em] text-[#1c133b] sm:text-left">
+              <h3 className="mt-5 text-center text-[1.15rem] font-bold tracking-[-0.02em] text-brand-ink sm:text-left">
                 {step.title}
               </h3>
-              <p className="mt-2 text-center text-[13.5px] font-light leading-6 text-[#5a5470] sm:text-left">
+              <p className="mt-2 text-center text-[13.5px] font-light leading-6 text-brand-muted sm:text-left">
                 {step.body}
               </p>
             </StaggerItem>

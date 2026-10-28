@@ -16,13 +16,13 @@ export function BookingSpinner({
     size === "sm" ? "h-5 w-5" : size === "lg" ? "h-16 w-16" : "h-12 w-12";
   const track =
     size === "sm" ? "border-2" : size === "lg" ? "border-[3.5px]" : "border-[3px]";
-  const trackColor = tone === "inverse" ? "border-white/25" : "border-[#efe6ff]";
+  const trackColor = tone === "inverse" ? "border-white/25" : "border-brand-lavender-light";
   const spinColor =
     tone === "inverse"
       ? "border-t-white border-r-white/70"
-      : "border-t-[#6a45b8] border-r-[#d4694a]";
+      : "border-t-brand-purple border-r-brand-terracotta";
   const innerColor =
-    tone === "inverse" ? "border-b-white/80" : "border-b-[#6a45b8]/70";
+    tone === "inverse" ? "border-b-white/80" : "border-b-brand-purple/70";
 
   return (
     <span
@@ -67,11 +67,11 @@ export function BookingLoadingOverlay({
     >
       <div className="flex max-w-sm flex-col items-center text-center">
         <BookingSpinner size="lg" />
-        <p className="mt-5 text-lg font-bold tracking-[-0.02em] text-[#1c133b]">
+        <p className="mt-5 text-lg font-bold tracking-[-0.02em] text-brand-ink">
           {label}
         </p>
         {detail ? (
-          <p className="mt-2 text-sm leading-6 text-[#5a5470]">{detail}</p>
+          <p className="mt-2 text-sm leading-6 text-brand-muted">{detail}</p>
         ) : null}
       </div>
     </div>

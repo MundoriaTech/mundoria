@@ -71,7 +71,7 @@ export default function ForCleanersPage() {
         />
 
         <section className="bg-[#f4ebfe] px-4 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
-          <div className="mx-auto max-w-3xl divide-y divide-[#1c133b]/15">
+          <div className="mx-auto max-w-3xl divide-y divide-brand-ink/15">
             {benefits.map((item) => (
               <article
                 className="flex items-start gap-5 py-8 first:pt-0 last:pb-0 sm:gap-6"
@@ -86,7 +86,7 @@ export default function ForCleanersPage() {
                   width={512}
                 />
                 <div className="min-w-0 pt-1">
-                  <h2 className="text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+                  <h2 className="text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
                     {item.title}
                   </h2>
                   <p className="mt-3 max-w-2xl text-base leading-7 text-[#4e4860]">
@@ -104,7 +104,7 @@ export default function ForCleanersPage() {
               <p>
                 More in our{" "}
                 <Link
-                  className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                  className="font-semibold text-brand-purple underline-offset-2 hover:underline"
                   href="/help/become-a-cleaner"
                 >
                   Become a Mundoria cleaner
@@ -112,7 +112,7 @@ export default function ForCleanersPage() {
                 Help Centre.
               </p>
               <Link
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-brand-ink px-6 text-sm font-semibold text-white transition hover:bg-brand-ink/90"
                 href={signupHref}
               >
                 Apply as a cleaner
@@ -128,7 +128,7 @@ export default function ForCleanersPage() {
 
         <BrandedCtaBand
           body="Create a cleaner account, complete onboarding and wait for admin approval before jobs appear in your feed."
-          buttonClassName="bg-[#1c133b] text-white hover:bg-[#312c79]"
+          buttonClassName="bg-brand-ink text-white hover:bg-brand-indigo"
           href={signupHref}
           label="Create cleaner account"
           title="Ready to join?"

@@ -85,30 +85,30 @@ export default async function CleanerIncidentsPage() {
         <IncidentReportForm bookings={bookings} />
 
         <section>
-          <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+          <h2 className="text-lg font-semibold tracking-tight text-brand-ink">
             Your reports
           </h2>
           {incidents.length ? (
             <ul className="mt-4 space-y-3">
               {incidents.map((incident) => (
                 <li
-                  className="rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-4"
+                  className="rounded-2xl border-2 border-brand-ink bg-brand-cream p-4"
                   key={incident.id}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#c79c66]">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-brand-gold">
                       {INCIDENT_CATEGORIES.find(
                         (item) => item.value === incident.category,
                       )?.label ?? incident.category}
                     </p>
-                    <span className="rounded-full bg-[#1c133b] px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                    <span className="rounded-full bg-brand-ink px-2.5 py-0.5 text-[11px] font-semibold text-white">
                       {STATUS_LABELS[incident.status] ?? incident.status}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-[#1c133b]">
+                  <p className="mt-2 text-sm font-semibold text-brand-ink">
                     {incident.title}
                   </p>
-                  <p className="mt-1 text-xs text-[#5a5470]">
+                  <p className="mt-1 text-xs text-brand-muted">
                     {new Date(incident.created_at).toLocaleDateString("en-GB", {
                       day: "numeric",
                       hour: "2-digit",
@@ -124,7 +124,7 @@ export default async function CleanerIncidentsPage() {
               ))}
             </ul>
           ) : (
-            <p className="mt-4 rounded-2xl border-2 border-dashed border-[#1c133b]/30 bg-[#f9f6ef] p-5 text-sm text-[#5a5470]">
+            <p className="mt-4 rounded-2xl border-2 border-dashed border-brand-ink/30 bg-brand-cream p-5 text-sm text-brand-muted">
               No reports yet. If something goes wrong on a job, you can report
               it here.
             </p>

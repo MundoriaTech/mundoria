@@ -25,7 +25,7 @@ export function PasswordRequirementsList({ password }: { password: string }) {
           <Segment key={rule.id} rule={rule} />
         ))}
       </ul>
-      <div className="relative min-h-4 overflow-hidden text-[11px] leading-4 text-[#8b8798]">
+      <div className="relative min-h-4 overflow-hidden text-[11px] leading-4 text-brand-subtle">
         <AnimatePresence initial={false} mode="popLayout">
           <motion.p
             animate={{ opacity: 1, y: 0 }}
@@ -39,10 +39,10 @@ export function PasswordRequirementsList({ password }: { password: string }) {
             transition={{ duration: DURATION.fast, ease: EASE.out }}
           >
             {allMet ? (
-              <span className="inline-flex items-center gap-1 font-medium text-[#291845]">
+              <span className="inline-flex items-center gap-1 font-medium text-brand-plum">
                 <motion.span
                   animate={{ rotate: 0, scale: 1 }}
-                  className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#6a45b8] text-white"
+                  className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand-purple text-white"
                   initial={{ rotate: -45, scale: 0 }}
                   transition={SPRING.lively}
                 >
@@ -52,7 +52,7 @@ export function PasswordRequirementsList({ password }: { password: string }) {
               </span>
             ) : started ? (
               <>
-                <span className="font-medium text-[#6a45b8]">
+                <span className="font-medium text-brand-purple">
                   {metCount} of {rules.length}
                 </span>
                 <span className="text-[#9a93ad]">
@@ -94,7 +94,7 @@ function Segment({ rule }: { rule: PasswordRequirement }) {
       <span
         className={cn(
           "pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2",
-          "whitespace-nowrap rounded-md bg-[#291845] px-2 py-1 text-[10px] font-medium text-white shadow-sm",
+          "whitespace-nowrap rounded-md bg-brand-plum px-2 py-1 text-[10px] font-medium text-white shadow-sm",
           "opacity-0 transition-opacity duration-150 group-hover/seg:opacity-100",
         )}
       >

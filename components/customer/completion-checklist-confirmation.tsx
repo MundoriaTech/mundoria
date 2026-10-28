@@ -129,10 +129,12 @@ export function CompletionChecklistConfirmation({
       ) : null}
       <Button
         className="mt-5 w-full"
-        disabled={submitting || !items.length}
+        disabled={!items.length}
+        loading={submitting}
+        loadingLabel="Confirming…"
         onClick={() => void submit()}
       >
-        {submitting ? "Confirming…" : "Confirm checklist"}
+        Confirm checklist
       </Button>
     </section>
   );

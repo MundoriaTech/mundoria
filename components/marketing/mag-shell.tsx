@@ -42,7 +42,7 @@ export async function MagShell({
   return (
     <div
       className={cn(
-        "flex min-h-screen flex-col bg-[#faf8ff] text-foreground",
+        "flex min-h-screen flex-col bg-brand-haze text-foreground",
         className,
       )}
     >

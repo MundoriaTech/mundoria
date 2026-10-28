@@ -38,11 +38,11 @@ export type DashboardStatIcon = keyof typeof ICONS;
 
 const TONES: Record<string, string> = {
   peachPurple:
-    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-indigo",
   lavenderOrange:
-    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#d4694a]",
+    "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-brand-terracotta",
   lineOnly:
-    "[&_path:first-child]:!opacity-0 [&_path:last-child]:!fill-[#312c79]",
+    "[&_path:first-child]:!opacity-0 [&_path:last-child]:!fill-brand-indigo",
 };
 
 export function DashboardStatTiles({
@@ -61,15 +61,15 @@ export function DashboardStatTiles({
         const Glyph: Icon = ICONS[item.icon];
         return (
           <StaggerItem
-            className="relative overflow-hidden rounded-[1.5rem] bg-[#efe6ff] p-5 shadow-[0_12px_28px_rgba(49,44,121,0.06)]"
+            className="relative overflow-hidden rounded-[1.5rem] bg-brand-lavender-light p-5 shadow-[0_12px_28px_rgba(49,44,121,0.06)]"
             from={directionFor(index, 4)}
             key={item.label}
             lift
           >
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#823fb2]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-brand-violet">
               {item.label}
             </p>
-            <p className="mt-2 pr-14 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+            <p className="mt-2 pr-14 text-2xl font-semibold tracking-[-0.03em] text-brand-ink">
               <CountUp value={item.value} />
             </p>
             <Glyph

@@ -60,13 +60,13 @@ const LOCATION_FAQS = (place: string) =>
 export function LocationServicesExplainer({ place }: { place: string }) {
   return (
     <BrandedSection tone="cream">
-      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
         What cleaning services does Mundoria offer in {place}?
       </h2>
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470] sm:text-[15px] sm:leading-7">
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-brand-muted sm:text-[15px] sm:leading-7">
         <PlaceServiceExplainerIntro place={place} />
       </p>
-      <div className="mt-4 max-w-3xl text-[#5a5470] [&_li]:text-[#5a5470]">
+      <div className="mt-4 max-w-3xl text-brand-muted [&_li]:text-brand-muted">
         <PlaceServiceExplainerList place={place} />
       </div>
     </BrandedSection>
@@ -76,14 +76,14 @@ export function LocationServicesExplainer({ place }: { place: string }) {
 export function LocationWhatsCovered({ place }: { place: string }) {
   return (
     <BrandedSection>
-      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
         What’s covered in a Mundoria house clean in {place}?
       </h2>
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470]">
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-brand-muted">
         Exact scope depends on your service and cleaning standard. Typical
         residential visits include:
       </p>
-      <ul className="mt-6 list-disc space-y-2 pl-5 text-sm leading-7 text-[#5a5470]">
+      <ul className="mt-6 list-disc space-y-2 pl-5 text-sm leading-7 text-brand-muted">
         {houseCleanCoveredPoints().map((item) => (
           <li key={item}>{item}</li>
         ))}
@@ -103,7 +103,7 @@ export function LocationHowToBook({
     <>
       Open{" "}
       <Link
-        className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+        className="font-semibold text-brand-purple underline-offset-2 hover:underline"
         href={bookingHref}
       >
         Mundoria booking
@@ -117,19 +117,19 @@ export function LocationHowToBook({
   ];
   return (
     <BrandedSection tone="lavender">
-      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
         How do I book a cleaner in {place}?
       </h2>
       <ol className="mt-6 space-y-3">
         {steps.map((step, index) => (
           <li
-            className="flex gap-3 text-sm leading-6 text-[#5a5470]"
+            className="flex gap-3 text-sm leading-6 text-brand-muted"
             key={index}
           >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-xs font-bold text-white">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple text-xs font-bold text-white">
               {index + 1}
             </span>
-            <span className="[&_a]:font-semibold [&_a]:text-[#6a45b8] [&_a]:underline-offset-2 [&_a]:hover:underline">
+            <span className="[&_a]:font-semibold [&_a]:text-brand-purple [&_a]:underline-offset-2 [&_a]:hover:underline">
               {step}
             </span>
           </li>
@@ -149,38 +149,38 @@ export function LocationFaqBlock({
   const faqs = [...extraFaqs, ...LOCATION_FAQS(place)];
   return (
     <BrandedSection>
-      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
         Frequently asked questions — {place}
       </h2>
       <div className="mt-8 space-y-3">
         {faqs.map((item) => (
           <details
-            className="group rounded-[1.25rem] border border-[#e4daf5]/80 bg-white/90 px-5 py-4 shadow-[0_8px_22px_rgba(49,44,121,0.05)]"
+            className="group rounded-[1.25rem] border border-brand-lavender/80 bg-white/90 px-5 py-4 shadow-[0_8px_22px_rgba(49,44,121,0.05)]"
             key={item.question}
           >
-            <summary className="cursor-pointer list-none text-sm font-semibold text-[#1c133b] marker:content-none [&::-webkit-details-marker]:hidden">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-brand-ink marker:content-none [&::-webkit-details-marker]:hidden">
               <span className="flex items-center justify-between gap-3">
                 {item.question}
-                <span className="text-[#823fb2] transition group-open:rotate-45">
+                <span className="text-brand-violet transition group-open:rotate-45">
                   +
                 </span>
               </span>
             </summary>
-            <p className="mt-3 text-sm leading-7 text-[#5a5470]">{item.answer}</p>
+            <p className="mt-3 text-sm leading-7 text-brand-muted">{item.answer}</p>
           </details>
         ))}
       </div>
-      <p className="mt-6 text-sm text-[#5a5470]">
+      <p className="mt-6 text-sm text-brand-muted">
         More answers in our{" "}
         <Link
-          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          className="font-semibold text-brand-purple underline-offset-2 hover:underline"
           href="/faq"
         >
           FAQ
         </Link>{" "}
         and{" "}
         <Link
-          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          className="font-semibold text-brand-purple underline-offset-2 hover:underline"
           href="/help"
         >
           Help Centre
@@ -246,7 +246,7 @@ export function LocationNearPlacePills({
     .filter(Boolean)
     .join(" ");
   const pillClass =
-    "inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]";
+    "inline-flex rounded-full border border-brand-lavender bg-white px-4 py-2 text-sm font-semibold text-brand-ink transition hover:text-brand-purple";
 
   const placeList = (
     <ul className="mt-4 flex flex-wrap gap-3">
@@ -262,10 +262,10 @@ export function LocationNearPlacePills({
 
   const nearbyList = nearbyPlaces.length ? (
     <div className="mt-10">
-      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+      <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
         Nearby towns
       </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">
         {nearbyZone?.note}
       </p>
       <ul className="mt-4 flex flex-wrap gap-3">
@@ -285,17 +285,17 @@ export function LocationNearPlacePills({
       {surroundingLinks?.length ? (
         <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr] lg:items-start">
           <div>
-            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
               {heading}
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[#5a5470]">{intro}</p>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-brand-muted">{intro}</p>
             {placeList}
           </div>
           <div>
-            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
               Surrounding towns
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[#5a5470]">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-brand-muted">
               {surroundingTownsIntro({
                 category: categoryFocus,
                 serviceLabel,
@@ -314,10 +314,10 @@ export function LocationNearPlacePills({
         </div>
       ) : (
         <>
-          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
             {heading}
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">{intro}</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">{intro}</p>
           {placeList}
         </>
       )}
@@ -349,10 +349,10 @@ export function LocationFeaturedCleaners({
   return (
     <>
       <BrandedSection tone="cream">
-        <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+        <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
           Independent cleaners near {place}
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">
           Vetted independent cleaners covering {place}, with ratings from
           completed visits.
         </p>

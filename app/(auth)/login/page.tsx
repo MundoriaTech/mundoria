@@ -51,14 +51,14 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
         <>
           New to Mundoria?{" "}
           <Link
-            className="font-semibold text-[#291845] hover:underline"
+            className="font-semibold text-brand-plum hover:underline"
             href={signupHref}
           >
             Create a customer account
           </Link>
           <span className="mt-2 block text-sm text-muted-foreground">
             Are you a cleaner?{" "}
-            <Link className="font-semibold text-[#291845] hover:underline" href="/login/cleaner">
+            <Link className="font-semibold text-brand-plum hover:underline" href="/login/cleaner">
               Cleaner sign in
             </Link>
           </span>
