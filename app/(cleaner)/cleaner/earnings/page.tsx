@@ -5,10 +5,10 @@ import { EarningsControls } from "@/components/cleaner/earnings-controls";
 import { AppPage } from "@/components/shared/app-page";
 import {
   CountUp,
-  directionFor,
   Stagger,
   StaggerItem,
 } from "@/components/shared/motion-primitives";
+import { directionFor } from "@/lib/motion";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";

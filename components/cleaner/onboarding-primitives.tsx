@@ -206,6 +206,7 @@ export function OnboardingSelect({
                             ? "bg-[#1c133b] text-white"
                             : "text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
                         )}
+                        aria-selected={isSelected}
                         onClick={() => {
                           onChange(option.value);
                           setOpen(false);

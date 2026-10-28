@@ -159,7 +159,7 @@ export function JobFeed({
                   {job.scheduled_date} · {job.scheduled_start_time.slice(0, 5)}
                 </span>
                 {tab === "available" && !teamSlot ? (
-                  <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400">
+                  <span className="flex items-center gap-1 text-amber-700">
                     <Clock3 className="h-4 w-4" />
                     {Math.floor(remaining / 60000)}:
                     {String(Math.floor((remaining % 60000) / 1000)).padStart(

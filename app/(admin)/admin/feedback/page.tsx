@@ -1,5 +1,3 @@
-import { MessageSquare } from "lucide-react";
-
 import { AppPage } from "@/components/shared/app-page";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
@@ -42,7 +40,7 @@ export default async function AdminFeedbackPage() {
         </p>
       ) : rows.length === 0 ? (
         <EmptyState
-          icon={MessageSquare}
+          icon="message"
           message="Written reviews submitted on the public feedback page will appear here."
           title="No feedback yet"
         />

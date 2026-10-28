@@ -1,4 +1,3 @@
-import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -145,7 +144,7 @@ export default async function AdminCustomerPage({
           {!jobs.length ? (
             <EmptyState
               compact
-              icon={CalendarDays}
+              icon="calendar"
               message="This customer has not booked a clean yet."
               title="No bookings yet"
             />
@@ -195,7 +194,7 @@ export default async function AdminCustomerPage({
                   <td className="p-4" colSpan={7}>
                     <EmptyState
                       compact
-                      icon={CalendarDays}
+                      icon="calendar"
                       message="This customer has not booked a clean yet."
                       title="No bookings yet"
                     />

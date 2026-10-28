@@ -1,12 +1,9 @@
 import Link from "next/link";
 
 import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
-import {
-  directionFor,
-  Stagger,
-  StaggerItem,
-} from "@/components/shared/motion-primitives";
+import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
+import { directionFor } from "@/lib/motion";
 import { LAUNCH_CITY_COVERAGE_GROUPS } from "@/lib/seo/launch-city-coverage-links";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
 

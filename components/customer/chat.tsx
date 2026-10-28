@@ -256,9 +256,9 @@ export function Chat({
   const canSend = Boolean(content.trim() || pending.length) && !sending && !uploading;
 
   return (
-    <div className="flex h-[calc(100dvh-11rem-env(safe-area-inset-bottom))] min-h-[18rem] flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.08)] ring-1 ring-[#ece8f3] dark:bg-card dark:ring-border sm:h-[calc(100vh-12rem)] sm:min-h-[28rem]">
-      <div className="border-b border-[#ece8f3] px-4 py-3.5 dark:border-border sm:px-5">
-        <h1 className="text-base font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
+    <div className="flex h-[calc(100dvh-11rem-env(safe-area-inset-bottom))] min-h-[18rem] flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.08)] ring-1 ring-[#ece8f3] sm:h-[calc(100vh-12rem)] sm:min-h-[28rem]">
+      <div className="border-b border-[#ece8f3] px-4 py-3.5 sm:px-5">
+        <h1 className="text-base font-semibold tracking-tight text-[#1c133b]">
           {peerLabel ?? "Conversation"}
         </h1>
         <p className="mt-0.5 text-xs text-[#8b8798]">
@@ -273,7 +273,7 @@ export function Chat({
         </div>
       ) : null}
 
-      <div className="flex-1 space-y-3 overflow-y-auto bg-[#faf8ff] px-3 py-4 dark:bg-background sm:space-y-4 sm:px-5 sm:py-5">
+      <div className="flex-1 space-y-3 overflow-y-auto bg-[#faf8ff] px-3 py-4 sm:space-y-4 sm:px-5 sm:py-5">
         {messages.length ? (
           messages.map((message) => {
             const mine = message.sender_id === currentUserId;
@@ -291,7 +291,7 @@ export function Chat({
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#c79c66]">
               Messages
             </p>
-            <p className="mt-2 text-sm font-light text-[#5a5470] dark:text-muted-foreground">
+            <p className="mt-2 text-sm font-light text-[#5a5470]">
               Say hello — share access notes, parking tips, or photos.
             </p>
           </div>
@@ -300,7 +300,7 @@ export function Chat({
       </div>
 
       <form
-        className="relative border-t border-[#ece8f3] bg-white p-3 dark:border-border dark:bg-card sm:p-4"
+        className="relative border-t border-[#ece8f3] bg-white p-3 sm:p-4"
         onSubmit={sendMessage}
       >
         {emojiOpen ? (
@@ -391,7 +391,7 @@ export function Chat({
             <Smile className="h-5 w-5" />
           </button>
           <textarea
-            className="max-h-28 min-h-11 flex-1 resize-none rounded-[1.1rem] border border-[#e8e4f0] bg-[#faf8ff] px-3.5 py-2.5 text-sm text-[#1c133b] outline-none transition placeholder:text-[#8b8798] focus:border-[#c4b5e0] dark:border-border dark:bg-background dark:text-foreground"
+            className="max-h-28 min-h-11 flex-1 resize-none rounded-[1.1rem] border border-[#e8e4f0] bg-[#faf8ff] px-3.5 py-2.5 text-sm text-[#1c133b] outline-none transition placeholder:text-[#8b8798] focus:border-[#c4b5e0]"
             onChange={(event) => setContent(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
