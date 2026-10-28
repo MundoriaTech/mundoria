@@ -85,7 +85,7 @@ export default async function AdminPayoutsPage() {
       <div className="mt-6 hidden overflow-x-auto rounded-[1.25rem] border border-[#e8e0f4] bg-white shadow-[0_8px_20px_rgba(49,44,121,0.04)] md:block">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
-            <tr className="bg-[#f7f4fb] text-left text-[#5a5470]">
+            <tr className="bg-[#f7f4fb] text-left text-brand-muted">
               <th className="p-3 font-semibold">Cleaner</th>
               <th className="font-semibold">Period</th>
               <th className="font-semibold">Jobs</th>
@@ -122,11 +122,11 @@ export default async function AdminPayoutsPage() {
 
 function Card({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.25rem] border border-[#e8e0f4] bg-[#efe6ff] p-4 sm:p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
+    <div className="rounded-[1.25rem] border border-[#e8e0f4] bg-brand-lavender-light p-4 sm:p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-violet">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-[#1c133b]">
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-brand-ink">
         {value}
       </p>
     </div>

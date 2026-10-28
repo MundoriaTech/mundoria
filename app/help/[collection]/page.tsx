@@ -114,7 +114,7 @@ export default async function HelpCollectionPage({
           />
           <div className="relative mx-auto max-w-4xl">
             <Link
-              className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="text-sm font-semibold text-brand-purple underline-offset-2 hover:underline"
               href="/help"
             >
               ← Help Centre
@@ -129,13 +129,13 @@ export default async function HelpCollectionPage({
               >
                 {audienceLabel}
               </p>
-              <h1 className="mt-3 max-w-xl text-[2.35rem] font-black leading-[0.95] tracking-[-0.05em] text-[#1c133b] sm:text-[3.25rem]">
+              <h1 className="mt-3 max-w-xl text-[2.35rem] font-black leading-[0.95] tracking-[-0.05em] text-brand-ink sm:text-[3.25rem]">
                 {collection.title}
               </h1>
-              <p className="mt-4 max-w-xl text-base leading-7 text-[#5a5470]">
+              <p className="mt-4 max-w-xl text-base leading-7 text-brand-muted">
                 {collection.description}
               </p>
-              <p className="mt-4 text-sm text-[#5a5470]">
+              <p className="mt-4 text-sm text-brand-muted">
                 {articles.length} article{articles.length === 1 ? "" : "s"}
                 {allGroups.length > 1
                   ? ` · ${allGroups.length} topics`
@@ -147,7 +147,7 @@ export default async function HelpCollectionPage({
             {!paginate && allGroups.length > 1 ? (
               <nav
                 aria-label="Topics"
-                className="mt-7 flex flex-wrap gap-x-5 gap-y-2 border-t border-[#1c133b]/10 pt-5"
+                className="mt-7 flex flex-wrap gap-x-5 gap-y-2 border-t border-brand-ink/10 pt-5"
               >
                 {allGroups.map((group) => (
                   <a
@@ -175,13 +175,13 @@ export default async function HelpCollectionPage({
                 id={topicAnchor(group.topic)}
                 key={group.topic}
               >
-                <div className="flex items-start gap-4 border-b border-[#1c133b]/10 pb-5">
+                <div className="flex items-start gap-4 border-b border-brand-ink/10 pb-5">
                   <HelpTopicIcon topic={group.topic} />
                   <div className="min-w-0">
-                    <h2 className="text-xl font-black tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                    <h2 className="text-xl font-black tracking-[-0.03em] text-brand-ink sm:text-2xl">
                       {group.topic}
                     </h2>
-                    <p className="mt-1 text-sm text-[#5a5470]">
+                    <p className="mt-1 text-sm text-brand-muted">
                       {paginate
                         ? `${group.articles.length} on this page`
                         : `${group.articles.length} guide${
@@ -191,7 +191,7 @@ export default async function HelpCollectionPage({
                   </div>
                 </div>
 
-                <div className="mt-2 divide-y divide-[#1c133b]/8">
+                <div className="mt-2 divide-y divide-brand-ink/8">
                   {group.articles.map((article) => (
                     <Link
                       className="group flex items-start justify-between gap-4 py-4 transition first:pt-4 last:pb-0"
@@ -199,16 +199,16 @@ export default async function HelpCollectionPage({
                       key={article.id}
                     >
                       <div className="min-w-0">
-                        <h3 className="text-base font-semibold text-[#1c133b] transition group-hover:text-[#6a45b8]">
+                        <h3 className="text-base font-semibold text-brand-ink transition group-hover:text-brand-purple">
                           {article.title}
                         </h3>
                         {article.summary ? (
-                          <p className="mt-1 text-sm leading-6 text-[#5a5470]">
+                          <p className="mt-1 text-sm leading-6 text-brand-muted">
                             {article.summary}
                           </p>
                         ) : null}
                       </div>
-                      <span className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/80 ring-1 ring-[#1c133b]/8 transition group-hover:bg-white group-hover:shadow-sm">
+                      <span className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/80 ring-1 ring-brand-ink/8 transition group-hover:bg-white group-hover:shadow-sm">
                         <HelpArticleChevron />
                       </span>
                     </Link>
@@ -218,7 +218,7 @@ export default async function HelpCollectionPage({
             ))}
 
             <PaginationLinks
-              className="[&_p]:text-[#5a5470]"
+              className="[&_p]:text-brand-muted"
               page={helpPage}
               pageSize={helpPageSize}
               pathname={`/help/${collection.slug}`}
@@ -226,8 +226,8 @@ export default async function HelpCollectionPage({
             />
           </div>
 
-          <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-[1.75rem] bg-[#1c133b] px-6 py-8 sm:px-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#f0a888]">
+          <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-[1.75rem] bg-brand-ink px-6 py-8 sm:px-8">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-peach">
               Still stuck?
             </p>
             <h2 className="mt-3 text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">

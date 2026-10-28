@@ -33,7 +33,7 @@ function formatInline(
       if (onLinkClick) {
         return (
           <button
-            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            className="font-semibold text-brand-purple underline-offset-2 hover:underline"
             key={`l-${segmentIndex}`}
             onClick={() => {
               if (onLinkClick(href)) return;
@@ -47,7 +47,7 @@ function formatInline(
       }
       return (
         <a
-          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+          className="font-semibold text-brand-purple underline-offset-2 hover:underline"
           href={href}
           key={`l-${segmentIndex}`}
         >
@@ -59,7 +59,7 @@ function formatInline(
     return parts.map((part, index) => {
       if (part.startsWith("**") && part.endsWith("**")) {
         return (
-          <strong className="font-semibold text-[#1c133b]" key={`${segmentIndex}-${index}`}>
+          <strong className="font-semibold text-brand-ink" key={`${segmentIndex}-${index}`}>
             {part.slice(2, -2)}
           </strong>
         );
@@ -92,7 +92,7 @@ export function EditorialBody({
           return (
             <h2
               className={cn(
-                "font-semibold tracking-[-0.03em] text-[#1c133b]",
+                "font-semibold tracking-[-0.03em] text-brand-ink",
                 compact
                   ? "mt-5 text-base"
                   : "mt-12 text-[1.65rem] sm:text-3xl",
@@ -107,7 +107,7 @@ export function EditorialBody({
           return (
             <h3
               className={cn(
-                "font-semibold text-[#1c133b]",
+                "font-semibold text-brand-ink",
                 compact ? "mt-4 text-sm" : "mt-8 text-xl",
               )}
               key={index}
@@ -120,7 +120,7 @@ export function EditorialBody({
           return (
             <aside
               className={cn(
-                "rounded-[1.25rem] border text-sm leading-7 text-[#5a5470]",
+                "rounded-[1.25rem] border text-sm leading-7 text-brand-muted",
                 compact ? "mt-4 px-3 py-3" : "mt-8 px-5 py-4",
               )}
               key={index}
@@ -129,7 +129,7 @@ export function EditorialBody({
                 borderColor: `${accent}55`,
               }}
             >
-              <p className="font-semibold text-[#1c133b]">
+              <p className="font-semibold text-brand-ink">
                 {inline(block.value as string)}
               </p>
             </aside>
@@ -150,7 +150,7 @@ export function EditorialBody({
                 src={image.src}
               />
               {image.caption || image.alt ? (
-                <figcaption className="bg-[#f7f2ea] px-4 py-3 text-center text-xs leading-5 text-[#5a5470] sm:text-sm">
+                <figcaption className="bg-[#f7f2ea] px-4 py-3 text-center text-xs leading-5 text-brand-muted sm:text-sm">
                   {image.caption || image.alt}
                 </figcaption>
               ) : null}
@@ -161,7 +161,7 @@ export function EditorialBody({
           return (
             <blockquote
               className={cn(
-                "border-l-4 py-1 pl-4 text-sm italic leading-7 text-[#5a5470]",
+                "border-l-4 py-1 pl-4 text-sm italic leading-7 text-brand-muted",
                 compact ? "mt-3" : "mt-6",
               )}
               key={index}
@@ -175,7 +175,7 @@ export function EditorialBody({
           return (
             <ul
               className={cn(
-                "list-disc space-y-2 pl-5 text-sm leading-6 text-[#5a5470]",
+                "list-disc space-y-2 pl-5 text-sm leading-6 text-brand-muted",
                 compact ? "mt-3" : "mt-5 space-y-2.5 leading-7 sm:text-[15px]",
               )}
               key={index}
@@ -190,7 +190,7 @@ export function EditorialBody({
           return (
             <ol
               className={cn(
-                "list-decimal space-y-2 pl-5 text-sm leading-6 text-[#5a5470]",
+                "list-decimal space-y-2 pl-5 text-sm leading-6 text-brand-muted",
                 compact ? "mt-3" : "mt-5 space-y-2.5 leading-7 sm:text-[15px]",
               )}
               key={index}
@@ -219,7 +219,7 @@ export function EditorialBody({
                   <tr className="border-b border-[#eadfce] bg-[#f7f2ea]/80">
                     {table.headers.map((header) => (
                       <th
-                        className="px-4 py-3 font-semibold text-[#1c133b]"
+                        className="px-4 py-3 font-semibold text-brand-ink"
                         key={header}
                       >
                         {header}
@@ -235,7 +235,7 @@ export function EditorialBody({
                     >
                       {row.map((cell, cellIndex) => (
                         <td
-                          className="px-4 py-3 align-top leading-6 text-[#5a5470]"
+                          className="px-4 py-3 align-top leading-6 text-brand-muted"
                           key={`${rowIndex}-${cellIndex}`}
                         >
                           {inline(cell)}
@@ -251,7 +251,7 @@ export function EditorialBody({
         return (
           <p
             className={cn(
-              "text-sm leading-6 text-[#5a5470]",
+              "text-sm leading-6 text-brand-muted",
               compact ? "mt-3" : "mt-5 leading-7 sm:text-[15px] sm:leading-8",
             )}
             key={index}

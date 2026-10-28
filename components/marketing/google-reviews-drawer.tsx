@@ -134,7 +134,7 @@ function ReviewsPanel({
       </style>
       <button
         aria-label="Close reviews"
-        className="absolute inset-0 bg-[#1c133b]/40"
+        className="absolute inset-0 bg-brand-ink/40"
         onClick={onClose}
         type="button"
       />

@@ -147,16 +147,16 @@ export async function ServicePlacePage({
         />
 
         <BrandedSection>
-          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
             {service.label} in {placeLabel}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5a5470]">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-brand-muted">
             {area ? area.seoIntro : LAUNCH_CITY.summary} Starting estimates for{" "}
             {service.label.toLowerCase()} are from {service.fromPrice}, then
             sized to the property, standard and any add-ons.
           </p>
           <Link
-            className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-7 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-brand-purple px-7 text-sm font-semibold text-white transition hover:bg-brand-purple-deep"
             href={bookingHref}
           >
             Book in {place}
@@ -172,7 +172,7 @@ export async function ServicePlacePage({
         ) : null}
 
         <BrandedSection tone="cream">
-          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
             Guides for {service.label.toLowerCase()} in Birmingham
           </h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -192,7 +192,7 @@ export async function ServicePlacePage({
 
         {siblings.length ? (
           <BrandedSection tone="cream">
-            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
               Other {service.categoryLabel.toLowerCase()} in {place}
             </h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -210,14 +210,14 @@ export async function ServicePlacePage({
         ) : null}
 
         <BrandedSection tone="lavender">
-          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
             {service.label} in nearby Birmingham areas
           </h2>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {area ? (
               <li>
                 <Link
-                  className="block rounded-[1.15rem] border border-[#e4daf5]/80 bg-white/85 px-4 py-4 text-sm font-semibold text-[#1c133b] shadow-[0_8px_22px_rgba(49,44,121,0.05)] transition hover:-translate-y-0.5 hover:text-[#6a45b8]"
+                  className="block rounded-[1.15rem] border border-brand-lavender/80 bg-white/85 px-4 py-4 text-sm font-semibold text-brand-ink shadow-[0_8px_22px_rgba(49,44,121,0.05)] transition hover:-translate-y-0.5 hover:text-brand-purple"
                   href={servicePlacePath(service.slug)}
                 >
                   {service.label} in Birmingham
@@ -227,7 +227,7 @@ export async function ServicePlacePage({
             {otherAreas.map((item) => (
               <li key={item.slug}>
                 <Link
-                  className="block rounded-[1.15rem] border border-[#e4daf5]/80 bg-white/85 px-4 py-4 text-sm font-semibold text-[#1c133b] shadow-[0_8px_22px_rgba(49,44,121,0.05)] transition hover:-translate-y-0.5 hover:text-[#6a45b8]"
+                  className="block rounded-[1.15rem] border border-brand-lavender/80 bg-white/85 px-4 py-4 text-sm font-semibold text-brand-ink shadow-[0_8px_22px_rgba(49,44,121,0.05)] transition hover:-translate-y-0.5 hover:text-brand-purple"
                   href={servicePlacePath(service.slug, item.slug)}
                 >
                   {service.label} in {item.name}

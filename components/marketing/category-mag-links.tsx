@@ -108,12 +108,12 @@ export async function CategoryMagLinks({
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">
         <div>
           <div className="flex items-end justify-between gap-4">
-            <h2 className="max-w-[16rem] text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            <h2 className="max-w-[16rem] text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
               {MAG_HEADING}
             </h2>
           </div>
           {serviceSlug && matchedCount > 0 ? (
-            <p className="mt-3 max-w-sm text-sm leading-6 text-[#5a5470]">
+            <p className="mt-3 max-w-sm text-sm leading-6 text-brand-muted">
               Guides matched to this service — then more from the Mag.
             </p>
           ) : null}
@@ -124,7 +124,7 @@ export async function CategoryMagLinks({
                   className="group block py-4"
                   href={`/blog/${post.slug}`}
                 >
-                  <p className="text-[15px] font-semibold leading-snug text-[#1c133b] transition group-hover:text-[#6a45b8]">
+                  <p className="text-[15px] font-semibold leading-snug text-brand-ink transition group-hover:text-brand-purple">
                     {post.title}
                   </p>
                   <p className="mt-1.5 text-xs text-[#8b849c]">
@@ -135,7 +135,7 @@ export async function CategoryMagLinks({
             ))}
           </ul>
           <Link
-            className="mt-5 inline-flex text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            className="mt-5 inline-flex text-sm font-semibold text-brand-purple underline-offset-2 hover:underline"
             href="/blog"
           >
             Browse the Mag
@@ -144,7 +144,7 @@ export async function CategoryMagLinks({
 
         {index.length ? (
           <div>
-            <h3 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            <h3 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
               More to read
             </h3>
             <ol className="mt-6 grid gap-x-10 sm:grid-cols-2">
@@ -154,10 +154,10 @@ export async function CategoryMagLinks({
                     className="group grid grid-cols-[1.75rem_minmax(0,1fr)] items-baseline gap-1 py-3.5"
                     href={`/blog/${post.slug}`}
                   >
-                    <span className="text-base font-semibold text-[#c79c66]">
+                    <span className="text-base font-semibold text-brand-gold">
                       {position + 1}
                     </span>
-                    <span className="text-[15px] font-medium leading-snug text-[#1c133b] transition group-hover:text-[#6a45b8]">
+                    <span className="text-[15px] font-medium leading-snug text-brand-ink transition group-hover:text-brand-purple">
                       {post.title}
                     </span>
                   </Link>

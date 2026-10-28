@@ -346,7 +346,7 @@ export function DiaryBoard() {
       </div>
 
       {clashes.length ? (
-        <p className="rounded-2xl border border-[#f0a888] bg-[#fff4ee] px-4 py-3 text-sm text-[#7a3b28]">
+        <p className="rounded-2xl border border-brand-peach bg-[#fff4ee] px-4 py-3 text-sm text-[#7a3b28]">
           {clashes.length === 1
             ? "One of your plans overlaps a Mundoria visit."
             : `${clashes.length} of your plans overlap a Mundoria visit.`}
@@ -357,14 +357,14 @@ export function DiaryBoard() {
         <div className="flex items-center gap-2">
           <button
             aria-label="Earlier"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e4dced] bg-white text-[#1c133b]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e4dced] bg-white text-brand-ink"
             onClick={() => shift(-1)}
             type="button"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
-            className="h-10 rounded-full border border-[#e4dced] bg-white px-4 text-sm font-semibold text-[#1c133b]"
+            className="h-10 rounded-full border border-[#e4dced] bg-white px-4 text-sm font-semibold text-brand-ink"
             onClick={() => setAnchor(new Date())}
             type="button"
           >
@@ -372,13 +372,13 @@ export function DiaryBoard() {
           </button>
           <button
             aria-label="Later"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e4dced] bg-white text-[#1c133b]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e4dced] bg-white text-brand-ink"
             onClick={() => shift(1)}
             type="button"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
-          <p className="ml-1 text-sm font-semibold text-[#1c133b]">
+          <p className="ml-1 text-sm font-semibold text-brand-ink">
             {heading(view, range.from, range.to)}
           </p>
         </div>
@@ -387,7 +387,7 @@ export function DiaryBoard() {
             <button
               className={cn(
                 "rounded-full px-4 py-2 text-sm font-semibold capitalize",
-                view === option ? "bg-white text-[#312c79] shadow-sm" : "text-[#5c5670]",
+                view === option ? "bg-white text-brand-indigo shadow-sm" : "text-[#5c5670]",
               )}
               key={option}
               onClick={() => setView(option)}
@@ -402,16 +402,16 @@ export function DiaryBoard() {
       <Legend />
 
       {panel === "plan" ? (
-        <form className="grid gap-3 rounded-3xl border border-[#e6e0f2] bg-[#fbf8ff] p-4 sm:grid-cols-2" onSubmit={(event) => void addEvent(event)}>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b] sm:col-span-2">
+        <form className="grid gap-3 rounded-3xl border border-brand-line bg-[#fbf8ff] p-4 sm:grid-cols-2" onSubmit={(event) => void addEvent(event)}>
+          <label className="space-y-1 text-sm font-medium text-brand-ink sm:col-span-2">
             What is it?
             <Input onChange={(event) => setTitle(event.target.value)} placeholder="School run, dentist, family" value={title} />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="space-y-1 text-sm font-medium text-brand-ink">
             Starts
             <Input onChange={(event) => setStartsAt(event.target.value)} type="datetime-local" value={startsAt} />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="space-y-1 text-sm font-medium text-brand-ink">
             Ends
             <Input onChange={(event) => setEndsAt(event.target.value)} type="datetime-local" value={endsAt} />
           </label>
@@ -420,23 +420,23 @@ export function DiaryBoard() {
       ) : null}
 
       {panel === "away" ? (
-        <form className="grid gap-3 rounded-3xl border border-[#e6e0f2] bg-[#fff8f4] p-4 sm:grid-cols-2" onSubmit={(event) => void addAbsence(event)}>
+        <form className="grid gap-3 rounded-3xl border border-brand-line bg-[#fff8f4] p-4 sm:grid-cols-2" onSubmit={(event) => void addAbsence(event)}>
           <p className="text-sm leading-6 text-[#5c5670] sm:col-span-2">
             New visits will skip these days. You can also hand back visits already booked, so another pro can take them.
           </p>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="space-y-1 text-sm font-medium text-brand-ink">
             First day
             <Input onChange={(event) => setAwayStart(event.target.value)} type="date" value={awayStart} />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="space-y-1 text-sm font-medium text-brand-ink">
             Last day
             <Input onChange={(event) => setAwayEnd(event.target.value)} type="date" value={awayEnd} />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b] sm:col-span-2">
+          <label className="space-y-1 text-sm font-medium text-brand-ink sm:col-span-2">
             Note, if you want one
             <Input onChange={(event) => setAwayNote(event.target.value)} placeholder="Holiday, appointment, family" value={awayNote} />
           </label>
-          <label className="flex items-start gap-2 text-sm text-[#1c133b] sm:col-span-2">
+          <label className="flex items-start gap-2 text-sm text-brand-ink sm:col-span-2">
             <input
               checked={cancelExisting}
               className="mt-1"
@@ -449,7 +449,7 @@ export function DiaryBoard() {
         </form>
       ) : null}
 
-      {message ? <p className="text-sm text-[#312c79]">{message}</p> : null}
+      {message ? <p className="text-sm text-brand-indigo">{message}</p> : null}
 
       {view === "month" ? (
         <MonthGrid
@@ -497,19 +497,19 @@ export function DiaryBoard() {
       )}
 
       {absences.length ? (
-        <section className="rounded-3xl border border-[#e6e0f2] bg-white p-4">
-          <h2 className="text-sm font-semibold text-[#1c133b]">Days you are away</h2>
+        <section className="rounded-3xl border border-brand-line bg-white p-4">
+          <h2 className="text-sm font-semibold text-brand-ink">Days you are away</h2>
           <ul className="mt-3 space-y-2">
             {absences.map((absence) => (
               <li className="flex items-center justify-between gap-3 text-sm" key={absence.id}>
-                <span className="text-[#1c133b]">
+                <span className="text-brand-ink">
                   {parseDay(absence.starts_on).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   {" – "}
                   {parseDay(absence.ends_on).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   {absence.note ? ` · ${absence.note}` : ""}
                 </span>
                 <button
-                  className="text-sm font-semibold text-[#312c79]"
+                  className="text-sm font-semibold text-brand-indigo"
                   onClick={() => void remove("/api/cleaner/absence", absence.id)}
                   type="button"
                 >
@@ -526,9 +526,9 @@ export function DiaryBoard() {
 
 function Summary({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-[#e6e0f2] bg-white px-4 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#c79c66]">{label}</p>
-      <p className="mt-1 text-sm font-semibold leading-5 text-[#1c133b]">{value}</p>
+    <div className="rounded-3xl border border-brand-line bg-white px-4 py-3">
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-brand-gold">{label}</p>
+      <p className="mt-1 text-sm font-semibold leading-5 text-brand-ink">{value}</p>
     </div>
   );
 }
@@ -537,10 +537,10 @@ function Legend() {
   return (
     <div className="flex flex-wrap gap-4 text-xs font-medium text-[#5c5670]">
       <span className="inline-flex items-center gap-2">
-        <span className="h-3 w-3 rounded-full bg-[#312c79]" /> Mundoria visit
+        <span className="h-3 w-3 rounded-full bg-brand-indigo" /> Mundoria visit
       </span>
       <span className="inline-flex items-center gap-2">
-        <span className="h-3 w-3 rounded-full bg-[#f0a888]" /> Your plan
+        <span className="h-3 w-3 rounded-full bg-brand-peach" /> Your plan
       </span>
       <span className="inline-flex items-center gap-2">
         <span className="h-3 w-3 rounded-full bg-[#e4d7f7]" /> Time off
@@ -564,7 +564,7 @@ function WeekGrid({
 }) {
   const height = (END_HOUR - START_HOUR) * HOUR_PX;
   return (
-    <div className="hidden overflow-x-auto rounded-3xl border border-[#e6e0f2] bg-white md:block">
+    <div className="hidden overflow-x-auto rounded-3xl border border-brand-line bg-white md:block">
       <div className="grid min-w-[820px] grid-cols-[3.25rem_repeat(7,minmax(0,1fr))]">
         <div />
         {days.map((date) => {
@@ -580,7 +580,7 @@ function WeekGrid({
               <p className="text-[11px] uppercase tracking-[0.14em] text-[#8b849c]">
                 {day.toLocaleDateString("en-GB", { weekday: "short" })}
               </p>
-              <p className={cn("text-lg font-semibold", date === today ? "text-[#312c79]" : "text-[#1c133b]")}>
+              <p className={cn("text-lg font-semibold", date === today ? "text-brand-indigo" : "text-brand-ink")}>
                 {day.getDate()}
               </p>
             </div>
@@ -626,7 +626,7 @@ function WeekGrid({
                 const blockHeight = Math.max(28, ((end - start) / 60) * HOUR_PX);
                 return (
                   <div
-                    className="absolute inset-x-1 overflow-hidden rounded-xl bg-[#f0a888] px-2 py-1 text-[#3d241c]"
+                    className="absolute inset-x-1 overflow-hidden rounded-xl bg-brand-peach px-2 py-1 text-[#3d241c]"
                     key={event.id}
                     style={{ height: blockHeight, top: Math.max(0, top) }}
                   >
@@ -640,7 +640,7 @@ function WeekGrid({
                 const blockHeight = Math.max(36, Number(job.estimated_duration_hours ?? 1) * HOUR_PX);
                 return (
                   <Link
-                    className="absolute inset-x-1 overflow-hidden rounded-xl bg-[#312c79] px-2 py-1 text-white shadow-sm"
+                    className="absolute inset-x-1 overflow-hidden rounded-xl bg-brand-indigo px-2 py-1 text-white shadow-sm"
                     href={`/cleaner/job/${job.id}`}
                     key={job.id}
                     style={{ height: blockHeight, top: Math.max(0, top) }}
@@ -681,8 +681,8 @@ function DayAgenda({
   const dayEvents = events.filter((event) => eventDay(event.starts_at) === date);
   const empty = !away && !dayJobs.length && !dayEvents.length;
   return (
-    <section className="rounded-3xl border border-[#e6e0f2] bg-white p-4">
-      <h2 className="text-sm font-semibold text-[#1c133b]">
+    <section className="rounded-3xl border border-brand-line bg-white p-4">
+      <h2 className="text-sm font-semibold text-brand-ink">
         {parseDay(date).toLocaleDateString("en-GB", {
           day: "numeric",
           month: compact ? "short" : "long",
@@ -704,7 +704,7 @@ function DayAgenda({
                 className="block rounded-2xl bg-[#f7f3ff] px-3 py-3 transition hover:bg-[#efe7ff]"
                 href={`/cleaner/job/${job.id}`}
               >
-                <p className="text-sm font-semibold text-[#312c79]">
+                <p className="text-sm font-semibold text-brand-indigo">
                   {clock(job.scheduled_start_time)} · {formatServiceName(job.service_type)}
                 </p>
                 <p className="mt-1 text-sm text-[#5c5670]">
@@ -765,7 +765,7 @@ function MonthGrid({
     ...daysBetween(localIso(first), localIso(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0))),
   ];
   return (
-    <div className="rounded-3xl border border-[#e6e0f2] bg-white p-3">
+    <div className="rounded-3xl border border-brand-line bg-white p-3">
       <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium uppercase tracking-[0.12em] text-[#8b849c]">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <span key={day}>{day}</span>
@@ -781,7 +781,7 @@ function MonthGrid({
             <button
               className={cn(
                 "flex min-h-16 flex-col items-start rounded-2xl px-2 py-2 text-left",
-                date === today ? "bg-[#312c79] text-white" : "bg-[#fbf9ff] text-[#1c133b]",
+                date === today ? "bg-brand-indigo text-white" : "bg-[#fbf9ff] text-brand-ink",
                 away && date !== today && "bg-[#f3e9ff]",
               )}
               key={date}
@@ -792,10 +792,10 @@ function MonthGrid({
               <span className="mt-auto flex gap-1">
                 {count ? (
                   <span
-                    className={cn("h-2 w-2 rounded-full", date === today ? "bg-white" : "bg-[#312c79]")}
+                    className={cn("h-2 w-2 rounded-full", date === today ? "bg-white" : "bg-brand-indigo")}
                   />
                 ) : null}
-                {plans ? <span className="h-2 w-2 rounded-full bg-[#f0a888]" /> : null}
+                {plans ? <span className="h-2 w-2 rounded-full bg-brand-peach" /> : null}
                 {away ? (
                   <span
                     className={cn("h-2 w-2 rounded-full", date === today ? "bg-[#e4d7f7]" : "bg-[#c4b5e8]")}

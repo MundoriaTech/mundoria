@@ -22,7 +22,7 @@ export type MagNavCategory = {
 };
 
 const NAV_LINK_CLASS =
-  "whitespace-nowrap text-[12px] font-medium text-[#1c133b] transition hover:text-[#312c79] xl:text-[13px]";
+  "whitespace-nowrap text-[12px] font-medium text-brand-ink transition hover:text-brand-indigo xl:text-[13px]";
 
 function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
   const menuId = useId();
@@ -58,7 +58,7 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
         className={cn(
           NAV_LINK_CLASS,
           "inline-flex items-center gap-1 rounded-full px-2.5 py-1.5",
-          open && "bg-white/55 text-[#312c79]",
+          open && "bg-white/55 text-brand-indigo",
         )}
         onClick={() => setOpen((value) => !value)}
         onFocus={openMenu}
@@ -87,10 +87,10 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
         onMouseLeave={scheduleClose}
         role="menu"
       >
-        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
+        <div className="overflow-hidden rounded-2xl border border-brand-ink/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
           <div className="grid gap-0 sm:grid-cols-[1.15fr_0.85fr]">
             <div className="p-4 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4694a]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-terracotta">
                 Browse Mag
               </p>
               <ul className="mt-3 grid gap-1 sm:grid-cols-2">
@@ -110,10 +110,10 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
                           style={{ backgroundColor: theme.accent }}
                         />
                         <span className="min-w-0">
-                          <span className="block text-[13px] font-semibold text-[#1c133b] group-hover:text-[#312c79]">
+                          <span className="block text-[13px] font-semibold text-brand-ink group-hover:text-brand-indigo">
                             {category.label}
                           </span>
-                          <span className="mt-0.5 block text-[11px] leading-4 text-[#5a5470]">
+                          <span className="mt-0.5 block text-[11px] leading-4 text-brand-muted">
                             {category.posts.length
                               ? "Open section"
                               : "View section"}
@@ -127,7 +127,7 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
             </div>
 
             <div className="border-t border-[#eadfce]/80 bg-[#fff8f2] p-4 sm:border-l sm:border-t-0 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-violet">
                 Fresh reads
               </p>
               <ul className="mt-3 space-y-1">
@@ -147,10 +147,10 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
                         onClick={() => setOpen(false)}
                         role="menuitem"
                       >
-                        <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d4694a]">
+                        <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-terracotta">
                           {post.category}
                         </span>
-                        <span className="mt-0.5 block text-[13px] font-medium leading-5 text-[#1c133b] line-clamp-2">
+                        <span className="mt-0.5 block text-[13px] font-medium leading-5 text-brand-ink line-clamp-2">
                           {post.title}
                         </span>
                       </Link>
@@ -158,7 +158,7 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
                   ))}
               </ul>
               <Link
-                className="mt-3 inline-flex text-[12px] font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="mt-3 inline-flex text-[12px] font-semibold text-brand-purple underline-offset-2 hover:underline"
                 href="/blog"
                 onClick={() => setOpen(false)}
               >
@@ -210,10 +210,10 @@ export function MagNavbar({
       >
         <Link
           aria-label="Mundoria Mag home"
-          className="shrink-0 text-[1.05rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.3rem]"
+          className="shrink-0 text-[1.05rem] font-black tracking-[-0.06em] text-brand-ink sm:text-[1.3rem]"
           href="/blog"
         >
-          Mundoria <span className="text-[#d4694a]">Mag</span>
+          Mundoria <span className="text-brand-terracotta">Mag</span>
         </Link>
 
         <nav
@@ -231,7 +231,7 @@ export function MagNavbar({
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Link
-            className="hidden rounded-full px-3 py-1.5 text-[12px] font-semibold text-[#1c133b] transition hover:bg-white/55 sm:inline"
+            className="hidden rounded-full px-3 py-1.5 text-[12px] font-semibold text-brand-ink transition hover:bg-white/55 sm:inline"
             href="/"
           >
             Home
@@ -239,7 +239,7 @@ export function MagNavbar({
           {showBookCta ? (
             <HideForCleaners>
               <Link
-                className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90 sm:px-4"
+                className="inline-flex h-9 items-center justify-center rounded-full bg-brand-ink px-3.5 text-[12px] font-semibold text-white transition hover:bg-brand-ink/90 sm:px-4"
                 href={bookingHref}
               >
                 Book a clean
@@ -249,7 +249,7 @@ export function MagNavbar({
           <button
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-[#1c133b] touch-manipulation lg:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-brand-ink touch-manipulation lg:hidden"
             onClick={() => setMobileOpen((value) => !value)}
             type="button"
           >

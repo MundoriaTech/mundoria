@@ -93,12 +93,12 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-7">
       <LiveDashboardRefresh intervalMs={OPS_REFRESH_MS} scope="admin-dashboard" />
-      <section className="relative overflow-hidden rounded-[1.75rem] bg-[#1c133b] px-5 py-6 text-white shadow-[0_20px_48px_rgba(28,19,59,0.18)] sm:px-7 sm:py-8">
-        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#f0a888]/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 left-10 h-44 w-44 rounded-full bg-[#823fb2]/45 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-brand-ink px-5 py-6 text-white shadow-[0_20px_48px_rgba(28,19,59,0.18)] sm:px-7 sm:py-8">
+        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-brand-peach/25 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 left-10 h-44 w-44 rounded-full bg-brand-violet/45 blur-3xl" />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f0a888]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-peach">
               {weekday}
             </p>
             <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
@@ -111,7 +111,7 @@ export default async function AdminDashboardPage() {
           </div>
           {pending > 0 ? (
             <Link
-              className="inline-flex w-full items-center justify-center rounded-full bg-[#d4694a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c45a3c] sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-full bg-brand-terracotta px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c45a3c] sm:w-auto"
               href="/admin/cleaners"
             >
               Review {pending} cleaner{pending === 1 ? "" : "s"}
@@ -158,7 +158,7 @@ export default async function AdminDashboardPage() {
 
       {alerts.length ? (
         <div className="space-y-3 rounded-[1.5rem] border border-amber-300/60 bg-[#fff8ef] p-4 sm:p-5">
-          <p className="font-semibold text-[#1c133b]">
+          <p className="font-semibold text-brand-ink">
             <AlertTriangle className="mr-2 inline h-5 w-5 text-amber-600" />
             {alerts.length} cancelled booking{alerts.length > 1 ? "s" : ""} still
             need a new cleaner (payment held).
@@ -181,7 +181,7 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-5 xl:grid-cols-[1.4fr_.6fr]">
         <RevenueChart points={revenuePoints} />
         <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
-          <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+          <h2 className="text-lg font-semibold tracking-tight text-brand-ink">
             Quality
           </h2>
           <Health
@@ -203,10 +203,10 @@ export default async function AdminDashboardPage() {
       <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+            <h2 className="text-lg font-semibold tracking-tight text-brand-ink">
               Live map
             </h2>
-            <p className="text-sm text-[#5a5470]">
+            <p className="text-sm text-brand-muted">
               Pending, en route, and in-progress jobs
             </p>
           </div>
@@ -223,7 +223,7 @@ export default async function AdminDashboardPage() {
       </section>
 
       <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-4 shadow-[0_12px_28px_rgba(49,44,121,0.04)] sm:p-5">
-        <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+        <h2 className="text-lg font-semibold tracking-tight text-brand-ink">
           Recent activity
         </h2>
         <Stagger className="mt-4 divide-y divide-[#efe8f8]" gap={0.04} inView>
@@ -246,10 +246,10 @@ export default async function AdminDashboardPage() {
                 from="left"
                 key={`${item.date}-${index}`}
               >
-                <span className="min-w-0 font-medium text-[#1c133b]">
+                <span className="min-w-0 font-medium text-brand-ink">
                   {item.text}
                 </span>
-                <span className="shrink-0 text-[#5a5470]">
+                <span className="shrink-0 text-brand-muted">
                   {new Date(item.date).toLocaleString("en-GB")}
                 </span>
               </StaggerItem>
@@ -271,11 +271,11 @@ function Health({
 }) {
   return (
     <div className="mt-5 flex items-center justify-between border-b border-[#efe8f8] pb-4 last:border-0">
-      <span className="flex items-center gap-2 text-sm text-[#5a5470]">
-        {Icon ? <Icon className="h-4 w-4 text-[#823fb2]" /> : null}
+      <span className="flex items-center gap-2 text-sm text-brand-muted">
+        {Icon ? <Icon className="h-4 w-4 text-brand-violet" /> : null}
         {label}
       </span>
-      <b className="text-[#1c133b]">{value}</b>
+      <b className="text-brand-ink">{value}</b>
     </div>
   );
 }

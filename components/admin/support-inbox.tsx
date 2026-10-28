@@ -73,8 +73,8 @@ export function SupportInboxList({
             className={cn(
               "rounded-full px-3 py-1.5 text-sm font-semibold transition",
               status === value
-                ? "bg-[#312c79] text-white"
-                : "bg-white text-[#5a5470] ring-1 ring-[#eadff5]",
+                ? "bg-brand-indigo text-white"
+                : "bg-white text-brand-muted ring-1 ring-[#eadff5]",
             )}
             key={value}
             onClick={() => setStatus(value)}
@@ -97,11 +97,11 @@ export function SupportInboxList({
           {items.map((item) => (
             <li key={item.id}>
               <Link
-                className="block rounded-2xl border border-[#e6e0f2] bg-white p-4 transition hover:border-[#312c79]/25 hover:bg-[#faf8ff]"
+                className="block rounded-2xl border border-brand-line bg-white p-4 transition hover:border-brand-indigo/25 hover:bg-brand-haze"
                 href={`/admin/inbox/${item.id}`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-[#1c133b]">
+                  <p className="text-sm font-semibold text-brand-ink">
                     {displayName(item)}
                   </p>
                   <div className="flex items-center gap-2">
@@ -114,19 +114,19 @@ export function SupportInboxList({
                       className={cn(
                         "rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
                         item.status === "open"
-                          ? "bg-[#efe8ff] text-[#312c79]"
-                          : "bg-[#f3f0f7] text-[#8b8798]",
+                          ? "bg-[#efe8ff] text-brand-indigo"
+                          : "bg-[#f3f0f7] text-brand-subtle",
                       )}
                     >
                       {item.status}
                     </span>
                   </div>
                 </div>
-                <p className="mt-1 line-clamp-2 text-sm text-[#5a5470]">
+                <p className="mt-1 line-clamp-2 text-sm text-brand-muted">
                   {formatMessagePreview(item.last_message_preview) ||
                     "No messages yet"}
                 </p>
-                <p className="mt-2 text-xs text-[#8b8798]">
+                <p className="mt-2 text-xs text-brand-subtle">
                   {formatWhen(item.last_message_at)}
                 </p>
               </Link>
@@ -203,10 +203,10 @@ export function SupportInboxThread({
 
   return (
     <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
-      <div className="rounded-2xl border border-[#e6e0f2] bg-white">
+      <div className="rounded-2xl border border-brand-line bg-white">
         <div className="border-b border-[#eadff5] px-4 py-3">
-          <p className="text-sm font-semibold text-[#1c133b]">{title}</p>
-          <p className="text-xs text-[#8b8798]">
+          <p className="text-sm font-semibold text-brand-ink">{title}</p>
+          <p className="text-xs text-brand-subtle">
             {[conversation.user?.email, conversation.guest_email]
               .filter(Boolean)
               .join(" · ") || "Guest visitor"}
@@ -229,8 +229,8 @@ export function SupportInboxThread({
                       : "rounded-2xl px-3 py-2",
                     !gifUrl &&
                       (admin
-                        ? "rounded-br-md bg-[#312c79] text-white"
-                        : "rounded-bl-md bg-[#f6f0ff] text-[#1c133b]"),
+                        ? "rounded-br-md bg-brand-indigo text-white"
+                        : "rounded-bl-md bg-[#f6f0ff] text-brand-ink"),
                   )}
                 >
                   {gifUrl ? (
@@ -247,10 +247,10 @@ export function SupportInboxThread({
                     className={cn(
                       "mt-1 text-[10px]",
                       gifUrl
-                        ? "px-1 text-[#8b8798]"
+                        ? "px-1 text-brand-subtle"
                         : admin
                           ? "text-white/70"
-                          : "text-[#8b8798]",
+                          : "text-brand-subtle",
                     )}
                   >
                     {formatWhen(message.created_at)}
@@ -262,7 +262,7 @@ export function SupportInboxThread({
         </div>
         <div className="border-t border-[#eadff5] p-4">
           <textarea
-            className="min-h-[5rem] w-full resize-y rounded-xl border border-[#eadff5] px-3 py-2 text-sm outline-none ring-[#312c79]/20 focus:ring-2"
+            className="min-h-[5rem] w-full resize-y rounded-xl border border-[#eadff5] px-3 py-2 text-sm outline-none ring-brand-indigo/20 focus:ring-2"
             onChange={(event) => setDraft(event.target.value)}
             placeholder="Reply to visitor…"
             value={draft}
@@ -270,7 +270,7 @@ export function SupportInboxThread({
           {error ? <p className="mt-2 text-xs text-[#9a3412]">{error}</p> : null}
           <div className="mt-3 flex flex-wrap gap-2">
             <button
-              className="rounded-full bg-[#312c79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="rounded-full bg-brand-indigo px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
               disabled={sending || !draft.trim()}
               onClick={() => void reply()}
               type="button"
@@ -279,7 +279,7 @@ export function SupportInboxThread({
             </button>
             {conversation.status === "open" ? (
               <button
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#5a5470] ring-1 ring-[#eadff5]"
+                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-muted ring-1 ring-[#eadff5]"
                 disabled={sending}
                 onClick={() => void reply("closed")}
                 type="button"
@@ -288,7 +288,7 @@ export function SupportInboxThread({
               </button>
             ) : (
               <button
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#5a5470] ring-1 ring-[#eadff5]"
+                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-muted ring-1 ring-[#eadff5]"
                 disabled={sending}
                 onClick={() => void reply("open")}
                 type="button"
@@ -300,30 +300,30 @@ export function SupportInboxThread({
         </div>
       </div>
 
-      <aside className="rounded-2xl border border-[#e6e0f2] bg-white p-4 text-sm text-[#5a5470]">
-        <p className="font-semibold text-[#1c133b]">Details</p>
+      <aside className="rounded-2xl border border-brand-line bg-white p-4 text-sm text-brand-muted">
+        <p className="font-semibold text-brand-ink">Details</p>
         <dl className="mt-3 space-y-2">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-[#8b8798]">
+            <dt className="text-xs uppercase tracking-wide text-brand-subtle">
               Status
             </dt>
             <dd className="capitalize">{conversation.status}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-[#8b8798]">
+            <dt className="text-xs uppercase tracking-wide text-brand-subtle">
               Started
             </dt>
             <dd>{formatWhen(conversation.created_at)}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-[#8b8798]">
+            <dt className="text-xs uppercase tracking-wide text-brand-subtle">
               Last message
             </dt>
             <dd>{formatWhen(conversation.last_message_at)}</dd>
           </div>
         </dl>
         <Link
-          className="mt-4 inline-flex text-sm font-semibold text-[#6a45b8]"
+          className="mt-4 inline-flex text-sm font-semibold text-brand-purple"
           href="/admin/inbox"
         >
           Back to inbox

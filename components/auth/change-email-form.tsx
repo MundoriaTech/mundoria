@@ -56,7 +56,7 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
         <Input disabled value={currentEmail} />
       </label>
       {sentTo ? (
-        <p className="rounded-xl bg-[#efe6ff] px-3 py-2 text-sm leading-6 text-[#3b3358]">
+        <p className="rounded-xl bg-brand-lavender-light px-3 py-2 text-sm leading-6 text-[#3b3358]">
           Confirmation sent to <span className="font-semibold">{sentTo}</span>.
           Your login stays as {currentEmail} until you open that link.
         </p>
@@ -75,10 +75,10 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
         </Button>
       ) : (
         <form
-          className="space-y-4 rounded-2xl border border-[#e4daf5] bg-[#faf8fc] p-4"
+          className="space-y-4 rounded-2xl border border-brand-lavender bg-[#faf8fc] p-4"
           onSubmit={(event) => void submit(event)}
         >
-          <p className="text-sm leading-6 text-[#5a5470]">
+          <p className="text-sm leading-6 text-brand-muted">
             We will email a confirmation link to the new address and notify{" "}
             {currentEmail}. Your current email stays active until you confirm.
           </p>
@@ -103,8 +103,13 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
           </FormField>
           <FormStatus message={error} title="Couldn’t change email" />
           <div className="flex flex-wrap gap-2">
-            <Button className="rounded-full" disabled={pending} type="submit">
-              {pending ? "Sending…" : "Send confirmation"}
+            <Button
+              className="rounded-full"
+              loading={pending}
+              loadingLabel="Sending…"
+              type="submit"
+            >
+              Send confirmation
             </Button>
             <Button
               className="rounded-full"

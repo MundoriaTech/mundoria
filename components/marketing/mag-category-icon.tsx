@@ -22,7 +22,7 @@ const BY_CATEGORY: Record<
   "Cleaning Tips": {
     Icon: Broom,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-indigo",
   },
   "Home Care": {
     Icon: Plant,
@@ -42,7 +42,7 @@ const BY_CATEGORY: Record<
   "Cleaner Stories": {
     Icon: UsersThree,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-brand-indigo",
   },
   "Company News": {
     Icon: Newspaper,

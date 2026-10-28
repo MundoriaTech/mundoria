@@ -89,7 +89,7 @@ export function PhoneVerifyPanel({
 
   if (verified) {
     return (
-      <p className="rounded-xl bg-[#efe6ff] px-3 py-2 text-sm text-[#312c79]">
+      <p className="rounded-xl bg-brand-lavender-light px-3 py-2 text-sm text-brand-indigo">
         Phone verified for job contact.
       </p>
     );
@@ -98,28 +98,30 @@ export function PhoneVerifyPanel({
   return (
     <div className="space-y-3 rounded-2xl border border-[#f0c4b8] bg-[#fff7f2] p-4">
       <div>
-        <p className="text-sm font-semibold text-[#1c133b]">
+        <p className="text-sm font-semibold text-brand-ink">
           Verify your phone
         </p>
-        <p className="mt-1 text-sm leading-6 text-[#5a5470]">
+        <p className="mt-1 text-sm leading-6 text-brand-muted">
           Cleaners need a verified number before Mundoria treats it as trusted
           for jobs. Changing your number resets verification.
         </p>
       </div>
       <FormStatus message={error} title="Phone verification" />
       {devCode ? (
-        <p className="rounded-lg bg-white px-3 py-2 text-xs text-[#5a5470]">
+        <p className="rounded-lg bg-white px-3 py-2 text-xs text-brand-muted">
           Development code: <span className="font-mono font-semibold">{devCode}</span>
         </p>
       ) : null}
       {!awaitingCode ? (
         <Button
           className="rounded-full"
-          disabled={sending || normalizePhone(phone).length < 7}
+          disabled={normalizePhone(phone).length < 7}
+          loading={sending}
+          loadingLabel="Sending…"
           onClick={() => void sendCode()}
           type="button"
         >
-          {sending ? "Sending…" : "Send SMS code"}
+          Send SMS code
         </Button>
       ) : (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">

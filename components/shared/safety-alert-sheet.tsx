@@ -171,7 +171,7 @@ export function SafetyAlertSheet({
             <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#a67c52]">
               Safety
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-[#1c133b] sm:text-xl">
+            <h2 className="mt-1 text-lg font-semibold text-brand-ink sm:text-xl">
               {step === "sent" ? "Alert sent" : "Safety alert"}
             </h2>
           </div>
@@ -187,7 +187,7 @@ export function SafetyAlertSheet({
         </div>
 
         {!allowed ? (
-          <p className="text-sm leading-6 text-[#5a5470]">
+          <p className="text-sm leading-6 text-brand-muted">
             Safety alerts are available on the day of your visit and while the
             session is live.
           </p>
@@ -195,7 +195,7 @@ export function SafetyAlertSheet({
 
         {allowed && step === "danger" ? (
           <div className="space-y-4">
-            <p className="text-sm leading-6 text-[#5a5470]">{leaveCopy}</p>
+            <p className="text-sm leading-6 text-brand-muted">{leaveCopy}</p>
             <p className="rounded-xl bg-[#fff1ea] px-4 py-3 text-sm leading-6 text-[#7a3b28]">
               Mundoria cannot replace emergency services. If you or someone else
               is in immediate danger, call 999 first.
@@ -211,7 +211,7 @@ export function SafetyAlertSheet({
             >
               Also alert Mundoria
             </Button>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-xs leading-5 text-brand-subtle">
               For cleaning quality, lateness or breakage, use Report issue
               instead — not a safety alert.
             </p>
@@ -220,7 +220,7 @@ export function SafetyAlertSheet({
 
         {allowed && step === "details" ? (
           <div className="space-y-4">
-            <p className="text-sm leading-6 text-[#5a5470]">
+            <p className="text-sm leading-6 text-brand-muted">
               Choose what best describes the situation. Your private note is
               only shared with Mundoria.
             </p>
@@ -231,7 +231,7 @@ export function SafetyAlertSheet({
                     "rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition",
                     reason === value
                       ? "border-[#9f1239] bg-[#fff1f2] text-[#9f1239]"
-                      : "border-[#e6e0f2] bg-white text-[#1c133b] hover:bg-[#faf8fc]",
+                      : "border-brand-line bg-white text-brand-ink hover:bg-[#faf8fc]",
                   )}
                   key={value}
                   onClick={() => setReason(value)}
@@ -244,7 +244,7 @@ export function SafetyAlertSheet({
             <label className="block space-y-2 text-sm font-medium">
               <span>Optional note</span>
               <textarea
-                className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm outline-none ring-[#6a45b8] focus:ring-2"
+                className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm outline-none ring-brand-purple focus:ring-2"
                 maxLength={280}
                 onChange={(event) => setNote(event.target.value)}
                 placeholder="Anything Mundoria should know right now"
@@ -274,7 +274,7 @@ export function SafetyAlertSheet({
 
         {allowed && step === "confirm" ? (
           <div className="space-y-4">
-            <p className="text-sm leading-6 text-[#5a5470]">
+            <p className="text-sm leading-6 text-brand-muted">
               Mundoria ops will be paged. This booking will be paused for
               review. The other party is told an alert was raised — not your
               private note.
@@ -315,7 +315,7 @@ export function SafetyAlertSheet({
 
         {step === "sent" ? (
           <div className="space-y-4">
-            <p className="text-sm leading-6 text-[#5a5470]">
+            <p className="text-sm leading-6 text-brand-muted">
               Stay somewhere you feel safe. Mundoria has been notified
               {alertId ? (
                 <>
@@ -348,7 +348,7 @@ export function SafetyAlertSheet({
               </Button>
               {alertId ? (
                 <button
-                  className="text-sm font-semibold text-[#5a5470] underline-offset-2 hover:underline"
+                  className="text-sm font-semibold text-brand-muted underline-offset-2 hover:underline"
                   disabled={pending}
                   onClick={() => void withdraw()}
                   type="button"
@@ -357,11 +357,11 @@ export function SafetyAlertSheet({
                 </button>
               ) : null}
             </div>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-xs leading-5 text-brand-subtle">
               Withdrawing notifies ops but does not clear the booking hold
               without Mundoria.{" "}
               <Link
-                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="font-semibold text-brand-purple underline-offset-2 hover:underline"
                 href={FAQ_LINKS.safetyAlert}
               >
                 How safety alerts work

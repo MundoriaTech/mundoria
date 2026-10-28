@@ -12,7 +12,7 @@ export function CategoryHeroOverlay() {
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-r from-[#1c133b]/55 via-[#291845]/25 to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-brand-ink/55 via-brand-plum/25 to-transparent"
       />
     </>
   );

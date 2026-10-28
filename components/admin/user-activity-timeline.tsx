@@ -25,7 +25,7 @@ export function UserActivityTimeline({
             className="flex gap-3 border-b border-border/60 pb-3 last:border-0 last:pb-0"
             key={event.id}
           >
-            <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#291845]" />
+            <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-plum" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">
                 {activityEventLabel(event.event_name, event.metadata)}

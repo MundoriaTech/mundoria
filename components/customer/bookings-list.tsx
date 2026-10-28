@@ -60,8 +60,8 @@ export function BookingsList({
               className={cn(
                 "relative px-3 pb-3 pt-1 text-sm font-semibold transition sm:px-4",
                 active
-                  ? "text-[#1c133b]"
-                  : "text-[#8b8798] hover:text-[#5a5470]",
+                  ? "text-brand-ink"
+                  : "text-brand-subtle hover:text-brand-muted",
               )}
               key={item.id}
               onClick={() => setTab(item.id)}
@@ -69,7 +69,7 @@ export function BookingsList({
             >
               {label}
               {active ? (
-                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-[#d4694a] sm:inset-x-4" />
+                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-brand-terracotta sm:inset-x-4" />
               ) : null}
             </button>
           );

@@ -140,10 +140,10 @@ export default function HowItWorksPage() {
                     "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 calc(50% + 22px), 4px calc(50% + 22px), 4px calc(50% - 22px), 0 calc(50% - 22px))",
                 }}
               />
-              <p className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[1.75rem] font-semibold leading-none tracking-[0.06em] text-[#c79c66]">
+              <p className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[1.75rem] font-semibold leading-none tracking-[0.06em] text-brand-gold">
                 {String(index + 1).padStart(2, "0")}
               </p>
-              <h2 className="mt-3 text-[1.3rem] font-semibold tracking-[-0.02em] text-[#c79c66] sm:text-[1.4rem]">
+              <h2 className="mt-3 text-[1.3rem] font-semibold tracking-[-0.02em] text-brand-gold sm:text-[1.4rem]">
                 {step.title}
               </h2>
               <p className="mt-3 max-w-md text-[15px] leading-7 text-white/80">
@@ -158,7 +158,7 @@ export default function HowItWorksPage() {
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div className="max-w-sm">
-              <h2 className="text-[1.9rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-[2.15rem]">
+              <h2 className="text-[1.9rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-[2.15rem]">
                 From booking to cleaner confirmed
               </h2>
               <p className="mt-3 text-base leading-7 text-[#5c5670]">
@@ -168,7 +168,7 @@ export default function HowItWorksPage() {
               </p>
             </div>
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-full bg-[#6a45b8] px-5 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-brand-purple px-5 text-sm font-semibold text-white transition hover:bg-brand-purple-deep"
               href={bookingHref}
             >
               Book a Service

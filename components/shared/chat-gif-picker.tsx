@@ -93,10 +93,10 @@ export function ChatGifPicker({
       ref={rootRef}
     >
       <div className="flex items-center gap-2 border-b border-[#ebe6f2] px-3 py-2.5">
-        <p className="flex-1 text-sm font-semibold text-[#1c133b]">GIFs</p>
+        <p className="flex-1 text-sm font-semibold text-brand-ink">GIFs</p>
         <button
           aria-label="Close GIFs"
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[#6b6580] hover:bg-[#f7f5fb]"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[#6b6580] hover:bg-brand-surface"
           onClick={onClose}
           type="button"
         >
@@ -107,7 +107,7 @@ export function ChatGifPicker({
         <Search className="pointer-events-none absolute left-6 top-[calc(50%+0.2rem)] h-3.5 w-3.5 -translate-y-1/2 text-[#6b6580]" />
         <input
           autoFocus
-          className="h-9 w-full rounded-full bg-[#f7f5fb] pl-9 pr-3 text-sm outline-none placeholder:text-[#9a95a8]"
+          className="h-9 w-full rounded-full bg-brand-surface pl-9 pr-3 text-sm outline-none placeholder:text-[#9a95a8]"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search reactions"
           value={query}
@@ -123,7 +123,7 @@ export function ChatGifPicker({
             <button
               aria-label={item.label}
               className={cn(
-                "overflow-hidden rounded-xl bg-[#f7f5fb] transition hover:ring-2 hover:ring-[#1c133b]/25",
+                "overflow-hidden rounded-xl bg-brand-surface transition hover:ring-2 hover:ring-brand-ink/25",
               )}
               key={item.id}
               onClick={() => onPick(item.url)}

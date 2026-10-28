@@ -151,19 +151,19 @@ export function AddressManager({
       />
 
       {showForm || editing ? (
-        <div className="rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_16px_40px_rgba(28,19,59,0.06)] sm:p-6">
+        <div className="rounded-[1.75rem] border border-brand-line bg-white p-5 shadow-[0_16px_40px_rgba(28,19,59,0.06)] sm:p-6">
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
                 {editing ? "Edit" : "New"}
               </p>
-              <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+              <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
                 {editing ? (editing.label ?? "Address") : "Add a place"}
               </h2>
             </div>
             <button
               aria-label="Close address form"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#5c5670] transition hover:bg-[#f7f3ff] hover:text-[#1c133b]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#5c5670] transition hover:bg-[#f7f3ff] hover:text-brand-ink"
               onClick={() => {
                 setEditing(null);
                 setShowForm(false);
@@ -185,15 +185,15 @@ export function AddressManager({
         <div className="grid gap-4 md:grid-cols-2">
           {addresses.map((address) => (
             <article
-              className="flex flex-col overflow-hidden rounded-[1.75rem] border border-[#e6e0f2] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]"
+              className="flex flex-col overflow-hidden rounded-[1.75rem] border border-brand-line bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]"
               key={address.id}
             >
               <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
                     {address.is_default ? "Default" : "Saved place"}
                   </p>
-                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
                     {address.label ?? "Address"}
                   </h2>
                   <p className="mt-1 text-sm leading-6 text-[#5c5670]">
@@ -206,7 +206,7 @@ export function AddressManager({
                 <div className="flex shrink-0">
                   <button
                     aria-label="Edit address"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#312c79] transition hover:bg-[#f7f3ff]"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-brand-indigo transition hover:bg-[#f7f3ff]"
                     onClick={() => {
                       setEditing(address);
                       setShowForm(false);
@@ -225,7 +225,7 @@ export function AddressManager({
                   </button>
                 </div>
               </div>
-              <dl className="mt-5 grid grid-cols-3 gap-px border-t border-[#efe6ff] bg-[#efe6ff]">
+              <dl className="mt-5 grid grid-cols-3 gap-px border-t border-brand-lavender-light bg-brand-lavender-light">
                 <AddressFact label="Type" value={propertyLabel(address.property_type)} />
                 <AddressFact label="Beds" value={String(address.num_bedrooms ?? 0)} />
                 <AddressFact label="Baths" value={String(address.num_bathrooms ?? 0)} />
@@ -244,11 +244,11 @@ export function AddressManager({
           ))}
         </div>
       ) : (
-        <div className="rounded-[1.75rem] bg-[#f3efe6] px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <div className="rounded-[1.75rem] bg-brand-cream-deep px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
             Places
           </p>
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
             No saved addresses
           </h2>
           <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-6 text-[#3d3a48]">
@@ -263,10 +263,10 @@ export function AddressManager({
 function AddressFact({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white px-4 py-3.5 sm:px-5">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-violet">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
+      <dd className="mt-1 text-sm font-semibold tracking-tight text-brand-ink">
         {value}
       </dd>
     </div>
@@ -535,17 +535,17 @@ export function AddressForm({
 
       {showAccountExtras ? (
         <>
-      <label className="flex items-center gap-3 text-sm text-[#1c133b]">
+      <label className="flex items-center gap-3 text-sm text-brand-ink">
         <input
           checked={values.is_default}
-          className="h-4 w-4 accent-[#c79c66]"
+          className="h-4 w-4 accent-brand-gold"
           onChange={(event) => update("is_default", event.target.checked)}
           type="checkbox"
         />
         Make this my default address
       </label>
           <Button
-            className="h-11 rounded-full border border-[#1c133b] bg-white px-5 font-semibold text-[#1c133b] hover:bg-[#f8f5ff]"
+            className="h-11 rounded-full border border-brand-ink bg-white px-5 font-semibold text-brand-ink hover:bg-[#f8f5ff]"
             disabled={saving}
             type="submit"
             variant="outline"
@@ -564,7 +564,7 @@ export function AddressForm({
 
       {!compact && localOnly ? (
         <Button
-          className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
+          className="h-11 rounded-full bg-brand-gold px-5 font-semibold text-brand-ink hover:bg-[#b8894e]"
           disabled={saving}
           type="submit"
         >
@@ -575,7 +575,7 @@ export function AddressForm({
 
       {!localOnly && compact ? (
         <Button
-          className="h-11 rounded-full border border-[#1c133b] bg-white px-5 font-semibold text-[#1c133b] hover:bg-[#f8f5ff]"
+          className="h-11 rounded-full border border-brand-ink bg-white px-5 font-semibold text-brand-ink hover:bg-[#f8f5ff]"
           disabled={saving}
           type="submit"
           variant="outline"
@@ -769,7 +769,7 @@ function AddressAutocompleteInput({
                     key={`${suggestion.properties.lat}-${suggestion.properties.lon}-${primary}`}
                   >
                     <button
-                      className="block w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-[#efe6ff] touch-manipulation"
+                      className="block w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-brand-lavender-light touch-manipulation"
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => {
                         if (blurTimer.current) clearTimeout(blurTimer.current);
@@ -784,7 +784,7 @@ function AddressAutocompleteInput({
                       }}
                       type="button"
                     >
-                      <span className="font-medium text-[#1c133b]">
+                      <span className="font-medium text-brand-ink">
                         {primary}
                       </span>
                       {suggestion.properties.city ||
@@ -831,8 +831,8 @@ function AddressTagField({
           <button
             className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
               value === tag
-                ? "border-[#1c133b] bg-[#1c133b] text-white"
-                : "border-transparent bg-[#efe9df] text-[#5a5470] hover:bg-[#e8e0d0]"
+                ? "border-brand-ink bg-brand-ink text-white"
+                : "border-transparent bg-[#efe9df] text-brand-muted hover:bg-brand-sand"
             }`}
             key={tag}
             onClick={() => {
@@ -848,8 +848,8 @@ function AddressTagField({
           aria-label="Add custom tag"
           className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
             custom
-              ? "border-[#1c133b] bg-[#1c133b] text-white"
-              : "border-transparent bg-[#efe9df] text-[#5a5470] hover:bg-[#e8e0d0]"
+              ? "border-brand-ink bg-brand-ink text-white"
+              : "border-transparent bg-[#efe9df] text-brand-muted hover:bg-brand-sand"
           }`}
           onClick={() => {
             setCustom(true);

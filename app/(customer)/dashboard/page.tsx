@@ -81,14 +81,14 @@ export default async function CustomerDashboardPage() {
         actions={
           <>
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-xs font-semibold text-white transition hover:bg-[#312c79] sm:h-12 sm:px-6 sm:text-sm"
+              className="inline-flex h-9 items-center justify-center rounded-full bg-brand-ink px-3.5 text-xs font-semibold text-white transition hover:bg-brand-indigo sm:h-12 sm:px-6 sm:text-sm"
               href={DASHBOARD_BOOK_HREF}
             >
               <Plus className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
               Book a session
             </Link>
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
+              className="inline-flex h-9 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-3.5 text-xs font-semibold text-brand-ink transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
               href="/bookings"
             >
               <CalendarCheckLucide className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
@@ -117,7 +117,7 @@ export default async function CustomerDashboardPage() {
         action={
           upcoming.length > 1 ? (
             <Link
-              className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="text-sm font-semibold text-brand-purple underline-offset-2 hover:underline"
               href="/bookings"
             >
               View all
@@ -134,12 +134,12 @@ export default async function CustomerDashboardPage() {
             {later.length ? (
               <div>
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
                     Also scheduled
                   </p>
                   {laterOverflow > 0 ? (
                     <Link
-                      className="text-xs font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                      className="text-xs font-semibold text-brand-purple underline-offset-2 hover:underline"
                       href="/bookings"
                     >
                       +{laterOverflow} more
@@ -170,15 +170,15 @@ export default async function CustomerDashboardPage() {
                           href={`/booking/${booking.id}`}
                         >
                           <div className="flex w-12 shrink-0 flex-col items-center leading-none">
-                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#c79c66]">
+                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-brand-gold">
                               {month}
                             </span>
-                            <span className="mt-0.5 text-lg font-semibold tracking-tight text-[#1c133b]">
+                            <span className="mt-0.5 text-lg font-semibold tracking-tight text-brand-ink">
                               {day}
                             </span>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-[#1c133b]">
+                            <p className="truncate text-sm font-semibold text-brand-ink">
                               {formatServiceName(booking.service_type)}
                             </p>
                             <p className="mt-0.5 truncate text-xs text-[#5c5670]">
@@ -188,7 +188,7 @@ export default async function CustomerDashboardPage() {
                                 : ""}
                             </p>
                           </div>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-[#c4bfd4] transition group-hover:text-[#6a45b8]" />
+                          <ChevronRight className="h-4 w-4 shrink-0 text-[#c4bfd4] transition group-hover:text-brand-purple" />
                         </Link>
                       </li>
                     );
@@ -200,7 +200,7 @@ export default async function CustomerDashboardPage() {
         ) : (
           <DashboardEmptyCard
             action={
-              <Button asChild className="rounded-full bg-[#1c133b] hover:bg-[#312c79]">
+              <Button asChild className="rounded-full bg-brand-ink hover:bg-brand-indigo">
                 <Link href={DASHBOARD_BOOK_HREF}>Start a booking</Link>
               </Button>
             }
@@ -211,10 +211,10 @@ export default async function CustomerDashboardPage() {
       </DashboardSection>
 
       <section>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
           For you
         </p>
-        <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+        <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-brand-ink">
           Halloween
         </h2>
         <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-2">
@@ -229,9 +229,9 @@ export default async function CustomerDashboardPage() {
               sizes="(max-width: 1024px) 100vw, 720px"
               src="/images/promos/halloween-after-party.jpg"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1c133b]/88 via-[#1c133b]/25 to-[#1c133b]/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/88 via-brand-ink/25 to-brand-ink/10" />
             <div className="relative mt-auto p-5 sm:p-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#ffc79f]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-peach-light">
                 Until 1 November
               </p>
               <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
@@ -240,7 +240,7 @@ export default async function CustomerDashboardPage() {
               <p className="mt-2 max-w-sm text-sm font-light leading-6 text-white/85">
                 A one-off clean the morning after Halloween, so the house is yours again.
               </p>
-              <span className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-[#1c133b] transition group-hover:bg-[#fff4ee]">
+              <span className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-brand-ink transition group-hover:bg-[#fff4ee]">
                 Book a one-off
               </span>
             </div>
@@ -257,9 +257,9 @@ export default async function CustomerDashboardPage() {
               sizes="(max-width: 1024px) 100vw, 560px"
               src="/images/promos/halloween-deep-clean.jpg"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1c133b]/88 via-[#1c133b]/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/88 via-brand-ink/20 to-transparent" />
             <div className="relative mt-auto p-5 sm:p-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#ffc79f]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-peach-light">
                 Before the 31st
               </p>
               <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
@@ -268,7 +268,7 @@ export default async function CustomerDashboardPage() {
               <p className="mt-2 max-w-sm text-sm font-light leading-6 text-white/85">
                 A thorough clean before guests arrive.
               </p>
-              <span className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-[#1c133b] transition group-hover:bg-[#fff4ee]">
+              <span className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-brand-ink transition group-hover:bg-[#fff4ee]">
                 Book a deep clean
               </span>
             </div>
@@ -277,16 +277,16 @@ export default async function CustomerDashboardPage() {
       </section>
 
       {customer.referral_code ? (
-        <section className="rounded-[1.75rem] bg-[#f3efe6] p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <section className="rounded-[1.75rem] bg-brand-cream-deep p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
             Share Mundoria
           </p>
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
             Give £10, get £10
           </h2>
           <p className="mt-2 max-w-xl text-sm font-light leading-6 text-[#3d3a48]">
             Share code{" "}
-            <span className="font-semibold text-[#312c79]">
+            <span className="font-semibold text-brand-indigo">
               {customer.referral_code}
             </span>
             . Friends get £10 off their first clean; you get £10 after they
@@ -317,18 +317,18 @@ function NextCleanCard({ booking }: { booking: Booking }) {
   ];
 
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-[#e6e0f2] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
+    <article className="overflow-hidden rounded-[1.75rem] border border-brand-line bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
       <div className="px-5 pt-5 sm:px-6">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
           {waiting ? customerWaitingLabel(booking.status) : "Confirmed"}
         </p>
-        <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+        <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
           {formatServiceName(booking.service_type)}
         </h3>
       </div>
       <Stagger
         as="dl"
-        className="mt-5 grid grid-cols-2 gap-px border-y border-[#efe6ff] bg-[#efe6ff] sm:grid-cols-4"
+        className="mt-5 grid grid-cols-2 gap-px border-y border-brand-lavender-light bg-brand-lavender-light sm:grid-cols-4"
         delay={0.15}
       >
         {facts.map((fact) => (
@@ -337,10 +337,10 @@ function NextCleanCard({ booking }: { booking: Booking }) {
             distance={10}
             key={fact.label}
           >
-            <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+            <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-violet">
               {fact.label}
             </dt>
-            <dd className="mt-1 truncate text-sm font-semibold tracking-tight text-[#1c133b]">
+            <dd className="mt-1 truncate text-sm font-semibold tracking-tight text-brand-ink">
               {fact.value}
             </dd>
           </StaggerItem>
@@ -348,14 +348,14 @@ function NextCleanCard({ booking }: { booking: Booking }) {
       </Stagger>
       <div className="flex flex-col gap-2 p-5 sm:flex-row sm:flex-wrap sm:items-center sm:px-6">
         <Link
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+          className="inline-flex h-11 items-center justify-center rounded-full bg-brand-ink px-5 text-sm font-semibold text-white transition hover:bg-brand-indigo"
           href={`/booking/${booking.id}`}
         >
           {waiting ? "View request" : "Manage session"}
         </Link>
         {isCleanerVisibleToCustomer(booking.status) && booking.cleaner_id ? (
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-full border border-[#e6e0f2] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-brand-line bg-white px-5 text-sm font-semibold text-brand-ink transition hover:bg-[#f7f2ea]"
             href={`/messages/${booking.id}`}
           >
             Message

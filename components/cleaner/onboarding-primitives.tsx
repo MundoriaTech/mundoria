@@ -112,10 +112,10 @@ export function OnboardingSelect({
           aria-expanded={open}
           aria-haspopup="listbox"
           className={cn(
-            "flex w-full items-center justify-between gap-3 rounded-xl border-2 border-[#1c133b] bg-transparent px-3.5 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#1c133b]",
+            "flex w-full items-center justify-between gap-3 rounded-xl border-2 border-brand-ink bg-transparent px-3.5 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-brand-ink",
             floating ? "relative h-11" : "h-11",
-            error && "border-[#d4694a] focus-visible:ring-[#d4694a]",
-            open && "ring-2 ring-[#1c133b]",
+            error && "border-brand-terracotta focus-visible:ring-brand-terracotta",
+            open && "ring-2 ring-brand-ink",
             error && invalidControlClass,
           )}
           onClick={() => setOpen((current) => !current)}
@@ -127,10 +127,10 @@ export function OnboardingSelect({
                 className={cn(
                   "pointer-events-none absolute left-3.5 right-10 origin-left transition-all duration-150",
                   empty && !open
-                    ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#8b8798]"
-                    : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-[#5a5470]",
-                  open && "text-[#1c133b]",
-                  error && "text-[#d4694a]",
+                    ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-brand-subtle"
+                    : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-brand-muted",
+                  open && "text-brand-ink",
+                  error && "text-brand-terracotta",
                 )}
               >
                 {label}
@@ -138,7 +138,7 @@ export function OnboardingSelect({
               <span className="block flex-1 pb-1 pr-8 pt-3.5">
                 <span
                   className={cn(
-                    "flex h-6 items-center text-[15px] font-medium text-[#1c133b]",
+                    "flex h-6 items-center text-[15px] font-medium text-brand-ink",
                     empty && "text-transparent",
                   )}
                 >
@@ -152,7 +152,7 @@ export function OnboardingSelect({
           ) : (
             <span
               className={cn(
-                selected ? "font-medium text-[#1c133b]" : "text-[#8b8798]",
+                selected ? "font-medium text-brand-ink" : "text-brand-subtle",
               )}
             >
               <OptionLabel
@@ -163,7 +163,7 @@ export function OnboardingSelect({
           )}
           <ChevronDown
             className={cn(
-              "h-4 w-4 shrink-0 text-[#1c133b] transition",
+              "h-4 w-4 shrink-0 text-brand-ink transition",
               floating && "absolute right-3.5 top-1/2 -translate-y-1/2",
               open && "rotate-180",
             )}
@@ -172,15 +172,15 @@ export function OnboardingSelect({
         </button>
 
         {open ? (
-          <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
+          <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-brand-ink bg-brand-cream shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
             {searchable ? (
-              <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
+              <div className="flex items-center gap-2 border-b border-brand-sand px-3 py-2">
                 <Search
-                  className="h-4 w-4 shrink-0 text-[#8b8798]"
+                  className="h-4 w-4 shrink-0 text-brand-subtle"
                   strokeWidth={2.5}
                 />
                 <input
-                  className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
+                  className="h-9 w-full bg-transparent text-sm text-brand-ink outline-none placeholder:text-brand-subtle"
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder={searchPlaceholder}
                   ref={searchRef}
@@ -191,7 +191,7 @@ export function OnboardingSelect({
             ) : null}
             <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
               {filtered.length === 0 ? (
-                <li className="px-3 py-2.5 text-sm text-[#8b8798]">
+                <li className="px-3 py-2.5 text-sm text-brand-subtle">
                   No matches.
                 </li>
               ) : (
@@ -203,8 +203,8 @@ export function OnboardingSelect({
                         className={cn(
                           "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition",
                           isSelected
-                            ? "bg-[#1c133b] text-white"
-                            : "text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                            ? "bg-brand-ink text-white"
+                            : "text-brand-ink hover:bg-brand-ink hover:text-white",
                         )}
                         aria-selected={isSelected}
                         onClick={() => {
@@ -346,9 +346,9 @@ export function OnboardingDateField({
           aria-expanded={open}
           aria-haspopup="dialog"
           className={cn(
-            "group/field relative h-11 w-full rounded-xl border-2 border-[#1c133b] bg-transparent px-3.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1c133b]",
-            error && "border-[#d4694a] focus-visible:ring-[#d4694a]",
-            open && "ring-2 ring-[#1c133b]",
+            "group/field relative h-11 w-full rounded-xl border-2 border-brand-ink bg-transparent px-3.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink",
+            error && "border-brand-terracotta focus-visible:ring-brand-terracotta",
+            open && "ring-2 ring-brand-ink",
           )}
           id={fieldId}
           onClick={() => setOpen((current) => !current)}
@@ -358,10 +358,10 @@ export function OnboardingDateField({
             className={cn(
               "pointer-events-none absolute left-3.5 right-10 origin-left transition-all duration-150",
               empty && !open
-                ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#8b8798]"
-                : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-[#5a5470]",
-              open && "text-[#1c133b]",
-              error && "text-[#d4694a]",
+                ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-brand-subtle"
+                : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-brand-muted",
+              open && "text-brand-ink",
+              error && "text-brand-terracotta",
             )}
           >
             {label}
@@ -369,7 +369,7 @@ export function OnboardingDateField({
           <span className="block pb-1 pr-8 pt-3.5">
             <span
               className={cn(
-                "block h-6 truncate text-[15px] leading-6 text-[#1c133b]",
+                "block h-6 truncate text-[15px] leading-6 text-brand-ink",
                 empty && "text-transparent",
               )}
             >
@@ -378,36 +378,36 @@ export function OnboardingDateField({
           </span>
           <CalendarDays
             aria-hidden
-            className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1c133b]"
+            className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink"
             strokeWidth={2.25}
           />
         </button>
 
         {open ? (
           <div
-            className="absolute right-0 z-30 mt-1.5 w-[15rem] rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] p-2 shadow-[0_12px_28px_rgba(28,19,59,0.12)]"
+            className="absolute right-0 z-30 mt-1.5 w-[15rem] rounded-xl border-2 border-brand-ink bg-brand-cream p-2 shadow-[0_12px_28px_rgba(28,19,59,0.12)]"
             role="dialog"
           >
             <div className="mb-1.5 flex items-center justify-between gap-1">
               <button
                 aria-label="Previous month"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-brand-ink/35 text-base leading-none text-brand-ink transition hover:border-brand-ink touch-manipulation"
                 onClick={() => shiftMonth(-1)}
                 type="button"
               >
                 ‹
               </button>
-              <p className="text-xs font-semibold text-[#1c133b]">{monthLabel}</p>
+              <p className="text-xs font-semibold text-brand-ink">{monthLabel}</p>
               <button
                 aria-label="Next month"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-brand-ink/35 text-base leading-none text-brand-ink transition hover:border-brand-ink touch-manipulation"
                 onClick={() => shiftMonth(1)}
                 type="button"
               >
                 ›
               </button>
             </div>
-            <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-[#8b8798]">
+            <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-brand-subtle">
               {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
                 <span key={day}>{day}</span>
               ))}
@@ -423,8 +423,8 @@ export function OnboardingDateField({
                     className={cn(
                       "mx-auto flex h-7 w-7 items-center justify-center rounded-full touch-manipulation transition",
                       selected
-                        ? "bg-[#1c133b] font-semibold text-white"
-                        : "text-[#1c133b] hover:bg-[#1c133b]/10",
+                        ? "bg-brand-ink font-semibold text-white"
+                        : "text-brand-ink hover:bg-brand-ink/10",
                       disabled && "pointer-events-none opacity-30",
                     )}
                     disabled={disabled}
@@ -445,7 +445,7 @@ export function OnboardingDateField({
   );
 }
 
-const ONBOARDING_PAGE_BG = "bg-[#f9f6ef]";
+const ONBOARDING_PAGE_BG = "bg-brand-cream";
 
 export function OnboardingCheckbox({
   checked,
@@ -467,8 +467,8 @@ export function OnboardingCheckbox({
       <span
         aria-hidden
         className={cn(
-          "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] transition",
-          checked ? "bg-[#1c133b] text-white" : "bg-transparent",
+          "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-brand-ink transition",
+          checked ? "bg-brand-ink text-white" : "bg-transparent",
           className,
         )}
       >
@@ -501,18 +501,18 @@ export function BranchChoice({
         return (
           <button
             className={cn(
-              "rounded-2xl border-2 bg-[#f9f6ef] p-4 text-left transition touch-manipulation",
+              "rounded-2xl border-2 bg-brand-cream p-4 text-left transition touch-manipulation",
               active
-                ? "border-[#1c133b] bg-white"
-                : "border-[#1c133b]/35 hover:border-[#1c133b]",
+                ? "border-brand-ink bg-white"
+                : "border-brand-ink/35 hover:border-brand-ink",
             )}
             key={option.value}
             onClick={() => onChange(option.value)}
             type="button"
           >
-            <p className="font-semibold text-[#1c133b]">{option.label}</p>
+            <p className="font-semibold text-brand-ink">{option.label}</p>
             {option.description ? (
-              <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+              <p className="mt-1 text-sm leading-5 text-brand-muted">
                 {option.description}
               </p>
             ) : null}
@@ -544,7 +544,7 @@ export function DecisionStrip({
     <div className="space-y-2">
       <div
         aria-label={label}
-        className="flex overflow-hidden rounded-full border-2 border-[#1c133b]"
+        className="flex overflow-hidden rounded-full border-2 border-brand-ink"
         role="radiogroup"
       >
         {options.map((option, index) => {
@@ -554,10 +554,10 @@ export function DecisionStrip({
               aria-checked={active}
               className={cn(
                 "min-w-0 flex-1 px-3 py-2.5 text-center text-xs font-semibold transition touch-manipulation",
-                index > 0 && "border-l-2 border-[#1c133b]",
+                index > 0 && "border-l-2 border-brand-ink",
                 active
-                  ? "bg-[#1c133b] text-white"
-                  : "bg-[#f9f6ef] text-[#1c133b] hover:bg-white",
+                  ? "bg-brand-ink text-white"
+                  : "bg-brand-cream text-brand-ink hover:bg-white",
               )}
               key={option.value}
               onClick={() => onChange(option.value)}
@@ -570,7 +570,7 @@ export function DecisionStrip({
         })}
       </div>
       {selected?.hint ? (
-        <p className="text-sm leading-5 text-[#5a5470]">{selected.hint}</p>
+        <p className="text-sm leading-5 text-brand-muted">{selected.hint}</p>
       ) : null}
     </div>
   );
@@ -602,8 +602,8 @@ export function ChoicePills({
             className={cn(
               "rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold transition touch-manipulation",
               active
-                ? "border-[#1c133b] bg-[#1c133b] text-white"
-                : "border-[#1c133b]/40 bg-transparent text-[#1c133b] hover:border-[#1c133b]",
+                ? "border-brand-ink bg-brand-ink text-white"
+                : "border-brand-ink/40 bg-transparent text-brand-ink hover:border-brand-ink",
             )}
             key={option.value}
             onClick={() => onChange(option.value)}
@@ -652,8 +652,8 @@ export function ChoiceMultiPills({
             className={cn(
               "rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold transition touch-manipulation",
               active
-                ? "border-[#1c133b] bg-[#1c133b] text-white"
-                : "border-[#1c133b]/40 bg-transparent text-[#1c133b] hover:border-[#1c133b]",
+                ? "border-brand-ink bg-brand-ink text-white"
+                : "border-brand-ink/40 bg-transparent text-brand-ink hover:border-brand-ink",
             )}
             key={option.value}
             onClick={() => toggle(option.value)}
@@ -700,18 +700,18 @@ export function BranchMultiChoice({
           <button
             aria-pressed={active}
             className={cn(
-              "rounded-2xl border-2 bg-[#f9f6ef] p-4 text-left transition touch-manipulation",
+              "rounded-2xl border-2 bg-brand-cream p-4 text-left transition touch-manipulation",
               active
-                ? "border-[#1c133b] bg-white"
-                : "border-[#1c133b]/35 hover:border-[#1c133b]",
+                ? "border-brand-ink bg-white"
+                : "border-brand-ink/35 hover:border-brand-ink",
             )}
             key={option.value}
             onClick={() => toggle(option.value)}
             type="button"
           >
-            <p className="font-semibold text-[#1c133b]">{option.label}</p>
+            <p className="font-semibold text-brand-ink">{option.label}</p>
             {option.description ? (
-              <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+              <p className="mt-1 text-sm leading-5 text-brand-muted">
                 {option.description}
               </p>
             ) : null}
@@ -731,10 +731,10 @@ export function FaqAccordion({
 
   return (
     <div className="mt-10 space-y-2">
-      <h3 className="text-base font-bold text-[#1c133b]">
+      <h3 className="text-base font-bold text-brand-ink">
         Frequently asked questions
       </h3>
-      <ul className="divide-y divide-[#e8e0d0] rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef]">
+      <ul className="divide-y divide-brand-sand rounded-2xl border-2 border-brand-ink bg-brand-cream">
         {items.map((item) => {
           const expanded = open === item.q;
           return (
@@ -745,18 +745,18 @@ export function FaqAccordion({
                 onClick={() => setOpen(expanded ? null : item.q)}
                 type="button"
               >
-                <span className="text-sm font-semibold text-[#1c133b]">
+                <span className="text-sm font-semibold text-brand-ink">
                   {item.q}
                 </span>
                 <ChevronDown
                   className={cn(
-                    "mt-0.5 h-4 w-4 shrink-0 text-[#1c133b] transition",
+                    "mt-0.5 h-4 w-4 shrink-0 text-brand-ink transition",
                     expanded && "rotate-180",
                   )}
                 />
               </button>
               {expanded ? (
-                <p className="px-4 pb-3.5 text-sm leading-6 text-[#5a5470]">
+                <p className="px-4 pb-3.5 text-sm leading-6 text-brand-muted">
                   {item.a}
                 </p>
               ) : null}
@@ -773,7 +773,7 @@ export function InfoCallout({ children }: { children: ReactNode }) {
     <div className="mt-4 flex gap-2.5 text-sm leading-6 text-[#3b3358]">
       <Info
         aria-hidden
-        className="mt-0.5 h-4 w-4 shrink-0 text-[#1c133b]"
+        className="mt-0.5 h-4 w-4 shrink-0 text-brand-ink"
         strokeWidth={2.25}
       />
       <div className="min-w-0 flex-1">{children}</div>
@@ -793,10 +793,10 @@ export function ExternalCta({
   return (
     <a
       className={cn(
-        "inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-[#1c133b] px-5 text-sm font-semibold touch-manipulation",
+        "inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-brand-ink px-5 text-sm font-semibold touch-manipulation",
         secondary
-          ? "bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
-          : "bg-[#1c133b] text-white hover:bg-[#312c79]",
+          ? "bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white"
+          : "bg-brand-ink text-white hover:bg-brand-indigo",
       )}
       href={href}
       rel="noopener noreferrer"
@@ -817,7 +817,7 @@ export function SoftDeferButton({
 }) {
   return (
     <button
-      className="inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] px-5 text-sm font-semibold text-[#1c133b] touch-manipulation hover:bg-[#1c133b] hover:text-white"
+      className="inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-brand-ink bg-brand-cream px-5 text-sm font-semibold text-brand-ink touch-manipulation hover:bg-brand-ink hover:text-white"
       onClick={onClick}
       type="button"
     >
@@ -876,8 +876,8 @@ export function ChipMultiSelect({
             className={cn(
               "rounded-full border-2 px-3 py-1.5 text-xs font-semibold transition touch-manipulation",
               active
-                ? "border-[#1c133b] bg-[#1c133b] text-white"
-                : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b]",
+                ? "border-brand-ink bg-brand-ink text-white"
+                : "border-brand-ink bg-brand-cream text-brand-ink",
             )}
             key={value}
             onClick={() => toggle(value)}
@@ -933,15 +933,15 @@ function DocumentFileRow({
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-[#1c133b]">{name}</p>
-          <p className="mt-0.5 text-xs text-[#8b8798]">
+          <p className="truncate text-sm font-medium text-brand-ink">{name}</p>
+          <p className="mt-0.5 text-xs text-brand-subtle">
             {uploading ? `Uploading… ${percent ?? 0}%` : "Uploaded"}
           </p>
         </div>
         {!uploading && onRemove ? (
           <button
             aria-label={removeLabel}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-brand-ink text-brand-ink transition hover:bg-brand-ink hover:text-white"
             onClick={onRemove}
             type="button"
           >
@@ -952,11 +952,11 @@ function DocumentFileRow({
       {uploading ? (
         <div
           aria-hidden
-          className="h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
+          className="h-1.5 overflow-hidden rounded-full bg-brand-sand"
         >
           <motion.div
             animate={{ width: `${percent ?? 0}%` }}
-            className="h-full rounded-full bg-[#312c79]"
+            className="h-full rounded-full bg-brand-indigo"
             initial={{ width: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
           />
@@ -1077,15 +1077,15 @@ export function DocumentUpload({
 
   return (
     <div className="mx-auto w-full max-w-sm space-y-3">
-      <p className="text-sm font-medium text-[#291845]">{label}</p>
+      <p className="text-sm font-medium text-brand-plum">{label}</p>
       <label
         className={cn(
-          "flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed bg-[#f9f6ef] p-8 text-center transition",
+          "flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed bg-brand-cream p-8 text-center transition",
           error
-            ? "border-[#d4694a] hover:border-[#d4694a]"
+            ? "border-brand-terracotta hover:border-brand-terracotta"
             : dragActive
-              ? "border-[#1c133b] bg-[#f3eee4]"
-              : "border-[#1c133b]/55 hover:border-[#1c133b]",
+              ? "border-brand-ink bg-[#f3eee4]"
+              : "border-brand-ink/55 hover:border-brand-ink",
           (uploading || atMax) && "pointer-events-none opacity-70",
         )}
         htmlFor={inputId}
@@ -1094,11 +1094,11 @@ export function DocumentUpload({
         onDragOver={onDragOver}
         onDrop={onDrop}
       >
-        <FileUp className="h-8 w-8 text-[#1c133b]" strokeWidth={2.25} />
-        <b className="mt-3 text-sm text-[#291845]">
+        <FileUp className="h-8 w-8 text-brand-ink" strokeWidth={2.25} />
+        <b className="mt-3 text-sm text-brand-plum">
           {atMax ? "Upload limit reached" : chooseLabel}
         </b>
-        <span className="mt-1 text-xs text-[#8b8798]">
+        <span className="mt-1 text-xs text-brand-subtle">
           {dragActive
             ? "Drop to upload"
             : imageOnly

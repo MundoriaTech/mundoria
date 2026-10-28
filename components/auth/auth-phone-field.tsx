@@ -49,7 +49,7 @@ export function AuthPhoneField({
   return (
     <div className="space-y-1.5">
       <label
-        className="block text-sm font-medium text-[#1c133b]"
+        className="block text-sm font-medium text-brand-ink"
         htmlFor={htmlFor}
       >
         {label}
@@ -60,10 +60,10 @@ export function AuthPhoneField({
       <div
         className={cn(
           "flex min-h-11 items-center gap-2 rounded-xl border bg-[#f6f5f8] px-3.5 transition",
-          "focus-within:ring-2 focus-within:ring-[#6a45b8]/20",
-          error ? "border-[#d4694a]" : "border-[#e4e0eb]",
+          "focus-within:ring-2 focus-within:ring-brand-purple/20",
+          error ? "border-brand-terracotta" : "border-[#e4e0eb]",
           className,
-          error ? "border-[#d4694a]" : null,
+          error ? "border-brand-terracotta" : null,
         )}
       >
         <span aria-hidden className="shrink-0">
@@ -71,7 +71,7 @@ export function AuthPhoneField({
         </span>
         <span
           aria-hidden
-          className="shrink-0 text-[15px] font-medium text-[#1c133b]"
+          className="shrink-0 text-[15px] font-medium text-brand-ink"
         >
           {UK_DIAL_CODE}
         </span>
@@ -88,7 +88,7 @@ export function AuthPhoneField({
         />
       </div>
       {hint ? (
-        <p className="px-0.5 text-xs leading-5 text-[#8b8798]">{hint}</p>
+        <p className="px-0.5 text-xs leading-5 text-brand-subtle">{hint}</p>
       ) : null}
       {error?.message ? <FieldError message={error.message} /> : null}
     </div>

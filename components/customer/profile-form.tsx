@@ -143,8 +143,13 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
         {status ? (
           <p className="mt-4 rounded-md bg-muted p-3 text-sm">{status}</p>
         ) : null}
-        <Button className="mt-6" disabled={saving} type="submit">
-          {saving ? "Saving…" : "Save changes"}
+        <Button
+          className="mt-6"
+          loading={saving}
+          loadingLabel="Saving…"
+          type="submit"
+        >
+          Save changes
         </Button>
       </form>
 

@@ -278,10 +278,10 @@ const days = [
 ];
 
 /** Same cream surface as the customer booking flow. */
-const ONBOARDING_PAGE_BG = "bg-[#f9f6ef]";
+const ONBOARDING_PAGE_BG = "bg-brand-cream";
 /** Fields sit on the page colour with a stronger ink border. */
 const ONBOARDING_FIELD_CLASS =
-  "border-2 border-[#1c133b] bg-[#f9f6ef] focus-visible:bg-[#f9f6ef] focus-visible:ring-[#1c133b]";
+  "border-2 border-brand-ink bg-brand-cream focus-visible:bg-brand-cream focus-visible:ring-brand-ink";
 
 /** Pack page headings in sentence case (not Title Case). Keep acronyms: UTR, DBS. */
 const STEPS = [
@@ -1252,58 +1252,58 @@ export function OnboardingWizard({
     return (
       <main
         className={cn(
-          "flex min-h-screen items-center justify-center px-4 py-10 text-[#1c133b]",
+          "flex min-h-screen items-center justify-center px-4 py-10 text-brand-ink",
           ONBOARDING_PAGE_BG,
         )}
       >
-        <div className="w-full max-w-lg rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-6 shadow-sm sm:p-8">
+        <div className="w-full max-w-lg rounded-2xl border-2 border-brand-ink bg-brand-cream p-6 shadow-sm sm:p-8">
           <div className="text-center">
-            <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#1c133b] bg-[#efe8fa]">
-              <Check className="h-6 w-6 text-[#312c79]" strokeWidth={3} />
+            <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand-ink bg-[#efe8fa]">
+              <Check className="h-6 w-6 text-brand-indigo" strokeWidth={3} />
             </span>
-            <h1 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#312c79]">
+            <h1 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-brand-indigo">
               Application Submitted!
             </h1>
-            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+            <p className="mt-2 text-sm leading-6 text-brand-muted">
               Thanks — we’re reviewing your application. This usually takes a
               few working days.
             </p>
           </div>
 
           {applicationReference ? (
-            <div className="mt-5 rounded-xl border-2 border-[#1c133b]/25 bg-[#f3eee4] px-4 py-3 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+            <div className="mt-5 rounded-xl border-2 border-brand-ink/25 bg-[#f3eee4] px-4 py-3 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-subtle">
                 Application reference
               </p>
-              <p className="mt-1 text-lg font-semibold tracking-wide text-[#1c133b]">
+              <p className="mt-1 text-lg font-semibold tracking-wide text-brand-ink">
                 {applicationReference}
               </p>
             </div>
           ) : null}
 
           {data.interview_scheduled_at ? (
-            <p className="mt-4 rounded-xl bg-[#f3eee4] px-4 py-3 text-center text-sm font-medium text-[#1c133b]">
+            <p className="mt-4 rounded-xl bg-[#f3eee4] px-4 py-3 text-center text-sm font-medium text-brand-ink">
               Interview booked:{" "}
               {formatAppointmentSummary(data.interview_scheduled_at)}
             </p>
           ) : null}
 
-          <h2 className="mt-6 text-sm font-semibold text-[#1c133b]">
+          <h2 className="mt-6 text-sm font-semibold text-brand-ink">
             What&apos;s next?
           </h2>
-          <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+          <p className="mt-2 text-sm leading-6 text-brand-muted">
             Once your application has been submitted:
           </p>
-          <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm leading-6 text-[#5a5470]">
+          <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm leading-6 text-brand-muted">
             <li>
-              <span className="font-medium text-[#1c133b]">
+              <span className="font-medium text-brand-ink">
                 Application review:
               </span>{" "}
               Our team checks the information and documents you&apos;ve
               provided.
             </li>
             <li>
-              <span className="font-medium text-[#1c133b]">Verification:</span>{" "}
+              <span className="font-medium text-brand-ink">Verification:</span>{" "}
               We confirm your identity, required checks and eligibility for
               your selected cleaning services
               {data.interview_scheduled_at
@@ -1315,32 +1315,32 @@ export function OnboardingWizard({
                 : ""}
             </li>
             <li>
-              <span className="font-medium text-[#1c133b]">
+              <span className="font-medium text-brand-ink">
                 Additional information:
               </span>{" "}
               If anything is missing, we&apos;ll contact you and explain what
               to do.
             </li>
             <li>
-              <span className="font-medium text-[#1c133b]">Approval:</span> Once
+              <span className="font-medium text-brand-ink">Approval:</span> Once
               approved, your cleaner profile will be activated for eligible
               services.
             </li>
             <li>
-              <span className="font-medium text-[#1c133b]">
+              <span className="font-medium text-brand-ink">
                 Start receiving bookings:
               </span>{" "}
               You&apos;ll be able to view suitable cleaning opportunities
               through Mundoria.
             </li>
           </ol>
-          <p className="mt-3 text-xs leading-5 text-[#8b8798]">
+          <p className="mt-3 text-xs leading-5 text-brand-subtle">
             You can track your progress at any time through your cleaner
             dashboard.
           </p>
 
           <Button
-            className="mt-6 w-full rounded-xl bg-[#312c79] hover:bg-[#271f5c]"
+            className="mt-6 w-full rounded-xl bg-brand-indigo hover:bg-[#271f5c]"
             onClick={() => {
               router.push("/cleaner/dashboard");
               router.refresh();
@@ -1355,11 +1355,11 @@ export function OnboardingWizard({
   }
 
   return (
-    <main className={cn("min-h-screen text-[#1c133b]", ONBOARDING_PAGE_BG)}>
+    <main className={cn("min-h-screen text-brand-ink", ONBOARDING_PAGE_BG)}>
       <div className="mx-auto flex min-h-screen w-full max-w-[1200px]">
         <aside
           className={cn(
-            "sticky top-0 z-20 hidden h-[100dvh] shrink-0 flex-col border-r border-[#e8e0d0]/80 transition-[width] duration-200 md:flex",
+            "sticky top-0 z-20 hidden h-[100dvh] shrink-0 flex-col border-r border-brand-sand/80 transition-[width] duration-200 md:flex",
             ONBOARDING_PAGE_BG,
             desktopNavCollapsed ? "w-[3.75rem]" : "w-[260px] lg:w-[280px]",
           )}
@@ -1367,7 +1367,7 @@ export function OnboardingWizard({
           <div className="flex h-full flex-col">
             <div
               className={cn(
-                "flex shrink-0 items-start gap-2 border-b border-[#e8e0d0]/60 py-5",
+                "flex shrink-0 items-start gap-2 border-b border-brand-sand/60 py-5",
                 desktopNavCollapsed ? "justify-center px-2" : "px-5 lg:px-6",
               )}
             >
@@ -1383,7 +1383,7 @@ export function OnboardingWizard({
                     ? "Expand onboarding steps"
                     : "Collapse onboarding steps"
                 }
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b]/25 text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f3eee4]"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-brand-ink/25 text-brand-ink transition hover:border-brand-ink hover:bg-[#f3eee4]"
                 onClick={() => setDesktopNavCollapsed((open) => !open)}
                 type="button"
               >
@@ -1397,16 +1397,16 @@ export function OnboardingWizard({
 
             {desktopNavCollapsed ? (
               <div className="flex flex-1 flex-col items-center gap-3 overflow-y-auto overscroll-contain px-2 py-4">
-                <p className="text-center text-[10px] font-semibold tabular-nums text-[#8b8798]">
+                <p className="text-center text-[10px] font-semibold tabular-nums text-brand-subtle">
                   {completedCount}/{STEPS.length}
                 </p>
                 <div
                   aria-hidden
-                  className="h-16 w-1.5 overflow-hidden rounded-full bg-[#e8e0d0]"
+                  className="h-16 w-1.5 overflow-hidden rounded-full bg-brand-sand"
                 >
                   <motion.div
                     animate={{ height: `${progressPercent}%` }}
-                    className="w-full rounded-full bg-[#1c133b]"
+                    className="w-full rounded-full bg-brand-ink"
                     initial={false}
                     transition={SPRING.snappy}
                   />
@@ -1421,10 +1421,10 @@ export function OnboardingWizard({
                       className={cn(
                         "inline-flex h-8 w-8 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition",
                         isOpen
-                          ? "border-[#1c133b] bg-[#1c133b] text-white"
+                          ? "border-brand-ink bg-brand-ink text-white"
                           : complete
-                            ? "border-[#312c79] bg-[#312c79] text-white"
-                            : "border-[#1c133b]/35 bg-[#f9f6ef] text-[#8b8798]",
+                            ? "border-brand-indigo bg-brand-indigo text-white"
+                            : "border-brand-ink/35 bg-brand-cream text-brand-subtle",
                       )}
                       key={step.id}
                       onClick={() => toggleStep(step.id)}
@@ -1450,20 +1450,20 @@ export function OnboardingWizard({
             ) : (
               <div className="flex min-h-0 flex-1 flex-col">
                 <div className="shrink-0 px-5 pt-5 lg:px-6">
-                  <h1 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b]">
+                  <h1 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-brand-ink">
                     Your onboarding
                   </h1>
                   <div className="mt-4">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-[#8b8798]">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-brand-subtle">
                       <span>
                         {completedCount} of {STEPS.length} done
                       </span>
                       <span>~{Math.max(minutesLeft, 1)} min left</span>
                     </div>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-brand-sand">
                       <motion.div
                         animate={{ width: `${progressPercent}%` }}
-                        className="h-full rounded-full bg-[#1c133b]"
+                        className="h-full rounded-full bg-brand-ink"
                         initial={false}
                         transition={SPRING.snappy}
                       />
@@ -1481,17 +1481,17 @@ export function OnboardingWizard({
                     onSelect={toggleStep}
                   />
                 </nav>
-                <div className="shrink-0 border-t border-[#e8e0d0]/60 px-5 py-4 lg:px-6">
+                <div className="shrink-0 border-t border-brand-sand/60 px-5 py-4 lg:px-6">
                   {!preview ? (
                     <div className="flex flex-col items-start gap-1.5">
                       <a
-                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-sm font-medium text-brand-subtle transition hover:text-brand-ink"
                         href="/help"
                       >
                         Help
                       </a>
                       <button
-                        className="text-left text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-left text-sm font-medium text-brand-subtle transition hover:text-brand-ink"
                         onClick={() => void logout()}
                         type="button"
                       >
@@ -1505,7 +1505,7 @@ export function OnboardingWizard({
                     aria-live="polite"
                     className={cn(
                       "mt-3 text-xs font-medium transition",
-                      saveFlash ? "text-[#312c79]" : "text-transparent",
+                      saveFlash ? "text-brand-indigo" : "text-transparent",
                     )}
                   >
                     Progress saved
@@ -1522,22 +1522,22 @@ export function OnboardingWizard({
           </div>
 
           <div className="mb-5 md:hidden">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#8b8798]">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-brand-subtle">
               <span>
                 {completedCount} of {STEPS.length} done
               </span>
               <span>~{Math.max(minutesLeft, 1)} min left</span>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-brand-sand">
               <motion.div
                 animate={{ width: `${progressPercent}%` }}
-                className="h-full rounded-full bg-[#1c133b]"
+                className="h-full rounded-full bg-brand-ink"
                 initial={false}
                 transition={SPRING.snappy}
               />
             </div>
 
-            <div className="mt-3 rounded-2xl border-2 border-[#1c133b]/20 bg-[#f9f6ef]">
+            <div className="mt-3 rounded-2xl border-2 border-brand-ink/20 bg-brand-cream">
               <button
                 aria-controls="mobile-onboarding-steps"
                 aria-expanded={mobileNavOpen}
@@ -1546,17 +1546,17 @@ export function OnboardingWizard({
                 type="button"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-subtle">
                     Steps · {stepIndex} of {STEPS.length}
                   </span>
-                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#1c133b]">
+                  <span className="mt-0.5 block truncate text-sm font-semibold text-brand-ink">
                     {activeStep.label}
                   </span>
                 </span>
                 <ChevronDown
                   aria-hidden
                   className={cn(
-                    "h-4 w-4 shrink-0 text-[#1c133b] transition",
+                    "h-4 w-4 shrink-0 text-brand-ink transition",
                     mobileNavOpen && "rotate-180",
                   )}
                   strokeWidth={2.25}
@@ -1564,7 +1564,7 @@ export function OnboardingWizard({
               </button>
               {mobileNavOpen ? (
                 <div
-                  className="max-h-[min(55dvh,24rem)] overflow-y-auto overscroll-contain border-t border-[#e8e0d0] px-2.5 py-3"
+                  className="max-h-[min(55dvh,24rem)] overflow-y-auto overscroll-contain border-t border-brand-sand px-2.5 py-3"
                   id="mobile-onboarding-steps"
                 >
                   <OnboardingStepList
@@ -1574,15 +1574,15 @@ export function OnboardingWizard({
                     onSelect={toggleStep}
                   />
                   {!preview ? (
-                    <div className="mt-3 flex items-center gap-4 border-t border-[#e8e0d0] px-1 pt-3">
+                    <div className="mt-3 flex items-center gap-4 border-t border-brand-sand px-1 pt-3">
                       <a
-                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-sm font-medium text-brand-subtle transition hover:text-brand-ink"
                         href="/help"
                       >
                         Help
                       </a>
                       <button
-                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-sm font-medium text-brand-subtle transition hover:text-brand-ink"
                         onClick={() => void logout()}
                         type="button"
                       >
@@ -1598,7 +1598,7 @@ export function OnboardingWizard({
               aria-live="polite"
               className={cn(
                 "mt-2 text-xs font-medium transition",
-                saveFlash ? "text-[#312c79]" : "text-transparent",
+                saveFlash ? "text-brand-indigo" : "text-transparent",
               )}
             >
               Progress saved
@@ -1624,25 +1624,25 @@ export function OnboardingWizard({
                 width={64}
               />
               <div className="min-w-0">
-                <h2 className="text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-[#312c79] sm:text-[2.55rem] sm:leading-none">
+                <h2 className="text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-brand-indigo sm:text-[2.55rem] sm:leading-none">
                   {activeStep.label}
                 </h2>
               </div>
             </div>
-            <p className="mt-2.5 max-w-xl text-sm leading-6 text-[#5a5470] sm:mt-3.5 sm:text-base sm:leading-7">
+            <p className="mt-2.5 max-w-xl text-sm leading-6 text-brand-muted sm:mt-3.5 sm:text-base sm:leading-7">
               {STEP_WHY[activeStep.id]}
             </p>
             {appointmentActive ? (
-              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-[#5a5470]">
+              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-brand-muted">
                 <span className="inline-flex items-center gap-2">
-                  <Clock3 className="h-4 w-4 text-[#1c133b]" strokeWidth={2} />
+                  <Clock3 className="h-4 w-4 text-brand-ink" strokeWidth={2} />
                   {INTERVIEW_DURATION_MINUTES} min
                 </span>
                 <span className="inline-flex items-center gap-2">
-                  <Monitor className="h-4 w-4 text-[#1c133b]" strokeWidth={2} />
+                  <Monitor className="h-4 w-4 text-brand-ink" strokeWidth={2} />
                   Online video call
                 </span>
-                <span className="inline-flex items-center gap-2 text-[#8b8798]">
+                <span className="inline-flex items-center gap-2 text-brand-subtle">
                   Times shown in UK time
                 </span>
               </div>
@@ -1687,7 +1687,7 @@ export function OnboardingWizard({
           ) : null}
           {savedNote ? (
             <p
-              className="mt-4 hidden rounded-xl border-2 border-[#1c133b]/25 bg-[#f3eee4] p-3 text-sm text-[#1c133b] md:block"
+              className="mt-4 hidden rounded-xl border-2 border-brand-ink/25 bg-[#f3eee4] p-3 text-sm text-brand-ink md:block"
               role="status"
             >
               {savedNote}
@@ -1696,7 +1696,7 @@ export function OnboardingWizard({
 
           <div className="mt-8 hidden items-center justify-between gap-3 md:flex">
             <button
-              className="text-sm font-medium text-[#8b8798] hover:text-[#1c133b] disabled:opacity-40"
+              className="text-sm font-medium text-brand-subtle hover:text-brand-ink disabled:opacity-40"
               disabled={stepIndex <= 1}
               onClick={goBack}
               type="button"
@@ -1705,7 +1705,7 @@ export function OnboardingWizard({
             </button>
             <div className="flex items-center gap-4">
               <button
-                className="text-sm font-semibold text-[#312c79] underline-offset-2 hover:underline disabled:opacity-40"
+                className="text-sm font-semibold text-brand-indigo underline-offset-2 hover:underline disabled:opacity-40"
                 disabled={submitting}
                 onClick={saveAndFinishLater}
                 type="button"
@@ -1713,7 +1713,7 @@ export function OnboardingWizard({
                 Save &amp; finish later
               </button>
               <Button
-                className="rounded-xl bg-[#312c79] px-6 hover:bg-[#271f5c]"
+                className="rounded-xl bg-brand-indigo px-6 hover:bg-[#271f5c]"
                 disabled={submitting}
                 onClick={goContinue}
                 size="lg"
@@ -1723,7 +1723,7 @@ export function OnboardingWizard({
             </div>
           </div>
           {isLastStep && !allComplete ? (
-            <p className="mt-3 hidden text-right text-xs text-[#8b8798] md:block">
+            <p className="mt-3 hidden text-right text-xs text-brand-subtle md:block">
               Complete every step before you submit. Incomplete steps are marked
               in the step list.
             </p>
@@ -1731,10 +1731,10 @@ export function OnboardingWizard({
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e8e0d0]/80 bg-[#f9f6ef]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-sand/80 bg-brand-cream/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:hidden">
         <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3">
           <button
-            className="shrink-0 px-1 text-sm font-medium text-[#8b8798] touch-manipulation disabled:opacity-40"
+            className="shrink-0 px-1 text-sm font-medium text-brand-subtle touch-manipulation disabled:opacity-40"
             disabled={stepIndex <= 1}
             onClick={goBack}
             type="button"
@@ -1742,7 +1742,7 @@ export function OnboardingWizard({
             Back
           </button>
           <Button
-            className="h-12 flex-1 rounded-xl bg-[#312c79] touch-manipulation hover:bg-[#271f5c]"
+            className="h-12 flex-1 rounded-xl bg-brand-indigo touch-manipulation hover:bg-[#271f5c]"
             disabled={submitting}
             onClick={goContinue}
             size="lg"
@@ -1751,7 +1751,7 @@ export function OnboardingWizard({
           </Button>
         </div>
         <button
-          className="mx-auto mt-2 block text-xs font-semibold text-[#312c79] touch-manipulation disabled:opacity-40"
+          className="mx-auto mt-2 block text-xs font-semibold text-brand-indigo touch-manipulation disabled:opacity-40"
           disabled={submitting}
           onClick={saveAndFinishLater}
           type="button"
@@ -1759,12 +1759,12 @@ export function OnboardingWizard({
           Save &amp; finish later
         </button>
         {savedNote ? (
-          <p className="mx-auto mt-1 max-w-[1200px] text-center text-[11px] leading-4 text-[#5a5470]">
+          <p className="mx-auto mt-1 max-w-[1200px] text-center text-[11px] leading-4 text-brand-muted">
             {savedNote}
           </p>
         ) : null}
         {isLastStep && !allComplete ? (
-          <p className="mx-auto mt-2 max-w-[1200px] text-center text-[11px] leading-4 text-[#8b8798]">
+          <p className="mx-auto mt-2 max-w-[1200px] text-center text-[11px] leading-4 text-brand-subtle">
             Complete every step before you submit.
           </p>
         ) : null}
@@ -1796,7 +1796,7 @@ function OnboardingStepList({
         );
         return (
           <section key={group.title}>
-            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-subtle">
               {group.title}
               {groupDone ? " · Done" : ""}
             </h2>
@@ -1827,10 +1827,10 @@ function OnboardingStepList({
                         className={cn(
                           "relative inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
                           isOpen
-                            ? "border-[#1c133b] bg-[#1c133b]"
+                            ? "border-brand-ink bg-brand-ink"
                             : complete
-                              ? "border-[#312c79] bg-[#312c79] text-white"
-                              : "border-[#1c133b]/35 bg-[#f9f6ef]",
+                              ? "border-brand-indigo bg-brand-indigo text-white"
+                              : "border-brand-ink/35 bg-brand-cream",
                         )}
                       >
                         {complete && !isOpen ? (
@@ -1848,10 +1848,10 @@ function OnboardingStepList({
                         className={cn(
                           "relative min-w-0 flex-1 text-[15px] leading-snug",
                           isOpen
-                            ? "font-semibold text-[#1c133b]"
+                            ? "font-semibold text-brand-ink"
                             : complete
-                              ? "font-medium text-[#291845]"
-                              : "font-medium text-[#8b8798]",
+                              ? "font-medium text-brand-plum"
+                              : "font-medium text-brand-subtle",
                         )}
                       >
                         {step.label}
@@ -2198,10 +2198,10 @@ function StepBody({
     return (
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <p className="text-sm font-medium text-[#1c133b]">Full name</p>
+          <p className="text-sm font-medium text-brand-ink">Full name</p>
           <p
             className={cn(
-              "flex min-h-11 w-full items-center rounded-xl px-3.5 text-[15px] text-[#291845]",
+              "flex min-h-11 w-full items-center rounded-xl px-3.5 text-[15px] text-brand-plum",
               ONBOARDING_FIELD_CLASS,
             )}
           >
@@ -2234,12 +2234,12 @@ function StepBody({
               />
             ) : (
               <div className="space-y-1.5">
-                <p className="text-sm font-medium text-[#1c133b]">
+                <p className="text-sm font-medium text-brand-ink">
                   Phone number
                 </p>
                 <p
                   className={cn(
-                    "flex min-h-11 w-full items-center gap-2 rounded-xl px-3.5 text-[15px] text-[#291845]",
+                    "flex min-h-11 w-full items-center gap-2 rounded-xl px-3.5 text-[15px] text-brand-plum",
                     ONBOARDING_FIELD_CLASS,
                   )}
                 >
@@ -2259,12 +2259,12 @@ function StepBody({
             </div>
           </div>
         </div>
-        <p className="text-xs leading-5 text-[#8b8798]">
+        <p className="text-xs leading-5 text-brand-subtle">
           {askForPhone
             ? "Your name comes from your account. Change it later in "
             : "Name and phone come from your account. Change them later in "}
           <a
-            className="font-medium text-[#6a45b8] hover:underline"
+            className="font-medium text-brand-purple hover:underline"
             href="/cleaner/profile"
           >
             Profile
@@ -2353,16 +2353,16 @@ function AppointmentPicker({
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef]">
+      <div className="overflow-hidden rounded-2xl border-2 border-brand-ink bg-brand-cream">
         <div className="space-y-8 p-5 sm:p-7">
           {days.length === 0 ? (
-            <p className="text-sm text-[#8b8798]">
+            <p className="text-sm text-brand-subtle">
               No interview times are open right now. Check back shortly.
             </p>
           ) : (
             <>
               <div>
-                <p className="text-sm font-semibold text-[#1c133b]">
+                <p className="text-sm font-semibold text-brand-ink">
                   Choose a day
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -2375,8 +2375,8 @@ function AppointmentPicker({
                         className={cn(
                           "flex h-[4.25rem] w-[3.25rem] flex-col items-center justify-center rounded-xl border-2 text-center transition sm:h-[4.5rem] sm:w-14",
                           active
-                            ? "border-[#312c79] bg-[#312c79] text-white"
-                            : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                            ? "border-brand-indigo bg-brand-indigo text-white"
+                            : "border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white",
                         )}
                         key={item.date}
                         onClick={() => setDayDate(item.date)}
@@ -2396,11 +2396,11 @@ function AppointmentPicker({
 
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-[#1c133b]">
+                  <p className="text-sm font-semibold text-brand-ink">
                     Choose a time
                   </p>
                   {dayContext ? (
-                    <p className="text-xs font-medium text-[#8b8798]">
+                    <p className="text-xs font-medium text-brand-subtle">
                       {dayContext}
                     </p>
                   ) : null}
@@ -2408,7 +2408,7 @@ function AppointmentPicker({
 
                 {morning.length ? (
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-[#8b8798]">
+                    <p className="text-xs font-semibold text-brand-subtle">
                       Morning
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -2421,8 +2421,8 @@ function AppointmentPicker({
                             className={cn(
                               "min-w-[4.5rem] rounded-xl border-2 px-3 py-2 text-sm font-semibold transition",
                               active
-                                ? "border-[#312c79] bg-[#312c79] text-white"
-                                : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                                ? "border-brand-indigo bg-brand-indigo text-white"
+                                : "border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white",
                             )}
                             key={slot.startsAt}
                             onClick={() => pickSlot(slot.startsAt)}
@@ -2438,7 +2438,7 @@ function AppointmentPicker({
 
                 {afternoon.length ? (
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-[#8b8798]">
+                    <p className="text-xs font-semibold text-brand-subtle">
                       Afternoon
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -2451,8 +2451,8 @@ function AppointmentPicker({
                             className={cn(
                               "min-w-[4.5rem] rounded-xl border-2 px-3 py-2 text-sm font-semibold transition",
                               active
-                                ? "border-[#312c79] bg-[#312c79] text-white"
-                                : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                                ? "border-brand-indigo bg-brand-indigo text-white"
+                                : "border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white",
                             )}
                             key={slot.startsAt}
                             onClick={() => pickSlot(slot.startsAt)}
@@ -2472,10 +2472,10 @@ function AppointmentPicker({
         </div>
 
         {booked ? (
-          <div className="space-y-2 border-t-2 border-[#1c133b] bg-[#f3eee4] px-5 py-4 sm:px-7">
-            <p className="inline-flex items-start gap-2 text-sm font-semibold text-[#1c133b]">
+          <div className="space-y-2 border-t-2 border-brand-ink bg-[#f3eee4] px-5 py-4 sm:px-7">
+            <p className="inline-flex items-start gap-2 text-sm font-semibold text-brand-ink">
               <CalendarDays
-                className="mt-0.5 h-4 w-4 shrink-0 text-[#312c79]"
+                className="mt-0.5 h-4 w-4 shrink-0 text-brand-indigo"
                 strokeWidth={2.5}
               />
               <span>
@@ -2483,7 +2483,7 @@ function AppointmentPicker({
                 {INTERVIEW_DURATION_MINUTES} min video call
               </span>
             </p>
-            <p className="text-xs text-[#8b8798]">
+            <p className="text-xs text-brand-subtle">
               We’ll email the meeting link. You can change the slot before you
               submit.
             </p>
@@ -2505,7 +2505,7 @@ function ConsentStep({
 }) {
   return (
     <div className="space-y-4">
-      <label className="flex cursor-pointer items-start gap-3 text-[#1c133b]">
+      <label className="flex cursor-pointer items-start gap-3 text-brand-ink">
         <OnboardingCheckbox checked={accepted} onCheckedChange={onAccepted} />
         <span className="text-sm font-medium leading-6">
           I agree to GPS capture at check-in and check-out only. We do not track
@@ -2561,14 +2561,14 @@ function IdentityStep({
     <div className="space-y-4">
       <div className="flex justify-end">
         <button
-          className="inline-flex h-9 items-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+          className="inline-flex h-9 items-center rounded-full border-2 border-brand-ink bg-brand-cream px-3.5 text-xs font-semibold text-brand-ink transition hover:bg-brand-ink hover:text-white"
           onClick={() => setGuideOpen(true)}
           type="button"
         >
           ID tips
         </button>
       </div>
-      <p className="text-xs leading-5 text-[#8b8798]">
+      <p className="text-xs leading-5 text-brand-subtle">
         Passport photo page is usually enough. For a driving licence or BRP,
         add front and back.
       </p>
@@ -2613,8 +2613,8 @@ function IdentityStep({
       {guideOpen ? (
         <AppModal
           backdrop="blur"
-          className="max-w-2xl border-[#e8e0d0] bg-[#f9f6ef] text-[#1c133b] shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:max-w-3xl"
-          closeClassName="h-9 w-9 rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
+          className="max-w-2xl border-brand-sand bg-brand-cream text-brand-ink shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:max-w-3xl"
+          closeClassName="h-9 w-9 rounded-full border-2 border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white"
           description="What we need so we can verify your identity quickly."
           onClose={() => setGuideOpen(false)}
           title="Identity document tips"
@@ -2622,7 +2622,7 @@ function IdentityStep({
           <div className={guideTipGridClass(IDENTITY_GUIDE_TIPS.length)}>
             {IDENTITY_GUIDE_TIPS.map((tip) => (
               <article
-                className="overflow-hidden rounded-2xl border border-[#e8e0d0] bg-[#f3eee4]"
+                className="overflow-hidden rounded-2xl border border-brand-sand bg-[#f3eee4]"
                 key={tip.title}
               >
                 <div className={GUIDE_TIP_MEDIA_CLASS}>
@@ -2637,26 +2637,26 @@ function IdentityStep({
                   {tip.crossedOut ? (
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#291845]/25"
+                      className="pointer-events-none absolute inset-0 flex items-center justify-center bg-brand-plum/25"
                     >
-                      <span className="flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-[#d4694a] bg-white/90 text-[#d4694a] shadow-sm">
+                      <span className="flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-brand-terracotta bg-white/90 text-brand-terracotta shadow-sm">
                         <X className="h-9 w-9" strokeWidth={3} />
                       </span>
                     </div>
                   ) : null}
                 </div>
                 <div className="space-y-1.5 p-3.5">
-                  <h3 className="text-sm font-semibold text-[#291845]">
+                  <h3 className="text-sm font-semibold text-brand-plum">
                     {tip.title}
                   </h3>
-                  <p className="text-xs leading-5 text-[#5a5470]">{tip.body}</p>
+                  <p className="text-xs leading-5 text-brand-muted">{tip.body}</p>
                 </div>
               </article>
             ))}
           </div>
           <div className="mt-5 flex justify-end">
             <Button
-              className="h-11 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-6 font-semibold text-white hover:border-[#312c79] hover:bg-[#312c79]"
+              className="h-11 rounded-full border-2 border-brand-ink bg-brand-ink px-6 font-semibold text-white hover:border-brand-indigo hover:bg-brand-indigo"
               onClick={() => setGuideOpen(false)}
               type="button"
             >
@@ -2734,10 +2734,10 @@ function HomeDistrictsPicker({
         aria-expanded={open}
         aria-haspopup="listbox"
         className={cn(
-          "flex h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#1c133b]",
+          "flex h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-brand-ink",
           ONBOARDING_FIELD_CLASS,
           error ? invalidControlClass : undefined,
-          open && "ring-2 ring-[#1c133b]",
+          open && "ring-2 ring-brand-ink",
         )}
         disabled={atLimit}
         onClick={() => {
@@ -2746,7 +2746,7 @@ function HomeDistrictsPicker({
         }}
         type="button"
       >
-        <span className="inline-flex min-w-0 items-center gap-2 text-[#8b8798]">
+        <span className="inline-flex min-w-0 items-center gap-2 text-brand-subtle">
           <Search className="h-4 w-4 shrink-0" strokeWidth={2.5} />
           <span className="truncate">
             {atLimit
@@ -2758,21 +2758,21 @@ function HomeDistrictsPicker({
         </span>
         <ChevronDown
           className={cn(
-            "h-4 w-4 shrink-0 text-[#1c133b] transition",
+            "h-4 w-4 shrink-0 text-brand-ink transition",
             open && "rotate-180",
           )}
           strokeWidth={2.5}
         />
       </button>
       {open && !atLimit ? (
-        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
-          <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
+        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-brand-ink bg-brand-cream shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
+          <div className="flex items-center gap-2 border-b border-brand-sand px-3 py-2">
             <Search
-              className="h-4 w-4 shrink-0 text-[#8b8798]"
+              className="h-4 w-4 shrink-0 text-brand-subtle"
               strokeWidth={2.5}
             />
             <input
-              className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
+              className="h-9 w-full bg-transparent text-sm text-brand-ink outline-none placeholder:text-brand-subtle"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search districts…"
               ref={searchRef}
@@ -2782,7 +2782,7 @@ function HomeDistrictsPicker({
           </div>
           <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
             {filtered.length === 0 ? (
-              <li className="px-3 py-2.5 text-sm text-[#8b8798]">
+              <li className="px-3 py-2.5 text-sm text-brand-subtle">
                 {available.length === 0
                   ? "Every available district is already added."
                   : "No districts match that search."}
@@ -2791,7 +2791,7 @@ function HomeDistrictsPicker({
               filtered.map((item) => (
                 <li key={item.prefix}>
                   <button
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-brand-ink transition hover:bg-brand-ink hover:text-white"
                     aria-selected={false}
                     onClick={() => {
                       onAdd(item.prefix);
@@ -2911,7 +2911,7 @@ function CoverageStep({
     <div className="space-y-6">
       <div className="flex justify-end">
         <button
-          className="inline-flex h-9 items-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+          className="inline-flex h-9 items-center rounded-full border-2 border-brand-ink bg-brand-cream px-3.5 text-xs font-semibold text-brand-ink transition hover:bg-brand-ink hover:text-white"
           onClick={() => setGuideOpen(true)}
           type="button"
         >
@@ -2922,8 +2922,8 @@ function CoverageStep({
       <div className="flex flex-col gap-6 sm:gap-8">
         <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2">
           <div className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-2">
-            <p className="text-sm font-medium text-[#291845]">Districts</p>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-sm font-medium text-brand-plum">Districts</p>
+            <p className="text-xs leading-5 text-brand-subtle">
               First pick is your home base. Up to {MAX_WORKING_DISTRICTS}{" "}
               districts.
             </p>
@@ -2935,14 +2935,14 @@ function CoverageStep({
             />
           </div>
           <div className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-2">
-            <p className="text-sm font-medium text-[#291845]">Working radius</p>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-sm font-medium text-brand-plum">Working radius</p>
+            <p className="text-xs leading-5 text-brand-subtle">
               Travel from home base — up to {MAX_RADIUS_MILES} miles.
             </p>
             <div className="flex h-11 items-center gap-3">
               <button
                 aria-label="Decrease radius"
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-brand-ink bg-brand-cream text-brand-ink transition hover:bg-brand-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={miles <= 1}
                 onClick={() => onRadiusMiles(miles - 1)}
                 type="button"
@@ -2950,16 +2950,16 @@ function CoverageStep({
                 <Minus className="h-4 w-4" strokeWidth={2.5} />
               </button>
               <div className="min-w-[5.5rem] text-center">
-                <p className="text-lg font-semibold leading-none tabular-nums text-[#291845]">
+                <p className="text-lg font-semibold leading-none tabular-nums text-brand-plum">
                   {miles}
                 </p>
-                <p className="mt-0.5 text-xs font-medium text-[#8b8798]">
+                <p className="mt-0.5 text-xs font-medium text-brand-subtle">
                   {miles === 1 ? "mile" : "miles"}
                 </p>
               </div>
               <button
                 aria-label="Increase radius"
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-brand-ink bg-brand-cream text-brand-ink transition hover:bg-brand-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={miles >= MAX_RADIUS_MILES}
                 onClick={() => onRadiusMiles(miles + 1)}
                 type="button"
@@ -2970,7 +2970,7 @@ function CoverageStep({
           </div>
         </div>
         {geocoding ? (
-          <p className="-mt-4 text-xs text-[#8b8798]">
+          <p className="-mt-4 text-xs text-brand-subtle">
             Finding that area on the map…
           </p>
         ) : null}
@@ -2987,8 +2987,8 @@ function CoverageStep({
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-semibold",
                     isHome
-                      ? "border-[#312c79] bg-[#312c79] text-white"
-                      : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b]",
+                      ? "border-brand-indigo bg-brand-indigo text-white"
+                      : "border-brand-ink bg-brand-cream text-brand-ink",
                   )}
                   key={prefix}
                 >
@@ -3008,7 +3008,7 @@ function CoverageStep({
                     aria-label={`Remove ${label}`}
                     className={cn(
                       "rounded-full p-0.5 transition",
-                      isHome ? "hover:bg-white/20" : "hover:bg-[#1c133b]/10",
+                      isHome ? "hover:bg-white/20" : "hover:bg-brand-ink/10",
                     )}
                     onClick={() => removeDistrict(prefix)}
                     type="button"
@@ -3032,8 +3032,8 @@ function CoverageStep({
       {guideOpen ? (
         <AppModal
           backdrop="blur"
-          className="max-w-lg border-[#e8e0d0] bg-[#f9f6ef] text-[#1c133b] shadow-[0_24px_60px_rgba(28,19,59,0.18)]"
-          closeClassName="h-9 w-9 rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
+          className="max-w-lg border-brand-sand bg-brand-cream text-brand-ink shadow-[0_24px_60px_rgba(28,19,59,0.18)]"
+          closeClassName="h-9 w-9 rounded-full border-2 border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white"
           description="A short guide to choosing areas you’ll actually cover."
           onClose={() => setGuideOpen(false)}
           title="How coverage areas work"
@@ -3041,13 +3041,13 @@ function CoverageStep({
           <ul className="mt-4 space-y-3">
             {COVERAGE_GUIDE_TIPS.map((tip) => (
               <li
-                className="rounded-2xl border border-[#e8e0d0] bg-[#f3eee4] px-4 py-3"
+                className="rounded-2xl border border-brand-sand bg-[#f3eee4] px-4 py-3"
                 key={tip.title}
               >
-                <p className="text-sm font-semibold text-[#1c133b]">
+                <p className="text-sm font-semibold text-brand-ink">
                   {tip.title}
                 </p>
-                <p className="mt-1 text-sm leading-6 text-[#5a5470]">
+                <p className="mt-1 text-sm leading-6 text-brand-muted">
                   {tip.body}
                 </p>
               </li>
@@ -3055,7 +3055,7 @@ function CoverageStep({
           </ul>
           <div className="mt-5 flex justify-end">
             <Button
-              className="h-11 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-6 font-semibold text-white hover:border-[#312c79] hover:bg-[#312c79]"
+              className="h-11 rounded-full border-2 border-brand-ink bg-brand-ink px-6 font-semibold text-white hover:border-brand-indigo hover:bg-brand-indigo"
               onClick={() => setGuideOpen(false)}
               type="button"
             >
@@ -3091,7 +3091,7 @@ function PhotoStep({
     <div className="space-y-4">
       <div className="flex justify-end">
         <button
-          className="inline-flex h-9 items-center rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+          className="inline-flex h-9 items-center rounded-full border-2 border-brand-ink bg-brand-cream px-3.5 text-xs font-semibold text-brand-ink transition hover:bg-brand-ink hover:text-white"
           onClick={() => setGuideOpen(true)}
           type="button"
         >
@@ -3113,8 +3113,8 @@ function PhotoStep({
       {guideOpen ? (
         <AppModal
           backdrop="blur"
-          className="max-w-2xl border-[#e8e0d0] bg-[#f9f6ef] text-[#1c133b] shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:max-w-3xl"
-          closeClassName="h-9 w-9 rounded-full border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white"
+          className="max-w-2xl border-brand-sand bg-brand-cream text-brand-ink shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:max-w-3xl"
+          closeClassName="h-9 w-9 rounded-full border-2 border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white"
           description="A few friendly pointers for a photo customers will trust."
           onClose={() => setGuideOpen(false)}
           title="What makes a great profile photo"
@@ -3122,7 +3122,7 @@ function PhotoStep({
           <div className={guideTipGridClass(PHOTO_GUIDE_TIPS.length)}>
             {PHOTO_GUIDE_TIPS.map((tip) => (
               <article
-                className="overflow-hidden rounded-2xl border border-[#e8e0d0] bg-[#f3eee4]"
+                className="overflow-hidden rounded-2xl border border-brand-sand bg-[#f3eee4]"
                 key={tip.title}
               >
                 <div className={GUIDE_TIP_MEDIA_CLASS}>
@@ -3139,26 +3139,26 @@ function PhotoStep({
                   {tip.crossedOut ? (
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#291845]/25"
+                      className="pointer-events-none absolute inset-0 flex items-center justify-center bg-brand-plum/25"
                     >
-                      <span className="flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-[#d4694a] bg-white/90 text-[#d4694a] shadow-sm">
+                      <span className="flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-brand-terracotta bg-white/90 text-brand-terracotta shadow-sm">
                         <X className="h-9 w-9" strokeWidth={3} />
                       </span>
                     </div>
                   ) : null}
                 </div>
                 <div className="space-y-1.5 p-3.5">
-                  <h3 className="text-sm font-semibold text-[#291845]">
+                  <h3 className="text-sm font-semibold text-brand-plum">
                     {tip.title}
                   </h3>
-                  <p className="text-xs leading-5 text-[#5a5470]">{tip.body}</p>
+                  <p className="text-xs leading-5 text-brand-muted">{tip.body}</p>
                 </div>
               </article>
             ))}
           </div>
           <div className="mt-5 flex justify-end">
             <Button
-              className="h-11 rounded-full border-2 border-[#1c133b] bg-[#1c133b] px-6 font-semibold text-white hover:bg-[#312c79] hover:border-[#312c79]"
+              className="h-11 rounded-full border-2 border-brand-ink bg-brand-ink px-6 font-semibold text-white hover:bg-brand-indigo hover:border-brand-indigo"
               onClick={() => setGuideOpen(false)}
               type="button"
             >
@@ -3215,7 +3215,7 @@ function ExperienceStepper({
     <div className="flex items-center gap-3">
       <button
         aria-label="Decrease years of experience"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-brand-ink bg-brand-cream text-brand-ink transition hover:bg-brand-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         disabled={years <= 0}
         onClick={() => onChange(years - 1)}
         type="button"
@@ -3223,16 +3223,16 @@ function ExperienceStepper({
         <Minus className="h-4 w-4" strokeWidth={2.5} />
       </button>
       <div className="min-w-[4.5rem] text-center">
-        <p className="text-lg font-semibold tabular-nums tracking-[-0.02em] text-[#291845]">
+        <p className="text-lg font-semibold tabular-nums tracking-[-0.02em] text-brand-plum">
           {years}
         </p>
-        <p className="text-xs font-medium text-[#8b8798]">
+        <p className="text-xs font-medium text-brand-subtle">
           {years === 1 ? "year" : "years"}
         </p>
       </div>
       <button
         aria-label="Increase years of experience"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-brand-ink bg-brand-cream text-brand-ink transition hover:bg-brand-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         disabled={years >= EXPERIENCE_MAX}
         onClick={() => onChange(years + 1)}
         type="button"
@@ -3407,7 +3407,7 @@ function HoursPicker({
       {error ? <FieldError message={error} /> : null}
 
       <div>
-        <p className="mb-3 text-sm font-medium text-[#291845]">
+        <p className="mb-3 text-sm font-medium text-brand-plum">
           Which days are you available?
         </p>
         <div className="mb-3 flex flex-wrap gap-2">
@@ -3416,8 +3416,8 @@ function HoursPicker({
               className={cn(
                 "rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold transition",
                 preset.active
-                  ? "border-[#312c79] bg-[#312c79] text-white"
-                  : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                  ? "border-brand-indigo bg-brand-indigo text-white"
+                  : "border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white",
               )}
               key={preset.id}
               onClick={() => applyPreset(preset.id)}
@@ -3439,8 +3439,8 @@ function HoursPicker({
                 className={cn(
                   "flex aspect-square flex-col items-center justify-center rounded-xl border-2 text-[10px] font-semibold transition sm:rounded-2xl sm:text-xs",
                   selected
-                    ? "border-[#312c79] bg-[#312c79] text-white"
-                    : "border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] hover:bg-[#1c133b] hover:text-white",
+                    ? "border-brand-indigo bg-brand-indigo text-white"
+                    : "border-brand-ink bg-brand-cream text-brand-ink hover:bg-brand-ink hover:text-white",
                 )}
                 key={dayOfWeek}
                 onClick={() => toggleDay(dayOfWeek)}
@@ -3455,11 +3455,11 @@ function HoursPicker({
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm font-medium text-[#291845]">
+        <p className="text-sm font-medium text-brand-plum">
           Start and end times
         </p>
         {active.length === 0 ? (
-          <p className="text-sm text-[#8b8798]">
+          <p className="text-sm text-brand-subtle">
             Select at least one day to set your hours.
           </p>
         ) : (
@@ -3472,7 +3472,7 @@ function HoursPicker({
             return (
               <div className="space-y-2" key={dayOfWeek}>
                 <div className="grid grid-cols-[minmax(4.5rem,auto)_1fr_auto_1fr] items-center gap-2">
-                  <span className="text-sm font-semibold text-[#291845]">
+                  <span className="text-sm font-semibold text-brand-plum">
                     {days[dayOfWeek]}
                   </span>
                   <Input
@@ -3486,7 +3486,7 @@ function HoursPicker({
                     type="time"
                     value={day.start_time}
                   />
-                  <span className="text-sm text-[#8b8798]">to</span>
+                  <span className="text-sm text-brand-subtle">to</span>
                   <Input
                     aria-label={`${days[dayOfWeek]} end`}
                     className={ONBOARDING_FIELD_CLASS}
@@ -3505,7 +3505,7 @@ function HoursPicker({
                 </div>
                 {showSecond ? (
                   <div className="grid grid-cols-[minmax(4.5rem,auto)_1fr_auto_1fr_auto] items-center gap-2">
-                    <span className="text-xs font-medium text-[#8b8798]">
+                    <span className="text-xs font-medium text-brand-subtle">
                       and
                     </span>
                     <Input
@@ -3523,7 +3523,7 @@ function HoursPicker({
                       type="time"
                       value={day.start_time_2 ?? ""}
                     />
-                    <span className="text-sm text-[#8b8798]">to</span>
+                    <span className="text-sm text-brand-subtle">to</span>
                     <Input
                       aria-label={`${days[dayOfWeek]} second end`}
                       className={ONBOARDING_FIELD_CLASS}
@@ -3541,7 +3541,7 @@ function HoursPicker({
                     />
                     <button
                       aria-label={`Remove ${days[dayOfWeek]} second window`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#1c133b] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-ink text-brand-ink transition hover:bg-brand-ink hover:text-white"
                       onClick={() => removeDaySecond(dayOfWeek)}
                       type="button"
                     >
@@ -3550,7 +3550,7 @@ function HoursPicker({
                   </div>
                 ) : (
                   <button
-                    className="text-xs font-semibold text-[#312c79] underline-offset-2 hover:underline"
+                    className="text-xs font-semibold text-brand-indigo underline-offset-2 hover:underline"
                     onClick={() =>
                       setSecondOpen((current) => [...current, dayOfWeek])
                     }
@@ -3565,12 +3565,12 @@ function HoursPicker({
         )}
       </div>
 
-      <div className="space-y-3 border-t border-[#e8e0d0] pt-8">
+      <div className="space-y-3 border-t border-brand-sand pt-8">
         <div className="mb-1">
-          <h3 className="text-lg font-bold tracking-[-0.02em] text-[#1c133b]">
+          <h3 className="text-lg font-bold tracking-[-0.02em] text-brand-ink">
             How many hours would you prefer to work per week?
           </h3>
-          <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">
+          <p className="mt-1.5 text-sm leading-6 text-brand-muted">
             Guides how much work we typically offer each week.
           </p>
         </div>
@@ -3670,7 +3670,7 @@ function ServicesPicker({
                 const ServiceIcon = service.icon;
                 return (
                   <label
-                    className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-sm text-[#1c133b] transition hover:bg-[#fbf9ff] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#312c79]/30"
+                    className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-sm text-brand-ink transition hover:bg-[#fbf9ff] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-indigo/30"
                     key={service.value}
                   >
                     <OnboardingCheckbox
@@ -3682,7 +3682,7 @@ function ServicesPicker({
                     />
                     <ServiceIcon
                       aria-hidden
-                      className="h-4 w-4 shrink-0 text-[#8b8798]"
+                      className="h-4 w-4 shrink-0 text-brand-subtle"
                       strokeWidth={2}
                     />
                     <span className="font-medium">{service.label}</span>
@@ -4275,7 +4275,7 @@ function CoverageMap({
             ]
           : []
       }
-      className="h-44 overflow-hidden rounded-2xl border-2 border-[#1c133b] sm:h-56"
+      className="h-44 overflow-hidden rounded-2xl border-2 border-brand-ink sm:h-56"
       markers={
         showCircle
           ? [

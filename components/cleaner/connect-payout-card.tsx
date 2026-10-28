@@ -55,10 +55,10 @@ export function ConnectPayoutCard({
 
   return (
     <section className="rounded-[1.75rem] border border-[#e8e0d6]/80 bg-white p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
         Payouts
       </p>
-      <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+      <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
         Let’s get you paid
       </h2>
       <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c5670]">
@@ -67,7 +67,7 @@ export function ConnectPayoutCard({
         ask for your sort code or account number here.
       </p>
       <Button
-        className="mt-5 h-11 rounded-full bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]"
+        className="mt-5 h-11 rounded-full bg-brand-ink px-5 font-semibold text-white hover:bg-brand-indigo"
         loading={busy}
         loadingLabel="Opening Stripe…"
         onClick={() => void connect()}

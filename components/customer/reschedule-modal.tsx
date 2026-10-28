@@ -97,10 +97,12 @@ export function RescheduleModal({
             Cancel
           </Button>
           <Button
-            disabled={saving || !date || !time}
+            disabled={!date || !time}
+            loading={saving}
+            loadingLabel="Saving…"
             onClick={() => void save()}
           >
-            {saving ? "Saving…" : "Save new time"}
+            Save new time
           </Button>
         </div>
       </div>

@@ -22,7 +22,7 @@ export function ChatMessage({
       <div className="max-w-[85%] sm:max-w-[72%]">
         <p
           className={cn(
-            "mb-1 px-1 text-[11px] text-[#8b8798]",
+            "mb-1 px-1 text-[11px] text-brand-subtle",
             isOwn && "text-right",
           )}
         >
@@ -32,8 +32,8 @@ export function ChatMessage({
           className={cn(
             "overflow-hidden rounded-[1.25rem] text-sm",
             isOwn
-              ? "rounded-br-md bg-[#1c133b] text-white"
-              : "rounded-bl-md bg-white text-[#1c133b] shadow-[0_8px_20px_rgba(28,19,59,0.06)] ring-1 ring-[#ece8f3]",
+              ? "rounded-br-md bg-brand-ink text-white"
+              : "rounded-bl-md bg-white text-brand-ink shadow-[0_8px_20px_rgba(28,19,59,0.06)] ring-1 ring-[#ece8f3]",
           )}
         >
           {attachments.length ? (
@@ -86,7 +86,7 @@ export function ChatMessage({
           <div
             className={cn(
               "flex items-center justify-end gap-1 px-3 pb-2 text-[10px]",
-              isOwn ? "text-white/65" : "text-[#8b8798]",
+              isOwn ? "text-white/65" : "text-brand-subtle",
               !text && attachments.length > 0 && "pt-1",
             )}
           >

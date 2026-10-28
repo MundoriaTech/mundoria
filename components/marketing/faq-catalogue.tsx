@@ -190,19 +190,19 @@ export function FaqCatalogue() {
   return (
     <>
       <header className="mx-auto max-w-6xl px-4 pb-8 pt-4 sm:px-8 sm:pb-10 sm:pt-6 lg:px-12">
-        <h1 className="text-[2rem] font-semibold tracking-[-0.04em] text-[#1c133b] sm:text-[2.5rem]">
+        <h1 className="text-[2rem] font-semibold tracking-[-0.04em] text-brand-ink sm:text-[2.5rem]">
           FAQ
         </h1>
-        <p className="mt-2 max-w-xl text-pretty text-base leading-7 text-[#5a5470]">
+        <p className="mt-2 max-w-xl text-pretty text-base leading-7 text-brand-muted">
           Find answers about booking, cleaning, pricing and more.
         </p>
 
         <label className="relative mt-6 block max-w-xl">
           <span className="sr-only">Search FAQs</span>
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8798]" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-subtle" />
           <input
             autoComplete="off"
-            className="h-12 w-full rounded-full border border-[#e4daf5] bg-white pl-11 pr-11 text-sm text-[#1c133b] shadow-[0_8px_24px_rgba(49,44,121,0.04)] outline-none transition placeholder:text-[#9a95a8] focus:border-[#1c133b]/35 focus:shadow-[0_10px_28px_rgba(49,44,121,0.08)] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+            className="h-12 w-full rounded-full border border-brand-lavender bg-white pl-11 pr-11 text-sm text-brand-ink shadow-[0_8px_24px_rgba(49,44,121,0.04)] outline-none transition placeholder:text-[#9a95a8] focus:border-brand-ink/35 focus:shadow-[0_10px_28px_rgba(49,44,121,0.08)] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search questions…"
             type="search"
@@ -211,7 +211,7 @@ export function FaqCatalogue() {
           {query ? (
             <button
               aria-label="Clear search"
-              className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#8b8798] transition hover:bg-[#f3eef8] hover:text-[#1c133b]"
+              className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-brand-subtle transition hover:bg-[#f3eef8] hover:text-brand-ink"
               onClick={() => setQuery("")}
               type="button"
             >
@@ -221,7 +221,7 @@ export function FaqCatalogue() {
         </label>
 
         {isFiltering ? (
-          <p className="mt-3 text-sm text-[#8b8798]">
+          <p className="mt-3 text-sm text-brand-subtle">
             {totalAnswers === 0
               ? "No matching answers."
               : `${totalAnswers} ${totalAnswers === 1 ? "answer" : "answers"} across ${sections.length} ${sections.length === 1 ? "topic" : "topics"}`}
@@ -235,7 +235,7 @@ export function FaqCatalogue() {
             <div className="sticky top-28 flex max-h-[calc(100vh-8rem)] flex-col pr-1">
               <div className="mb-4 flex gap-2">
                 <button
-                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-[#e4daf5] bg-white text-[12px] font-semibold text-[#1c133b] transition hover:border-[#1c133b]/25 hover:bg-[#faf8ff]"
+                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-brand-lavender bg-white text-[12px] font-semibold text-brand-ink transition hover:border-brand-ink/25 hover:bg-brand-haze"
                   onClick={() => softScrollToTop()}
                   type="button"
                 >
@@ -243,7 +243,7 @@ export function FaqCatalogue() {
                   Top
                 </button>
                 <button
-                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-[#e4daf5] bg-white text-[12px] font-semibold text-[#1c133b] transition hover:border-[#1c133b]/25 hover:bg-[#faf8ff]"
+                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-brand-lavender bg-white text-[12px] font-semibold text-brand-ink transition hover:border-brand-ink/25 hover:bg-brand-haze"
                   onClick={() => softScrollToBottom()}
                   type="button"
                 >
@@ -253,20 +253,20 @@ export function FaqCatalogue() {
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8b8798]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-subtle">
                   Jump to
                 </p>
                 {jumpGroups.length > 0 ? (
                   <nav aria-label="On this page" className="mt-4 space-y-5">
                     {jumpGroups.map((group) => (
                       <div key={group.id}>
-                        <p className="px-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c79c66]">
+                        <p className="px-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-gold">
                           {group.label}
                         </p>
                         <div className="mt-1.5 space-y-0.5">
                           {group.sections.map((section) => (
                             <a
-                              className="block rounded-lg px-2.5 py-1.5 text-[13px] font-medium leading-snug text-[#5a5470] transition hover:bg-white hover:text-[#1c133b]"
+                              className="block rounded-lg px-2.5 py-1.5 text-[13px] font-medium leading-snug text-brand-muted transition hover:bg-white hover:text-brand-ink"
                               href={`#${section.id}`}
                               key={section.id}
                             >
@@ -278,7 +278,7 @@ export function FaqCatalogue() {
                     ))}
                   </nav>
                 ) : (
-                  <p className="mt-4 text-sm leading-6 text-[#8b8798]">
+                  <p className="mt-4 text-sm leading-6 text-brand-subtle">
                     No topics match this search.
                   </p>
                 )}
@@ -293,16 +293,16 @@ export function FaqCatalogue() {
                 id={section.id}
                 key={section.id}
               >
-                <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#1c133b]/10 pb-4">
+                <div className="flex flex-wrap items-end justify-between gap-3 border-b border-brand-ink/10 pb-4">
                   <div>
-                    <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
+                    <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-brand-ink sm:text-2xl">
                       {section.title}
                     </h2>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">
                       {section.description}
                     </p>
                   </div>
-                  <p className="text-xs font-medium tabular-nums text-[#8b8798]">
+                  <p className="text-xs font-medium tabular-nums text-brand-subtle">
                     {section.items.length}{" "}
                     {section.items.length === 1 ? "answer" : "answers"}
                   </p>
@@ -313,24 +313,24 @@ export function FaqCatalogue() {
                     const anchor = faqItemAnchor(section.id, item.question);
                     return (
                       <details
-                        className="group scroll-mt-32 rounded-[1.25rem] border border-[#e4daf5]/90 bg-white/95 shadow-[0_8px_22px_rgba(49,44,121,0.04)] open:shadow-[0_10px_28px_rgba(49,44,121,0.07)]"
+                        className="group scroll-mt-32 rounded-[1.25rem] border border-brand-lavender/90 bg-white/95 shadow-[0_8px_22px_rgba(49,44,121,0.04)] open:shadow-[0_10px_28px_rgba(49,44,121,0.07)]"
                         data-faq-item=""
                         id={anchor}
                         key={item.question}
                       >
                         <summary className="cursor-pointer list-none px-5 py-4 marker:content-none sm:px-6 [&::-webkit-details-marker]:hidden">
                           <span className="flex items-start justify-between gap-3">
-                            <h3 className="text-[15px] font-semibold leading-snug text-[#1c133b] sm:text-base">
+                            <h3 className="text-[15px] font-semibold leading-snug text-brand-ink sm:text-base">
                               {item.question}
                             </h3>
                             <ChevronDown
                               aria-hidden
-                              className="mt-0.5 h-4 w-4 shrink-0 text-[#8b8798] transition group-open:rotate-180 group-open:text-[#6a45b8]"
+                              className="mt-0.5 h-4 w-4 shrink-0 text-brand-subtle transition group-open:rotate-180 group-open:text-brand-purple"
                             />
                           </span>
                         </summary>
-                        <div className="faq-answer border-t border-[#e4daf5]/70 px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
-                          <p className="whitespace-pre-line text-sm leading-6 text-[#5a5470] sm:text-[15px] sm:leading-7">
+                        <div className="faq-answer border-t border-brand-lavender/70 px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
+                          <p className="whitespace-pre-line text-sm leading-6 text-brand-muted sm:text-[15px] sm:leading-7">
                             {item.answer}
                           </p>
                         </div>
@@ -342,15 +342,15 @@ export function FaqCatalogue() {
             ))}
 
             {sections.length === 0 ? (
-              <div className="rounded-[1.35rem] border border-dashed border-[#e4daf5] bg-white/60 px-6 py-10 text-center">
-                <p className="text-base font-semibold text-[#1c133b]">
+              <div className="rounded-[1.35rem] border border-dashed border-brand-lavender bg-white/60 px-6 py-10 text-center">
+                <p className="text-base font-semibold text-brand-ink">
                   No answers match “{deferredQuery.trim()}”
                 </p>
-                <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+                <p className="mt-2 text-sm leading-6 text-brand-muted">
                   Try a shorter phrase, or clear the search to browse all topics.
                 </p>
                 <button
-                  className="mt-5 inline-flex h-10 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#15102e]"
+                  className="mt-5 inline-flex h-10 items-center justify-center rounded-full bg-brand-ink px-5 text-sm font-semibold text-white transition hover:bg-[#15102e]"
                   onClick={() => setQuery("")}
                   type="button"
                 >
@@ -359,7 +359,7 @@ export function FaqCatalogue() {
               </div>
             ) : null}
 
-            <section className="rounded-[1.5rem] bg-[#1c133b] px-6 py-8 text-white sm:px-8 sm:py-10">
+            <section className="rounded-[1.5rem] bg-brand-ink px-6 py-8 text-white sm:px-8 sm:py-10">
               <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] sm:text-2xl">
                 Still looking for something?
               </h2>
@@ -369,7 +369,7 @@ export function FaqCatalogue() {
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f3eef8]"
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand-ink transition hover:bg-[#f3eef8]"
                   href="/help"
                 >
                   Help Centre
@@ -389,7 +389,7 @@ export function FaqCatalogue() {
       <div className="fixed bottom-6 left-4 z-40 flex flex-col gap-2 sm:bottom-8 sm:left-6 lg:hidden">
         <button
           aria-label="Scroll to top"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e4daf5] bg-white text-[#1c133b] shadow-[0_10px_28px_rgba(49,44,121,0.12)] transition hover:bg-[#faf8ff]"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-lavender bg-white text-brand-ink shadow-[0_10px_28px_rgba(49,44,121,0.12)] transition hover:bg-brand-haze"
           onClick={() => softScrollToTop()}
           type="button"
         >
@@ -397,7 +397,7 @@ export function FaqCatalogue() {
         </button>
         <button
           aria-label="Scroll to bottom"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e4daf5] bg-white text-[#1c133b] shadow-[0_10px_28px_rgba(49,44,121,0.12)] transition hover:bg-[#faf8ff]"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-lavender bg-white text-brand-ink shadow-[0_10px_28px_rgba(49,44,121,0.12)] transition hover:bg-brand-haze"
           onClick={() => softScrollToBottom()}
           type="button"
         >

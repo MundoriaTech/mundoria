@@ -29,7 +29,7 @@ export function CookieSettingsWidget({
       <button
         aria-label="Cookie settings"
         className={cn(
-          "group fixed z-[60] rounded-full transition hover:scale-110 active:scale-95 motion-safe:animate-[cookie-bob_2.8s_ease-in-out_infinite] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c79c66]",
+          "group fixed z-[60] rounded-full transition hover:scale-110 active:scale-95 motion-safe:animate-[cookie-bob_2.8s_ease-in-out_infinite] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold",
           "bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-[max(0.75rem,env(safe-area-inset-left))]",
           "sm:bottom-[max(1rem,env(safe-area-inset-bottom))] sm:left-[max(1rem,env(safe-area-inset-left))]",
           className,
@@ -51,7 +51,7 @@ export function CookieSettingsWidget({
     <button
       aria-label="Cookie settings"
       className={cn(
-        "group rounded-full transition hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c79c66]",
+        "group rounded-full transition hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold",
         className,
       )}
       onClick={handleClick}
@@ -78,7 +78,7 @@ export function CookieSettingsLink({
   return (
     <button
       className={cn(
-        "text-sm font-medium text-muted-foreground transition hover:text-[#312c79]",
+        "text-sm font-medium text-muted-foreground transition hover:text-brand-indigo",
         className,
       )}
       onClick={() => openCookieSettings()}

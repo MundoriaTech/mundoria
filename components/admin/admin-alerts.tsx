@@ -263,7 +263,7 @@ export function AdminAlerts({
       <Button
         aria-expanded={open}
         aria-label="Admin alerts"
-        className="relative h-10 w-10 rounded-full border border-[#e4daf5] bg-white text-[#1c133b] hover:bg-[#f0e9fb]"
+        className="relative h-10 w-10 rounded-full border border-brand-lavender bg-white text-brand-ink hover:bg-[#f0e9fb]"
         onClick={() => setOpen(!open)}
         ref={triggerRef}
         size="icon"
@@ -273,7 +273,7 @@ export function AdminAlerts({
         {unread ? (
           <motion.span
             animate={{ scale: 1 }}
-            className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d4694a] px-1 text-[10px] font-bold text-white"
+            className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-terracotta px-1 text-[10px] font-bold text-white"
             initial={{ scale: 0 }}
             key={unread}
             transition={SPRING.lively}

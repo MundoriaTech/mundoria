@@ -111,14 +111,14 @@ export function TimeSlotPicker({
             }
             aria-pressed={selected}
             className={cn(
-              "flex min-h-12 flex-col items-center justify-center rounded-xl bg-[#f3f3f5] px-1.5 py-2 text-sm text-[#1c133b] transition-colors touch-manipulation sm:px-2",
+              "flex min-h-12 flex-col items-center justify-center rounded-xl bg-[#f3f3f5] px-1.5 py-2 text-sm text-brand-ink transition-colors touch-manipulation sm:px-2",
               isPreferred &&
-                "border-2 border-transparent bg-[#c79c66] font-semibold text-white",
+                "border-2 border-transparent bg-brand-gold font-semibold text-white",
               isAlternate &&
-                "border-2 border-transparent bg-[#6a45b8] font-semibold text-white",
+                "border-2 border-transparent bg-brand-purple font-semibold text-white",
               !selected && enabled && "hover:bg-[#ececef]",
               !enabled &&
-                "cursor-not-allowed bg-[#f3f3f5] text-[#8b8798] opacity-40",
+                "cursor-not-allowed bg-[#f3f3f5] text-brand-subtle opacity-40",
             )}
             disabled={!enabled}
             key={slot}
@@ -130,7 +130,7 @@ export function TimeSlotPicker({
               <span
                 className={cn(
                   "mt-0.5 text-[11px] leading-none",
-                  selected ? "text-white/85" : "text-[#8b8798]",
+                  selected ? "text-white/85" : "text-brand-subtle",
                 )}
               >
                 {priceLabel}

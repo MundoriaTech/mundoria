@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const pillClass =
-  "inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]";
+  "inline-flex rounded-full border border-brand-lavender bg-white px-4 py-2 text-sm font-semibold text-brand-ink transition hover:text-brand-purple";
 
 export function CoveragePlacePills({
   links,

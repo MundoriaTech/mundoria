@@ -107,7 +107,7 @@ export function DashboardGreeting({ firstName }: { firstName: string }) {
   return (
     <section className="relative isolate overflow-hidden rounded-[2rem] bg-[#221f50] px-6 py-8 text-white shadow-2xl shadow-[#221f50]/15 sm:px-10 sm:py-10">
       <div className="absolute -right-20 top-0 -z-10 h-56 w-56 rounded-full bg-[#7669d1]/45 blur-3xl" />
-      <div className="absolute -bottom-20 left-10 -z-10 h-44 w-44 rounded-full bg-[#ffc79f]/30 blur-3xl" />
+      <div className="absolute -bottom-20 left-10 -z-10 h-44 w-44 rounded-full bg-brand-peach-light/30 blur-3xl" />
       <h1 className="break-words text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
         {greeting}, {firstName}.
       </h1>
@@ -117,7 +117,7 @@ export function DashboardGreeting({ firstName }: { firstName: string }) {
       <div className="mt-7 flex flex-col gap-3 sm:flex-row">
         <Button
           asChild
-          className="bg-[#ffc79f] font-bold text-[#221f50] hover:bg-[#ffd4b8]"
+          className="bg-brand-peach-light font-bold text-[#221f50] hover:bg-[#ffd4b8]"
         >
           <Link href="/booking/new?fresh=1&returnTo=/dashboard">
             <Plus className="mr-2 h-4 w-4" />

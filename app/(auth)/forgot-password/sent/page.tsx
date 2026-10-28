@@ -74,7 +74,7 @@ export default function PasswordEmailSentPage({
     />
   );
   const footer = (
-    <Link className="font-semibold text-[#291845] hover:underline" href={againHref}>
+    <Link className="font-semibold text-brand-plum hover:underline" href={againHref}>
       Try a different email
     </Link>
   );

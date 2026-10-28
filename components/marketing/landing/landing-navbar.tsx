@@ -52,7 +52,7 @@ export {
 } from "@/components/marketing/landing/nav-metrics";
 
 const NAV_LINK_CLASS =
-  "whitespace-nowrap text-[12px] font-medium text-[#1c133b] transition hover:text-[#312c79] xl:text-[13px]";
+  "whitespace-nowrap text-[12px] font-medium text-brand-ink transition hover:text-brand-indigo xl:text-[13px]";
 
 export function LandingNavbar({
   accountMenuItems,
@@ -210,7 +210,7 @@ export function LandingNavbar({
           ) : null}
           {showForCleanersCta ? (
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
+              className="inline-flex h-9 items-center justify-center rounded-full bg-brand-ink px-4 text-[12px] font-semibold text-white transition hover:bg-brand-ink/90"
               href="/for-cleaners"
             >
               For cleaners
@@ -218,7 +218,7 @@ export function LandingNavbar({
           ) : null}
           {!viewer ? (
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#c79c66] px-4 text-[12px] font-semibold text-[#1c133b] transition hover:bg-[#c79c66]/90"
+              className="inline-flex h-9 items-center justify-center rounded-full bg-brand-gold px-4 text-[12px] font-semibold text-brand-ink transition hover:bg-brand-gold/90"
               href={loginHref}
             >
               Log in
@@ -282,7 +282,7 @@ function FaqNavDropdown({ menu }: { menu: FaqNavMenu }) {
         className={cn(
           NAV_LINK_CLASS,
           "inline-flex items-center gap-0.5 rounded-full px-1.5 py-1.5 xl:gap-1 xl:px-2.5",
-          open && "bg-white/55 text-[#312c79]",
+          open && "bg-white/55 text-brand-indigo",
         )}
         href={menu.href}
         onFocus={openMenu}
@@ -310,24 +310,24 @@ function FaqNavDropdown({ menu }: { menu: FaqNavMenu }) {
         onMouseLeave={scheduleClose}
         role="menu"
       >
-        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
-          <div className="border-b border-[#1c133b]/06 bg-[#f8f4ff] px-4 py-3">
-            <p className="text-[13px] font-semibold text-[#1c133b]">
+        <div className="overflow-hidden rounded-2xl border border-brand-ink/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
+          <div className="border-b border-brand-ink/06 bg-[#f8f4ff] px-4 py-3">
+            <p className="text-[13px] font-semibold text-brand-ink">
               {menu.label}
             </p>
-            <p className="mt-1 text-[12px] leading-5 text-[#5a5470]">
+            <p className="mt-1 text-[12px] leading-5 text-brand-muted">
               {menu.description}
             </p>
           </div>
           <div className="max-h-[min(22rem,55vh)] overflow-y-auto p-2">
-            <p className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
+            <p className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-violet">
               Topics
             </p>
             <ul>
               {sections.map((item) => (
                 <li key={item.href}>
                   <Link
-                    className="block rounded-xl px-3 py-2.5 text-[13px] font-semibold leading-snug text-[#1c133b] transition hover:bg-[#f6f0ff] hover:text-[#312c79]"
+                    className="block rounded-xl px-3 py-2.5 text-[13px] font-semibold leading-snug text-brand-ink transition hover:bg-[#f6f0ff] hover:text-brand-indigo"
                     href={item.href}
                     onClick={() => setOpen(false)}
                     role="menuitem"
@@ -339,14 +339,14 @@ function FaqNavDropdown({ menu }: { menu: FaqNavMenu }) {
             </ul>
             {questions.length ? (
               <>
-                <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#823fb2]">
+                <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-violet">
                   Popular questions
                 </p>
                 <ul>
                   {questions.map((item) => (
                     <li key={item.href}>
                       <Link
-                        className="block rounded-xl px-3 py-2 text-[12px] font-medium leading-snug text-[#5a5470] transition hover:bg-[#f6f0ff] hover:text-[#312c79]"
+                        className="block rounded-xl px-3 py-2 text-[12px] font-medium leading-snug text-brand-muted transition hover:bg-[#f6f0ff] hover:text-brand-indigo"
                         href={item.href}
                         onClick={() => setOpen(false)}
                         role="menuitem"
@@ -359,9 +359,9 @@ function FaqNavDropdown({ menu }: { menu: FaqNavMenu }) {
               </>
             ) : null}
           </div>
-          <div className="border-t border-[#1c133b]/06 p-2">
+          <div className="border-t border-brand-ink/06 p-2">
             <Link
-              className="flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-semibold text-[#6a45b8] transition hover:bg-[#f6f0ff]"
+              className="flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-semibold text-brand-purple transition hover:bg-[#f6f0ff]"
               href={menu.href}
               onClick={() => setOpen(false)}
               role="menuitem"
@@ -423,7 +423,7 @@ function CategoryNavDropdown({
         className={cn(
           NAV_LINK_CLASS,
           "inline-flex items-center gap-1 rounded-full px-2.5 py-1.5",
-          open && "bg-white/55 text-[#312c79]",
+          open && "bg-white/55 text-brand-indigo",
         )}
         href={menu.href}
         onFocus={openMenu}
@@ -451,10 +451,10 @@ function CategoryNavDropdown({
         onMouseLeave={scheduleClose}
         role="menu"
       >
-        <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
+        <div className="overflow-hidden rounded-2xl border border-brand-ink/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
           <div className="grid sm:grid-cols-[1.15fr_0.85fr]">
             <div className="p-4 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-violet">
                 Services
               </p>
               <ul className="mt-3 grid gap-1">
@@ -466,10 +466,10 @@ function CategoryNavDropdown({
                       onClick={() => setOpen(false)}
                       role="menuitem"
                     >
-                      <span className="text-[13px] font-semibold text-[#1c133b] group-hover:text-[#312c79]">
+                      <span className="text-[13px] font-semibold text-brand-ink group-hover:text-brand-indigo">
                         {item.label}
                       </span>
-                      <span className="text-[12px] font-normal text-[#1c133b]/60">
+                      <span className="text-[12px] font-normal text-brand-ink/60">
                         {item.description}
                       </span>
                     </Link>
@@ -478,22 +478,22 @@ function CategoryNavDropdown({
               </ul>
             </div>
 
-            <div className="flex flex-col border-t border-[#1c133b]/06 bg-[#f8f4ff] p-4 sm:border-l sm:border-t-0 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#823fb2]">
+            <div className="flex flex-col border-t border-brand-ink/06 bg-[#f8f4ff] p-4 sm:border-l sm:border-t-0 sm:p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-violet">
                 {menu.label}
               </p>
-              <p className="mt-2 text-[15px] font-semibold leading-snug text-[#1c133b]">
+              <p className="mt-2 text-[15px] font-semibold leading-snug text-brand-ink">
                 {menu.description}
               </p>
               <ul className="mt-4 space-y-2.5">
                 {menu.notes.map((note) => (
                   <li
-                    className="flex gap-2 text-[13px] leading-5 text-[#1c133b]/80"
+                    className="flex gap-2 text-[13px] leading-5 text-brand-ink/80"
                     key={note}
                   >
                     <span
                       aria-hidden
-                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#823fb2]"
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-violet"
                     />
                     <span>{note}</span>
                   </li>
@@ -501,7 +501,7 @@ function CategoryNavDropdown({
               </ul>
               <div className="mt-auto flex flex-col gap-2 border-t border-[#e4d8f5] pt-4">
                 <Link
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-[#312c79] px-3 text-center text-[13px] font-semibold text-white transition hover:bg-[#241f5c]"
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-brand-indigo px-3 text-center text-[13px] font-semibold text-white transition hover:bg-[#241f5c]"
                   href={categoryBookHref(customerHref, menu.bookCategory)}
                   onClick={() => setOpen(false)}
                   role="menuitem"
@@ -509,7 +509,7 @@ function CategoryNavDropdown({
                   {menu.bookLabel}
                 </Link>
                 <Link
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-white px-3 text-center text-[13px] font-semibold text-[#312c79] transition hover:bg-[#f3efe6]"
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-white px-3 text-center text-[13px] font-semibold text-brand-indigo transition hover:bg-brand-cream-deep"
                   href={menu.href}
                   onClick={() => setOpen(false)}
                   role="menuitem"
@@ -563,7 +563,7 @@ function MobileNav({
       ) : null}
       {!viewer ? (
         <Link
-          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#c79c66] px-2.5 text-[11px] font-semibold text-[#1c133b] transition hover:bg-[#c79c66]/90 touch-manipulation min-[380px]:px-3.5 min-[380px]:text-[12px]"
+          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-brand-gold px-2.5 text-[11px] font-semibold text-brand-ink transition hover:bg-brand-gold/90 touch-manipulation min-[380px]:px-3.5 min-[380px]:text-[12px]"
           href={loginHref}
         >
           Log in
@@ -572,7 +572,7 @@ function MobileNav({
       <button
         aria-expanded={mobileOpen}
         aria-label={mobileOpen ? "Close menu" : "Open menu"}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-[#1c133b] touch-manipulation"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-brand-ink touch-manipulation"
         onClick={() => onMobileOpenChange(!mobileOpen)}
         type="button"
       >

@@ -153,7 +153,7 @@ export function LoginForm({
 
         <div className="text-right">
           <Link
-            className="text-sm font-medium text-[#291845] hover:underline"
+            className="text-sm font-medium text-brand-plum hover:underline"
             href={forgotPasswordHref(requiredRole, redirectTo)}
           >
             Forgot Password?
@@ -162,7 +162,7 @@ export function LoginForm({
 
         <Button
           className={cn(
-            "h-12 w-full rounded-xl bg-[#291845] text-base font-semibold text-white hover:bg-[#291845]/90",
+            "h-12 w-full rounded-xl bg-brand-plum text-base font-semibold text-white hover:bg-brand-plum/90",
           )}
           loading={isSubmitting}
           loadingLabel="Signing in…"

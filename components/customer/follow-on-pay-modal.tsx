@@ -117,8 +117,13 @@ function PayForm({
         >
           Cancel
         </Button>
-        <Button disabled={processing || !stripe} type="submit">
-          {processing ? "Saving…" : "Save card"}
+        <Button
+          disabled={!stripe}
+          loading={processing}
+          loadingLabel="Saving…"
+          type="submit"
+        >
+          Save card
         </Button>
       </div>
     </form>

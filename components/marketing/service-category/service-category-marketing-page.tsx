@@ -123,7 +123,7 @@ export function ServiceCategoryMarketingPage({
                 ))}
               </ul>
               <Link
-                className="mt-6 hidden h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 md:inline-flex sm:mt-8"
+                className="mt-6 hidden h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand-ink transition hover:bg-white/90 md:inline-flex sm:mt-8"
                 href={bookingHref}
               >
                 {bookCta}
@@ -151,7 +151,7 @@ export function ServiceCategoryMarketingPage({
           footer={
             <div className="hidden justify-center md:flex">
               <Link
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-brand-ink px-6 text-sm font-semibold text-white transition hover:bg-brand-ink/90"
                 href={bookingHref}
               >
                 Book a clean
@@ -165,14 +165,14 @@ export function ServiceCategoryMarketingPage({
                 {faq.services ? (
                   <>
                     {faq.servicesHeading ? (
-                      <h4 className="mt-4 text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
+                      <h4 className="mt-4 text-[15px] font-bold leading-snug text-brand-ink sm:text-base">
                         {faq.servicesHeading}
                       </h4>
                     ) : null}
                     <ul className="mt-2.5 list-disc space-y-1.5 pl-5">
                       {faq.services.map((service) => (
                         <li key={service.name}>
-                          <span className="font-semibold text-[#1c133b]">
+                          <span className="font-semibold text-brand-ink">
                             {service.name}
                           </span>
                           {service.description ? (
@@ -225,13 +225,13 @@ function CategoryServicesSection({
     <section className="px-4 py-10 sm:px-8 sm:py-14">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-end justify-between gap-4">
-          <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+          <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:text-2xl lg:text-[1.75rem]">
             {title}
           </h2>
           <div className="flex shrink-0 gap-2 lg:hidden">
             <button
               aria-label="Previous services"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-[#1c133b] shadow-sm transition hover:bg-[#f7f2fc]"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-brand-ink shadow-sm transition hover:bg-[#f7f2fc]"
               onClick={() => onScroll(-1)}
               type="button"
             >
@@ -239,7 +239,7 @@ function CategoryServicesSection({
             </button>
             <button
               aria-label="Next services"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-[#1c133b] shadow-sm transition hover:bg-[#f7f2fc]"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-brand-ink shadow-sm transition hover:bg-[#f7f2fc]"
               onClick={() => onScroll(1)}
               type="button"
             >

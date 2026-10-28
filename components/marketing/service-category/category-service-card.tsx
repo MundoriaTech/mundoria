@@ -71,7 +71,7 @@ export function CategoryServiceCard({
         />
         <div
           className={cn(
-            "absolute inset-0 z-[2] flex items-center justify-center gap-2 bg-[#1c133b]/55 px-3 transition duration-300",
+            "absolute inset-0 z-[2] flex items-center justify-center gap-2 bg-brand-ink/55 px-3 transition duration-300",
             open
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0 [@media(hover:none)]:group-focus-within:pointer-events-auto [@media(hover:none)]:group-focus-within:opacity-100",
@@ -84,7 +84,7 @@ export function CategoryServiceCard({
             aria-label={`Read more about ${label}`}
             className={cn(
               overlayLinkClass,
-              "border border-white text-white hover:bg-white hover:text-[#1c133b]",
+              "border border-white text-white hover:bg-white hover:text-brand-ink",
             )}
             href={href}
           >
@@ -94,7 +94,7 @@ export function CategoryServiceCard({
             aria-label={`Book ${label}`}
             className={cn(
               overlayLinkClass,
-              "hidden bg-white text-[#1c133b] hover:bg-[#f3efe6] md:inline-flex",
+              "hidden bg-white text-brand-ink hover:bg-brand-cream-deep md:inline-flex",
             )}
             href={bookHref}
           >
@@ -103,7 +103,7 @@ export function CategoryServiceCard({
         </div>
       </div>
       <div className="flex min-h-[3.5rem] items-center bg-[#e8def8] px-3.5 py-2.5 sm:min-h-[3.75rem] sm:px-4">
-        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-[#312c79] sm:text-[14px]">
+        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-brand-indigo sm:text-[14px]">
           {label}
         </p>
       </div>

@@ -141,8 +141,13 @@ export function GuidedDisputeForm({
           {error ? (
             <ActionError message={error} title="Couldn’t submit this dispute" />
           ) : null}
-          <Button className="w-full" disabled={submitting} onClick={() => void submit()}>
-            {submitting ? "Submitting…" : "Submit to admin"}
+          <Button
+            className="w-full"
+            loading={submitting}
+            loadingLabel="Submitting…"
+            onClick={() => void submit()}
+          >
+            Submit to admin
           </Button>
         </div>
       )}

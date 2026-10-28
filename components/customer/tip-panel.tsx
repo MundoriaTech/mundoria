@@ -78,7 +78,7 @@ function TipForm({
           <button
             className={`rounded-full border px-4 py-2 text-sm font-semibold ${
               amount === value
-                ? "border-[#6a45b8] bg-[#6a45b8] text-white"
+                ? "border-brand-purple bg-brand-purple text-white"
                 : "border-[#d9ccef] bg-white"
             }`}
             key={value}

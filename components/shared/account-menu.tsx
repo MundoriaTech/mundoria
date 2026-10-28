@@ -135,12 +135,12 @@ export function AccountMenu({
           size="sm"
           url={profile.avatar_url}
         />
-        <span className="hidden max-w-[7rem] truncate text-sm font-medium tracking-tight text-[#1c133b] sm:inline">
+        <span className="hidden max-w-[7rem] truncate text-sm font-medium tracking-tight text-brand-ink sm:inline">
           {firstName}
         </span>
         <ChevronDown
           className={cn(
-            "hidden h-3.5 w-3.5 text-[#8b8798] transition sm:block",
+            "hidden h-3.5 w-3.5 text-brand-subtle transition sm:block",
             open && "rotate-180",
           )}
         />
@@ -159,20 +159,20 @@ export function AccountMenu({
             variants={popIn}
           >
           <div className="border-b border-[#efe8f8] px-3.5 py-2.5">
-            <p className="truncate text-sm font-semibold text-[#1c133b]">
+            <p className="truncate text-sm font-semibold text-brand-ink">
               {profile.full_name}
             </p>
-            <p className="mt-0.5 text-[11px] text-[#8b8798]">Your account</p>
+            <p className="mt-0.5 text-[11px] text-brand-subtle">Your account</p>
           </div>
           {items.map((item) => (
             <Link
-              className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-[#1c133b] transition hover:bg-[#f7f4fb]"
+              className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-brand-ink transition hover:bg-[#f7f4fb]"
               href={item.href}
               key={item.href}
               onClick={() => setOpen(false)}
               role="menuitem"
             >
-              <item.icon className="h-4 w-4 text-[#823fb2]" />
+              <item.icon className="h-4 w-4 text-brand-violet" />
               {item.label}
             </Link>
           ))}

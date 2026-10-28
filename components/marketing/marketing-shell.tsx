@@ -102,7 +102,7 @@ export function MarketingHero({
   showBrand?: boolean;
 }) {
   const primaryClass =
-    "inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-black text-white transition hover:bg-[#5a38a3]";
+    "inline-flex h-12 items-center justify-center rounded-full bg-brand-purple px-6 text-sm font-black text-white transition hover:bg-brand-purple-deep";
 
   return (
     <section
@@ -118,14 +118,14 @@ export function MarketingHero({
     >
       <div className="mx-auto max-w-4xl">
         {showBrand ? (
-          <p className="text-[1.35rem] font-black tracking-[-0.06em] text-[#1c133b] sm:text-[1.55rem]">
+          <p className="text-[1.35rem] font-black tracking-[-0.06em] text-brand-ink sm:text-[1.55rem]">
             Mundoria
           </p>
         ) : null}
         {eyebrow ? (
           <p
             className={cn(
-              "text-sm font-black uppercase tracking-[0.22em] text-[#823fb2]",
+              "text-sm font-black uppercase tracking-[0.22em] text-brand-violet",
               showBrand ? "mt-5" : null,
             )}
           >
@@ -133,13 +133,13 @@ export function MarketingHero({
           </p>
         ) : null}
         <h1
-          className={`text-4xl font-black tracking-[-0.05em] text-[#1c133b] sm:text-6xl ${
+          className={`text-4xl font-black tracking-[-0.05em] text-brand-ink sm:text-6xl ${
             eyebrow ? "mt-4" : "mt-5"
           }`}
         >
           {title}
         </h1>
-        <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#5a5470] sm:text-lg">
+        <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-brand-muted sm:text-lg">
           {description}
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -156,7 +156,7 @@ export function MarketingHero({
           {secondaryHref && secondaryLabel ? (
             <Button
               asChild
-              className="h-12 rounded-full border-[#d9ccef] bg-white/80 px-6 font-black text-[#312c79] hover:bg-white"
+              className="h-12 rounded-full border-[#d9ccef] bg-white/80 px-6 font-black text-brand-indigo hover:bg-white"
               variant="outline"
             >
               <Link href={secondaryHref}>{secondaryLabel}</Link>

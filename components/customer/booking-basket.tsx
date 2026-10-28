@@ -112,7 +112,7 @@ function BasketSection({
       <span
         className={cn(
           "flex h-8 w-8 shrink-0 items-center justify-center",
-          filled ? "text-[#6a45b8]" : "text-[#b0a9bc]",
+          filled ? "text-brand-purple" : "text-[#b0a9bc]",
         )}
       >
         {icon}
@@ -120,7 +120,7 @@ function BasketSection({
       <span
         className={cn(
           "min-w-0 flex-1 text-sm",
-          filled ? "font-bold text-[#1c133b]" : "font-semibold text-[#8a8498]",
+          filled ? "font-bold text-brand-ink" : "font-semibold text-[#8a8498]",
         )}
       >
         {title}
@@ -129,7 +129,7 @@ function BasketSection({
         <span
           className={cn(
             "shrink-0 text-[11px] font-normal tabular-nums",
-            filled ? "text-[#5a5470]" : "text-[#8a8498]",
+            filled ? "text-brand-muted" : "text-[#8a8498]",
           )}
         >
           {right}
@@ -139,7 +139,7 @@ function BasketSection({
   );
 
   return (
-    <div className="border-b border-[#e4daf5] last:border-b-0">
+    <div className="border-b border-brand-lavender last:border-b-0">
       <div className="flex w-full items-center gap-1 px-2 py-2 sm:px-3">
         {canExpand ? (
           <button
@@ -158,7 +158,7 @@ function BasketSection({
           <button
             aria-expanded={open}
             aria-label={open ? "Hide details" : "Show details"}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8b8798] touch-manipulation hover:bg-black/[0.03]"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-brand-subtle touch-manipulation hover:bg-black/[0.03]"
             onClick={onToggle}
             type="button"
           >
@@ -169,7 +169,7 @@ function BasketSection({
         ) : null}
       </div>
       {canExpand && open && children ? (
-        <div className="px-4 pb-4 pl-[3.25rem] text-sm font-bold text-[#1c133b]">
+        <div className="px-4 pb-4 pl-[3.25rem] text-sm font-bold text-brand-ink">
           {children}
         </div>
       ) : null}
@@ -240,7 +240,7 @@ function BasketPanel({
     return (
       <div className={cn("overflow-hidden rounded-[1.25rem]", BASKET_SURFACE)}>
         {showHeader ? (
-          <p className="px-5 pt-5 text-center text-base font-bold text-[#1c133b]">
+          <p className="px-5 pt-5 text-center text-base font-bold text-brand-ink">
             {headerTitle}
           </p>
         ) : null}
@@ -253,8 +253,8 @@ function BasketPanel({
             src="/images/booking/astronaut.png"
             width={112}
           />
-          <p className="mt-4 text-base font-bold text-[#1c133b]">Welcome!</p>
-          <p className="mt-1 text-sm leading-6 text-[#5a5470]">
+          <p className="mt-4 text-base font-bold text-brand-ink">Welcome!</p>
+          <p className="mt-1 text-sm leading-6 text-brand-muted">
             We can&apos;t wait to take care of your home.
           </p>
         </div>
@@ -343,8 +343,8 @@ function BasketPanel({
   return (
     <div className={cn("overflow-hidden rounded-[1.25rem]", BASKET_SURFACE)}>
       {showHeader ? (
-        <div className="border-b border-[#e4daf5] px-5 py-4">
-          <p className="text-center text-base font-bold text-[#1c133b]">
+        <div className="border-b border-brand-lavender px-5 py-4">
+          <p className="text-center text-base font-bold text-brand-ink">
             {headerTitle}
           </p>
         </div>
@@ -376,7 +376,7 @@ function BasketPanel({
               >
                 <span>· {line.label}</span>
                 {line.price ? (
-                  <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#5a5470]">
+                  <span className="shrink-0 text-[11px] font-normal tabular-nums text-brand-muted">
                     {line.price}
                   </span>
                 ) : null}
@@ -392,13 +392,13 @@ function BasketPanel({
 
       {promo ? (
         <div
-          className="border-b border-[#e4daf5] px-4 py-3 sm:px-5"
+          className="border-b border-brand-lavender px-4 py-3 sm:px-5"
           ref={promoRef}
         >
           {!promoOpen ? (
             <div className="flex justify-center">
               <button
-                className="text-sm font-semibold text-[#1c133b] underline underline-offset-2 touch-manipulation"
+                className="text-sm font-semibold text-brand-ink underline underline-offset-2 touch-manipulation"
                 onClick={() => setPromoOpen(true)}
                 type="button"
               >
@@ -410,7 +410,7 @@ function BasketPanel({
               <div className="flex items-center justify-center gap-2">
                 <Input
                   autoFocus
-                  className="h-9 w-[8.5rem] shrink-0 rounded-lg border-2 border-[#1c133b] bg-transparent px-2.5 text-sm focus-visible:ring-1 focus-visible:ring-[#1c133b] focus-visible:ring-offset-0"
+                  className="h-9 w-[8.5rem] shrink-0 rounded-lg border-2 border-brand-ink bg-transparent px-2.5 text-sm focus-visible:ring-1 focus-visible:ring-brand-ink focus-visible:ring-offset-0"
                   id="basket-promo-code"
                   onChange={(event) => promo.onChange(event.target.value)}
                   onKeyDown={(event) => {
@@ -423,7 +423,7 @@ function BasketPanel({
                   value={promo.code}
                 />
                 <button
-                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-[#1c133b] px-3 text-sm font-semibold text-white touch-manipulation disabled:opacity-40"
+                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand-ink px-3 text-sm font-semibold text-white touch-manipulation disabled:opacity-40"
                   disabled={!promo.code.trim() || !promo.addressReady}
                   onClick={promo.onValidate}
                   type="button"
@@ -432,7 +432,7 @@ function BasketPanel({
                 </button>
               </div>
               {promo.feedback ? (
-                <p className="mt-2 text-center text-xs leading-5 text-[#5a5470]">
+                <p className="mt-2 text-center text-xs leading-5 text-brand-muted">
                   {promo.feedback}
                 </p>
               ) : null}
@@ -574,14 +574,14 @@ export function BookingBasketSheet({
         <div className="flex shrink-0 flex-col items-center px-4 pb-4 pt-2">
           <button
             aria-label="Close basket"
-            className="inline-flex h-11 w-14 items-center justify-center rounded-full text-[#1c133b] touch-manipulation hover:bg-[#f3f3f5]"
+            className="inline-flex h-11 w-14 items-center justify-center rounded-full text-brand-ink touch-manipulation hover:bg-[#f3f3f5]"
             onClick={onClose}
             type="button"
           >
             <ChevronDown className="h-6 w-6" strokeWidth={2.5} />
           </button>
           <h2
-            className="mt-1 text-base font-bold text-[#1c133b]"
+            className="mt-1 text-base font-bold text-brand-ink"
             id={titleId}
           >
             My basket

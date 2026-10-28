@@ -8,7 +8,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[22rem] items-center justify-center text-sm text-[#8b8798]">
+    <div className="flex h-[22rem] items-center justify-center text-sm text-brand-subtle">
       Loading emoji…
     </div>
   ),

@@ -52,7 +52,7 @@ function SupportMessageBody({
     );
   }
   return (
-    <p className={cn("whitespace-pre-wrap", mine ? "text-white" : "text-[#1c133b]")}>
+    <p className={cn("whitespace-pre-wrap", mine ? "text-white" : "text-brand-ink")}>
       {content}
     </p>
   );
@@ -675,8 +675,8 @@ export function SupportMessengerWidget() {
                   className={cn(
                     "relative flex flex-col items-center gap-1 px-2 py-2.5 text-[11px] font-semibold transition",
                     tab === id
-                      ? "text-[#1c133b]"
-                      : "text-[#9a95a8] hover:text-[#1c133b]",
+                      ? "text-brand-ink"
+                      : "text-[#9a95a8] hover:text-brand-ink",
                   )}
                   key={id}
                   onClick={() => {
@@ -695,7 +695,7 @@ export function SupportMessengerWidget() {
                   <Icon className="h-4 w-4" strokeWidth={tab === id ? 2.4 : 2} />
                   {label}
                   {id === "messages" && unread > 0 ? (
-                    <span className="absolute right-5 top-1.5 h-2 w-2 rounded-full bg-[#1c133b]" />
+                    <span className="absolute right-5 top-1.5 h-2 w-2 rounded-full bg-brand-ink" />
                   ) : null}
                 </button>
               ))}
@@ -706,7 +706,7 @@ export function SupportMessengerWidget() {
 
       <button
         aria-label={open ? "Minimize support chat" : "Open support chat"}
-        className="pointer-events-auto relative inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#1c133b] text-white transition hover:bg-[#15102e]"
+        className="pointer-events-auto relative inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-ink text-white transition hover:bg-[#15102e]"
         onClick={() => {
           setOpen((value) => !value);
           setMoreOpen(false);
@@ -719,7 +719,7 @@ export function SupportMessengerWidget() {
           <MundoriaMarkWhite size={26} />
         )}
         {!open && unread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[#1c133b]">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-brand-ink">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}
@@ -730,7 +730,7 @@ export function SupportMessengerWidget() {
 
 function HomeHeader({ onClose }: { onClose: () => void }) {
   return (
-    <header className="bg-[#1c133b] px-5 pb-5 pt-4 text-white">
+    <header className="bg-brand-ink px-5 pb-5 pt-4 text-white">
       <div className="flex justify-end">
         <button
           aria-label="Close messenger"
@@ -760,10 +760,10 @@ function SimpleHeader({
 }) {
   return (
     <header className="relative flex items-center justify-center border-b border-[#ebe6f2] px-4 py-3">
-      <p className="text-sm font-semibold text-[#1c133b]">{title}</p>
+      <p className="text-sm font-semibold text-brand-ink">{title}</p>
       <button
         aria-label="Close messenger"
-        className="absolute right-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#6b6580] hover:bg-[#f7f5fb]"
+        className="absolute right-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#6b6580] hover:bg-brand-surface"
         onClick={onClose}
         type="button"
       >
@@ -794,7 +794,7 @@ function ThreadHeader({
     <header className="relative flex items-center gap-2 border-b border-[#ebe6f2] px-2 py-2.5">
       <button
         aria-label="Back"
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[#1c133b] hover:bg-[#f7f5fb]"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-brand-ink hover:bg-brand-surface"
         onClick={onBack}
         type="button"
       >
@@ -802,14 +802,14 @@ function ThreadHeader({
       </button>
       <MundoriaAvatar size={32} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-[#1c133b]">
+        <p className="truncate text-sm font-semibold text-brand-ink">
           {AGENT_NAME}
         </p>
         <p className="truncate text-[11px] text-[#6b6580]">{AGENT_SUBTITLE}</p>
       </div>
       <button
         aria-label="More options"
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[#1c133b] hover:bg-[#f7f5fb]"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-brand-ink hover:bg-brand-surface"
         onClick={onToggleMore}
         type="button"
       >
@@ -817,7 +817,7 @@ function ThreadHeader({
       </button>
       <button
         aria-label="Close messenger"
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[#1c133b] hover:bg-[#f7f5fb]"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-brand-ink hover:bg-brand-surface"
         onClick={onClose}
         type="button"
       >
@@ -853,7 +853,7 @@ function MoreItem({
 }) {
   return (
     <button
-      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm text-[#1c133b] hover:bg-[#f7f5fb]"
+      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm text-brand-ink hover:bg-brand-surface"
       onClick={onClick}
       type="button"
     >
@@ -881,14 +881,14 @@ function HomeTab({
   return (
     <div className="flex h-full flex-col">
       <button
-        className="flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-[#f7f5fb]"
+        className="flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-brand-surface"
         onClick={onOpenRecent}
         type="button"
       >
         <MundoriaAvatar size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[#1c133b]">{AGENT_NAME}</p>
+            <p className="text-sm font-semibold text-brand-ink">{AGENT_NAME}</p>
             <p className="shrink-0 text-[11px] text-[#6b6580]">
               {recent ? formatRelative(recent.last_message_at) : "Just now"}
             </p>
@@ -905,19 +905,19 @@ function HomeTab({
       <div className="px-5 py-4">
         <label className="relative block">
           <input
-            className="h-11 w-full rounded-full border border-[#ebe6f2] bg-white px-4 pr-11 text-sm outline-none placeholder:text-[#9a95a8] focus:border-[#1c133b]/35"
+            className="h-11 w-full rounded-full border border-[#ebe6f2] bg-white px-4 pr-11 text-sm outline-none placeholder:text-[#9a95a8] focus:border-brand-ink/35"
             onChange={(event) => onQueryChange(event.target.value)}
             onFocus={onOpenHelp}
             placeholder="Search for help"
             value={helpQuery}
           />
-          <Search className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1c133b]" />
+          <Search className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink" />
         </label>
       </div>
 
       <div className="mt-auto px-5 pb-5">
         <button
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white transition hover:bg-[#15102e]"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-ink px-4 text-sm font-semibold text-white transition hover:bg-[#15102e]"
           onClick={onAsk}
           type="button"
         >
@@ -946,14 +946,14 @@ function MessagesEmpty({
           {conversations.map((item) => (
             <li key={item.id}>
               <button
-                className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-[#f7f5fb]"
+                className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-brand-surface"
                 onClick={() => onOpen(item.id)}
                 type="button"
               >
                 <MundoriaAvatar size={36} />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-[#1c133b]">
+                    <span className="text-sm font-semibold text-brand-ink">
                       {AGENT_NAME}
                     </span>
                     <span className="text-[11px] text-[#6b6580]">
@@ -966,7 +966,7 @@ function MessagesEmpty({
                   </span>
                 </span>
                 {item.unread_user > 0 ? (
-                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#1c133b]" />
+                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-ink" />
                 ) : null}
               </button>
             </li>
@@ -974,7 +974,7 @@ function MessagesEmpty({
         </ul>
         <div className="mt-auto p-4">
           <button
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white transition hover:bg-[#15102e]"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-ink px-4 text-sm font-semibold text-white transition hover:bg-[#15102e]"
             onClick={onAsk}
             type="button"
           >
@@ -989,10 +989,10 @@ function MessagesEmpty({
   return (
     <div className="flex h-full flex-col items-center justify-between px-6 pb-6 pt-16">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#f7f5fb] text-[#1c133b]">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand-surface text-brand-ink">
           <MessageSquare className="h-5 w-5" strokeWidth={2.2} />
         </span>
-        <p className="mt-4 text-base font-semibold text-[#1c133b]">
+        <p className="mt-4 text-base font-semibold text-brand-ink">
           No messages
         </p>
         <p className="mt-1 max-w-[14rem] text-sm text-[#6b6580]">
@@ -1000,7 +1000,7 @@ function MessagesEmpty({
         </p>
       </div>
       <button
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white transition hover:bg-[#15102e]"
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-ink px-4 text-sm font-semibold text-white transition hover:bg-[#15102e]"
         onClick={onAsk}
         type="button"
       >
@@ -1063,7 +1063,7 @@ function ThreadView({
       <div className="flex-1 space-y-3 overflow-y-auto px-3 pb-3">
         {messages.length === 0 && awaitingTriage ? (
           <div className="space-y-2">
-            <div className="max-w-[90%] rounded-2xl rounded-bl-md bg-[#f3f0f7] px-3.5 py-2.5 text-sm leading-5 text-[#1c133b]">
+            <div className="max-w-[90%] rounded-2xl rounded-bl-md bg-[#f3f0f7] px-3.5 py-2.5 text-sm leading-5 text-brand-ink">
               Hi there 👋 Welcome to Mundoria! To help you faster, could you tell
               us who you are? 👇 Just choose the option that fits you best:
             </div>
@@ -1091,8 +1091,8 @@ function ThreadView({
                       : "rounded-2xl px-3.5 py-2.5",
                     !gifUrl &&
                       (mine
-                        ? "rounded-br-md bg-[#1c133b] text-white"
-                        : "rounded-bl-md bg-[#f3f0f7] text-[#1c133b]"),
+                        ? "rounded-br-md bg-brand-ink text-white"
+                        : "rounded-bl-md bg-[#f3f0f7] text-brand-ink"),
                   )}
                 >
                   <SupportMessageBody content={message.content} mine={mine} />
@@ -1119,7 +1119,7 @@ function ThreadView({
         <div className="space-y-2 border-t border-[#ebe6f2] px-3 py-3">
           {TRIAGE_OPTIONS.map((option) => (
             <button
-              className="w-full rounded-xl border border-[#ebe6f2] bg-white px-3 py-2.5 text-left text-sm font-medium text-[#1c133b] transition hover:bg-[#f7f5fb]"
+              className="w-full rounded-xl border border-[#ebe6f2] bg-white px-3 py-2.5 text-left text-sm font-medium text-brand-ink transition hover:bg-brand-surface"
               disabled={sending}
               key={option}
               onClick={() => onPickTriage(option)}
@@ -1149,9 +1149,9 @@ function ThreadView({
               }}
             />
           ) : null}
-          <div className="rounded-2xl border border-[#ebe6f2] bg-white p-2 focus-within:border-[#1c133b]/40">
+          <div className="rounded-2xl border border-[#ebe6f2] bg-white p-2 focus-within:border-brand-ink/40">
             {parseGifMessage(draft) ? (
-              <div className="relative mb-2 inline-block overflow-hidden rounded-xl bg-[#f7f5fb] p-1">
+              <div className="relative mb-2 inline-block overflow-hidden rounded-xl bg-brand-surface p-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="Selected GIF"
@@ -1187,7 +1187,7 @@ function ThreadView({
               <div className="flex items-center gap-1 text-[#6b6580]">
                 <button
                   aria-label="Attach file"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#f7f5fb]"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-brand-surface"
                   onClick={() => fileInputRef.current?.click()}
                   type="button"
                 >
@@ -1196,8 +1196,8 @@ function ThreadView({
                 <button
                   aria-label="Insert emoji"
                   className={cn(
-                    "inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#f7f5fb]",
-                    emojiOpen && "bg-[#f7f5fb] text-[#1c133b]",
+                    "inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-brand-surface",
+                    emojiOpen && "bg-brand-surface text-brand-ink",
                   )}
                   onClick={() => {
                     setGifOpen(false);
@@ -1210,8 +1210,8 @@ function ThreadView({
                 <button
                   aria-label="Insert GIF"
                   className={cn(
-                    "inline-flex h-8 items-center rounded-full px-2 text-[10px] font-bold tracking-wide hover:bg-[#f7f5fb]",
-                    gifOpen ? "bg-[#f7f5fb] text-[#1c133b]" : "text-[#6b6580]",
+                    "inline-flex h-8 items-center rounded-full px-2 text-[10px] font-bold tracking-wide hover:bg-brand-surface",
+                    gifOpen ? "bg-brand-surface text-brand-ink" : "text-[#6b6580]",
                   )}
                   onClick={() => {
                     setEmojiOpen(false);
@@ -1224,7 +1224,7 @@ function ThreadView({
               </div>
               <button
                 aria-label="Send message"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1c133b] text-white transition hover:bg-[#15102e] disabled:bg-[#e8e4ef] disabled:text-[#b0aab8]"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-ink text-white transition hover:bg-[#15102e] disabled:bg-[#e8e4ef] disabled:text-[#b0aab8]"
                 disabled={sending || !draft.trim()}
                 onClick={onSend}
                 type="button"
@@ -1295,7 +1295,7 @@ function HelpTab({
         <div className="flex items-center gap-2 border-b border-[#ebe6f2] px-3 py-2">
           <button
             aria-label="Back"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[#1c133b] hover:bg-[#f7f5fb]"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-brand-ink hover:bg-brand-surface"
             onClick={() => {
               if (view.fromCollection) {
                 const title =
@@ -1316,7 +1316,7 @@ function HelpTab({
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <p className="truncate text-sm font-semibold text-[#1c133b]">
+          <p className="truncate text-sm font-semibold text-brand-ink">
             {activeArticle?.title || "Article"}
           </p>
         </div>
@@ -1331,7 +1331,7 @@ function HelpTab({
                 </p>
               ) : null}
               {activeArticle.summary ? (
-                <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+                <p className="mt-2 text-sm leading-6 text-brand-muted">
                   {activeArticle.summary}
                 </p>
               ) : null}
@@ -1341,12 +1341,12 @@ function HelpTab({
                 compact
                 onLinkClick={onLinkClick}
               />
-              <div className="mt-6 rounded-2xl bg-[#f7f5fb] px-4 py-3">
-                <p className="text-sm font-semibold text-[#1c133b]">
+              <div className="mt-6 rounded-2xl bg-brand-surface px-4 py-3">
+                <p className="text-sm font-semibold text-brand-ink">
                   Still need help?
                 </p>
                 <button
-                  className="mt-2 text-sm font-semibold text-[#1c133b] underline underline-offset-2"
+                  className="mt-2 text-sm font-semibold text-brand-ink underline underline-offset-2"
                   onClick={onSendMessage}
                   type="button"
                 >
@@ -1366,13 +1366,13 @@ function HelpTab({
         <div className="flex items-center gap-2 border-b border-[#ebe6f2] px-3 py-2">
           <button
             aria-label="Back to Help"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[#1c133b] hover:bg-[#f7f5fb]"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-brand-ink hover:bg-brand-surface"
             onClick={() => onViewChange({ kind: "browse" })}
             type="button"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <p className="truncate text-sm font-semibold text-[#1c133b]">
+          <p className="truncate text-sm font-semibold text-brand-ink">
             {view.title}
           </p>
         </div>
@@ -1388,12 +1388,12 @@ function HelpTab({
               {collectionArticles.map((article) => (
                 <li key={article.slug}>
                   <button
-                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-[#f7f5fb]"
+                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-brand-surface"
                     onClick={() => onOpenArticle(article.slug, view.slug)}
                     type="button"
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-[#1c133b]">
+                      <span className="block text-sm font-semibold text-brand-ink">
                         {article.title}
                       </span>
                       {article.summary ? (
@@ -1423,19 +1423,19 @@ function HelpTab({
             placeholder="Search for help"
             value={query}
           />
-          <Search className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1c133b]" />
+          <Search className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink" />
         </label>
       </div>
 
       {!query ? (
         <div className="px-4 pb-2">
-          <p className="text-sm font-semibold text-[#1c133b]">
+          <p className="text-sm font-semibold text-brand-ink">
             {collections.length} collection{collections.length === 1 ? "" : "s"}
           </p>
         </div>
       ) : (
         <div className="px-4 pb-2">
-          <p className="text-sm font-semibold text-[#1c133b]">Results</p>
+          <p className="text-sm font-semibold text-brand-ink">Results</p>
         </div>
       )}
 
@@ -1450,12 +1450,12 @@ function HelpTab({
               {articles.map((article) => (
                 <li key={article.slug}>
                   <button
-                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-[#f7f5fb]"
+                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-brand-surface"
                     onClick={() => onOpenArticle(article.slug)}
                     type="button"
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-[#1c133b]">
+                      <span className="block text-sm font-semibold text-brand-ink">
                         {article.title}
                       </span>
                       <span className="mt-0.5 line-clamp-2 block text-xs text-[#6b6580]">
@@ -1473,7 +1473,7 @@ function HelpTab({
             {collections.map((collection) => (
               <li key={collection.slug}>
                 <button
-                  className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-[#f7f5fb]"
+                  className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-brand-surface"
                   onClick={() =>
                     onOpenCollection(collection.slug, collection.title)
                   }
@@ -1483,10 +1483,10 @@ function HelpTab({
                     {collection.emoji}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-[#1c133b]">
+                    <span className="block text-sm font-semibold text-brand-ink">
                       {collection.title}
                     </span>
-                    <span className="mt-0.5 block text-sm leading-5 text-[#5a5470]">
+                    <span className="mt-0.5 block text-sm leading-5 text-brand-muted">
                       {collection.description}
                     </span>
                     <span className="mt-1 block text-xs text-[#6b6580]">

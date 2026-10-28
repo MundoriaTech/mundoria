@@ -78,7 +78,7 @@ function CategoryChip({
           "inline-flex items-center rounded-sm border px-4 py-2 text-xs font-semibold transition",
           active
             ? "border-transparent text-white shadow-[0_6px_16px_rgba(106,69,184,0.35)]"
-            : "border-[#d9ccef] bg-white/90 text-[#1c133b] hover:border-[#6a45b8]",
+            : "border-[#d9ccef] bg-white/90 text-brand-ink hover:border-brand-purple",
         )}
         href={href}
         style={active ? { backgroundColor: "#6a45b8" } : undefined}
@@ -180,15 +180,15 @@ function ArticleRow({ post }: { post: BlogPost }) {
         >
           {post.category}
         </p>
-        <h3 className="mt-2 text-lg font-semibold tracking-[-0.03em] text-[#1c133b] transition group-hover:text-[#6a45b8]">
+        <h3 className="mt-2 text-lg font-semibold tracking-[-0.03em] text-brand-ink transition group-hover:text-brand-purple">
           {post.title}
         </h3>
         {post.excerpt ? (
-          <p className="mt-2 text-sm leading-6 text-[#5a5470] line-clamp-2">
+          <p className="mt-2 text-sm leading-6 text-brand-muted line-clamp-2">
             {post.excerpt}
           </p>
         ) : null}
-        <p className="mt-3 text-xs text-[#5a5470]">
+        <p className="mt-3 text-xs text-brand-muted">
           {post.author_name} · {formatDate(post.published_at ?? post.created_at)}
         </p>
       </div>
@@ -259,7 +259,7 @@ export default async function BlogIndexPage({
         }}
       />
       <div
-        className="relative overflow-hidden bg-[#faf8ff]"
+        className="relative overflow-hidden bg-brand-haze"
         style={{ marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` }}
       >
         <div
@@ -276,13 +276,13 @@ export default async function BlogIndexPage({
           style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2.75rem)` }}
         >
           <div className="mx-auto max-w-6xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d4694a]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-terracotta">
               The magazine
             </p>
-            <h1 className="mt-4 max-w-3xl text-[3rem] font-black leading-[0.95] tracking-[-0.05em] text-[#1c133b] sm:text-[4.75rem]">
+            <h1 className="mt-4 max-w-3xl text-[3rem] font-black leading-[0.95] tracking-[-0.05em] text-brand-ink sm:text-[4.75rem]">
               Mundoria Mag
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-[#5a5470] sm:text-lg">
+            <p className="mt-5 max-w-xl text-base leading-7 text-brand-muted sm:text-lg">
               Cleaning & home magazine — practical guides, host tips and
               Birmingham stories for real homes.
             </p>
@@ -308,14 +308,14 @@ export default async function BlogIndexPage({
           </div>
 
           {!posts.length ? (
-            <p className="mt-10 max-w-xl text-sm leading-7 text-[#5a5470]">
+            <p className="mt-10 max-w-xl text-sm leading-7 text-brand-muted">
               Stories will appear here once Mag content is published.
             </p>
           ) : !filtered.length ? (
-            <p className="mt-10 max-w-xl text-sm leading-7 text-[#5a5470]">
+            <p className="mt-10 max-w-xl text-sm leading-7 text-brand-muted">
               No stories in this section yet.{" "}
               <Link
-                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                className="font-semibold text-brand-purple underline-offset-2 hover:underline"
                 href="/blog"
               >
                 Browse all Mag stories
@@ -351,7 +351,7 @@ export default async function BlogIndexPage({
                     if (!sectionPosts.length) return null;
                     const theme = magThemeFor(section);
                     const panelByCategory: Record<string, string> = {
-                      "Cleaning Tips": "bg-[#efe6ff]",
+                      "Cleaning Tips": "bg-brand-lavender-light",
                       "Home Care": "bg-[#f0e4ec]",
                       "Host Tips": "bg-[#e8f7f5]",
                       "Local Life": "bg-[#e8f2ff]",
@@ -362,11 +362,11 @@ export default async function BlogIndexPage({
                       <section
                         className={cn(
                           "mt-10 overflow-hidden rounded-[1.75rem] px-5 py-7 sm:px-8 sm:py-9",
-                          panelByCategory[section] ?? "bg-[#efe6ff]",
+                          panelByCategory[section] ?? "bg-brand-lavender-light",
                         )}
                         key={section}
                       >
-                        <div className="flex items-start justify-between gap-4 border-b border-[#1c133b]/10 pb-5">
+                        <div className="flex items-start justify-between gap-4 border-b border-brand-ink/10 pb-5">
                           <div className="flex items-start gap-4">
                             <MagCategoryIcon category={section} />
                             <div>
@@ -378,7 +378,7 @@ export default async function BlogIndexPage({
                               >
                                 Magazine
                               </p>
-                              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-[#1c133b] sm:text-3xl">
+                              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-brand-ink sm:text-3xl">
                                 {section}
                               </h2>
                             </div>
@@ -408,7 +408,7 @@ export default async function BlogIndexPage({
                         magThemeFor(activeCategory).soft,
                       )}
                     >
-                      <div className="flex items-start gap-4 border-b border-[#1c133b]/10 pb-5">
+                      <div className="flex items-start gap-4 border-b border-brand-ink/10 pb-5">
                         <MagCategoryIcon category={activeCategory} />
                         <div>
                           <p
@@ -419,10 +419,10 @@ export default async function BlogIndexPage({
                           >
                             Magazine
                           </p>
-                          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-[#1c133b] sm:text-3xl">
+                          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-brand-ink sm:text-3xl">
                             {activeCategory}
                           </h2>
-                          <p className="mt-1 text-sm text-[#5a5470]">
+                          <p className="mt-1 text-sm text-brand-muted">
                             {listPosts.length} stor
                             {listPosts.length === 1 ? "y" : "ies"}
                             {magPages > 1
@@ -437,7 +437,7 @@ export default async function BlogIndexPage({
                         ))}
                       </div>
                       <PaginationLinks
-                        className="mt-8 border-t border-[#1c133b]/10 pt-6 [&_p]:text-[#5a5470]"
+                        className="mt-8 border-t border-brand-ink/10 pt-6 [&_p]:text-brand-muted"
                         page={magPage}
                         pageSize={magPageSize}
                         pathname="/blog"

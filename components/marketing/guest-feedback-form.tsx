@@ -11,6 +11,7 @@ import {
 } from "@phosphor-icons/react";
 import { useState, type ComponentType, type CSSProperties } from "react";
 
+import { Button } from "@/components/ui/button";
 import { GUEST_FEEDBACK_MOODS, type GuestFeedbackMood } from "@/lib/guest-feedback";
 import { cn } from "@/lib/utils";
 
@@ -77,14 +78,14 @@ export function GuestFeedbackForm() {
           className={cn(
             "mx-auto h-16 w-16",
             ICON_STICKER,
-            "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+            "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-indigo",
           )}
           weight="duotone"
         />
-        <h1 className="mt-6 text-[2rem] font-black leading-[1.15] tracking-[-0.05em] text-[#1c133b] sm:text-5xl">
+        <h1 className="mt-6 text-[2rem] font-black leading-[1.15] tracking-[-0.05em] text-brand-ink sm:text-5xl">
           We’ve received your review
         </h1>
-        <p className="mx-auto mt-3 max-w-md text-base leading-7 text-[#5a5470]">
+        <p className="mx-auto mt-3 max-w-md text-base leading-7 text-brand-muted">
           {reviewer
             ? `Thank you, ${reviewer}. The Mundoria team has it.`
             : "Thank you. The Mundoria team has it."}
@@ -95,10 +96,10 @@ export function GuestFeedbackForm() {
 
   return (
     <>
-      <h1 className="text-[2rem] font-black leading-[1.15] tracking-[-0.05em] text-[#1c133b] sm:text-5xl">
+      <h1 className="text-[2rem] font-black leading-[1.15] tracking-[-0.05em] text-brand-ink sm:text-5xl">
         How was your clean?
       </h1>
-      <p className="mt-3 max-w-md text-base leading-7 text-[#5a5470]">
+      <p className="mt-3 max-w-md text-base leading-7 text-brand-muted">
         Tell us in your own words.
       </p>
       <form
@@ -109,9 +110,9 @@ export function GuestFeedbackForm() {
       }}
     >
       <label className="block" htmlFor="reviewer-name">
-        <span className="text-sm font-semibold text-[#1c133b]">Your name</span>
+        <span className="text-sm font-semibold text-brand-ink">Your name</span>
         <input
-          className="mt-2 h-12 w-full rounded-2xl border border-[#eadfce] bg-[#fbf8f4] px-4 text-base text-[#1c133b] outline-none transition placeholder:text-[#a398b0] focus:border-[#6a45b8] focus:ring-4 focus:ring-[#6a45b8]/10"
+          className="mt-2 h-12 w-full rounded-2xl border border-[#eadfce] bg-[#fbf8f4] px-4 text-base text-brand-ink outline-none transition placeholder:text-[#a398b0] focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10"
           id="reviewer-name"
           maxLength={80}
           onChange={(event) => setName(event.target.value)}
@@ -120,7 +121,7 @@ export function GuestFeedbackForm() {
       </label>
 
       <fieldset className="mt-6">
-        <legend className="text-sm font-semibold text-[#1c133b]">
+        <legend className="text-sm font-semibold text-brand-ink">
           How did the clean feel?
         </legend>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -132,10 +133,10 @@ export function GuestFeedbackForm() {
               <button
                 aria-pressed={active}
                 className={cn(
-                  "flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6a45b8]/15 hover:-translate-y-0.5 last:sm:col-span-2",
+                  "flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-purple/15 hover:-translate-y-0.5 last:sm:col-span-2",
                   active
-                    ? "border-[#312c79] bg-[#f6f1fc] ring-1 ring-[#312c79]"
-                    : "border-[#eadfce] bg-[#fbf8f4] hover:border-[#6a45b8]",
+                    ? "border-brand-indigo bg-[#f6f1fc] ring-1 ring-brand-indigo"
+                    : "border-[#eadfce] bg-[#fbf8f4] hover:border-brand-purple",
                 )}
                 key={option.value}
                 onClick={() => setMood(option.value)}
@@ -165,10 +166,10 @@ export function GuestFeedbackForm() {
                   />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-[#1c133b]">
+                  <span className="block text-sm font-semibold text-brand-ink">
                     {option.label}
                   </span>
-                  <span className="mt-0.5 block text-sm leading-6 text-[#5a5470]">
+                  <span className="mt-0.5 block text-sm leading-6 text-brand-muted">
                     {option.description}
                   </span>
                 </span>
@@ -179,13 +180,13 @@ export function GuestFeedbackForm() {
       </fieldset>
 
       <label className="mt-2 block" htmlFor="feedback">
-        <span className="text-sm font-semibold text-[#1c133b]">
+        <span className="text-sm font-semibold text-brand-ink">
           Your review
           <span className="text-[#d14343]"> *</span>
         </span>
         <textarea
           aria-required="true"
-          className="mt-2 min-h-40 w-full resize-y rounded-2xl border border-[#eadfce] bg-[#fbf8f4] px-4 py-3 text-base leading-7 text-[#1c133b] outline-none transition placeholder:text-[#a398b0] focus:border-[#6a45b8] focus:ring-4 focus:ring-[#6a45b8]/10"
+          className="mt-2 min-h-40 w-full resize-y rounded-2xl border border-[#eadfce] bg-[#fbf8f4] px-4 py-3 text-base leading-7 text-brand-ink outline-none transition placeholder:text-[#a398b0] focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10"
           id="feedback"
           maxLength={2000}
           onChange={(event) => setComment(event.target.value)}
@@ -200,13 +201,14 @@ export function GuestFeedbackForm() {
         </p>
       ) : null}
 
-      <button
-        className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6a45b8]/25 disabled:opacity-60"
-        disabled={submitting}
+      <Button
+        className="mt-6 h-12 w-full rounded-full bg-brand-purple px-6 text-sm font-semibold text-white hover:bg-brand-purple-deep focus-visible:ring-4 focus-visible:ring-brand-purple/25"
+        loading={submitting}
+        loadingLabel="Sending…"
         type="submit"
       >
-        {submitting ? "Sending…" : "Send review"}
-      </button>
+        Send review
+      </Button>
     </form>
     </>
   );

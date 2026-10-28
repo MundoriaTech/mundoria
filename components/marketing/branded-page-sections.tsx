@@ -16,7 +16,7 @@ export function BrandedPageWash({
 }) {
   return (
     <div
-      className="relative overflow-hidden bg-[#faf8ff]"
+      className="relative overflow-hidden bg-brand-haze"
       style={{
         ...(underNav
           ? { marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` }
@@ -67,19 +67,19 @@ export function BrandedCardLink({
   return (
     <ScrollReveal>
       <Link
-        className="group flex h-full flex-col rounded-[1.35rem] border border-[#e4daf5]/80 bg-white/85 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(49,44,121,0.12)] sm:p-6"
+        className="group flex h-full flex-col rounded-[1.35rem] border border-brand-lavender/80 bg-white/85 p-5 shadow-[0_10px_28px_rgba(49,44,121,0.06)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(49,44,121,0.12)] sm:p-6"
         href={href}
       >
         {meta ? (
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#823fb2]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-brand-violet">
             {meta}
           </p>
         ) : null}
-        <h3 className="mt-2 text-[1.05rem] font-semibold tracking-[-0.02em] text-[#1c133b] transition group-hover:text-[#6a45b8] sm:text-lg">
+        <h3 className="mt-2 text-[1.05rem] font-semibold tracking-[-0.02em] text-brand-ink transition group-hover:text-brand-purple sm:text-lg">
           {label}
         </h3>
         {description ? (
-          <p className="mt-2 flex-1 text-sm leading-6 text-[#5a5470]">
+          <p className="mt-2 flex-1 text-sm leading-6 text-brand-muted">
             {description}
           </p>
         ) : null}
@@ -128,7 +128,7 @@ export function BrandedCtaBand({
             className={cn(
               "font-semibold tracking-[-0.03em]",
               "text-[1.35rem] leading-tight sm:text-2xl lg:text-[1.75rem]",
-              onWhite ? "text-[#1c133b]" : "text-white",
+              onWhite ? "text-brand-ink" : "text-white",
             )}
           >
             {title}
@@ -153,7 +153,7 @@ export function BrandedCtaBand({
             onWhite
               ? (buttonClassName ??
                 "bg-[#ff5274] text-white hover:bg-[#ff3d63]")
-              : "bg-white text-[#1c133b] hover:bg-[#e8e0f9]",
+              : "bg-white text-brand-ink hover:bg-[#e8e0f9]",
           )}
           href={href}
         >

@@ -113,7 +113,7 @@ export function CategoryPhotoHero({
         ) : (
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-r from-[#1c133b]/55 via-[#291845]/25 to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-brand-ink/55 via-brand-plum/25 to-transparent"
           />
         )}
       </div>
@@ -143,7 +143,7 @@ export function CategoryPhotoHero({
               ))}
             </ul>
             <Link
-              className="mt-6 hidden h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 md:inline-flex sm:mt-8"
+              className="mt-6 hidden h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand-ink transition hover:bg-white/90 md:inline-flex sm:mt-8"
               href={bookingHref}
             >
               {hero.bookCta}

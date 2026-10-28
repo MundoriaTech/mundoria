@@ -92,7 +92,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         >
           <div className="mx-auto max-w-4xl">
             <Link
-              className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              className="text-sm font-semibold text-brand-purple underline-offset-2 hover:underline"
               href="/blog"
             >
               ← Mundoria Mag
@@ -124,16 +124,16 @@ export default async function BlogPostPage({ params }: PageProps) {
               >
                 {post.category}
               </span>
-              <h1 className="mt-4 text-[2rem] font-semibold tracking-[-0.045em] text-[#1c133b] sm:text-[2.75rem] sm:leading-[1.1]">
+              <h1 className="mt-4 text-[2rem] font-semibold tracking-[-0.045em] text-brand-ink sm:text-[2.75rem] sm:leading-[1.1]">
                 {post.title}
               </h1>
               {post.excerpt ? (
-                <p className="mt-4 text-base leading-7 text-[#5a5470] sm:text-lg sm:leading-8">
+                <p className="mt-4 text-base leading-7 text-brand-muted sm:text-lg sm:leading-8">
                   {post.excerpt}
                 </p>
               ) : null}
-              <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[#eadfce] pb-6 text-sm text-[#5a5470]">
-                <span className="font-semibold text-[#1c133b]">
+              <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[#eadfce] pb-6 text-sm text-brand-muted">
+                <span className="font-semibold text-brand-ink">
                   {post.author_name}
                 </span>
                 <span aria-hidden>·</span>
@@ -154,7 +154,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
           {related.length ? (
             <div className="mx-auto mt-14 max-w-3xl">
-              <h2 className="text-xl font-semibold text-[#1c133b]">
+              <h2 className="text-xl font-semibold text-brand-ink">
                 Keep reading
               </h2>
               <div className="mt-5 grid gap-4 sm:grid-cols-3">
@@ -163,7 +163,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                   return (
                     <Link
                       className={cn(
-                        "group overflow-hidden rounded-[1.25rem] border border-[#e4daf5]/80 transition hover:-translate-y-0.5",
+                        "group overflow-hidden rounded-[1.25rem] border border-brand-lavender/80 transition hover:-translate-y-0.5",
                         relatedTheme.soft,
                       )}
                       href={`/blog/${item.slug}`}
@@ -192,7 +192,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                         >
                           {item.category}
                         </p>
-                        <h3 className="mt-2 text-sm font-semibold text-[#1c133b] transition group-hover:text-[#6a45b8]">
+                        <h3 className="mt-2 text-sm font-semibold text-brand-ink transition group-hover:text-brand-purple">
                           {item.title}
                         </h3>
                       </div>

@@ -71,7 +71,7 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
             value={form.code}
           />
           <select
-            className="rounded-md border border-[#e8e8eb] bg-white px-3 text-[#1c133b]"
+            className="rounded-md border border-[#e8e8eb] bg-white px-3 text-brand-ink"
             onChange={(e) => setForm({ ...form, discount_type: e.target.value })}
             value={form.discount_type}
           >

@@ -44,7 +44,7 @@ export function DashboardBackLink({
   return (
     <Link
       className={cn(
-        "inline-flex min-h-10 items-center gap-0.5 text-sm font-medium text-[#5a5470] transition hover:text-[#1c133b]",
+        "inline-flex min-h-10 items-center gap-0.5 text-sm font-medium text-brand-muted transition hover:text-brand-ink",
         className,
       )}
       href={href}

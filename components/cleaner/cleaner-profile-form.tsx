@@ -198,11 +198,11 @@ export function CleanerProfileForm({
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)]">
-      <section className="rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-7">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+      <section className="rounded-[1.75rem] border border-brand-line bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-7">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
           You
         </p>
-        <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+        <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
           Photo and details
         </h2>
         <div className="mt-5">
@@ -294,15 +294,15 @@ export function CleanerProfileForm({
             />
           </Field>
           <fieldset>
-            <legend className="text-sm font-medium text-[#1c133b]">Pay me</legend>
+            <legend className="text-sm font-medium text-brand-ink">Pay me</legend>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {(["weekly", "monthly"] as const).map((option) => (
                 <button
                   className={cn(
                     "h-11 rounded-2xl border text-sm font-semibold transition",
                     cleaner.payout_preference === option
-                      ? "border-[#312c79] bg-[#f7f3ff] text-[#312c79]"
-                      : "border-[#e6e0f2] bg-white text-[#5c5670] hover:bg-[#fbf9ff]",
+                      ? "border-brand-indigo bg-[#f7f3ff] text-brand-indigo"
+                      : "border-brand-line bg-white text-[#5c5670] hover:bg-[#fbf9ff]",
                   )}
                   key={option}
                   onClick={() =>
@@ -331,14 +331,14 @@ export function CleanerProfileForm({
                   className={cn(
                     "flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition",
                     selected
-                      ? "border-[#312c79] bg-[#f7f3ff] text-[#312c79]"
-                      : "border-[#e6e0f2] bg-white text-[#1c133b] hover:bg-[#fbf9ff]",
+                      ? "border-brand-indigo bg-[#f7f3ff] text-brand-indigo"
+                      : "border-brand-line bg-white text-brand-ink hover:bg-[#fbf9ff]",
                   )}
                   key={service.value}
                 >
                   <input
                     checked={selected}
-                    className="h-4 w-4 accent-[#312c79]"
+                    className="h-4 w-4 accent-brand-indigo"
                     onChange={(event) =>
                       setServices((current) =>
                         event.target.checked
@@ -379,7 +379,7 @@ export function CleanerProfileForm({
               value={prefix}
             />
             <Button
-              className="h-11 w-11 shrink-0 rounded-2xl bg-[#1c133b] text-white hover:bg-[#312c79]"
+              className="h-11 w-11 shrink-0 rounded-2xl bg-brand-ink text-white hover:bg-brand-indigo"
               onClick={() => {
                 const next = prefix.trim().toUpperCase();
                 if (next) {
@@ -395,7 +395,7 @@ export function CleanerProfileForm({
           <div className="mt-3 flex flex-wrap gap-2">
             {areas.filter(Boolean).map((area) => (
               <button
-                className="inline-flex items-center rounded-full bg-[#f3efe6] px-3 py-1.5 text-sm font-medium text-[#1c133b]"
+                className="inline-flex items-center rounded-full bg-brand-cream-deep px-3 py-1.5 text-sm font-medium text-brand-ink"
                 key={area}
                 onClick={() =>
                   setAreas((current) => current.filter((item) => item !== area))
@@ -415,14 +415,14 @@ export function CleanerProfileForm({
               <label
                 className={cn(
                   "flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-sm",
-                  day.is_available ? "bg-[#f7f3ff] text-[#312c79]" : "bg-[#f7f4f8] text-[#5c5670]",
+                  day.is_available ? "bg-[#f7f3ff] text-brand-indigo" : "bg-[#f7f4f8] text-[#5c5670]",
                 )}
                 key={day.day_of_week}
               >
                 <span className="font-medium">
                   <input
                     checked={day.is_available}
-                    className="mr-2 h-4 w-4 accent-[#312c79]"
+                    className="mr-2 h-4 w-4 accent-brand-indigo"
                     onChange={(event) => {
                       const next = [...availability];
                       next[index] = { ...day, is_available: event.target.checked };
@@ -454,7 +454,7 @@ export function CleanerProfileForm({
           </p>
           {cleaner.status === "certified" || cleaner.status === "active" ? (
             <Button
-              className="h-11 w-full rounded-full border-[#e6e0f2] text-[#1c133b]"
+              className="h-11 w-full rounded-full border-brand-line text-brand-ink"
               onClick={() => void connectStripe()}
               variant="outline"
             >
@@ -466,10 +466,10 @@ export function CleanerProfileForm({
           ) : null}
         </Panel>
 
-        {status ? <p className="text-sm text-[#312c79]">{status}</p> : null}
+        {status ? <p className="text-sm text-brand-indigo">{status}</p> : null}
 
         <Button
-          className="h-12 w-full rounded-full bg-[#1c133b] text-white hover:bg-[#312c79]"
+          className="h-12 w-full rounded-full bg-brand-ink text-white hover:bg-brand-indigo"
           onClick={() => void save()}
         >
           Save profile
@@ -488,7 +488,7 @@ export function CleanerProfileForm({
 }
 
 const fieldClass =
-  "rounded-2xl border-[#e6e0f2] bg-white text-[#1c133b] focus-visible:ring-[#312c79]";
+  "rounded-2xl border-brand-line bg-white text-brand-ink focus-visible:ring-brand-indigo";
 
 const DAY_NAMES = [
   "Sunday",
@@ -531,12 +531,12 @@ function AboutYou({
         : "This is what customers read.";
 
   return (
-    <div className="rounded-[1.35rem] border border-[#e6e0f2] bg-[#fbf8ff] p-4">
+    <div className="rounded-[1.35rem] border border-brand-line bg-[#fbf8ff] p-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-medium text-[#1c133b]">About you</p>
+        <p className="text-sm font-medium text-brand-ink">About you</p>
         {value ? (
           <button
-            className="text-xs font-semibold text-[#312c79]"
+            className="text-xs font-semibold text-brand-indigo"
             onClick={() => onChange("")}
             type="button"
           >
@@ -551,14 +551,14 @@ function AboutYou({
         <div className="flex items-center gap-3">
           <UserAvatar name={name} seed={seed} url={url} />
           <div>
-            <p className="text-sm font-semibold text-[#1c133b]">{firstName}</p>
+            <p className="text-sm font-semibold text-brand-ink">{firstName}</p>
             <p className="text-[11px] text-[#8b849c]">How customers see this</p>
           </div>
         </div>
         <label className="mt-3 block">
           <span className="sr-only">About you</span>
           <textarea
-            className="min-h-28 w-full resize-y bg-transparent text-sm leading-6 text-[#1c133b] outline-none placeholder:text-[#8b849c]"
+            className="min-h-28 w-full resize-y bg-transparent text-sm leading-6 text-brand-ink outline-none placeholder:text-[#8b849c]"
             maxLength={2000}
             onChange={(event) => onChange(event.target.value)}
             placeholder="I look after homes nearby, and I like leaving a kitchen that feels easy to walk back into."
@@ -583,7 +583,7 @@ function Field({
   label: string;
 }) {
   return (
-    <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
+    <label className="block space-y-2 text-sm font-medium text-brand-ink">
       <span>{label}</span>
       {children}
       {hint ? <span className="block text-xs font-normal leading-5 text-[#5c5670]">{hint}</span> : null}
@@ -602,12 +602,12 @@ function Panel({
   title: string;
 }) {
   return (
-    <section className="space-y-3 rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-6">
+    <section className="space-y-3 rounded-[1.75rem] border border-brand-line bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-6">
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
           {eyebrow}
         </p>
-        <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+        <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
           {title}
         </h2>
       </div>
@@ -620,7 +620,7 @@ function StatusRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl bg-[#f7f4f8] px-3 py-2.5">
       <span className="text-sm text-[#5c5670]">{label}</span>
-      <span className="text-sm font-semibold text-[#1c133b]">{value}</span>
+      <span className="text-sm font-semibold text-brand-ink">{value}</span>
     </div>
   );
 }

@@ -133,7 +133,7 @@ export function AppModal({
           className={cn(
             "fixed inset-0 z-[200] flex items-end justify-center p-0 sm:items-center sm:p-4",
             backdrop === "blur"
-              ? "bg-[#1c133b]/20 backdrop-blur-md"
+              ? "bg-brand-ink/20 backdrop-blur-md"
               : "bg-slate-950/45 backdrop-blur-[2px]",
           )}
           exit={{
@@ -168,7 +168,7 @@ export function AppModal({
             variants={mobile ? sheetUp : popIn}
           >
             {accent === "peach" ? (
-              <div aria-hidden className="h-1 w-full shrink-0 bg-[#ffc79f]" />
+              <div aria-hidden className="h-1 w-full shrink-0 bg-brand-peach-light" />
             ) : null}
             {accent === "destructive" ? (
               <div aria-hidden className="h-1 w-full shrink-0 bg-destructive" />

@@ -36,12 +36,12 @@ export default function CleanerLoginPage({
       footer={
         <>
           New cleaner?{" "}
-          <Link className="font-semibold text-[#291845] hover:underline" href="/signup/cleaner">
+          <Link className="font-semibold text-brand-plum hover:underline" href="/signup/cleaner">
             Create a cleaner account
           </Link>
           <span className="mt-2 block text-sm text-muted-foreground">
             Booking a clean?{" "}
-            <Link className="font-semibold text-[#291845] hover:underline" href="/login">
+            <Link className="font-semibold text-brand-plum hover:underline" href="/login">
               Customer sign in
             </Link>
           </span>

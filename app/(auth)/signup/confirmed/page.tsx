@@ -23,8 +23,8 @@ export default function EmailConfirmedPage({
       : "Go to my account";
 
   return (
-    <main className="flex min-h-screen flex-col bg-[#f9f6ef]">
-      <header className="border-b border-[#e8e0d0]/80 bg-[#f9f6ef]/95">
+    <main className="flex min-h-screen flex-col bg-brand-cream">
+      <header className="border-b border-brand-sand/80 bg-brand-cream/95">
         <div className="mx-auto flex h-14 w-full max-w-[1140px] items-center justify-center px-5 sm:h-16">
           <LandingLogo href="/" />
         </div>
@@ -41,22 +41,22 @@ export default function EmailConfirmedPage({
             src="/images/marketing/icons/account-validated.svg"
             width={80}
           />
-          <h1 className="mt-6 text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+          <h1 className="mt-6 text-[1.75rem] font-bold tracking-[-0.03em] text-brand-ink sm:text-[2rem]">
             Your account has been validated
           </h1>
-          <p className="mt-3 text-base leading-7 text-[#5a5470]">
+          <p className="mt-3 text-base leading-7 text-brand-muted">
             Welcome! You’re ready to book and manage cleans with Mundoria.
           </p>
           <div className="mt-8 flex justify-center">
             <Button
               asChild
-              className="h-12 w-full max-w-xs rounded-full bg-[#1c133b] text-base font-semibold text-white hover:bg-[#1c133b]/90"
+              className="h-12 w-full max-w-xs rounded-full bg-brand-ink text-base font-semibold text-white hover:bg-brand-ink/90"
             >
               <Link href={continueHref}>{continueLabel}</Link>
             </Button>
           </div>
           <p className="mt-6 text-sm text-[#8a8498]">
-            <Link className="font-medium text-[#1c133b] hover:underline" href="/">
+            <Link className="font-medium text-brand-ink hover:underline" href="/">
               Browse all services
             </Link>
           </p>

@@ -138,7 +138,7 @@ export function JobFeed({
                       {formatServiceName(job.service_type)}
                     </h2>
                     {teamSlot ? (
-                      <span className="rounded-full bg-[#efe6ff] px-2 py-0.5 text-[11px] font-semibold text-[#6a45b8]">
+                      <span className="rounded-full bg-brand-lavender-light px-2 py-0.5 text-[11px] font-semibold text-brand-purple">
                         Team slot
                       </span>
                     ) : null}

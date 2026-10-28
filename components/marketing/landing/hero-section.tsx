@@ -110,7 +110,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             variants={fadeFrom("up", { distance: 20, duration: DURATION.slow })}
           >
             <Link
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:brightness-95 active:scale-[0.97] touch-manipulation sm:mt-8 sm:h-12 sm:px-8 sm:text-[15px]"
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-brand-gold px-6 text-sm font-semibold text-brand-ink transition hover:brightness-95 active:scale-[0.97] touch-manipulation sm:mt-8 sm:h-12 sm:px-8 sm:text-[15px]"
               href={bookingHref}
             >
               Book now
@@ -121,7 +121,7 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
       <motion.div
         animate={{ opacity: 0 }}
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[5] bg-[#1c133b]"
+        className="pointer-events-none absolute inset-0 z-[5] bg-brand-ink"
         initial={{ opacity: 0.55 }}
         transition={{ duration: 1.1, ease: EASE.out }}
       />

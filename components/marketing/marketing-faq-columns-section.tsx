@@ -32,7 +32,7 @@ export function MarketingFaqColumnsSection({
         <h2
           className={cn(
             "text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] sm:text-2xl lg:text-[1.75rem]",
-            service ? "text-[#1c133b]" : "text-[#c45c3a]",
+            service ? "text-brand-ink" : "text-[#c45c3a]",
           )}
         >
           {title}
@@ -55,10 +55,10 @@ export function MarketingFaqColumnsSection({
               )}
               key={faq.question}
             >
-              <h3 className="text-[15px] font-bold leading-snug text-[#1c133b] sm:text-base">
+              <h3 className="text-[15px] font-bold leading-snug text-brand-ink sm:text-base">
                 {faq.question}
               </h3>
-              <div className="mt-2.5 text-sm font-normal leading-6 text-[#414141] sm:text-[15px] sm:leading-7 [&_a]:font-semibold [&_a]:text-[#6a45b8] [&_a]:underline-offset-2 [&_a]:hover:underline [&_ul]:mt-2.5 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
+              <div className="mt-2.5 text-sm font-normal leading-6 text-[#414141] sm:text-[15px] sm:leading-7 [&_a]:font-semibold [&_a]:text-brand-purple [&_a]:underline-offset-2 [&_a]:hover:underline [&_ul]:mt-2.5 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
                 {faq.answer}
               </div>
             </article>

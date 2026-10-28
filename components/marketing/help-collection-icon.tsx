@@ -24,12 +24,12 @@ const COLLECTION_VISUAL = {
   "for-customers": {
     Icon: HouseLine,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-indigo",
   },
   "become-a-cleaner": {
     Icon: RocketLaunch,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#d4694a]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-brand-terracotta",
   },
   "cleaner-guide": {
     Icon: BookOpenText,
@@ -42,42 +42,42 @@ const TOPIC_VISUAL: Record<string, { Icon: Icon; iconClass: string }> = {
   "Book a clean": {
     Icon: CalendarCheck,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-indigo",
   },
   "Manage my account": {
     Icon: IdentificationCard,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#6a45b8]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-brand-purple",
   },
   "Booking issues": {
     Icon: Wrench,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#d4694a]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-brand-terracotta",
   },
   "Services & cleaners": {
     Icon: Sparkle,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#823fb2]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-brand-violet",
   },
   "Getting started": {
     Icon: RocketLaunch,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#d4694a]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-brand-terracotta",
   },
   "Jobs & sessions": {
     Icon: CalendarCheck,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#ffffff] [&_path:last-child]:!fill-brand-indigo",
   },
   "Revenue & payouts": {
     Icon: Wallet,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#f0a888] [&_path:last-child]:!fill-[#2f6f6a]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-brand-peach [&_path:last-child]:!fill-[#2f6f6a]",
   },
   "Reputation & safety": {
     Icon: ShieldCheck,
     iconClass:
-      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-[#312c79]",
+      "[&_path:first-child]:!opacity-100 [&_path:first-child]:!fill-[#c4b5e8] [&_path:last-child]:!fill-brand-indigo",
   },
   "App & account": {
     Icon: ChatCircleDots,
@@ -139,7 +139,7 @@ export function HelpArticleChevron({ className }: { className?: string }) {
   return (
     <CaretRight
       aria-hidden
-      className={cn("h-4 w-4 shrink-0 text-[#823fb2]", className)}
+      className={cn("h-4 w-4 shrink-0 text-brand-violet", className)}
       weight="bold"
     />
   );

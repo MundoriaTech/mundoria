@@ -98,7 +98,7 @@ function ReviewCard({
         <div className="flex items-start justify-between gap-3">
           <p
             aria-hidden
-            className="text-sm tracking-[0.12em] text-[#c79c66]"
+            className="text-sm tracking-[0.12em] text-brand-gold"
           >
             ★★★★★
           </p>
@@ -110,14 +110,14 @@ function ReviewCard({
             width={36}
           />
         </div>
-        <p className="mt-4 flex-1 text-[15px] font-normal leading-[1.55] text-[#1c133b] sm:text-base sm:leading-relaxed">
+        <p className="mt-4 flex-1 text-[15px] font-normal leading-[1.55] text-brand-ink sm:text-base sm:leading-relaxed">
           “{review.quote}”
         </p>
         <div className="mt-6 pb-1">
-          <p className="text-sm font-semibold leading-snug text-[#1c133b] sm:text-[15px]">
+          <p className="text-sm font-semibold leading-snug text-brand-ink sm:text-[15px]">
             {review.name}
           </p>
-          <p className="mt-1 text-xs font-normal leading-snug text-[#5a5470] sm:text-sm">
+          <p className="mt-1 text-xs font-normal leading-snug text-brand-muted sm:text-sm">
             {review.detail}
           </p>
         </div>
@@ -395,7 +395,7 @@ export function ReviewsSection({
             width={30}
           />
 
-          <h2 className="max-w-[20rem] text-balance text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
+          <h2 className="max-w-[20rem] text-balance text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-brand-ink sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
             {heading}
           </h2>
           <GoogleReviewsButton className="mt-4" />

@@ -26,8 +26,8 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
     <section className="min-w-0 overflow-hidden rounded-[1.5rem] border border-[#e8e0f4] bg-white p-4 shadow-[0_12px_28px_rgba(49,44,121,0.04)] sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-semibold text-[#1c133b]">Revenue</h2>
-          <p className="text-sm text-[#5a5470]">Captured platform revenue</p>
+          <h2 className="font-semibold text-brand-ink">Revenue</h2>
+          <p className="text-sm text-brand-muted">Captured platform revenue</p>
         </div>
         <div className="flex w-full rounded-full bg-[#f3eef8] p-1 sm:w-auto">
           {(["daily", "weekly", "monthly"] as const).map((value) => (
@@ -39,7 +39,7 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
               className={
                 period === value
                   ? "flex-1 rounded-full capitalize sm:flex-none"
-                  : "flex-1 rounded-full capitalize text-[#5a5470] sm:flex-none"
+                  : "flex-1 rounded-full capitalize text-brand-muted sm:flex-none"
               }
             >
               {value}
@@ -117,7 +117,7 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
             )}
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-full items-center justify-center rounded-2xl bg-[#f7f4fb] text-sm text-[#5a5470]">
+          <div className="flex h-full items-center justify-center rounded-2xl bg-[#f7f4fb] text-sm text-brand-muted">
             No captured revenue yet for this view.
           </div>
         )}

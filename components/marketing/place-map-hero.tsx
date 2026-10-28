@@ -76,12 +76,12 @@ export function PlaceMapHero({
 
           <div className={showReviews ? "max-w-[34rem] sm:pr-44" : "max-w-[34rem]"}>
             {eyebrow ? (
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[#823fb2]">
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-brand-violet">
                 {eyebrow}
               </p>
             ) : null}
             <h1
-              className={`text-balance text-[2.15rem] font-bold leading-[1.05] tracking-[-0.04em] text-[#1c133b] min-[400px]:text-[2.5rem] sm:text-5xl lg:text-[3.35rem] ${
+              className={`text-balance text-[2.15rem] font-bold leading-[1.05] tracking-[-0.04em] text-brand-ink min-[400px]:text-[2.5rem] sm:text-5xl lg:text-[3.35rem] ${
                 eyebrow ? "mt-4" : ""
               }`}
             >
@@ -91,10 +91,10 @@ export function PlaceMapHero({
               {description}
             </p>
             {bullets?.length ? (
-              <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-[#1c133b] sm:mt-6 sm:text-sm">
+              <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-brand-ink sm:mt-6 sm:text-sm">
                 {bullets.map((item) => (
                   <li className="flex items-start gap-2.5" key={item}>
-                    <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#1c133b]/12">
+                    <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-ink/12">
                       <Check className="h-3 w-3" strokeWidth={3} />
                     </span>
                     <span>{item}</span>
@@ -105,14 +105,14 @@ export function PlaceMapHero({
             <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
               <Button
                 asChild
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90 sm:h-12 sm:px-7"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-brand-ink px-6 text-sm font-semibold text-white transition hover:bg-brand-ink/90 sm:h-12 sm:px-7"
               >
                 <Link href={primaryHref}>{primaryLabel}</Link>
               </Button>
               {secondaryHref && secondaryLabel ? (
                 <Button
                   asChild
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-[#1c133b]/40 bg-white/50 px-6 text-sm font-semibold text-[#1c133b] backdrop-blur-[2px] transition hover:bg-white/75 sm:h-12 sm:px-7"
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-brand-ink/40 bg-white/50 px-6 text-sm font-semibold text-brand-ink backdrop-blur-[2px] transition hover:bg-white/75 sm:h-12 sm:px-7"
                   variant="outline"
                 >
                   <Link href={secondaryHref}>{secondaryLabel}</Link>

@@ -52,10 +52,11 @@ export function ProcessPayoutsButton() {
     <div className="w-full">
       <Button
         className="w-full sm:w-auto"
-        disabled={working}
+        loading={working}
+        loadingLabel="Processing…"
         onClick={() => void process()}
       >
-        {working ? "Processing…" : "Process payouts"}
+        Process payouts
       </Button>
     </div>
   );
