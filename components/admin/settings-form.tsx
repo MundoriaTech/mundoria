@@ -169,16 +169,16 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           Service hourly rates (£/h)
         </h2>
         <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          Essential uses the standard rate. Enhanced and Comprehensive use the
-          deep rate. Amounts are pounds per cleaner-hour.
+          Two labour bands per service. Standard is the everyday rate; deep is
+          used for heavier cleans. Amounts are pounds per cleaner-hour.
         </p>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="border-b text-[#5a5470]">
                 <th className="py-2 pr-3 font-medium">Service</th>
-                <th className="py-2 pr-3 font-medium">Essential</th>
-                <th className="py-2 font-medium">Enhanced+</th>
+                <th className="py-2 pr-3 font-medium">Standard</th>
+                <th className="py-2 font-medium">Deep</th>
               </tr>
             </thead>
             <tbody>
