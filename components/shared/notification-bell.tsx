@@ -11,9 +11,11 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { motion } from "motion/react";
 import { createPortal } from "react-dom";
 
 import { EmptyState } from "@/components/shared/empty-state";
+import { SPRING } from "@/lib/motion";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -280,23 +282,33 @@ export function NotificationBell({
     open && mounted
       ? createPortal(
           <>
-            <button
+            <motion.button
+              animate={{ opacity: 1 }}
               aria-label="Close notifications"
               className="fixed inset-0 z-[110] bg-slate-950/45"
+              initial={{ opacity: 0 }}
               onClick={() => setOpen(false)}
+              transition={{ duration: 0.22 }}
               type="button"
             />
-            <div
+            <motion.div
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               aria-label="Notifications"
               className={cn(
                 "fixed z-[120] flex flex-col overflow-hidden border border-border bg-background shadow-2xl",
                 isDesktop
-                  ? "rounded-xl"
+                  ? "origin-top-right rounded-xl"
                   : "rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
               )}
+              initial={
+                isDesktop
+                  ? { opacity: 0, scale: 0.95, y: -8 }
+                  : { opacity: 1, scale: 1, y: 48 }
+              }
               ref={panelRef}
               role="dialog"
               style={panelStyle}
+              transition={isDesktop ? SPRING.snappy : SPRING.gentle}
             >
               {!isDesktop ? (
                 <div className="flex shrink-0 items-center justify-center py-2">
@@ -331,7 +343,7 @@ export function NotificationBell({
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 {list}
               </div>
-            </div>
+            </motion.div>
           </>,
           document.body,
         )
@@ -352,9 +364,15 @@ export function NotificationBell({
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 ? (
-          <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
+          <motion.span
+            animate={{ scale: 1 }}
+            className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white"
+            initial={{ scale: 0 }}
+            key={unreadCount}
+            transition={SPRING.lively}
+          >
             {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
+          </motion.span>
         ) : null}
       </Button>
       {panel}

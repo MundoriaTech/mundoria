@@ -8,9 +8,11 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { motion } from "motion/react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
+import { SPRING } from "@/lib/motion";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Notification } from "@/types/customer";
@@ -152,22 +154,32 @@ export function AdminAlerts({
     open && mounted
       ? createPortal(
           <>
-            <button
+            <motion.button
+              animate={{ opacity: 1 }}
               aria-label="Close alerts"
               className="fixed inset-0 z-[110] bg-slate-950/45"
+              initial={{ opacity: 0 }}
               onClick={() => setOpen(false)}
+              transition={{ duration: 0.22 }}
               type="button"
             />
-            <div
+            <motion.div
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               className={cn(
                 "fixed z-[120] flex flex-col overflow-hidden border border-border bg-card shadow-2xl",
                 isDesktop
-                  ? "rounded-xl"
+                  ? "origin-top-right rounded-xl"
                   : "rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
               )}
+              initial={
+                isDesktop
+                  ? { opacity: 0, scale: 0.95, y: -8 }
+                  : { opacity: 1, scale: 1, y: 48 }
+              }
               ref={panelRef}
               role="dialog"
               style={panelStyle}
+              transition={isDesktop ? SPRING.snappy : SPRING.gentle}
             >
               {!isDesktop ? (
                 <div className="flex shrink-0 items-center justify-center py-2">
@@ -240,7 +252,7 @@ export function AdminAlerts({
                   </p>
                 ) : null}
               </div>
-            </div>
+            </motion.div>
           </>,
           document.body,
         )
@@ -259,9 +271,15 @@ export function AdminAlerts({
       >
         <Bell className="h-4 w-4" />
         {unread ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d4694a] px-1 text-[10px] font-bold text-white">
+          <motion.span
+            animate={{ scale: 1 }}
+            className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d4694a] px-1 text-[10px] font-bold text-white"
+            initial={{ scale: 0 }}
+            key={unread}
+            transition={SPRING.lively}
+          >
             {unread > 9 ? "9+" : unread}
-          </span>
+          </motion.span>
         ) : null}
       </Button>
       {panel}

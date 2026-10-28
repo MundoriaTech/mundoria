@@ -3,7 +3,6 @@
 import { type ReactNode, useState } from "react";
 
 import { AppModal } from "@/components/shared/app-modal";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { Button, type ButtonProps } from "@/components/ui/button";
 
 export function ConfirmModal({
@@ -60,15 +59,13 @@ export function ConfirmModal({
         </Button>
         <Button
           className="min-h-11 w-full sm:w-auto"
-          disabled={working || confirmDisabled}
+          disabled={confirmDisabled}
+          loading={working}
+          loadingLabel={action}
           onClick={() => void confirm()}
           variant={variant}
         >
-          {working ? (
-            <LoadingSpinner className="text-current" label={action} />
-          ) : (
-            action
-          )}
+          {action}
         </Button>
       </div>
     </AppModal>

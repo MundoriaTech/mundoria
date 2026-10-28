@@ -10,11 +10,13 @@ import {
   UserRound,
   type LucideIcon,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { popIn } from "@/lib/motion";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -144,11 +146,17 @@ export function AccountMenu({
         />
       </button>
 
+      <AnimatePresence>
       {open ? (
         <div className="absolute right-0 top-full z-50 pt-1.5">
-          <div
-            className="w-56 overflow-hidden rounded-2xl border border-[#e8e0f4] bg-white py-1.5 shadow-[0_18px_40px_rgba(28,19,59,0.16)] dark:border-border dark:bg-card"
+          <motion.div
+            animate="visible"
+            className="w-56 origin-top-right overflow-hidden rounded-2xl border border-[#e8e0f4] bg-white py-1.5 shadow-[0_18px_40px_rgba(28,19,59,0.16)]"
+            exit="exit"
+            initial="hidden"
+            key="account-menu"
             role="menu"
+            variants={popIn}
           >
           <div className="border-b border-[#efe8f8] px-3.5 py-2.5 dark:border-border">
             <p className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground">
@@ -178,9 +186,10 @@ export function AccountMenu({
             <LogOut className="h-4 w-4" />
             {signingOut ? "Signing out…" : "Log out"}
           </button>
-          </div>
+          </motion.div>
         </div>
       ) : null}
+      </AnimatePresence>
     </div>
   );
 }
