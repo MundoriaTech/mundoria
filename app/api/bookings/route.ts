@@ -7,6 +7,7 @@ import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import { calculateOfficeQuote } from "@/lib/customer/office-pricing";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
 import {
   addOnAmountPence,
   formatMoney,
@@ -120,7 +121,19 @@ export async function POST(request: Request) {
   const selectedAddOnDefs = SERVICE_ADD_ONS.filter((addOn) =>
     parsed.data.selectedAddOns.includes(addOn.id),
   );
-  const platformAmount = Math.round(amountPence * 0.2);
+  const [{ data: commissionRow }, pricing] = await Promise.all([
+    admin
+      .from("platform_settings")
+      .select("platform_commission_percent")
+      .eq("id", true)
+      .maybeSingle(),
+    loadServicePricing(),
+  ]);
+  const commissionPercent = Math.min(
+    100,
+    Math.max(0, Number(commissionRow?.platform_commission_percent ?? 20)),
+  );
+  const platformAmount = Math.round(amountPence * (commissionPercent / 100));
   const cleanerAmount = amountPence - platformAmount;
   const officeQuote =
     parsed.data.serviceType === "office" && parsed.data.officeSpaces.length
@@ -255,6 +268,7 @@ export async function POST(request: Request) {
         add_on_id: addOn.id,
         amount: addOnAmountPence(addOn, {
           durationHours: supplyHours,
+          pricing,
           serviceType: parsed.data.serviceType,
           standard: parsed.data.cleaningStandard,
         }),

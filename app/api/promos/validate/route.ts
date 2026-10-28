@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { estimatePrice } from "@/lib/customer/services";
 import type { Address } from "@/types/customer";
 
@@ -70,6 +71,7 @@ export async function POST(request: Request) {
     );
   }
 
+  const pricing = await loadServicePricing();
   const baseAmount = estimatePrice(
     parsed.data.serviceType,
     address as Address,
@@ -79,6 +81,7 @@ export async function POST(request: Request) {
       date: parsed.data.scheduledDate,
       time: parsed.data.scheduledTime,
     },
+    { pricing },
   );
   const discount =
     promo.discount_type === "percentage"

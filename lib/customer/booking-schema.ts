@@ -115,6 +115,8 @@ export const bookingDraftSchema = z.object({
       }),
     )
     .default([]),
+  /** Existing Stripe PaymentMethod on the customer — reuse at checkout. */
+  paymentMethodId: z.string().min(1).optional(),
 });
 
 export const createBookingSchema = bookingDraftSchema.extend({

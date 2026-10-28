@@ -4,6 +4,14 @@ import type {
   ServiceType,
 } from "@/types/customer";
 
+import {
+  DEFAULT_SERVICE_PRICING,
+  equipmentSupplyFromPricing,
+  hourlyRateFromPricing,
+  productSupplyFromPricing,
+  type ServicePricingConfig,
+} from "@/lib/customer/pricing-config";
+
 /** Maps booking standards onto the published rate-card levels. */
 export type RateCardLevel = "standard" | "deep";
 
@@ -13,62 +21,30 @@ export function rateCardLevel(standard: CleaningStandard): RateCardLevel {
 
 /**
  * Mundoria hourly labour rates (pence).
- * Regular uses Essential £22 / Enhanced+ £26; most others use standard/deep pairs.
+ * Pass `pricing` from `loadServicePricing()` so admin overrides apply.
  */
-const HOURLY_RATE_PENCE: Partial<
-  Record<ServiceType, { deep: number; standard: number }>
-> = {
-  regular: { standard: 2200, deep: 2600 },
-  deep_clean: { standard: 2200, deep: 2600 },
-  one_off: { standard: 2600, deep: 2600 },
-  same_day: { standard: 2600, deep: 2600 },
-  move_in: { standard: 2600, deep: 2600 },
-  move_out: { standard: 2600, deep: 2600 },
-  end_of_tenancy: { standard: 2600, deep: 2600 },
-  airbnb_turnover: { standard: 2200, deep: 2600 },
-  holiday_let: { standard: 2200, deep: 2600 },
-  serviced_accommodation: { standard: 2200, deep: 2600 },
-  office: { standard: 2200, deep: 2600 },
-  retail_hospitality: { standard: 2200, deep: 2600 },
-  educational_facility: { standard: 2200, deep: 2600 },
-  communal_area: { standard: 2200, deep: 2600 },
-  pregnancy_support: { standard: 2300, deep: 2700 },
-  postpartum: { standard: 2300, deep: 2700 },
-  illness_recovery: { standard: 2300, deep: 2700 },
-  post_injury: { standard: 2300, deep: 2700 },
-  hospital_discharge: { standard: 2300, deep: 2700 },
-  bereavement_support: { standard: 2300, deep: 2700 },
-};
-
-const DEFAULT_HOURLY = { standard: 2200, deep: 2600 };
-
 export function hourlyRatePence(
   serviceType: ServiceType,
   standard: CleaningStandard,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
 ) {
-  const envCommercial = process.env.COMMERCIAL_HOURLY_RATE_PENCE;
-  if (
-    envCommercial &&
-    ["office", "retail_hospitality", "educational_facility", "communal_area"].includes(
-      serviceType,
-    )
-  ) {
-    const parsed = Number(envCommercial);
-    if (Number.isFinite(parsed) && parsed > 0) return parsed;
-  }
-
-  const band = HOURLY_RATE_PENCE[serviceType] ?? DEFAULT_HOURLY;
-  return band[rateCardLevel(standard)];
+  return hourlyRateFromPricing(pricing, serviceType, standard);
 }
 
 /** Product supply: £2/h residential-family categories, £3/h commercial. */
-export function productSupplyRatePence(category: ServiceCategory) {
-  return category === "commercial" ? 300 : 200;
+export function productSupplyRatePence(
+  category: ServiceCategory,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+) {
+  return productSupplyFromPricing(pricing, category);
 }
 
 /** Equipment supply: £3/h normally, £5/h for Deep Cleaning. */
-export function equipmentSupplyRatePence(serviceType: ServiceType) {
-  return serviceType === "deep_clean" ? 500 : 300;
+export function equipmentSupplyRatePence(
+  serviceType: ServiceType,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+) {
+  return equipmentSupplyFromPricing(pricing, serviceType);
 }
 
 export type SupplyKit = {

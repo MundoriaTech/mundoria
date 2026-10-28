@@ -111,6 +111,10 @@ import {
   SERVICE_CATEGORIES,
   servicesForCategory,
 } from "@/lib/customer/services";
+import {
+  DEFAULT_SERVICE_PRICING,
+  type ServicePricingConfig,
+} from "@/lib/customer/pricing-config";
 import { hourlyRatePence } from "@/lib/customer/rate-card";
 import {
   calculateOfficeQuote,
@@ -359,6 +363,9 @@ export function BookingWizard({
   const [authVerifyPending, setAuthVerifyPending] = useState(false);
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
   const [promoAmount, setPromoAmount] = useState<number | null>(null);
+  const [pricing, setPricing] = useState<ServicePricingConfig>(
+    DEFAULT_SERVICE_PRICING,
+  );
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [tooFarOpen, setTooFarOpen] = useState(false);
   const dismissedFarPostcodeRef = useRef<string | null>(null);
@@ -473,6 +480,7 @@ export function BookingWizard({
                     propertyType: roomsAddress?.property_type,
                   },
                 ),
+          pricing,
           serviceType: draft.serviceType,
           standard: selectedStandard,
         }
@@ -489,9 +497,9 @@ export function BookingWizard({
               date: draft.scheduledDate,
               time: draft.scheduledTime,
             },
-            { officeSpaces: draft.officeSpaces },
+            { officeSpaces: draft.officeSpaces, pricing },
           )
-        : indicativeFromPrice(draft.serviceType) +
+        : indicativeFromPrice(draft.serviceType, pricing) +
           selectedAddOnTotal(draft.selectedAddOns, addOnPriceContext)
       : 0;
   const duration = durationSummary({
@@ -781,6 +789,25 @@ export function BookingWizard({
     }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/pricing")
+      .then(async (response) => {
+        const result = (await response.json()) as {
+          pricing?: ServicePricingConfig;
+        };
+        if (!cancelled && response.ok && result.pricing) {
+          setPricing(result.pricing);
+        }
+      })
+      .catch(() => {
+        /* keep defaults */
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -1408,9 +1435,9 @@ export function BookingWizard({
   const displayAmount = promoAmount ?? estimatedAmount;
   const displayHourlyRatePence =
     draft.serviceType && selectedStandard
-      ? hourlyRatePence(draft.serviceType, selectedStandard)
+      ? hourlyRatePence(draft.serviceType, selectedStandard, pricing)
       : draft.serviceType
-        ? indicativeHourlyRatePence(draft.serviceType)
+        ? indicativeHourlyRatePence(draft.serviceType, pricing)
         : null;
   const priceLabel =
     displayHourlyRatePence != null
@@ -1424,10 +1451,16 @@ export function BookingWizard({
           amount: item.hourly
             ? addOnAmountPence(item, {
                 durationHours: 1,
+                pricing,
                 serviceType: draft.serviceType!,
                 standard: selectedStandard ?? normalizeStandard(draft.serviceType!, null),
               })
-            : item.amount,
+            : addOnAmountPence(item, {
+                durationHours: 0,
+                pricing,
+                serviceType: draft.serviceType!,
+                standard: selectedStandard ?? normalizeStandard(draft.serviceType!, null),
+              }),
           hourly: Boolean(item.hourly),
         }))
     : [];
@@ -3551,6 +3584,20 @@ function TimeStep({
   );
 }
 
+type SavedCheckoutCard = {
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  id: string;
+  isDefault: boolean;
+  last4: string;
+};
+
+function formatCardBrand(brand: string) {
+  if (!brand) return "Card";
+  return brand.charAt(0).toUpperCase() + brand.slice(1);
+}
+
 function CheckoutStep({
   address,
   customerFirstName = null,
@@ -3583,10 +3630,19 @@ function CheckoutStep({
   const [paymentPhase, setPaymentPhase] = useState<
     "idle" | "saving" | "saving_card" | "confirming"
   >("idle");
-  const [cardOpen, setCardOpen] = useState(false);
+  const [savedCards, setSavedCards] = useState<SavedCheckoutCard[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(Boolean(userId));
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<
+    string | "new" | null
+  >(null);
   const [cardFocused, setCardFocused] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState(address);
   const [firstName, setFirstName] = useState(customerFirstName);
+  const usingNewCard = selectedPaymentMethodId === "new" || !savedCards.length;
+  const selectedSavedCard =
+    selectedPaymentMethodId && selectedPaymentMethodId !== "new"
+      ? savedCards.find((card) => card.id === selectedPaymentMethodId) ?? null
+      : null;
 
   useEffect(() => {
     setResolvedAddress(address);
@@ -3617,6 +3673,39 @@ function CheckoutStep({
       cancelled = true;
     };
   }, [customerFirstName, userId]);
+
+  useEffect(() => {
+    if (!userId) {
+      setSavedCards([]);
+      setSelectedPaymentMethodId("new");
+      setCardsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setCardsLoading(true);
+    void fetch("/api/stripe/payment-methods")
+      .then(async (response) => {
+        const result = (await response.json()) as {
+          error?: string;
+          paymentMethods?: SavedCheckoutCard[];
+        };
+        if (cancelled) return;
+        const methods = response.ok ? (result.paymentMethods ?? []) : [];
+        setSavedCards(methods);
+        setSelectedPaymentMethodId(methods[0]?.id ?? "new");
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSavedCards([]);
+        setSelectedPaymentMethodId("new");
+      })
+      .finally(() => {
+        if (!cancelled) setCardsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   useEffect(() => {
     onProcessingChange?.(processing);
@@ -3668,17 +3757,19 @@ function CheckoutStep({
     event.preventDefault();
     setError(null);
     if (payingRef.current || processing) return;
-    if (!stripe || !elements) return;
-    if (!cardOpen) {
-      setCardOpen(true);
-      setError("Enter your card details to continue.");
-      return;
-    }
-    const card = elements.getElement(CardElement);
-    if (!card) {
-      setCardOpen(true);
-      setError("Enter your card details to continue.");
-      return;
+    if (!stripe) return;
+
+    const reuseSavedCard =
+      Boolean(selectedSavedCard) && selectedPaymentMethodId !== "new";
+
+    if (!reuseSavedCard) {
+      if (!elements) return;
+      const card = elements.getElement(CardElement);
+      if (!card) {
+        setSelectedPaymentMethodId("new");
+        setError("Enter your card details to continue.");
+        return;
+      }
     }
 
     payingRef.current = true;
@@ -3699,46 +3790,73 @@ function CheckoutStep({
       };
 
       setPaymentPhase("saving_card");
-      const setupResponse = await fetch("/api/bookings/payment-intent", {
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-      });
-      const setup = (await setupResponse.json()) as {
-        clientSecret?: string;
-        error?: string;
-        setupIntentId?: string;
-      };
-      if (!setupResponse.ok || !setup.clientSecret) {
-        throw new Error(setup.error ?? "Unable to save your card.");
-      }
+      let setupIntentId: string | undefined;
 
-      const { error: stripeError, setupIntent } =
-        await stripe.confirmCardSetup(setup.clientSecret, {
-          payment_method: {
-            card,
-            billing_details: {
-              address: {
-                city: savedAddress.city,
-                line1: savedAddress.address_line_1,
-                line2: savedAddress.address_line_2 ?? undefined,
-                postal_code: savedAddress.postcode,
+      if (reuseSavedCard && selectedPaymentMethodId !== "new") {
+        const setupResponse = await fetch("/api/bookings/payment-intent", {
+          body: JSON.stringify({
+            ...payload,
+            paymentMethodId: selectedPaymentMethodId,
+          }),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        });
+        const setup = (await setupResponse.json()) as {
+          confirmed?: boolean;
+          error?: string;
+          setupIntentId?: string;
+        };
+        if (!setupResponse.ok || !setup.setupIntentId || !setup.confirmed) {
+          throw new Error(setup.error ?? "Unable to use your saved card.");
+        }
+        setupIntentId = setup.setupIntentId;
+      } else {
+        const card = elements!.getElement(CardElement);
+        if (!card) {
+          throw new Error("Enter your card details to continue.");
+        }
+        const setupResponse = await fetch("/api/bookings/payment-intent", {
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        });
+        const setup = (await setupResponse.json()) as {
+          clientSecret?: string;
+          error?: string;
+          setupIntentId?: string;
+        };
+        if (!setupResponse.ok || !setup.clientSecret) {
+          throw new Error(setup.error ?? "Unable to save your card.");
+        }
+
+        const { error: stripeError, setupIntent } =
+          await stripe.confirmCardSetup(setup.clientSecret, {
+            payment_method: {
+              card,
+              billing_details: {
+                address: {
+                  city: savedAddress.city,
+                  line1: savedAddress.address_line_1,
+                  line2: savedAddress.address_line_2 ?? undefined,
+                  postal_code: savedAddress.postcode,
+                },
               },
             },
-          },
-        });
-      if (stripeError || !setupIntent) {
-        throw new Error(stripeError?.message ?? "Card could not be saved.");
-      }
-      if (setupIntent.status !== "succeeded") {
-        throw new Error("Card was not saved. Please try again.");
+          });
+        if (stripeError || !setupIntent) {
+          throw new Error(stripeError?.message ?? "Card could not be saved.");
+        }
+        if (setupIntent.status !== "succeeded") {
+          throw new Error("Card was not saved. Please try again.");
+        }
+        setupIntentId = setupIntent.id;
       }
 
       setPaymentPhase("confirming");
       const bookingResponse = await fetch("/api/bookings", {
         body: JSON.stringify({
           ...payload,
-          setupIntentId: setupIntent.id,
+          setupIntentId,
         }),
         headers: { "Content-Type": "application/json" },
         method: "POST",
@@ -3802,54 +3920,93 @@ function CheckoutStep({
 
       <div className="mt-6">
         <p className="font-semibold text-[#1c133b]">Your payment method</p>
-        <div
-          className={cn(
-            "mt-3 overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-transparent transition",
-            cardOpen && "ring-2 ring-[#1c133b] ring-offset-0",
-          )}
-        >
-          <button
-            aria-expanded={cardOpen}
-            className="flex w-full items-center gap-3 px-4 py-3.5 text-left touch-manipulation"
-            onClick={() => setCardOpen((value) => !value)}
-            type="button"
-          >
-            <CreditCard className="h-5 w-5 shrink-0 text-[#1c133b]" />
-            <span className="font-semibold text-[#1c133b]">Card</span>
-          </button>
-          {cardOpen ? (
-            <div className="px-4 pb-4 pt-1">
-              <div
-                className={cn(
-                  "rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] px-3 py-3 transition",
-                  cardFocused && "ring-2 ring-[#1c133b] ring-offset-0",
-                )}
+        {cardsLoading ? (
+          <p className="mt-3 text-sm text-[#7a7198]">Loading saved cards…</p>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {savedCards.map((card) => {
+              const selected = selectedPaymentMethodId === card.id;
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-2xl border-2 bg-transparent px-4 py-3.5 text-left transition touch-manipulation",
+                    selected
+                      ? "border-[#1c133b]"
+                      : "border-[#e4daf5] hover:border-[#c9b8ef]",
+                  )}
+                  key={card.id}
+                  onClick={() => setSelectedPaymentMethodId(card.id)}
+                  type="button"
+                >
+                  <CreditCard className="h-5 w-5 shrink-0 text-[#1c133b]" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold text-[#1c133b]">
+                      {formatCardBrand(card.brand)} •••• {card.last4}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-[#7a7198]">
+                      Expires {String(card.expMonth).padStart(2, "0")}/
+                      {String(card.expYear).slice(-2)}
+                      {card.isDefault ? " · Default" : ""}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+
+            <div
+              className={cn(
+                "overflow-hidden rounded-2xl border-2 bg-transparent transition",
+                usingNewCard ? "border-[#1c133b]" : "border-[#e4daf5]",
+              )}
+            >
+              <button
+                aria-expanded={usingNewCard}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left touch-manipulation"
+                onClick={() => setSelectedPaymentMethodId("new")}
+                type="button"
               >
-                <CardElement
-                  onBlur={() => setCardFocused(false)}
-                  onFocus={() => setCardFocused(true)}
-                  options={{
-                    hidePostalCode: true,
-                    style: {
-                      base: {
-                        color: "#1c133b",
-                        fontFamily: "system-ui, sans-serif",
-                        fontSize: "16px",
-                        "::placeholder": { color: "#8a8498" },
-                      },
-                    },
-                  }}
-                />
-              </div>
-              <p className="mt-3 text-xs leading-5 text-[#7a7198]">
-                By providing your card information, you allow Mundoria to save
-                it for this booking, place a hold about 24 hours before your
-                clean (once a cleaner is confirmed), and capture payment the
-                next day after the clean — in accordance with our terms.
-              </p>
+                <CreditCard className="h-5 w-5 shrink-0 text-[#1c133b]" />
+                <span className="font-semibold text-[#1c133b]">
+                  {savedCards.length ? "Use a different card" : "Card"}
+                </span>
+              </button>
+              {usingNewCard ? (
+                <div className="px-4 pb-4 pt-1">
+                  <div
+                    className={cn(
+                      "rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] px-3 py-3 transition",
+                      cardFocused && "ring-2 ring-[#1c133b] ring-offset-0",
+                    )}
+                  >
+                    <CardElement
+                      onBlur={() => setCardFocused(false)}
+                      onFocus={() => setCardFocused(true)}
+                      options={{
+                        hidePostalCode: true,
+                        style: {
+                          base: {
+                            color: "#1c133b",
+                            fontFamily: "system-ui, sans-serif",
+                            fontSize: "16px",
+                            "::placeholder": { color: "#8a8498" },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-[#7a7198]">
+                    By providing your card information, you allow Mundoria to
+                    save it for this booking, place a hold about 24 hours before
+                    your clean (once a cleaner is confirmed), and capture
+                    payment the next day after the clean — in accordance with
+                    our terms.
+                  </p>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
+          </div>
+        )}
         <div className="mt-3 flex items-start gap-2.5 px-0.5">
           <Info
             aria-hidden
@@ -3899,14 +4056,18 @@ function CheckoutStep({
             paymentPhase === "saving"
               ? "Saving your address securely."
               : paymentPhase === "saving_card"
-                ? "Saving your card securely — no charge yet."
+                ? usingNewCard
+                  ? "Saving your card securely — no charge yet."
+                  : "Confirming your saved card — no charge yet."
                 : "Almost done — creating your booking."
           }
           label={
             paymentPhase === "saving"
               ? "Saving…"
               : paymentPhase === "saving_card"
-                ? "Saving card…"
+                ? usingNewCard
+                  ? "Saving card…"
+                  : "Using saved card…"
                 : "Confirming booking…"
           }
         />
@@ -3971,7 +4132,7 @@ function CheckoutStep({
 
       <Button
         className="mt-6 min-h-12 w-full rounded-full bg-[#6a45b8] text-base touch-manipulation hover:bg-[#5a38a3]"
-        disabled={!stripe || processing}
+        disabled={!stripe || processing || cardsLoading}
         size="lg"
         type="submit"
       >
@@ -3981,7 +4142,9 @@ function CheckoutStep({
             {paymentPhase === "saving"
               ? "Saving…"
               : paymentPhase === "saving_card"
-                ? "Saving card…"
+                ? usingNewCard
+                  ? "Saving card…"
+                  : "Using saved card…"
                 : "Confirming booking…"}
           </span>
         ) : (

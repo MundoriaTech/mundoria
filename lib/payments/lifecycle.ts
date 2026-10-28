@@ -72,6 +72,57 @@ export async function createBookingSetupIntent({
 }
 
 /**
+ * Reuse a card already on the Stripe Customer — confirm a SetupIntent
+ * server-side so booking creation can keep verifying via setupIntentId.
+ */
+export async function confirmBookingSetupIntentWithSavedCard({
+  amount,
+  customerId,
+  idempotencyKey,
+  metadata,
+  paymentMethodId,
+  stripeCustomerId,
+}: {
+  amount: number;
+  customerId: string;
+  idempotencyKey?: string;
+  metadata: Record<string, string>;
+  paymentMethodId: string;
+  stripeCustomerId: string;
+}) {
+  const stripe = getStripe();
+  const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+  const owner =
+    typeof paymentMethod.customer === "string"
+      ? paymentMethod.customer
+      : paymentMethod.customer?.id ?? null;
+  if (owner !== stripeCustomerId) {
+    throw new Error("That card does not belong to this account.");
+  }
+  if (paymentMethod.type !== "card") {
+    throw new Error("Only card payment methods can be used for bookings.");
+  }
+
+  return stripe.setupIntents.create(
+    {
+      confirm: true,
+      customer: stripeCustomerId,
+      metadata: {
+        ...metadata,
+        amount_pence: String(amount),
+        supabase_user_id: customerId,
+      },
+      payment_method: paymentMethodId,
+      payment_method_types: ["card"],
+      usage: "off_session",
+    },
+    idempotencyKey
+      ? { idempotencyKey: idempotencyKey.slice(0, 255) }
+      : undefined,
+  );
+}
+
+/**
  * Off-session manual-capture PaymentIntent using the saved card.
  * Sets payment_status to held when requires_capture / succeeded.
  */

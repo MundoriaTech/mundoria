@@ -1,0 +1,321 @@
+import { createAdminClient } from "@/lib/supabase/admin";
+import type {
+  CleaningStandard,
+  ServiceCategory,
+  ServiceType,
+} from "@/types/customer";
+
+type RateCardLevel = "standard" | "deep";
+
+function rateCardLevel(standard: CleaningStandard): RateCardLevel {
+  return standard === "essential" ? "standard" : "deep";
+}
+
+export type HourlyBand = { deep: number; standard: number };
+
+export type ServicePricingConfig = {
+  addOns: Record<string, number>;
+  defaults: HourlyBand;
+  hourly: Partial<Record<ServiceType, HourlyBand>>;
+  schedule: {
+    early: number;
+    evening: number;
+    weekend: number;
+    weekendPeak: number;
+  };
+  supply: {
+    equipmentDeepClean: number;
+    equipmentDefault: number;
+    productsCommercial: number;
+    productsResidential: number;
+  };
+};
+
+/** In-code defaults — match historic rate-card / add-on / schedule values. */
+export const DEFAULT_SERVICE_PRICING: ServicePricingConfig = {
+  defaults: { standard: 2200, deep: 2600 },
+  hourly: {
+    regular: { standard: 2200, deep: 2600 },
+    deep_clean: { standard: 2200, deep: 2600 },
+    one_off: { standard: 2600, deep: 2600 },
+    same_day: { standard: 2600, deep: 2600 },
+    move_in: { standard: 2600, deep: 2600 },
+    move_out: { standard: 2600, deep: 2600 },
+    end_of_tenancy: { standard: 2600, deep: 2600 },
+    airbnb_turnover: { standard: 2200, deep: 2600 },
+    holiday_let: { standard: 2200, deep: 2600 },
+    serviced_accommodation: { standard: 2200, deep: 2600 },
+    office: { standard: 2200, deep: 2600 },
+    retail_hospitality: { standard: 2200, deep: 2600 },
+    educational_facility: { standard: 2200, deep: 2600 },
+    communal_area: { standard: 2200, deep: 2600 },
+    pregnancy_support: { standard: 2300, deep: 2700 },
+    postpartum: { standard: 2300, deep: 2700 },
+    illness_recovery: { standard: 2300, deep: 2700 },
+    post_injury: { standard: 2300, deep: 2700 },
+    hospital_discharge: { standard: 2300, deep: 2700 },
+    bereavement_support: { standard: 2300, deep: 2700 },
+  },
+  supply: {
+    productsResidential: 200,
+    productsCommercial: 300,
+    equipmentDefault: 300,
+    equipmentDeepClean: 500,
+  },
+  schedule: {
+    early: 1.1,
+    evening: 1.15,
+    weekend: 1.18,
+    weekendPeak: 1.28,
+  },
+  addOns: {
+    ironing: 0,
+    inside_fridge: 1200,
+    inside_oven: 1800,
+    inside_cabinets: 1500,
+    interior_windows: 1400,
+    balcony_patio: 2000,
+    extra_bathroom_detail: 1600,
+    linen_change: 1000,
+    recovery_priority: 2200,
+  },
+};
+
+const COMMERCIAL_TYPES: ServiceType[] = [
+  "office",
+  "retail_hospitality",
+  "educational_facility",
+  "communal_area",
+];
+
+function asPositiveInt(value: unknown, fallback: number) {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n) || n < 0) return fallback;
+  return Math.round(n);
+}
+
+function asMultiplier(value: unknown, fallback: number) {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n) || n < 1 || n > 3) return fallback;
+  return Math.round(n * 1000) / 1000;
+}
+
+function asBand(value: unknown, fallback: HourlyBand): HourlyBand {
+  if (!value || typeof value !== "object") return fallback;
+  const row = value as Record<string, unknown>;
+  return {
+    standard: asPositiveInt(row.standard, fallback.standard),
+    deep: asPositiveInt(row.deep, fallback.deep),
+  };
+}
+
+/** Merge partial admin JSON over code defaults. */
+export function normalizeServicePricing(raw: unknown): ServicePricingConfig {
+  const base = DEFAULT_SERVICE_PRICING;
+  if (!raw || typeof raw !== "object") return structuredClone(base);
+  const input = raw as Record<string, unknown>;
+
+  const defaults = asBand(input.defaults, base.defaults);
+  const hourlyIn =
+    input.hourly && typeof input.hourly === "object"
+      ? (input.hourly as Record<string, unknown>)
+      : {};
+  const hourly: ServicePricingConfig["hourly"] = { ...base.hourly };
+  for (const key of Object.keys(base.hourly) as ServiceType[]) {
+    hourly[key] = asBand(hourlyIn[key], base.hourly[key] ?? defaults);
+  }
+  for (const [key, value] of Object.entries(hourlyIn)) {
+    if (!(key in hourly)) {
+      hourly[key as ServiceType] = asBand(value, defaults);
+    }
+  }
+
+  const supplyIn =
+    input.supply && typeof input.supply === "object"
+      ? (input.supply as Record<string, unknown>)
+      : {};
+  const scheduleIn =
+    input.schedule && typeof input.schedule === "object"
+      ? (input.schedule as Record<string, unknown>)
+      : {};
+  const addOnsIn =
+    input.addOns && typeof input.addOns === "object"
+      ? (input.addOns as Record<string, unknown>)
+      : {};
+
+  const addOns: Record<string, number> = { ...base.addOns };
+  for (const [id, amount] of Object.entries(addOnsIn)) {
+    addOns[id] = asPositiveInt(amount, base.addOns[id] ?? 0);
+  }
+
+  return {
+    defaults,
+    hourly,
+    supply: {
+      productsResidential: asPositiveInt(
+        supplyIn.productsResidential,
+        base.supply.productsResidential,
+      ),
+      productsCommercial: asPositiveInt(
+        supplyIn.productsCommercial,
+        base.supply.productsCommercial,
+      ),
+      equipmentDefault: asPositiveInt(
+        supplyIn.equipmentDefault,
+        base.supply.equipmentDefault,
+      ),
+      equipmentDeepClean: asPositiveInt(
+        supplyIn.equipmentDeepClean,
+        base.supply.equipmentDeepClean,
+      ),
+    },
+    schedule: {
+      early: asMultiplier(scheduleIn.early, base.schedule.early),
+      evening: asMultiplier(scheduleIn.evening, base.schedule.evening),
+      weekend: asMultiplier(scheduleIn.weekend, base.schedule.weekend),
+      weekendPeak: asMultiplier(
+        scheduleIn.weekendPeak,
+        base.schedule.weekendPeak,
+      ),
+    },
+    addOns,
+  };
+}
+
+let cached: { at: number; value: ServicePricingConfig } | null = null;
+const CACHE_MS = 15_000;
+
+export function clearServicePricingCache() {
+  cached = null;
+}
+
+/** Load platform pricing (admin overrides merged onto defaults). */
+export async function loadServicePricing(): Promise<ServicePricingConfig> {
+  if (cached && Date.now() - cached.at < CACHE_MS) {
+    return cached.value;
+  }
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("platform_settings")
+      .select("service_pricing")
+      .eq("id", true)
+      .maybeSingle();
+    const value = normalizeServicePricing(data?.service_pricing);
+    cached = { at: Date.now(), value };
+    return value;
+  } catch {
+    return structuredClone(DEFAULT_SERVICE_PRICING);
+  }
+}
+
+export function bandForService(
+  pricing: ServicePricingConfig,
+  serviceType: ServiceType,
+): HourlyBand {
+  return pricing.hourly[serviceType] ?? pricing.defaults;
+}
+
+export function hourlyRateFromPricing(
+  pricing: ServicePricingConfig,
+  serviceType: ServiceType,
+  standard: CleaningStandard,
+) {
+  const envCommercial = process.env.COMMERCIAL_HOURLY_RATE_PENCE;
+  if (envCommercial && COMMERCIAL_TYPES.includes(serviceType)) {
+    const parsed = Number(envCommercial);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  const band = bandForService(pricing, serviceType);
+  const level: RateCardLevel = rateCardLevel(standard);
+  return band[level];
+}
+
+export function productSupplyFromPricing(
+  pricing: ServicePricingConfig,
+  category: ServiceCategory,
+) {
+  return category === "commercial"
+    ? pricing.supply.productsCommercial
+    : pricing.supply.productsResidential;
+}
+
+export function equipmentSupplyFromPricing(
+  pricing: ServicePricingConfig,
+  serviceType: ServiceType,
+) {
+  return serviceType === "deep_clean"
+    ? pricing.supply.equipmentDeepClean
+    : pricing.supply.equipmentDefault;
+}
+
+export function flatAddOnAmountFromPricing(
+  pricing: ServicePricingConfig,
+  addOnId: string,
+  fallbackAmount: number,
+) {
+  if (Object.prototype.hasOwnProperty.call(pricing.addOns, addOnId)) {
+    return pricing.addOns[addOnId]!;
+  }
+  return fallbackAmount;
+}
+
+export function scheduleMultiplierFromPricing(
+  pricing: ServicePricingConfig,
+  scheduledDate?: string | null,
+  scheduledTime?: string | null,
+) {
+  if (!scheduledDate || !scheduledTime) return 1;
+
+  const day = new Date(`${scheduledDate}T12:00:00`).getDay();
+  const weekend = day === 0 || day === 6;
+  const hour = Number(scheduledTime.slice(0, 2));
+  if (!Number.isFinite(hour)) return weekend ? pricing.schedule.weekend : 1;
+
+  const early = hour < 9;
+  const evening = hour >= 17;
+
+  if (weekend && (early || evening)) return pricing.schedule.weekendPeak;
+  if (weekend) return pricing.schedule.weekend;
+  if (evening) return pricing.schedule.evening;
+  if (early) return pricing.schedule.early;
+  return 1;
+}
+
+/** Services shown in the admin rate table (excludes hidden aliases). */
+export const ADMIN_PRICING_SERVICES: Array<{
+  label: string;
+  value: ServiceType;
+}> = [
+  { label: "Regular cleaning", value: "regular" },
+  { label: "One-off cleaning", value: "one_off" },
+  { label: "Same-day cleaning", value: "same_day" },
+  { label: "Deep cleaning", value: "deep_clean" },
+  { label: "End of tenancy", value: "end_of_tenancy" },
+  { label: "Move-in", value: "move_in" },
+  { label: "Move-out", value: "move_out" },
+  { label: "Airbnb turnover", value: "airbnb_turnover" },
+  { label: "Holiday let", value: "holiday_let" },
+  { label: "Serviced accommodation", value: "serviced_accommodation" },
+  { label: "Office", value: "office" },
+  { label: "Retail & hospitality", value: "retail_hospitality" },
+  { label: "Educational facility", value: "educational_facility" },
+  { label: "Communal area", value: "communal_area" },
+  { label: "Pregnancy support", value: "pregnancy_support" },
+  { label: "Postpartum", value: "postpartum" },
+  { label: "Illness recovery", value: "illness_recovery" },
+  { label: "Post-injury", value: "post_injury" },
+  { label: "Hospital discharge", value: "hospital_discharge" },
+  { label: "Bereavement support", value: "bereavement_support" },
+];
+
+export const ADMIN_FLAT_ADD_ONS: Array<{ id: string; label: string }> = [
+  { id: "inside_fridge", label: "Inside fridge" },
+  { id: "inside_oven", label: "Inside oven" },
+  { id: "inside_cabinets", label: "Inside cabinets" },
+  { id: "interior_windows", label: "Interior windows" },
+  { id: "balcony_patio", label: "Balcony or patio" },
+  { id: "extra_bathroom_detail", label: "Extra bathroom detail" },
+  { id: "linen_change", label: "Linen change" },
+  { id: "recovery_priority", label: "Recovery priority care" },
+];

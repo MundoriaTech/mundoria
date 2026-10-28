@@ -22,6 +22,12 @@ import {
   type OfficeSpaceSelection,
 } from "@/lib/customer/office-pricing";
 import {
+  DEFAULT_SERVICE_PRICING,
+  flatAddOnAmountFromPricing,
+  scheduleMultiplierFromPricing,
+  type ServicePricingConfig,
+} from "@/lib/customer/pricing-config";
+import {
   equipmentSupplyRatePence,
   hourlyRatePence,
   productSupplyRatePence,
@@ -627,6 +633,7 @@ export function availableAddOns(serviceType: ServiceType) {
 
 export type AddOnPriceContext = {
   durationHours: number;
+  pricing?: ServicePricingConfig;
   serviceType: ServiceType;
   standard: CleaningStandard;
 };
@@ -635,16 +642,17 @@ export function addOnAmountPence(
   addOn: ServiceAddOnDefinition,
   context?: AddOnPriceContext,
 ) {
+  const pricing = context?.pricing ?? DEFAULT_SERVICE_PRICING;
   if (!addOn.hourly || !context) {
-    return addOn.amount;
+    return flatAddOnAmountFromPricing(pricing, addOn.id, addOn.amount);
   }
   const hours = Math.max(0, context.durationHours);
   if (addOn.hourly === "products") {
     const category = serviceDefinition(context.serviceType).category;
-    return Math.round(hours * productSupplyRatePence(category));
+    return Math.round(hours * productSupplyRatePence(category, pricing));
   }
   return Math.round(
-    hours * equipmentSupplyRatePence(context.serviceType),
+    hours * equipmentSupplyRatePence(context.serviceType, pricing),
   );
 }
 
@@ -663,29 +671,21 @@ export function selectedAddOnTotal(
 export function schedulePriceMultiplier(
   scheduledDate?: string | null,
   scheduledTime?: string | null,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
 ) {
-  if (!scheduledDate || !scheduledTime) return 1;
-
-  const day = new Date(`${scheduledDate}T12:00:00`).getDay();
-  const weekend = day === 0 || day === 6;
-  const hour = Number(scheduledTime.slice(0, 2));
-  if (!Number.isFinite(hour)) return weekend ? 1.18 : 1;
-
-  const early = hour < 9;
-  const evening = hour >= 17;
-
-  if (weekend && (early || evening)) return 1.28;
-  if (weekend) return 1.18;
-  if (evening) return 1.15;
-  if (early) return 1.1;
-  return 1;
+  return scheduleMultiplierFromPricing(pricing, scheduledDate, scheduledTime);
 }
 
 export function schedulePriceLabel(
   scheduledDate?: string | null,
   scheduledTime?: string | null,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
 ) {
-  const multiplier = schedulePriceMultiplier(scheduledDate, scheduledTime);
+  const multiplier = schedulePriceMultiplier(
+    scheduledDate,
+    scheduledTime,
+    pricing,
+  );
   if (multiplier === 1) return null;
   if (!scheduledDate || !scheduledTime) return null;
 
@@ -762,10 +762,16 @@ export function estimatePrice(
   },
   options?: {
     officeSpaces?: OfficeSpaceSelection[];
+    pricing?: ServicePricingConfig;
   },
 ) {
-  const scheduleMult = schedulePriceMultiplier(schedule?.date, schedule?.time);
-  const rate = hourlyRatePence(serviceType, standard);
+  const pricing = options?.pricing ?? DEFAULT_SERVICE_PRICING;
+  const scheduleMult = schedulePriceMultiplier(
+    schedule?.date,
+    schedule?.time,
+    pricing,
+  );
+  const rate = hourlyRatePence(serviceType, standard, pricing);
 
   if (serviceType === "office" && options?.officeSpaces?.length) {
     const quote = calculateOfficeQuote(options.officeSpaces, standard, rate);
@@ -774,6 +780,7 @@ export function estimatePrice(
       labour +
       selectedAddOnTotal(selectedAddOns, {
         durationHours: quote.cleanerHours,
+        pricing,
         serviceType,
         standard,
       })
@@ -791,6 +798,7 @@ export function estimatePrice(
     labour +
     selectedAddOnTotal(selectedAddOns, {
       durationHours: hours,
+      pricing,
       serviceType,
       standard,
     })
@@ -885,12 +893,22 @@ export function formatHourlyRate(amountInPence: number | null | undefined) {
 }
 
 /** Published hourly labour rate for a service at its default pricing standard. */
-export function indicativeHourlyRatePence(serviceType: ServiceType) {
-  return hourlyRatePence(serviceType, normalizeStandard(serviceType, null));
+export function indicativeHourlyRatePence(
+  serviceType: ServiceType,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+) {
+  return hourlyRatePence(
+    serviceType,
+    normalizeStandard(serviceType, null),
+    pricing,
+  );
 }
 
 /** Baseline “from” price for cards / early basket (1 bed · 1 bath · recommended standard). */
-export function indicativeFromPrice(serviceType: ServiceType) {
+export function indicativeFromPrice(
+  serviceType: ServiceType,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+) {
   const stub = {
     address_line_1: "",
     address_line_2: null,
@@ -915,6 +933,8 @@ export function indicativeFromPrice(serviceType: ServiceType) {
     stub,
     normalizeStandard(serviceType, null),
     [],
+    undefined,
+    { pricing },
   );
 }
 

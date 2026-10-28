@@ -4,8 +4,12 @@ import { NextResponse } from "next/server";
 import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { estimatePrice } from "@/lib/customer/services";
-import { createBookingSetupIntent } from "@/lib/payments/lifecycle";
+import {
+  confirmBookingSetupIntentWithSavedCard,
+  createBookingSetupIntent,
+} from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import type { Address } from "@/types/customer";
@@ -93,6 +97,7 @@ export async function POST(request: Request) {
     }
   }
 
+  const pricing = await loadServicePricing();
   const baseAmount = estimatePrice(
     parsed.data.serviceType,
     address as Address,
@@ -102,7 +107,7 @@ export async function POST(request: Request) {
       date: parsed.data.scheduledDate,
       time: parsed.data.scheduledTime,
     },
-    { officeSpaces: parsed.data.officeSpaces },
+    { officeSpaces: parsed.data.officeSpaces, pricing },
   );
   const discount = promo
     ? promo.discount_type === "percentage"
@@ -127,8 +132,17 @@ export async function POST(request: Request) {
       .eq("id", user.id);
   }
 
-  const idempotencyKey = [
-    "setup",
+  const metadata = {
+    address_id: parsed.data.addressId,
+    cleaning_standard: parsed.data.cleaningStandard,
+    promo_code_id: promo?.id ?? "",
+    scheduled_date: parsed.data.scheduledDate,
+    scheduled_time: parsed.data.scheduledTime,
+    selected_add_ons: parsed.data.selectedAddOns.join(","),
+    service_type: parsed.data.serviceType,
+  };
+
+  const baseIdempotency = [
     user.id,
     parsed.data.addressId,
     parsed.data.serviceType,
@@ -138,19 +152,52 @@ export async function POST(request: Request) {
     parsed.data.selectedAddOns.slice().sort().join("-") || "none",
   ].join("_");
 
+  if (parsed.data.paymentMethodId) {
+    try {
+      const setupIntent = await confirmBookingSetupIntentWithSavedCard({
+        amount,
+        customerId: user.id,
+        idempotencyKey: `reuse_${parsed.data.paymentMethodId}_${baseIdempotency}`,
+        metadata,
+        paymentMethodId: parsed.data.paymentMethodId,
+        stripeCustomerId,
+      });
+      if (setupIntent.status !== "succeeded" || !setupIntent.id) {
+        return NextResponse.json(
+          {
+            error:
+              "That saved card needs another check. Please use a different card or try again.",
+            clientSecret: setupIntent.client_secret,
+            requiresAction: true,
+            setupIntentId: setupIntent.id,
+          },
+          { status: 409 },
+        );
+      }
+      return NextResponse.json({
+        amount,
+        confirmed: true,
+        promoCodeId: promo?.id ?? null,
+        setupIntentId: setupIntent.id,
+      });
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : "Unable to use that saved card.",
+        },
+        { status: 400 },
+      );
+    }
+  }
+
   const setupIntent = await createBookingSetupIntent({
     amount,
     customerId: user.id,
-    idempotencyKey,
-    metadata: {
-      address_id: parsed.data.addressId,
-      cleaning_standard: parsed.data.cleaningStandard,
-      promo_code_id: promo?.id ?? "",
-      scheduled_date: parsed.data.scheduledDate,
-      scheduled_time: parsed.data.scheduledTime,
-      selected_add_ons: parsed.data.selectedAddOns.join(","),
-      service_type: parsed.data.serviceType,
-    },
+    idempotencyKey: `setup_${baseIdempotency}`,
+    metadata,
     stripeCustomerId,
   });
 
