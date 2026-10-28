@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -8,6 +9,9 @@ import {
   LANDING_NAV_PILL_H,
   LANDING_NAV_TOP,
 } from "@/components/marketing/landing/nav-metrics";
+import { DURATION, EASE, fadeFrom, staggerContainer } from "@/lib/motion";
+
+const HERO_LINES = ["Book Trusted", "Home Cleaning", "Service in Minutes"];
 
 const HERO_VIDEO = "/images/marketing/landing/hero-living-room.mp4";
 const HERO_POSTER = "/images/marketing/landing/hero-living-room-poster.jpg";
@@ -81,22 +85,46 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
       />
 
       <div className="absolute inset-0 z-10 flex items-center">
-        <div className="mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8 xl:px-10">
+        <motion.div
+          animate="visible"
+          className="mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8 xl:px-10"
+          initial="hidden"
+          variants={staggerContainer(0.14, 0.25)}
+        >
           <h1 className="max-w-[18rem] text-balance text-[clamp(1.85rem,7.4vw,3.75rem)] font-bold leading-[1.05] tracking-[-0.045em] text-white sm:max-w-[34rem]">
-            Book Trusted
-            <br />
-            Home Cleaning
-            <br />
-            Service in Minutes
+            {HERO_LINES.map((line, index) => (
+              <span className="block overflow-hidden" key={line}>
+                <motion.span
+                  className="block"
+                  variants={fadeFrom(index % 2 === 0 ? "up" : "up-left", {
+                    distance: 34,
+                    duration: DURATION.slow,
+                  })}
+                >
+                  {line}
+                </motion.span>
+              </span>
+            ))}
           </h1>
-          <Link
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:brightness-95 touch-manipulation sm:mt-8 sm:h-12 sm:px-8 sm:text-[15px]"
-            href={bookingHref}
+          <motion.div
+            variants={fadeFrom("up", { distance: 20, duration: DURATION.slow })}
           >
-            Book now
-          </Link>
-        </div>
+            <Link
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:brightness-95 active:scale-[0.97] touch-manipulation sm:mt-8 sm:h-12 sm:px-8 sm:text-[15px]"
+              href={bookingHref}
+            >
+              Book now
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
+      <motion.div
+        animate={{ opacity: 0 }}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[5] bg-[#1c133b]"
+        initial={{ opacity: 0.55 }}
+        transition={{ duration: 1.1, ease: EASE.out }}
+      />
     </section>
   );
 }

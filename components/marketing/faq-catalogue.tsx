@@ -329,7 +329,7 @@ export function FaqCatalogue() {
                             />
                           </span>
                         </summary>
-                        <div className="border-t border-[#e4daf5]/70 px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
+                        <div className="faq-answer border-t border-[#e4daf5]/70 px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
                           <p className="whitespace-pre-line text-sm leading-6 text-[#5a5470] sm:text-[15px] sm:leading-7">
                             {item.answer}
                           </p>

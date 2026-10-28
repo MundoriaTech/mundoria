@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
+import {
+  directionFor,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion-primitives";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { LAUNCH_CITY_COVERAGE_GROUPS } from "@/lib/seo/launch-city-coverage-links";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
@@ -22,9 +27,18 @@ export function CoverageSection() {
           UK cities coming soon.
         </p>
 
-        <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {LAUNCH_CITY_COVERAGE_GROUPS.map((group) => (
-            <div className="min-w-0" key={group.id}>
+        <Stagger
+          className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6"
+          gap={0.1}
+          inView
+        >
+          {LAUNCH_CITY_COVERAGE_GROUPS.map((group, index) => (
+            <StaggerItem
+              className="min-w-0"
+              distance={28}
+              from={directionFor(index, 3)}
+              key={group.id}
+            >
               <h3 className="text-[15px] font-semibold leading-snug text-white">
                 {group.heading}
               </h3>
@@ -40,9 +54,9 @@ export function CoverageSection() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </ScrollReveal>
   );
