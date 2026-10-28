@@ -1,5 +1,3 @@
-import { Banknote } from "lucide-react";
-
 import { ProcessPayoutsButton } from "@/components/admin/process-payouts-button";
 import { AppPage } from "@/components/shared/app-page";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -77,7 +75,7 @@ export default async function AdminPayoutsPage() {
         {!payouts.length ? (
           <EmptyState
             compact
-            icon={Banknote}
+            icon="banknote"
             message="Payout batches appear here once completed cleans are captured."
             title="No payouts yet"
           />

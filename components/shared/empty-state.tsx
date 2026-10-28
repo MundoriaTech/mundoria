@@ -1,11 +1,34 @@
 "use client";
 
-import { Inbox, type LucideIcon } from "lucide-react";
+import {
+  Banknote,
+  CalendarDays,
+  Inbox,
+  MessageSquare,
+  SearchX,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
 import { fadeFrom, SPRING } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+
+/**
+ * Icons server components can request by name. A Lucide component object
+ * cannot cross the server/client boundary, so server pages pass a key.
+ */
+const NAMED_ICONS = {
+  banknote: Banknote,
+  calendar: CalendarDays,
+  inbox: Inbox,
+  message: MessageSquare,
+  search: SearchX,
+  shield: ShieldCheck,
+} as const;
+
+export type EmptyStateIconName = keyof typeof NAMED_ICONS;
 
 /**
  * The one empty state. Fades up on mount with the icon popping in, so an
@@ -16,7 +39,7 @@ export function EmptyState({
   className,
   compact = false,
   eyebrow,
-  icon: Icon = Inbox,
+  icon = "inbox",
   message,
   title = "Nothing here yet",
 }: {
@@ -25,10 +48,12 @@ export function EmptyState({
   /** Tighter padding for table cells and side panels. */
   compact?: boolean;
   eyebrow?: string;
-  icon?: LucideIcon;
+  /** A Lucide component (client callers) or a name from the built-in set (server callers). */
+  icon?: LucideIcon | EmptyStateIconName;
   message: ReactNode;
   title?: string;
 }) {
+  const Icon = typeof icon === "string" ? NAMED_ICONS[icon] : icon;
   return (
     <motion.div
       animate="visible"

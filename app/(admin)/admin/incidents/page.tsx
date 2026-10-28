@@ -1,4 +1,3 @@
-import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 import { AppPage } from "@/components/shared/app-page";
@@ -62,7 +61,7 @@ export default async function AdminIncidentsPage() {
                 <td className="p-4" colSpan={6}>
                   <EmptyState
                     compact
-                    icon={ShieldCheck}
+                    icon="shield"
                     message="Reports from cleaners will show here with severity and RIDDOR flags."
                     title="No incidents reported yet"
                   />
