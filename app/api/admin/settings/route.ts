@@ -31,7 +31,24 @@ export async function POST(request: Request) {
       ? normalizeServicePricing(parsed.data.service_pricing)
       : undefined;
 
-  const { service_pricing: _ignored, ...platformFields } = parsed.data;
+  const {
+    cancellation_window_hours,
+    geofence_radius_meters,
+    payment_capture_hour_uk,
+    payment_capture_minute_uk,
+    payment_preauth_hours_before,
+    platform_commission_percent,
+    support_email,
+  } = parsed.data;
+  const platformFields = {
+    cancellation_window_hours,
+    geofence_radius_meters,
+    payment_capture_hour_uk,
+    payment_capture_minute_uk,
+    payment_preauth_hours_before,
+    platform_commission_percent,
+    support_email,
+  };
   const { error } = await auth.admin
     .from("platform_settings")
     .update({
