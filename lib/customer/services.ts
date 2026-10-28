@@ -62,6 +62,8 @@ export interface ServiceAddOnDefinition {
   description: string;
   /** Optional expandable “A little more detail” copy shown in booking. */
   detail?: string;
+  /** Extra cleaner time when selected (non-hourly add-ons). Defaults to 0.25h. */
+  durationHours?: number;
   id: string;
   /** When set, charge this many pence per cleaner-hour instead of `amount`. */
   hourly?: "products" | "equipment";
@@ -354,9 +356,10 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     amount: 0,
     categories: ["residential"],
     description:
-      "Pressing and folding during the visit. Adds about 15 minutes to the booking.",
+      "Pressing and folding during the visit. Adds about 30 minutes to the booking.",
     detail:
-      "We’ll add 15 minutes to your booking to start with, and you can adjust the time depending on how much ironing you have.\n\nKindly note: you’ll need to provide the ironing board. If you’ve asked the professional to bring cleaning equipment, they can also bring an iron, but the ironing board is not included.",
+      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much ironing you have.\n\nKindly note: you’ll need to provide the ironing board. If you’ve asked the professional to bring cleaning equipment, they can also bring an iron, but the ironing board is not included.",
+    durationHours: 0.5,
     id: "ironing",
     label: "Ironing",
   },
@@ -724,11 +727,11 @@ export function estimateDuration(
   const standardExtra =
     standard === "comprehensive" ? 1.5 : standard === "enhanced" ? 0.75 : 0;
   // Flat extras (ironing etc.) still add time; hourly supply add-ons do not.
-  const timedAddOnCount = selectedAddOns.filter((id) => {
+  const addOnExtra = selectedAddOns.reduce((sum, id) => {
     const addOn = SERVICE_ADD_ONS.find((item) => item.id === id);
-    return addOn && !addOn.hourly;
-  }).length;
-  const addOnExtra = timedAddOnCount * 0.25;
+    if (!addOn || addOn.hourly) return sum;
+    return sum + (addOn.durationHours ?? 0.25);
+  }, 0);
 
   const bedrooms = options?.bedrooms ?? 1;
   const bathrooms = options?.bathrooms ?? 1;

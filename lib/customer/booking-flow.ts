@@ -199,6 +199,7 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
   const mode = frequencyModeFor(serviceType);
   if (mode === "required_recurring") {
     return [
+      { label: "One-off cleaning", popular: false, value: "one_off" as const },
       { label: "Once a week", popular: true, value: "weekly" as const },
       { label: "Once a fortnight", popular: false, value: "fortnightly" as const },
       { label: "Once a month", popular: false, value: "monthly" as const },
@@ -268,15 +269,9 @@ export function frequencyChoiceSatisfied(
   const mode = frequencyModeFor(draft.serviceType);
   if (mode === "none") return true;
   if (!draft.frequencyChosen) return false;
-  const needsSchedule =
-    mode === "required_recurring" || !frequencyAllowsOneOff(draft.serviceType);
-  if (needsSchedule) {
-    if (draft.recurrencePattern === "custom") {
-      return draft.customRecurrenceDates.length >= 2;
-    }
-    return Boolean(draft.isRecurring && draft.recurrencePattern);
+  if (!draft.isRecurring) {
+    return frequencyAllowsOneOff(draft.serviceType);
   }
-  if (!draft.isRecurring) return true;
   if (draft.recurrencePattern === "custom") {
     return draft.customRecurrenceDates.length >= 2;
   }

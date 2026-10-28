@@ -24,6 +24,8 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
   const { success } = useFeedback();
   const [profile, setProfile] = useState(initialProfile);
   const [status, setStatus] = useState<string | null>(null);
+  const [portalStatus, setPortalStatus] = useState<string | null>(null);
+  const [portalBusy, setPortalBusy] = useState(false);
   const [saving, setSaving] = useState(false);
 
   async function saveProfile(event: React.FormEvent) {
@@ -51,16 +53,26 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
   }
 
   async function openPortal() {
-    setStatus("Opening secure payment settings…");
-    const response = await fetch("/api/stripe/customer-portal", {
-      method: "POST",
-    });
-    const result = (await response.json()) as { error?: string; url?: string };
-    if (!response.ok || !result.url) {
-      setStatus(result.error ?? "Unable to open payment settings.");
-      return;
+    setPortalBusy(true);
+    setPortalStatus("Opening secure payment settings…");
+    try {
+      const response = await fetch("/api/stripe/customer-portal", {
+        method: "POST",
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        url?: string;
+      };
+      if (!response.ok || !result.url) {
+        setPortalStatus(result.error ?? "Unable to open payment settings.");
+        setPortalBusy(false);
+        return;
+      }
+      window.location.assign(result.url);
+    } catch {
+      setPortalStatus("Unable to open payment settings. Please try again.");
+      setPortalBusy(false);
     }
-    window.location.assign(result.url);
   }
 
   async function logout() {
@@ -207,12 +219,19 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
             </Button>
             <Button
               className="justify-start"
+              disabled={portalBusy}
               onClick={() => void openPortal()}
+              type="button"
               variant="outline"
             >
               <CreditCard className="mr-2 h-4 w-4" />
-              Payment methods
+              {portalBusy ? "Opening…" : "Payment methods"}
             </Button>
+            {portalStatus ? (
+              <p className="rounded-md bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
+                {portalStatus}
+              </p>
+            ) : null}
             <Button asChild className="justify-start" variant="outline">
               <Link href="/payments">
                 <CreditCard className="mr-2 h-4 w-4" />

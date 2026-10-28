@@ -11,6 +11,20 @@ export type TimeSlotAvailability =
 export const DAY_WINDOW_START_MINUTES = 7 * 60;
 export const DAY_WINDOW_END_MINUTES = 23 * 60;
 
+/** Bookings need this much notice before the slot start. */
+export const BOOKING_MIN_LEAD_HOURS = 48;
+
+/** First calendar day that can contain a slot past the lead window. */
+export function earliestBookableDateKey(
+  minLeadHours: number = BOOKING_MIN_LEAD_HOURS,
+  now: Date = new Date(),
+) {
+  const earliest = new Date(
+    now.getTime() + Math.max(0, minLeadHours) * 60 * 60 * 1000,
+  );
+  return localDateKey(earliest);
+}
+
 function formatMinutes(totalMinutes: number) {
   const hour = Math.floor(totalMinutes / 60);
   const minute = totalMinutes % 60;
@@ -20,6 +34,19 @@ function formatMinutes(totalMinutes: number) {
 function slotToMinutes(slot: string) {
   const [hour, minute] = slot.split(":").map(Number);
   return hour * 60 + minute;
+}
+
+function localDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function slotStartLocal(dateKey: string, slot: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const [hour, minute] = slot.split(":").map(Number);
+  return new Date(year, month - 1, day, hour, minute, 0, 0);
 }
 
 /** Half-hour start times across the full daytime window. */
@@ -33,14 +60,33 @@ export const dayWindowSlots = Array.from(
 
 /**
  * Start times in the daytime window where start + duration finishes by 23:00.
+ * Slots sooner than `minLeadHours` from now are excluded on every date.
  */
-export function slotsFinishingByWindowEnd(durationHours: number) {
+export function slotsFinishingByWindowEnd(
+  durationHours: number,
+  options?: {
+    date?: string;
+    minLeadHours?: number;
+    now?: Date;
+  },
+) {
   const durationMinutes = Math.max(0, Math.round(durationHours * 60));
   const lastStart = DAY_WINDOW_END_MINUTES - durationMinutes;
   if (lastStart < DAY_WINDOW_START_MINUTES) return [];
-  return dayWindowSlots.filter(
-    (slot) => slotToMinutes(slot) <= lastStart,
-  );
+
+  const now = options?.now ?? new Date();
+  const dateKey = options?.date?.trim().slice(0, 10) || null;
+  const minLeadHours = Math.max(0, options?.minLeadHours ?? 0);
+  const earliestMs =
+    dateKey && minLeadHours > 0
+      ? now.getTime() + minLeadHours * 60 * 60 * 1000
+      : null;
+
+  return dayWindowSlots.filter((slot) => {
+    if (slotToMinutes(slot) > lastStart) return false;
+    if (earliestMs == null || !dateKey) return true;
+    return slotStartLocal(dateKey, slot).getTime() >= earliestMs;
+  });
 }
 
 export function TimeSlotPicker({

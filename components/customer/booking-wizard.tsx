@@ -14,7 +14,10 @@ import {
   ChevronDown,
   ChevronUp,
   CreditCard,
+  Info,
   MapPin,
+  Minus,
+  Plus,
   X,
 } from "lucide-react";
 import {
@@ -52,7 +55,12 @@ import {
   BookingSpinner,
 } from "@/components/customer/booking-loader";
 import { AddressForm } from "@/components/customer/address-manager";
-import { TimeSlotPicker, slotsFinishingByWindowEnd } from "@/components/shared/time-slot-picker";
+import {
+  BOOKING_MIN_LEAD_HOURS,
+  TimeSlotPicker,
+  earliestBookableDateKey,
+  slotsFinishingByWindowEnd,
+} from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
 import { trackClientActivity } from "@/lib/analytics/track-client";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -65,7 +73,6 @@ import {
   frequencyAllowsOneOff,
   frequencyBasketLabel,
   frequencyChoiceSatisfied,
-  frequencyModeFor,
   frequencyOptionsFor,
   isoDateOrEmpty,
   getFlowSteps,
@@ -109,7 +116,6 @@ import {
   calculateOfficeQuote,
   type OfficeSpaceSize,
 } from "@/lib/customer/office-pricing";
-import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import { cn } from "@/lib/utils";
 import type {
   Address,
@@ -2261,6 +2267,8 @@ function AddressStep({
   const signedIn = Boolean(userId) && !localOnly;
   const collapsibleSaved = signedIn && addresses.length > 1;
   const [savedOpen, setSavedOpen] = useState(() => addresses.length <= 2);
+  // Restored draft addresses stay unhighlighted until the customer taps them.
+  const [guestHighlighted, setGuestHighlighted] = useState(false);
 
   return (
     <div>
@@ -2286,26 +2294,33 @@ function AddressStep({
           address={localOnly ? guestAsAddress : null}
           compact
           localOnly={localOnly}
-          onSaved={onSaved}
+          onSaved={(address) => {
+            onSaved(address);
+            setGuestHighlighted(true);
+          }}
           userId={userId ?? undefined}
         />
       </div>
 
       {guestAsAddress && localOnly ? (
-        <div className="mt-6 rounded-2xl border-2 border-[#6a45b8] bg-white p-4">
-          <div className="flex gap-3">
-            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
-            <div className="min-w-0">
-              <p className="font-semibold text-[#1c133b]">
-                {guestAsAddress.label ?? "Your address"}
-              </p>
-              <p className="mt-1 break-words text-sm text-[#5a5470]">
-                {guestAsAddress.address_line_1}, {guestAsAddress.city},{" "}
-                {guestAsAddress.postcode}
-              </p>
-            </div>
+        <button
+          className={cn(
+            "mt-6 flex w-full gap-3 rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff] touch-manipulation",
+            guestHighlighted &&
+              "border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
+          )}
+          onClick={() => setGuestHighlighted(true)}
+          type="button"
+        >
+          <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6a45b8]" />
+          <div className="min-w-0">
+            <p className="font-semibold text-[#1c133b]">Previous address</p>
+            <p className="mt-1 break-words text-sm text-[#5a5470]">
+              {guestAsAddress.address_line_1}, {guestAsAddress.city},{" "}
+              {guestAsAddress.postcode}
+            </p>
           </div>
-        </div>
+        </button>
       ) : null}
 
       {signedIn && addresses.length > 0 ? (
@@ -2590,6 +2605,64 @@ function CountField({
   );
 }
 
+function RoomCountStepper({
+  label,
+  onChange,
+  unitPlural,
+  unitSingular,
+  value,
+}: {
+  label: string;
+  onChange: (value: number) => void;
+  unitPlural: string;
+  unitSingular: string;
+  value: number | null;
+}) {
+  const min = ROOM_COUNT_OPTIONS[0];
+  const max = ROOM_COUNT_OPTIONS[ROOM_COUNT_OPTIONS.length - 1]!;
+  const set = value != null;
+
+  return (
+    <div className="grid min-w-0 gap-3">
+      <p className="text-sm font-medium text-[#291845]">{label}</p>
+      <div className="flex h-11 items-center gap-3">
+        <button
+          aria-label={`Decrease ${label.toLowerCase()}`}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={set && value <= min}
+          onClick={() => {
+            if (!set) onChange(min);
+            else onChange(Math.max(min, value - 1));
+          }}
+          type="button"
+        >
+          <Minus className="h-4 w-4" strokeWidth={2.5} />
+        </button>
+        <div className="min-w-[5.5rem] text-center">
+          <p className="text-lg font-semibold leading-none tabular-nums text-[#291845]">
+            {!set ? "—" : value === 6 ? "6+" : value}
+          </p>
+          <p className="mt-0.5 text-xs font-medium text-[#8b8798]">
+            {!set ? unitPlural : value === 1 ? unitSingular : unitPlural}
+          </p>
+        </div>
+        <button
+          aria-label={`Increase ${label.toLowerCase()}`}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={set && value >= max}
+          onClick={() => {
+            if (!set) onChange(Math.min(max, 1));
+            else onChange(Math.min(max, value + 1));
+          }}
+          type="button"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function RoomsStep({
   bathrooms,
   bedrooms,
@@ -2610,41 +2683,21 @@ function RoomsStep({
         This helps size duration and price — separate from your address.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
-          <span>Bedrooms</span>
-          <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
-            onChange={(event) => onBedrooms(Number(event.target.value))}
-            value={bedrooms ?? ""}
-          >
-            <option disabled value="">
-              Select
-            </option>
-            {ROOM_COUNT_OPTIONS.map((count) => (
-              <option key={count} value={count}>
-                {count === 6 ? "6+" : count}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
-          <span>Toilets</span>
-          <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
-            onChange={(event) => onBathrooms(Number(event.target.value))}
-            value={bathrooms ?? ""}
-          >
-            <option disabled value="">
-              Select
-            </option>
-            {ROOM_COUNT_OPTIONS.map((count) => (
-              <option key={count} value={count}>
-                {count === 6 ? "6+" : count}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 sm:gap-4">
+        <RoomCountStepper
+          label="Bedrooms"
+          onChange={onBedrooms}
+          unitPlural="bedrooms"
+          unitSingular="bedroom"
+          value={bedrooms}
+        />
+        <RoomCountStepper
+          label="Toilets"
+          onChange={onBathrooms}
+          unitPlural="toilets"
+          unitSingular="toilet"
+          value={bathrooms}
+        />
       </div>
     </div>
   );
@@ -3008,10 +3061,9 @@ function FrequencyStep({
     value: BookingDraft[K],
   ) => void;
 }) {
-  const mode = frequencyModeFor(draft.serviceType);
   const allowsOneOff = frequencyAllowsOneOff(draft.serviceType);
   const options = frequencyOptionsFor(draft.serviceType);
-  const minDate = new Date().toISOString().slice(0, 10);
+  const minDate = earliestBookableDateKey(BOOKING_MIN_LEAD_HOURS);
 
   function selectFrequency(
     value: "one_off" | "weekly" | "fortnightly" | "monthly" | "custom",
@@ -3057,7 +3109,7 @@ function FrequencyStep({
     ? null
     : draft.isRecurring
       ? draft.recurrencePattern
-      : mode === "optional" && allowsOneOff
+      : allowsOneOff
         ? "one_off"
         : draft.recurrencePattern;
 
@@ -3067,7 +3119,7 @@ function FrequencyStep({
         How often do you want your session to happen?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        {mode === "required_recurring" || !allowsOneOff
+        {!allowsOneOff
           ? "Choose a rhythm, or build your own calendar of visits."
           : "One-off, a set cadence, or customize your own calendar."}
       </p>
@@ -3209,7 +3261,7 @@ function DateStep({
     value: BookingDraft[K],
   ) => void;
 }) {
-  const minDate = new Date().toISOString().slice(0, 10);
+  const minDate = earliestBookableDateKey(BOOKING_MIN_LEAD_HOURS);
   const selectedDate = isoDateOrEmpty(draft.scheduledDate);
   const selectedLabel = formatBookingDate(selectedDate, {
     weekday: "long",
@@ -3221,6 +3273,14 @@ function DateStep({
   useEffect(() => {
     if (!selectedDate) setDateExpanded(true);
   }, [selectedDate]);
+
+  useEffect(() => {
+    if (selectedDate && selectedDate < minDate) {
+      update("scheduledDate", "");
+      update("scheduledTime", "");
+      update("alternateTimes", []);
+    }
+  }, [minDate, selectedDate, update]);
 
   const showDuration = Boolean(selectedDate) && !dateExpanded && duration;
 
@@ -3293,6 +3353,7 @@ function TimeStep({
   const flexPromptSeenRef = useRef(false);
   const maxTimeSlots = 7; // 1 preferred + up to 6 alternates (schema limit)
 
+  // 48h notice is enforced on the calendar date; all daytime slots are open.
   const allowedSlots = useMemo(
     () => slotsFinishingByWindowEnd(durationHours),
     [durationHours],
@@ -3789,22 +3850,27 @@ function CheckoutStep({
             </div>
           ) : null}
         </div>
+        <div className="mt-3 flex items-start gap-2.5 px-0.5">
+          <Info
+            aria-hidden
+            className="mt-0.5 h-4 w-4 shrink-0 text-[#6a45b8]"
+            strokeWidth={2}
+          />
+          <div>
+            <p className="text-sm font-semibold text-[#1c133b]">
+              Pay after the clean
+            </p>
+            <p className="mt-0.5 text-sm leading-5 text-[#5b5478]">
+              Mundoria doesn’t take payment until your cleaning is completed.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="mt-6 divide-y divide-[#e4daf5] border-y border-[#e4daf5]">
         <TrustRow
           iconSrc="/images/marketing/icons/plain/free-cancellation.svg"
-          subtitle={
-            <>
-              Free up to 48 hours before each session.{" "}
-              <a
-                className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-                href={FAQ_LINKS.cancellationFee}
-              >
-                Fee details
-              </a>
-            </>
-          }
+          subtitle="Free up to 48 hours before each session."
           title="Free cancellation"
         />
         <TrustRow
@@ -3820,22 +3886,10 @@ function CheckoutStep({
       </div>
 
       <p className="mt-5 text-sm leading-6 text-[#5b5478]">
-        We save your card when you book — no charge yet. About 24 hours before
-        your clean (once a cleaner is confirmed), we place a hold. Payment is
-        captured the next day after the clean.{" "}
-        <a
-          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-          href={FAQ_LINKS.whenCharged}
-        >
-          When am I charged?
-        </a>{" "}
-        ·{" "}
-        <a
-          className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-          href="/help/article/why-pay-in-advance"
-        >
-          How payment works
-        </a>
+        By tapping the button below and booking, you accept our{" "}
+        <CheckoutOutboundLink href="/terms">
+          Terms of Service
+        </CheckoutOutboundLink>
         .
       </p>
 
@@ -3935,6 +3989,38 @@ function CheckoutStep({
         )}
       </Button>
     </form>
+  );
+}
+
+/** Leave checkout in history so browser Back returns to this exact step. */
+function CheckoutOutboundLink({
+  children,
+  href,
+}: {
+  children: ReactNode;
+  href: string;
+}) {
+  return (
+    <a
+      className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+      href={href}
+      onClick={() => {
+        if (typeof window === "undefined") return;
+        const url = new URL(window.location.href);
+        url.searchParams.set("step", "checkout");
+        const prior =
+          typeof window.history.state === "object" && window.history.state
+            ? window.history.state
+            : {};
+        window.history.replaceState(
+          { ...prior, bookingStepId: "checkout" },
+          "",
+          url,
+        );
+      }}
+    >
+      {children}
+    </a>
   );
 }
 

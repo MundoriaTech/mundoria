@@ -1,5 +1,6 @@
 import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -19,29 +20,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
 
-  const stripe = getStripe();
-  const admin = createAdminClient();
-  let customerId = profile.stripe_customer_id as string | null;
+  try {
+    const stripe = getStripe();
+    const admin = createAdminClient();
+    let customerId = profile.stripe_customer_id as string | null;
 
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: profile.email,
-      metadata: { supabase_user_id: user.id },
-      name: profile.full_name,
-      phone: profile.phone ?? undefined,
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: profile.email,
+        metadata: { supabase_user_id: user.id },
+        name: profile.full_name,
+        phone: profile.phone ?? undefined,
+      });
+      customerId = customer.id;
+      await admin
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", user.id);
+    }
+
+    const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${origin}/profile`,
     });
-    customerId = customer.id;
-    await admin
-      .from("profiles")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", user.id);
+
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    const message =
+      error instanceof Stripe.errors.StripeError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : "Unable to open payment settings.";
+    console.error("[customer-portal]", message);
+    return NextResponse.json({ error: message }, { status: 502 });
   }
-
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const session = await stripe.billingPortal.sessions.create({
-    customer: customerId,
-    return_url: `${origin}/profile`,
-  });
-
-  return NextResponse.json({ url: session.url });
 }
