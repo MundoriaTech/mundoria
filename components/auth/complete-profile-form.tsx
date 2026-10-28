@@ -98,8 +98,13 @@ export function CompleteProfileForm({
         required
       />
       <input type="hidden" {...register("phone")} />
-      <Button className="w-full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Saving…" : "Continue"}
+      <Button
+        className="w-full"
+        loading={isSubmitting}
+        loadingLabel="Saving…"
+        type="submit"
+      >
+        Continue
       </Button>
       <Button
         className="w-full"

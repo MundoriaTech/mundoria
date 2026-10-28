@@ -96,8 +96,13 @@ export function AdminInviteAcceptForm({
         <PasswordRequirementsList password={password} />
       </div>
 
-      <Button className="w-full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Creating admin account…" : "Accept invitation"}
+      <Button
+        className="w-full"
+        loading={isSubmitting}
+        loadingLabel="Creating admin account…"
+        type="submit"
+      >
+        Accept invitation
       </Button>
     </form>
   );

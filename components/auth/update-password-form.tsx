@@ -107,8 +107,13 @@ export function UpdatePasswordForm({ next }: { next?: string | null }) {
           {...register("confirmPassword")}
         />
       </FormField>
-      <Button className="w-full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Updating password…" : "Update password"}
+      <Button
+        className="w-full"
+        loading={isSubmitting}
+        loadingLabel="Updating password…"
+        type="submit"
+      >
+        Update password
       </Button>
     </form>
   );

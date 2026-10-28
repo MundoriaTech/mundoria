@@ -246,10 +246,13 @@ export function SignupForm({
           }
         />
 
-        <Button className="w-full" disabled={isSubmitting} type="submit">
-          {isSubmitting
-            ? "Creating account…"
-            : "Create account"}
+        <Button
+          className="w-full"
+          loading={isSubmitting}
+          loadingLabel="Creating account…"
+          type="submit"
+        >
+          Create account
         </Button>
       </form>
     </div>
