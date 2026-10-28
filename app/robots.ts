@@ -17,7 +17,7 @@ const PRIVATE_PREFIXES = [
   "/payments/",
   "/profile",
   "/addresses",
-  "/cleaner",
+  // Trailing slash only: bare "/cleaner" also matches public "/cleaners/…" pages.
   "/cleaner/",
   "/setup",
   "/complete-profile",
@@ -51,6 +51,8 @@ const PUBLIC_MARKETING_ALLOW = [
   "/llms.txt",
 ] as const;
 
+const SEARCH_CRAWLERS = ["Googlebot", "Bingbot"] as const;
+
 const AI_CRAWLERS = [
   "GPTBot",
   "ChatGPT-User",
@@ -59,6 +61,14 @@ const AI_CRAWLERS = [
   "PerplexityBot",
   "Google-Extended",
 ] as const;
+
+function marketingCrawlerRules(userAgents: readonly string[]) {
+  return userAgents.map((userAgent) => ({
+    allow: [...PUBLIC_MARKETING_ALLOW],
+    disallow: [...PRIVATE_PREFIXES],
+    userAgent,
+  }));
+}
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -69,11 +79,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [...PRIVATE_PREFIXES],
         userAgent: "*",
       },
-      ...AI_CRAWLERS.map((userAgent) => ({
-        allow: [...PUBLIC_MARKETING_ALLOW],
-        disallow: [...PRIVATE_PREFIXES],
-        userAgent,
-      })),
+      ...marketingCrawlerRules(SEARCH_CRAWLERS),
+      ...marketingCrawlerRules(AI_CRAWLERS),
     ],
     sitemap: absoluteUrl("/sitemap.xml"),
   };
