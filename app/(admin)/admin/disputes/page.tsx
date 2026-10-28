@@ -1,5 +1,5 @@
 import { DisputesTable } from "@/components/admin/disputes-table";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminDispute } from "@/types/admin";
 
@@ -12,11 +12,12 @@ export default async function AdminDisputesPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-w-0">
-      <AdminPageIntro>
-        Investigate evidence and resolve customer issues.
-      </AdminPageIntro>
+    <AppPage
+      description="Investigate evidence and resolve customer issues."
+      eyebrow="Operations"
+      title="Disputes"
+    >
       <DisputesTable disputes={(data ?? []) as AdminDispute[]} />
-    </div>
+    </AppPage>
   );
 }

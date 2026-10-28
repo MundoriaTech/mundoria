@@ -1,4 +1,5 @@
 import { MagPostsManager } from "@/components/admin/mag-posts-manager";
+import { AppPage } from "@/components/shared/app-page";
 import { canonicalBlogCategory } from "@/lib/content/editorial";
 import type { MagPostAdminRow } from "@/lib/content/mag-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,7 +18,7 @@ export default async function AdminMagPage() {
     .order("updated_at", { ascending: false });
 
   return (
-    <div className="min-w-0">
+    <AppPage>
       <h1 className="sr-only">Mundoria Mag</h1>
       <MagPostsManager
         posts={((data as MagPostAdminRow[]) ?? []).map((post) => ({
@@ -28,6 +29,6 @@ export default async function AdminMagPage() {
             : [],
         }))}
       />
-    </div>
+    </AppPage>
   );
 }

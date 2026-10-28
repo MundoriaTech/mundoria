@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { SupportInboxThread } from "@/components/admin/support-inbox";
+import { AppPage } from "@/components/shared/app-page";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   SupportConversationWithUser,
@@ -44,10 +44,12 @@ export default async function AdminInboxThreadPage({
   };
 
   return (
-    <div className="min-w-0">
-      <AdminPageIntro>
-        Reply as Mundoria. Visitors see your message in the site messenger.
-      </AdminPageIntro>
+    <AppPage
+      description="Reply as Mundoria. Visitors see your message in the site messenger."
+      eyebrow="Inbox"
+      headerSize="compact"
+      title="Conversation"
+    >
       <SupportInboxThread
         conversationId={params.id}
         initialConversation={{
@@ -57,6 +59,6 @@ export default async function AdminInboxThreadPage({
         }}
         initialMessages={(messages ?? []) as SupportMessage[]}
       />
-    </div>
+    </AppPage>
   );
 }

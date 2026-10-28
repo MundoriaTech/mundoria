@@ -5,6 +5,7 @@ import {
   type AdminInvitationRow,
 } from "@/components/admin/admin-invitations-manager";
 import { AdminProfileForm } from "@/components/admin/admin-profile-form";
+import { AppPage } from "@/components/shared/app-page";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
@@ -42,11 +43,11 @@ export default async function AdminTeamPage() {
   ]);
 
   return (
-    <div className="space-y-7">
-      <p className="max-w-2xl text-sm leading-6 text-[#5a5470] sm:text-base">
-        Admins who can review cleaners, bookings, and payouts. Invite new people
-        here — accounts cannot self-register.
-      </p>
+    <AppPage
+      description="Admins who can review cleaners, bookings, and payouts. Invite new people here — accounts cannot self-register."
+      eyebrow="People"
+      title="Team"
+    >
 
       <AdminProfileForm initialProfile={me as Profile} />
 
@@ -121,6 +122,6 @@ export default async function AdminTeamPage() {
         </Link>
         .
       </p>
-    </div>
+    </AppPage>
   );
 }

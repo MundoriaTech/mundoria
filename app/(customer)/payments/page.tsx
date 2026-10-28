@@ -1,6 +1,7 @@
 import { CreditCard, FileText } from "lucide-react";
 import Link from "next/link";
 
+import { AppPage } from "@/components/shared/app-page";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { Button } from "@/components/ui/button";
 import { formatServiceName } from "@/lib/customer/services";
@@ -49,23 +50,23 @@ export default async function CustomerPaymentsPage() {
   );
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Payments & receipts
-        </h1>
-        <p className="mt-2 text-muted-foreground">
+    <AppPage
+      description={
+        <>
           Save a card for visits that still need one, then find receipts after
           payment is captured the day after a clean.{" "}
           <Link
-            className="font-medium text-primary underline-offset-2 hover:underline"
+            className="font-medium text-brand-purple underline-offset-2 hover:underline"
             href="/help/article/why-pay-in-advance"
           >
-            how payment works
+            How payment works
           </Link>
           .
-        </p>
-      </div>
+        </>
+      }
+      eyebrow="Account"
+      title="Payments & receipts"
+    >
 
       {due.length ? (
         <section>
@@ -222,6 +223,6 @@ export default async function CustomerPaymentsPage() {
           </p>
         )}
       </section>
-    </div>
+    </AppPage>
   );
 }

@@ -1,4 +1,5 @@
 import { JobFeed } from "@/components/cleaner/job-feed";
+import { AppPage } from "@/components/shared/app-page";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import { getAvailableJobs, getCleanerJobs } from "@/lib/cleaner/server";
@@ -15,16 +16,16 @@ export default async function CleanerJobsPage() {
   ]);
 
   return (
-    <div>
+    <AppPage
+      description="Find new work and manage your schedule."
+      eyebrow="Work"
+      title="Jobs"
+    >
       <LiveDashboardRefresh
         scope={`cleaner-jobs-${user!.id}`}
         watches={bookingWatchesFor("cleaner")}
       />
-      <h1 className="text-3xl font-semibold">Jobs</h1>
-      <p className="mb-7 mt-2 text-muted-foreground">
-        Find new work and manage your schedule.
-      </p>
       <JobFeed assigned={assigned} available={available} />
-    </div>
+    </AppPage>
   );
 }

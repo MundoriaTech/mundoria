@@ -5,6 +5,7 @@ import {
   IncidentReportForm,
   type IncidentBookingOption,
 } from "@/components/cleaner/incident-report-form";
+import { AppPage } from "@/components/shared/app-page";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
 import { INCIDENT_CATEGORIES } from "@/lib/cleaner/onboarding-compliance";
 import { formatServiceName } from "@/lib/customer/services";
@@ -62,23 +63,23 @@ export default async function CleanerIncidentsPage() {
     }));
 
   return (
-    <div className="space-y-8 pb-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-[#1c133b] sm:text-3xl">
-          Report an incident
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-[#5c5670] sm:text-base">
+    <AppPage
+      description={
+        <>
           Tell us about injuries, damage, unsafe conditions, theft or anything
           that worried you on a job. See our{" "}
           <Link
-            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+            className="font-semibold text-brand-purple underline-offset-2 hover:underline"
             href="/legal/cleaner-standards"
           >
             Cleaner Standards
           </Link>{" "}
           for more.
-        </p>
-      </div>
+        </>
+      }
+      eyebrow="Safety"
+      title="Report an incident"
+    >
 
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]">
         <IncidentReportForm bookings={bookings} />
@@ -130,6 +131,6 @@ export default async function CleanerIncidentsPage() {
           )}
         </section>
       </div>
-    </div>
+    </AppPage>
   );
 }

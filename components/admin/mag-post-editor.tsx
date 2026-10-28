@@ -195,7 +195,7 @@ export function MagPostEditor({
 
   return (
     <div className="min-h-[calc(100vh-6rem)] bg-[#f7f4fb]">
-      <div className="sticky top-0 z-30 border-b border-white/10 bg-[#1c133b] px-4 py-3 text-white sm:px-6">
+      <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-30 border-b border-white/10 bg-[#1c133b] px-4 py-3 text-white sm:px-6">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
           <div className="min-w-0">
             <Link

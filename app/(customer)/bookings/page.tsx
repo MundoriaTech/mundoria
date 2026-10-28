@@ -1,4 +1,5 @@
 import { BookingsList } from "@/components/customer/bookings-list";
+import { AppPage } from "@/components/shared/app-page";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import { getCustomerBookings } from "@/lib/customer/server";
@@ -22,23 +23,16 @@ export default async function CustomerBookingsPage({
       : "upcoming";
 
   return (
-    <div className="pb-4">
+    <AppPage
+      description="Upcoming cleans, completed visits, and cancelled sessions."
+      eyebrow="Your cleans"
+      title="Sessions"
+    >
       <LiveDashboardRefresh
         scope={`customer-bookings-${user!.id}`}
         watches={bookingWatchesFor("customer")}
       />
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-        Your cleans
-      </p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground sm:text-3xl">
-        Sessions
-      </h1>
-      <p className="mt-2 max-w-xl text-sm font-light leading-6 text-[#5a5470] dark:text-muted-foreground">
-        Upcoming cleans, completed visits, and cancelled sessions.
-      </p>
-      <div className="mt-6">
-        <BookingsList bookings={bookings} initialTab={tab} />
-      </div>
-    </div>
+      <BookingsList bookings={bookings} initialTab={tab} />
+    </AppPage>
   );
 }
