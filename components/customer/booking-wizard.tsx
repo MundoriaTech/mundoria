@@ -52,6 +52,7 @@ import { addressOutsideCoverage } from "@/lib/seo/cleaner-coverage";
 import {
   BookingBasket,
   BookingBasketSheet,
+  BookingSummaryCard,
 } from "@/components/customer/booking-basket";
 import { BookingCalendar } from "@/components/customer/booking-calendar";
 import { BookingChrome } from "@/components/customer/booking-chrome";
@@ -482,7 +483,10 @@ export function BookingWizard({
     Boolean(roomsAddress) &&
     (draft.serviceType === "office"
       ? draft.officeSpaces.some((space) => space.quantity > 0)
-      : draft.numBedrooms != null && draft.numBathrooms != null);
+      : draft.serviceType &&
+          serviceDefinition(draft.serviceType).category === "commercial"
+        ? true
+        : draft.numBedrooms != null && draft.numBathrooms != null);
   const priceBreakdown =
     draft.serviceType && selectedStandard && hasPropertySizing && roomsAddress
       ? estimatePriceBreakdown(
@@ -1393,8 +1397,14 @@ export function BookingWizard({
       case "address": {
         // Require a resolvable address — not just a stale addressId in storage.
         const addressReady = Boolean(selectedAddress);
+        const category =
+          draft.serviceType != null
+            ? serviceDefinition(draft.serviceType).category
+            : draft.serviceCategory;
+        const needsHomeRooms = category !== "commercial";
         const roomsReady =
-          draft.numBedrooms != null && draft.numBathrooms != null;
+          !needsHomeRooms ||
+          (draft.numBedrooms != null && draft.numBathrooms != null);
         const serviceReady = Boolean(draft.serviceType);
         // Office length is set after spaces; home length is chosen here.
         const durationReady =
@@ -1799,31 +1809,41 @@ export function BookingWizard({
               Go to address
             </button>
           </div>
-        ) : stripePromise ? (
-          <Elements stripe={stripePromise}>
-            <CheckoutStep
-              address={roomsAddress}
-              amountPence={Math.max(0, displayAmount)}
-              customerFirstName={customerFirstName}
-              draft={{
-                ...draft,
-                cleaningStandard: selectedStandard,
-                serviceType: draft.serviceType,
-              }}
-              onAddressPersisted={(address) => {
-                setAddresses((current) => [address, ...current]);
-                update("addressId", address.id);
-                update("guestAddress", null);
-              }}
-              onProcessingChange={setCheckoutBusy}
-              update={update}
-              userId={userId}
-            />
-          </Elements>
         ) : (
-          <p className="rounded-2xl bg-white p-4 text-sm text-[#5a5470]">
-            Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure payment.
-          </p>
+          <>
+            <div className="mb-6 lg:hidden">
+              <BookingSummaryCard
+                {...basketProps}
+                title="Your booking"
+              />
+            </div>
+            {stripePromise ? (
+              <Elements stripe={stripePromise}>
+                <CheckoutStep
+                  address={roomsAddress}
+                  amountPence={Math.max(0, displayAmount)}
+                  customerFirstName={customerFirstName}
+                  draft={{
+                    ...draft,
+                    cleaningStandard: selectedStandard,
+                    serviceType: draft.serviceType,
+                  }}
+                  onAddressPersisted={(address) => {
+                    setAddresses((current) => [address, ...current]);
+                    update("addressId", address.id);
+                    update("guestAddress", null);
+                  }}
+                  onProcessingChange={setCheckoutBusy}
+                  update={update}
+                  userId={userId}
+                />
+              </Elements>
+            ) : (
+              <p className="rounded-2xl bg-white p-4 text-sm text-[#5a5470]">
+                Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to enable secure payment.
+              </p>
+            )}
+          </>
         )
       ) : null}
     </>
@@ -1849,11 +1869,8 @@ export function BookingWizard({
     >
       <div
         className={cn(
-          // WeCasa funnel: 1140px shell. Bottom pad on mobile for the fixed Next bar.
-          "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-6 sm:pt-8 md:px-5 md:pt-6 xl:px-0",
-          stepId === "checkout"
-            ? "pb-10"
-            : "pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-10",
+          // WeCasa funnel: 1140px shell. Bottom pad on mobile for the fixed Next / Book bar.
+          "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pt-8 md:px-5 md:pt-6 lg:pb-10 xl:px-0",
         )}
       >
         <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-start lg:gap-0">
@@ -1921,16 +1938,16 @@ export function BookingWizard({
       ) : null}
 
       {tooFarOpen && requestedPro ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#1c133b]/40 px-4">
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-[#1c133b]/40 sm:items-center sm:px-4">
           <div
             aria-labelledby="too-far-title"
             aria-modal="true"
-            className="relative w-full max-w-md rounded-[1.75rem] bg-white px-6 py-8 text-center shadow-[0_24px_60px_rgba(28,19,59,0.18)]"
+            className="relative w-full max-w-md rounded-t-[1.75rem] bg-white px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8 text-center shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:rounded-[1.75rem] sm:pb-8"
             role="dialog"
           >
             <button
               aria-label="Close"
-              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e6ea] text-[#1c133b]"
+              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e6e6ea] text-[#1c133b] touch-manipulation"
               onClick={() => {
                 dismissedFarPostcodeRef.current = addressPostcode;
                 setTooFarOpen(false);
@@ -1950,7 +1967,7 @@ export function BookingWizard({
               book, and Mundoria will match another cleaner who covers it.
             </p>
             <button
-              className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition hover:bg-[#5a38a3]"
+              className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-8 text-base font-semibold text-white transition touch-manipulation hover:bg-[#5a38a3] sm:w-auto"
               onClick={() => {
                 dismissedFarPostcodeRef.current = addressPostcode;
                 setTooFarOpen(false);
@@ -2322,19 +2339,25 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
   switch (stepId) {
     case "address":
     case "category":
-    case "service":
+    case "service": {
+      const category =
+        draft.serviceType != null
+          ? serviceDefinition(draft.serviceType).category
+          : draft.serviceCategory;
+      const needsHomeRooms = category !== "commercial";
       return (
         (guestAddressComplete(draft.guestAddress) ||
           Boolean(
             draft.addressId && !draft.addressId.startsWith("guest-"),
           )) &&
-        draft.numBedrooms != null &&
-        draft.numBathrooms != null &&
+        (!needsHomeRooms ||
+          (draft.numBedrooms != null && draft.numBathrooms != null)) &&
         Boolean(draft.serviceType) &&
         (draft.serviceType === "office" ||
           (draft.estimatedDurationHours != null &&
             draft.estimatedDurationHours >= 1))
       );
+    }
     case "history":
       return true;
     case "addons":
@@ -2476,6 +2499,11 @@ function AddressStep({
   const signedIn = Boolean(userId) && !localOnly;
   const collapsibleSaved = signedIn && addresses.length > 1;
   const [savedOpen, setSavedOpen] = useState(() => addresses.length <= 2);
+  const categoryForRooms =
+    selectedService != null
+      ? serviceDefinition(selectedService).category
+      : (selectedCategory ?? lockedCategory);
+  const showHomeRooms = categoryForRooms !== "commercial";
 
   return (
     <div>
@@ -2582,30 +2610,32 @@ function AddressStep({
         </div>
       ) : null}
 
-      <div className="mt-10 border-t border-[#eeeef1] pt-8">
-        <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-          Tell us about the rooms
-        </h2>
-        <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-          This helps size duration and price for the clean.
-        </p>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 sm:gap-4">
-          <RoomCountStepper
-            label="Bedrooms"
-            onChange={onBedrooms}
-            unitPlural="bedrooms"
-            unitSingular="bedroom"
-            value={bedrooms}
-          />
-          <RoomCountStepper
-            label="Toilets"
-            onChange={onBathrooms}
-            unitPlural="toilets"
-            unitSingular="toilet"
-            value={bathrooms}
-          />
+      {showHomeRooms ? (
+        <div className="mt-10 border-t border-[#eeeef1] pt-8">
+          <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+            Tell us about the rooms
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+            This helps size duration and price for the clean.
+          </p>
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6">
+            <RoomCountStepper
+              label="Bedrooms"
+              onChange={onBedrooms}
+              unitPlural="bedrooms"
+              unitSingular="bedroom"
+              value={bedrooms}
+            />
+            <RoomCountStepper
+              label="Toilets"
+              onChange={onBathrooms}
+              unitPlural="toilets"
+              unitSingular="toilet"
+              value={bathrooms}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {onSelectService ? (
         <div className="mt-10 border-t border-[#eeeef1] pt-8">
@@ -2855,12 +2885,12 @@ function RoomCountStepper({
   const set = value != null;
 
   return (
-    <div className="grid min-w-0 gap-3">
+    <div className="grid min-w-0 grid-rows-[auto_auto] gap-2">
       <p className="text-sm font-medium text-[#291845]">{label}</p>
-      <div className="flex h-11 items-center gap-3">
+      <div className="flex h-11 items-center justify-between gap-2 sm:justify-start sm:gap-3">
         <button
           aria-label={`Decrease ${label.toLowerCase()}`}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition touch-manipulation hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           disabled={set && value <= min}
           onClick={() => {
             if (!set) onChange(min);
@@ -2870,7 +2900,7 @@ function RoomCountStepper({
         >
           <Minus className="h-4 w-4" strokeWidth={2.5} />
         </button>
-        <div className="min-w-[5.5rem] text-center">
+        <div className="min-w-0 flex-1 text-center sm:min-w-[5.5rem] sm:flex-none">
           <p className="text-lg font-semibold leading-none tabular-nums text-[#291845]">
             {!set ? "-" : value === 6 ? "6+" : value}
           </p>
@@ -2880,7 +2910,7 @@ function RoomCountStepper({
         </div>
         <button
           aria-label={`Increase ${label.toLowerCase()}`}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition touch-manipulation hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           disabled={set && value >= max}
           onClick={() => {
             if (!set) onChange(Math.min(max, 1));
@@ -2958,22 +2988,19 @@ function AddOnsStep({
         Tap extras you want. Details are behind the info icon.
       </p>
       {addOns.length ? (
-        <div className="mt-6 flex flex-wrap justify-center gap-x-2.5 gap-y-3 sm:gap-x-3">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-3">
           {addOns.map((addOn) => {
             const selected = draft.selectedAddOns.includes(addOn.id);
             const icon = ADD_ON_ICONS[addOn.id];
             const AddOnIcon = icon?.Icon;
             const imageSrc = ADD_ON_IMAGES[addOn.id];
             return (
-              <div
-                className="relative w-[calc((100%-3*0.625rem)/4)] min-w-0 sm:w-[calc((100%-3*0.75rem)/4)]"
-                key={addOn.id}
-              >
+              <div className="relative min-w-0" key={addOn.id}>
                 <button
                   aria-label={addOn.label}
                   aria-pressed={selected}
                   className={cn(
-                    "flex w-full flex-col items-center rounded-2xl border-2 border-transparent bg-white px-1.5 pb-2.5 pt-3 text-center transition touch-manipulation hover:bg-[#f8f5ff]",
+                    "flex w-full flex-col items-center rounded-2xl border-2 border-transparent bg-white px-2 pb-2.5 pt-3 text-center transition touch-manipulation hover:bg-[#f8f5ff]",
                     selected && "border-[#6a45b8] bg-white",
                   )}
                   onClick={() => toggleAddOn(addOn.id)}
@@ -3000,13 +3027,13 @@ function AddOnsStep({
                       <span className="h-16 w-16 rounded-full border-[3px] border-[#1c133b] bg-[#efe6ff] sm:h-20 sm:w-20" />
                     )}
                   </span>
-                  <span className="mt-2 line-clamp-2 min-h-[2.5rem] text-[11px] font-semibold leading-tight text-[#1c133b] sm:text-xs">
+                  <span className="mt-2 line-clamp-2 min-h-[2.5rem] text-xs font-semibold leading-tight text-[#1c133b]">
                     {addOn.label}
                   </span>
                 </button>
                 <button
                   aria-label={`About ${addOn.label}`}
-                  className="absolute right-0.5 top-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#6a45b8] shadow-sm touch-manipulation hover:bg-[#f8f5ff]"
+                  className="absolute right-0.5 top-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#6a45b8] shadow-sm touch-manipulation hover:bg-[#f8f5ff]"
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -3014,7 +3041,7 @@ function AddOnsStep({
                   }}
                   type="button"
                 >
-                  <Info className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  <Info className="h-4 w-4" strokeWidth={2.25} />
                 </button>
               </div>
             );
@@ -3692,16 +3719,16 @@ function TimeSection({
       ) : null}
 
       {showFlexPrompt ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4">
           <div
             aria-labelledby="flex-prompt-title"
             aria-modal="true"
-            className="relative w-full max-w-md rounded-[1.75rem] bg-white px-6 pb-6 pt-8 shadow-[0_24px_60px_rgba(28,19,59,0.28)]"
+            className="relative w-full max-w-md rounded-t-[1.75rem] bg-white px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-8 shadow-[0_24px_60px_rgba(28,19,59,0.28)] sm:rounded-[1.75rem] sm:pb-6"
             role="dialog"
           >
             <button
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#1c133b] touch-manipulation"
+              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1c133b] touch-manipulation"
               onClick={dismissFlexPrompt}
               type="button"
             >
@@ -3722,14 +3749,14 @@ function TimeSection({
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
-                className="rounded-full border border-[#1c133b] bg-white px-4 py-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
+                className="min-h-12 rounded-full border border-[#1c133b] bg-white px-4 py-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
                 onClick={dismissFlexPrompt}
                 type="button"
               >
                 No, keep going
               </button>
               <button
-                className="rounded-full bg-[#1c133b] px-4 py-3 text-sm font-semibold text-white touch-manipulation"
+                className="min-h-12 rounded-full bg-[#1c133b] px-4 py-3 text-sm font-semibold text-white touch-manipulation"
                 onClick={dismissFlexPrompt}
                 type="button"
               >
@@ -4467,7 +4494,7 @@ function CheckoutStep({
       ) : null}
 
       <Button
-        className="mt-6 min-h-12 w-full rounded-full bg-[#6a45b8] text-base touch-manipulation hover:bg-[#5a38a3]"
+        className="mt-6 hidden min-h-12 w-full rounded-full bg-[#6a45b8] text-base touch-manipulation hover:bg-[#5a38a3] lg:inline-flex"
         disabled={!stripe || processing || cardsLoading}
         size="lg"
         type="submit"
@@ -4487,6 +4514,30 @@ function CheckoutStep({
           "Book my cleaning"
         )}
       </Button>
+
+      <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-[#e8e0d0]/80 bg-[#f9f6ef]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm lg:hidden">
+        <Button
+          className="min-h-12 w-full rounded-full bg-[#6a45b8] text-base touch-manipulation hover:bg-[#5a38a3]"
+          disabled={!stripe || processing || cardsLoading}
+          size="lg"
+          type="submit"
+        >
+          {processing ? (
+            <span className="inline-flex items-center gap-2">
+              <BookingSpinner size="sm" tone="inverse" />
+              {paymentPhase === "saving"
+                ? "Saving…"
+                : paymentPhase === "saving_card"
+                  ? usingNewCard
+                    ? "Saving card…"
+                    : "Using saved card…"
+                  : "Confirming booking…"}
+            </span>
+          ) : (
+            "Book my cleaning"
+          )}
+        </Button>
+      </div>
     </form>
   );
 }

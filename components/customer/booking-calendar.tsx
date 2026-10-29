@@ -117,7 +117,7 @@ export function BookingCalendar({
           return (
             <button
               className={cn(
-                "mx-auto flex h-9 w-9 items-center justify-center rounded-full text-[#1c133b] touch-manipulation",
+                "mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[#1c133b] touch-manipulation",
                 isSelected && "bg-[#6a45b8] font-bold text-white",
                 disabled && "opacity-30",
                 !isSelected && !disabled && "hover:bg-white",
