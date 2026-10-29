@@ -111,9 +111,8 @@ export function BirminghamPlaceFaqList({
     ),
     [entries[10]!.question]: (
       <>
-        Cancel or reschedule free of charge more than 48 hours before the visit.
-        A partial fee may apply within 48 hours, and the full amount within 24
-        hours. See{" "}
+        Cancel or reschedule free of charge more than 24 hours before the visit.
+        Within 24 hours, the full booking amount is retained. See{" "}
         <Link className={linkClass} href={FAQ_LINKS.cancellationFee}>
           cancellation fees
         </Link>

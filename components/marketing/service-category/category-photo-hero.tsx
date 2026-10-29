@@ -38,7 +38,7 @@ export function placePhotoHero(
 
   if (focus?.category === "commercial") {
     return {
-      bookCta: "Book commercial cleaning",
+      bookCta: "Book workspace cleaning",
       bullets: [
         "One-off or recurring workplace cleans",
         "Clear estimates before you book",
@@ -48,7 +48,7 @@ export function placePhotoHero(
       overlay: "wash",
       subtitle:
         "Offices, retail, education and communal spaces — cleaned without the chase",
-      title: `Commercial Cleaning in ${name}`,
+      title: `Workspace Cleaning in ${name}`,
     };
   }
 

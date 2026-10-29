@@ -89,6 +89,10 @@ export const bookingDraftSchema = z.object({
     .max(6, "Please choose up to 7 time slots (one preferred, plus alternatives).")
     .default([]),
   estimatedDurationHours: z.number().min(1).max(12),
+  /** Draft room counts from the rooms step — preferred over saved address for pricing. */
+  numBedrooms: z.number().int().min(0).nullable().optional(),
+  numBathrooms: z.number().int().min(0).nullable().optional(),
+  otherRoomTypes: z.array(z.string().trim().min(1)).max(20).default([]),
   selectedAddOns: z.array(z.string().trim().min(1)).default([]),
   serviceCategory,
   serviceType,

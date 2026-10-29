@@ -70,6 +70,11 @@ export interface ServiceAddOnDefinition {
   detail?: string;
   /** Extra cleaner time when selected (non-hourly add-ons). Defaults to 0.25h. */
   durationHours?: number;
+  /**
+   * When true, `durationHours` lengthens the visit for scheduling but is not
+   * charged (e.g. ironing adds 30 minutes at no extra cost).
+   */
+  freeDuration?: boolean;
   id: string;
   /** When set, charge this many pence per cleaner-hour instead of `amount`. */
   hourly?: "products" | "equipment";
@@ -130,7 +135,7 @@ export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
   {
     description: "Workplaces, retail, hospitality, education and shared areas.",
     icon: BriefcaseBusiness,
-    label: "Commercial Cleaning",
+    label: "Workspace Cleaning",
     value: "commercial",
   },
   {
@@ -362,12 +367,103 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     amount: 0,
     categories: ["residential"],
     description:
-      "Pressing and folding during the visit. Adds about 30 minutes to the booking.",
+      "Pressing and folding during the visit. Adds about 30 minutes to the booking at no extra charge.",
     detail:
-      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much ironing you have.\n\nKindly note: you’ll need to provide the ironing board. If you’ve asked the professional to bring cleaning equipment, they can also bring an iron, but the ironing board is not included.",
+      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much ironing you have. Ironing itself isn’t charged; you only pay for the cleaning time.\n\nKindly note: you’ll need to provide the ironing board. If you’ve asked the professional to bring cleaning equipment, they can also bring an iron, but the ironing board is not included.",
     durationHours: 0.5,
+    freeDuration: true,
     id: "ironing",
     label: "Ironing",
+  },
+  {
+    amount: 0,
+    categories: ["residential"],
+    description:
+      "Wash, dry and fold during the visit. Adds about 30 minutes at no extra charge.",
+    detail:
+      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much laundry you have. Laundry itself isn’t charged; you only pay for the cleaning time.\n\nPlease have detergent available, and note the machine must be usable during the visit.",
+    durationHours: 0.5,
+    freeDuration: true,
+    id: "laundry",
+    label: "Laundry",
+  },
+  {
+    amount: 0,
+    categories: ["residential", "moving_home", "short_term_rental", "recovery"],
+    description:
+      "Interior fridge clean and wipe-down. Adds about 30 minutes at no extra charge.",
+    detail:
+      "We’ll add 30 minutes for shelves, drawers and seals. Fridge cleaning itself isn’t charged; you only pay for the cleaning time.\n\nPlease empty perishables you don’t want moved.",
+    durationHours: 0.5,
+    freeDuration: true,
+    id: "inside_fridge",
+    label: "Inside fridge",
+  },
+  {
+    amount: 0,
+    categories: ["residential", "moving_home", "short_term_rental", "recovery"],
+    description:
+      "Oven interior clean for grease and residue. Adds about 30 minutes at no extra charge.",
+    detail:
+      "We’ll add 30 minutes for interior walls, racks and door glass. Oven cleaning itself isn’t charged; you only pay for the cleaning time.\n\nSelf-cleaning cycles should be finished before the visit.",
+    durationHours: 0.5,
+    freeDuration: true,
+    id: "inside_oven",
+    label: "Inside oven",
+  },
+  {
+    amount: 0,
+    categories: [
+      "residential",
+      "moving_home",
+      "commercial",
+      "short_term_rental",
+      "recovery",
+    ],
+    description:
+      "Interior window glass and sill clean. Adds about 30 minutes at no extra charge.",
+    detail:
+      "We’ll add 30 minutes for inside glass and accessible sills. Window cleaning itself isn’t charged; you only pay for the cleaning time.\n\nThis does not cover exterior glazing or high atrium windows.",
+    durationHours: 0.5,
+    freeDuration: true,
+    id: "interior_windows",
+    label: "Inside windows",
+  },
+  {
+    amount: 1500,
+    categories: ["short_term_rental"],
+    description: "Interior cupboard/cabinet wipe-down.",
+    id: "inside_cabinets",
+    label: "Inside cabinets",
+  },
+  {
+    amount: 2000,
+    categories: ["short_term_rental"],
+    description: "Light clean of balcony or patio area.",
+    id: "balcony_patio",
+    label: "Balcony or patio",
+  },
+  {
+    amount: 1600,
+    categories: ["short_term_rental", "recovery"],
+    description: "Additional limescale and bathroom-detail time.",
+    id: "extra_bathroom_detail",
+    label: "Extra bathroom detail",
+  },
+  {
+    amount: 1000,
+    categories: ["short_term_rental"],
+    description: "Change bed linen supplied by customer or host.",
+    id: "linen_change",
+    label: "Linen change",
+    services: ["airbnb_turnover", "holiday_let", "serviced_accommodation"],
+  },
+  {
+    amount: 2200,
+    categories: ["recovery"],
+    description: "Extra care time for sensitive recovery-support bookings.",
+    id: "recovery_priority",
+    label: "Recovery priority care",
   },
   {
     amount: 0,
@@ -402,63 +498,6 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     hourly: "equipment",
     id: "cleaning_equipment",
     label: "Cleaning equipment",
-  },
-  {
-    amount: 1200,
-    categories: ["short_term_rental"],
-    description: "Interior fridge clean and wipe-down.",
-    id: "inside_fridge",
-    label: "Inside fridge",
-  },
-  {
-    amount: 1800,
-    categories: ["short_term_rental"],
-    description: "Oven interior clean for grease and residue.",
-    id: "inside_oven",
-    label: "Inside oven",
-  },
-  {
-    amount: 1500,
-    categories: ["short_term_rental"],
-    description: "Interior cupboard/cabinet wipe-down.",
-    id: "inside_cabinets",
-    label: "Inside cabinets",
-  },
-  {
-    amount: 1400,
-    categories: ["commercial", "short_term_rental"],
-    description: "Interior window glass and sill clean.",
-    id: "interior_windows",
-    label: "Interior windows",
-  },
-  {
-    amount: 2000,
-    categories: ["short_term_rental"],
-    description: "Light clean of balcony or patio area.",
-    id: "balcony_patio",
-    label: "Balcony or patio",
-  },
-  {
-    amount: 1600,
-    categories: ["short_term_rental", "recovery"],
-    description: "Additional limescale and bathroom-detail time.",
-    id: "extra_bathroom_detail",
-    label: "Extra bathroom detail",
-  },
-  {
-    amount: 1000,
-    categories: ["short_term_rental"],
-    description: "Change bed linen supplied by customer or host.",
-    id: "linen_change",
-    label: "Linen change",
-    services: ["airbnb_turnover", "holiday_let", "serviced_accommodation"],
-  },
-  {
-    amount: 2200,
-    categories: ["recovery"],
-    description: "Extra care time for sensitive recovery-support bookings.",
-    id: "recovery_priority",
-    label: "Recovery priority care",
   },
 ];
 
@@ -642,6 +681,7 @@ export function addOnAmountPence(
   addOn: ServiceAddOnDefinition,
   context?: AddOnPriceContext,
 ) {
+  if (addOn.freeDuration) return 0;
   const pricing = context?.pricing ?? DEFAULT_SERVICE_PRICING;
   if (!addOn.hourly || !context) {
     return flatAddOnAmountFromPricing(pricing, addOn.id, addOn.amount);
@@ -665,6 +705,14 @@ export function selectedAddOnTotal(
     (sum, addOn) => sum + addOnAmountPence(addOn, context),
     0,
   );
+}
+
+/** Session minutes added for free (not charged as labour), e.g. ironing. */
+export function freeAddOnDurationHours(selectedAddOns: string[]) {
+  const selected = new Set(selectedAddOns);
+  return SERVICE_ADD_ONS.filter(
+    (addOn) => selected.has(addOn.id) && addOn.freeDuration,
+  ).reduce((sum, addOn) => sum + (addOn.durationHours ?? 0), 0);
 }
 
 /** Arrival-time pricing — evenings and weekends cost more than weekday daytime. */
@@ -751,6 +799,150 @@ export function estimateDuration(
   );
 }
 
+export type EstimatePriceOptions = {
+  /**
+   * Billable cleaner-hours override (customer-chosen session length).
+   * Ignored for office quotes, which always use calculated cleaner-hours.
+   */
+  durationHours?: number | null;
+  officeSpaces?: OfficeSpaceSelection[];
+  pricing?: ServicePricingConfig;
+  /** Prefer draft room counts over the saved address when sizing the formula. */
+  rooms?: {
+    bathrooms?: number | null;
+    bedrooms?: number | null;
+    otherRooms?: number | null;
+  };
+};
+
+export type PriceBreakdownAddOn = {
+  amountPence: number;
+  hourly: boolean;
+  id: string;
+  label: string;
+  /** Per-hour rate for hourly supply add-ons (for secondary copy). */
+  ratePence?: number;
+};
+
+export type PriceBreakdown = {
+  addOns: PriceBreakdownAddOn[];
+  /** Cleaner-hours used for labour + hourly supply (office = team hours). */
+  billableHours: number;
+  labourPence: number;
+  ratePence: number;
+  scheduleLabel: string | null;
+  scheduleMult: number;
+  totalPence: number;
+  /** Wall-clock visit length for office; same as billableHours otherwise. */
+  visitHours: number;
+};
+
+/** Full visit price with line items that sum to `totalPence`. */
+export function estimatePriceBreakdown(
+  serviceType: ServiceType,
+  address: Address,
+  standard: CleaningStandard = recommendedStandardFor(serviceType),
+  selectedAddOns: string[] = [],
+  schedule?: {
+    date?: string | null;
+    time?: string | null;
+  },
+  options?: EstimatePriceOptions,
+): PriceBreakdown {
+  const pricing = options?.pricing ?? DEFAULT_SERVICE_PRICING;
+  const scheduleMult = schedulePriceMultiplier(
+    schedule?.date,
+    schedule?.time,
+    pricing,
+  );
+  const rate = hourlyRatePence(serviceType, standard, pricing);
+  const scheduleLabel = schedulePriceLabel(
+    schedule?.date,
+    schedule?.time,
+    pricing,
+  );
+
+  let billableHours: number;
+  let visitHours: number;
+  let labourBasePence: number;
+
+  if (serviceType === "office" && options?.officeSpaces?.length) {
+    const quote = calculateOfficeQuote(options.officeSpaces, standard, rate);
+    billableHours = quote.cleanerHours;
+    visitHours = Math.max(1, quote.jobDurationHours);
+    labourBasePence = quote.pricePence;
+  } else {
+    const formulaHours = estimateDuration(serviceType, standard, selectedAddOns, {
+      bathrooms: options?.rooms?.bathrooms ?? address.num_bathrooms,
+      bedrooms: options?.rooms?.bedrooms ?? address.num_bedrooms,
+      otherRooms: options?.rooms?.otherRooms ?? address.num_other_rooms,
+      propertyType: address.property_type,
+    });
+    const chosen = options?.durationHours;
+    const sessionHours =
+      chosen != null && Number.isFinite(chosen) && chosen >= 1
+        ? Number(chosen)
+        : formulaHours;
+    const freeHours = freeAddOnDurationHours(selectedAddOns);
+    // Session length includes free extras (ironing); labour ignores that carve-out.
+    visitHours = sessionHours;
+    billableHours = Math.max(1, Number((sessionHours - freeHours).toFixed(2)));
+    labourBasePence = Math.round(billableHours * rate);
+  }
+
+  const labourPence = Math.round(labourBasePence * scheduleMult);
+  const selected = new Set(selectedAddOns);
+  const addOns: PriceBreakdownAddOn[] = SERVICE_ADD_ONS.filter((addOn) =>
+    selected.has(addOn.id),
+  ).map((addOn) => {
+    const amountPence = addOnAmountPence(addOn, {
+      durationHours: billableHours,
+      pricing,
+      serviceType,
+      standard,
+    });
+    if (addOn.hourly === "products") {
+      return {
+        amountPence,
+        hourly: true,
+        id: addOn.id,
+        label: addOn.label,
+        ratePence: productSupplyRatePence(
+          serviceDefinition(serviceType).category,
+          pricing,
+        ),
+      };
+    }
+    if (addOn.hourly === "equipment") {
+      return {
+        amountPence,
+        hourly: true,
+        id: addOn.id,
+        label: addOn.label,
+        ratePence: equipmentSupplyRatePence(serviceType, pricing),
+      };
+    }
+    return {
+      amountPence,
+      hourly: false,
+      id: addOn.id,
+      label: addOn.label,
+    };
+  });
+
+  const addOnTotal = addOns.reduce((sum, item) => sum + item.amountPence, 0);
+  return {
+    addOns,
+    billableHours,
+    labourPence,
+    ratePence: rate,
+    scheduleLabel,
+    scheduleMult,
+    totalPence: labourPence + addOnTotal,
+    visitHours,
+  };
+}
+
 export function estimatePrice(
   serviceType: ServiceType,
   address: Address,
@@ -760,49 +952,16 @@ export function estimatePrice(
     date?: string | null;
     time?: string | null;
   },
-  options?: {
-    officeSpaces?: OfficeSpaceSelection[];
-    pricing?: ServicePricingConfig;
-  },
+  options?: EstimatePriceOptions,
 ) {
-  const pricing = options?.pricing ?? DEFAULT_SERVICE_PRICING;
-  const scheduleMult = schedulePriceMultiplier(
-    schedule?.date,
-    schedule?.time,
-    pricing,
-  );
-  const rate = hourlyRatePence(serviceType, standard, pricing);
-
-  if (serviceType === "office" && options?.officeSpaces?.length) {
-    const quote = calculateOfficeQuote(options.officeSpaces, standard, rate);
-    const labour = Math.round(quote.pricePence * scheduleMult);
-    return (
-      labour +
-      selectedAddOnTotal(selectedAddOns, {
-        durationHours: quote.cleanerHours,
-        pricing,
-        serviceType,
-        standard,
-      })
-    );
-  }
-
-  const hours = estimateDuration(serviceType, standard, selectedAddOns, {
-    bathrooms: address.num_bathrooms,
-    bedrooms: address.num_bedrooms,
-    otherRooms: address.num_other_rooms,
-    propertyType: address.property_type,
-  });
-  const labour = Math.round(hours * rate * scheduleMult);
-  return (
-    labour +
-    selectedAddOnTotal(selectedAddOns, {
-      durationHours: hours,
-      pricing,
-      serviceType,
-      standard,
-    })
-  );
+  return estimatePriceBreakdown(
+    serviceType,
+    address,
+    standard,
+    selectedAddOns,
+    schedule,
+    options,
+  ).totalPence;
 }
 
 export function getSmartRecommendation({

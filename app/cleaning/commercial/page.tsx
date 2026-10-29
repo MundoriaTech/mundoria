@@ -13,9 +13,9 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Commercial cleaning with Mundoria — office, retail & hospitality, educational and communal area cleans with clear pricing and vetted cleaners in Birmingham.",
+    "Workspace cleaning with Mundoria — office, retail & hospitality, educational and communal area cleans with clear pricing and vetted cleaners in Birmingham.",
   path: "/cleaning/commercial",
-  title: "Commercial Cleaning | Mundoria",
+  title: "Workspace Cleaning | Mundoria",
 });
 
 export default async function CommercialCleaningRoute() {
@@ -36,8 +36,8 @@ export default async function CommercialCleaningRoute() {
               name: "Birmingham",
             },
             description:
-              "Commercial cleaning for offices, retail, education and communal spaces.",
-            name: "Commercial Cleaning",
+              "Workspace cleaning for offices, retail, education and communal spaces.",
+            name: "Workspace Cleaning",
             provider: {
               "@type": "Organization",
               name: "Mundoria",

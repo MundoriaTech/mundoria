@@ -1644,7 +1644,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I get a refund if my booking is cancelled?",
         answer:
-          "That depends on when the booking is cancelled and who cancelled it.\n\nIf you cancel:\n\n• 48 hours or more before the start time: no cancellation fee, and any payment authorisation is released\n• Between 24 and 48 hours before the start time: a 50% cancellation fee applies\n• Less than 24 hours before the start time: the full booking amount is retained\n\nIf Mundoria or the assigned professional cannot fulfil the booking and no suitable replacement is arranged, the payment is handled under the cancellation and replacement process rather than leaving you without a clear next step.\n\nThe same notice windows are shown in the booking and cancellation journey.",
+          "That depends on when the booking is cancelled and who cancelled it.\n\nIf you cancel:\n\n• 24 hours or more before the start time: no cancellation fee, and any payment authorisation is released\n• Less than 24 hours before the start time: the full booking amount is retained\n\nIf Mundoria or the assigned professional cannot fulfil the booking and no suitable replacement is arranged, the payment is handled under the cancellation and replacement process rather than leaving you without a clear next step.\n\nThe same notice windows are shown in the booking and cancellation journey.",
       },
     ],
   },
@@ -1927,12 +1927,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How much notice do I need to cancel?",
         answer:
-          "You can cancel through the Mundoria booking process before the clean starts.\n\nTo cancel without a fee, cancel at least 48 hours before the scheduled start time.\n\nCancellations between 24 and 48 hours before the start time incur a 50% fee. Cancellations less than 24 hours before the start time incur the full booking amount.",
+          "You can cancel through the Mundoria booking process before the clean starts.\n\nTo cancel without a fee, cancel at least 24 hours before the scheduled start time.\n\nCancellations less than 24 hours before the start time incur the full booking amount.",
       },
       {
         question: "Is there a cancellation fee?",
         answer:
-          "Yes, for late cancellations.\n\n• 48 hours or more before the start time: no fee\n• Between 24 and 48 hours before the start time: 50% of the booking total\n• Less than 24 hours before the start time: 100% of the booking total\n\nThose windows are applied when you cancel through Mundoria and are shown as part of the cancellation process.",
+          "Yes, for late cancellations.\n\n• 24 hours or more before the start time: no fee\n• Less than 24 hours before the start time: 100% of the booking total\n\nThose windows are applied when you cancel through Mundoria and are shown as part of the cancellation process.",
       },
       {
         question: "Is there a rescheduling fee?",
@@ -2017,7 +2017,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I cancel a recurring clean?",
         answer:
-          "Yes.\n\nRecurring cleaning does not lock you in forever. You can cancel future visits through Mundoria.\n\nEach upcoming visit follows the same cancellation notice windows as a one-off booking: free at 48 hours or more before the start time, 50% between 24 and 48 hours, and 100% within 24 hours.",
+          "Yes.\n\nRecurring cleaning does not lock you in forever. You can cancel future visits through Mundoria.\n\nEach upcoming visit follows the same cancellation notice windows as a one-off booking: free at 24 hours or more before the start time, and 100% within 24 hours.",
       },
       {
         question: "Can I pause a recurring clean?",
@@ -2228,7 +2228,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I cancel recurring cleaning?",
         answer:
-          "Yes.\n\nRecurring cleaning does not lock you in forever. You can cancel future visits through Mundoria.\n\nEach upcoming visit follows the same cancellation notice windows as a one-off booking: free at 48 hours or more before the start time, 50% between 24 and 48 hours, and 100% within 24 hours.",
+          "Yes.\n\nRecurring cleaning does not lock you in forever. You can cancel future visits through Mundoria.\n\nEach upcoming visit follows the same cancellation notice windows as a one-off booking: free at 24 hours or more before the start time, and 100% within 24 hours.",
       },
       {
         question: "Can I change the number of hours on future bookings?",

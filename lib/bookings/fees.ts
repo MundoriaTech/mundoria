@@ -1,4 +1,4 @@
-/** Soft cancellation fee window: free at 48h or more, 50% within 48h, 100% within 24h. */
+/** Soft cancellation fee window: free at 24h or more; full amount within 24h. */
 export function cancellationFeePence({
   amountTotal,
   hoursUntilStart,
@@ -6,8 +6,7 @@ export function cancellationFeePence({
   amountTotal: number;
   hoursUntilStart: number;
 }): number {
-  if (hoursUntilStart >= 48) return 0;
-  if (hoursUntilStart >= 24) return Math.round(amountTotal * 0.5);
+  if (hoursUntilStart >= 24) return 0;
   return amountTotal;
 }
 

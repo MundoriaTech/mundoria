@@ -254,7 +254,7 @@ const INCLUDED: Partial<
       <>
         Office cleaning keeps workplaces presentable between busier deep cleans.
         See all{" "}
-        <FaqLink href="/cleaning/commercial">commercial cleaning</FaqLink>{" "}
+        <FaqLink href="/cleaning/commercial">workspace cleaning</FaqLink>{" "}
         options. A typical visit can include:
       </>
     ),
@@ -424,7 +424,7 @@ function frequencyFaq(service: MarketingService): CategoryFaq | null {
         presentation. Others book a deeper clean less often. Pick a one-off
         visit or a repeating schedule when you{" "}
         <FaqLink href={service.bookingHref}>book</FaqLink>, or explore{" "}
-        <FaqLink href="/cleaning/commercial">commercial cleaning</FaqLink>.
+        <FaqLink href="/cleaning/commercial">workspace cleaning</FaqLink>.
       </p>,
     );
   }

@@ -247,7 +247,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
       },
       {
         answer:
-          "You manage eligible changes in your account. Fee windows are shown before you confirm — typically free more than 48 hours ahead.",
+          "You manage eligible changes in your account. Fee windows are shown before you confirm, typically free more than 24 hours ahead.",
         question: "How do cancellations work for Kings Heath bookings?",
       },
     ],

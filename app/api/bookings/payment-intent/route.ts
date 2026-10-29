@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     !parsed.data.isRecurring
   ) {
     return NextResponse.json(
-      { error: "Commercial cleaning needs a repeat schedule." },
+      { error: "Workspace cleaning needs a repeat schedule." },
       { status: 400 },
     );
   }
@@ -98,16 +98,26 @@ export async function POST(request: Request) {
   }
 
   const pricing = await loadServicePricing();
+  const pricedAddress = address as Address;
   const baseAmount = estimatePrice(
     parsed.data.serviceType,
-    address as Address,
+    pricedAddress,
     parsed.data.cleaningStandard,
     parsed.data.selectedAddOns,
     {
       date: parsed.data.scheduledDate,
       time: parsed.data.scheduledTime,
     },
-    { officeSpaces: parsed.data.officeSpaces, pricing },
+    {
+      durationHours: parsed.data.estimatedDurationHours,
+      officeSpaces: parsed.data.officeSpaces,
+      pricing,
+      rooms: {
+        bathrooms: parsed.data.numBathrooms,
+        bedrooms: parsed.data.numBedrooms,
+        otherRooms: parsed.data.otherRoomTypes?.length ?? null,
+      },
+    },
   );
   const discount = promo
     ? promo.discount_type === "percentage"

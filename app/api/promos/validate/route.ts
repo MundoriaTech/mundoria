@@ -12,6 +12,10 @@ const schema = bookingDraftSchema
   .pick({
     addressId: true,
     cleaningStandard: true,
+    numBathrooms: true,
+    numBedrooms: true,
+    officeSpaces: true,
+    otherRoomTypes: true,
     scheduledDate: true,
     scheduledTime: true,
     selectedAddOns: true,
@@ -19,6 +23,8 @@ const schema = bookingDraftSchema
   })
   .extend({
     code: z.string().trim().min(1).max(40),
+    /** Optional — formula hours used when the customer has not chosen a length yet. */
+    estimatedDurationHours: z.number().min(1).max(12).nullable().optional(),
   });
 
 export async function POST(request: Request) {
@@ -81,7 +87,16 @@ export async function POST(request: Request) {
       date: parsed.data.scheduledDate,
       time: parsed.data.scheduledTime,
     },
-    { pricing },
+    {
+      durationHours: parsed.data.estimatedDurationHours,
+      officeSpaces: parsed.data.officeSpaces,
+      pricing,
+      rooms: {
+        bathrooms: parsed.data.numBathrooms,
+        bedrooms: parsed.data.numBedrooms,
+        otherRooms: parsed.data.otherRoomTypes?.length ?? null,
+      },
+    },
   );
   const discount =
     promo.discount_type === "percentage"

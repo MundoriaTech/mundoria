@@ -39,7 +39,7 @@ export const BIRMINGHAM_LOCATION_REVIEWS = [
   {
     author: "James (City centre)",
     body: "Office tidy between client visits. Booking is quick and the team always knows what to prioritise.",
-    service: "Commercial cleaning",
+    service: "Workspace cleaning",
   },
   {
     author: "Elena (Selly Oak)",

@@ -1,5 +1,8 @@
-/** Resume booking checkout after signup / sign-in / Google OAuth. */
+/** Resume payment checkout after signup / sign-in / Google OAuth. */
 export const BOOKING_CHECKOUT_RETURN_PATH = "/booking/new?step=checkout";
+
+/** In-wizard account gate (separate URL from payment checkout). */
+export const BOOKING_AUTH_PATH = "/booking/new?step=auth";
 
 /** Must match the wizard’s localStorage step key. */
 export const BOOKING_STEP_STORAGE_KEY = "mundoria-booking-step-v5";
@@ -14,7 +17,7 @@ export function rememberBookingCheckoutStep() {
 }
 
 /**
- * Map a booking redirectTo into wizard checkout sign-in (keeps booking chrome).
+ * Map a booking redirectTo into the wizard auth gate (keeps booking chrome).
  * Returns null when redirectTo is not a booking path.
  */
 export function bookingCheckoutSignInPath(
@@ -25,8 +28,9 @@ export function bookingCheckoutSignInPath(
   if (!raw.startsWith("/booking")) return null;
   const [pathname, query = ""] = raw.split("?");
   const params = new URLSearchParams(query);
-  if (pathname.startsWith("/booking/new") && !params.get("step")) {
-    params.set("step", "checkout");
+  if (pathname.startsWith("/booking/new")) {
+    // Auth gate owns its own step URL; never share checkout with payment.
+    params.set("step", "auth");
   }
   params.set("auth", "signin");
   if (options.verify) params.set("verify", "1");
@@ -34,11 +38,10 @@ export function bookingCheckoutSignInPath(
   return qs ? `${pathname}?${qs}` : pathname;
 }
 
-/** Default checkout URL opened in sign-in mode. */
+/** Default auth-gate URL opened in sign-in mode. */
 export function bookingCheckoutAuthHref(options: { verify?: boolean } = {}) {
   return (
-    bookingCheckoutSignInPath(BOOKING_CHECKOUT_RETURN_PATH, options) ??
-    BOOKING_CHECKOUT_RETURN_PATH
+    bookingCheckoutSignInPath(BOOKING_AUTH_PATH, options) ?? BOOKING_AUTH_PATH
   );
 }
 

@@ -24,6 +24,18 @@ Admin timing lives on `platform_settings`:
 | Email / SMS | Confirm = card saved; complete = hold remains until next-day capture. |
 | Help | `/help/article/why-pay-in-advance`, payment & cancellation, payment failed. |
 
+## Apple Pay and Google Pay
+
+Checkout can save a wallet card the same way as a typed card (SetupIntent → later hold → next-day capture).
+
+**Stripe Dashboard (required before wallets appear in production):**
+
+1. **Settings → Payment methods** — enable **Apple Pay** and **Google Pay**.
+2. **Settings → Payment method domains** — register every HTTPS host customers use (e.g. `mundoria.co.uk`, `www.mundoria.co.uk`, staging). Apple Pay will not show on unregistered domains.
+3. Test on a real device: Safari + Apple Wallet for Apple Pay; Chrome + Google Pay for Google Pay.
+
+Wallets are offered via Stripe’s Payment Request Button on booking checkout when `canMakePayment()` succeeds. Localhost usually works for Google Pay in Chrome; Apple Pay typically needs a registered domain.
+
 ## Code
 
 - Labels: `lib/customer/payment-status.ts`

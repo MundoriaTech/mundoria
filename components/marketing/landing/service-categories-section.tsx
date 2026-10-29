@@ -50,7 +50,7 @@ const GROUPS = [
     imageAlt: "A cleaner in pink gloves wiping a table with spray and cloth",
     imageClassName: "object-[center_28%]",
     intro: "Desks, shop floors, classrooms and the shared spaces between them.",
-    label: "Commercial",
+    label: "Workspace",
     items: [
       {
         description: "Desks, toilets and shared rooms.",

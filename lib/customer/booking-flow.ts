@@ -29,6 +29,7 @@ export type BookingFlowStepId =
   | "duration"
   | "date"
   | "time"
+  | "auth"
   | "checkout";
 
 /** Canonical order used to remap when the active flow drops a step. */
@@ -47,6 +48,7 @@ export const BOOKING_STEP_ORDER: BookingFlowStepId[] = [
   "date",
   "frequency",
   "time",
+  "auth",
   "checkout",
 ];
 
@@ -67,6 +69,27 @@ export function resolveFlowStepIndex(
   if (desired === "duration" && flowSteps.includes("date")) {
     return flowSteps.indexOf("date");
   }
+  // Service / category picker folded into the address step.
+  if (
+    (desired === "service" || desired === "category") &&
+    flowSteps.includes("address")
+  ) {
+    return flowSteps.indexOf("address");
+  }
+  // Frequency / time folded into the date step.
+  if (
+    (desired === "frequency" || desired === "time") &&
+    flowSteps.includes("date")
+  ) {
+    return flowSteps.indexOf("date");
+  }
+  // Guest auth gate vs signed-in payment — same funnel slot, different URLs.
+  if (desired === "auth" && flowSteps.includes("checkout")) {
+    return flowSteps.indexOf("checkout");
+  }
+  if (desired === "checkout" && flowSteps.includes("auth")) {
+    return flowSteps.indexOf("auth");
+  }
   if (desired && isBookingFlowStepId(desired)) {
     const desiredOrder = BOOKING_STEP_ORDER.indexOf(desired);
     for (let i = desiredOrder - 1; i >= 0; i -= 1) {
@@ -84,7 +107,7 @@ export type PropertyQuestionMode = "home" | "commercial" | "moving" | "recovery"
 
 const STEP_LABELS: Record<BookingFlowStepId, string> = {
   cleaner: "Cleaner",
-  category: "Category",
+  category: "Service",
   service: "Service",
   address: "Address",
   history: "Suggestion",
@@ -97,6 +120,7 @@ const STEP_LABELS: Record<BookingFlowStepId, string> = {
   duration: "Duration",
   date: "Schedule",
   time: "Time",
+  auth: "Book",
   checkout: "Book",
 };
 
@@ -310,6 +334,8 @@ export function getFlowSteps(
   options?: {
     entryLock?: BookingEntryLock;
     includeCleanerChoice?: boolean;
+    /** When false, final step is auth (account gate); when true, payment checkout. */
+    signedIn?: boolean;
   },
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
@@ -318,7 +344,8 @@ export function getFlowSteps(
     : draft.serviceCategory;
   const isCommercial = category === "commercial";
 
-  // Address is always the first question, before service choice.
+  // Address + rooms + service picker share the first step (service deep link
+  // still collects address/rooms here; the accordion is hidden).
   steps.push("address");
 
   // After the address, offer cleaners this customer has already finished a visit with.
@@ -326,15 +353,10 @@ export function getFlowSteps(
     steps.push("cleaner");
   }
 
-  // A link from a category or service page should not ask that question again.
-  if (options?.entryLock !== "service") {
-    if (options?.entryLock !== "category") steps.push("category");
-    steps.push("service");
+  // Home room counts live on the address step. Office still needs a spaces step.
+  if (draft.serviceType === "office") {
+    steps.push("rooms");
   }
-
-  // Essential / Enhanced / Comprehensive stay on the booking as a price input.
-  // The customer does not pick them.
-  steps.push("rooms");
 
   if (draft.serviceType) {
     if (availableAddOns(draft.serviceType).length > 0) {
@@ -348,13 +370,11 @@ export function getFlowSteps(
     steps.push("preferences");
   }
 
+  // Appointment date + frequency + time availability share one step.
   steps.push("date");
 
-  if (frequencyModeFor(draft.serviceType) !== "none") {
-    steps.push("frequency");
-  }
-
-  steps.push("time", "checkout");
+  // Auth and checkout share the same progress slot but need distinct URLs.
+  steps.push(options?.signedIn === false ? "auth" : "checkout");
   return steps;
 }
 
@@ -426,7 +446,7 @@ export function durationSummary(args: {
     wholeHours: Math.floor(hours),
     propertyHint,
     windowsTip:
-      "If you would like interior windows included, add Interior Window Cleaning — or allow additional time.",
+      "If you would like interior windows included, add Interior Window Cleaning, or allow additional time.",
   };
 }
 

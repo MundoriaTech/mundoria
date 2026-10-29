@@ -40,7 +40,7 @@ export function placeServiceExplainerItems(place: string): PlaceServiceExplainer
       explanation:
         "Workplace and front-of-house cleaning for offices, studios, retail and hospitality — clear scope, secure payment and live booking status.",
       href: "/cleaning/commercial",
-      name: "Commercial cleaning",
+      name: "Workspace cleaning",
     },
     {
       explanation:

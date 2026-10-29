@@ -14,11 +14,11 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
   },
   {
     id: "commercial",
-    heading: "Commercial cleaning",
+    heading: "Workspace cleaning",
     links: [
       {
         href: "/cleaning/commercial",
-        label: `Commercial cleaning in ${LAUNCH_CITY.name}`,
+        label: `Workspace cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
   },

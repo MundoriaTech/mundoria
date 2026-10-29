@@ -26,7 +26,7 @@ function heroEyebrow(name: string, focus?: PlacePageFocus) {
   const lead = focus?.serviceLabel
     ? focus.serviceLabel
     : focus?.category === "commercial"
-      ? "Commercial"
+      ? "Workspace"
       : focus?.category === "recovery"
         ? "Recovery"
         : focus?.category === "residential"

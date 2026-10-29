@@ -100,8 +100,8 @@ export const OFFICE_SPACE_OPTIONS: Array<{
   {
     label: "Office / Work Areas",
     sizeBands: {
-      large: "61–100m²",
-      medium: "26–60m²",
+      large: "61 to 100m²",
+      medium: "26 to 60m²",
       small: "≤25m²",
     },
     value: "office_work_area",
@@ -109,8 +109,8 @@ export const OFFICE_SPACE_OPTIONS: Array<{
   {
     label: "Meeting / Conference Rooms",
     sizeBands: {
-      large: "31–50m²",
-      medium: "16–30m²",
+      large: "31 to 50m²",
+      medium: "16 to 30m²",
       small: "≤15m²",
     },
     value: "meeting_room",
@@ -118,8 +118,8 @@ export const OFFICE_SPACE_OPTIONS: Array<{
   {
     label: "Toilets / Washrooms",
     sizeBands: {
-      large: "21–35m²",
-      medium: "11–20m²",
+      large: "21 to 35m²",
+      medium: "11 to 20m²",
       small: "≤10m²",
     },
     value: "toilet",
@@ -127,8 +127,8 @@ export const OFFICE_SPACE_OPTIONS: Array<{
   {
     label: "Kitchen / Break Rooms",
     sizeBands: {
-      large: "26–40m²",
-      medium: "11–25m²",
+      large: "26 to 40m²",
+      medium: "11 to 25m²",
       small: "≤10m²",
     },
     value: "kitchen",
@@ -136,8 +136,8 @@ export const OFFICE_SPACE_OPTIONS: Array<{
   {
     label: "Reception / Waiting Areas",
     sizeBands: {
-      large: "36–60m²",
-      medium: "16–35m²",
+      large: "36 to 60m²",
+      medium: "16 to 35m²",
       small: "≤15m²",
     },
     value: "reception",
@@ -145,8 +145,8 @@ export const OFFICE_SPACE_OPTIONS: Array<{
   {
     label: "Corridors / Common Areas",
     sizeBands: {
-      large: "61–100m²",
-      medium: "26–60m²",
+      large: "61 to 100m²",
+      medium: "26 to 60m²",
       small: "≤25m²",
     },
     value: "corridor",

@@ -113,7 +113,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
       description:
         "Offices, retail and shared spaces with clearer scope before you book.",
       href: "/cleaning/commercial",
-      label: "Commercial Cleaning",
+      label: "Workspace Cleaning",
       soft: "#f8e4d4",
       services: [
         bookable("office", bookingHref),

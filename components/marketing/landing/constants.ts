@@ -63,7 +63,7 @@ export const landingCategoryNav = [
     bookLabel: "Book a workplace clean",
     description: "Offices, shops and shared workplaces",
     href: "/cleaning/commercial",
-    pageLabel: "See commercial services",
+    pageLabel: "See workspace services",
     items: [
       {
         description: "Desks, toilets and shared rooms",
@@ -86,7 +86,7 @@ export const landingCategoryNav = [
         label: "Communal areas",
       },
     ],
-    label: "Commercial",
+    label: "Workspace",
     notes: [
       "Visits planned around opening hours",
       "A clear estimate before you confirm",
@@ -141,7 +141,7 @@ export const landingServicesMenu = {
     {
       description: "Offices, retail and workplaces",
       href: "/cleaning/commercial",
-      label: "Commercial",
+      label: "Workspace",
     },
     {
       description: "Airbnb and guest turnovers",

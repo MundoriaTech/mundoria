@@ -52,7 +52,7 @@ const LOCATION_FAQS = (place: string) =>
     },
     {
       answer:
-        "Free cancellation more than 48 hours before the visit; a partial fee may apply within 48 hours, and the full amount within 24 hours. Exact fees are confirmed in your booking.",
+        "Free cancellation more than 24 hours before the visit; within 24 hours the full booking amount is retained. Exact fees are confirmed in your booking.",
       question: "What is the Mundoria cancellation policy?",
     },
   ] as const;

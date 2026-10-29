@@ -482,6 +482,11 @@ export function BookingDetail({
             }
             bathrooms={booking.address?.num_bathrooms ?? null}
             bedrooms={booking.address?.num_bedrooms ?? null}
+            durationHint={
+              booking.service_type === "office" && booking.cleaner_hours != null
+                ? `${Number(booking.cleaner_hours).toFixed(1).replace(/\.0$/, "")} cleaner-hours`
+                : null
+            }
             durationHours={booking.estimated_duration_hours}
             frequencyLabel={frequencyLabelForBooking(booking)}
             hasPets={petsFromNotes(booking.special_instructions)}
@@ -489,6 +494,18 @@ export function BookingDetail({
               booking.service_type,
               booking.cleaning_standard,
             )}
+            labourAmountPence={
+              booking.amount_total != null
+                ? Math.max(
+                    0,
+                    Number(booking.amount_total) -
+                      (booking.add_ons ?? []).reduce(
+                        (sum, addOn) => sum + Number(addOn.amount ?? 0),
+                        0,
+                      ),
+                  )
+                : null
+            }
             priorityAreas={booking.special_attention_areas ?? []}
             scheduledDate={booking.scheduled_date}
             scheduledTime={booking.scheduled_start_time}
@@ -779,10 +796,10 @@ export function BookingDetail({
           confirmDisabled={reason.trim().length < 3}
           description={
             feePreview.feePence <= 0
-              ? "Free cancellation — you’re more than 48 hours before the visit. Eligible refunds go to your original payment method."
+              ? "Free cancellation. You’re more than 24 hours before the visit. Eligible refunds go to your original payment method."
               : feePreview.feePence >= Number(booking.amount_total ?? 0)
                 ? "Within 24 hours of the visit, the full booking amount is retained. Tell us why you’re cancelling."
-                : `Within 48 hours of the visit, a ${formatMoney(feePreview.feePence)} cancellation fee applies. The rest is refunded to your original payment method.`
+                : `A ${formatMoney(feePreview.feePence)} cancellation fee applies. The rest is refunded to your original payment method.`
           }
           onCancel={() => setShowCancel(false)}
           onConfirm={cancelBooking}

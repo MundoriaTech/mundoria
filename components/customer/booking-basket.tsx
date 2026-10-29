@@ -25,22 +25,37 @@ type BasketPromo = {
 };
 
 type BasketProps = {
-  addOns: { amount: number; hourly?: boolean; label: string }[];
+  addOns: {
+    amount: number;
+    /** Optional secondary note, e.g. "£2/h" for supply add-ons. */
+    detail?: string;
+    /** @deprecated Prefer visit `amount`; kept for older callers. */
+    hourly?: boolean;
+    label: string;
+    /** When true, list the add-on with no price / Free tag. */
+    quiet?: boolean;
+  }[];
   address: Address | null;
   alternateTimes?: string[];
-  /** Visit total in pence (labour + add-ons) shown on the Cleaning row. */
+  /** Visit total in pence (labour + add-ons − promo) shown on the Cleaning row. */
   amount: number | null;
   bathrooms: number | null;
   bedrooms: number | null;
   customDates?: string[];
+  /** Extra duration context (e.g. cleaner-hours or timed-arrival label). */
+  durationHint?: string | null;
   durationHours: number | null;
   frequencyLabel: string | null;
   hasPets?: boolean | null;
   /** Labour rate for the selected service / standard (pence per hour). */
   hourlyRatePence?: number | null;
+  /** @deprecated Unused — Cleaning header shows visit total; lines show £/h. */
+  labourAmountPence?: number | null;
   priorityAreas?: string[];
   /** Checkout-only: “Add a promo code” expands to an input (Wecasa-style). */
   promo?: BasketPromo | null;
+  /** Promo reduction in pence (shown as a negative line when applied). */
+  promoDiscountPence?: number | null;
   scheduledDate: string;
   scheduledTime: string;
   serviceLabel: string | null;
@@ -183,6 +198,7 @@ function BasketPanel({
   bathrooms,
   bedrooms,
   customDates = [],
+  durationHint = null,
   durationHours,
   frequencyLabel,
   hasPets = null,
@@ -190,6 +206,7 @@ function BasketPanel({
   hourlyRatePence = null,
   priorityAreas = [],
   promo = null,
+  promoDiscountPence = null,
   scheduledDate,
   scheduledTime,
   serviceLabel,
@@ -260,10 +277,16 @@ function BasketPanel({
     );
   }
 
+  /** Line items show £/h; the Cleaning header already shows the visit total. */
   const hourlyLabel =
     hourlyRatePence != null ? formatHourlyRate(hourlyRatePence) : undefined;
 
-  const serviceLines: { key: string; label: string; price?: string }[] = [];
+  const serviceLines: {
+    detail?: string;
+    key: string;
+    label: string;
+    price?: string;
+  }[] = [];
   if (serviceLabel) {
     serviceLines.push({
       key: "service",
@@ -283,8 +306,12 @@ function BasketPanel({
   if (durationHours != null) {
     serviceLines.push({
       key: "duration",
-      label: `For ${formatDuration(durationHours)}`,
+      label: durationHint
+        ? `For ${formatDuration(durationHours)} · ${durationHint}`
+        : `For ${formatDuration(durationHours)}`,
     });
+  } else if (durationHint) {
+    serviceLines.push({ key: "duration-hint", label: durationHint });
   }
   if (standardLabel) {
     serviceLines.push({ key: "standard", label: standardLabel });
@@ -310,29 +337,51 @@ function BasketPanel({
     });
   }
   for (const addOn of addOns) {
+    // Quiet rows (free-duration extras) show the label only.
+    // Priced rows show £/h — visit total stays on the Cleaning header.
+    if (addOn.quiet) {
+      serviceLines.push({
+        key: `addon-${addOn.label}`,
+        label: addOn.label,
+      });
+      continue;
+    }
+    const price =
+      addOn.amount > 0
+        ? addOn.hourly
+          ? formatHourlyRate(addOn.amount)
+          : formatMoney(addOn.amount)
+        : undefined;
     serviceLines.push({
+      detail: addOn.detail,
       key: `addon-${addOn.label}`,
       label: addOn.label,
-      price: addOn.hourly
-        ? formatHourlyRate(addOn.amount)
-        : addOn.amount <= 0
-          ? undefined
-          : formatMoney(addOn.amount),
+      price,
+    });
+  }
+  if (promoDiscountPence != null && promoDiscountPence > 0) {
+    serviceLines.push({
+      key: "promo",
+      label: "Promo",
+      price: `−${formatMoney(promoDiscountPence)}`,
     });
   }
 
-  /** Cleaning header shows visit total; hourly rate sits on the service line. */
+  /** Cleaning header shows the visit total; priced lines below use £/h where applicable. */
   const cleaningTotalLabel = amount != null ? formatMoney(amount) : null;
-
-  const scheduleTitle =
-    scheduleDates.length > 1
-      ? `${scheduleDates.length} dates`
-      : when ?? "Date of the session";
 
   const times = [
     scheduledTime,
     ...alternateTimes.filter((slot) => slot !== scheduledTime),
   ].filter(Boolean);
+
+  const multiSchedule = scheduleDates.length > 1;
+  const scheduleTitle = multiSchedule
+    ? `${scheduleDates.length} dates`
+    : when ?? "Date of the session";
+  /** Single date+time already lives in the title — don't repeat it in the body. */
+  const scheduleExpandable =
+    multiSchedule || times.length > 1;
 
   const addressFilled = Boolean(address);
   const serviceFilled = Boolean(serviceLabel);
@@ -372,7 +421,14 @@ function BasketPanel({
                 className="flex items-baseline justify-between gap-3"
                 key={line.key}
               >
-                <span>· {line.label}</span>
+                <span className="min-w-0">
+                  · {line.label}
+                  {line.detail ? (
+                    <span className="mt-0.5 block text-[11px] font-normal text-[#8a8498]">
+                      {line.detail}
+                    </span>
+                  ) : null}
+                </span>
                 {line.price ? (
                   <span className="shrink-0 text-[11px] font-normal tabular-nums text-[#5a5470]">
                     {line.price}
@@ -445,46 +501,42 @@ function BasketPanel({
       ) : null}
 
       <BasketSection
+        expandable={scheduleExpandable}
         filled={scheduleFilled}
         icon={<Clock className="h-5 w-5" weight="fill" />}
         onToggle={() => setOpen((c) => ({ ...c, schedule: !c.schedule }))}
-        open={open.schedule}
+        open={scheduleExpandable ? open.schedule : false}
         title={scheduleTitle}
       >
-        {scheduleDates.length || times.length ? (
-          <ul className="space-y-1.5">
-            {scheduleDates.length > 1 ? (
-              <>
-                {scheduleDates.map((date) => (
-                  <li key={date}>· {formatDay(date)}</li>
-                ))}
-                {times.length ? (
-                  <li>
-                    · Times for all days:{" "}
-                    {times.map((slot) => slot.slice(0, 5)).join(", ")}
-                  </li>
-                ) : null}
-              </>
-            ) : (
-              <>
+        {scheduleExpandable ? (
+          scheduleDates.length || times.length ? (
+            <ul className="space-y-1.5">
+              {multiSchedule ? (
+                <>
+                  {scheduleDates.map((date) => (
+                    <li key={date}>· {formatDay(date)}</li>
+                  ))}
+                  {times.length ? (
+                    <li>
+                      · Times for all days:{" "}
+                      {times.map((slot) => slot.slice(0, 5)).join(", ")}
+                    </li>
+                  ) : null}
+                </>
+              ) : times.length > 1 ? (
                 <li>
-                  · {when ?? formatDay(scheduleDates[0] ?? scheduledDate)}
+                  · Also available:{" "}
+                  {times
+                    .slice(1)
+                    .map((slot) => slot.slice(0, 5))
+                    .join(", ")}
                 </li>
-                {times.length > 1 ? (
-                  <li>
-                    · Also available:{" "}
-                    {times
-                      .slice(1)
-                      .map((slot) => slot.slice(0, 5))
-                      .join(", ")}
-                  </li>
-                ) : null}
-              </>
-            )}
-          </ul>
-        ) : (
-          <p>Choose a date for your session.</p>
-        )}
+              ) : null}
+            </ul>
+          ) : (
+            <p>Choose a date for your session.</p>
+          )
+        ) : null}
       </BasketSection>
     </div>
   );

@@ -15,7 +15,7 @@ export function whyChooseMundoriaPoints() {
     "Clear estimates sized to your property, service and add-ons before you pay.",
     "Secure online payment held until the job is completed to your checklist.",
     "Live status from matching through arrival and completion in your account.",
-    "Flexible scheduling with free cancellation more than 48 hours before the visit.",
+    "Flexible scheduling with free cancellation more than 24 hours before the visit.",
     "Residential, commercial, short-let, move and Recovery services in one booking flow.",
     "Add-ons such as oven, fridge, ironing and cleaning products when you need them.",
     "Customer support and help articles when you want guidance before you book.",
@@ -115,7 +115,7 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
     {
       question: "What is the Mundoria cancellation policy?",
       schemaAnswer:
-        "You can cancel or reschedule free of charge more than 48 hours before the visit. A partial fee may apply within 48 hours, and the full amount within 24 hours. Your booking confirmation shows the exact windows that apply.",
+        "You can cancel or reschedule free of charge more than 24 hours before the visit. Within 24 hours, the full booking amount is retained. Your booking confirmation shows the exact windows that apply.",
     },
   ];
 }

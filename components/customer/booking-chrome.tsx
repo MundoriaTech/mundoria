@@ -33,7 +33,7 @@ export function BookingChrome({
 }) {
   const configured = hasSupabasePublicConfig();
   const authHref = configured
-    ? "/booking/new?step=checkout&auth=signin"
+    ? "/booking/new?step=auth&auth=signin"
     : "/setup";
   const progressPct =
     progress == null

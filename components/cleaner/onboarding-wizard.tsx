@@ -160,7 +160,7 @@ const MAIN_SERVICE_CATEGORIES = [
 const MAIN_CATEGORY_LABEL: Record<(typeof MAIN_SERVICE_CATEGORIES)[number], string> =
   {
     residential: "Residential",
-    commercial: "Commercial",
+    commercial: "Workspace",
     recovery: "Recovery",
   };
 

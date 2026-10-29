@@ -67,10 +67,11 @@ export const DEFAULT_SERVICE_PRICING: ServicePricingConfig = {
   },
   addOns: {
     ironing: 0,
-    inside_fridge: 1200,
-    inside_oven: 1800,
+    laundry: 0,
+    inside_fridge: 0,
+    inside_oven: 0,
+    interior_windows: 0,
     inside_cabinets: 1500,
-    interior_windows: 1400,
     balcony_patio: 2000,
     extra_bathroom_detail: 1600,
     linen_change: 1000,
@@ -309,10 +310,7 @@ export const ADMIN_PRICING_SERVICES: Array<{
 ];
 
 export const ADMIN_FLAT_ADD_ONS: Array<{ id: string; label: string }> = [
-  { id: "inside_fridge", label: "Inside fridge" },
-  { id: "inside_oven", label: "Inside oven" },
   { id: "inside_cabinets", label: "Inside cabinets" },
-  { id: "interior_windows", label: "Interior windows" },
   { id: "balcony_patio", label: "Balcony or patio" },
   { id: "extra_bathroom_detail", label: "Extra bathroom detail" },
   { id: "linen_change", label: "Linen change" },

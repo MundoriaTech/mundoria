@@ -39,7 +39,7 @@ function poundsInputToPence(value: string) {
 export function SettingsForm({ initial }: { initial: Settings | null }) {
   const { success } = useFeedback();
   const [settings, setSettings] = useState({
-    cancellation_window_hours: initial?.cancellation_window_hours ?? 48,
+    cancellation_window_hours: initial?.cancellation_window_hours ?? 24,
     geofence_radius_meters: initial?.geofence_radius_meters ?? 150,
     payment_capture_hour_uk: initial?.payment_capture_hour_uk ?? 10,
     payment_capture_minute_uk: initial?.payment_capture_minute_uk ?? 0,
