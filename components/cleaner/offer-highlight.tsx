@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { toast } from "@/lib/feedback/toast";
 import type { CleanerJob } from "@/types/cleaner";
 
 const OFFER_WINDOW_MS = 30 * 60 * 1000;
@@ -46,9 +47,17 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
       method: "POST",
     });
     setBusy(false);
-    if (res.ok && response === "accepted") {
+    if (!res.ok) {
+      const result = (await res.json().catch(() => ({}))) as { error?: string };
+      toast.error(result.error ?? "Could not answer that offer", { action: { label: "Retry", onClick: () => void respond(response) } });
+      router.refresh();
+      return;
+    }
+    if (response === "accepted") {
+      toast.success("Job accepted", { description: "It is in your schedule now." });
       router.push(`/cleaner/job/${job.id}`);
     } else {
+      toast.info("Offer declined");
       router.refresh();
     }
   }

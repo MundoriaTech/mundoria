@@ -61,12 +61,6 @@ export default async function CustomerDashboardPage() {
     const when = new Date(`${booking.scheduled_date}T12:00:00`).getTime();
     return when >= new Date(`${today}T12:00:00`).getTime() && when < Date.now() + 7 * 864e5;
   }).length;
-  const monthSpend = bookings
-    .filter(
-      (booking) =>
-        booking.status === "completed" && booking.scheduled_date.slice(0, 7) === today.slice(0, 7),
-    )
-    .reduce((sum, booking) => sum + (booking.amount_total ?? 0), 0);
   const nextLabel = next
     ? `${next.scheduled_start_time.slice(0, 5)} · ${next.address?.city ?? "Home"}`
     : "None";
@@ -107,7 +101,6 @@ export default async function CustomerDashboardPage() {
         stats={[
           { label: "Today", value: String(todayCount) },
           { label: "This week", value: String(weekCount) },
-          { label: "This month", value: formatMoney(monthSpend) },
           { label: "Next clean", value: nextLabel },
         ]}
         subtitle="Keep track of your cleaning services, upcoming bookings, and past appointments."

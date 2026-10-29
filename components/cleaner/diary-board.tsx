@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/feedback/toast";
 import type { ServiceType } from "@/types/customer";
 
 type View = "day" | "week" | "month";
@@ -235,8 +236,10 @@ export function DiaryBoard() {
     const result = (await response.json()) as { error?: string };
     if (!response.ok) {
       setMessage(result.error ?? "That plan could not be saved.");
+      toast.error(result.error ?? "That plan could not be saved");
       return;
     }
+    toast.success("Plan added to your diary");
     setTitle("");
     setStartsAt("");
     setEndsAt("");
@@ -260,8 +263,10 @@ export function DiaryBoard() {
     const result = (await response.json()) as { cancelled?: number; error?: string };
     if (!response.ok) {
       setMessage(result.error ?? "Those days off could not be saved.");
+      toast.error(result.error ?? "Those days off could not be saved");
       return;
     }
+    toast.success("Time off saved");
     setMessage(
       result.cancelled
         ? `Time off saved. ${result.cancelled} visit${result.cancelled === 1 ? "" : "s"} handed back so someone else can take them.`
@@ -278,8 +283,10 @@ export function DiaryBoard() {
     if (!response.ok) {
       const result = (await response.json()) as { error?: string };
       setMessage(result.error ?? "That could not be removed.");
+      toast.error(result.error ?? "That could not be removed");
       return;
     }
+    toast.success("Removed from your diary");
     setReload((current) => current + 1);
   }
 

@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { EditorialBody } from "@/components/marketing/editorial-body";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SimpleSelect } from "@/components/ui/select";
 import { renderEditorialBlocks } from "@/lib/content/editorial";
 import {
   DEFAULT_MAG_AUTHOR,
@@ -21,6 +22,7 @@ import {
 } from "@/lib/content/mag-service-links";
 import { magThemeFor } from "@/lib/content/mag-theme";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/feedback/toast";
 
 type MagForm = {
   author_name: string;
@@ -159,8 +161,10 @@ export function MagPostEditor({
       };
       if (!response.ok) {
         setError(result.error ?? "Could not save post.");
+        toast.error(result.error ?? "Could not save post");
         return;
       }
+      toast.success("Post saved");
       router.push("/admin/mag");
       router.refresh();
     } finally {
@@ -377,17 +381,13 @@ export function MagPostEditor({
             <label className="text-sm font-semibold text-brand-ink">
               Category
             </label>
-            <select
-              className="mt-2 w-full rounded-xl border border-[#e8e0f4] bg-white px-3 py-2.5 text-sm text-brand-ink"
-              onChange={(event) => setField("category", event.target.value)}
+            <SimpleSelect
+              aria-label="Category"
+              className="mt-2"
+              onChange={(value) => setField("category", value)}
+              options={MAG_POST_CATEGORIES.map((category) => ({ label: category, value: category }))}
               value={form.category}
-            >
-              {MAG_POST_CATEGORIES.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            />
 
             <label className="mt-4 block text-sm font-semibold text-brand-ink">
               Related services

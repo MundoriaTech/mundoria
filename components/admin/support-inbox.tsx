@@ -11,6 +11,7 @@ import {
   parseGifMessage,
 } from "@/components/shared/chat-gif-picker";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/feedback/toast";
 import type {
   SupportConversationWithUser,
   SupportMessage,
@@ -190,8 +191,10 @@ export function SupportInboxThread({
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(data.error ?? "Could not update conversation.");
+        toast.error(data.error ?? "Could not update conversation");
         return;
       }
+      toast.success(content ? "Reply sent" : "Conversation updated");
       setDraft("");
       await refresh();
     } catch {

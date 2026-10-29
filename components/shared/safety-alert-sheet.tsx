@@ -14,6 +14,7 @@ import {
 } from "@/lib/bookings/safety-alert-shared";
 import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/feedback/toast";
 
 type Step = "danger" | "details" | "confirm" | "sent";
 
@@ -143,6 +144,7 @@ export function SafetyAlertSheet({
     }
     setAlertId(result.alertId);
     setStep("sent");
+    toast.success("Alert sent", { description: "Someone from Mundoria is on it now." });
     onSubmitted?.(result.alertId);
   }
 
@@ -160,6 +162,7 @@ export function SafetyAlertSheet({
       setError(result.error ?? "Unable to withdraw the alert.");
       return;
     }
+    toast.success("Alert withdrawn");
     onClose();
   }
 
