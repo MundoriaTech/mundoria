@@ -12,6 +12,7 @@ import { ActionError } from "@/components/shared/action-error";
 import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import {
   ChevronDown,
+  ChevronLeft,
   ChevronUp,
   CreditCard,
   MapPin,
@@ -89,6 +90,7 @@ import {
   type HistoryVisit,
 } from "@/lib/customer/history-recommendation";
 import { LazyImage } from "@/components/shared/lazy-image";
+import { SimpleSelect } from "@/components/ui/select";
 import {
   addOnAmountPence,
   availableAddOns,
@@ -114,6 +116,7 @@ import {
 } from "@/lib/customer/office-pricing";
 import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/feedback/toast";
 import type {
   Address,
   BookingDraft,
@@ -1710,11 +1713,23 @@ export function BookingWizard({
                 </motion.div>
               </AnimatePresence>
             </div>
-            {/* Desktop: Next pinned to the bottom of the content column. */}
+            {/* Desktop: Back and a full-width Next sit right under the step, so the
+                pointer never has to travel to the bottom of the page. */}
             {stepId !== "checkout" ? (
-              <div className="mt-10 hidden lg:mt-auto lg:block lg:pt-10 lg:pb-2">
+              <div className="mt-8 hidden gap-3 lg:flex lg:pb-2">
+                {stepIndex > 0 ? (
+                  <button
+                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full border border-brand-ink/20 bg-white px-6 text-base font-semibold text-brand-ink transition hover:border-brand-ink hover:bg-brand-cream active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
+                    disabled={checkoutBusy}
+                    onClick={goBack}
+                    type="button"
+                  >
+                    <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
+                    Back
+                  </button>
+                ) : null}
                 <button
-                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-brand-purple text-base font-semibold text-white transition hover:bg-brand-purple-deep active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-brand-ink/25 disabled:text-white touch-manipulation"
+                  className="inline-flex h-12 min-w-0 flex-1 items-center justify-center rounded-full bg-brand-purple text-base font-semibold text-white transition hover:bg-brand-purple-deep active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-brand-ink/25 disabled:text-white touch-manipulation"
                   disabled={!canContinue()}
                   onClick={goNext}
                   type="button"
@@ -2609,17 +2624,13 @@ function CountField({
   return (
     <label className="block space-y-2 text-sm font-medium text-brand-ink">
       <span>{label}</span>
-      <select
-        className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
-        onChange={(event) => onChange(Number(event.target.value))}
-        value={value}
-      >
-        {ROOM_COUNT_OPTIONS.map((count) => (
-          <option key={count} value={count}>
-            {count === 6 ? "6+" : count}
-          </option>
-        ))}
-      </select>
+      <SimpleSelect
+        aria-label={label}
+        onChange={(next) => onChange(Number(next))}
+        options={ROOM_COUNT_OPTIONS.map((count) => ({ label: count === 6 ? "6+" : String(count), value: String(count) }))}
+        size="lg"
+        value={String(value)}
+      />
     </label>
   );
 }
@@ -2647,37 +2658,25 @@ function RoomsStep({
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <label className="block space-y-2 text-sm font-medium text-brand-ink">
           <span>Bedrooms</span>
-          <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
-            onChange={(event) => onBedrooms(Number(event.target.value))}
-            value={bedrooms ?? ""}
-          >
-            <option disabled value="">
-              Select
-            </option>
-            {ROOM_COUNT_OPTIONS.map((count) => (
-              <option key={count} value={count}>
-                {count === 6 ? "6+" : count}
-              </option>
-            ))}
-          </select>
+          <SimpleSelect
+            aria-label="Bedrooms"
+            onChange={(next) => onBedrooms(Number(next))}
+            options={ROOM_COUNT_OPTIONS.map((count) => ({ label: count === 6 ? "6+" : String(count), value: String(count) }))}
+            placeholder="Select"
+            size="lg"
+            value={bedrooms == null ? "" : String(bedrooms)}
+          />
         </label>
         <label className="block space-y-2 text-sm font-medium text-brand-ink">
           <span>Toilets</span>
-          <select
-            className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
-            onChange={(event) => onBathrooms(Number(event.target.value))}
-            value={bathrooms ?? ""}
-          >
-            <option disabled value="">
-              Select
-            </option>
-            {ROOM_COUNT_OPTIONS.map((count) => (
-              <option key={count} value={count}>
-                {count === 6 ? "6+" : count}
-              </option>
-            ))}
-          </select>
+          <SimpleSelect
+            aria-label="Toilets"
+            onChange={(next) => onBathrooms(Number(next))}
+            options={ROOM_COUNT_OPTIONS.map((count) => ({ label: count === 6 ? "6+" : String(count), value: String(count) }))}
+            placeholder="Select"
+            size="lg"
+            value={bathrooms == null ? "" : String(bathrooms)}
+          />
         </label>
       </div>
     </div>
@@ -3730,6 +3729,7 @@ function CheckoutStep({
         guestAddress: draft.guestAddress,
       });
       const seriesNotice = booking.recurringError ? "?series=failed" : "";
+      toast.success("Booking requested", { description: "We are finding you a cleaner now." });
       router.replace(`/booking/${booking.bookingId}${seriesNotice}`);
       router.refresh();
     } catch (paymentError) {

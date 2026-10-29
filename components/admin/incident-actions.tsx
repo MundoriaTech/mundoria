@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
+import { SimpleSelect } from "@/components/ui/select";
 
 const STATUSES = [
   { label: "Submitted", value: "submitted" },
@@ -67,18 +68,13 @@ export function IncidentActions({
       <label className="mt-4 block text-sm font-medium" htmlFor="incident-status">
         Status
       </label>
-      <select
-        className="mt-1 h-11 w-full rounded-md border bg-white px-3 text-sm"
+      <SimpleSelect
+        className="mt-1"
         id="incident-status"
-        onChange={(event) => setNextStatus(event.target.value)}
+        onChange={setNextStatus}
+        options={STATUSES.map((item) => ({ label: item.label, value: item.value }))}
         value={nextStatus}
-      >
-        {STATUSES.map((item) => (
-          <option key={item.value} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
+      />
 
       <label className="mt-4 block text-sm font-medium" htmlFor="incident-notes">
         Admin notes

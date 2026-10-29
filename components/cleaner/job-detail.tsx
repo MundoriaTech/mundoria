@@ -23,6 +23,7 @@ import {
   standardLabel,
 } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { toast } from "@/lib/feedback/toast";
 import type { CleanerJob } from "@/types/cleaner";
 
 function CheckInAction({
@@ -104,12 +105,15 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     setWorking(false);
     if (!res.ok) {
       setError(result.error ?? "Unable to answer this offer.");
+      toast.error(result.error ?? "Unable to answer this offer");
       return;
     }
     if (response === "declined") {
+      toast.info("Offer declined");
       router.push("/cleaner/jobs");
       return;
     }
+    toast.success("Job accepted", { description: "It is in your schedule now." });
     setJob((current) => ({ ...current, status: "confirmed" }));
     router.refresh();
   }
@@ -178,9 +182,13 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     }
     if (value === "override") {
       setError("Manual override requested. An admin will review your location.");
+      toast.info("Override requested", { description: "An admin will review your location." });
       setOverrideCoords(null);
       return;
     }
+    toast.success(
+      value === "en_route" ? "Customer told you are on your way" : value === "checkin" ? "Checked in" : "Job completed",
+    );
     setJob((current) => ({
       ...current,
       arrived_at:
