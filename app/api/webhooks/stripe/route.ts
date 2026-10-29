@@ -77,16 +77,50 @@ export async function POST(request: Request) {
     }
     case "payment_intent.payment_failed": {
       const intent = event.data.object;
-      await admin
+      const bookingId =
+        typeof intent.metadata?.booking_id === "string"
+          ? intent.metadata.booking_id
+          : null;
+      const { data: booking } = await admin
         .from("bookings")
-        .update({ payment_status: "unpaid" })
-        .eq("stripe_payment_intent_id", intent.id);
-      await alertAdmins(
-        "payment_failed",
-        "Customer payment failed",
-        `PaymentIntent ${intent.id} failed.`,
-        { payment_intent_id: intent.id },
-      );
+        .select("id,customer_id,status,payment_status")
+        .eq(
+          bookingId ? "id" : "stripe_payment_intent_id",
+          bookingId ?? intent.id,
+        )
+        .maybeSingle();
+
+      if (
+        booking &&
+        (booking.status === "confirmed" ||
+          booking.status === "cleaner_en_route") &&
+        booking.payment_status === "unpaid"
+      ) {
+        const { markPreauthFailure } = await import(
+          "@/lib/payments/lifecycle"
+        );
+        const failReason =
+          intent.last_payment_error?.message ??
+          "Card pre-authorisation failed.";
+        await markPreauthFailure(booking.id, booking.customer_id, failReason, {
+          intentId: intent.id,
+        });
+      } else {
+        await admin
+          .from("bookings")
+          .update({ payment_status: "unpaid" })
+          .eq("stripe_payment_intent_id", intent.id)
+          .eq("payment_status", "unpaid");
+        await alertAdmins(
+          "payment_failed",
+          "Customer payment failed",
+          `PaymentIntent ${intent.id} failed.`,
+          {
+            booking_id: booking?.id,
+            payment_intent_id: intent.id,
+          },
+        );
+      }
       break;
     }
     case "payout.failed": {

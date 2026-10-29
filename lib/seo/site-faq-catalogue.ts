@@ -1629,7 +1629,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What happens if my payment fails?",
         answer:
-          "If a payment cannot be completed, the booking may be paused until the payment issue is resolved.\n\nThat could happen when we try to place the pre-clean hold — for example because a card has expired, the bank declines the transaction, there are insufficient funds or additional authentication is required.\n\nIf a payment fails, you should be able to update your card on the booking and try again.\n\nWe do not want a cleaner travelling to a booking that has not been properly authorised.",
+          "If we cannot place the pre-clean payment hold, the booking is cancelled free of charge.\n\nThat can happen when a card has expired, the bank declines the hold, there are insufficient funds, or extra bank confirmation is required for an off-session charge.\n\nWe will notify you so you can update your payment method and book again. We do not want a cleaner travelling to a visit that has not been properly authorised.\n\nNo charge is taken when a hold fails before the clean.",
       },
       {
         question: "Can I update my payment method?",

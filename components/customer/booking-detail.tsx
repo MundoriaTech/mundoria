@@ -403,16 +403,61 @@ export function BookingDetail({
       ) : null}
 
       {booking.status === "cancelled" ? (
-        <div className="rounded-[1.25rem] bg-[#f3f3f5] px-5 py-4 text-sm text-[#3d3654]">
-          This booking was cancelled.
-          {booking.payment_status === "refunded"
-            ? " Any payment taken has been refunded."
-            : booking.payment_status === "held"
-              ? " The card hold has been released where applicable."
-              : ""}
+        <div
+          className={
+            booking.payment_preauth_failed_at
+              ? "rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950"
+              : "rounded-[1.25rem] bg-[#f3f3f5] px-5 py-4 text-sm text-[#3d3654]"
+          }
+        >
+          {booking.payment_preauth_failed_at ? (
+            <>
+              <p className="font-semibold">Cancelled — payment hold failed</p>
+              <p className="mt-1 leading-6">
+                {booking.cancellation_reason ??
+                  "We could not place a payment hold on your card, so this booking was cancelled free of charge. Update your payment method and book again when you are ready."}
+              </p>
+              <Link
+                className="mt-3 inline-flex font-semibold underline-offset-2 hover:underline"
+                href="/booking/new"
+              >
+                Book again
+              </Link>
+            </>
+          ) : (
+            <>
+              This booking was cancelled.
+              {booking.payment_status === "refunded"
+                ? " Any payment taken has been refunded."
+                : booking.payment_status === "held"
+                  ? " The card hold has been released where applicable."
+                  : ""}
+              {booking.cancellation_reason ? (
+                <p className="mt-2 leading-6">{booking.cancellation_reason}</p>
+              ) : null}
+            </>
+          )}
         </div>
       ) : waitingForCleaner ? (
         <LookingForCleanerCard confirmByLabel={confirmByLabel} />
+      ) : null}
+
+      {booking.payment_preauth_failed_at &&
+      booking.status !== "cancelled" ? (
+        <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+          <p className="font-semibold">Payment hold needs attention</p>
+          <p className="mt-1 leading-6">
+            We could not authorise your card for this visit. Update your payment
+            method so we can complete the hold before the clean.
+          </p>
+          <Button
+            className="mt-3 min-h-11 rounded-full"
+            onClick={() => setShowPay(true)}
+            size="sm"
+          >
+            Update card
+          </Button>
+        </div>
       ) : null}
 
       {needsPayment ? (

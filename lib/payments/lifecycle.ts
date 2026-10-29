@@ -3,6 +3,7 @@ import {
   createInAppNotification,
   sendPushNotification,
 } from "@/lib/notifications/send";
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { captureBookingPayment } from "@/lib/payments/service";
 import {
   bookingStartUtc,
@@ -16,6 +17,15 @@ const PREAUTH_STATUSES = [
   "cleaner_en_route",
   "in_progress",
 ] as const;
+
+/** Statuses where a failed hold should cancel the visit free of charge (WeCasa-like). */
+const CANCEL_ON_PREAUTH_FAIL_STATUSES = [
+  "confirmed",
+  "cleaner_en_route",
+] as const;
+
+const PREAUTH_CANCEL_REASON =
+  "We could not place a payment hold on your card, so this booking was cancelled free of charge. Update your payment method and book again when you are ready.";
 
 export type PaymentTimingSettings = {
   payment_preauth_hours_before: number;
@@ -240,18 +250,16 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
         "Your bank needs extra confirmation before we can hold the payment.";
       await admin
         .from("bookings")
-        .update({
-          payment_preauth_failed_at: new Date().toISOString(),
-          payment_preauth_failure_reason: reason,
-          stripe_payment_intent_id: intent.id,
-        })
+        .update({ stripe_payment_intent_id: intent.id })
         .eq("id", bookingId);
-      await notifyCustomerPaymentIssue(
-        booking.customer_id,
-        bookingId,
-        "Confirm your card",
-        reason,
-      );
+      try {
+        await stripe.paymentIntents.cancel(intent.id);
+      } catch {
+        // Booking cancel still proceeds even if the PI cannot be cancelled.
+      }
+      await markPreauthFailure(bookingId, booking.customer_id, reason, {
+        intentId: intent.id,
+      });
       return {
         authorized: false,
         intentId: intent.id,
@@ -265,7 +273,9 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
       intent.status !== "succeeded"
     ) {
       const reason = `Pre-authorisation ended in status ${intent.status}.`;
-      await markPreauthFailure(bookingId, booking.customer_id, reason);
+      await markPreauthFailure(bookingId, booking.customer_id, reason, {
+        intentId: intent.id,
+      });
       return { authorized: false, intentId: intent.id, reason };
     }
 
@@ -288,12 +298,6 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
         ? error.message
         : "Card pre-authorisation failed.";
     await markPreauthFailure(bookingId, booking.customer_id, reason);
-    await alertAdmins(
-      "payment_failed",
-      "Booking pre-authorisation failed",
-      reason,
-      { booking_id: bookingId },
-    );
     return { authorized: false, reason };
   }
 }
@@ -458,25 +462,203 @@ export async function processDueCaptures(limit = 50) {
   };
 }
 
-async function markPreauthFailure(
+/**
+ * Soft-notify or cancel free of charge when a pre-clean card hold fails.
+ * Confirmed / en-route visits are cancelled (WeCasa-style). In-progress visits
+ * stay open so the clean is not interrupted mid-job; ops are alerted instead.
+ */
+export async function markPreauthFailure(
   bookingId: string,
   customerId: string,
   reason: string,
+  options?: { intentId?: string },
 ) {
   const admin = createAdminClient();
+  const failedAt = new Date().toISOString();
+  const customerReason = customerFacingPreauthReason(reason);
+
+  const { data: booking } = await admin
+    .from("bookings")
+    .select(
+      "id,status,cleaner_id,payment_status,scheduled_date,scheduled_start_time,stripe_payment_intent_id,cancelled_at",
+    )
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  if (!booking || booking.cancelled_at || booking.status === "cancelled") {
+    return { cancelled: false as const };
+  }
+
+  const shouldCancel = (
+    CANCEL_ON_PREAUTH_FAIL_STATUSES as readonly string[]
+  ).includes(booking.status);
+
+  if (!shouldCancel) {
+    await admin
+      .from("bookings")
+      .update({
+        payment_preauth_failed_at: failedAt,
+        payment_preauth_failure_reason: reason,
+        ...(options?.intentId
+          ? { stripe_payment_intent_id: options.intentId }
+          : {}),
+      })
+      .eq("id", bookingId);
+    await notifyCustomerPaymentIssue(
+      customerId,
+      bookingId,
+      "Payment needs attention",
+      customerReason,
+    );
+    await alertAdmins(
+      "payment_failed",
+      "Pre-authorisation failed during active visit",
+      reason,
+      { booking_id: bookingId },
+    );
+    return { cancelled: false as const };
+  }
+
+  const cleanerId = booking.cleaner_id as string | null;
+
   await admin
     .from("bookings")
     .update({
-      payment_preauth_failed_at: new Date().toISOString(),
+      cancellation_reason: PREAUTH_CANCEL_REASON,
+      cancelled_at: failedAt,
+      cancelled_by: null,
+      cleaner_id: null,
+      payment_preauth_failed_at: failedAt,
       payment_preauth_failure_reason: reason,
+      payment_status:
+        booking.payment_status === "held" ? "refunded" : booking.payment_status,
+      status: "cancelled",
+      ...(options?.intentId
+        ? { stripe_payment_intent_id: options.intentId }
+        : {}),
     })
-    .eq("id", bookingId);
+    .eq("id", bookingId)
+    .neq("status", "cancelled");
+
+  const intentId =
+    options?.intentId ?? (booking.stripe_payment_intent_id as string | null);
+  if (intentId) {
+    try {
+      await getStripe().paymentIntents.cancel(intentId);
+    } catch {
+      // Already cancelled / not cancellable.
+    }
+  }
+
+  await admin
+    .from("cleaner_job_responses")
+    .update({
+      expires_at: failedAt,
+      response: "expired",
+      responded_at: failedAt,
+    })
+    .eq("booking_id", bookingId)
+    .is("responded_at", null);
+
   await notifyCustomerPaymentIssue(
     customerId,
     bookingId,
-    "Payment needs attention",
-    reason,
+    "Booking cancelled — payment hold failed",
+    PREAUTH_CANCEL_REASON,
   );
+
+  const { data: customer } = await admin
+    .from("profiles")
+    .select("email")
+    .eq("id", customerId)
+    .maybeSingle();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  if (customer?.email) {
+    await sendBrandedEmail({
+      data: {
+        appUrl,
+        bookingId,
+        bookingUrl: `${appUrl}/booking/${bookingId}`,
+        reason: PREAUTH_CANCEL_REASON,
+        scheduledDate: booking.scheduled_date,
+        scheduledTime: String(booking.scheduled_start_time).slice(0, 5),
+      },
+      template: "customer.booking_cancelled",
+      to: customer.email,
+    });
+  }
+
+  if (cleanerId) {
+    await createInAppNotification(
+      cleanerId,
+      "job_cancelled",
+      "Job cancelled",
+      "This visit was cancelled because the customer payment hold failed. No charge was taken.",
+      { booking_id: bookingId },
+    );
+    await sendPushNotification(
+      cleanerId,
+      "Job cancelled",
+      "This visit was cancelled because the customer payment hold failed.",
+      { booking_id: bookingId },
+    );
+    const { data: cleaner } = await admin
+      .from("profiles")
+      .select("email,notification_preferences")
+      .eq("id", cleanerId)
+      .maybeSingle();
+    const preferences = cleaner?.notification_preferences as
+      | { email?: boolean }
+      | null;
+    if (cleaner?.email && preferences?.email !== false) {
+      await sendBrandedEmail({
+        data: {
+          appUrl,
+          bookingId,
+          jobUrl: `${appUrl}/cleaner/jobs`,
+          reason: "Customer payment hold failed. The visit was cancelled free of charge.",
+          scheduledDate: booking.scheduled_date,
+          scheduledTime: String(booking.scheduled_start_time).slice(0, 5),
+        },
+        template: "cleaner.job_cancelled",
+        to: cleaner.email,
+      });
+    }
+  }
+
+  await alertAdmins(
+    "payment_failed",
+    "Booking cancelled after pre-authorisation failure",
+    reason,
+    { booking_id: bookingId },
+  );
+
+  return { cancelled: true as const };
+}
+
+function customerFacingPreauthReason(raw: string) {
+  const lower = raw.toLowerCase();
+  if (lower.includes("insufficient") || lower.includes("funds")) {
+    return "Your card did not have enough available funds for the payment hold.";
+  }
+  if (
+    lower.includes("authentication") ||
+    lower.includes("requires_action") ||
+    lower.includes("extra confirmation")
+  ) {
+    return "Your bank needs extra confirmation before we can hold the payment.";
+  }
+  if (
+    lower.includes("expired") ||
+    lower.includes("invalid") ||
+    lower.includes("no saved payment")
+  ) {
+    return "We could not use the saved card for this booking.";
+  }
+  if (lower.includes("declined") || lower.includes("do_not_honor")) {
+    return "Your bank declined the payment hold.";
+  }
+  return "We could not place a payment hold on your saved card.";
 }
 
 async function notifyCustomerPaymentIssue(

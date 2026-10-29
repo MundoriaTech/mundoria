@@ -4255,11 +4255,6 @@ function CheckoutStep({
                 },
               }}
             />
-            <p className="text-xs leading-5 text-[#7a7198]">
-              Apple Pay or Google Pay saves your card for this booking, with no
-              charge yet. We hold funds about 24 hours before your clean, then
-              capture payment the day after.
-            </p>
             <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-[#8a8498]">
               <span className="h-px flex-1 bg-[#e4daf5]" />
               or pay with card
