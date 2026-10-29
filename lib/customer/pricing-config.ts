@@ -221,8 +221,10 @@ export function hourlyRateForService(
 export function hourlyRateFromPricing(
   pricing: ServicePricingConfig,
   serviceType: ServiceType,
-  _standard?: CleaningStandard,
+  // Retained so existing call sites can still pass a standard.
+  standard?: CleaningStandard,
 ) {
+  void standard;
   const envCommercial = process.env.COMMERCIAL_HOURLY_RATE_PENCE;
   if (envCommercial && COMMERCIAL_TYPES.includes(serviceType)) {
     const parsed = Number(envCommercial);

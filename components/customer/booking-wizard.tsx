@@ -659,7 +659,6 @@ export function BookingWizard({
           signedIn: Boolean(userId),
         },
       );
-      const dateIndex = previewSteps.indexOf("date");
       const frequencyIndex = previewSteps.indexOf("frequency");
       const savedIndex = isBookingFlowStepId(preferredStepRaw)
         ? resolveFlowStepIndex(previewSteps, preferredStepRaw)
