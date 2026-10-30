@@ -1388,6 +1388,7 @@ export function BookingWizard({
         return draft.rebookCleanerChoice === "same" || draft.rebookCleanerChoice === "new";
       case "category":
       case "service":
+        return Boolean(draft.serviceType);
       case "address": {
         // Require a resolvable address — not just a stale addressId in storage.
         const addressReady = Boolean(selectedAddress);
@@ -1405,18 +1406,7 @@ export function BookingWizard({
           draft.serviceType === "office" ||
           (draft.estimatedDurationHours != null &&
             draft.estimatedDurationHours >= 1);
-        // Pets live with “other needs” on this step for home services.
-        const petsReady =
-          !needsHomeRooms ||
-          !draft.serviceType ||
-          draft.hasPets !== null;
-        return (
-          addressReady &&
-          roomsReady &&
-          serviceReady &&
-          durationReady &&
-          petsReady
-        );
+        return addressReady && roomsReady && serviceReady && durationReady;
       }
       case "history":
         return Boolean(historySuggestion);
@@ -1426,14 +1416,7 @@ export function BookingWizard({
       case "standard":
         return Boolean(draft.cleaningStandard);
       case "addons":
-        // Pets are only asked on home services; commercial can skip extras.
-        if (
-          draft.serviceType &&
-          serviceDefinition(draft.serviceType).category === "commercial"
-        ) {
-          return true;
-        }
-        return draft.hasPets !== null;
+        return true;
       case "preferences":
         return draft.specialAttentionAreas.length > 0;
       case "pets":
@@ -1441,14 +1424,18 @@ export function BookingWizard({
       case "duration":
       case "date":
       case "frequency":
-      case "time":
-        return (
+      case "time": {
+        const scheduleReady =
           Boolean(draft.scheduledDate) &&
           draft.estimatedDurationHours != null &&
           draft.estimatedDurationHours >= 1 &&
           frequencyChoiceSatisfied(draft) &&
-          Boolean(draft.scheduledTime)
-        );
+          Boolean(draft.scheduledTime);
+        const needsPets =
+          Boolean(draft.serviceType) &&
+          serviceDefinition(draft.serviceType).category !== "commercial";
+        return scheduleReady && (!needsPets || draft.hasPets !== null);
+      }
       default:
         return true;
     }
@@ -1645,9 +1632,20 @@ export function BookingWizard({
           suggestion={historySuggestion}
         />
       ) : null}
-      {stepId === "address" ||
-      stepId === "category" ||
-      stepId === "service" ? (
+      {stepId === "category" || stepId === "service" ? (
+        <ServicePickerStep
+          focusServices={focusServices}
+          lockedCategory={
+            entryLock === "category" ? draft.serviceCategory : null
+          }
+          onSelectService={(serviceType) =>
+            selectService(serviceType, { advance: true })
+          }
+          selectedCategory={draft.serviceCategory}
+          selectedService={draft.serviceType}
+        />
+      ) : null}
+      {stepId === "address" ? (
         <AddressStep
           addresses={userId ? addresses : []}
           bathrooms={draft.numBathrooms}
@@ -1659,20 +1657,11 @@ export function BookingWizard({
               : null
           }
           durationHours={draft.estimatedDurationHours}
-          focusServices={focusServices}
           localOnly={!userId}
-          lockedCategory={
-            entryLock === "category" ? draft.serviceCategory : null
-          }
           onBathrooms={(value) => update("numBathrooms", value)}
           onBedrooms={(value) => update("numBedrooms", value)}
           onDurationChange={(value) =>
             update("estimatedDurationHours", value)
-          }
-          onSelectService={
-            entryLock === "service"
-              ? undefined
-              : (serviceType) => selectService(serviceType)
           }
           update={update}
           onSelect={(addressId) => {
@@ -2343,9 +2332,10 @@ function withHistoryStep(steps: BookingFlowStepId[], include: boolean) {
 
 function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
   switch (stepId) {
-    case "address":
     case "category":
-    case "service": {
+    case "service":
+      return Boolean(draft.serviceType);
+    case "address": {
       const category =
         draft.serviceType != null
           ? serviceDefinition(draft.serviceType).category
@@ -2361,20 +2351,13 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
         Boolean(draft.serviceType) &&
         (draft.serviceType === "office" ||
           (draft.estimatedDurationHours != null &&
-            draft.estimatedDurationHours >= 1)) &&
-        (!needsHomeRooms || draft.hasPets !== null)
+            draft.estimatedDurationHours >= 1))
       );
     }
     case "history":
       return true;
     case "addons":
-      if (
-        draft.serviceType &&
-        serviceDefinition(draft.serviceType).category === "commercial"
-      ) {
-        return true;
-      }
-      return draft.hasPets !== null;
+      return true;
     case "cleaner":
       return (
         draft.rebookCleanerChoice === "same" ||
@@ -2391,14 +2374,18 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
     case "duration":
     case "date":
     case "frequency":
-    case "time":
-      return (
+    case "time": {
+      const scheduleReady =
         Boolean(draft.scheduledDate) &&
         draft.estimatedDurationHours != null &&
         draft.estimatedDurationHours >= 1 &&
         frequencyChoiceSatisfied(draft) &&
-        Boolean(draft.scheduledTime)
-      );
+        Boolean(draft.scheduledTime);
+      const needsPets =
+        Boolean(draft.serviceType) &&
+        serviceDefinition(draft.serviceType).category !== "commercial";
+      return scheduleReady && (!needsPets || draft.hasPets !== null);
+    }
     default:
       return false;
   }
@@ -2950,14 +2937,82 @@ function RoomCountStepper({
   );
 }
 
-function AddOnsStep({
+function PetsSection({
   draft,
-  onAdvance,
   update,
 }: {
   draft: BookingDraft;
-  /** When set, choosing pets advances (standalone step). Omit when embedded. */
-  onAdvance?: () => void;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
+}) {
+  if (
+    !draft.serviceType ||
+    serviceDefinition(draft.serviceType).category === "commercial"
+  ) {
+    return null;
+  }
+
+  return (
+    <div>
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        Do you have any pets?
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        Some cleaners have allergies or prefer not to work around animals. This
+        helps us match you well.
+      </p>
+      <div className="mt-8 grid gap-3">
+        {(
+          [
+            ["Yes, furry or scaly housemates", true],
+            ["Nope, pet-free zone", false],
+          ] as const
+        ).map(([label, value]) => {
+          const active = draft.hasPets === value;
+          return (
+            <button
+              className={cn(
+                "rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                active && "border-[#6a45b8] bg-white",
+              )}
+              key={label}
+              onClick={() => {
+                update("hasPets", value);
+                if (!value) update("petTypes", []);
+              }}
+              type="button"
+            >
+              <div className="flex items-center gap-3">
+                <Image
+                  alt=""
+                  className="h-11 w-11 shrink-0 object-contain"
+                  height={512}
+                  src={
+                    value
+                      ? "/images/marketing/icons/plain/pets.png"
+                      : "/images/marketing/icons/plain/no-pets.png"
+                  }
+                  width={512}
+                />
+                <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
+                  {label}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AddOnsStep({
+  draft,
+  update,
+}: {
+  draft: BookingDraft;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -3114,60 +3169,6 @@ function AddOnsStep({
             </Button>
           </div>
         </AppModal>
-      ) : null}
-      {draft.serviceType &&
-      serviceDefinition(draft.serviceType).category !== "commercial" ? (
-        <>
-          <h3 className="mt-10 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
-            Do you have any pets?
-          </h3>
-          <p className="mt-2 text-sm leading-6 text-[#5a5470]">
-            Some cleaners have allergies or prefer not to work around animals.
-            This helps us match you well.
-          </p>
-          <div className="mt-4 grid gap-3">
-            {(
-              [
-                ["Yes, furry or scaly housemates", true],
-                ["Nope, pet-free zone", false],
-              ] as const
-            ).map(([label, value]) => {
-              const active = draft.hasPets === value;
-              return (
-                <button
-                  className={cn(
-                    "rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
-                    active && "border-[#6a45b8] bg-white",
-                  )}
-                  key={label}
-                  onClick={() => {
-                    update("hasPets", value);
-                    if (!value) update("petTypes", []);
-                    onAdvance?.();
-                  }}
-                  type="button"
-                >
-                  <div className="flex items-center gap-3">
-                    <Image
-                      alt=""
-                      className="h-11 w-11 shrink-0 object-contain"
-                      height={512}
-                      src={
-                        value
-                          ? "/images/marketing/icons/plain/pets.png"
-                          : "/images/marketing/icons/plain/no-pets.png"
-                      }
-                      width={512}
-                    />
-                    <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
-                      {label}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </>
       ) : null}
       {addOns.length ? (
         <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
@@ -3546,6 +3547,14 @@ function DateStep({
             durationHours={durationHours}
             update={update}
           />
+        </div>
+      ) : null}
+
+      {showScheduleDetails &&
+      draft.serviceType &&
+      serviceDefinition(draft.serviceType).category !== "commercial" ? (
+        <div className="mt-10 border-t border-[#eeeef1] pt-8">
+          <PetsSection draft={draft} update={update} />
         </div>
       ) : null}
     </div>

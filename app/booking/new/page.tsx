@@ -269,7 +269,13 @@ export default async function NewBookingPage({
     <BookingWizard
       cleaningHistory={cleaningHistory}
       customerFirstName={customerFirstName}
-      entryLock={searchParams.rebook ? null : entryLock}
+      entryLock={
+        searchParams.rebook
+          ? initialDraft?.serviceType
+            ? "service"
+            : null
+          : entryLock
+      }
       fresh={fresh}
       initialAddresses={addresses}
       initialDraft={initialDraft}

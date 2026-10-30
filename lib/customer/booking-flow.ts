@@ -33,11 +33,11 @@ export type BookingFlowStepId =
 
 /** Canonical order used to remap when the active flow drops a step. */
 export const BOOKING_STEP_ORDER: BookingFlowStepId[] = [
+  "category",
+  "service",
   "address",
   "history",
   "cleaner",
-  "category",
-  "service",
   "rooms",
   "standard",
   "addons",
@@ -335,9 +335,13 @@ export function getFlowSteps(
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
 
-  // Address + rooms + service picker + other needs + duration share the first
-  // step (service deep link still collects address/rooms here; the accordion
-  // is hidden).
+  // Generic “Book now” / category entry: pick the service first.
+  // Service deep links already know what they need — skip straight to address.
+  if (options?.entryLock !== "service") {
+    steps.push("service");
+  }
+
+  // Address + rooms + other needs + duration share one step.
   steps.push("address");
 
   // After the address, offer cleaners this customer has already finished a visit with.
