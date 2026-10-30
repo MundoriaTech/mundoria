@@ -48,6 +48,24 @@ emails require `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL`. Seed and
 other non-routable addresses (`*@seed.mundoria.local`, `.local`, etc.) are
 skipped before Resend so they never bounce.
 
+## Zoho CRM (optional)
+
+Mundoria can upsert people into Zoho CRM EU without blocking signup or booking:
+
+- Customers → **Contacts** (signup + booking enrichment)
+- Cleaners → **Leads** (signup + onboarding submit)
+
+Set these server-only vars in `.env.local` / Vercel (see `.env.example`):
+
+- `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN`
+- `ZOHO_ACCOUNTS_URL` (default `https://accounts.zoho.eu`)
+- `ZOHO_API_DOMAIN` (default `https://www.zohoapis.eu`)
+
+Create an EU API Console self-client with Contacts and Leads CREATE/UPDATE
+scopes, generate a refresh token, then deploy the secrets. When unset, CRM
+sync is a no-op. Bookings stay in Mundoria; Zoho is for people follow-up only.
+Full setup notes: [`docs/zoho-crm.md`](docs/zoho-crm.md).
+
 ## Sentry
 
 The Sentry SDK is configured for browser, server, and edge runtimes. Add

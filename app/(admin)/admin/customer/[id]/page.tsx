@@ -1,24 +1,37 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
+import { RemoveUserButton } from "@/components/admin/remove-user-button";
 import {
   UserActivityTimeline,
   type UserActivityRow,
 } from "@/components/admin/user-activity-timeline";
+import {
+  getHardDeleteEligibility,
+  hardDeleteBlockMessage,
+} from "@/lib/admin/delete-user";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createServerClient } from "@/lib/supabase/server";
 
 export default async function AdminCustomerPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const session = createServerClient();
+  const {
+    data: { user },
+  } = await session.auth.getUser();
+  if (!user) redirect("/admin/login");
+
   const admin = createAdminClient();
   const [
     { data: profile },
     { data: bookings },
     { data: addresses },
     { data: activity },
+    eligibility,
   ] = await Promise.all([
       admin
         .from("profiles")
@@ -45,6 +58,10 @@ export default async function AdminCustomerPage({
         .eq("user_id", params.id)
         .order("created_at", { ascending: false })
         .limit(100),
+      getHardDeleteEligibility({
+        actorAdminId: user.id,
+        userId: params.id,
+      }),
     ]);
 
   if (!profile) notFound();
@@ -197,6 +214,18 @@ export default async function AdminCustomerPage({
           </table>
         </div>
       </section>
+
+      <RemoveUserButton
+        allowed={eligibility.allowed}
+        blockMessage={
+          eligibility.blockReason
+            ? hardDeleteBlockMessage(eligibility.blockReason)
+            : null
+        }
+        fullName={profile.full_name}
+        role="customer"
+        userId={profile.id}
+      />
     </div>
   );
 }

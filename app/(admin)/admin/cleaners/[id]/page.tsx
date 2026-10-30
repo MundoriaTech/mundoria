@@ -1,17 +1,23 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
 import { DocumentViewerButton } from "@/components/admin/document-viewer";
+import { RemoveUserButton } from "@/components/admin/remove-user-button";
 import {
   UserActivityTimeline,
   type UserActivityRow,
 } from "@/components/admin/user-activity-timeline";
 import { TierBadge } from "@/components/cleaner/tier-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import {
+  getHardDeleteEligibility,
+  hardDeleteBlockMessage,
+} from "@/lib/admin/delete-user";
 import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
 import { verificationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createServerClient } from "@/lib/supabase/server";
 import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -24,6 +30,12 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default async function AdminCleanerPage({ params }: { params: { id: string } }) {
+  const session = createServerClient();
+  const {
+    data: { user },
+  } = await session.auth.getUser();
+  if (!user) redirect("/admin/login");
+
   const admin = createAdminClient();
   const [
     { data: profile },
@@ -33,6 +45,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
     { data: bookings },
     { data: ratings },
     { data: activity },
+    eligibility,
   ] = await Promise.all([
     admin.from("profiles").select("*").eq("id", params.id).single(),
     admin.from("cleaner_profiles").select("*").eq("id", params.id).single(),
@@ -46,6 +59,10 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
       .eq("user_id", params.id)
       .order("created_at", { ascending: false })
       .limit(100),
+    getHardDeleteEligibility({
+      actorAdminId: user.id,
+      userId: params.id,
+    }),
   ]);
   if (!profile || !cleaner) notFound();
   const dbsSlots = parseDocumentUrls(cleaner.dbs_document_url);
@@ -377,6 +394,18 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
           item.comment ?? "—",
         ])}
         title="Mood ratings"
+      />
+
+      <RemoveUserButton
+        allowed={eligibility.allowed}
+        blockMessage={
+          eligibility.blockReason
+            ? hardDeleteBlockMessage(eligibility.blockReason)
+            : null
+        }
+        fullName={profile.full_name}
+        role="cleaner"
+        userId={profile.id}
       />
     </div>
   );

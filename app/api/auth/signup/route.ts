@@ -12,6 +12,7 @@ import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { syncSignupToZoho } from "@/lib/zoho/crm";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as Record<string, unknown>;
@@ -159,6 +160,18 @@ export async function POST(request: Request) {
     role,
     userId: user.id,
   });
+
+  try {
+    await syncSignupToZoho({
+      email,
+      fullName: full_name,
+      phone,
+      role,
+      userId: user.id,
+    });
+  } catch (zohoError) {
+    Sentry.captureException(zohoError);
+  }
 
   return NextResponse.json({
     email,

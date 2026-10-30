@@ -19,6 +19,7 @@ import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
+import { upsertZohoContact } from "@/lib/zoho/crm";
 
 export async function POST(request: Request) {
   const parsed = createBookingSchema.safeParse(await request.json());
@@ -380,6 +381,23 @@ export async function POST(request: Request) {
     path: "/booking/new",
     userId: user.id,
   });
+
+  try {
+    await upsertZohoContact(
+      {
+        email: profile.email,
+        fullName: profile.full_name,
+        phone: profile.phone,
+        userId: user.id,
+      },
+      {
+        lastBookingDate: parsed.data.scheduledDate,
+        serviceType: formatServiceName(parsed.data.serviceType),
+      },
+    );
+  } catch (zohoError) {
+    Sentry.captureException(zohoError);
+  }
 
   return NextResponse.json({
     bookingId: booking.id,

@@ -17,6 +17,7 @@ import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { syncSignupToZoho } from "@/lib/zoho/crm";
 import { isUserRole, type UserRole } from "@/types/auth";
 
 type SelfRegisterableRole = Extract<UserRole, "customer" | "cleaner">;
@@ -133,6 +134,17 @@ export async function GET(request: Request) {
         role: profile.role,
         userId: user.id,
       });
+      try {
+        await syncSignupToZoho({
+          email: profile.email ?? user.email ?? "",
+          fullName: profile.full_name ?? "Mundoria user",
+          phone: profile.phone,
+          role: profile.role,
+          userId: user.id,
+        });
+      } catch {
+        // CRM sync must never block sign-in.
+      }
     }
 
     if (user && !isPasswordReset) {

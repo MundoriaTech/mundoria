@@ -9,6 +9,7 @@ import { RematchButton } from "@/components/admin/rematch-button";
 import { RevenueChart } from "@/components/admin/revenue-chart";
 import { DashboardStatTiles } from "@/components/shared/dashboard-stat-tiles";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
+import { loadAdminUserCounts } from "@/lib/admin/user-counts";
 import { OPS_REFRESH_MS } from "@/lib/dashboard/live-refresh";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -22,6 +23,7 @@ export default async function AdminDashboardPage() {
     { data: disputes },
     { data: cleaners },
     { data: ratings },
+    people,
   ] = await Promise.all([
     admin
       .from("bookings")
@@ -35,6 +37,7 @@ export default async function AdminDashboardPage() {
       .from("ratings")
       .select("overall_score,application_status")
       .eq("application_status", "applied"),
+    loadAdminUserCounts(),
   ]);
   const all = (bookings ?? []) as AdminBooking[];
   const todayBookings = all.filter((booking) => booking.scheduled_date === today);
@@ -143,6 +146,39 @@ export default async function AdminDashboardPage() {
           },
         ]}
       />
+
+      <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
+              People
+            </h2>
+            <p className="text-sm text-[#5a5470]">
+              Everyone with a Mundoria account, by role
+            </p>
+          </div>
+          <p className="text-sm font-medium text-[#1c133b]">
+            {people.total.toLocaleString("en-GB")} total
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <PeopleLink
+            href="/admin/customers"
+            label="Customers"
+            value={people.customers}
+          />
+          <PeopleLink
+            href="/admin/cleaners"
+            label="Cleaners"
+            value={people.cleaners}
+          />
+          <PeopleLink
+            href="/admin/team"
+            label="Admins"
+            value={people.admins}
+          />
+        </div>
+      </section>
 
       {alerts.length ? (
         <div className="space-y-3 rounded-[1.5rem] border border-amber-300/60 bg-[#fff8ef] p-4 sm:p-5">
@@ -263,5 +299,29 @@ function Health({
       </span>
       <b className="text-[#1c133b]">{value}</b>
     </div>
+  );
+}
+
+function PeopleLink({
+  href,
+  label,
+  value,
+}: {
+  href: string;
+  label: string;
+  value: number;
+}) {
+  return (
+    <Link
+      className="rounded-2xl border border-[#efe8f8] bg-[#fbf9ff] px-4 py-4 transition hover:border-[#d9c8f0] hover:bg-white"
+      href={href}
+    >
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
+        {value.toLocaleString("en-GB")}
+      </p>
+    </Link>
   );
 }
