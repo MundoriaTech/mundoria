@@ -13,9 +13,8 @@ import {
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
 import {
-  MARKETING_SERVICES,
+  indexableMarketingServices,
   marketingServiceBySlug,
-  servicePlacePath,
 } from "@/lib/seo/marketing";
 import {
   SERVICE_GUIDE_TOPICS,
@@ -33,7 +32,7 @@ type PageProps = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return MARKETING_SERVICES.flatMap((service) =>
+  return indexableMarketingServices().flatMap((service) =>
     SERVICE_GUIDE_TOPICS.map((topic) => ({ slug: service.slug, topic })),
   );
 }
@@ -78,7 +77,7 @@ export default function ServiceGuidePage({ params }: PageProps) {
             },
             {
               "@type": "ListItem",
-              item: absoluteUrl(servicePlacePath(service.slug)),
+              item: absoluteUrl(`/cleaners/birmingham`),
               name: "Birmingham",
               position: 3,
             },
@@ -92,8 +91,8 @@ export default function ServiceGuidePage({ params }: PageProps) {
           eyebrow={`${service.label} · Birmingham`}
           primaryHref={bookingHref}
           primaryLabel={`Book ${service.label}`}
-          secondaryHref={servicePlacePath(service.slug)}
-          secondaryLabel={`${service.label} in Birmingham`}
+          secondaryHref={`/cleaning/${service.slug}`}
+          secondaryLabel={service.label}
           title={guide.title}
           underNav
         />
@@ -109,9 +108,16 @@ export default function ServiceGuidePage({ params }: PageProps) {
           <p className="mt-8 text-sm text-[#5a5470]">
             <Link
               className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-              href={servicePlacePath(service.slug)}
+              href={`/cleaning/${service.slug}`}
             >
-              {service.label} in Birmingham
+              {service.label}
+            </Link>
+            {" · "}
+            <Link
+              className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+              href="/cleaners/birmingham"
+            >
+              Cleaners in Birmingham
             </Link>
           </p>
         </BrandedSection>

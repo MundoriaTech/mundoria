@@ -6,26 +6,28 @@ import {
   listPublishedHelpArticles,
 } from "@/lib/content/editorial";
 import {
-  birminghamTownZones,
   birminghamCoveragePlaces,
   coveragePlaceHref,
-  coverageZoneHref,
 } from "@/lib/seo/birmingham-coverage";
+import { isStandaloneTownSlug } from "@/lib/seo/canonical";
 import {
   BIRMINGHAM_AREAS,
   BIRMINGHAM_POSTCODES,
   LAUNCH_CITY,
   MARKETING_CATEGORY_PATHS,
-  MARKETING_SERVICES,
+  indexableMarketingServices,
   postcodePath,
-  servicePlacePath,
-  servicePlaceZonePath,
 } from "@/lib/seo/marketing";
 import { SERVICE_GUIDE_TOPICS, serviceGuidePath } from "@/lib/seo/service-guides";
 import { absoluteUrl } from "@/lib/seo/site";
 
+/**
+ * Lean sitemap: one page per service intent + one page per area.
+ * No service×area matrix, no wider-zone duplicates.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const indexableServices = indexableMarketingServices();
 
   const staticRoutes = [
     "",
@@ -54,45 +56,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: absoluteUrl(path),
   }));
 
-  const serviceRoutes = MARKETING_SERVICES.map((service) => ({
+  const serviceRoutes = indexableServices.map((service) => ({
     changeFrequency: "weekly" as const,
     lastModified: now,
-    priority: 0.7,
+    priority: 0.75,
     url: absoluteUrl(`/cleaning/${service.slug}`),
   }));
 
-  const serviceAreaSlugs = Array.from(
-    new Set([
-      ...BIRMINGHAM_AREAS.map((area) => area.slug),
-      ...birminghamCoveragePlaces().map((place) => place.slug),
-    ]),
-  );
-  const servicePlaceRoutes = MARKETING_SERVICES.flatMap((service) => [
-    {
-      changeFrequency: "weekly" as const,
-      lastModified: now,
-      priority: 0.65,
-      url: absoluteUrl(servicePlacePath(service.slug)),
-    },
-    ...birminghamTownZones().map((zone) => ({
-      changeFrequency: "weekly" as const,
-      lastModified: now,
-      priority: 0.6,
-      url: absoluteUrl(servicePlaceZonePath(service.slug, zone.id)),
-    })),
-    ...serviceAreaSlugs.map((area) => ({
-      changeFrequency: "weekly" as const,
-      lastModified: now,
-      priority: 0.55,
-      url: absoluteUrl(servicePlacePath(service.slug, area)),
-    })),
-  ]);
-
-  const guideRoutes = MARKETING_SERVICES.flatMap((service) =>
+  const guideRoutes = indexableServices.flatMap((service) =>
     SERVICE_GUIDE_TOPICS.map((topic) => ({
       changeFrequency: "monthly" as const,
       lastModified: now,
-      priority: 0.55,
+      priority: 0.5,
       url: absoluteUrl(serviceGuidePath(service.slug, topic)),
     })),
   );
@@ -117,15 +92,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .map((place) => ({
         changeFrequency: "weekly" as const,
         lastModified: now,
-        priority: 0.55,
+        priority: isStandaloneTownSlug(place.slug) ? 0.65 : 0.55,
         url: absoluteUrl(coveragePlaceHref(place)),
       })),
-    ...birminghamTownZones().map((zone) => ({
-      changeFrequency: "weekly" as const,
-      lastModified: now,
-      priority: 0.6,
-      url: absoluteUrl(coverageZoneHref(zone.id)),
-    })),
   ];
 
   const [posts, collections, articles] = await Promise.all([
@@ -161,7 +130,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...categoryRoutes,
     ...serviceRoutes,
-    ...servicePlaceRoutes,
     ...guideRoutes,
     ...postcodeRoutes,
     ...areaRoutes,

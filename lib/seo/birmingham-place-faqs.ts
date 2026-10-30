@@ -1,6 +1,4 @@
 import { placeServiceExplainerSchemaText } from "@/lib/seo/place-service-explainer";
-import { servicePlacePath } from "@/lib/seo/marketing";
-
 /** Plain-text FAQ answers for JSON-LD (matches on-page linked copy). */
 export function birminghamPlaceFaqSchemaAnswers(place: string) {
   return birminghamPlaceFaqEntries(place).map((item) => ({
@@ -121,8 +119,8 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
 }
 
 export const BIRMINGHAM_SERVICE_FAQ_LINKS = {
-  airbnb: servicePlacePath("airbnb-shortlet-cleaning"),
-  deep: servicePlacePath("deep-cleaning"),
-  eot: servicePlacePath("end-of-tenancy-cleaning"),
-  regular: servicePlacePath("regular-cleaning"),
+  airbnb: "/cleaning/airbnb-shortlet-cleaning",
+  deep: "/cleaning/deep-cleaning",
+  eot: "/cleaning/end-of-tenancy-cleaning",
+  regular: "/cleaning/regular-cleaning",
 } as const;

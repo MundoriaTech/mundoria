@@ -1,6 +1,6 @@
-import { LAUNCH_CITY, servicePlacePath } from "@/lib/seo/marketing";
+import { LAUNCH_CITY } from "@/lib/seo/marketing";
 
-/** WeCasa-style “service in city” links for the launch city (homepage coverage block). */
+/** Homepage coverage block — main service / category hubs only. */
 export const LAUNCH_CITY_COVERAGE_GROUPS = [
   {
     id: "residential",
@@ -37,7 +37,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Regular cleaning",
     links: [
       {
-        href: servicePlacePath("regular-cleaning"),
+        href: "/cleaning/regular-cleaning",
         label: `Regular Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -47,7 +47,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Deep cleaning",
     links: [
       {
-        href: servicePlacePath("deep-cleaning"),
+        href: "/cleaning/deep-cleaning",
         label: `Deep Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -57,7 +57,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "End of tenancy cleaning",
     links: [
       {
-        href: servicePlacePath("end-of-tenancy-cleaning"),
+        href: "/cleaning/end-of-tenancy-cleaning",
         label: `End of Tenancy Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -67,7 +67,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Airbnb/Shortlet cleaning",
     links: [
       {
-        href: servicePlacePath("airbnb-shortlet-cleaning"),
+        href: "/cleaning/airbnb-shortlet-cleaning",
         label: `Airbnb/Shortlet Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],

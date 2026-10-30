@@ -285,11 +285,37 @@ function propertyLabel(type: Address["property_type"]) {
   return "Property";
 }
 
+function addressFormValuesFromAddress(
+  address: Address,
+  localOnly: boolean,
+): AddressFormValues {
+  const searchLine = [address.address_line_1, address.city, address.postcode]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(", ");
+  return {
+    address_line_1: searchLine || address.address_line_1,
+    address_line_2: address.address_line_2 ?? "",
+    city: address.city,
+    is_default: address.is_default,
+    label: localOnly ? "" : (address.label ?? "Home"),
+    latitude: address.latitude,
+    longitude: address.longitude,
+    num_bathrooms: address.num_bathrooms ?? 1,
+    num_bedrooms: address.num_bedrooms ?? 1,
+    num_other_rooms: address.num_other_rooms ?? 0,
+    postcode: address.postcode,
+    property_type: address.property_type ?? "flat",
+    special_requirements: address.special_requirements ?? "",
+  };
+}
+
 export function AddressForm({
   address,
   bare = false,
   compact = false,
   localOnly = false,
+  onClearSelection,
   onSaved,
 }: {
   address?: Address | null;
@@ -298,34 +324,32 @@ export function AddressForm({
   compact?: boolean;
   /** Collect address in-memory (no sign-in / API). Used in guest booking. */
   localOnly?: boolean;
+  /** Fired when the user edits the search field away from a loaded saved address. */
+  onClearSelection?: () => void;
   onSaved: (address: Address) => void;
   /** @deprecated Ownership comes from the authenticated session via /api/addresses */
   userId?: string;
 }) {
   const [values, setValues] = useState<AddressFormValues>(() =>
     address
-      ? {
-          address_line_1: address.address_line_1,
-          address_line_2: address.address_line_2 ?? "",
-          city: address.city,
-          is_default: address.is_default,
-          label: localOnly ? "" : (address.label ?? "Home"),
-          latitude: address.latitude,
-          longitude: address.longitude,
-          num_bathrooms: address.num_bathrooms ?? 1,
-          num_bedrooms: address.num_bedrooms ?? 1,
-          num_other_rooms: address.num_other_rooms ?? 0,
-          postcode: address.postcode,
-          property_type: address.property_type ?? "flat",
-          special_requirements: address.special_requirements ?? "",
-        }
+      ? addressFormValuesFromAddress(address, localOnly)
       : localOnly
         ? { ...emptyAddress, label: "" }
         : emptyAddress,
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const loadedAddressId = address?.id ?? null;
+  const syncedAddressIdRef = useRef<string | null>(address?.id ?? null);
   const mapsKey = getGeoapifyApiKey();
+
+  useEffect(() => {
+    const nextId = address?.id ?? null;
+    if (!address || nextId === syncedAddressIdRef.current) return;
+    syncedAddressIdRef.current = nextId;
+    setValues(addressFormValuesFromAddress(address, localOnly));
+    setError(null);
+  }, [address, localOnly]);
 
   function update<K extends keyof AddressFormValues>(
     key: K,
@@ -453,6 +477,10 @@ export function AddressForm({
             id={addressFieldId}
             label={addressLabel}
             onPlaceSelected={(place) => {
+              if (loadedAddressId && onClearSelection) {
+                syncedAddressIdRef.current = null;
+                onClearSelection();
+              }
               applySelectedPlace(place);
               if (localOnly && compact) {
                 const properties = place.properties;
@@ -494,16 +522,26 @@ export function AddressForm({
               }
             }}
             value={values.address_line_1}
-            onQueryChange={(next) => update("address_line_1", next)}
+            onQueryChange={(next) => {
+              update("address_line_1", next);
+              if (loadedAddressId && onClearSelection) {
+                syncedAddressIdRef.current = null;
+                onClearSelection();
+              }
+            }}
           />
         ) : (
           <>
             <FormField htmlFor={addressFieldId} label={addressLabel} plain>
               <Input
                 id={addressFieldId}
-                onChange={(event) =>
-                  update("address_line_1", event.target.value)
-                }
+                onChange={(event) => {
+                  update("address_line_1", event.target.value);
+                  if (loadedAddressId && onClearSelection) {
+                    syncedAddressIdRef.current = null;
+                    onClearSelection();
+                  }
+                }}
                 placeholder=" "
                 required
                 value={values.address_line_1}

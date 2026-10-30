@@ -1,3 +1,4 @@
+import { cleanerPlacePath } from "@/lib/seo/canonical";
 import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
 
 export type CoverageArea = {
@@ -371,18 +372,19 @@ export function coverageFocusSearch(focus?: CoverageLinkFocus) {
 }
 
 export function coverageAreaHref(area: CoverageArea, focus?: CoverageLinkFocus) {
-  return `/cleaners/${LAUNCH_CITY.slug}/${coverageAreaSlug(area)}${coverageFocusSearch(focus)}`;
+  return `${cleanerPlacePath(coverageAreaSlug(area))}${coverageFocusSearch(focus)}`;
 }
 
 export function coveragePlaceHref(
   place: Pick<CoveragePlace, "slug">,
   focus?: CoverageLinkFocus,
 ) {
-  return `/cleaners/${LAUNCH_CITY.slug}/${place.slug}${coverageFocusSearch(focus)}`;
+  return `${cleanerPlacePath(place.slug)}${coverageFocusSearch(focus)}`;
 }
 
-export function coverageZoneHref(zoneId: string, focus?: CoverageLinkFocus) {
-  return `/cleaners/${LAUNCH_CITY.slug}/wider/${zoneId}${coverageFocusSearch(focus)}`;
+/** Wider-zone hubs collapse to the city cleaners page — kept for legacy callers. */
+export function coverageZoneHref(_zoneId: string, focus?: CoverageLinkFocus) {
+  return `/cleaners/${LAUNCH_CITY.slug}${coverageFocusSearch(focus)}`;
 }
 
 /** Unique places. The same slug keeps the first town’s page. */

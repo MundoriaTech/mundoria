@@ -12,9 +12,9 @@ import {
   coverageFocusSearch,
   coverageZoneHref,
 } from "@/lib/seo/birmingham-coverage";
+import { cleanerPlacePath, isStandaloneTownSlug } from "@/lib/seo/canonical";
 import {
   BIRMINGHAM_POSTCODES,
-  LAUNCH_CITY,
   birminghamAreaBySlug,
   districtFromAreaParam,
   districtLinkLabel,
@@ -71,7 +71,7 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
     description: coverage?.note
       ? `${title} (${coverage.note}). Book with a clear estimate before you pay.`
       : `${title}. Book with a clear estimate before you pay.`,
-    path: `/cleaners/${LAUNCH_CITY.slug}/${area?.slug ?? coverage!.slug}`,
+    path: cleanerPlacePath(area?.slug ?? coverage!.slug),
     title: `${title} | Mundoria`,
   });
 }
@@ -83,6 +83,13 @@ export default async function BirminghamAreaPage({
   const parsed = districtFromAreaParam(params.area);
   if (parsed?.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
   if (parsed) return <PostcodeDistrictPage prefix={parsed.district.prefix} />;
+
+  if (isStandaloneTownSlug(params.area)) {
+    const focus = readPlacePageFocus(searchParams ?? {});
+    permanentRedirect(
+      `${cleanerPlacePath(params.area)}${coverageFocusSearch(focus)}`,
+    );
+  }
 
   const area = birminghamAreaBySlug(params.area);
   const coverage = birminghamCoveragePlaceBySlug(params.area);
@@ -99,7 +106,7 @@ export default async function BirminghamAreaPage({
       bookingHref={bookingHref}
       focus={focus}
       name={name}
-      path={`/cleaners/${LAUNCH_CITY.slug}/${slug}${coverageFocusSearch(focus)}`}
+      path={`${cleanerPlacePath(slug)}${coverageFocusSearch(focus)}`}
       placeLinks={
         zone
           ? zone.areas
@@ -111,17 +118,16 @@ export default async function BirminghamAreaPage({
           : undefined
       }
       placesNote={coverage?.note ?? zone?.note}
+      regionLabel="Birmingham"
       serviceCardLocation={{ kind: "place", slug }}
       surroundingLinks={
         zone
           ? BIRMINGHAM_COVERAGE_ZONES.filter(
               (item) => item.id !== zone.id && item.id !== "border",
-            ).map(
-              (item) => ({
-                href: coverageZoneHref(item.id, focus),
-                label: item.label,
-              }),
-            )
+            ).map((item) => ({
+              href: coverageZoneHref(item.id, focus),
+              label: item.label,
+            }))
           : undefined
       }
     />

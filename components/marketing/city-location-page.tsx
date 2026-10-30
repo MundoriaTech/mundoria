@@ -44,6 +44,7 @@ export async function CityLocationPage({
   path,
   placeLinks,
   placesNote,
+  regionLabel = "Birmingham",
   serviceCardLocation,
   showNearbyTowns = false,
   surroundingLinks,
@@ -54,6 +55,8 @@ export async function CityLocationPage({
   path: string;
   placeLinks?: Array<{ href: string; label: string }>;
   placesNote?: string;
+  /** Local authority / city for schema — omit Birmingham for Solihull, Sandwell towns, etc. */
+  regionLabel?: string | null;
   serviceCardLocation?: ServiceCardLocation;
   showNearbyTowns?: boolean;
   surroundingLinks?: Array<{ href: string; label: string }>;
@@ -108,7 +111,10 @@ export async function CityLocationPage({
           {
             "@context": "https://schema.org",
             "@type": "Service",
-            areaServed: { "@type": "Place", name: `${name}, Birmingham` },
+            areaServed: {
+              "@type": "Place",
+              name: regionLabel ? `${name}, ${regionLabel}` : name,
+            },
             description: HERO_DESCRIPTION,
             name: title,
             provider: {

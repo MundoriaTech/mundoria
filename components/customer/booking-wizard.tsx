@@ -1670,6 +1670,7 @@ export function BookingWizard({
           }
           onSelect={(addressId) => {
             update("addressId", addressId);
+            if (!addressId) return;
             update("guestAddress", null);
             const saved = addresses.find((item) => item.id === addressId);
             if (saved) {
@@ -2488,7 +2489,7 @@ function AddressStep({
   onBedrooms: (value: number) => void;
   onDurationChange?: (hours: number) => void;
   onSaved: (address: Address) => void;
-  onSelect: (addressId: string) => void;
+  onSelect: (addressId: string | null) => void;
   onSelectService?: (service: ServiceType) => void;
   proName?: string | null;
   selectedCategory?: ServiceCategory | null;
@@ -2504,6 +2505,10 @@ function AddressStep({
       ? serviceDefinition(selectedService).category
       : (selectedCategory ?? lockedCategory);
   const showHomeRooms = categoryForRooms !== "commercial";
+  const selectedSaved =
+    selectedId != null
+      ? (addresses.find((item) => item.id === selectedId) ?? null)
+      : null;
 
   return (
     <div>
@@ -2526,9 +2531,10 @@ function AddressStep({
 
       <div className="relative z-20 mt-8">
         <AddressForm
-          address={null}
+          address={selectedSaved}
           compact
           localOnly={localOnly}
+          onClearSelection={() => onSelect(null)}
           onSaved={(address) => {
             onSaved(address);
           }}

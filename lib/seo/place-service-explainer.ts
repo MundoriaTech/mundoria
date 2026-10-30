@@ -1,5 +1,3 @@
-import { servicePlacePath } from "@/lib/seo/marketing";
-
 export type PlaceServiceExplainerItem = {
   explanation: string;
   href: string;
@@ -15,25 +13,25 @@ export function placeServiceExplainerItems(place: string): PlaceServiceExplainer
     {
       explanation:
         "Scheduled home cleans on a rhythm you choose — kitchens, bathrooms and living areas kept fresh without chasing each visit yourself.",
-      href: servicePlacePath("regular-cleaning"),
+      href: "/cleaning/regular-cleaning",
       name: "Regular cleaning",
     },
     {
       explanation:
         "A more thorough reset for buildup, neglected rooms or before guests — extra attention on kitchens, bathrooms and detail work beyond a routine wipe-down.",
-      href: servicePlacePath("deep-cleaning"),
+      href: "/cleaning/deep-cleaning",
       name: "Deep cleaning",
     },
     {
       explanation:
         "Move-out cleans aimed at landlord and agent standards — bathrooms, kitchen, floors and visible areas ready for inventory and deposit handover.",
-      href: servicePlacePath("end-of-tenancy-cleaning"),
+      href: "/cleaning/end-of-tenancy-cleaning",
       name: "End-of-tenancy cleaning",
     },
     {
       explanation:
         "Turnover cleans between guests — beds reset, bathrooms sanitised, kitchen touched up and bins emptied so check-in day feels guest-ready.",
-      href: servicePlacePath("airbnb-shortlet-cleaning"),
+      href: "/cleaning/airbnb-shortlet-cleaning",
       name: "Airbnb and short-let cleaning",
     },
     {

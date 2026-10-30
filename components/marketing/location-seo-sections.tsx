@@ -14,7 +14,6 @@ import {
   birminghamNearbyZone,
   birminghamTownZones,
   coverageAreaHref,
-  coverageAreaSlug,
   coverageZoneHref,
   type CoverageLinkFocus,
 } from "@/lib/seo/birmingham-coverage";
@@ -223,9 +222,7 @@ export function LocationNearPlacePills({
   const nearbyZone = birminghamNearbyZone();
   const nearbyPlaces = showNearbyTowns
     ? (nearbyZone?.areas ?? []).map((area) => ({
-        href: serviceSlug
-          ? `/cleaning/${serviceSlug}/birmingham/${coverageAreaSlug(area)}`
-          : coverageAreaHref(area, focus),
+        href: coverageAreaHref(area, focus),
         label: area.label,
       }))
     : [];

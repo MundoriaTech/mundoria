@@ -5,6 +5,7 @@ import {
   indicativeHourlyRatePence,
   servicesForCategory,
 } from "@/lib/customer/services";
+import { isIndexableServiceSlug } from "@/lib/seo/canonical";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
 export type MarketingService = {
@@ -76,13 +77,26 @@ export function publicMarketingServices() {
   return MARKETING_SERVICES.filter(isPublicMarketingService);
 }
 
-/** `/cleaning/{service}/birmingham` or `/cleaning/{service}/birmingham/{area}`. */
+/**
+ * Services that keep their own indexable `/cleaning/{slug}` page.
+ * Duplicates (move-out twin, holiday-let twin, etc.) redirect to a canonical slug.
+ */
+export function indexableMarketingServices() {
+  return publicMarketingServices().filter((service) =>
+    isIndexableServiceSlug(service.slug),
+  );
+}
+
+/**
+ * Legacy geo URLs (kept for redirects only).
+ * New internal links should use `/cleaning/{slug}` + `/cleaners/...` hubs.
+ */
 export function servicePlacePath(serviceSlug: string, areaSlug?: string) {
   const city = `/cleaning/${serviceSlug}/${LAUNCH_CITY.slug}`;
   return areaSlug ? `${city}/${areaSlug}` : city;
 }
 
-/** `/cleaning/{service}/birmingham/wider/{zone}`. */
+/** Legacy wider geo URL (redirect target only). */
 export function servicePlaceZonePath(serviceSlug: string, zoneId: string) {
   return `${servicePlacePath(serviceSlug)}/wider/${zoneId}`;
 }
@@ -92,13 +106,12 @@ export type ServiceCardLocation =
   | { kind: "zone"; id: string }
   | { kind: "place"; slug: string };
 
+/** Always the main service page — area pages link here; service pages link to areas. */
 export function serviceCardHref(
   serviceSlug: string,
-  location?: ServiceCardLocation,
+  _location?: ServiceCardLocation,
 ) {
-  if (!location || location.kind === "city") return servicePlacePath(serviceSlug);
-  if (location.kind === "zone") return servicePlaceZonePath(serviceSlug, location.id);
-  return servicePlacePath(serviceSlug, location.slug);
+  return `/cleaning/${serviceSlug}`;
 }
 
 export function servicePlaceFaqs(service: MarketingService, place: string) {

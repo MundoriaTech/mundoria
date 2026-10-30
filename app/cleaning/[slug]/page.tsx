@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import {
   CategoryMagLinks,
@@ -10,7 +10,11 @@ import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ServiceCityCoverage } from "@/components/marketing/service-city-coverage";
 import { ServiceCategoryMarketingPage } from "@/components/marketing/service-category/service-category-marketing-page";
 import {
-  MARKETING_SERVICES,
+  canonicalCleaningPath,
+  isIndexableServiceSlug,
+} from "@/lib/seo/canonical";
+import {
+  indexableMarketingServices,
   marketingServiceBySlug,
 } from "@/lib/seo/marketing";
 import { serviceDetailConfig } from "@/lib/seo/service-detail-config";
@@ -22,10 +26,11 @@ type PageProps = {
 };
 
 export function generateStaticParams() {
-  return MARKETING_SERVICES.map((service) => ({ slug: service.slug }));
+  return indexableMarketingServices().map((service) => ({ slug: service.slug }));
 }
 
 export function generateMetadata({ params }: PageProps): Metadata {
+  if (!isIndexableServiceSlug(params.slug)) return {};
   const service = marketingServiceBySlug(params.slug);
   if (!service) return {};
   return buildPageMetadata({
@@ -36,6 +41,10 @@ export function generateMetadata({ params }: PageProps): Metadata {
 }
 
 export default function CleaningServicePage({ params }: PageProps) {
+  if (!isIndexableServiceSlug(params.slug)) {
+    permanentRedirect(canonicalCleaningPath(params.slug));
+  }
+
   const service = marketingServiceBySlug(params.slug);
   if (!service) notFound();
 
