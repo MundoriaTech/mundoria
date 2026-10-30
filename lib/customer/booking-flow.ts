@@ -1,5 +1,4 @@
 import {
-  availableAddOns,
   estimateDuration,
   serviceDefinition,
 } from "@/lib/customer/services";
@@ -65,9 +64,16 @@ export function resolveFlowStepIndex(
   if (desired && flowSteps.includes(desired as BookingFlowStepId)) {
     return flowSteps.indexOf(desired as BookingFlowStepId);
   }
-  // Duration folded into the date step; resume old drafts on date.
+  // Duration folded into the address step (home); office still sets length on rooms.
+  if (desired === "duration" && flowSteps.includes("address")) {
+    return flowSteps.indexOf("address");
+  }
   if (desired === "duration" && flowSteps.includes("date")) {
     return flowSteps.indexOf("date");
+  }
+  // Add-ons / pets folded into the address step above “How long?”.
+  if (desired === "addons" && flowSteps.includes("address")) {
+    return flowSteps.indexOf("address");
   }
   // Service / category picker folded into the address step.
   if (
@@ -227,11 +233,6 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
       { label: "Once a week", popular: true, value: "weekly" as const },
       { label: "Once a fortnight", popular: false, value: "fortnightly" as const },
       { label: "Once a month", popular: false, value: "monthly" as const },
-      {
-        label: "Customize your calendar",
-        popular: false,
-        value: "custom" as const,
-      },
     ];
   }
   if (mode === "optional") {
@@ -240,11 +241,6 @@ export function frequencyOptionsFor(serviceType: ServiceType | null) {
       { label: "Once a week", popular: true, value: "weekly" as const },
       { label: "Once a fortnight", popular: false, value: "fortnightly" as const },
       { label: "Once a month", popular: false, value: "monthly" as const },
-      {
-        label: "Customize your calendar",
-        popular: false,
-        value: "custom" as const,
-      },
     ];
     if (!frequencyAllowsOneOff(serviceType)) {
       return options.filter((option) => option.value !== "one_off");
@@ -296,9 +292,8 @@ export function frequencyChoiceSatisfied(
   if (!draft.isRecurring) {
     return frequencyAllowsOneOff(draft.serviceType);
   }
-  if (draft.recurrencePattern === "custom") {
-    return draft.customRecurrenceDates.length >= 2;
-  }
+  // Custom calendars are no longer offered — force a fresh cadence choice.
+  if (draft.recurrencePattern === "custom") return false;
   return Boolean(draft.recurrencePattern);
 }
 
@@ -339,13 +334,10 @@ export function getFlowSteps(
   },
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
-  const category = draft.serviceType
-    ? serviceDefinition(draft.serviceType).category
-    : draft.serviceCategory;
-  const isCommercial = category === "commercial";
 
-  // Address + rooms + service picker share the first step (service deep link
-  // still collects address/rooms here; the accordion is hidden).
+  // Address + rooms + service picker + other needs + duration share the first
+  // step (service deep link still collects address/rooms here; the accordion
+  // is hidden).
   steps.push("address");
 
   // After the address, offer cleaners this customer has already finished a visit with.
@@ -356,14 +348,6 @@ export function getFlowSteps(
   // Home room counts live on the address step. Office still needs a spaces step.
   if (draft.serviceType === "office") {
     steps.push("rooms");
-  }
-
-  if (draft.serviceType) {
-    if (availableAddOns(draft.serviceType).length > 0) {
-      steps.push("addons");
-    }
-  } else if (!isCommercial) {
-    steps.push("addons");
   }
 
   if (propertyQuestionModeFor(draft.serviceType) === "recovery") {

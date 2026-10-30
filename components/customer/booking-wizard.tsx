@@ -45,9 +45,14 @@ import {
   type ReactNode,
 } from "react";
 
+import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
 import { AppModal } from "@/components/shared/app-modal";
+import {
+  nationalFromPhone,
+  storedPhone,
+} from "@/lib/auth/uk-phone";
 import { addressOutsideCoverage } from "@/lib/seo/cleaner-coverage";
 import {
   BookingBasket,
@@ -335,6 +340,7 @@ export function BookingWizard({
   initialDraft,
   knownCleaners = [],
   previousCleaner = null,
+  profileNeedsPhone = false,
   requestedPro = null,
   requestedProCoverage = [],
   returnTo = null,
@@ -352,6 +358,8 @@ export function BookingWizard({
   initialDraft?: Partial<BookingDraft>;
   knownCleaners?: KnownCleaner[];
   previousCleaner?: CleanerPublicProfile | null;
+  /** Google OAuth often has no phone yet — collect it in checkout, not /complete-profile. */
+  profileNeedsPhone?: boolean;
   /** First name when the customer started from a cleaner profile. */
   requestedPro?: string | null;
   /** Postcode districts that cleaner travels to. */
@@ -1240,20 +1248,6 @@ export function BookingWizard({
         };
       });
     }
-    if (stepId === "date" || stepId === "frequency") {
-      setDraft((current) => {
-        if (
-          current.recurrencePattern === "custom" &&
-          current.customRecurrenceDates[0]
-        ) {
-          return {
-            ...current,
-            scheduledDate: current.customRecurrenceDates[0],
-          };
-        }
-        return current;
-      });
-    }
     if (stepId === "history" && historySuggestion) {
       acceptHistorySuggestion(historySuggestion);
       return;
@@ -1411,7 +1405,18 @@ export function BookingWizard({
           draft.serviceType === "office" ||
           (draft.estimatedDurationHours != null &&
             draft.estimatedDurationHours >= 1);
-        return addressReady && roomsReady && serviceReady && durationReady;
+        // Pets live with “other needs” on this step for home services.
+        const petsReady =
+          !needsHomeRooms ||
+          !draft.serviceType ||
+          draft.hasPets !== null;
+        return (
+          addressReady &&
+          roomsReady &&
+          serviceReady &&
+          durationReady &&
+          petsReady
+        );
       }
       case "history":
         return Boolean(historySuggestion);
@@ -1647,6 +1652,7 @@ export function BookingWizard({
           addresses={userId ? addresses : []}
           bathrooms={draft.numBathrooms}
           bedrooms={draft.numBedrooms}
+          draft={draft}
           duration={
             duration && draft.serviceType && draft.serviceType !== "office"
               ? duration
@@ -1668,6 +1674,7 @@ export function BookingWizard({
               ? undefined
               : (serviceType) => selectService(serviceType)
           }
+          update={update}
           onSelect={(addressId) => {
             update("addressId", addressId);
             if (!addressId) return;
@@ -1741,9 +1748,6 @@ export function BookingWizard({
           onComplete={goNext}
           spaces={draft.officeSpaces}
         />
-      ) : null}
-      {stepId === "addons" ? (
-        <AddOnsStep draft={draft} onAdvance={goNext} update={update} />
       ) : null}
       {stepId === "preferences" ? (
         <RecoveryPreferencesStep draft={draft} update={update} />
@@ -1835,6 +1839,7 @@ export function BookingWizard({
                     update("guestAddress", null);
                   }}
                   onProcessingChange={setCheckoutBusy}
+                  profileNeedsPhone={profileNeedsPhone}
                   update={update}
                   userId={userId}
                 />
@@ -2356,7 +2361,8 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
         Boolean(draft.serviceType) &&
         (draft.serviceType === "office" ||
           (draft.estimatedDurationHours != null &&
-            draft.estimatedDurationHours >= 1))
+            draft.estimatedDurationHours >= 1)) &&
+        (!needsHomeRooms || draft.hasPets !== null)
       );
     }
     case "history":
@@ -2460,6 +2466,7 @@ function AddressStep({
   addresses,
   bathrooms,
   bedrooms,
+  draft,
   duration = null,
   durationHours = null,
   focusServices,
@@ -2475,11 +2482,13 @@ function AddressStep({
   selectedCategory = null,
   selectedId,
   selectedService = null,
+  update,
   userId,
 }: {
   addresses: Address[];
   bathrooms: number | null;
   bedrooms: number | null;
+  draft: BookingDraft;
   duration?: NonNullable<ReturnType<typeof durationSummary>> | null;
   durationHours?: number | null;
   focusServices?: ServiceType[];
@@ -2495,6 +2504,10 @@ function AddressStep({
   selectedCategory?: ServiceCategory | null;
   selectedId: string | null;
   selectedService?: ServiceType | null;
+  update: <K extends keyof BookingDraft>(
+    key: K,
+    value: BookingDraft[K],
+  ) => void;
   userId: string | null;
 }) {
   const signedIn = Boolean(userId) && !localOnly;
@@ -2652,6 +2665,12 @@ function AddressStep({
             selectedCategory={selectedCategory}
             selectedService={selectedService}
           />
+        </div>
+      ) : null}
+
+      {selectedService ? (
+        <div className="mt-10 border-t border-[#eeeef1] pt-8">
+          <AddOnsStep draft={draft} update={update} />
         </div>
       ) : null}
 
@@ -2937,6 +2956,7 @@ function AddOnsStep({
   update,
 }: {
   draft: BookingDraft;
+  /** When set, choosing pets advances (standalone step). Omit when embedded. */
   onAdvance?: () => void;
   update: <K extends keyof BookingDraft>(
     key: K,
@@ -3149,15 +3169,17 @@ function AddOnsStep({
           </div>
         </>
       ) : null}
-      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
-        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
-          i
-        </span>
-        <p>
-          Your estimate covers labour for the session. Add cleaning products or
-          equipment if you want the cleaner to bring the Mundoria kit.
-        </p>
-      </div>
+      {addOns.length ? (
+        <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
+          <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
+            i
+          </span>
+          <p>
+            Your estimate covers labour for the session. Add cleaning products or
+            equipment if you want the cleaner to bring the Mundoria kit.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -3283,12 +3305,20 @@ function FrequencySection({
 }) {
   const allowsOneOff = frequencyAllowsOneOff(draft.serviceType);
   const options = frequencyOptionsFor(draft.serviceType);
-  const minDate = earliestBookableDateKey(BOOKING_MIN_LEAD_HOURS);
+
+  // Retired “customize your calendar” — clear stale drafts so Next stays honest.
+  useEffect(() => {
+    if (draft.recurrencePattern !== "custom") return;
+    update("frequencyChosen", false);
+    update("isRecurring", false);
+    update("recurrencePattern", null);
+    update("customRecurrenceDates", []);
+  }, [draft.recurrencePattern, update]);
 
   if (!options.length) return null;
 
   function selectFrequency(
-    value: "one_off" | "weekly" | "fortnightly" | "monthly" | "custom",
+    value: "one_off" | "weekly" | "fortnightly" | "monthly",
   ) {
     if (value === "one_off") {
       update("frequencyChosen", true);
@@ -3300,33 +3330,15 @@ function FrequencySection({
     update("frequencyChosen", true);
     update("isRecurring", true);
     update("recurrencePattern", value);
-    if (value === "custom") {
-      const seed = draft.scheduledDate;
-      const current = draft.customRecurrenceDates;
-      const next =
-        seed && !current.includes(seed)
-          ? [...current, seed].sort()
-          : current.length
-            ? current
-            : seed
-              ? [seed]
-              : [];
-      update("customRecurrenceDates", next);
-      return;
-    }
     update("customRecurrenceDates", []);
-  }
-
-  function onCustomDatesChange(dates: string[]) {
-    update("customRecurrenceDates", dates);
-    const firstDate = isoDateOrEmpty(dates[0]);
-    if (firstDate) update("scheduledDate", firstDate);
   }
 
   const selectedValue = !draft.frequencyChosen
     ? null
     : draft.isRecurring
-      ? draft.recurrencePattern
+      ? draft.recurrencePattern === "custom"
+        ? null
+        : draft.recurrencePattern
       : allowsOneOff
         ? "one_off"
         : draft.recurrencePattern;
@@ -3338,8 +3350,8 @@ function FrequencySection({
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
         {!allowsOneOff
-          ? "Choose a rhythm, or build your own calendar of visits."
-          : "One-off, a set cadence, or customize your own calendar."}
+          ? "Choose how often this clean should repeat."
+          : "One visit, or a regular weekly, fortnightly, or monthly rhythm."}
       </p>
       <div className="mt-8 grid gap-3">
         {options.map((option) => {
@@ -3371,27 +3383,6 @@ function FrequencySection({
           );
         })}
       </div>
-
-      {draft.recurrencePattern === "custom" ? (
-        <div className="mt-5">
-          <p className="text-sm text-[#5a5470]">
-            Tap the dates you want cleaned. Pick at least two upcoming visits.
-          </p>
-          <BookingCalendar
-            className="mt-3"
-            minDate={minDate}
-            mode="multi"
-            onChange={onCustomDatesChange}
-            selectedDates={draft.customRecurrenceDates}
-          />
-          {draft.customRecurrenceDates.length ? (
-            <p className="mt-3 text-sm text-[#5a5470]">
-              {draft.customRecurrenceDates.length} date
-              {draft.customRecurrenceDates.length === 1 ? "" : "s"} selected
-            </p>
-          ) : null}
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -3642,51 +3633,23 @@ function TimeSection({
     setShowFlexPrompt(false);
   }
 
-  const customDates =
-    draft.recurrencePattern === "custom" ? draft.customRecurrenceDates : [];
-  const isSharedCustomDays = customDates.length > 1;
   const appointmentDate = formatBookingDate(draft.scheduledDate, {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
-  const heading = isSharedCustomDays
-    ? "What times work on these days?"
-    : appointmentDate
-      ? `What is your availability on ${appointmentDate}?`
-      : "When do you want your session?";
+  const heading = appointmentDate
+    ? `What is your availability on ${appointmentDate}?`
+    : "When do you want your session?";
 
   return (
     <div>
       <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
         {heading}
       </h2>
-      {isSharedCustomDays ? (
-        <ul className="mt-3 space-y-1 text-sm font-medium text-[#1c133b]">
-          {customDates.map((date) => (
-            <li key={date}>
-              ·{" "}
-              {formatBookingDate(date, {
-                weekday: "short",
-                day: "numeric",
-                month: "short",
-              }) ?? date}
-            </li>
-          ))}
-        </ul>
-      ) : null}
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        {isSharedCustomDays ? (
-          <>
-            These slots apply to every day you selected. Are you flexible? Select{" "}
-            <strong className="font-semibold text-[#1c133b]">several slots.</strong>
-          </>
-        ) : (
-          <>
-            Are you flexible? Select{" "}
-            <strong className="font-semibold text-[#1c133b]">several slots.</strong>
-          </>
-        )}
+        Are you flexible? Select{" "}
+        <strong className="font-semibold text-[#1c133b]">several slots.</strong>
       </p>
       <TimeSlotPicker
         availability={allowedSlots}
@@ -3744,14 +3707,11 @@ function TimeSection({
               className="pr-8 text-xl font-bold tracking-[-0.02em] text-[#1c133b]"
               id="flex-prompt-title"
             >
-              {isSharedCustomDays
-                ? "Flexible on other times too?"
-                : "Available at other times on the same day?"}
+              Available at other times on the same day?
             </h3>
             <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-              {isSharedCustomDays
-                ? "The more slots you add, the easier it will be for us to match a cleaner across all your dates."
-                : "The more slots you add, the easier it will be for us to find the ideal pro for you."}
+              The more slots you add, the easier it will be for us to find the
+              ideal pro for you.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
@@ -3797,6 +3757,7 @@ function CheckoutStep({
   draft,
   onAddressPersisted,
   onProcessingChange,
+  profileNeedsPhone = false,
   update,
   userId,
 }: {
@@ -3809,6 +3770,7 @@ function CheckoutStep({
   };
   onAddressPersisted: (address: Address) => void;
   onProcessingChange?: (busy: boolean) => void;
+  profileNeedsPhone?: boolean;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -3832,6 +3794,10 @@ function CheckoutStep({
   const [cardFocused, setCardFocused] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState(address);
   const [firstName, setFirstName] = useState(customerFirstName);
+  const [needsPhone, setNeedsPhone] = useState(
+    Boolean(userId) && profileNeedsPhone,
+  );
+  const [profileFullName, setProfileFullName] = useState("");
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
     null,
   );
@@ -3855,21 +3821,31 @@ function CheckoutStep({
   }, [customerFirstName]);
 
   useEffect(() => {
-    if (customerFirstName || !userId) return;
+    setNeedsPhone(Boolean(userId) && profileNeedsPhone);
+  }, [profileNeedsPhone, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
     const supabase = createBrowserClient();
     let cancelled = false;
     void supabase
       .from("profiles")
-      .select("full_name")
+      .select("full_name, phone")
       .eq("id", userId)
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return;
-        const name =
-          (data as { full_name?: string | null } | null)?.full_name
-            ?.trim()
-            .split(/\s+/)[0] || null;
-        if (name) setFirstName(name);
+        const row = data as {
+          full_name?: string | null;
+          phone?: string | null;
+        } | null;
+        const name = row?.full_name?.trim() || "";
+        if (name) {
+          setProfileFullName(name);
+          if (!customerFirstName) setFirstName(name.split(/\s+/)[0] || null);
+        }
+        if (!row?.phone?.trim()) setNeedsPhone(true);
+        else setNeedsPhone(false);
       });
     return () => {
       cancelled = true;
@@ -4140,6 +4116,21 @@ function CheckoutStep({
       // Ignore update races while the wallet sheet is open.
     }
   }, [paymentRequest, walletTotalPence]);
+
+  if (needsPhone && userId) {
+    return (
+      <BookingCheckoutPhoneGate
+        defaultFullName={profileFullName}
+        onSaved={(name) => {
+          setNeedsPhone(false);
+          if (name) {
+            setProfileFullName(name);
+            setFirstName(name.trim().split(/\s+/)[0] || null);
+          }
+        }}
+      />
+    );
+  }
 
   async function pay(event: React.FormEvent) {
     event.preventDefault();
@@ -4544,6 +4535,104 @@ function CheckoutStep({
           )}
         </Button>
       </div>
+    </form>
+  );
+}
+
+/** Phone + name for Google OAuth customers — kept inside booking chrome. */
+function BookingCheckoutPhoneGate({
+  defaultFullName,
+  onSaved,
+}: {
+  defaultFullName: string;
+  onSaved: (fullName: string) => void;
+}) {
+  const [fullName, setFullName] = useState(defaultFullName);
+  const [nationalNumber, setNationalNumber] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (defaultFullName) setFullName(defaultFullName);
+  }, [defaultFullName]);
+
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    const phone = storedPhone(nationalFromPhone(nationalNumber));
+    if (phone.replace(/\D/g, "").length < 10) {
+      setMessage("Enter a valid phone number.");
+      return;
+    }
+    if (!fullName.trim()) {
+      setMessage("Enter your full name.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const response = await fetch("/api/auth/complete-profile", {
+        body: JSON.stringify({
+          full_name: fullName.trim(),
+          phone,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const result = (await response.json()) as { error?: string };
+      if (!response.ok || result.error) {
+        throw new Error(result.error ?? "Unable to save your details.");
+      }
+      onSaved(fullName.trim());
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Unable to save your details.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className="mx-auto w-full max-w-sm" onSubmit={(event) => void save(event)}>
+      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+        One last detail
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+        Add a phone number so we can reach you about this booking. Then you’ll
+        continue to payment.
+      </p>
+      <div className="mt-8 space-y-3">
+        <FormField htmlFor="booking-checkout-full-name" label="Full name" plain>
+          <input
+            autoComplete="name"
+            id="booking-checkout-full-name"
+            onChange={(event) => setFullName(event.target.value)}
+            placeholder=" "
+            required
+            value={fullName}
+          />
+        </FormField>
+        <AuthPhoneField
+          htmlFor="booking-checkout-phone"
+          nationalNumber={nationalNumber}
+          onNationalNumberChange={(value) =>
+            setNationalNumber(nationalFromPhone(value))
+          }
+          required
+        />
+        <Button
+          className="h-12 w-full rounded-full bg-[#6a45b8] text-base font-semibold text-white hover:bg-[#5a38a3]"
+          disabled={busy}
+          type="submit"
+        >
+          {busy ? "Saving…" : "Continue to payment"}
+        </Button>
+      </div>
+      {message ? (
+        <div className="mt-4">
+          <ActionError message={message} title="Couldn’t save" />
+        </div>
+      ) : null}
     </form>
   );
 }

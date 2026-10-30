@@ -126,6 +126,7 @@ export default async function NewBookingPage({
   let cleaningHistory: HistoryVisit[] = [];
   let knownCleaners: KnownCleaner[] = [];
   let customerFirstName: string | null = null;
+  let profileNeedsPhone = false;
   let initialDraft: Partial<BookingDraft> | undefined = draftFromSearchParams(
     searchParams,
   );
@@ -148,15 +149,18 @@ export default async function NewBookingPage({
         .order("is_default", { ascending: false }),
       supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, phone")
         .eq("id", user.id)
         .maybeSingle(),
     ]);
     addresses = (data ?? []) as Address[];
+    const profileRow = profile as {
+      full_name?: string | null;
+      phone?: string | null;
+    } | null;
     customerFirstName =
-      (profile as { full_name?: string | null } | null)?.full_name
-        ?.trim()
-        .split(/\s+/)[0] || null;
+      profileRow?.full_name?.trim().split(/\s+/)[0] || null;
+    profileNeedsPhone = !profileRow?.phone?.trim();
     cleaningHistory = await loadCleaningHistory(supabase, user.id);
     knownCleaners = await loadKnownCleaners(supabase, user.id);
 
@@ -271,6 +275,7 @@ export default async function NewBookingPage({
       initialDraft={initialDraft}
       knownCleaners={knownCleaners}
       previousCleaner={previousCleaner}
+      profileNeedsPhone={profileNeedsPhone}
       requestedPro={requestedProName(searchParams.pro)}
       requestedProCoverage={requestedProCoverage(searchParams.cover)}
       returnTo={returnTo}

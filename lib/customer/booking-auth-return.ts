@@ -7,6 +7,19 @@ export const BOOKING_AUTH_PATH = "/booking/new?step=auth";
 /** Must match the wizard’s localStorage step key. */
 export const BOOKING_STEP_STORAGE_KEY = "mundoria-booking-step-v5";
 
+/** True when OAuth / auth should resume the guest booking wizard (not dashboards). */
+export function isBookingResumePath(path: string | null | undefined) {
+  if (!path) return false;
+  let decoded = path;
+  try {
+    decoded = decodeURIComponent(path);
+  } catch {
+    decoded = path;
+  }
+  const pathname = decoded.split("?")[0] ?? decoded;
+  return pathname === "/booking/new" || pathname.startsWith("/booking/new/");
+}
+
 /** Pin the saved funnel step to checkout before a session refresh. */
 export function rememberBookingCheckoutStep() {
   try {

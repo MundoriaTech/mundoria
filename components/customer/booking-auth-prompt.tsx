@@ -294,7 +294,10 @@ export function BookingAuthPrompt({
           <OAuthButton
             label="Use Google"
             next={RETURN_PATH}
-            onBeforeRedirect={markBookingAuthReturn}
+            onBeforeRedirect={() => {
+              markBookingAuthReturn();
+              rememberBookingCheckoutStep();
+            }}
             role="customer"
           />
 
@@ -409,6 +412,15 @@ export function BookingAuthPrompt({
           <Button className="h-11 w-full" disabled={busy} type="submit">
             {busy ? "Signing in…" : "Continue booking"}
           </Button>
+          <OAuthButton
+            label="Use Google"
+            next={RETURN_PATH}
+            onBeforeRedirect={() => {
+              markBookingAuthReturn();
+              rememberBookingCheckoutStep();
+            }}
+            role="customer"
+          />
           <div className="flex justify-between gap-3 text-sm text-muted-foreground">
             <Link
               className="hover:text-foreground"

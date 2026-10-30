@@ -4,7 +4,7 @@ import { Repeat2 } from "lucide-react";
 
 export interface RecurringValue {
   enabled: boolean;
-  frequency: "weekly" | "fortnightly" | "monthly" | "custom" | null;
+  frequency: "weekly" | "fortnightly" | "monthly" | null;
   preferSameCleaner: boolean;
 }
 
@@ -55,7 +55,6 @@ export function RecurringToggle({
           <option value="weekly">Weekly</option>
           <option value="fortnightly">Fortnightly</option>
           <option value="monthly">Monthly</option>
-          <option value="custom">Customize your calendar</option>
         </select>
       ) : null}
     </div>

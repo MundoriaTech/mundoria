@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { isoDateOrEmpty } from "@/lib/customer/booking-flow";
 import { cn } from "@/lib/utils";
 
 function toIso(year: number, monthIndex: number, day: number) {
   return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function monthDateFromIso(iso: string) {
+  const [year, month] = iso.split("-").map(Number);
+  return new Date(year, month - 1, 1, 12);
+}
+
+/** Open on the selected day when bookable; otherwise the earliest bookable month. */
+function initialViewMonth(earliest: string, seed: string) {
+  if (seed && seed >= earliest) return monthDateFromIso(seed);
+  return monthDateFromIso(earliest);
 }
 
 export function BookingCalendar({
@@ -33,8 +44,18 @@ export function BookingCalendar({
     mode === "multi" ? selectedDates?.[0] : selectedDate,
   );
   const [viewMonth, setViewMonth] = useState(() =>
-    seed ? new Date(`${seed}T12:00:00`) : new Date(),
+    initialViewMonth(earliest, seed),
   );
+
+  // If the 48h lead pushes the floor into the next month, jump the view there
+  // instead of showing a fully disabled current month.
+  useEffect(() => {
+    const viewStart = toIso(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
+    const earliestMonthStart = `${earliest.slice(0, 7)}-01`;
+    if (viewStart < earliestMonthStart) {
+      setViewMonth(monthDateFromIso(earliest));
+    }
+  }, [earliest, viewMonth]);
 
   const year = viewMonth.getFullYear();
   const month = viewMonth.getMonth();
@@ -57,10 +78,14 @@ export function BookingCalendar({
         : [],
   );
 
+  const earliestMonthStart = `${earliest.slice(0, 7)}-01`;
+  const viewMonthStart = toIso(year, month, 1);
+  const canGoPrev = viewMonthStart > earliestMonthStart;
+
   function shiftMonth(delta: number) {
     const next = new Date(year, month + delta, 1);
     const monthStart = toIso(next.getFullYear(), next.getMonth(), 1);
-    if (monthStart < earliest.slice(0, 8) + "01") return;
+    if (monthStart < earliestMonthStart) return;
     setViewMonth(next);
   }
 
@@ -87,7 +112,11 @@ export function BookingCalendar({
       <div className="mb-4 flex items-center justify-between">
         <button
           aria-label="Previous month"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation"
+          className={cn(
+            "inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation",
+            !canGoPrev && "opacity-30",
+          )}
+          disabled={!canGoPrev}
           onClick={() => shiftMonth(-1)}
           type="button"
         >

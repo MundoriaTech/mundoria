@@ -17,6 +17,7 @@ import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isBookingResumePath } from "@/lib/customer/booking-auth-return";
 import { syncSignupToZoho } from "@/lib/zoho/crm";
 import { isUserRole, type UserRole } from "@/types/auth";
 
@@ -158,12 +159,15 @@ export async function GET(request: Request) {
       }
     }
 
+    // Booking Google sign-in stays in the wizard — collect phone at checkout
+    // instead of bouncing through /complete-profile (email/password already did).
     if (
       user &&
       isUserRole(profile?.role) &&
       !profile?.phone?.trim() &&
       next !== "/complete-profile" &&
-      !isPasswordReset
+      !isPasswordReset &&
+      !isBookingResumePath(next)
     ) {
       const completionUrl = new URL("/complete-profile", requestUrl.origin);
       completionUrl.searchParams.set("next", next);
@@ -173,7 +177,8 @@ export async function GET(request: Request) {
     return finishAuthRedirect(
       requestUrl,
       new URL(next, requestUrl.origin),
-      showAccountValidated,
+      // Don't park booking resumes on the "account validated" interstitial.
+      showAccountValidated && !isBookingResumePath(next),
     );
   }
 
