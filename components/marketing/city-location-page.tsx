@@ -8,11 +8,7 @@ import { placePhotoHero } from "@/components/marketing/service-category/category
 import { PlaceFeatureBand } from "@/components/marketing/service-category/place-feature-band";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlaceMapHero } from "@/components/marketing/place-map-hero";
-import {
-  LAUNCH_CITY,
-  marketingServiceBySlug,
-  type ServiceCardLocation,
-} from "@/lib/seo/marketing";
+import { LAUNCH_CITY, marketingServiceBySlug } from "@/lib/seo/marketing";
 import {
   cleaningPlaceTitle,
   type PlacePageFocus,
@@ -45,7 +41,6 @@ export async function CityLocationPage({
   placeLinks,
   placesNote,
   regionLabel = "Birmingham",
-  serviceCardLocation,
   showNearbyTowns = false,
   surroundingLinks,
 }: {
@@ -57,7 +52,6 @@ export async function CityLocationPage({
   placesNote?: string;
   /** Local authority / city for schema — omit Birmingham for Solihull, Sandwell towns, etc. */
   regionLabel?: string | null;
-  serviceCardLocation?: ServiceCardLocation;
   showNearbyTowns?: boolean;
   surroundingLinks?: Array<{ href: string; label: string }>;
 }) {
@@ -156,7 +150,6 @@ export async function CityLocationPage({
           place={name}
           placeLinks={placeLinks}
           placesNote={placesNote}
-          serviceCardLocation={serviceCardLocation}
           serviceFocus={service ?? undefined}
           showAreaCards={!focus?.category && !focus?.serviceSlug}
           showCategoryServices={Boolean(focus?.category)}

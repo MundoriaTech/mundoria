@@ -83,7 +83,6 @@ export default function StandaloneTownCleanersPage({
       }
       placesNote={coverage.note ?? zone?.note}
       regionLabel={null}
-      serviceCardLocation={{ kind: "place", slug: coverage.slug }}
     />
   );
 }

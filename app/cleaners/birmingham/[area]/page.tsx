@@ -119,7 +119,6 @@ export default async function BirminghamAreaPage({
       }
       placesNote={coverage?.note ?? zone?.note}
       regionLabel="Birmingham"
-      serviceCardLocation={{ kind: "place", slug }}
       surroundingLinks={
         zone
           ? BIRMINGHAM_COVERAGE_ZONES.filter(

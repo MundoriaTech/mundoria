@@ -27,7 +27,6 @@ import {
   publicMarketingServices,
   serviceCardHref,
   type MarketingService,
-  type ServiceCardLocation,
 } from "@/lib/seo/marketing";
 import { coverageFocusSearch } from "@/lib/seo/birmingham-coverage";
 
@@ -120,7 +119,6 @@ export async function LaunchCityHubSections({
   place = PLACE,
   placeLinks,
   placesNote,
-  serviceCardLocation,
   showNearbyTowns = false,
   surroundingLinks,
 }: {
@@ -137,7 +135,6 @@ export async function LaunchCityHubSections({
   place?: string;
   placeLinks?: Array<{ href: string; label: string }>;
   placesNote?: string;
-  serviceCardLocation?: ServiceCardLocation;
   showNearbyTowns?: boolean;
   surroundingLinks?: Array<{ href: string; label: string }>;
 }) {
