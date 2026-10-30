@@ -1432,7 +1432,7 @@ export function BookingWizard({
           frequencyChoiceSatisfied(draft) &&
           Boolean(draft.scheduledTime);
         const needsPets =
-          Boolean(draft.serviceType) &&
+          draft.serviceType != null &&
           serviceDefinition(draft.serviceType).category !== "commercial";
         return scheduleReady && (!needsPets || draft.hasPets !== null);
       }
@@ -2382,7 +2382,7 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
         frequencyChoiceSatisfied(draft) &&
         Boolean(draft.scheduledTime);
       const needsPets =
-        Boolean(draft.serviceType) &&
+        draft.serviceType != null &&
         serviceDefinition(draft.serviceType).category !== "commercial";
       return scheduleReady && (!needsPets || draft.hasPets !== null);
     }
