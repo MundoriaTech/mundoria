@@ -1,7 +1,10 @@
 import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 
-import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
+import {
+  frequencyAllowsOneOff,
+  pricingServiceTypeFor,
+} from "@/lib/customer/booking-flow";
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
@@ -99,8 +102,14 @@ export async function POST(request: Request) {
 
   const pricing = await loadServicePricing();
   const pricedAddress = address as Address;
+  const pricedServiceType =
+    pricingServiceTypeFor({
+      frequencyChosen: true,
+      isRecurring: parsed.data.isRecurring,
+      serviceType: parsed.data.serviceType,
+    }) ?? parsed.data.serviceType;
   const baseAmount = estimatePrice(
-    parsed.data.serviceType,
+    pricedServiceType,
     pricedAddress,
     parsed.data.cleaningStandard,
     parsed.data.selectedAddOns,

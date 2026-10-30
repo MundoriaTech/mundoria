@@ -2,6 +2,7 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { pricingServiceTypeFor } from "@/lib/customer/booking-flow";
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
@@ -25,6 +26,8 @@ const schema = bookingDraftSchema
     code: z.string().trim().min(1).max(40),
     /** Optional — formula hours used when the customer has not chosen a length yet. */
     estimatedDurationHours: z.number().min(1).max(12).nullable().optional(),
+    /** Needed so regular + one-off uses the one-off rate card. */
+    isRecurring: z.boolean().optional().default(true),
   });
 
 export async function POST(request: Request) {
@@ -78,8 +81,14 @@ export async function POST(request: Request) {
   }
 
   const pricing = await loadServicePricing();
+  const pricedServiceType =
+    pricingServiceTypeFor({
+      frequencyChosen: true,
+      isRecurring: parsed.data.isRecurring,
+      serviceType: parsed.data.serviceType,
+    }) ?? parsed.data.serviceType;
   const baseAmount = estimatePrice(
-    parsed.data.serviceType,
+    pricedServiceType,
     address as Address,
     parsed.data.cleaningStandard,
     parsed.data.selectedAddOns,

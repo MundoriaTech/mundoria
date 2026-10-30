@@ -297,6 +297,27 @@ export function frequencyChoiceSatisfied(
   return Boolean(draft.recurrencePattern);
 }
 
+/**
+ * Labour rate card for quotes. Regular cleaning + an explicit one-off cadence
+ * uses the One-Off Cleaning rate (not the recurring regular £/h).
+ */
+export function pricingServiceTypeFor(
+  draft: Pick<
+    BookingDraft,
+    "frequencyChosen" | "isRecurring" | "serviceType"
+  >,
+): ServiceType | null {
+  if (!draft.serviceType) return null;
+  if (
+    draft.serviceType === "regular" &&
+    draft.frequencyChosen &&
+    !draft.isRecurring
+  ) {
+    return "one_off";
+  }
+  return draft.serviceType;
+}
+
 /** Basket / summary label — null until the customer has chosen a frequency. */
 export function frequencyBasketLabel(
   draft: Pick<

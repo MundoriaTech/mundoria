@@ -89,6 +89,7 @@ import {
   isoDateOrEmpty,
   getFlowSteps,
   guestAddressComplete,
+  pricingServiceTypeFor,
   type BookingEntryLock,
   isBookingFlowStepId,
   resolveFlowStepIndex,
@@ -495,10 +496,14 @@ export function BookingWizard({
           serviceDefinition(draft.serviceType).category === "commercial"
         ? true
         : draft.numBedrooms != null && draft.numBathrooms != null);
+  const pricedServiceType = pricingServiceTypeFor(draft);
   const priceBreakdown =
-    draft.serviceType && selectedStandard && hasPropertySizing && roomsAddress
+    pricedServiceType &&
+    selectedStandard &&
+    hasPropertySizing &&
+    roomsAddress
       ? estimatePriceBreakdown(
-          draft.serviceType,
+          pricedServiceType,
           roomsAddress,
           selectedStandard,
           draft.selectedAddOns,
@@ -519,7 +524,7 @@ export function BookingWizard({
         )
       : null;
   const addOnPriceContext =
-    draft.serviceType && selectedStandard
+    pricedServiceType && selectedStandard
       ? {
           durationHours:
             priceBreakdown?.billableHours ??
@@ -530,7 +535,7 @@ export function BookingWizard({
                   selectedStandard,
                 ).cleanerHours
               : estimateDuration(
-                  draft.serviceType,
+                  pricedServiceType,
                   selectedStandard,
                   draft.selectedAddOns,
                   {
@@ -542,15 +547,15 @@ export function BookingWizard({
                   },
                 )),
           pricing,
-          serviceType: draft.serviceType,
+          serviceType: pricedServiceType,
           standard: selectedStandard,
         }
       : undefined;
   const estimatedAmount =
-    draft.serviceType && selectedStandard
+    pricedServiceType && selectedStandard
       ? priceBreakdown
         ? priceBreakdown.totalPence
-        : indicativeFromPrice(draft.serviceType, pricing) +
+        : indicativeFromPrice(pricedServiceType, pricing) +
           selectedAddOnTotal(draft.selectedAddOns, addOnPriceContext)
       : 0;
   const duration = durationSummary({
@@ -1268,6 +1273,8 @@ export function BookingWizard({
       key === "selectedAddOns" ||
       key === "cleaningStandard" ||
       key === "serviceType" ||
+      key === "isRecurring" ||
+      key === "frequencyChosen" ||
       key === "estimatedDurationHours" ||
       key === "numBedrooms" ||
       key === "numBathrooms" ||
@@ -1459,6 +1466,7 @@ export function BookingWizard({
         numBedrooms: draft.numBedrooms,
         officeSpaces: draft.officeSpaces,
         otherRoomTypes: draft.otherRoomTypes,
+        isRecurring: draft.isRecurring,
         scheduledDate: draft.scheduledDate,
         scheduledTime: draft.scheduledTime,
         selectedAddOns: draft.selectedAddOns,
@@ -1479,10 +1487,10 @@ export function BookingWizard({
   const displayAmount = promoAmount ?? estimatedAmount;
   const displayHourlyRatePence =
     priceBreakdown?.ratePence ??
-    (draft.serviceType && selectedStandard
-      ? hourlyRatePence(draft.serviceType, selectedStandard, pricing)
-      : draft.serviceType
-        ? indicativeHourlyRatePence(draft.serviceType, pricing)
+    (pricedServiceType && selectedStandard
+      ? hourlyRatePence(pricedServiceType, selectedStandard, pricing)
+      : pricedServiceType
+        ? indicativeHourlyRatePence(pricedServiceType, pricing)
         : null);
   const priceLabel =
     displayHourlyRatePence != null
@@ -2961,18 +2969,19 @@ function PetsSection({
         Some cleaners have allergies or prefer not to work around animals. This
         helps us match you well.
       </p>
-      <div className="mt-8 grid gap-3">
+      <div className="mt-8 grid max-w-md grid-cols-2 gap-3">
         {(
           [
-            ["Yes, furry or scaly housemates", true],
-            ["Nope, pet-free zone", false],
+            ["Yes, pets", true, "/images/marketing/icons/plain/pets.png"],
+            ["No, none", false, "/images/marketing/icons/plain/no-pets.png"],
           ] as const
-        ).map(([label, value]) => {
+        ).map(([label, value, imageSrc]) => {
           const active = draft.hasPets === value;
           return (
             <button
+              aria-pressed={active}
               className={cn(
-                "rounded-2xl border-2 border-transparent bg-white p-4 text-left transition hover:bg-[#f8f5ff] touch-manipulation sm:px-5 sm:py-4",
+                "flex flex-col items-center rounded-2xl border-2 border-transparent bg-white px-3 pb-3 pt-4 text-center transition hover:bg-[#f8f5ff] touch-manipulation",
                 active && "border-[#6a45b8] bg-white",
               )}
               key={label}
@@ -2982,22 +2991,16 @@ function PetsSection({
               }}
               type="button"
             >
-              <div className="flex items-center gap-3">
-                <Image
-                  alt=""
-                  className="h-11 w-11 shrink-0 object-contain"
-                  height={512}
-                  src={
-                    value
-                      ? "/images/marketing/icons/plain/pets.png"
-                      : "/images/marketing/icons/plain/no-pets.png"
-                  }
-                  width={512}
-                />
-                <p className="min-w-0 flex-1 font-semibold text-[#1c133b]">
-                  {label}
-                </p>
-              </div>
+              <Image
+                alt=""
+                className="h-14 w-14 object-contain sm:h-16 sm:w-16"
+                height={512}
+                src={imageSrc}
+                width={512}
+              />
+              <p className="mt-2 text-sm font-semibold leading-snug text-[#1c133b]">
+                {label}
+              </p>
             </button>
           );
         })}
