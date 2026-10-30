@@ -7,6 +7,11 @@ import {
   formatMessagePreview,
   parseGifMessage,
 } from "@/components/shared/chat-gif-picker";
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
+import { PAGE_SIZES } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
 import type {
   SupportConversationWithUser,
@@ -62,6 +67,12 @@ export function SupportInboxList({
     };
   }, [status]);
 
+  const { page, pageItems, setPage, totalItems } = usePagedItems(
+    items,
+    PAGE_SIZES.admin,
+    status,
+  );
+
   return (
     <div className="min-w-0">
       <div className="mb-4 flex flex-wrap gap-2">
@@ -85,46 +96,55 @@ export function SupportInboxList({
       {items.length === 0 ? (
         <p className="text-sm text-[#5a5470]">No conversations yet.</p>
       ) : (
-        <ul className="grid gap-3">
-          {items.map((item) => (
-            <li key={item.id}>
-              <Link
-                className="block rounded-2xl border border-[#e6e0f2] bg-white p-4 transition hover:border-[#312c79]/25 hover:bg-[#faf8ff]"
-                href={`/admin/inbox/${item.id}`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-[#1c133b]">
-                    {displayName(item)}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    {item.unread_admin > 0 ? (
-                      <span className="rounded-full bg-[#e67248] px-2 py-0.5 text-[11px] font-bold text-white">
-                        {item.unread_admin} new
+        <>
+          <ul className="grid gap-3">
+            {pageItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  className="block rounded-2xl border border-[#e6e0f2] bg-white p-4 transition hover:border-[#312c79]/25 hover:bg-[#faf8ff]"
+                  href={`/admin/inbox/${item.id}`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-[#1c133b]">
+                      {displayName(item)}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {item.unread_admin > 0 ? (
+                        <span className="rounded-full bg-[#e67248] px-2 py-0.5 text-[11px] font-bold text-white">
+                          {item.unread_admin} new
+                        </span>
+                      ) : null}
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                          item.status === "open"
+                            ? "bg-[#efe8ff] text-[#312c79]"
+                            : "bg-[#f3f0f7] text-[#8b8798]",
+                        )}
+                      >
+                        {item.status}
                       </span>
-                    ) : null}
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                        item.status === "open"
-                          ? "bg-[#efe8ff] text-[#312c79]"
-                          : "bg-[#f3f0f7] text-[#8b8798]",
-                      )}
-                    >
-                      {item.status}
-                    </span>
+                    </div>
                   </div>
-                </div>
-                <p className="mt-1 line-clamp-2 text-sm text-[#5a5470]">
-                  {formatMessagePreview(item.last_message_preview) ||
-                    "No messages yet"}
-                </p>
-                <p className="mt-2 text-xs text-[#8b8798]">
-                  {formatWhen(item.last_message_at)}
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  <p className="mt-1 line-clamp-2 text-sm text-[#5a5470]">
+                    {formatMessagePreview(item.last_message_preview) ||
+                      "No messages yet"}
+                  </p>
+                  <p className="mt-2 text-xs text-[#8b8798]">
+                    {formatWhen(item.last_message_at)}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <ClientPagination
+            className="mt-4"
+            onPageChange={setPage}
+            page={page}
+            pageSize={PAGE_SIZES.admin}
+            totalItems={totalItems}
+          />
+        </>
       )}
     </div>
   );

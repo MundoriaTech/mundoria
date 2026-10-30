@@ -1,6 +1,7 @@
-import { CreditCard, FileText } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import Link from "next/link";
 
+import { ReceiptsList } from "@/components/customer/receipts-list";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { Button } from "@/components/ui/button";
 import { formatServiceName } from "@/lib/customer/services";
@@ -141,86 +142,7 @@ export default async function CustomerPaymentsPage() {
 
       <section>
         <h2 className="font-semibold">Past receipts</h2>
-        {receipts.length ? (
-          <>
-            <div className="mt-4 space-y-3 md:hidden">
-              {receipts.map((booking) => (
-                <article
-                  className="rounded-2xl border border-border bg-card p-4"
-                  key={booking.id}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-medium text-foreground">
-                        {formatServiceName(booking.service_type)}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {booking.scheduled_date}
-                        {booking.address
-                          ? ` · ${booking.address.city}, ${booking.address.postcode}`
-                          : ""}
-                      </p>
-                    </div>
-                    <PriceDisplay amount={booking.amount_total} />
-                  </div>
-                  <Button
-                    asChild
-                    className="mt-4 min-h-11 w-full"
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Link href={`/booking/${booking.id}/receipt`}>
-                      <FileText className="mr-1.5 h-3.5 w-3.5" />
-                      View receipt
-                    </Link>
-                  </Button>
-                </article>
-              ))}
-            </div>
-            <div className="mt-4 hidden overflow-x-auto rounded-2xl border bg-card md:block">
-              <table className="w-full min-w-[640px] text-sm">
-                <thead className="bg-muted/40 text-left">
-                  <tr>
-                    <th className="p-3">Date</th>
-                    <th>Service</th>
-                    <th>Location</th>
-                    <th>Amount</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {receipts.map((booking) => (
-                    <tr className="border-t" key={booking.id}>
-                      <td className="p-3">{booking.scheduled_date}</td>
-                      <td>{formatServiceName(booking.service_type)}</td>
-                      <td>
-                        {booking.address
-                          ? `${booking.address.city}, ${booking.address.postcode}`
-                          : "—"}
-                      </td>
-                      <td>
-                        <PriceDisplay amount={booking.amount_total} />
-                      </td>
-                      <td className="p-3 text-right">
-                        <Button asChild size="sm" variant="outline">
-                          <Link href={`/booking/${booking.id}/receipt`}>
-                            <FileText className="mr-1.5 h-3.5 w-3.5" />
-                            Receipt
-                          </Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        ) : (
-          <p className="mt-3 rounded-2xl border bg-card p-5 text-sm text-muted-foreground">
-            Receipts appear here after a cleaning is completed and payment is
-            captured.
-          </p>
-        )}
+        <ReceiptsList receipts={receipts} />
       </section>
     </div>
   );

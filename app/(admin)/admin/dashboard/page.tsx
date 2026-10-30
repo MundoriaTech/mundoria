@@ -18,63 +18,119 @@ import type { AdminBooking, RevenuePoint } from "@/types/admin";
 export default async function AdminDashboardPage() {
   const admin = createAdminClient();
   const today = new Date().toISOString().slice(0, 10);
+  const chartFrom = new Date();
+  chartFrom.setDate(chartFrom.getDate() - 90);
+  const chartFromIso = chartFrom.toISOString().slice(0, 10);
+  const alertSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
   const [
-    { data: bookings },
-    { data: disputes },
-    { data: cleaners },
+    { data: todayBookingsData },
+    { count: activeCount },
+    { data: liveMapBookings },
+    { data: releasedForChart },
+    { data: rematchAlerts },
+    { data: recentBookings },
+    { data: recentDisputes },
+    { count: completedCount },
+    { count: noShowCount },
+    { count: cancelledCount },
+    { count: totalBookingsCount },
+    { count: pendingReviewCount },
     { data: ratings },
     people,
   ] = await Promise.all([
     admin
       .from("bookings")
-      .select("*, address:addresses(*), customer:profiles!bookings_customer_id_fkey(full_name), cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)")
-      .order("created_at", { ascending: false }),
-    admin.from("disputes").select("*").order("created_at", { ascending: false }),
+      .select(
+        "id,scheduled_date,scheduled_start_time,status,payment_status,amount_platform,updated_at,created_at",
+      )
+      .eq("scheduled_date", today),
+    admin
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["cleaner_en_route", "in_progress"]),
+    admin
+      .from("bookings")
+      .select(
+        "*, address:addresses(*), customer:profiles!bookings_customer_id_fkey(full_name), cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)",
+      )
+      .in("status", ["pending_match", "cleaner_en_route", "in_progress"])
+      .order("scheduled_date", { ascending: true })
+      .limit(100),
+    admin
+      .from("bookings")
+      .select("scheduled_date,amount_platform")
+      .eq("payment_status", "released")
+      .gte("scheduled_date", chartFromIso)
+      .order("scheduled_date", { ascending: true })
+      .limit(2000),
+    admin
+      .from("bookings")
+      .select(
+        "id,scheduled_start_time,status,payment_status,updated_at,created_at",
+      )
+      .eq("status", "cancelled")
+      .eq("payment_status", "held")
+      .gte("updated_at", alertSince)
+      .order("updated_at", { ascending: false })
+      .limit(20),
+    admin
+      .from("bookings")
+      .select("id,status,created_at")
+      .order("created_at", { ascending: false })
+      .limit(10),
+    admin
+      .from("disputes")
+      .select("id,type,created_at")
+      .order("created_at", { ascending: false })
+      .limit(5),
+    admin
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "completed"),
+    admin
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "no_show"),
+    admin
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "cancelled"),
+    admin.from("bookings").select("id", { count: "exact", head: true }),
     admin
       .from("cleaner_profiles")
-      .select("status,no_show_count,cancellation_count,onboarding_complete"),
+      .select("id", { count: "exact", head: true })
+      .in("status", ["pending", "in_training"])
+      .eq("onboarding_complete", true),
     admin
       .from("ratings")
-      .select("overall_score,application_status")
-      .eq("application_status", "applied"),
+      .select("overall_score")
+      .eq("application_status", "applied")
+      .limit(500),
     loadAdminUserCounts(),
   ]);
-  const all = (bookings ?? []) as AdminBooking[];
-  const todayBookings = all.filter((booking) => booking.scheduled_date === today);
-  const active = all.filter((booking) =>
-    ["cleaner_en_route", "in_progress"].includes(booking.status),
-  );
+
+  const todayBookings = todayBookingsData ?? [];
   const revenueToday = todayBookings
     .filter((booking) => booking.payment_status === "released")
     .reduce((sum, booking) => sum + (booking.amount_platform ?? 0), 0);
-  const pending = (cleaners ?? []).filter(
-    (cleaner) =>
-      (cleaner.status === "pending" || cleaner.status === "in_training") &&
-      cleaner.onboarding_complete,
-  ).length;
+  const pending = pendingReviewCount ?? 0;
   const avgRating = ratings?.length
     ? ratings.reduce((sum, rating) => sum + Number(rating.overall_score), 0) /
       ratings.length
     : 0;
-  const completed = all.filter((booking) => booking.status === "completed").length;
-  const noShowBookings = all.filter((booking) => booking.status === "no_show").length;
-  const cancelledBookings = all.filter(
-    (booking) => booking.status === "cancelled",
-  ).length;
+  const completed = completedCount ?? 0;
+  const noShowBookings = noShowCount ?? 0;
+  const cancelledBookings = cancelledCount ?? 0;
   const finishedLike = completed + noShowBookings + cancelledBookings;
-  const revenuePoints: RevenuePoint[] = all
-    .filter((booking) => booking.payment_status === "released")
-    .map((booking) => ({
+  const revenuePoints: RevenuePoint[] = (releasedForChart ?? []).map(
+    (booking) => ({
       date: booking.scheduled_date,
       revenue: booking.amount_platform ?? 0,
-    }));
-  const alerts = all.filter(
-    (booking) =>
-      booking.status === "cancelled" &&
-      booking.payment_status === "held" &&
-      new Date(booking.updated_at ?? booking.created_at).getTime() >
-        Date.now() - 24 * 60 * 60 * 1000,
+    }),
   );
+  const alerts = rematchAlerts ?? [];
+  const mapBookings = (liveMapBookings ?? []) as AdminBooking[];
   const weekday = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -130,7 +186,7 @@ export default async function AdminDashboardPage() {
             icon: "pulse",
             label: "Jobs in progress",
             tone: "lavenderOrange",
-            value: String(active.length),
+            value: String(activeCount ?? 0),
           },
           {
             icon: "currencyGbp",
@@ -219,7 +275,11 @@ export default async function AdminDashboardPage() {
           />
           <Health
             label="Cancellation rate"
-            value={`${all.length ? ((cancelledBookings / all.length) * 100).toFixed(1) : 0}%`}
+            value={`${
+              totalBookingsCount
+                ? ((cancelledBookings / totalBookingsCount) * 100).toFixed(1)
+                : 0
+            }%`}
           />
         </section>
       </div>
@@ -236,13 +296,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
         <div className="mt-4">
-          <OperationsMap
-            bookings={all.filter((booking) =>
-              ["pending_match", "cleaner_en_route", "in_progress"].includes(
-                booking.status,
-              ),
-            )}
-          />
+          <OperationsMap bookings={mapBookings} />
         </div>
       </section>
 
@@ -252,11 +306,11 @@ export default async function AdminDashboardPage() {
         </h2>
         <div className="mt-4 divide-y divide-[#efe8f8]">
           {[
-            ...all.slice(0, 7).map((booking) => ({
+            ...(recentBookings ?? []).map((booking) => ({
               date: booking.created_at,
               text: `Booking ${booking.id.slice(0, 8)} · ${booking.status.replaceAll("_", " ")}`,
             })),
-            ...(disputes ?? []).slice(0, 3).map((dispute) => ({
+            ...(recentDisputes ?? []).map((dispute) => ({
               date: dispute.created_at,
               text: `Dispute opened · ${dispute.type}`,
             })),

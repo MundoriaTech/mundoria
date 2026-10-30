@@ -1,6 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import {
+  CustomerBookingsPanel,
+  type AdminCustomerBookingRow,
+} from "@/components/admin/customer-bookings-panel";
 import { RemoveUserButton } from "@/components/admin/remove-user-button";
 import {
   UserActivityTimeline,
@@ -10,7 +13,7 @@ import {
   getHardDeleteEligibility,
   hardDeleteBlockMessage,
 } from "@/lib/admin/delete-user";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -136,84 +139,9 @@ export default async function AdminCustomerPage({
         </div>
       </section>
 
-      <section className="rounded-xl border bg-card p-4 sm:p-5">
-        <h2 className="font-semibold">Bookings</h2>
-        <div className="mt-4 space-y-3 md:hidden">
-          {jobs.map((booking) => (
-            <Link
-              className="block rounded-lg border p-3 transition active:bg-muted/40"
-              href={`/admin/booking/${booking.id}`}
-              key={booking.id}
-            >
-              <p className="font-medium">
-                {formatServiceName(booking.service_type)}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {booking.scheduled_date} ·{" "}
-                {booking.status.replaceAll("_", " ")}
-              </p>
-              <p className="mt-1 text-sm font-semibold">
-                {formatMoney(booking.amount_total)}
-              </p>
-            </Link>
-          ))}
-          {!jobs.length ? (
-            <p className="text-sm text-muted-foreground">No bookings yet.</p>
-          ) : null}
-        </div>
-        <div className="mt-4 hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-muted/50 text-left">
-              <tr>
-                <th className="p-3">Service</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Payment</th>
-                <th>Cleaner</th>
-                <th>Amount</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.map((booking) => (
-                <tr className="border-t" key={booking.id}>
-                  <td className="p-3">
-                    {formatServiceName(booking.service_type)}
-                  </td>
-                  <td>
-                    {booking.scheduled_date}{" "}
-                    {booking.scheduled_start_time?.slice(0, 5)}
-                  </td>
-                  <td className="capitalize">
-                    {booking.status.replaceAll("_", " ")}
-                  </td>
-                  <td className="capitalize">{booking.payment_status}</td>
-                  <td>{booking.cleaner_profile?.full_name ?? "—"}</td>
-                  <td>{formatMoney(booking.amount_total)}</td>
-                  <td>
-                    <Link
-                      className="text-primary hover:underline"
-                      href={`/admin/booking/${booking.id}`}
-                    >
-                      Open
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              {!jobs.length ? (
-                <tr>
-                  <td
-                    className="p-6 text-center text-muted-foreground"
-                    colSpan={7}
-                  >
-                    No bookings yet.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <CustomerBookingsPanel
+        bookings={jobs as AdminCustomerBookingRow[]}
+      />
 
       <RemoveUserButton
         allowed={eligibility.allowed}

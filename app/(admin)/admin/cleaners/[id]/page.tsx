@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
 import { DocumentViewerButton } from "@/components/admin/document-viewer";
 import { RemoveUserButton } from "@/components/admin/remove-user-button";
+import { PagedHistoryTable } from "@/components/admin/paged-history-table";
 import {
   UserActivityTimeline,
   type UserActivityRow,
@@ -353,7 +354,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
           ))}
         </div>
       </section>
-      <DataTable
+      <PagedHistoryTable
         headers={["Date", "Event", "Score", "Tier change", "Notes"]}
         rows={(medallionEvents ?? []).map((item) => [
           new Date(item.created_at).toLocaleDateString("en-GB"),
@@ -364,7 +365,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         ])}
         title="Account history"
       />
-      <DataTable
+      <PagedHistoryTable
         headers={["Month", "Score", "Tier change", "Jobs"]}
         rows={(history ?? []).map((item) => [
           item.month,
@@ -374,7 +375,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         ])}
         title="Performance history"
       />
-      <DataTable
+      <PagedHistoryTable
         headers={["Date", "Service", "Status", "Net"]}
         rows={(bookings ?? []).map((item) => [
           item.scheduled_date,
@@ -384,7 +385,7 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         ])}
         title="Booking history"
       />
-      <DataTable
+      <PagedHistoryTable
         headers={["Date", "Mood", "Internal score", "Status", "Comment"]}
         rows={(ratings ?? []).map((item) => [
           new Date(item.created_at).toLocaleDateString("en-GB"),
@@ -408,51 +409,5 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         userId={profile.id}
       />
     </div>
-  );
-}
-
-function DataTable({
-  headers,
-  rows,
-  title,
-}: {
-  headers: string[];
-  rows: (string | number | null)[][];
-  title: string;
-}) {
-  return (
-    <section className="overflow-hidden rounded-xl border bg-card p-4 sm:p-5">
-      <h2 className="mb-4 font-semibold">{title}</h2>
-      <div className="-mx-4 overflow-x-auto sm:mx-0">
-        <table className="w-full min-w-[520px] text-sm">
-          <thead>
-            <tr>
-              {headers.map((header) => (
-                <th className="border-b p-2 text-left first:pl-4 sm:first:pl-2" key={header}>
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={index}>
-                {row.map((cell, cellIndex) => (
-                  <td
-                    className="border-b p-2 first:pl-4 sm:first:pl-2"
-                    key={cellIndex}
-                  >
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {!rows.length ? (
-        <p className="py-4 text-sm text-muted-foreground">Nothing here yet.</p>
-      ) : null}
-    </section>
   );
 }

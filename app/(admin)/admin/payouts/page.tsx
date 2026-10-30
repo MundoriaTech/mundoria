@@ -1,4 +1,8 @@
 import { ProcessPayoutsButton } from "@/components/admin/process-payouts-button";
+import {
+  PayoutsTable,
+  type AdminPayoutRow,
+} from "@/components/admin/payouts-table";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -7,7 +11,7 @@ export default async function AdminPayoutsPage() {
     .from("payouts")
     .select("*,cleaner:profiles!payouts_cleaner_id_fkey(full_name)")
     .order("created_at", { ascending: false });
-  const payouts = data ?? [];
+  const payouts = (data ?? []) as AdminPayoutRow[];
   const now = new Date();
   const week = payouts
     .filter(
@@ -42,79 +46,7 @@ export default async function AdminPayoutsPage() {
         <Card label="This month" value={formatMoney(month)} />
       </div>
 
-      <div className="mt-6 space-y-3 md:hidden">
-        {payouts.map((item) => (
-          <div
-            className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-4 shadow-[0_8px_20px_rgba(49,44,121,0.04)]"
-            key={item.id}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate font-semibold">
-                  {item.cleaner?.full_name ?? "Cleaner"}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {item.period_start} – {item.period_end}
-                </p>
-              </div>
-              <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-xs capitalize">
-                {item.status}
-              </span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              <span>{item.total_jobs} jobs</span>
-              <span className="font-semibold">
-                {formatMoney(item.net_amount)}
-              </span>
-            </div>
-            {item.stripe_transfer_id ? (
-              <p className="mt-2 truncate font-mono text-xs text-muted-foreground">
-                {item.stripe_transfer_id}
-              </p>
-            ) : null}
-          </div>
-        ))}
-        {!payouts.length ? (
-          <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-            No payouts yet.
-          </p>
-        ) : null}
-      </div>
-
-      <div className="mt-6 hidden overflow-x-auto rounded-[1.25rem] border border-[#e8e0f4] bg-white shadow-[0_8px_20px_rgba(49,44,121,0.04)] md:block">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead>
-            <tr className="bg-[#f7f4fb] text-left text-[#5a5470]">
-              <th className="p-3 font-semibold">Cleaner</th>
-              <th className="font-semibold">Period</th>
-              <th className="font-semibold">Jobs</th>
-              <th className="font-semibold">Gross</th>
-              <th className="font-semibold">Net</th>
-              <th className="font-semibold">Status</th>
-              <th className="font-semibold">Transfer ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payouts.map((item) => (
-              <tr className="border-t" key={item.id}>
-                <td className="p-3">{item.cleaner?.full_name}</td>
-                <td>
-                  {item.period_start} – {item.period_end}
-                </td>
-                <td>{item.total_jobs}</td>
-                <td>{formatMoney(item.gross_amount)}</td>
-                <td className="font-semibold">
-                  {formatMoney(item.net_amount)}
-                </td>
-                <td className="capitalize">{item.status}</td>
-                <td className="font-mono text-xs">
-                  {item.stripe_transfer_id ?? "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <PayoutsTable payouts={payouts} />
     </div>
   );
 }

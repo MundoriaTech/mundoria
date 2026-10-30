@@ -1,4 +1,11 @@
+"use client";
+
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
 import { activityEventLabel } from "@/lib/analytics/user-activity";
+import { PAGE_SIZES } from "@/lib/pagination";
 
 export type UserActivityRow = {
   created_at: string;
@@ -13,6 +20,11 @@ export function UserActivityTimeline({
 }: {
   events: UserActivityRow[];
 }) {
+  const { page, pageItems, setPage, totalItems } = usePagedItems(
+    events,
+    PAGE_SIZES.app,
+  );
+
   return (
     <section className="rounded-xl border bg-card p-4 sm:p-5">
       <h2 className="font-semibold">Activity after signup</h2>
@@ -20,7 +32,7 @@ export function UserActivityTimeline({
         What this person did on Mundoria after creating an account.
       </p>
       <div className="mt-4 space-y-3">
-        {events.map((event) => (
+        {pageItems.map((event) => (
           <div
             className="flex gap-3 border-b border-border/60 pb-3 last:border-0 last:pb-0"
             key={event.id}
@@ -43,6 +55,13 @@ export function UserActivityTimeline({
           </p>
         ) : null}
       </div>
+      <ClientPagination
+        className="mt-4"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.app}
+        totalItems={totalItems}
+      />
     </section>
   );
 }
