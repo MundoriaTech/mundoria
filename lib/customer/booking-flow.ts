@@ -335,13 +335,9 @@ export function getFlowSteps(
 ): BookingFlowStepId[] {
   const steps: BookingFlowStepId[] = [];
 
-  // Generic “Book now” / category entry: pick the service first.
-  // Service deep links already know what they need — skip straight to address.
-  if (options?.entryLock !== "service") {
-    steps.push("service");
-  }
-
-  // Address + rooms + other needs + duration share one step.
+  // Address + (optional) service picker + rooms + other needs + duration share
+  // one step. Generic Book now / category entry shows “What do you need?” first
+  // on this page; service deep links hide the picker.
   steps.push("address");
 
   // After the address, offer cleaners this customer has already finished a visit with.

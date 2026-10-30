@@ -1388,7 +1388,6 @@ export function BookingWizard({
         return draft.rebookCleanerChoice === "same" || draft.rebookCleanerChoice === "new";
       case "category":
       case "service":
-        return Boolean(draft.serviceType);
       case "address": {
         // Require a resolvable address — not just a stale addressId in storage.
         const addressReady = Boolean(selectedAddress);
@@ -1632,20 +1631,9 @@ export function BookingWizard({
           suggestion={historySuggestion}
         />
       ) : null}
-      {stepId === "category" || stepId === "service" ? (
-        <ServicePickerStep
-          focusServices={focusServices}
-          lockedCategory={
-            entryLock === "category" ? draft.serviceCategory : null
-          }
-          onSelectService={(serviceType) =>
-            selectService(serviceType, { advance: true })
-          }
-          selectedCategory={draft.serviceCategory}
-          selectedService={draft.serviceType}
-        />
-      ) : null}
-      {stepId === "address" ? (
+      {stepId === "address" ||
+      stepId === "category" ||
+      stepId === "service" ? (
         <AddressStep
           addresses={userId ? addresses : []}
           bathrooms={draft.numBathrooms}
@@ -1657,11 +1645,20 @@ export function BookingWizard({
               : null
           }
           durationHours={draft.estimatedDurationHours}
+          focusServices={focusServices}
           localOnly={!userId}
+          lockedCategory={
+            entryLock === "category" ? draft.serviceCategory : null
+          }
           onBathrooms={(value) => update("numBathrooms", value)}
           onBedrooms={(value) => update("numBedrooms", value)}
           onDurationChange={(value) =>
             update("estimatedDurationHours", value)
+          }
+          onSelectService={
+            entryLock === "service"
+              ? undefined
+              : (serviceType) => selectService(serviceType)
           }
           update={update}
           onSelect={(addressId) => {
@@ -2332,10 +2329,9 @@ function withHistoryStep(steps: BookingFlowStepId[], include: boolean) {
 
 function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
   switch (stepId) {
+    case "address":
     case "category":
-    case "service":
-      return Boolean(draft.serviceType);
-    case "address": {
+    case "service": {
       const category =
         draft.serviceType != null
           ? serviceDefinition(draft.serviceType).category
@@ -2512,109 +2508,123 @@ function AddressStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        {proName
-          ? `Where should ${proName} clean?`
-          : "Where will your cleaning take place?"}
-      </h2>
-      <p className="mt-2 flex items-start gap-2 text-sm leading-6 text-[#5a5470]">
-        <MapPin
-          aria-hidden
-          className="mt-0.5 h-4 w-4 shrink-0 text-[#6a45b8]"
+      {onSelectService ? (
+        <ServicePickerStep
+          focusServices={focusServices}
+          lockedCategory={lockedCategory}
+          onSelectService={onSelectService}
+          selectedCategory={selectedCategory}
+          selectedService={selectedService}
         />
-        <span>
-          Enter as{" "}
-          <strong className="font-semibold text-[#1c133b]">number</strong>,
-          street, city, postcode, then pick a suggestion.
-        </span>
-      </p>
-
-      <div className="relative z-20 mt-8">
-        <AddressForm
-          address={selectedSaved}
-          compact
-          localOnly={localOnly}
-          onClearSelection={() => onSelect(null)}
-          onSaved={(address) => {
-            onSaved(address);
-          }}
-          userId={userId ?? undefined}
-        />
-      </div>
-
-      {signedIn && addresses.length > 0 ? (
-        <div className="mt-6">
-          {collapsibleSaved ? (
-            <button
-              aria-controls="saved-addresses-panel"
-              aria-expanded={savedOpen}
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-transparent bg-white px-4 py-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]"
-              onClick={() => setSavedOpen((open) => !open)}
-              type="button"
-            >
-              <span className="min-w-0">
-                <span className="block text-base font-semibold text-[#1c133b] sm:text-[1.05rem]">
-                  {savedOpen
-                    ? "My saved addresses"
-                    : "View my saved addresses"}
-                </span>
-                <span className="mt-0.5 block text-sm text-[#5a5470]">
-                  {addresses.length}{" "}
-                  {addresses.length === 1 ? "place" : "places"}
-                </span>
-              </span>
-              {savedOpen ? (
-                <ChevronUp className="h-5 w-5 shrink-0 text-[#6a45b8]" />
-              ) : (
-                <ChevronDown className="h-5 w-5 shrink-0 text-[#6a45b8]" />
-              )}
-            </button>
-          ) : (
-            <p className="mb-3 text-sm font-semibold text-[#1c133b]">
-              Saved address
-            </p>
-          )}
-
-          {!collapsibleSaved || savedOpen ? (
-            <div
-              className={cn("grid gap-3", collapsibleSaved && "mt-3")}
-              id="saved-addresses-panel"
-            >
-              {addresses.map((address) => {
-                const active = selectedId === address.id;
-                return (
-                  <button
-                    className={cn(
-                      "rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]",
-                      active &&
-                        "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
-                    )}
-                    key={address.id}
-                    onClick={() => {
-                      onSelect(address.id);
-                      if (collapsibleSaved) setSavedOpen(false);
-                    }}
-                    type="button"
-                  >
-                    <p className="font-semibold text-[#1c133b]">
-                      {address.label ?? "Saved address"}
-                      {address.is_default ? (
-                        <span className="ml-2 text-xs font-medium text-[#6a45b8]">
-                          Default
-                        </span>
-                      ) : null}
-                    </p>
-                    <p className="mt-1 break-words text-sm text-[#5a5470]">
-                      {address.address_line_1}, {address.city},{" "}
-                      {address.postcode}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
-        </div>
       ) : null}
+
+      <div
+        className={cn(onSelectService && "mt-10 border-t border-[#eeeef1] pt-8")}
+      >
+        <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+          {proName
+            ? `Where should ${proName} clean?`
+            : "Where will your cleaning take place?"}
+        </h2>
+        <p className="mt-2 flex items-start gap-2 text-sm leading-6 text-[#5a5470]">
+          <MapPin
+            aria-hidden
+            className="mt-0.5 h-4 w-4 shrink-0 text-[#6a45b8]"
+          />
+          <span>
+            Enter as{" "}
+            <strong className="font-semibold text-[#1c133b]">number</strong>,
+            street, city, postcode, then pick a suggestion.
+          </span>
+        </p>
+
+        <div className="relative z-20 mt-8">
+          <AddressForm
+            address={selectedSaved}
+            compact
+            localOnly={localOnly}
+            onClearSelection={() => onSelect(null)}
+            onSaved={(address) => {
+              onSaved(address);
+            }}
+            userId={userId ?? undefined}
+          />
+        </div>
+
+        {signedIn && addresses.length > 0 ? (
+          <div className="mt-6">
+            {collapsibleSaved ? (
+              <button
+                aria-controls="saved-addresses-panel"
+                aria-expanded={savedOpen}
+                className="flex w-full items-center justify-between gap-3 rounded-2xl border border-transparent bg-white px-4 py-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]"
+                onClick={() => setSavedOpen((open) => !open)}
+                type="button"
+              >
+                <span className="min-w-0">
+                  <span className="block text-base font-semibold text-[#1c133b] sm:text-[1.05rem]">
+                    {savedOpen
+                      ? "My saved addresses"
+                      : "View my saved addresses"}
+                  </span>
+                  <span className="mt-0.5 block text-sm text-[#5a5470]">
+                    {addresses.length}{" "}
+                    {addresses.length === 1 ? "place" : "places"}
+                  </span>
+                </span>
+                {savedOpen ? (
+                  <ChevronUp className="h-5 w-5 shrink-0 text-[#6a45b8]" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 shrink-0 text-[#6a45b8]" />
+                )}
+              </button>
+            ) : (
+              <p className="mb-3 text-sm font-semibold text-[#1c133b]">
+                Saved address
+              </p>
+            )}
+
+            {!collapsibleSaved || savedOpen ? (
+              <div
+                className={cn("grid gap-3", collapsibleSaved && "mt-3")}
+                id="saved-addresses-panel"
+              >
+                {addresses.map((address) => {
+                  const active = selectedId === address.id;
+                  return (
+                    <button
+                      className={cn(
+                        "rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-[0_8px_24px_rgba(28,19,59,0.06)] transition hover:bg-[#f8f5ff]",
+                        active &&
+                          "border-2 border-[#6a45b8] bg-white shadow-[0_12px_32px_rgba(28,19,59,0.08)]",
+                      )}
+                      key={address.id}
+                      onClick={() => {
+                        onSelect(address.id);
+                        if (collapsibleSaved) setSavedOpen(false);
+                      }}
+                      type="button"
+                    >
+                      <p className="font-semibold text-[#1c133b]">
+                        {address.label ?? "Saved address"}
+                        {address.is_default ? (
+                          <span className="ml-2 text-xs font-medium text-[#6a45b8]">
+                            Default
+                          </span>
+                        ) : null}
+                      </p>
+                      <p className="mt-1 break-words text-sm text-[#5a5470]">
+                        {address.address_line_1}, {address.city},{" "}
+                        {address.postcode}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
 
       {showHomeRooms ? (
         <div className="mt-10 border-t border-[#eeeef1] pt-8">
@@ -2640,18 +2650,6 @@ function AddressStep({
               value={bathrooms}
             />
           </div>
-        </div>
-      ) : null}
-
-      {onSelectService ? (
-        <div className="mt-10 border-t border-[#eeeef1] pt-8">
-          <ServicePickerStep
-            focusServices={focusServices}
-            lockedCategory={lockedCategory}
-            onSelectService={onSelectService}
-            selectedCategory={selectedCategory}
-            selectedService={selectedService}
-          />
         </div>
       ) : null}
 
