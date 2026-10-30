@@ -107,10 +107,7 @@ export type ServiceCardLocation =
   | { kind: "place"; slug: string };
 
 /** Always the main service page — area pages link here; service pages link to areas. */
-export function serviceCardHref(
-  serviceSlug: string,
-  _location?: ServiceCardLocation,
-) {
+export function serviceCardHref(serviceSlug: string) {
   return `/cleaning/${serviceSlug}`;
 }
 

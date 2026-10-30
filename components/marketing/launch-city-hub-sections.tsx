@@ -174,7 +174,7 @@ export async function LaunchCityHubSections({
             {categoryServices.map((service) => (
               <CategoryServiceCard
                 bookingHref={bookingHref}
-                href={serviceCardHref(service.slug, serviceCardLocation)}
+                href={serviceCardHref(service.slug)}
                 image={marketingServiceCardImage(service)}
                 key={service.slug}
                 label={`${service.label} in ${place}`}
