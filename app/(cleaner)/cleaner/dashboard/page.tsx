@@ -199,9 +199,18 @@ export default async function CleanerDashboardPage() {
             }
             photoSrc={sessionPhotoForService(nextJob.service_type)}
             statusLabel={
-              nextJob.status === "matched" ? "Offer pending" : "Confirmed"
+              nextJob.status === "matched"
+                ? "Offer pending"
+                : nextJob.status === "awaiting_payment"
+                  ? "Confirming payment"
+                  : "Confirmed"
             }
-            statusTone={nextJob.status === "matched" ? "waiting" : "confirmed"}
+            statusTone={
+              nextJob.status === "matched" ||
+              nextJob.status === "awaiting_payment"
+                ? "waiting"
+                : "confirmed"
+            }
             title={formatServiceName(nextJob.service_type)}
           />
         ) : (

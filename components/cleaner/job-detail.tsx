@@ -385,6 +385,13 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
               </Button>
             </>
           ) : null}
+          {job.status === "awaiting_payment" ? (
+            <p className="text-sm leading-6 text-muted-foreground">
+              You accepted this job. Mundoria is securing the customer payment
+              before the visit is fully confirmed. You&apos;ll be notified when
+              it&apos;s locked in.
+            </p>
+          ) : null}
           {job.status === "confirmed" ? (
             <>
               <Button disabled={working} onClick={() => void action("en_route")}>

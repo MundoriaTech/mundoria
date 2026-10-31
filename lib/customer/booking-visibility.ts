@@ -9,12 +9,14 @@ export function isWaitingForCleanerAcceptance(status: BookingStatus): boolean {
 export function customerWaitingLabel(status: BookingStatus): string | null {
   if (status === "pending_match") return "Looking for a cleaner";
   if (status === "matched") return "Waiting for confirmation";
+  if (status === "awaiting_payment") return "Confirming payment";
   return null;
 }
 
 /** Cleaner identity / messaging is only shown after acceptance. */
 export function isCleanerVisibleToCustomer(status: BookingStatus): boolean {
   return (
+    status === "awaiting_payment" ||
     status === "confirmed" ||
     status === "cleaner_en_route" ||
     status === "in_progress" ||

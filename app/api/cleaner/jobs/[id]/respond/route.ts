@@ -2,14 +2,13 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { sendBrandedEmail } from "@/lib/email/send-email";
 import {
   activateEmergencyList,
   markReservePromoted,
   notifyCustomerCleanerChanged,
 } from "@/lib/matching/emergency-list";
 import { sendPushNotification } from "@/lib/notifications/send";
-import { maybeAuthorizeBookingIfDue } from "@/lib/payments/lifecycle";
+import { onCleanerAcceptedForPayment } from "@/lib/payments/preauth-flow";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({ response: z.enum(["accepted", "declined"]) });
@@ -64,7 +63,7 @@ export async function POST(
 
     const { data: booking } = await admin
       .from("bookings")
-      .update({ cleaner_id: user.id, status: "confirmed" })
+      .update({ cleaner_id: user.id })
       .eq("id", bookingId)
       .in("status", ["pending_match", "matched"])
       .or(`cleaner_id.is.null,cleaner_id.eq.${user.id}`)
@@ -87,8 +86,10 @@ export async function POST(
       reasons: { source: "cleaner_job_feed" },
     });
 
-    // If the visit is already inside the pre-auth window, hold now.
-    await maybeAuthorizeBookingIfDue(bookingId).catch(() => undefined);
+    // Provisional accept → awaiting_payment → authorize (or schedule) → confirmed.
+    const authResult = await onCleanerAcceptedForPayment(bookingId).catch(
+      () => null,
+    );
 
     const { data: onList } = await admin
       .from("booking_emergency_list")
@@ -127,8 +128,10 @@ export async function POST(
         previousName,
         cleanerName,
       );
-    } else {
-      await notifyCustomerSessionConfirmed(bookingId, booking, cleanerName);
+    } else if (authResult?.authorized) {
+      // Full confirmation emails/pushes are sent from promoteToConfirmed.
+    } else if (!authResult?.cancelled) {
+      await notifyCustomerProvisionalAccept(bookingId, booking, cleanerName);
     }
   }
 
@@ -177,7 +180,9 @@ export async function POST(
 
     const wasAssigned =
       booking?.cleaner_id === user.id &&
-      ["matched", "confirmed", "cleaner_en_route"].includes(booking.status);
+      ["matched", "awaiting_payment", "confirmed", "cleaner_en_route"].includes(
+        booking.status,
+      );
 
     await admin
       .from("booking_emergency_list")
@@ -211,79 +216,27 @@ export async function POST(
   return NextResponse.json({ success: true });
 }
 
-async function notifyCustomerSessionConfirmed(
+async function notifyCustomerProvisionalAccept(
   bookingId: string,
-  booking: {
-    customer_id: string;
-    scheduled_date: string;
-    scheduled_start_time: string;
-    service_type: string;
-    address:
-      | { address_line_1?: string; city?: string; postcode?: string }
-      | { address_line_1?: string; city?: string; postcode?: string }[]
-      | null;
-    customer:
-      | {
-          email?: string | null;
-          full_name?: string | null;
-          notification_preferences?: { email?: boolean } | null;
-        }
-      | {
-          email?: string | null;
-          full_name?: string | null;
-          notification_preferences?: { email?: boolean } | null;
-        }[]
-      | null;
-  },
+  booking: { customer_id: string },
   cleanerName: string,
 ) {
   const firstName = cleanerName.split(" ")[0] || "Your cleaner";
   const admin = createAdminClient();
-  const address = Array.isArray(booking.address)
-    ? booking.address[0]
-    : booking.address;
-  const customer = Array.isArray(booking.customer)
-    ? booking.customer[0]
-    : booking.customer;
-  const preferences = customer?.notification_preferences as
-    | { email?: boolean }
-    | undefined;
 
   await Promise.all([
     sendPushNotification(
       booking.customer_id,
-      "Your session is confirmed",
-      `${firstName} has accepted your booking.`,
+      "Cleaner accepted — confirming payment",
+      `${firstName} accepted. We’re securing payment to confirm your visit.`,
       { booking_id: bookingId },
     ),
     admin.from("notifications").insert({
-      body: `${firstName} has accepted your booking.`,
+      body: `${firstName} accepted. We’re securing payment to confirm your visit.`,
       data: { booking_id: bookingId },
-      title: "Your session is confirmed",
-      type: "session_confirmed",
+      title: "Cleaner accepted — confirming payment",
+      type: "session_pending_payment",
       user_id: booking.customer_id,
     }),
   ]);
-
-  if (!customer?.email || preferences?.email === false) return;
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  await sendBrandedEmail({
-    data: {
-      address: address
-        ? `${address.address_line_1}, ${address.city}, ${address.postcode}`
-        : undefined,
-      appUrl,
-      bookingId,
-      bookingUrl: `${appUrl}/booking/${bookingId}`,
-      cleanerName,
-      firstName: customer.full_name?.split(" ")[0],
-      fullName: customer.full_name,
-      scheduledDate: booking.scheduled_date,
-      scheduledTime: booking.scheduled_start_time?.slice(0, 5),
-      serviceName: String(booking.service_type).replaceAll("_", " "),
-    },
-    template: "customer.session_confirmed",
-    to: customer.email,
-  });
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { AuthSignupLegal } from "@/components/auth/auth-signup-legal";
@@ -40,18 +40,21 @@ const RETURN_PATH = BOOKING_CHECKOUT_RETURN_PATH;
 
 export function BookingAuthPrompt({
   hideTitle = false,
+  initialEmail = "",
   initialVerifyPending = false,
   mode,
   onModeChange,
 }: {
   hideTitle?: boolean;
+  /** Prefill from the date-step “Where should we send your booking?” field. */
+  initialEmail?: string;
   /** Landing from email-confirmation signup — open sign-in with success copy. */
   initialVerifyPending?: boolean;
   mode: BookingAuthMode;
   onModeChange: (mode: BookingAuthMode) => void;
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => initialEmail.trim().toLowerCase());
   const [fullName, setFullName] = useState("");
   const [nationalNumber, setNationalNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -62,7 +65,13 @@ export function BookingAuthPrompt({
     initialVerifyPending ? SIGNUP_VERIFY_MESSAGE : null,
   );
   const [busy, setBusy] = useState(false);
+  const autoResolvedRef = useRef(false);
   const passwordReady = passwordMeetsRequirements(password);
+
+  useEffect(() => {
+    const trimmed = initialEmail.trim().toLowerCase();
+    if (trimmed && trimmed !== email) setEmail(trimmed);
+  }, [email, initialEmail]);
 
   useEffect(() => {
     if (!initialVerifyPending) return;
@@ -80,16 +89,15 @@ export function BookingAuthPrompt({
     onModeChange(next);
   }
 
-  async function continueWithEmail(event: React.FormEvent) {
-    event.preventDefault();
-    setMessage(null);
-    const trimmed = email.trim().toLowerCase();
+  async function resolveEmail(rawEmail: string) {
+    const trimmed = rawEmail.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       setMessage("Enter a valid email address.");
       return;
     }
     setEmail(trimmed);
     setBusy(true);
+    setMessage(null);
     try {
       const response = await fetch("/api/auth/email-status", {
         body: JSON.stringify({ email: trimmed }),
@@ -124,6 +132,26 @@ export function BookingAuthPrompt({
     } finally {
       setBusy(false);
     }
+  }
+
+  useEffect(() => {
+    autoResolvedRef.current = false;
+  }, [initialEmail]);
+
+  // Date-step email already collected — skip re-asking and open create/sign-in.
+  // If the customer taps “edit email”, autoResolvedRef stays true so ask stays editable.
+  useEffect(() => {
+    if (mode !== "ask" || autoResolvedRef.current) return;
+    const trimmed = initialEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+    autoResolvedRef.current = true;
+    void resolveEmail(trimmed);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot from date-step email
+  }, [mode, initialEmail]);
+
+  async function continueWithEmail(event: React.FormEvent) {
+    event.preventDefault();
+    await resolveEmail(email);
   }
 
   async function createAccount(event: React.FormEvent) {
@@ -275,39 +303,50 @@ export function BookingAuthPrompt({
 
       {mode === "ask" ? (
         <div className={cn("space-y-4", !hideTitle && "mt-6")}>
-          <form className="space-y-3" onSubmit={(event) => void continueWithEmail(event)}>
-            <FormField htmlFor="booking-auth-email" label="Email">
-              <Input
-                autoComplete="email"
-                id="booking-auth-email"
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder=" "
-                type="email"
-                value={email}
+          {busy && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? (
+            <p className="text-sm leading-6 text-muted-foreground">
+              Checking {email}…
+            </p>
+          ) : (
+            <>
+              <form
+                className="space-y-3"
+                onSubmit={(event) => void continueWithEmail(event)}
+              >
+                <FormField htmlFor="booking-auth-email" label="Email" plain>
+                  <Input
+                    autoComplete="email"
+                    id="booking-auth-email"
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder=" "
+                    type="email"
+                    value={email}
+                  />
+                </FormField>
+                <Button className="h-11 w-full" disabled={busy} type="submit">
+                  {busy ? "Checking…" : "Continue"}
+                </Button>
+              </form>
+
+              <OAuthButton
+                label="Use Google"
+                next={RETURN_PATH}
+                onBeforeRedirect={() => {
+                  markBookingAuthReturn();
+                  rememberBookingCheckoutStep();
+                }}
+                role="customer"
               />
-            </FormField>
-            <Button className="h-11 w-full" disabled={busy} type="submit">
-              {busy ? "Checking…" : "Continue"}
-            </Button>
-          </form>
 
-          <OAuthButton
-            label="Use Google"
-            next={RETURN_PATH}
-            onBeforeRedirect={() => {
-              markBookingAuthReturn();
-              rememberBookingCheckoutStep();
-            }}
-            role="customer"
-          />
-
-          <button
-            className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setMode("signin")}
-            type="button"
-          >
-            I already have an account
-          </button>
+              <button
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => setMode("signin")}
+                type="button"
+              >
+                I already have an account
+              </button>
+            </>
+          )}
         </div>
       ) : null}
 

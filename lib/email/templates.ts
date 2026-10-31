@@ -36,6 +36,7 @@ export type EmailTemplateId =
   | "customer.booking_cancelled"
   | "customer.booking_completed"
   | "customer.booking_confirmed"
+  | "customer.booking_incomplete"
   | "customer.checklist_confirmation"
   | "customer.cleaner_checked_in"
   | "customer.cleaner_checked_out"
@@ -226,6 +227,21 @@ function resolveTemplate(
         ],
         subject: "Your Mundoria booking is confirmed",
         title: "Booking confirmed",
+        tone: "customer",
+      };
+    case "customer.booking_incomplete":
+      return {
+        body:
+          "You started a Mundoria booking but didn’t finish. Your details are still saved — pick up where you left off in one tap.",
+        buttonHref: string(data.resumeUrl) || string(data.bookingUrl),
+        buttonLabel: "Finish your booking",
+        cards: bookingCards(data),
+        intro: firstName
+          ? `Hi ${firstName}, your booking is almost ready.`
+          : "Your booking is almost ready.",
+        preview: "Finish your Mundoria booking.",
+        subject: "Finish your Mundoria booking",
+        title: "Still want this clean?",
         tone: "customer",
       };
     case "customer.cleaner_matched":

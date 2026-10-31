@@ -5,6 +5,7 @@ import type { BookingStatus } from "@/types/customer";
 const statusStyles: Record<BookingStatus, string> = {
   pending_match: "bg-amber-100 text-amber-800",
   matched: "bg-amber-100 text-amber-800",
+  awaiting_payment: "bg-amber-100 text-amber-800",
   confirmed: "bg-indigo-100 text-indigo-800",
   cleaner_en_route: "bg-violet-100 text-violet-800",
   in_progress: "bg-cyan-100 text-cyan-800",
@@ -18,6 +19,7 @@ const statusStyles: Record<BookingStatus, string> = {
 const statusLabels: Record<BookingStatus, string> = {
   pending_match: "Looking for a cleaner",
   matched: "Waiting for confirmation",
+  awaiting_payment: "Confirming payment",
   confirmed: "Confirmed",
   cleaner_en_route: "En route",
   in_progress: "In progress",

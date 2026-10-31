@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 
 import { isAuthorizedCron } from "@/lib/cron/auth";
 import { processDuePreauths } from "@/lib/payments/lifecycle";
+import {
+  processDuePaymentAuthAttempts,
+  processPaymentAuthDeadlines,
+} from "@/lib/payments/preauth-flow";
 
 /**
- * Places manual-capture holds on bookings that have a confirmed cleaner and
- * are inside the admin-configured pre-auth window (default T−24h).
+ * Auth retries for awaiting_payment bookings, T−24h unpaid cancel,
+ * plus legacy pre-auth for confirmed unpaid visits.
  */
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
@@ -13,8 +17,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await processDuePreauths();
-    return NextResponse.json(result);
+    const [attempts, deadlines, legacy] = await Promise.all([
+      processDuePaymentAuthAttempts(),
+      processPaymentAuthDeadlines(),
+      processDuePreauths(),
+    ]);
+    return NextResponse.json({ attempts, deadlines, legacy });
   } catch (error) {
     return NextResponse.json(
       {

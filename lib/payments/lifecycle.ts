@@ -13,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
 const PREAUTH_STATUSES = [
+  "awaiting_payment",
   "confirmed",
   "cleaner_en_route",
   "in_progress",
@@ -28,6 +29,7 @@ const PREAUTH_CANCEL_REASON =
   "We could not place a payment hold on your card, so this booking was cancelled free of charge. Update your payment method and book again when you are ready.";
 
 export type PaymentTimingSettings = {
+  payment_auth_open_hours_before: number;
   payment_preauth_hours_before: number;
   payment_capture_hour_uk: number;
   payment_capture_minute_uk: number;
@@ -38,11 +40,12 @@ export async function getPaymentTimingSettings(): Promise<PaymentTimingSettings>
   const { data } = await admin
     .from("platform_settings")
     .select(
-      "payment_preauth_hours_before,payment_capture_hour_uk,payment_capture_minute_uk",
+      "payment_auth_open_hours_before,payment_preauth_hours_before,payment_capture_hour_uk,payment_capture_minute_uk",
     )
     .eq("id", true)
     .maybeSingle();
   return {
+    payment_auth_open_hours_before: data?.payment_auth_open_hours_before ?? 48,
     payment_capture_hour_uk: data?.payment_capture_hour_uk ?? 10,
     payment_capture_minute_uk: data?.payment_capture_minute_uk ?? 0,
     payment_preauth_hours_before: data?.payment_preauth_hours_before ?? 24,
@@ -135,9 +138,18 @@ export async function confirmBookingSetupIntentWithSavedCard({
 /**
  * Off-session manual-capture PaymentIntent using the saved card.
  * Sets payment_status to held when requires_capture / succeeded.
+ * When `allowAwaitingPayment` is set, failures are returned to the caller
+ * (retry orchestrator) instead of immediately cancelling the booking.
  */
-export async function authorizeBookingPayment(bookingId: string): Promise<{
+export async function authorizeBookingPayment(
+  bookingId: string,
+  options?: {
+    allowAwaitingPayment?: boolean;
+    attemptNumber?: number;
+  },
+): Promise<{
   authorized: boolean;
+  declineCode?: string;
   intentId?: string;
   reason?: string;
   requiresAction?: boolean;
@@ -169,7 +181,7 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
   if (!PREAUTH_STATUSES.includes(booking.status as (typeof PREAUTH_STATUSES)[number])) {
     return {
       authorized: false,
-      reason: "Cleaner has not confirmed this booking yet.",
+      reason: "Cleaner has not accepted this booking yet.",
     };
   }
   if (!booking.cleaner_id) {
@@ -180,6 +192,10 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
   if (amount < 100) {
     return { authorized: false, reason: "Invalid booking amount." };
   }
+
+  const deferFailure =
+    Boolean(options?.allowAwaitingPayment) &&
+    booking.status === "awaiting_payment";
 
   const { data: profile } = await admin
     .from("profiles")
@@ -215,6 +231,20 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
           .eq("id", bookingId);
         return { authorized: true, intentId: existing.id };
       }
+      // Cancel a stale non-held intent so the next attempt can create a fresh one.
+      if (
+        existing.status === "requires_payment_method" ||
+        existing.status === "requires_confirmation" ||
+        existing.status === "canceled"
+      ) {
+        try {
+          if (existing.status !== "canceled") {
+            await getStripe().paymentIntents.cancel(existing.id);
+          }
+        } catch {
+          // Continue with a new intent.
+        }
+      }
     } catch {
       // Fall through to create a fresh intent.
     }
@@ -222,11 +252,14 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
 
   if (!paymentMethodId || !profile?.stripe_customer_id) {
     const reason = "No saved payment method on this booking.";
-    await markPreauthFailure(bookingId, booking.customer_id, reason);
+    if (!deferFailure) {
+      await markPreauthFailure(bookingId, booking.customer_id, reason);
+    }
     return { authorized: false, reason };
   }
 
   const stripe = getStripe();
+  const attemptNumber = Math.max(1, options?.attemptNumber ?? 1);
   try {
     const intent = await stripe.paymentIntents.create(
       {
@@ -236,13 +269,19 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
         currency: "gbp",
         customer: profile.stripe_customer_id,
         metadata: {
+          attempt_number: String(attemptNumber),
           booking_id: bookingId,
           supabase_user_id: booking.customer_id,
         },
         off_session: true,
         payment_method: paymentMethodId,
       },
-      { idempotencyKey: `preauth_${bookingId}_${amount}`.slice(0, 255) },
+      {
+        idempotencyKey: `preauth_${bookingId}_${attemptNumber}_${amount}`.slice(
+          0,
+          255,
+        ),
+      },
     );
 
     if (intent.status === "requires_action") {
@@ -255,13 +294,16 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
       try {
         await stripe.paymentIntents.cancel(intent.id);
       } catch {
-        // Booking cancel still proceeds even if the PI cannot be cancelled.
+        // Continue — caller decides cancel vs retry.
       }
-      await markPreauthFailure(bookingId, booking.customer_id, reason, {
-        intentId: intent.id,
-      });
+      if (!deferFailure) {
+        await markPreauthFailure(bookingId, booking.customer_id, reason, {
+          intentId: intent.id,
+        });
+      }
       return {
         authorized: false,
+        declineCode: "authentication_required",
         intentId: intent.id,
         reason,
         requiresAction: true,
@@ -273,9 +315,16 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
       intent.status !== "succeeded"
     ) {
       const reason = `Pre-authorisation ended in status ${intent.status}.`;
-      await markPreauthFailure(bookingId, booking.customer_id, reason, {
-        intentId: intent.id,
-      });
+      if (!deferFailure) {
+        await markPreauthFailure(bookingId, booking.customer_id, reason, {
+          intentId: intent.id,
+        });
+      } else {
+        await admin
+          .from("bookings")
+          .update({ stripe_payment_intent_id: intent.id })
+          .eq("id", bookingId);
+      }
       return { authorized: false, intentId: intent.id, reason };
     }
 
@@ -293,18 +342,28 @@ export async function authorizeBookingPayment(bookingId: string): Promise<{
 
     return { authorized: true, intentId: intent.id };
   } catch (error) {
+    const stripeError =
+      error && typeof error === "object" && "code" in error
+        ? (error as { code?: string; decline_code?: string; message?: string })
+        : null;
     const reason =
-      error instanceof Error
+      stripeError?.message ||
+      (error instanceof Error
         ? error.message
-        : "Card pre-authorisation failed.";
-    await markPreauthFailure(bookingId, booking.customer_id, reason);
-    return { authorized: false, reason };
+        : "Card pre-authorisation failed.");
+    const declineCode =
+      stripeError?.decline_code || stripeError?.code || undefined;
+    if (!deferFailure) {
+      await markPreauthFailure(bookingId, booking.customer_id, reason);
+    }
+    return { authorized: false, declineCode, reason };
   }
 }
 
 /**
- * Pre-auth when a cleaner is confirmed and the visit is inside the
- * configurable T−N window (or already past that window).
+ * Pre-auth when a cleaner is assigned and the visit is inside the
+ * auth-open window (default T−48h). Awaiting-payment bookings use the
+ * retry orchestrator so soft declines do not cancel immediately.
  */
 export async function maybeAuthorizeBookingIfDue(bookingId: string) {
   const settings = await getPaymentTimingSettings();
@@ -325,10 +384,17 @@ export async function maybeAuthorizeBookingIfDue(bookingId: string) {
     return { authorized: false, reason: "No cleaner assigned." };
   }
   if (!PREAUTH_STATUSES.includes(booking.status as (typeof PREAUTH_STATUSES)[number])) {
-    return { authorized: false, reason: "Cleaner not confirmed." };
+    return { authorized: false, reason: "Cleaner not accepted." };
   }
   if (!booking.stripe_payment_method_id) {
     return { authorized: false, reason: "No payment method." };
+  }
+
+  if (booking.status === "awaiting_payment") {
+    const { runAuthorizationAttempt } = await import(
+      "@/lib/payments/preauth-flow"
+    );
+    return runAuthorizationAttempt(bookingId, { force: true });
   }
 
   const start = bookingStartUtc(
@@ -341,10 +407,11 @@ export async function maybeAuthorizeBookingIfDue(bookingId: string) {
 
   const hoursUntil =
     (start.getTime() - Date.now()) / (1000 * 60 * 60);
-  if (hoursUntil > settings.payment_preauth_hours_before) {
+  const openHours = settings.payment_auth_open_hours_before;
+  if (hoursUntil > openHours) {
     return {
       authorized: false,
-      reason: `Pre-auth opens ${settings.payment_preauth_hours_before}h before the visit.`,
+      reason: `Pre-auth opens ${openHours}h before the visit.`,
     };
   }
 
@@ -369,12 +436,16 @@ export async function scheduleNextDayCapture(bookingId: string) {
   return captureAt;
 }
 
-/** Cron: pre-authorise bookings that entered the T−N window with a confirmed cleaner. */
+/**
+ * Cron safety net: pre-authorise confirmed/in-progress unpaid bookings
+ * inside the auth-open window. Awaiting-payment retries are handled by
+ * processDuePaymentAuthAttempts.
+ */
 export async function processDuePreauths(limit = 50) {
   const settings = await getPaymentTimingSettings();
   const admin = createAdminClient();
-  const horizonMs =
-    settings.payment_preauth_hours_before * 60 * 60 * 1000 + 60 * 60 * 1000;
+  const openHours = settings.payment_auth_open_hours_before;
+  const horizonMs = openHours * 60 * 60 * 1000 + 60 * 60 * 1000;
   const horizonDate = new Date(Date.now() + horizonMs);
   const horizonDay = horizonDate.toISOString().slice(0, 10);
 
@@ -384,7 +455,7 @@ export async function processDuePreauths(limit = 50) {
       "id,scheduled_date,scheduled_start_time,status,cleaner_id,stripe_payment_method_id",
     )
     .eq("payment_status", "unpaid")
-    .in("status", [...PREAUTH_STATUSES])
+    .in("status", ["confirmed", "cleaner_en_route", "in_progress"])
     .not("cleaner_id", "is", null)
     .not("stripe_payment_method_id", "is", null)
     .lte("scheduled_date", horizonDay)
@@ -406,7 +477,7 @@ export async function processDuePreauths(limit = 50) {
     }
     const hoursUntil =
       (start.getTime() - Date.now()) / (1000 * 60 * 60);
-    if (hoursUntil > settings.payment_preauth_hours_before) {
+    if (hoursUntil > openHours) {
       skipped += 1;
       continue;
     }

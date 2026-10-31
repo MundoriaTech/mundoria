@@ -69,6 +69,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           {[
             "pending_match",
             "matched",
+            "awaiting_payment",
             "confirmed",
             "cleaner_en_route",
             "in_progress",

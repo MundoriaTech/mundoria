@@ -49,6 +49,7 @@ export type RecommendationOutcome =
 export type BookingStatus =
   | "pending_match"
   | "matched"
+  | "awaiting_payment"
   | "confirmed"
   | "cleaner_en_route"
   | "in_progress"
@@ -308,4 +309,6 @@ export interface BookingDraft {
   petTypes: string[];
   promoCode: string;
   specialInstructions: string;
+  /** Prefills auth; used for incomplete-booking reminders before sign-in. */
+  contactEmail: string;
 }

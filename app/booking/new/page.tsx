@@ -106,6 +106,7 @@ export default async function NewBookingPage({
 }: {
   searchParams: {
     category?: string;
+    draft?: string;
     focus?: string;
     fresh?: string;
     cleaner?: string;
@@ -125,6 +126,7 @@ export default async function NewBookingPage({
   let addresses: Address[] = [];
   let cleaningHistory: HistoryVisit[] = [];
   let knownCleaners: KnownCleaner[] = [];
+  let customerEmail: string | null = null;
   let customerFirstName: string | null = null;
   let profileNeedsPhone = false;
   let initialDraft: Partial<BookingDraft> | undefined = draftFromSearchParams(
@@ -149,15 +151,17 @@ export default async function NewBookingPage({
         .order("is_default", { ascending: false }),
       supabase
         .from("profiles")
-        .select("full_name, phone")
+        .select("email, full_name, phone")
         .eq("id", user.id)
         .maybeSingle(),
     ]);
     addresses = (data ?? []) as Address[];
     const profileRow = profile as {
+      email?: string | null;
       full_name?: string | null;
       phone?: string | null;
     } | null;
+    customerEmail = profileRow?.email?.trim() || user.email || null;
     customerFirstName =
       profileRow?.full_name?.trim().split(/\s+/)[0] || null;
     profileNeedsPhone = !profileRow?.phone?.trim();
@@ -268,6 +272,7 @@ export default async function NewBookingPage({
   return (
     <BookingWizard
       cleaningHistory={cleaningHistory}
+      customerEmail={customerEmail}
       customerFirstName={customerFirstName}
       entryLock={
         searchParams.rebook

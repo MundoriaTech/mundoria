@@ -211,7 +211,13 @@ export async function pruneEmergencyListConflicts(bookingId: string) {
     )
     .eq("scheduled_date", booking.scheduled_date)
     .in("cleaner_id", cleanerIds)
-    .in("status", ["confirmed", "matched", "cleaner_en_route", "in_progress"])
+    .in("status", [
+      "confirmed",
+      "awaiting_payment",
+      "matched",
+      "cleaner_en_route",
+      "in_progress",
+    ])
     .neq("id", bookingId);
 
   const removed: string[] = [];

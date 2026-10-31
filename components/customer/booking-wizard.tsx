@@ -48,6 +48,7 @@ import {
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
+import { Input } from "@/components/ui/input";
 import { AppModal } from "@/components/shared/app-modal";
 import {
   nationalFromPhone,
@@ -95,6 +96,7 @@ import {
   resolveFlowStepIndex,
   type BookingFlowStepId,
 } from "@/lib/customer/booking-flow";
+import { rememberSignupEmail } from "@/lib/auth/signup-email-pending";
 import {
   BOOKING_STEP_STORAGE_KEY,
   clearBookingAuthReturn,
@@ -153,6 +155,7 @@ const blankDraft: BookingDraft = {
   addressId: null,
   alternateTimes: [],
   cleaningStandard: null,
+  contactEmail: "",
   customRecurrenceDates: [],
   estimatedDurationHours: null,
   frequencyChosen: false,
@@ -188,6 +191,31 @@ const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
 const BOOKING_STEP_KEY = BOOKING_STEP_STORAGE_KEY;
 /** Address alone — never cleared when the basket/draft is wiped. */
 const BOOKING_ADDRESS_KEY = "mundoria-booking-address-v1";
+const BOOKING_DRAFT_TOKEN_KEY = "mundoria-booking-draft-token-v1";
+
+function isValidContactEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function readDraftResumeToken() {
+  try {
+    return window.localStorage.getItem(BOOKING_DRAFT_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeDraftResumeToken(token: string | null) {
+  try {
+    if (!token) {
+      window.localStorage.removeItem(BOOKING_DRAFT_TOKEN_KEY);
+      return;
+    }
+    window.localStorage.setItem(BOOKING_DRAFT_TOKEN_KEY, token);
+  } catch {
+    // Ignore private mode.
+  }
+}
 
 /** Stops draft/step writes after abandon, checkout, or leave — reset on mount. */
 let allowBookingPersist = true;
@@ -269,6 +297,7 @@ function clearBookingStorage(keep?: Partial<StoredAddressFields>) {
       window.localStorage.removeItem(BOOKING_DRAFT_KEY);
     }
     window.localStorage.removeItem(BOOKING_STEP_KEY);
+    writeDraftResumeToken(null);
   } catch {
     // Ignore storage failures (private mode, quota, etc.).
   }
@@ -333,6 +362,7 @@ const ADD_ON_ICONS: Record<string, { Icon: Icon; className: string }> = {
 
 export function BookingWizard({
   cleaningHistory = [],
+  customerEmail = null,
   customerFirstName = null,
   entryLock = null,
   focusServices,
@@ -349,6 +379,8 @@ export function BookingWizard({
   userId,
 }: {
   cleaningHistory?: HistoryVisit[];
+  /** Signed-in customer email — prefills “Where should we send your booking?”. */
+  customerEmail?: string | null;
   /** Signed-in customer’s first name for checkout greeting. */
   customerFirstName?: string | null;
   /** Skip the category and/or service step when the customer arrived from that page. */
@@ -376,9 +408,15 @@ export function BookingWizard({
     ...blankDraft,
     ...initialDraft,
     alternateTimes: initialDraft?.alternateTimes ?? [],
+    contactEmail:
+      initialDraft?.contactEmail?.trim() ||
+      customerEmail?.trim() ||
+      "",
   });
   const [stepIndex, setStepIndex] = useState(0);
   const [hydrated, setHydrated] = useState(false);
+  const [draftResumeToken, setDraftResumeToken] = useState<string | null>(null);
+  const draftSyncTimerRef = useRef<number | null>(null);
   const [authMode, setAuthMode] = useState<BookingAuthMode>("ask");
   const [authVerifyPending, setAuthVerifyPending] = useState(false);
   const [promoFeedback, setPromoFeedback] = useState<string | null>(null);
@@ -701,6 +739,7 @@ export function BookingWizard({
                 ...parsed,
                 alternateTimes: parsed.alternateTimes ?? [],
                 guestAddress: parsed.guestAddress ?? null,
+                contactEmail: parsed.contactEmail ?? "",
                 hasPets: parsed.hasPets ?? null,
                 petTypes: parsed.petTypes ?? [],
               }
@@ -710,6 +749,12 @@ export function BookingWizard({
           alternateTimes: keepSaved
             ? (parsed?.alternateTimes ?? []).slice(0, 6)
             : [],
+          contactEmail: keepSaved
+            ? (parsed?.contactEmail ||
+                customerEmail ||
+                initialDraft?.contactEmail ||
+                "")
+            : (customerEmail || initialDraft?.contactEmail || ""),
           selectedAddOns: keepSaved ? (parsed?.selectedAddOns ?? []) : [],
           scheduledDate: isoDateOrEmpty(
             keepSaved
@@ -846,13 +891,79 @@ export function BookingWizard({
         ...initialDraft,
         alternateTimes: initialDraft?.alternateTimes ?? [],
         addressId: initialDraft?.addressId ?? keptAddress.addressId ?? null,
+        contactEmail:
+          customerEmail || initialDraft?.contactEmail || "",
         guestAddress:
           initialDraft?.guestAddress ?? keptAddress.guestAddress ?? null,
       });
     }
+    setDraftResumeToken(readDraftResumeToken());
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Resume from abandoned-booking email link (?draft=token).
+  useEffect(() => {
+    if (!hydrated) return;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("draft")?.trim();
+    if (!token) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch(`/api/booking-drafts/${token}`);
+        const result = (await response.json()) as {
+          currentStep?: string | null;
+          draft?: Partial<BookingDraft>;
+          email?: string;
+          error?: string;
+          resumeToken?: string;
+        };
+        if (cancelled || !response.ok || !result.draft) return;
+
+        writeDraftResumeToken(result.resumeToken ?? token);
+        setDraftResumeToken(result.resumeToken ?? token);
+        setDraft((current) => ({
+          ...blankDraft,
+          ...current,
+          ...result.draft,
+          alternateTimes: result.draft?.alternateTimes ?? current.alternateTimes,
+          contactEmail:
+            result.email ||
+            result.draft?.contactEmail ||
+            current.contactEmail ||
+            "",
+        }));
+        if (
+          result.currentStep &&
+          isBookingFlowStepId(result.currentStep)
+        ) {
+          const nextIndex = resolveFlowStepIndex(
+            flowStepsRef.current,
+            result.currentStep,
+          );
+          historyWriteModeRef.current = "replace";
+          setStepIndex(nextIndex);
+        }
+        params.delete("draft");
+        const cleaned = params.toString();
+        window.history.replaceState(
+          window.history.state,
+          "",
+          cleaned
+            ? `${window.location.pathname}?${cleaned}`
+            : window.location.pathname,
+        );
+      } catch {
+        // Keep local draft if resume fails.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated]);
 
   useEffect(() => {
     let cancelled = false;
@@ -877,6 +988,62 @@ export function BookingWizard({
     if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
     window.localStorage.setItem(BOOKING_DRAFT_KEY, JSON.stringify(draft));
   }, [draft, hydrated]);
+
+  // Persist lead email server-side once valid so abandoned reminders can fire.
+  useEffect(() => {
+    if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
+    if (!isValidContactEmail(draft.contactEmail)) return;
+    if (draftSyncTimerRef.current) {
+      window.clearTimeout(draftSyncTimerRef.current);
+    }
+    draftSyncTimerRef.current = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const response = await fetch("/api/booking-drafts", {
+            body: JSON.stringify({
+              currentStep: stepIdRef.current,
+              draft,
+              email: draft.contactEmail,
+              resumeToken: draftResumeToken,
+            }),
+            headers: { "Content-Type": "application/json" },
+            method: "POST",
+          });
+          const result = (await response.json()) as {
+            resumeToken?: string;
+          };
+          if (response.ok && result.resumeToken) {
+            writeDraftResumeToken(result.resumeToken);
+            setDraftResumeToken(result.resumeToken);
+          }
+        } catch {
+          // Offline / transient — local draft still holds the email.
+        }
+      })();
+    }, 700);
+    return () => {
+      if (draftSyncTimerRef.current) {
+        window.clearTimeout(draftSyncTimerRef.current);
+      }
+    };
+  }, [draft, draftResumeToken, hydrated]);
+
+  // Signed-in customers skip the lead field — keep contactEmail in sync.
+  useEffect(() => {
+    if (!customerEmail) return;
+    setDraft((current) => {
+      if (current.contactEmail === customerEmail) return current;
+      return { ...current, contactEmail: customerEmail };
+    });
+  }, [customerEmail]);
+
+  // After auth, attach the open draft to the signed-in customer.
+  useEffect(() => {
+    if (!hydrated || !userId || !draftResumeToken) return;
+    void fetch(`/api/booking-drafts/${draftResumeToken}/claim`, {
+      method: "POST",
+    }).catch(() => undefined);
+  }, [draftResumeToken, hydrated, userId]);
 
   // Address is always persisted separately so basket clears cannot wipe it.
   useEffect(() => {
@@ -1186,9 +1353,10 @@ export function BookingWizard({
 
   function goBack() {
     if (checkoutBusy) return;
-    if (stepId === "auth" && authMode !== "ask") {
+    // Auth email was collected on the date step — Back always leaves auth
+    // (never parks on “Save your booking” / ask).
+    if (stepId === "auth") {
       setAuthMode("ask");
-      return;
     }
     // Always drive Back through the History API so Chrome Back and the
     // Mundoria Back control walk the same stack.
@@ -1252,6 +1420,30 @@ export function BookingWizard({
           },
         };
       });
+    }
+    if (
+      (stepId === "date" || stepId === "frequency" || stepId === "time") &&
+      isValidContactEmail(draft.contactEmail)
+    ) {
+      rememberSignupEmail(draft.contactEmail);
+      void fetch("/api/booking-drafts", {
+        body: JSON.stringify({
+          currentStep: "auth",
+          draft,
+          email: draft.contactEmail,
+          resumeToken: draftResumeToken,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      })
+        .then(async (response) => {
+          const result = (await response.json()) as { resumeToken?: string };
+          if (response.ok && result.resumeToken) {
+            writeDraftResumeToken(result.resumeToken);
+            setDraftResumeToken(result.resumeToken);
+          }
+        })
+        .catch(() => undefined);
     }
     if (stepId === "history" && historySuggestion) {
       acceptHistorySuggestion(historySuggestion);
@@ -1440,7 +1632,14 @@ export function BookingWizard({
         const needsPets =
           draft.serviceType != null &&
           serviceDefinition(draft.serviceType).category !== "commercial";
-        return scheduleReady && (!needsPets || draft.hasPets !== null);
+        // Guests must leave a contact email; signed-in customers already have one.
+        const emailReady =
+          Boolean(userId) || isValidContactEmail(draft.contactEmail);
+        return (
+          scheduleReady &&
+          (!needsPets || draft.hasPets !== null) &&
+          emailReady
+        );
       }
       default:
         return true;
@@ -1748,6 +1947,7 @@ export function BookingWizard({
       ) : null}
       {stepId === "date" || stepId === "frequency" || stepId === "time" ? (
         <DateStep
+          collectEmail={!userId}
           draft={draft}
           durationHours={
             draft.estimatedDurationHours ?? duration?.hours ?? 2
@@ -1779,6 +1979,7 @@ export function BookingWizard({
         ) : (
           <CheckoutAuthGate
             authMode={authMode}
+            initialEmail={draft.contactEmail}
             initialVerifyPending={authVerifyPending}
             onModeChange={(mode) => {
               setAuthMode(mode);
@@ -1827,6 +2028,7 @@ export function BookingWizard({
                     cleaningStandard: selectedStandard,
                     serviceType: draft.serviceType,
                   }}
+                  draftResumeToken={draftResumeToken}
                   onAddressPersisted={(address) => {
                     setAddresses((current) => [address, ...current]);
                     update("addressId", address.id);
@@ -1992,22 +2194,29 @@ export function BookingWizard({
 
 function CheckoutAuthGate({
   authMode,
+  initialEmail = "",
   initialVerifyPending = false,
   onModeChange,
 }: {
   authMode: BookingAuthMode;
+  initialEmail?: string;
   initialVerifyPending?: boolean;
   onModeChange: (mode: BookingAuthMode) => void;
 }) {
+  const resolvingAsk =
+    authMode === "ask" &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(initialEmail.trim());
   const title =
     authMode === "ask"
-      ? "Where should we send your booking?"
+      ? "Save your booking"
       : authMode === "create"
         ? "Create your account"
         : "Sign in";
   const subtitle =
     authMode === "ask"
-      ? "Your selections are already saved. Enter your email to create an account or sign in."
+      ? resolvingAsk
+        ? null
+        : "Your selections are already saved. Enter your email to create an account or sign in."
       : authMode === "create"
         ? "Save your details to finish this booking. You can manage cleans from your account anytime."
         : initialVerifyPending
@@ -2019,10 +2228,13 @@ function CheckoutAuthGate({
       <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
         {title}
       </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">{subtitle}</p>
+      {subtitle ? (
+        <p className="mt-3 text-sm leading-6 text-[#5a5470]">{subtitle}</p>
+      ) : null}
       <div className="mt-8 max-w-md">
         <BookingAuthPrompt
           hideTitle
+          initialEmail={initialEmail}
           initialVerifyPending={initialVerifyPending}
           mode={authMode}
           onModeChange={onModeChange}
@@ -2388,7 +2600,11 @@ function stepSatisfied(stepId: BookingFlowStepId, draft: BookingDraft) {
       const needsPets =
         draft.serviceType != null &&
         serviceDefinition(draft.serviceType).category !== "commercial";
-      return scheduleReady && (!needsPets || draft.hasPets !== null);
+      return (
+        scheduleReady &&
+        (!needsPets || draft.hasPets !== null) &&
+        isValidContactEmail(draft.contactEmail)
+      );
     }
     default:
       return false;
@@ -3461,10 +3677,12 @@ function DurationStep({
 }
 
 function DateStep({
+  collectEmail = true,
   draft,
   durationHours,
   update,
 }: {
+  collectEmail?: boolean;
   draft: BookingDraft;
   durationHours: number;
   update: <K extends keyof BookingDraft>(
@@ -3497,7 +3715,41 @@ function DateStep({
 
   return (
     <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+      {collectEmail ? (
+        <div>
+          <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
+            Where should we send your booking?
+          </h2>
+          <div className="mt-6 max-w-md">
+            <FormField htmlFor="booking-contact-email" label="Email" plain>
+              <Input
+                autoComplete="email"
+                id="booking-contact-email"
+                inputMode="email"
+                onBlur={(event) =>
+                  update(
+                    "contactEmail",
+                    event.target.value.trim().toLowerCase(),
+                  )
+                }
+                onChange={(event) =>
+                  update("contactEmail", event.target.value.trimStart())
+                }
+                placeholder=" "
+                type="email"
+                value={draft.contactEmail}
+              />
+            </FormField>
+          </div>
+        </div>
+      ) : null}
+
+      <h2
+        className={cn(
+          "text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]",
+          collectEmail ? "mt-10 border-t border-[#eeeef1] pt-8" : null,
+        )}
+      >
         {selectedDate
           ? "When should we come?"
           : "Date of your first appointment"}
@@ -3561,6 +3813,7 @@ function DateStep({
     </div>
   );
 }
+
 
 function TimeSection({
   draft,
@@ -3765,6 +4018,7 @@ function CheckoutStep({
   amountPence,
   customerFirstName = null,
   draft,
+  draftResumeToken = null,
   onAddressPersisted,
   onProcessingChange,
   profileNeedsPhone = false,
@@ -3778,6 +4032,7 @@ function CheckoutStep({
     cleaningStandard: CleaningStandard;
     serviceType: ServiceType;
   };
+  draftResumeToken?: string | null;
   onAddressPersisted: (address: Address) => void;
   onProcessingChange?: (busy: boolean) => void;
   profileNeedsPhone?: boolean;
@@ -4019,6 +4274,14 @@ function CheckoutStep({
     };
     if (!bookingResponse.ok || !booking.bookingId) {
       throw new Error(booking.error ?? "Unable to create booking.");
+    }
+
+    if (draftResumeToken) {
+      void fetch(`/api/booking-drafts/${draftResumeToken}/complete`, {
+        body: JSON.stringify({ bookingId: booking.bookingId }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }).catch(() => undefined);
     }
 
     clearBookingStorage({

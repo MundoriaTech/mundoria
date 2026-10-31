@@ -7,6 +7,7 @@ type Admin = ReturnType<typeof createAdminClient>;
 const OPEN_STATUSES = [
   "pending_match",
   "matched",
+  "awaiting_payment",
   "confirmed",
   "cleaner_en_route",
 ];

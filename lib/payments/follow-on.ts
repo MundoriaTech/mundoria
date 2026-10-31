@@ -5,6 +5,7 @@ import {
   createBookingSetupIntent,
   maybeAuthorizeBookingIfDue,
 } from "@/lib/payments/lifecycle";
+import { retryAuthAfterCardUpdate } from "@/lib/payments/preauth-flow";
 import { runMatchingEngine } from "@/lib/matching/engine";
 
 /** Create or reuse a SetupIntent so the customer can save a card for an unpaid visit. */
@@ -21,7 +22,7 @@ export async function ensureBookingPaymentIntent({
   const { data: booking } = await admin
     .from("bookings")
     .select(
-      "id,customer_id,amount_total,payment_status,status,stripe_payment_intent_id,stripe_payment_method_id,stripe_setup_intent_id",
+      "id,customer_id,amount_total,payment_status,status,stripe_payment_intent_id,stripe_payment_method_id,stripe_setup_intent_id,payment_auth_attempt_count",
     )
     .eq("id", bookingId)
     .single();
@@ -35,7 +36,10 @@ export async function ensureBookingPaymentIntent({
   if (booking.payment_status !== "unpaid") {
     throw new Error("This booking does not need a payment method.");
   }
-  if (booking.stripe_payment_method_id) {
+  const replacingCard =
+    Boolean(booking.stripe_payment_method_id) &&
+    booking.status === "awaiting_payment";
+  if (booking.stripe_payment_method_id && !replacingCard) {
     throw new Error("A payment method is already saved for this booking.");
   }
   const amount = Number(booking.amount_total ?? 0);
@@ -66,7 +70,7 @@ export async function ensureBookingPaymentIntent({
     }
   }
 
-  if (booking.stripe_setup_intent_id) {
+  if (booking.stripe_setup_intent_id && !replacingCard) {
     try {
       const existing = await getStripe().setupIntents.retrieve(
         booking.stripe_setup_intent_id,
@@ -87,13 +91,17 @@ export async function ensureBookingPaymentIntent({
     }
   }
 
+  const attemptTag = replacingCard
+    ? `r${booking.payment_auth_attempt_count ?? 0}_${Date.now()}`
+    : "initial";
   const setupIntent = await createBookingSetupIntent({
     amount,
     customerId,
-    idempotencyKey: `followon_setup_${bookingId}_${amount}`,
+    idempotencyKey: `followon_setup_${bookingId}_${amount}_${attemptTag}`,
     metadata: {
       amount_pence: String(amount),
       booking_id: bookingId,
+      replace_card: replacingCard ? "1" : "0",
     },
     stripeCustomerId: customer,
   });
@@ -102,7 +110,10 @@ export async function ensureBookingPaymentIntent({
   }
   await admin
     .from("bookings")
-    .update({ stripe_setup_intent_id: setupIntent.id })
+    .update({
+      stripe_setup_intent_id: setupIntent.id,
+      ...(replacingCard ? { stripe_payment_method_id: null } : {}),
+    })
     .eq("id", bookingId);
 
   return {
@@ -113,7 +124,8 @@ export async function ensureBookingPaymentIntent({
 
 /**
  * After the customer confirms a SetupIntent (or an older hold), mark the method
- * saved and kick off matching. Pre-auth runs later via cron / cleaner confirm.
+ * saved and kick off matching. Pre-auth runs later via cron / cleaner confirm,
+ * or immediately when the booking is awaiting payment after a card update.
  */
 export async function confirmBookingPaymentHold(bookingId: string) {
   const admin = createAdminClient();
@@ -130,20 +142,19 @@ export async function confirmBookingPaymentHold(bookingId: string) {
   let paymentMethodId = booking.stripe_payment_method_id as string | null;
   let paymentStatus: "unpaid" | "held" | "released" = "unpaid";
 
-  if (booking.stripe_setup_intent_id && !paymentMethodId) {
+  if (booking.stripe_setup_intent_id) {
     const setup = await stripe.setupIntents.retrieve(
       booking.stripe_setup_intent_id,
       { expand: ["payment_method"] },
     );
-    if (setup.status !== "succeeded") {
+    if (setup.status === "succeeded") {
+      const fromSetup =
+        typeof setup.payment_method === "string"
+          ? setup.payment_method
+          : setup.payment_method?.id ?? null;
+      if (fromSetup) paymentMethodId = fromSetup;
+    } else if (!paymentMethodId) {
       throw new Error("Card has not been saved yet.");
-    }
-    paymentMethodId =
-      typeof setup.payment_method === "string"
-        ? setup.payment_method
-        : setup.payment_method?.id ?? null;
-    if (!paymentMethodId) {
-      throw new Error("No payment method on the setup intent.");
     }
   }
 
@@ -157,7 +168,7 @@ export async function confirmBookingPaymentHold(bookingId: string) {
       typeof intent.payment_method === "string"
         ? intent.payment_method
         : intent.payment_method?.id;
-    if (pm) paymentMethodId = pm;
+    if (pm && !paymentMethodId) paymentMethodId = pm;
   }
 
   if (!paymentMethodId && paymentStatus === "unpaid") {
@@ -177,9 +188,12 @@ export async function confirmBookingPaymentHold(bookingId: string) {
     await runMatchingEngine(bookingId);
   }
 
-  // If already inside the pre-auth window with a confirmed cleaner, hold now.
   if (paymentStatus === "unpaid" && paymentMethodId) {
-    await maybeAuthorizeBookingIfDue(bookingId);
+    if (booking.status === "awaiting_payment") {
+      await retryAuthAfterCardUpdate(bookingId);
+    } else {
+      await maybeAuthorizeBookingIfDue(bookingId);
+    }
   }
 
   return { payment_status: paymentStatus };

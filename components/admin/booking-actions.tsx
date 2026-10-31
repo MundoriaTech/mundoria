@@ -166,6 +166,7 @@ export function BookingActions({
           {[
             ["pending_match", "Pending match"],
             ["matched", "Matched"],
+            ["awaiting_payment", "Awaiting payment"],
             ["confirmed", "Confirmed"],
             ["cleaner_en_route", "En route"],
             ["in_progress", "In progress"],

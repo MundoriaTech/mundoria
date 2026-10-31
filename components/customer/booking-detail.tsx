@@ -442,13 +442,31 @@ export function BookingDetail({
         <LookingForCleanerCard confirmByLabel={confirmByLabel} />
       ) : null}
 
+      {booking.status === "awaiting_payment" &&
+      !booking.payment_preauth_failed_at ? (
+        <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+          <p className="font-semibold">Confirming payment</p>
+          <p className="mt-1 leading-6">
+            Your cleaner has accepted. We&apos;re securing the card hold to
+            confirm this visit. You can update your card anytime if needed.
+          </p>
+          <Button
+            className="mt-3 min-h-11 rounded-full"
+            onClick={() => setShowPay(true)}
+            size="sm"
+          >
+            Update card
+          </Button>
+        </div>
+      ) : null}
+
       {booking.payment_preauth_failed_at &&
       booking.status !== "cancelled" ? (
         <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
           <p className="font-semibold">Payment hold needs attention</p>
           <p className="mt-1 leading-6">
-            We could not authorise your card for this visit. Update your payment
-            method so we can complete the hold before the clean.
+            {booking.payment_preauth_failure_reason ??
+              "We could not authorise your card for this visit. Update your payment method so we can complete the hold before the clean."}
           </p>
           <Button
             className="mt-3 min-h-11 rounded-full"

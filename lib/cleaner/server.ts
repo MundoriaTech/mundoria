@@ -238,7 +238,7 @@ export async function getAvailableJobs(cleanerId: string) {
       .gt("allocated_cleaners", 1)
       .not("cleaner_id", "is", null)
       .neq("cleaner_id", cleanerId)
-      .in("status", ["matched", "confirmed"])
+      .in("status", ["matched", "awaiting_payment", "confirmed"])
       .gte("scheduled_date", new Date().toISOString().slice(0, 10))
       .order("scheduled_date")
       .limit(50),

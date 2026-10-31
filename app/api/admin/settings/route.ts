@@ -10,6 +10,7 @@ import {
 const schema = z.object({
   cancellation_window_hours: z.number().int().min(0).max(72),
   geofence_radius_meters: z.number().int().min(50).max(5000),
+  payment_auth_open_hours_before: z.number().int().min(2).max(168),
   payment_capture_hour_uk: z.number().int().min(0).max(23),
   payment_capture_minute_uk: z.number().int().min(0).max(59),
   payment_preauth_hours_before: z.number().int().min(1).max(168),
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
   const {
     cancellation_window_hours,
     geofence_radius_meters,
+    payment_auth_open_hours_before,
     payment_capture_hour_uk,
     payment_capture_minute_uk,
     payment_preauth_hours_before,
@@ -43,6 +45,7 @@ export async function POST(request: Request) {
   const platformFields = {
     cancellation_window_hours,
     geofence_radius_meters,
+    payment_auth_open_hours_before,
     payment_capture_hour_uk,
     payment_capture_minute_uk,
     payment_preauth_hours_before,

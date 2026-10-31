@@ -50,7 +50,13 @@ export async function POST(request: Request) {
       .eq("cleaner_id", user.id)
       .gte("scheduled_date", parsed.data.startsOn)
       .lte("scheduled_date", parsed.data.endsOn)
-      .in("status", ["matched", "confirmed", "pending_match", "cleaner_en_route"]);
+      .in("status", [
+        "matched",
+        "awaiting_payment",
+        "confirmed",
+        "pending_match",
+        "cleaner_en_route",
+      ]);
     for (const job of jobs ?? []) {
       await admin
         .from("bookings")

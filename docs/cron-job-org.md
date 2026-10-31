@@ -43,8 +43,9 @@ seconds.
 | Mundoria Insurance Expiry | `https://www.mundoria.co.uk/api/cron/insurance-expiry` | `0 1 * * *` | Marks cleaner Public Liability insurance as expired after its expiry date, notifies the cleaner and admins, and removes them from matching until renewed. |
 | Mundoria Insurance Reminders | `https://www.mundoria.co.uk/api/cron/insurance-reminders` | `0 2 * * *` | Reminds cleaners 30, 14 and 7 days before verified Public Liability insurance expires (in-app + email). Sends once per threshold per expiry date. |
 | Mundoria Recurring Payments | `https://www.mundoria.co.uk/api/cron/recurring-payments` | `0 9 * * *` | Rolls forward series visits and reminds customers who still need a saved card (T−7…T−2). |
-| Mundoria Pre-auth Payments | `https://www.mundoria.co.uk/api/cron/preauth-payments` | `*/15 * * * *` | Places card holds for confirmed bookings inside the pre-auth window (default T−24h). |
+| Mundoria Pre-auth Payments | `https://www.mundoria.co.uk/api/cron/preauth-payments` | `*/15 * * * *` | Places card holds for confirmed bookings inside the pre-auth window (default T−24h). Also runs awaiting-payment auth retries and T−24 unpaid cancels. |
 | Mundoria Capture Payments | `https://www.mundoria.co.uk/api/cron/capture-payments` | `*/15 * * * *` | Captures held payments whose next-day UK capture time has arrived. |
+| Mundoria Abandoned Bookings | `https://www.mundoria.co.uk/api/cron/abandoned-booking-reminders` | `*/15 * * * *` | Emails guests who left an email on the date step but never finished booking (first nudge ~45m, second ~24h). |
 
 Use `Africa/Lagos` as the timezone for calendar-style schedules. For interval
 jobs such as every 5 or 15 minutes, either `Africa/Lagos` or `UTC` is fine.

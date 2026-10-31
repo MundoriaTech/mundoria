@@ -77,7 +77,7 @@ export function JobFeed({
     return (
       Number(job.allocated_cleaners ?? 1) > 1 &&
       Boolean(job.cleaner_id) &&
-      ["matched", "confirmed"].includes(job.status)
+      ["matched", "awaiting_payment", "confirmed"].includes(job.status)
     );
   }
 

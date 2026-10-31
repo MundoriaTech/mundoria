@@ -6,6 +6,7 @@ import {
 const SCHEDULE_CHANGE_STATUSES = [
   "pending_match",
   "matched",
+  "awaiting_payment",
   "confirmed",
   "cleaner_en_route",
 ] as const;
