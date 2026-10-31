@@ -14,7 +14,7 @@ interface FormFieldProps {
   label: string;
   /** Taller shell for textarea; empty label sits on the first line. */
   multiline?: boolean;
-  /** No fill — border only (e.g. booking address on a warm page wash). */
+  /** No fill, border only (e.g. booking address on a warm page wash). */
   plain?: boolean;
 }
 

@@ -8,7 +8,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Contact Mundoria — apply as a cleaner, reach the team for press, or open chat for help with booking and your account.",
+    "Contact Mundoria: apply as a cleaner, reach the team for press, or open chat for help with booking and your account.",
   path: "/contact",
   title: "Contact us | Mundoria",
 });

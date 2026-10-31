@@ -172,7 +172,7 @@ const RESIDENTIAL_BUCKET = new Set<ServiceCategory>([
 ]);
 
 /**
- * Legacy / overlapping short-stay types — matching already aliases these to
+ * Legacy / overlapping short-stay types, matching already aliases these to
  * airbnb_turnover, so cleaners only need the one Airbnb/Shortlet option.
  */
 const SHORT_LET_DUPES = new Set<ServiceType>([
@@ -395,7 +395,7 @@ const GUIDE_TIP_MEDIA_CLASS =
 
 const PHOTO_GUIDE_TIPS = [
   {
-    body: "Show your face and shoulders looking at the camera — like a friendly hello.",
+    body: "Show your face and shoulders looking at the camera, like a friendly hello.",
     crossedOut: false,
     image: "/images/marketing/onboarding/photo-tip-framing.jpg",
     title: "Face and shoulders",
@@ -408,7 +408,7 @@ const PHOTO_GUIDE_TIPS = [
     zoomFace: true,
   },
   {
-    body: "One clear photo of just you — JPEG, PNG or WebP all work.",
+    body: "One clear photo of just you. JPEG, PNG or WebP all work.",
     crossedOut: true,
     image: "/images/marketing/onboarding/photo-tip-group.jpg",
     title: "No group photos",
@@ -891,14 +891,14 @@ export function OnboardingWizard({
             unreadable_doc: true,
             unreadable_doc_hint:
               quality.reason === "too_small"
-                ? "Upload looks unusually small — may be blank or corrupted."
+                ? "Upload looks unusually small, may be blank or corrupted."
                 : "Upload looked empty.",
             unreadable_doc_kind: kind,
           }),
         }));
         setNotice({
           message:
-            "That file looks too small or empty. Upload a clearer copy — we’ll also flag it for review.",
+            "That file looks too small or empty. Upload a clearer copy, we’ll also flag it for review.",
           title: "Document may be unreadable",
         });
       } else if (kind === "utr") {
@@ -1189,7 +1189,7 @@ export function OnboardingWizard({
     window.setTimeout(() => setSaveFlash(false), 1600);
     setSavedNote(
       preview
-        ? "Preview only — nothing is saved."
+        ? "Preview only, nothing is saved."
         : "Your progress is saved on this device. You can log out and come back to finish later.",
     );
   }
@@ -1256,7 +1256,7 @@ export function OnboardingWizard({
               Application Submitted!
             </h1>
             <p className="mt-2 text-sm leading-6 text-[#5a5470]">
-              Thanks — we’re reviewing your application. This usually takes a
+              Thanks, we’re reviewing your application. This usually takes a
               few working days.
             </p>
           </div>
@@ -2619,7 +2619,7 @@ function IdentityStep({
 
 const COVERAGE_GUIDE_TIPS = [
   {
-    body: `Pick the Birmingham district you usually start from — that becomes your home base and the centre of the map. You can add up to ${MAX_WORKING_DISTRICTS} districts in total from the same list.`,
+    body: `Pick the Birmingham district you usually start from, that becomes your home base and the centre of the map. You can add up to ${MAX_WORKING_DISTRICTS} districts in total from the same list.`,
     title: "Districts",
   },
   {
@@ -2884,7 +2884,7 @@ function CoverageStep({
           <div className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-2">
             <p className="text-sm font-medium text-[#291845]">Working radius</p>
             <p className="text-xs leading-5 text-[#8b8798]">
-              Travel from home base — up to {MAX_RADIUS_MILES} miles.
+              Travel from home base, up to {MAX_RADIUS_MILES} miles.
             </p>
             <div className="flex h-11 items-center gap-3">
               <button

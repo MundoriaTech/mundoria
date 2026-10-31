@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Description under the shell page title — avoids duplicate h1s. */
+/** Description under the shell page title, avoids duplicate h1s. */
 export function AdminPageIntro({
   children,
   className,

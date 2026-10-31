@@ -598,7 +598,7 @@ export function allowedStandards(serviceType: ServiceType) {
   if (fixed) {
     return CLEANING_STANDARDS.filter((standard) => standard.value === fixed);
   }
-  // Comprehensive is for deep cleans / handover-style work — not routine Regular.
+  // Comprehensive is for deep cleans / handover-style work, not routine Regular.
   if (serviceType === "regular") {
     return CLEANING_STANDARDS.filter(
       (standard) => standard.value !== "comprehensive",
@@ -715,7 +715,7 @@ export function freeAddOnDurationHours(selectedAddOns: string[]) {
   ).reduce((sum, addOn) => sum + (addOn.durationHours ?? 0), 0);
 }
 
-/** Arrival-time pricing — evenings and weekends cost more than weekday daytime. */
+/** Arrival-time pricing, evenings and weekends cost more than weekday daytime. */
 export function schedulePriceMultiplier(
   scheduledDate?: string | null,
   scheduledTime?: string | null,

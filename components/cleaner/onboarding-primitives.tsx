@@ -27,7 +27,7 @@ type OnboardingSelectOption = {
   value: string;
 };
 
-/** Custom dropdown — floating label chrome, optional search for long lists. */
+/** Custom dropdown, floating label chrome, optional search for long lists. */
 export function OnboardingSelect({
   error,
   label,
@@ -572,7 +572,7 @@ export function DecisionStrip({
   );
 }
 
-/** Soft pill single-select — lighter than BranchChoice cards. */
+/** Soft pill single-select, lighter than BranchChoice cards. */
 export function ChoicePills({
   label,
   options,
@@ -614,7 +614,7 @@ export function ChoicePills({
   );
 }
 
-/** Soft pill multi-select — toggle every option that applies. */
+/** Soft pill multi-select, toggle every option that applies. */
 export function ChoiceMultiPills({
   label,
   options,

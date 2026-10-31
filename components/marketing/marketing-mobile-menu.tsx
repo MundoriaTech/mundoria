@@ -137,7 +137,7 @@ export function MarketingMobileMenuSheet({
                 panel === "main" ? "translateX(0%)" : "translateX(-50%)",
             }}
           >
-            {/* Main — WeCasa sections */}
+            {/* Main. WeCasa sections */}
             <nav
               aria-hidden={panel !== "main"}
               aria-label="Mobile navigation"

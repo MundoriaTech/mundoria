@@ -382,7 +382,7 @@ export function coveragePlaceHref(
   return `${cleanerPlacePath(place.slug)}${coverageFocusSearch(focus)}`;
 }
 
-/** Wider-zone hubs collapse to the city cleaners page — kept for legacy callers. */
+/** Wider-zone hubs collapse to the city cleaners page, kept for legacy callers. */
 export function coverageZoneHref(_zoneId: string, focus?: CoverageLinkFocus) {
   return `/cleaners/${LAUNCH_CITY.slug}${coverageFocusSearch(focus)}`;
 }

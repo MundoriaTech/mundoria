@@ -91,7 +91,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             <p><b>Allocated cleaners:</b> {booking.allocated_cleaners ?? 1}</p>
             <p><b>Cleaner hours:</b> {booking.cleaner_hours ?? "—"}</p>
             <p><b>Property condition:</b> {booking.property_condition?.replaceAll("_", " ") ?? "—"}</p>
-            <p><b>Recently moved:</b> {booking.recently_moved == null ? "—" : booking.recently_moved ? "Yes" : "No"}</p>
+            <p><b>Recently moved:</b> {booking.recently_moved == null ? ", " : booking.recently_moved ? "Yes" : "No"}</p>
             <p className="sm:col-span-2"><b>Special attention:</b> {(booking.special_attention_areas ?? []).join(", ") || "None"}</p>
             <p className="sm:col-span-2"><b>Add-ons:</b> {(addOns ?? []).map((addOn) => addOn.label).join(", ") || "None"}</p>
             <p className="sm:col-span-2"><b>Recommendation:</b> {booking.recommendation_outcome?.replaceAll("_", " ") ?? "not shown"}{booking.recommended_service_type ? ` → ${formatServiceName(booking.recommended_service_type)}` : ""}</p>

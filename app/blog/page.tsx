@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Mundoria Mag — cleaning tips, home care, host guides, Birmingham life and cleaner stories.",
+    "Mundoria Mag: cleaning tips, home care, host guides, Birmingham life and cleaner stories.",
   path: "/blog",
   title: "Mundoria Mag | Cleaning & home magazine",
 });
@@ -221,7 +221,7 @@ export default async function BlogIndexPage({
       : posts.filter((post) => post.category === activeCategory);
 
   const isAll = activeCategory === "All";
-  // On "See all" / category views, list every post — don't hide the first 3
+  // On "See all" / category views, list every post, don't hide the first 3
   // inside featured cards and leave a blank list when a section is small.
   const featured = isAll ? filtered.slice(0, 3) : [];
   const listPosts = isAll ? filtered.slice(3) : filtered;
@@ -248,7 +248,7 @@ export default async function BlogIndexPage({
           "@context": "https://schema.org",
           "@type": "Blog",
           description:
-            "Mundoria Mag — cleaning tips, home care, host guides, Birmingham life and cleaner stories.",
+            "Mundoria Mag: cleaning tips, home care, host guides, Birmingham life and cleaner stories.",
           name: "Mundoria Mag",
           publisher: {
             "@type": "Organization",
@@ -283,7 +283,7 @@ export default async function BlogIndexPage({
               Mundoria Mag
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-[#5a5470] sm:text-lg">
-              Cleaning & home magazine — practical guides, host tips and
+              Cleaning & home magazine, practical guides, host tips and
               Birmingham stories for real homes.
             </p>
           </div>
@@ -457,7 +457,7 @@ export default async function BlogIndexPage({
         </BrandedSection>
 
         <BrandedCtaBand
-          body="Clear estimates, vetted cleaners and live status — starting in Birmingham."
+          body="Clear estimates, vetted cleaners and live status, starting in Birmingham."
           href={bookingHref}
           label="Book a clean"
           title="Ready for a cleaner home?"

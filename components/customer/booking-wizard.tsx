@@ -189,7 +189,7 @@ const blankDraft: BookingDraft = {
 
 const BOOKING_DRAFT_KEY = "mundoria-booking-draft-v2";
 const BOOKING_STEP_KEY = BOOKING_STEP_STORAGE_KEY;
-/** Address alone — never cleared when the basket/draft is wiped. */
+/** Address alone, never cleared when the basket/draft is wiped. */
 const BOOKING_ADDRESS_KEY = "mundoria-booking-address-v1";
 const BOOKING_DRAFT_TOKEN_KEY = "mundoria-booking-draft-token-v1";
 
@@ -217,7 +217,7 @@ function writeDraftResumeToken(token: string | null) {
   }
 }
 
-/** Stops draft/step writes after abandon, checkout, or leave — reset on mount. */
+/** Stops draft/step writes after abandon, checkout, or leave, reset on mount. */
 let allowBookingPersist = true;
 
 type StoredAddressFields = Pick<BookingDraft, "addressId" | "guestAddress">;
@@ -379,7 +379,7 @@ export function BookingWizard({
   userId,
 }: {
   cleaningHistory?: HistoryVisit[];
-  /** Signed-in customer email — prefills “Where should we send your booking?”. */
+  /** Signed-in customer email, prefills “Where should we send your booking?”. */
   customerEmail?: string | null;
   /** Signed-in customer’s first name for checkout greeting. */
   customerFirstName?: string | null;
@@ -391,7 +391,7 @@ export function BookingWizard({
   initialDraft?: Partial<BookingDraft>;
   knownCleaners?: KnownCleaner[];
   previousCleaner?: CleanerPublicProfile | null;
-  /** Google OAuth often has no phone yet — collect it in checkout, not /complete-profile. */
+  /** Google OAuth often has no phone yet, collect it in checkout, not /complete-profile. */
   profileNeedsPhone?: boolean;
   /** First name when the customer started from a cleaner profile. */
   requestedPro?: string | null;
@@ -826,7 +826,7 @@ export function BookingWizard({
             null,
         });
       } else {
-        // No draft blob — still restore address from dedicated storage.
+        // No draft blob, still restore address from dedicated storage.
         setDraft({
           ...blankDraft,
           ...initialDraft,
@@ -865,7 +865,7 @@ export function BookingWizard({
       ) {
         setStepIndex(0);
       } else if (isBookingFlowStepId(urlStepRaw)) {
-        // Auth / checkout return — prefer URL over a deep-link reset.
+        // Auth / checkout return, prefer URL over a deep-link reset.
         setStepIndex(resolveFlowStepIndex(restoredSteps, urlStepRaw));
       } else if (urlService) {
         setStepIndex(resolveFlowStepIndex(restoredSteps, "address"));
@@ -1017,7 +1017,7 @@ export function BookingWizard({
             setDraftResumeToken(result.resumeToken);
           }
         } catch {
-          // Offline / transient — local draft still holds the email.
+          // Offline / transient, local draft still holds the email.
         }
       })();
     }, 700);
@@ -1028,7 +1028,7 @@ export function BookingWizard({
     };
   }, [draft, draftResumeToken, hydrated]);
 
-  // Signed-in customers skip the lead field — keep contactEmail in sync.
+  // Signed-in customers skip the lead field, keep contactEmail in sync.
   useEffect(() => {
     if (!customerEmail) return;
     setDraft((current) => {
@@ -1074,7 +1074,7 @@ export function BookingWizard({
     );
   }, [addresses, draft.addressId, draft.guestAddress, hydrated]);
 
-  // Guest who signs in at checkout may gain a "known cleaners" step — send them there once.
+  // Guest who signs in at checkout may gain a "known cleaners" step, send them there once.
   useEffect(() => {
     if (!hydrated || !userId || knownCleaners.length === 0) return;
     if (draft.rebookCleanerChoice) return;
@@ -1180,7 +1180,7 @@ export function BookingWizard({
         bootstrap.index === stepIndex &&
         now - bootstrap.at < 750
       ) {
-        // Strict Mode remount — stack already built.
+        // Strict Mode remount, stack already built.
         funnelDepthRef.current = stepIndex;
         lastSyncedStepIdRef.current = stepId;
         historyWriteModeRef.current = null;
@@ -1278,7 +1278,7 @@ export function BookingWizard({
       }
 
       funnelDepthRef.current = 0;
-      // Left the funnel entry — if we are still on the booking URL, exit cleanly.
+      // Left the funnel entry, if we are still on the booking URL, exit cleanly.
       if (window.location.pathname.startsWith("/booking/new")) {
         exitBookingFlowRef.current();
       }
@@ -1353,7 +1353,7 @@ export function BookingWizard({
 
   function goBack() {
     if (checkoutBusy) return;
-    // Auth email was collected on the date step — Back always leaves auth
+    // Auth email was collected on the date step. Back always leaves auth
     // (never parks on “Save your booking” / ask).
     if (stepId === "auth") {
       setAuthMode("ask");
@@ -1588,7 +1588,7 @@ export function BookingWizard({
       case "category":
       case "service":
       case "address": {
-        // Require a resolvable address — not just a stale addressId in storage.
+        // Require a resolvable address, not just a stale addressId in storage.
         const addressReady = Boolean(selectedAddress);
         const category =
           draft.serviceType != null
@@ -3524,7 +3524,7 @@ function FrequencySection({
   const allowsOneOff = frequencyAllowsOneOff(draft.serviceType);
   const options = frequencyOptionsFor(draft.serviceType);
 
-  // Retired “customize your calendar” — clear stale drafts so Next stays honest.
+  // Retired “customize your calendar”, clear stale drafts so Next stays honest.
   useEffect(() => {
     if (draft.recurrencePattern !== "custom") return;
     update("frequencyChosen", false);
@@ -3639,7 +3639,7 @@ function DurationStep({
       </h2>
       <div className="mt-8 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
         {options.map((option) => {
-          // Only a customer tap counts — never preselect the recommendation.
+          // Only a customer tap counts, never preselect the recommendation.
           const active = hours != null && Math.abs(option - hours) < 0.01;
           const isRecommended = Math.abs(option - recommended) < 0.01;
           return (
@@ -4812,7 +4812,7 @@ function CheckoutStep({
   );
 }
 
-/** Phone + name for Google OAuth customers — kept inside booking chrome. */
+/** Phone + name for Google OAuth customers, kept inside booking chrome. */
 function BookingCheckoutPhoneGate({
   defaultFullName,
   onSaved,

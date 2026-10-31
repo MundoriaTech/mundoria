@@ -19,7 +19,7 @@ export const MAG_CATEGORY_THEME: Record<
   },
   "Home Care": {
     accent: "#b85a8a",
-    // Was #f5eaf1 — too close to the Mag page wash, so the pill looked colourless
+    // Was #f5eaf1, too close to the Mag page wash, so the pill looked colourless
     chip: "border-[#f5b8cb] bg-[#ffe8f0] text-[#c2186a]",
     chipActive: "border-transparent bg-[#b85a8a] text-white shadow-[0_6px_16px_rgba(184,90,138,0.35)]",
     label: "text-[#b85a8a]",

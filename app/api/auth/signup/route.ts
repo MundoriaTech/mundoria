@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   const bookingCheckoutSignup =
     role === "customer" && nextPath.startsWith("/booking");
   /**
-   * Customers (booking + standalone): Wecasa-style soft confirm — sign-in ready
+   * Customers (booking + standalone): Wecasa-style soft confirm, sign-in ready
    * immediately; confirm mail stays out-of-band. Cleaners still hard-confirm.
    */
   const softEmailConfirm = role === "customer";
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
       firstName: full_name.split(/\s+/)[0],
       password,
       redirectTo: emailRedirectTo,
-      // Soft-confirm accounts are already sign-in ready — magic link still lands on “validated”.
+      // Soft-confirm accounts are already sign-in ready, magic link still lands on “validated”.
       type: softEmailConfirm ? "magiclink" : "signup",
     });
   } catch (emailError) {

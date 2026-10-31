@@ -53,7 +53,7 @@ function isPublicMarketingPath(pathname: string) {
 
 function requiredRole(pathname: string): UserRole | null {
   // Guest booking flow (WeCasa-style): start without an account.
-  // Signed-in cleaners are redirected away below — guests stay allowed.
+  // Signed-in cleaners are redirected away below, guests stay allowed.
   if (pathname === "/booking/new") {
     return null;
   }
@@ -144,7 +144,7 @@ export async function middleware(request: NextRequest) {
   const { phone, response, user, role } = await updateSession(request);
   const protectedRole = requiredRole(pathname);
 
-  // Cleaners cannot book as customers — keep /booking/new open for guests only.
+  // Cleaners cannot book as customers, keep /booking/new open for guests only.
   if (
     user &&
     role === "cleaner" &&

@@ -6,7 +6,7 @@ import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { Button } from "@/components/ui/button";
 
-/** Figma map layer — sits under a lavender wash that fades out toward the bottom. */
+/** Figma map layer, sits under a lavender wash that fades out toward the bottom. */
 const PLACE_HERO_MAP = "/images/marketing/landing/place-hero-map.png";
 
 export function PlaceMapHero({
@@ -35,7 +35,7 @@ export function PlaceMapHero({
       className="relative overflow-hidden bg-[#e9e0f4]"
       style={{ marginTop: `calc(-1 * ${LANDING_NAV_BLOCK})` }}
     >
-      {/* Map / pin — kept sharp; lavender layers only tint it. */}
+      {/* Map / pin, kept sharp; lavender layers only tint it. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <Image
           alt=""
@@ -47,7 +47,7 @@ export function PlaceMapHero({
         />
       </div>
 
-      {/* Light lavender veil — mutes charcoal/red without hiding the map. */}
+      {/* Light lavender veil, mutes charcoal/red without hiding the map. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[#e9e0f4]/45 mix-blend-soft-light"

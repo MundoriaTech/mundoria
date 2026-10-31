@@ -4,7 +4,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 /**
  * Cookie-free anon client for public editorial reads (blog/help).
- * Safe to call from generateStaticParams / generateMetadata — unlike
+ * Safe to call from generateStaticParams / generateMetadata, unlike
  * createServerClient(), which requires a request cookie store.
  */
 let publicClient: SupabaseClient | null | undefined;

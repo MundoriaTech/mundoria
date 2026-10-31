@@ -83,7 +83,7 @@ export function VerificationQueueTable({
                 {flags.length ? (
                   flags.join(", ")
                 ) : (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground">, </span>
                 )}
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">

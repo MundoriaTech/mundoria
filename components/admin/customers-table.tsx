@@ -64,7 +64,7 @@ function AddressCell({
   extraCount: number;
   label: string | null;
 }) {
-  if (!label) return <span className="text-muted-foreground">—</span>;
+  if (!label) return <span className="text-muted-foreground">, </span>;
   return (
     <span>
       <span className="line-clamp-2">{label}</span>

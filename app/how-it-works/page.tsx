@@ -12,7 +12,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "See how Mundoria booking works — choose a service, get a clear estimate, book securely and track the clean from match to checklist completion.",
+    "See how Mundoria booking works: choose a service, get a clear estimate, book securely and track the clean from match to checklist completion.",
   path: "/how-it-works",
   title: "How Mundoria Works | Mundoria",
 });
@@ -55,7 +55,7 @@ export default function HowItWorksPage() {
           </h1>
           <p className="mt-4 max-w-[17rem] text-sm leading-6 text-[#1a191d]">
             Mundoria is designed so customers never feel like they’re filling
-            in an insurance form — tell us what you need, see a clear estimate,
+            in an insurance form, tell us what you need, see a clear estimate,
             then book.
           </p>
           <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -89,7 +89,7 @@ export default function HowItWorksPage() {
           </h1>
           <p className="mt-5 leading-[1.45] text-[#1a191d] [font-size:clamp(0.85rem,1.02vw,1.22rem)]">
             Mundoria is designed so customers never feel like they’re filling
-            in an insurance form — tell us what you need, see a clear estimate,
+            in an insurance form, tell us what you need, see a clear estimate,
             then book.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">

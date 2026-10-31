@@ -359,8 +359,8 @@ export default async function AdminCleanerPage({ params }: { params: { id: strin
         rows={(medallionEvents ?? []).map((item) => [
           new Date(item.created_at).toLocaleDateString("en-GB"),
           item.event_type.replaceAll("_", " "),
-          `${item.score_before ?? "—"} → ${item.score_after ?? "—"}`,
-          `${item.tier_before ?? "—"} → ${item.tier_after ?? "—"}`,
+          `${item.score_before ?? ", "} → ${item.score_after ?? ", "}`,
+          `${item.tier_before ?? ", "} → ${item.tier_after ?? ", "}`,
           item.notes ?? "—",
         ])}
         title="Account history"

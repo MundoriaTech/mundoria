@@ -1,6 +1,6 @@
 import { getGtmId } from "@/lib/analytics/gtm";
 
-/** Standard GTM bootstrap — placed in <head> after Consent Mode defaults. */
+/** Standard GTM bootstrap, placed in <head> after Consent Mode defaults. */
 export function GoogleTagManagerHead() {
   const gtmId = getGtmId();
   if (!gtmId) return null;

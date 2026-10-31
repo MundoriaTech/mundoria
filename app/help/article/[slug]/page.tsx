@@ -105,7 +105,7 @@ export default async function HelpArticlePage({ params }: PageProps) {
             >
               FAQ
             </Link>{" "}
-            or reach the Mundoria team in chat — we’ll point you to the right
+            or reach the Mundoria team in chat, we’ll point you to the right
             place.
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">

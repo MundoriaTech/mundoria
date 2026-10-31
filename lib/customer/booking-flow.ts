@@ -89,7 +89,7 @@ export function resolveFlowStepIndex(
   ) {
     return flowSteps.indexOf("date");
   }
-  // Guest auth gate vs signed-in payment — same funnel slot, different URLs.
+  // Guest auth gate vs signed-in payment, same funnel slot, different URLs.
   if (desired === "auth" && flowSteps.includes("checkout")) {
     return flowSteps.indexOf("checkout");
   }
@@ -292,7 +292,7 @@ export function frequencyChoiceSatisfied(
   if (!draft.isRecurring) {
     return frequencyAllowsOneOff(draft.serviceType);
   }
-  // Custom calendars are no longer offered — force a fresh cadence choice.
+  // Custom calendars are no longer offered, force a fresh cadence choice.
   if (draft.recurrencePattern === "custom") return false;
   return Boolean(draft.recurrencePattern);
 }
@@ -318,7 +318,7 @@ export function pricingServiceTypeFor(
   return draft.serviceType;
 }
 
-/** Basket / summary label — null until the customer has chosen a frequency. */
+/** Basket / summary label, null until the customer has chosen a frequency. */
 export function frequencyBasketLabel(
   draft: Pick<
     BookingDraft,

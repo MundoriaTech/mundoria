@@ -23,7 +23,7 @@ export function whyChooseMundoriaPoints() {
 export function houseCleanCoveredPoints() {
   return [
     "Hoovering and floor care for hard floors and carpets in agreed rooms",
-    "Bathroom cleaning — sinks, toilets and visible fixtures; mirrors streak-free",
+    "Bathroom cleaning, sinks, toilets and visible fixtures; mirrors streak-free",
     "Kitchen surfaces, sink and hob wipe-down (oven deep-clean as an add-on)",
     "Dusting and surface wipe of reachable furniture and ledges",
     "Emptying bins and light tidy of clutter-free areas",
@@ -41,7 +41,7 @@ export function bookCleanerSteps(place: string) {
     "Choose your service and cleaning standard",
     "Add property details, duration and any add-ons",
     "Pick a date and time that works for you",
-    "Pay securely — we hold payment until the clean is done",
+    "Pay securely, we hold payment until the clean is done",
   ] as const;
 }
 
@@ -94,7 +94,7 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
     {
       question: `What do most cleaners charge per hour in ${place}?`,
       schemaAnswer:
-        "Local cleaner rates vary by experience and whether you book an independent or a company. Mundoria pricing starts from £22 per hour for Essential regular cleans (and from £23 per hour for recovery support), with a clear estimate for your home size and service before you confirm — not an open-ended hourly quote after the visit.",
+        "Local cleaner rates vary by experience and whether you book an independent or a company. Mundoria pricing starts from £22 per hour for Essential regular cleans (and from £23 per hour for recovery support), with a clear estimate for your home size and service before you confirm, not an open-ended hourly quote after the visit.",
     },
     {
       question: `How much does Mundoria cleaning cost in ${place}?`,

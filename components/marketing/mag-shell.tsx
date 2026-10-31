@@ -13,7 +13,7 @@ import {
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
-/** Standalone Mag chrome — landing-style pill nav + Mag footer. */
+/** Standalone Mag chrome, landing-style pill nav + Mag footer. */
 export async function MagShell({
   children,
   className,

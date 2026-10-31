@@ -15,7 +15,7 @@ export function PlaceServiceExplainerList({ place }: { place: string }) {
           <Link className={linkClass} href={item.href}>
             {item.label}
           </Link>
-          {" — "}
+          {", "}
           {item.explanation}
         </li>
       ))}

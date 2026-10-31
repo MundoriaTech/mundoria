@@ -194,7 +194,7 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
               success({
                 kind: "done",
                 title: "Invite link copied",
-                note: "Send it along — they’ll thank you later.",
+                note: "Send it along, they’ll thank you later.",
               });
             }}
             size="sm"

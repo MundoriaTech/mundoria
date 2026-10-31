@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 
-/** Mundoria is light-branded only — dark mode is not supported. */
+/** Mundoria is light-branded only, dark mode is not supported. */
 export type ThemeMode = "light";
 
 type ThemeContextValue = {

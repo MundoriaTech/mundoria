@@ -4,7 +4,7 @@ import { BrandedSection } from "@/components/marketing/branded-page-sections";
 import type { MarketingService } from "@/lib/seo/marketing";
 import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
 
-/** Links the main service page to strong area hubs — not service×area copies. */
+/** Links the main service page to strong area hubs, not service×area copies. */
 export function ServiceCityCoverage({ service }: { service: MarketingService }) {
   const label = service.label;
   const featured = BIRMINGHAM_AREAS.slice(0, 8);

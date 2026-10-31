@@ -63,7 +63,7 @@ export function CompletionChecklistConfirmation({
     success({
       kind: "done",
       title: "Clean confirmed",
-      note: "Thanks — payment can finish settling from here.",
+      note: "Thanks, payment can finish settling from here.",
     });
     onConfirmed();
   }

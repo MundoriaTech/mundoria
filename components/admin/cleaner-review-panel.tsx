@@ -220,7 +220,7 @@ export function CleanerReviewPanel({
             <p className="mt-1 text-sm text-muted-foreground">
               {interviewScheduledAt
                 ? `30-minute online interview booked for ${formatInterviewSlot(interviewScheduledAt)}. Mark it complete after the call, check documents, then approve for live jobs.`
-                : "Complete the phone interview, check documents, then approve for live jobs — or hold / remove the account."}
+                : "Complete the phone interview, check documents, then approve for live jobs, or hold / remove the account."}
             </p>
           </div>
           <div className="flex gap-3 text-xs text-muted-foreground sm:shrink-0 sm:flex-col sm:text-right">
@@ -240,7 +240,7 @@ export function CleanerReviewPanel({
         <Input
           className="mt-4"
           onChange={(event) => setReason(event.target.value)}
-          placeholder="Note, e.g. Interview done — DBS and ID checked"
+          placeholder="Note, e.g. Interview done. DBS and ID checked"
           value={reason}
         />
         <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm text-muted-foreground">

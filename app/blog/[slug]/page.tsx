@@ -85,7 +85,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             },
           }}
         />
-        {/* Editorial hero: cover first, title below — real-blog rhythm */}
+        {/* Editorial hero: cover first, title below, real-blog rhythm */}
         <section
           className="relative px-4 sm:px-8 lg:px-12"
           style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2.5rem)` }}

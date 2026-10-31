@@ -13,7 +13,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Residential cleaning with Mundoria — regular, deep and one-off cleans with clear pricing and vetted cleaners in Birmingham.",
+    "Residential cleaning with Mundoria: regular, deep and one-off cleans with clear pricing and vetted cleaners in Birmingham.",
   path: "/cleaning/residential",
   title: "Residential Cleaning | Mundoria",
 });

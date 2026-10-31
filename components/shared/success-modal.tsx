@@ -11,7 +11,7 @@ const TIDBITS: Record<SuccessKind, string[]> = {
   saved: [
     "Locked in. That’ll be ready next time you need it.",
     "Tucked away safely. Nice one.",
-    "Saved and sorted — nothing more to do here.",
+    "Saved and sorted, nothing more to do here.",
   ],
   deleted: [
     "Gone. Space cleared.",
@@ -29,7 +29,7 @@ const TIDBITS: Record<SuccessKind, string[]> = {
     "Delivered to the queue.",
   ],
   done: [
-    "That’s that — handled.",
+    "That’s that, handled.",
     "Done. You can carry on.",
     "All set from here.",
   ],

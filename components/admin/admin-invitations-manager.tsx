@@ -76,7 +76,7 @@ export function AdminInvitationsManager({
       setMessage(
         result.emailSent
           ? ""
-          : "Email isn’t configured — copy the invite link below.",
+          : "Email isn’t configured, copy the invite link below.",
       );
       success({
         kind: "sent",

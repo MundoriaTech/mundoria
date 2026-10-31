@@ -8,7 +8,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Browse Mundoria cleaning services — residential, commercial, guest turns and recovery cleaning. Get a quote online and book with clear next steps.",
+    "Browse Mundoria cleaning services, residential, commercial, guest turns and recovery cleaning. Get a quote online and book with clear next steps.",
   path: "/cleaning",
   title: "Cleaning Services | Mundoria",
 });

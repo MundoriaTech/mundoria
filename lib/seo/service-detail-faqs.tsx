@@ -144,7 +144,7 @@ const INCLUDED: Partial<
   one_off: {
     intro: (
       <>
-        A one-off clean is for a specific date — guests, a reset, or a catch-up.
+        A one-off clean is for a specific date, guests, a reset, or a catch-up.
         Prefer a repeating rhythm instead? See{" "}
         {relatedServiceLink("regular-cleaning", "regular cleaning")}. A typical
         visit can include:
@@ -321,8 +321,8 @@ function includedFaq(service: MarketingService): CategoryFaq {
     `What’s included in ${service.label.toLowerCase()}?`,
     <p>
       {service.description} The checklist is agreed before the visit. Kitchens,
-      bathrooms and the rooms you include are the core of the job. Add notes —
-      pets, products, rooms to skip — when you{" "}
+      bathrooms and the rooms you include are the core of the job. Add notes , 
+      pets, products, rooms to skip, when you{" "}
       <FaqLink href={service.bookingHref}>book online</FaqLink>.
     </p>,
   );
@@ -409,7 +409,7 @@ function frequencyFaq(service: MarketingService): CategoryFaq | null {
         Most hosts book a turnover after every stay. Busy calendars can use a
         repeating schedule; quieter listings may book each clean as a one-off.
         Keep notes and checklists on the booking so each reset stays consistent
-        — start from{" "}
+       , start from{" "}
         <FaqLink href={service.bookingHref}>short-let booking</FaqLink> or
         browse{" "}
         <FaqLink href="/cleaning/short-lets">short-let services</FaqLink>.
@@ -432,7 +432,7 @@ function frequencyFaq(service: MarketingService): CategoryFaq | null {
     return faq(
       "When should I book a one-off clean?",
       <p>
-        Book when you need the home ready for a date — guests, a reset after a
+        Book when you need the home ready for a date, guests, a reset after a
         busy period, or a catch-up. Same-day options depend on cleaner
         availability in your area.{" "}
         <FaqLink href={service.bookingHref}>Book a one-off clean</FaqLink>, or
@@ -452,7 +452,7 @@ function costFaq(service: MarketingService): CategoryFaq {
       {service.label} starts from {service.fromPrice}. The estimate updates with
       property size, duration, cleaning standard and any add-ons.{" "}
       <FaqLink href={service.bookingHref}>See your price in booking</FaqLink>{" "}
-      before you pay — no surprise extras on the day. More pricing detail is in
+      before you pay, no surprise extras on the day. More pricing detail is in
       the <FaqLink href={FAQ_LINKS.pricing}>FAQ</FaqLink> and{" "}
       <FaqLink href="/help">Help Centre</FaqLink>.
     </p>,

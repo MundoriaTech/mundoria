@@ -85,7 +85,7 @@ export async function createBookingSetupIntent({
 }
 
 /**
- * Reuse a card already on the Stripe Customer — confirm a SetupIntent
+ * Reuse a card already on the Stripe Customer, confirm a SetupIntent
  * server-side so booking creation can keep verifying via setupIntentId.
  */
 export async function confirmBookingSetupIntentWithSavedCard({
@@ -294,7 +294,7 @@ export async function authorizeBookingPayment(
       try {
         await stripe.paymentIntents.cancel(intent.id);
       } catch {
-        // Continue — caller decides cancel vs retry.
+        // Continue, caller decides cancel vs retry.
       }
       if (!deferFailure) {
         await markPreauthFailure(bookingId, booking.customer_id, reason, {
@@ -634,7 +634,7 @@ export async function markPreauthFailure(
   await notifyCustomerPaymentIssue(
     customerId,
     bookingId,
-    "Booking cancelled — payment hold failed",
+    "Booking cancelled: payment hold failed",
     PREAUTH_CANCEL_REASON,
   );
 

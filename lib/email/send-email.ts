@@ -28,7 +28,7 @@ export async function sendBrandedEmail({
   if (!process.env.RESEND_API_KEY) return false;
 
   const recipients = filterDeliverableEmails(to);
-  // Seed/demo/.local addresses are skipped on purpose — treat as success so
+  // Seed/demo/.local addresses are skipped on purpose, treat as success so
   // callers do not retry, and Resend reputation is not burned by bounces.
   if (!recipients.length) return true;
 

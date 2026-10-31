@@ -19,8 +19,8 @@ import {
 
 /**
  * WeCasa-style consent:
- * 1) Banner — Accept all / Reject optional / Cookie preferences
- * 2) Preferences — Necessary (locked) + optional toggles
+ * 1) Banner. Accept all / Reject optional / Cookie preferences
+ * 2) Preferences. Necessary (locked) + optional toggles
  * Re-open via footer “Manage cookies” (no floating widget).
  */
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
@@ -34,7 +34,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     applyDefaultConsent();
     const existing = readConsent();
     setPreferences(existing);
-    // First visit (or reopen from footer) — show even before tags are configured
+    // First visit (or reopen from footer), show even before tags are configured
     // so consent UX matches WeCasa; tags only load when analytics is allowed.
     setBannerOpen(!existing);
     setReady(true);

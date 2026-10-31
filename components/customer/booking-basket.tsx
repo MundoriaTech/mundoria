@@ -11,7 +11,7 @@ import { formatHourlyRate, formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
 import type { Address } from "@/types/customer";
 
-/** Gold tint — Mundoria option 5 on the cream booking wash. */
+/** Gold tint. Mundoria option 5 on the cream booking wash. */
 const BASKET_SURFACE =
   "border border-transparent bg-[#fffefb] shadow-[0_10px_28px_rgba(28,19,59,0.05)]";
 
@@ -49,7 +49,7 @@ type BasketProps = {
   hasPets?: boolean | null;
   /** Labour rate for the selected service / standard (pence per hour). */
   hourlyRatePence?: number | null;
-  /** @deprecated Unused — Cleaning header shows visit total; lines show £/h. */
+  /** @deprecated Unused. Cleaning header shows visit total; lines show £/h. */
   labourAmountPence?: number | null;
   priorityAreas?: string[];
   /** Checkout-only: “Add a promo code” expands to an input (Wecasa-style). */
@@ -338,7 +338,7 @@ function BasketPanel({
   }
   for (const addOn of addOns) {
     // Quiet rows (free-duration extras) show the label only.
-    // Priced rows show £/h — visit total stays on the Cleaning header.
+    // Priced rows show £/h, visit total stays on the Cleaning header.
     if (addOn.quiet) {
       serviceLines.push({
         key: `addon-${addOn.label}`,
@@ -379,7 +379,7 @@ function BasketPanel({
   const scheduleTitle = multiSchedule
     ? `${scheduleDates.length} dates`
     : when ?? "Date of the session";
-  /** Single date+time already lives in the title — don't repeat it in the body. */
+  /** Single date+time already lives in the title, don't repeat it in the body. */
   const scheduleExpandable =
     multiSchedule || times.length > 1;
 
@@ -551,7 +551,7 @@ export function BookingBasket(props: BasketProps) {
   );
 }
 
-/** Read-only basket-style summary — used on booking detail. */
+/** Read-only basket-style summary, used on booking detail. */
 export function BookingSummaryCard({
   title = "Booking details",
   ...props
@@ -559,7 +559,7 @@ export function BookingSummaryCard({
   return <BasketPanel {...props} headerTitle={title} />;
 }
 
-/** Mobile bottom sheet — WeCasa-style “My basket”. Closed via bar chevron. */
+/** Mobile bottom sheet. WeCasa-style “My basket”. Closed via bar chevron. */
 export function BookingBasketSheet({
   onClose,
   open,

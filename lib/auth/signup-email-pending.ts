@@ -29,7 +29,7 @@ export function signupPendingLoginPath(
   role: "customer" | "cleaner",
   options: { next?: string | null } = {},
 ) {
-  // Booking checkout stays inside the wizard chrome — never AuthShell.
+  // Booking checkout stays inside the wizard chrome, never AuthShell.
   if (
     role === "customer" &&
     options.next &&

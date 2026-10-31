@@ -13,7 +13,7 @@ export const BIRMINGHAM_LOCATION_CLEANERS = [
 export const BIRMINGHAM_LOCATION_REVIEWS = [
   {
     author: "Sophie (Edgbaston)",
-    body: "Clear estimate before booking and the cleaner arrived on time. Kitchen and bathrooms looked genuinely finished — not a rushed wipe.",
+    body: "Clear estimate before booking and the cleaner arrived on time. Kitchen and bathrooms looked genuinely finished, not a rushed wipe.",
     service: "Regular cleaning",
   },
   {
@@ -28,7 +28,7 @@ export const BIRMINGHAM_LOCATION_REVIEWS = [
   },
   {
     author: "Tom (Moseley)",
-    body: "Recurring fortnightly clean — prefer same cleaner worked for us. Communication stayed in the app which we liked.",
+    body: "Recurring fortnightly clean, prefer same cleaner worked for us. Communication stayed in the app which we liked.",
     service: "Regular cleaning",
   },
   {
@@ -43,7 +43,7 @@ export const BIRMINGHAM_LOCATION_REVIEWS = [
   },
   {
     author: "Elena (Selly Oak)",
-    body: "Move-out clean left the flat ready for keys. Price was clear up front — no surprises on the day.",
+    body: "Move-out clean left the flat ready for keys. Price was clear up front, no surprises on the day.",
     service: "Moving home",
   },
   {

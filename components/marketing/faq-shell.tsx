@@ -8,7 +8,7 @@ import { faqNavMenus } from "@/lib/seo/site-faqs";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
-/** FAQ page chrome — floating marketing nav with FAQ category dropdowns. */
+/** FAQ page chrome, floating marketing nav with FAQ category dropdowns. */
 export function FaqShell({
   children,
   className,

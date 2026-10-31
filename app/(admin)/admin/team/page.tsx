@@ -46,7 +46,7 @@ export default async function AdminTeamPage() {
       <p className="max-w-2xl text-sm leading-6 text-[#5a5470] sm:text-base">
         {admins?.length ?? 0} admin
         {(admins?.length ?? 0) === 1 ? "" : "s"} who can review cleaners,
-        bookings, and payouts. Invite new people here — accounts cannot
+        bookings, and payouts. Invite new people here, accounts cannot
         self-register.
       </p>
 

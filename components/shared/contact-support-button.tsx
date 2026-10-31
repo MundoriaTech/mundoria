@@ -9,7 +9,7 @@ type SupportTab = "home" | "messages" | "help";
 
 /**
  * Opens the Mundoria support messenger (Home / Messages / Help).
- * Label stays generic — never mentions the chat provider or email.
+ * Label stays generic, never mentions the chat provider or email.
  */
 export function ContactSupportButton({
   className,

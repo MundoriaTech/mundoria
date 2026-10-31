@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Legacy path — keep bookmarks working after moving under /admin/cleaners. */
+/** Legacy path, keep bookmarks working after moving under /admin/cleaners. */
 export default function LegacyAdminCleanerRedirect({
   params,
 }: {

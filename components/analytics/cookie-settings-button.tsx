@@ -67,7 +67,7 @@ export function CookieSettingsWidget({
   );
 }
 
-/** Plain text control — WeCasa-style “Manage cookies” / Cookies footer link. */
+/** Plain text control. WeCasa-style “Manage cookies” / Cookies footer link. */
 export function CookieSettingsLink({
   className,
   children = "Manage cookies",
@@ -89,7 +89,7 @@ export function CookieSettingsLink({
   );
 }
 
-/** @deprecated Use CookieSettingsWidget — kept as alias for existing imports. */
+/** @deprecated Use CookieSettingsWidget, kept as alias for existing imports. */
 export function CookieSettingsButton({
   className,
 }: {

@@ -27,7 +27,7 @@ type PageProps = {
   searchParams?: { category?: string | string[]; service?: string | string[] };
 };
 
-/** Nearby towns get their own URL — not nested under /birmingham/. */
+/** Nearby towns get their own URL, not nested under /birmingham/. */
 export function generateStaticParams() {
   return Array.from(STANDALONE_TOWN_SLUGS).map((area) => ({ area }));
 }

@@ -6,7 +6,7 @@ import { ContactSupportButton } from "@/components/shared/contact-support-button
 import { SupportMessengerWidget } from "@/components/support/support-messenger";
 import { cn } from "@/lib/utils";
 
-/** Standalone Help Centre chrome — logo bar only, no marketing navbar/footer. */
+/** Standalone Help Centre chrome, logo bar only, no marketing navbar/footer. */
 export function HelpShell({
   children,
   className,

@@ -97,14 +97,14 @@ type HelpView =
 const TRIAGE_OPTIONS = [
   "A Mundoria customer",
   "A future customer",
-  "A future Mundoria cleaner — I'm registering to work with Mundoria",
-  "A Mundoria cleaner — I already work with Mundoria",
+  "A future Mundoria cleaner. I'm registering to work with Mundoria",
+  "A Mundoria cleaner. I already work with Mundoria",
 ] as const;
 
 const AGENT_NAME = "Mundoria";
 const AGENT_SUBTITLE = "The team can also help";
 const CONVERSATION_BANNER =
-  "Here, there are no silly questions — only clear answers.";
+  "Here, there are no silly questions, only clear answers.";
 const NAVY = "#1c133b";
 
 function MundoriaMarkWhite({

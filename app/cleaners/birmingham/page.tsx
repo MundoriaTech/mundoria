@@ -81,7 +81,7 @@ export default async function BirminghamCleanersPage() {
           "Clear estimates before you book",
           "Reliable, vetted cleaners you can trust",
         ]}
-        description="One-off or regular house cleaning with tried & vetted cleaners in your area — clear estimates from booking to checklist."
+        description="One-off or regular house cleaning with tried & vetted cleaners in your area, clear estimates from booking to checklist."
         primaryHref={bookingHref}
         primaryLabel="Book in Birmingham"
         showReviews
@@ -97,7 +97,7 @@ export default async function BirminghamCleanersPage() {
         />
 
         <BrandedCtaBand
-          body="Enter your Birmingham postcode and service — we’ll show a clear estimate before you book."
+          body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."
           href={bookingHref}
           label="Book in Birmingham"
           title="Ready to book in Birmingham?"

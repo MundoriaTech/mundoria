@@ -122,7 +122,7 @@ export function FaqCatalogue() {
   useEffect(() => {
     if (!hashId) return;
 
-    // Search can hide the target Q&A from the DOM — clear it first.
+    // Search can hide the target Q&A from the DOM, clear it first.
     if (query.trim()) {
       setQuery("");
       return;
@@ -146,7 +146,7 @@ export function FaqCatalogue() {
     };
   }, [hashId, query, sections]);
 
-  // Same-hash navbar re-clicks don't change the URL snapshot — open directly.
+  // Same-hash navbar re-clicks don't change the URL snapshot, open directly.
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       const anchor = (event.target as Element | null)?.closest?.("a[href]");

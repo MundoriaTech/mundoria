@@ -2,13 +2,13 @@
 
 Mundoria uses Stripe **SetupIntent → delayed manual capture**:
 
-1. **Save card** at booking — `payment_status: unpaid` with `stripe_payment_method_id`
-2. **Pre-authorise (hold)** about 24 hours before the visit once a cleaner is confirmed — `payment_status: held`
+1. **Save card** at booking, `payment_status: unpaid` with `stripe_payment_method_id`
+2. **Pre-authorise (hold)** about 24 hours before the visit once a cleaner is confirmed, `payment_status: held`
    - If the visit is already inside that window when the cleaner confirms, hold immediately
    - If the hold fails (declined card, insufficient funds, bank auth required), the booking is **cancelled free of charge** (WeCasa-like). Customer and cleaner are notified; no charge is taken.
-3. **Keep the hold** after checkout — do not capture on cleaner check-out
-4. **Capture** the next UK calendar day after the clean, at the admin-configured local time — `payment_status: released`
-5. **Refund / release** on qualifying cancel — `payment_status: refunded` (or hold released)
+3. **Keep the hold** after checkout, do not capture on cleaner check-out
+4. **Capture** the next UK calendar day after the clean, at the admin-configured local time, `payment_status: released`
+5. **Refund / release** on qualifying cancel, `payment_status: refunded` (or hold released)
 
 Admin timing lives on `platform_settings`:
 
@@ -31,8 +31,8 @@ Checkout can save a wallet card the same way as a typed card (SetupIntent → la
 
 **Stripe Dashboard (required before wallets appear in production):**
 
-1. **Settings → Payment methods** — enable **Apple Pay** and **Google Pay**.
-2. **Settings → Payment method domains** — register every HTTPS host customers use (e.g. `mundoria.co.uk`, `www.mundoria.co.uk`, staging). Apple Pay will not show on unregistered domains.
+1. **Settings → Payment methods**, enable **Apple Pay** and **Google Pay**.
+2. **Settings → Payment method domains**, register every HTTPS host customers use (e.g. `mundoria.co.uk`, `www.mundoria.co.uk`, staging). Apple Pay will not show on unregistered domains.
 3. Test on a real device: Safari + Apple Wallet for Apple Pay; Chrome + Google Pay for Google Pay.
 
 Wallets are offered via Stripe’s Payment Request Button on booking checkout when `canMakePayment()` succeeds. In Chrome, an authenticated Link session can take priority over Google Pay and show “Pay with Link” instead. Localhost usually works for Google Pay in Chrome; Apple Pay typically needs a registered domain.

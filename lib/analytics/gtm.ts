@@ -33,7 +33,7 @@ function ensureDataLayer() {
   }
 }
 
-/** Google Consent Mode defaults — call before any tags load. */
+/** Google Consent Mode defaults, call before any tags load. */
 export function applyDefaultConsent() {
   if (typeof window === "undefined") return;
   ensureDataLayer();

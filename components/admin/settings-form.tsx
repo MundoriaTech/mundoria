@@ -204,7 +204,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           Supply rates (£/h)
         </h2>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
-          <Field label="Cleaning products — home">
+          <Field label="Cleaning products (home)">
             <Input
               min={0}
               onChange={(event) =>
@@ -221,7 +221,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               value={penceToPoundsInput(pricing.supply.productsResidential)}
             />
           </Field>
-          <Field label="Cleaning products — commercial">
+          <Field label="Cleaning products (commercial)">
             <Input
               min={0}
               onChange={(event) =>
@@ -238,7 +238,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               value={penceToPoundsInput(pricing.supply.productsCommercial)}
             />
           </Field>
-          <Field label="Equipment — standard">
+          <Field label="Equipment (standard)">
             <Input
               min={0}
               onChange={(event) =>
@@ -255,7 +255,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               value={penceToPoundsInput(pricing.supply.equipmentDefault)}
             />
           </Field>
-          <Field label="Equipment — deep clean">
+          <Field label="Equipment (deep clean)">
             <Input
               min={0}
               onChange={(event) =>

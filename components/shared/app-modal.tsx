@@ -26,7 +26,7 @@ export function AppModal({
   title,
 }: {
   accent?: "none" | "peach" | "destructive";
-  /** `dim` — soft dark scrim. `blur` — page blur only, no overlay tint. */
+  /** `dim`, soft dark scrim. `blur`, page blur only, no overlay tint. */
   backdrop?: "dim" | "blur";
   children: ReactNode;
   className?: string;

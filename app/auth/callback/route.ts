@@ -159,7 +159,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // Booking Google sign-in stays in the wizard — collect phone at checkout
+    // Booking Google sign-in stays in the wizard, collect phone at checkout
     // instead of bouncing through /complete-profile (email/password already did).
     if (
       user &&

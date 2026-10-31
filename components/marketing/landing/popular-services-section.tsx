@@ -74,7 +74,7 @@ const starMaskStyle = {
   maskPosition: "center top",
 } as const;
 
-/** px/s — softer on touch / narrow viewports */
+/** px/s, softer on touch / narrow viewports */
 const AUTO_SCROLL_SPEED_DESKTOP = 36;
 const AUTO_SCROLL_SPEED_SOFT = 24;
 const MANUAL_PAUSE_MS = 5000;
@@ -400,7 +400,7 @@ export function PopularServicesSection({
             </div>
           </div>
 
-          {/* Desktop-only steppers — mobile uses soft auto-slide + swipe */}
+          {/* Desktop-only steppers, mobile uses soft auto-slide + swipe */}
           <div className="mt-5 hidden justify-end gap-2 md:flex">
             <button
               aria-label="Previous popular services"

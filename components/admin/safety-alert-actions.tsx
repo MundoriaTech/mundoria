@@ -109,7 +109,7 @@ export function SafetyAlertActions({
               type="button"
               variant="outline"
             >
-              Resolve — continue booking
+              Resolve, continue booking
             </Button>
             <Button
               disabled={pending || notes.trim().length < 3}
@@ -117,7 +117,7 @@ export function SafetyAlertActions({
               type="button"
               variant="destructive"
             >
-              Resolve — cancel booking
+              Resolve, cancel booking
             </Button>
           </>
         ) : (

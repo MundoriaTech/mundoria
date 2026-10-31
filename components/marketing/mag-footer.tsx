@@ -66,7 +66,7 @@ export function MagFooter({
               Mundoria <span className="text-[#d4694a]">Mag</span>
             </Link>
             <p className="mt-5 max-w-xl text-pretty text-sm font-light leading-7 text-muted-foreground sm:mt-6">
-              Cleaning & home magazine — practical guides, host tips and
+              Cleaning & home magazine, practical guides, host tips and
               Birmingham stories for real homes.
             </p>
             <div className="mt-5 sm:mt-6">

@@ -7,7 +7,7 @@ type PageProps = {
   params: { slug: string };
 };
 
-/** Former “service in Birmingham” copies — the main service page is the ranking URL. */
+/** Former “service in Birmingham” copies, the main service page is the ranking URL. */
 export default function ServiceBirminghamRedirect({ params }: PageProps) {
   const service = marketingServiceBySlug(params.slug);
   permanentRedirect(

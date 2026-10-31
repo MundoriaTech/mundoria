@@ -7,7 +7,7 @@ type AuthLinkType = "recovery" | "signup" | "magiclink";
 const TEMPLATE_BY_TYPE: Record<AuthLinkType, EmailTemplateId> = {
   recovery: "auth.password_reset",
   signup: "auth.signup_confirmation",
-  /** Same branded confirm copy — used when the account is already sign-in ready. */
+  /** Same branded confirm copy, used when the account is already sign-in ready. */
   magiclink: "auth.signup_confirmation",
 };
 
@@ -71,7 +71,7 @@ export async function sendAuthLinkEmail({
   appUrl: string;
   email: string;
   firstName?: string;
-  /** Required when type is signup — Supabase generateLink needs it. */
+  /** Required when type is signup. Supabase generateLink needs it. */
   password?: string;
   redirectTo: string;
   type: AuthLinkType;

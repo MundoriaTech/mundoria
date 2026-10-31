@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-/** Light-surface fields — explicit colours so app/system dark mode cannot restyle them. */
+/** Light-surface fields, explicit colours so app/system dark mode cannot restyle them. */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => (
     <input

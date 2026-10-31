@@ -10,7 +10,7 @@ import {
 } from "@/lib/cleaner/tier";
 import type { CleanerTier } from "@/types/cleaner";
 
-/** Glovo-style activity insights — compact scoring peek. */
+/** Glovo-style activity insights, compact scoring peek. */
 export function CleanerMedallionPanel({
   acceptanceRate,
   onTimeRate,

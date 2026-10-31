@@ -1614,7 +1614,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "When will I be charged?",
         answer:
-          "When you book, Mundoria saves your card — there is no charge and no hold at that moment.\n\nAbout 24 hours before your clean (once a cleaner has confirmed), we place a hold for the booking amount. That reserves the funds but is not the final charge yet.\n\nPayment is captured the next calendar day after the clean is completed.\n\nIf the booking is cancelled under the free-cancellation window, any authorisation is released. If a cancellation fee applies, that is handled according to the cancellation terms.",
+          "When you book, Mundoria saves your card, there is no charge and no hold at that moment.\n\nAbout 24 hours before your clean (once a cleaner has confirmed), we place a hold for the booking amount. That reserves the funds but is not the final charge yet.\n\nPayment is captured the next calendar day after the clean is completed.\n\nIf the booking is cancelled under the free-cancellation window, any authorisation is released. If a cancellation fee applies, that is handled according to the cancellation terms.",
       },
       {
         question: "Can I get a receipt or invoice?",
@@ -1895,7 +1895,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What happens if I have a safety concern?",
         answer:
-          "If it is happening during a booking and you feel unsafe, prioritise your immediate safety first — leave if you can, and call 999 if you are in danger.\n\nThen use Safety alert on the booking so Mundoria can review the case.\n\nOutside a live visit, contact Mundoria support and explain what happened.\n\nSafety concerns should not be treated like ordinary service feedback.",
+          "If it is happening during a booking and you feel unsafe, prioritise your immediate safety first, leave if you can, and call 999 if you are in danger.\n\nThen use Safety alert on the booking so Mundoria can review the case.\n\nOutside a live visit, contact Mundoria support and explain what happened.\n\nSafety concerns should not be treated like ordinary service feedback.",
       },
       {
         question: "How do I report inappropriate behaviour?",

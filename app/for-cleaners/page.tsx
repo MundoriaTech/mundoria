@@ -33,7 +33,7 @@ const benefits = [
     title: "Simple onboarding",
   },
   {
-    body: "Follow checklists, share status and message customers in-app — no private off-platform negotiation.",
+    body: "Follow checklists, share status and message customers in-app, no private off-platform negotiation.",
     icon: "/images/marketing/icons/tools.png",
     title: "Professional tools",
   },
@@ -63,7 +63,7 @@ export default function ForCleanersPage() {
       />
       <BrandedPageWash underNav>
         <ForCleanersHero
-          description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility — starting in Birmingham."
+          description="Mundoria is building a marketplace where independent cleaners get clearer work, fairer reviews and payout visibility, starting in Birmingham."
           eyebrow="Cleaners"
           primaryHref={signupHref}
           primaryLabel="Apply as a cleaner"

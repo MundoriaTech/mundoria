@@ -48,7 +48,7 @@ export function BookingAuthPrompt({
   hideTitle?: boolean;
   /** Prefill from the date-step “Where should we send your booking?” field. */
   initialEmail?: string;
-  /** Landing from email-confirmation signup — open sign-in with success copy. */
+  /** Landing from email-confirmation signup, open sign-in with success copy. */
   initialVerifyPending?: boolean;
   mode: BookingAuthMode;
   onModeChange: (mode: BookingAuthMode) => void;
@@ -138,7 +138,7 @@ export function BookingAuthPrompt({
     autoResolvedRef.current = false;
   }, [initialEmail]);
 
-  // Date-step email already collected — skip re-asking and open create/sign-in.
+  // Date-step email already collected, skip re-asking and open create/sign-in.
   // If the customer taps “edit email”, autoResolvedRef stays true so ask stays editable.
   useEffect(() => {
     if (mode !== "ask" || autoResolvedRef.current) return;
@@ -203,7 +203,7 @@ export function BookingAuthPrompt({
         throw new Error(result.error ?? "Unable to create your account.");
       }
 
-      // Booking signup auto-confirms — sign in immediately and stay on checkout.
+      // Booking signup auto-confirms, sign in immediately and stay on checkout.
       if (!result.requiresEmailConfirmation) {
         const supabase = createBrowserClient();
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -220,7 +220,7 @@ export function BookingAuthPrompt({
           return;
         }
         markBookingAuthReturn();
-        // Refresh session in place — avoid replace/remount that rebuilds the
+        // Refresh session in place, avoid replace/remount that rebuilds the
         // wizard history stack and can drop the customer back mid-funnel.
         rememberBookingCheckoutStep();
         router.refresh();

@@ -4,7 +4,7 @@ import { Sun } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-/** Mundoria is light-only — toggle kept as a non-interactive brand control if needed. */
+/** Mundoria is light-only, toggle kept as a non-interactive brand control if needed. */
 export function ThemeToggle({
   className,
 }: {

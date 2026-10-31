@@ -93,7 +93,7 @@ export async function GET(request: Request) {
         next.gate === "t24"
           ? "Confirm within the next 2 hours that you can still take this clean."
           : next.gate === "t6"
-            ? "Reconfirm this clean — the window is shorter now."
+            ? "Reconfirm this clean, the window is shorter now."
             : "Mark yourself on the way so the customer stays protected.",
         { booking_id: booking.id, gate: next.gate },
       );

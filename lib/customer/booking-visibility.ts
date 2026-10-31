@@ -37,7 +37,7 @@ export function formatConfirmByDeadline(iso: string): string {
   });
 }
 
-/** Marketing still for dashboard session cards — keyed by service type. */
+/** Marketing still for dashboard session cards, keyed by service type. */
 export function sessionPhotoForService(serviceType: ServiceType): string {
   const base = "/images/marketing/landing";
   switch (serviceType) {

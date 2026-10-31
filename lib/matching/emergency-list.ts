@@ -1,8 +1,8 @@
 /**
- * Dynamic Emergency List — booking engine helpers.
+ * Dynamic Emergency List, booking engine helpers.
  *
  * Rule: one primary holds the booking. Every other eligible cleaner stays
- * in reserve until unavailable or cleaning starts. List size ≠ push size —
+ * in reserve until unavailable or cleaning starts. List size ≠ push size , 
  * notify in rank order, three at a time.
  */
 
@@ -284,7 +284,7 @@ export async function closeEmergencyList(bookingId: string) {
 }
 
 /**
- * Promote next reserve(s) via ranked push — notify the top available wave
+ * Promote next reserve(s) via ranked push, notify the top available wave
  * first (default wave size 3), first to accept becomes primary.
  */
 export async function activateEmergencyList(

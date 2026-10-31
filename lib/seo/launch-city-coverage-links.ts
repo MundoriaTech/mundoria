@@ -1,6 +1,6 @@
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
 
-/** Homepage coverage block — main service / category hubs only. */
+/** Homepage coverage block, main service / category hubs only. */
 export const LAUNCH_CITY_COVERAGE_GROUPS = [
   {
     id: "residential",

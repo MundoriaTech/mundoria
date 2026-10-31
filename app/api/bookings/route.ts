@@ -252,7 +252,7 @@ export async function POST(request: Request) {
           ? seriesError.message
           : "The next visit in this series could not be created.";
       await admin.from("notifications").insert({
-        body: "Your first visit is booked. The next visit in the series could not be created yet — contact support if it does not appear in your bookings.",
+        body: "Your first visit is booked. The next visit in the series could not be created yet, contact support if it does not appear in your bookings.",
         data: { booking_id: booking.id },
         title: "Recurring visit needs attention",
         type: "booking_created",
@@ -315,7 +315,7 @@ export async function POST(request: Request) {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Card saved for ${formatMoney(amountPence)} — we hold funds about 24 hours before your clean, then charge the next day after it’s done.`;
+  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Card saved for ${formatMoney(amountPence)}, we hold funds about 24 hours before your clean, then charge the next day after it’s done.`;
   const preferences = profile.notification_preferences as {
     email?: boolean;
     sms?: boolean;

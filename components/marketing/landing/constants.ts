@@ -1,4 +1,4 @@
-/** Figma landing palette — mapped to Mundoria brand tokens where possible. */
+/** Figma landing palette, mapped to Mundoria brand tokens where possible. */
 export const landingColors = {
   navy: "#1c133b",
   purple: "#312c79",

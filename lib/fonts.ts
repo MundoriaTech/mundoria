@@ -1,6 +1,6 @@
 import { Sora } from "next/font/google";
 
-/** Site typography — Light through ExtraBold. */
+/** Site typography. Light through ExtraBold. */
 export const sora = Sora({
   display: "swap",
   subsets: ["latin"],

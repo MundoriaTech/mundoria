@@ -63,7 +63,7 @@ export function withDocumentAt(
   const urls = parseDocumentList(stored);
   const value = next.trim();
   if (!value) return removeDocumentAt(stored, index);
-  // Only replace an existing page or append as the next page — never skip ahead.
+  // Only replace an existing page or append as the next page, never skip ahead.
   if (index < 0 || index > urls.length) return serializeDocumentList(urls);
   if (index === urls.length) {
     urls.push(value);

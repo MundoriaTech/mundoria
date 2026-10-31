@@ -10,7 +10,7 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
   faqs: [
     {
       answer:
-        "Mundoria is a technology-enabled marketplace that connects you with suitable cleaning professionals — with clear estimates, secure payment and live booking status.",
+        "Mundoria is a technology-enabled marketplace that connects you with suitable cleaning professionals, with clear estimates, secure payment and live booking status.",
       question: "What is Mundoria?",
       services: [
         {
@@ -32,7 +32,7 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
     },
     {
       answer:
-        "Enter your location during booking. Mundoria matches cleaners by area and availability — launching with Birmingham and nearby neighbourhoods.",
+        "Enter your location during booking. Mundoria matches cleaners by area and availability, launching with Birmingham and nearby neighbourhoods.",
       question: "Where is this available?",
     },
   ],
@@ -50,7 +50,7 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
     },
   ],
   servicesTitle: "Choose your moving home cleaning service",
-  subtitle: "End of tenancy, move-in and move-out — without another thing on your list",
+  subtitle: "End of tenancy, move-in and move-out, without another thing on your list",
   title: "Moving Home",
 };
 
@@ -85,7 +85,7 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
     },
     {
       answer:
-        "Yes — where appropriate you can move from one-off turnovers toward a regular schedule that matches guest changeovers.",
+        "Yes, where appropriate you can move from one-off turnovers toward a regular schedule that matches guest changeovers.",
       question: "Can I book recurring turnovers?",
     },
   ],
@@ -112,12 +112,12 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   bullets: [
     "Cleaning that adapts when life does",
     "Share preferences before the cleaner arrives",
-    "Still cleaning — not healthcare or personal care",
+    "Still cleaning, not healthcare or personal care",
   ],
   faqs: [
     {
       answer:
-        "Recovery cleaning is for times when life changes — pregnancy, recovery, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
+        "Recovery cleaning is for times when life changes, pregnancy, recovery, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
       question: "What is recovery cleaning?",
       services: [
         {
@@ -178,6 +178,6 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   servicesGridClassName:
     "lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible",
   servicesTitle: "Choose your recovery cleaning service",
-  subtitle: "Cleaning that adapts when life does — with a little more consideration",
+  subtitle: "Cleaning that adapts when life does, with a little more consideration",
   title: "Recovery cleaning",
 };

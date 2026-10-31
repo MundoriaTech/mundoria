@@ -13,12 +13,12 @@ function buildLlmsTxt() {
   const popular = popularMarketingServices(6);
   const areas = BIRMINGHAM_AREAS.map(
     (area) =>
-      `- ${area.name}: ${absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`)} — ${area.description}`,
+      `- ${area.name}: ${absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`)}, ${area.description}`,
   ).join("\n");
   const services = popular
     .map(
       (service) =>
-        `- ${service.label}: ${absoluteUrl(`/cleaning/${service.slug}`)} — From ${service.fromPrice}. ${service.description}`,
+        `- ${service.label}: ${absoluteUrl(`/cleaning/${service.slug}`)}. From ${service.fromPrice}. ${service.description}`,
     )
     .join("\n");
   const faqs = MARKETING_FAQS.slice(0, 6)

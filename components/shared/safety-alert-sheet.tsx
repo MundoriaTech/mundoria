@@ -213,7 +213,7 @@ export function SafetyAlertSheet({
             </Button>
             <p className="text-xs leading-5 text-[#8b8798]">
               For cleaning quality, lateness or breakage, use Report issue
-              instead — not a safety alert.
+              instead, not a safety alert.
             </p>
           </div>
         ) : null}
@@ -276,7 +276,7 @@ export function SafetyAlertSheet({
           <div className="space-y-4">
             <p className="text-sm leading-6 text-[#5a5470]">
               Mundoria ops will be paged. This booking will be paused for
-              review. The other party is told an alert was raised — not your
+              review. The other party is told an alert was raised, not your
               private note.
             </p>
             <FormStatus message={error} title="Couldn’t send the alert" />

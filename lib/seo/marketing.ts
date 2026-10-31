@@ -56,7 +56,7 @@ export const MARKETING_SERVICES: MarketingService[] = SERVICES.map((service) => 
     categoryLabel: category.label,
     description: service.description,
     fromPrice: formatHourlyRate(indicativeHourlyRatePence(service.value)),
-    intro: `${service.label} with Mundoria — clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
+    intro: `${service.label} with Mundoria. Clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
     label: service.label,
     seoDescription: `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${formatHourlyRate(indicativeHourlyRatePence(service.value))}.`,
     slug,
@@ -106,7 +106,7 @@ export type ServiceCardLocation =
   | { kind: "zone"; id: string }
   | { kind: "place"; slug: string };
 
-/** Always the main service page — area pages link here; service pages link to areas. */
+/** Always the main service page, area pages link here; service pages link to areas. */
 export function serviceCardHref(serviceSlug: string) {
   return `/cleaning/${serviceSlug}`;
 }
@@ -142,7 +142,7 @@ export const LAUNCH_CITY = {
     "Book trusted cleaners in Birmingham with Mundoria. Regular, deep, end-of-tenancy, Airbnb and office cleaning with clear pricing and live status.",
   slug: "birmingham",
   summary:
-    "Mundoria covers Birmingham and the nearby towns listed on our location pages — cleaners choose a home district from the same live postcode list.",
+    "Mundoria covers Birmingham and the nearby towns listed on our location pages, cleaners choose a home district from the same live postcode list.",
 } as const;
 
 export const BIRMINGHAM_AREAS: MarketingArea[] = [
@@ -152,7 +152,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     faqs: [
       {
         answer:
-          "Yes. Jewellery Quarter flats and short-lets are a core Mundoria focus — regular cleans, guest turnovers and one-off deep cleans with clear estimates.",
+          "Yes. Jewellery Quarter flats and short-lets are a core Mundoria focus, regular cleans, guest turnovers and one-off deep cleans with clear estimates.",
         question: "Can Mundoria clean apartments in the Jewellery Quarter?",
       },
       {
@@ -168,7 +168,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     ],
     name: "Jewellery Quarter",
     seoIntro:
-      "Trusted cleaners for Jewellery Quarter apartments, lofts and short-lets — clear pricing before you book, live status through arrival and completion.",
+      "Trusted cleaners for Jewellery Quarter apartments, lofts and short-lets, clear pricing before you book, live status through arrival and completion.",
     slug: "jewellery-quarter",
   },
   {
@@ -193,7 +193,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     ],
     name: "Edgbaston",
     seoIntro:
-      "Book Mundoria cleaners in Edgbaston for family homes and nearby student streets — recommended duration, transparent price and vetted pros.",
+      "Book Mundoria cleaners in Edgbaston for family homes and nearby student streets, recommended duration, transparent price and vetted pros.",
     slug: "edgbaston",
   },
   {
@@ -218,7 +218,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     ],
     name: "Harborne",
     seoIntro:
-      "Harborne house cleaning with Mundoria — recurring visits, move cleans and deep cleans with a clear estimate and live booking updates.",
+      "Harborne house cleaning with Mundoria. Recurring visits, move cleans and deep cleans with a clear estimate and live booking updates.",
     slug: "harborne",
   },
   {
@@ -243,7 +243,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     ],
     name: "Moseley",
     seoIntro:
-      "Find Mundoria cleaners in Moseley for homes and rentals — book online, see the price first, and track your visit from match to finish.",
+      "Find Mundoria cleaners in Moseley for homes and rentals, book online, see the price first, and track your visit from match to finish.",
     slug: "moseley",
   },
   {
@@ -268,7 +268,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     ],
     name: "Kings Heath",
     seoIntro:
-      "Kings Heath cleaning with Mundoria — deep cleans, moving home support and regular visits with vetted cleaners and live status.",
+      "Kings Heath cleaning with Mundoria. Deep cleans, moving home support and regular visits with vetted cleaners and live status.",
     slug: "kings-heath",
   },
   {
@@ -293,7 +293,7 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     ],
     name: "Selly Oak",
     seoIntro:
-      "Book Mundoria cleaners in Selly Oak for student houses and residential streets — clear estimates, vetted pros and live booking status.",
+      "Book Mundoria cleaners in Selly Oak for student houses and residential streets, clear estimates, vetted pros and live booking status.",
     slug: "selly-oak",
   },
 ];
@@ -434,7 +434,7 @@ export function birminghamPostcodesForPicker() {
   });
 }
 
-/** `/cleaners/birmingham/harborne-b17` — place name in the path, postcode at the end. */
+/** `/cleaners/birmingham/harborne-b17`, place name in the path, postcode at the end. */
 export function postcodePath(prefix: string) {
   const district = birminghamPostcode(prefix);
   const slug = district
@@ -484,7 +484,7 @@ export const FOR_CLEANERS_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Photo ID (passport or driving licence), a clear DBS check, a profile headshot, and right-to-work evidence if you are not a British or Irish national. Independent cleaners should be registered as self-employed with HMRC — Mundoria may ask for your UTR before you accept paid jobs.",
+      "Photo ID (passport or driving licence), a clear DBS check, a profile headshot, and right-to-work evidence if you are not a British or Irish national. Independent cleaners should be registered as self-employed with HMRC. Mundoria may ask for your UTR before you accept paid jobs.",
     question: "What documents do I need?",
   },
   {
@@ -499,7 +499,7 @@ export const FOR_CLEANERS_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Eligible jobs appear in your feed for your working areas. Accept work that fits your schedule and keep a clear calendar — there is no private off-platform negotiation.",
+      "Eligible jobs appear in your feed for your working areas. Accept work that fits your schedule and keep a clear calendar, there is no private off-platform negotiation.",
     question: "Can I choose which jobs I accept?",
   },
   {
@@ -532,12 +532,12 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Your estimate is based on the service, cleaning standard, property size and any add-ons. You see the price before checkout — no surprise fees after you book.",
+      "Your estimate is based on the service, cleaning standard, property size and any add-ons. You see the price before checkout, no surprise fees after you book.",
     question: "How is pricing calculated?",
   },
   {
     answer:
-      "Payment is taken securely through Stripe. For most bookings, Mundoria authorises or collects payment through the platform — you never pay the cleaner directly.",
+      "Payment is taken securely through Stripe. For most bookings, Mundoria authorises or collects payment through the platform, you never pay the cleaner directly.",
     question: "When do I pay?",
   },
   {
@@ -564,7 +564,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
 
 export const HOW_IT_WORKS_STEPS = [
   {
-    body: "Choose residential, moving home, short-let, commercial or recovery support — then the specific service you need.",
+    body: "Choose residential, moving home, short-let, commercial or recovery support, then the specific service you need.",
     title: "Pick your service",
   },
   {

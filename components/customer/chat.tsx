@@ -264,7 +264,7 @@ export function Chat({
 
       {safetyHold ? (
         <div className="border-b border-[#f0c4b8] bg-[#fff7f2] px-4 py-3 text-xs leading-5 text-[#7a3b28] sm:px-5">
-          Safety review in progress — keep messages respectful. Mundoria can see
+          Safety review in progress, keep messages respectful. Mundoria can see
           this thread.
         </div>
       ) : null}
@@ -288,7 +288,7 @@ export function Chat({
               Messages
             </p>
             <p className="mt-2 text-sm font-light text-[#5a5470] dark:text-muted-foreground">
-              Say hello — share access notes, parking tips, or photos.
+              Say hello, share access notes, parking tips, or photos.
             </p>
           </div>
         )}

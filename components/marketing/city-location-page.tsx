@@ -16,7 +16,7 @@ import {
 import { absoluteUrl } from "@/lib/seo/site";
 
 const HERO_DESCRIPTION =
-  "One-off or regular house cleaning with tried & vetted cleaners in your area — clear estimates from booking to checklist.";
+  "One-off or regular house cleaning with tried & vetted cleaners in your area, clear estimates from booking to checklist.";
 
 function heroEyebrow(name: string, focus?: PlacePageFocus) {
   const lead = focus?.serviceLabel
@@ -50,7 +50,7 @@ export async function CityLocationPage({
   path: string;
   placeLinks?: Array<{ href: string; label: string }>;
   placesNote?: string;
-  /** Local authority / city for schema — omit Birmingham for Solihull, Sandwell towns, etc. */
+  /** Local authority / city for schema, omit Birmingham for Solihull, Sandwell towns, etc. */
   regionLabel?: string | null;
   showNearbyTowns?: boolean;
   surroundingLinks?: Array<{ href: string; label: string }>;

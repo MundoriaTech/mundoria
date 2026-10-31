@@ -21,7 +21,7 @@ const HELP_HERO_IMAGE = "/images/mag/welcome-mag.jpg";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Mundoria Help Centre — advice for customers and cleaners on booking, payments, Recovery, and becoming a partner.",
+    "Mundoria Help Centre: advice for customers and cleaners on booking, payments, Recovery, and becoming a partner.",
   path: "/help",
   title: "Help Centre | Mundoria",
 });
@@ -65,7 +65,7 @@ export default async function HelpCentrePage() {
               How can we help?
             </h1>
             <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
-              Advice and answers from the Mundoria team — for customers booking
+              Advice and answers from the Mundoria team: for customers booking
               cleans and cleaners joining the marketplace.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">

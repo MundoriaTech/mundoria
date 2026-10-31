@@ -113,7 +113,7 @@ function heading(view: View, from: string, to: string) {
   const startMonth = start.toLocaleDateString("en-GB", { month: "long" });
   const endMonth = end.toLocaleDateString("en-GB", { month: "long" });
   if (startMonth === endMonth) return `${start.getDate()}–${end.getDate()} ${startMonth}`;
-  return `${start.getDate()} ${startMonth} – ${end.getDate()} ${endMonth}`;
+  return `${start.getDate()} ${startMonth}, ${end.getDate()} ${endMonth}`;
 }
 
 function clock(time: string) {
@@ -500,7 +500,7 @@ export function DiaryBoard() {
               <li className="flex items-center justify-between gap-3 text-sm" key={absence.id}>
                 <span className="text-[#1c133b]">
                   {parseDay(absence.starts_on).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                  {" – "}
+                  {", "}
                   {parseDay(absence.ends_on).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   {absence.note ? ` · ${absence.note}` : ""}
                 </span>

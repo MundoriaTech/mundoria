@@ -65,7 +65,7 @@ export function absoluteUrl(path = "/") {
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-/** One brand mention — avoids `Title | Mundoria | Mundoria` from the root template. */
+/** One brand mention, avoids `Title | Mundoria | Mundoria` from the root template. */
 export function brandedTitle(title: string) {
   const trimmed = title.trim();
   if (/\bMundoria\b/i.test(trimmed)) return trimmed;

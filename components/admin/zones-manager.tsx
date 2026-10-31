@@ -125,7 +125,7 @@ function ZoneMap({ zones }: { zones: Zone[] }) {
         center={LONDON_CENTER}
         circles={activeZones.map((zone, index) => ({
           center: {
-            // Approximate spread for overview only — prefixes are not geocoded.
+            // Approximate spread for overview only, prefixes are not geocoded.
             lat: LONDON_CENTER.lat + (index % 3) * 0.035,
             lng: LONDON_CENTER.lng + (index % 4) * 0.045,
           },

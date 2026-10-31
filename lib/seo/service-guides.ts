@@ -30,7 +30,7 @@ export function serviceGuide(service: MarketingService, topic: ServiceGuideTopic
       description: `What a ${service.label.toLowerCase()} visit in Birmingham includes, and what stays outside the standard checklist.`,
       paragraphs: [
         service.description,
-        "The checklist is agreed before the visit. Kitchens, bathrooms and the rooms you include are the core of the job. Notes you add — pets, products, rooms to skip — stay on the booking.",
+        "The checklist is agreed before the visit. Kitchens, bathrooms and the rooms you include are the core of the job. Notes you add, pets, products, rooms to skip, stay on the booking.",
         "Specialist extras, such as an oven clean or inside windows, are add-ons when the service offers them. They are priced in the estimate rather than added on the day.",
       ],
       title: `What is included in ${service.label.toLowerCase()} in Birmingham?`,

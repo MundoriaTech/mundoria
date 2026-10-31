@@ -177,7 +177,7 @@ export async function listHelpArticlesForCollection(
   }
 }
 
-/** All published help articles — used for sitemap generation. */
+/** All published help articles, used for sitemap generation. */
 export async function listPublishedHelpArticles(): Promise<
   Array<Pick<HelpArticle, "slug" | "title"> & { updated_at?: string | null }>
 > {

@@ -70,7 +70,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
   return [
     {
       description:
-        "Homes, flats and guest turns — everyday upkeep through to deeper resets.",
+        "Homes, flats and guest turns, everyday upkeep through to deeper resets.",
       href: "/cleaning/residential",
       label: "Residential Cleaning",
       soft: "#efe6ff",
@@ -125,7 +125,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
     },
     {
       description:
-        "Cleaning that adapts when life does — with more personal consideration.",
+        "Cleaning that adapts when life does, with more personal consideration.",
       href: "/cleaning/recovery",
       label: "Recovery cleaning",
       soft: "#f0e4f8",
@@ -367,7 +367,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
               Ready when you are.
             </h2>
             <p className="mt-2 max-w-md text-sm leading-6 text-white/70">
-              Tell us about your space — we’ll keep the next steps clear.
+              Tell us about your space, we’ll keep the next steps clear.
             </p>
           </div>
           <Link

@@ -13,7 +13,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Workspace cleaning with Mundoria — office, retail & hospitality, educational and communal area cleans with clear pricing and vetted cleaners in Birmingham.",
+    "Workspace cleaning with Mundoria: office, retail & hospitality, educational and communal area cleans with clear pricing and vetted cleaners in Birmingham.",
   path: "/cleaning/commercial",
   title: "Workspace Cleaning | Mundoria",
 });

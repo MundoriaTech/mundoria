@@ -9,7 +9,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Airbnb and short-let cleaning with Mundoria — guest-ready turnovers for Airbnb, holiday lets and serviced accommodation in Birmingham.",
+    "Airbnb and short-let cleaning with Mundoria: guest-ready turnovers for Airbnb, holiday lets and serviced accommodation in Birmingham.",
   path: "/cleaning/short-lets",
   title: "Airbnb & Short Lets Cleaning | Mundoria",
 });

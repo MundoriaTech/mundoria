@@ -114,7 +114,7 @@ export async function CategoryMagLinks({
           </div>
           {serviceSlug && matchedCount > 0 ? (
             <p className="mt-3 max-w-sm text-sm leading-6 text-[#5a5470]">
-              Guides matched to this service — then more from the Mag.
+              Guides matched to this service, then more from the Mag.
             </p>
           ) : null}
           <ul className="mt-6 border-t border-[#e7e1f0]">

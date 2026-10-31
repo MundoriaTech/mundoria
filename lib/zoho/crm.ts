@@ -210,7 +210,7 @@ export async function upsertZohoLead(
       First_Name: firstName || undefined,
       Last_Name: lastName,
       Lead_Source: "Mundoria",
-      // Only a stock status — custom picklist values would 400 the upsert.
+      // Only a stock status, custom picklist values would 400 the upsert.
       ...(enrichment?.applicationSubmitted
         ? {}
         : { Lead_Status: "Not Contacted" }),

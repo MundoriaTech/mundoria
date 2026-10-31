@@ -86,7 +86,7 @@ export function CommercialCleaningPage({
                 Workspace Cleaning
               </h1>
               <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
-                Offices, retail, education and communal spaces — cleaned without
+                Offices, retail, education and communal spaces, cleaned without
                 the chase
               </p>
               <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">

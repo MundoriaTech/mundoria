@@ -52,7 +52,7 @@ export function OneSignalEnroll() {
           });
         }
       } catch {
-        // Push enroll is best-effort — never block the shell.
+        // Push enroll is best-effort, never block the shell.
       }
     });
 

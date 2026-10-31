@@ -100,7 +100,7 @@ function resolveTemplate(
       return {
         body:
           role === "cleaner"
-            ? "We’re glad you’re here. Finish onboarding when you’re ready — our team will review your documents and help you get certified."
+            ? "We’re glad you’re here. Finish onboarding when you’re ready. Our team will review your documents and help you get certified."
             : "We’re glad you’re here. Your booking is saved to your account, and you can manage cleans, addresses, and payments whenever you need.",
         buttonHref: string(data.actionUrl) || dashboardUrl,
         buttonLabel:
@@ -109,7 +109,7 @@ function resolveTemplate(
         intro: firstName
           ? `Hello ${firstName}, welcome to Mundoria!`
           : "Hello, welcome to Mundoria!",
-        preview: "Welcome to Mundoria — we’re glad you’re here.",
+        preview: "Welcome to Mundoria. We’re glad you’re here.",
         subject: `Welcome to Mundoria${firstName ? `, ${firstName}` : ""}`,
         title: "Welcome to Mundoria",
         tone: role === "cleaner" ? "cleaner" : "customer",
@@ -131,7 +131,7 @@ function resolveTemplate(
     case "auth.password_reset":
       return {
         body:
-          "We received a request to reset your Mundoria password. Use the link below to choose a new one. If you did not ask for this, you can ignore this email — your password will stay the same.",
+          "We received a request to reset your Mundoria password. Use the link below to choose a new one. If you did not ask for this, you can ignore this email. Your password will stay the same.",
         buttonHref: string(data.resetUrl),
         buttonLabel: "Reset my password",
         intro: firstName ? `Hello ${firstName},` : "Hello,",
@@ -232,7 +232,7 @@ function resolveTemplate(
     case "customer.booking_incomplete":
       return {
         body:
-          "You started a Mundoria booking but didn’t finish. Your details are still saved — pick up where you left off in one tap.",
+          "You started a Mundoria booking but didn’t finish. Your details are still saved. Pick up where you left off in one tap.",
         buttonHref: string(data.resumeUrl) || string(data.bookingUrl),
         buttonLabel: "Finish your booking",
         cards: bookingCards(data),
@@ -313,7 +313,7 @@ function resolveTemplate(
       };
     case "customer.booking_completed":
       return {
-        body: "Your cleaning has been completed and payment has been captured. Thank you for using Mundoria — your receipt is ready on the booking page.",
+        body: "Your cleaning has been completed and payment has been captured. Thank you for using Mundoria. Your receipt is ready on the booking page.",
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View receipt",
         cards: bookingCards(data, [{ label: "Amount charged", value: data.amount }]),
@@ -670,7 +670,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
     : `<h1 class="email-title" style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;font-weight:500;letter-spacing:-0.02em;color:#1c133b;">${escapeHtml(context.title)}</h1>`;
   const signoff = isAdmin
     ? `<p class="email-signoff" style="margin:28px 0 0;font-size:14px;line-height:1.6;color:#8a8498;">Mundoria ops alert · internal use only</p>`
-    : `<p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">See you soon — the Mundoria team</p>`;
+    : `<p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">See you soon, the Mundoria team</p>`;
   const footerPrimary = isAdmin
     ? `<p style="margin:0 0 14px;">Review this in the <a href="${escapeAttribute(appUrl)}/admin/dashboard" style="color:#b8894e;font-weight:600;text-decoration:underline;">admin panel</a>. Do not forward to customers.</p>`
     : `<p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a> or visit <a href="${escapeAttribute(appUrl)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>`;
@@ -759,7 +759,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
 }
 
 function renderCards(cards: Array<{ label: string; value?: unknown }>) {
-  // Soft detail list — spacing only, no boxed rows or heavy rules.
+  // Soft detail list, spacing only, no boxed rows or heavy rules.
   return `<table role="presentation" class="email-details" width="100%" cellspacing="0" cellpadding="0" style="margin-top:22px;">
     ${cards
       .map(
@@ -833,7 +833,7 @@ function resolveSupportEmail() {
   return raw;
 }
 
-/** Warm text CTA — open letter style, not a boxed button. */
+/** Warm text CTA, open letter style, not a boxed button. */
 function renderButton(href: string, label: string, showExpiry = false) {
   return `<p class="email-cta" style="margin:26px 0 0;font-size:16px;line-height:1.5;">
     <a class="email-cta" href="${escapeAttribute(href)}" style="color:#b8894e;font-weight:700;text-decoration:underline;">${escapeHtml(label)}</a>
@@ -885,7 +885,7 @@ function renderText(
     ),
     isAdmin
       ? "Mundoria ops alert · internal use only"
-      : "See you soon — the Mundoria team",
+      : "See you soon, the Mundoria team",
     isAdmin
       ? `Review in admin: ${appUrl}/admin/dashboard · Do not forward to customers.`
       : `Questions? ${supportEmail}`,

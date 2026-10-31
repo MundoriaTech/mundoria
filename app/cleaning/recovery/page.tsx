@@ -13,7 +13,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Recovery cleaning — personalised cleaning support for pregnancy, postpartum, illness, injury, hospital discharge and bereavement. Cleaning, not healthcare.",
+    "Recovery cleaning: personalised cleaning support for pregnancy, postpartum, illness, injury, hospital discharge and bereavement. Cleaning, not healthcare.",
   path: "/cleaning/recovery",
   title: "Recovery cleaning | Mundoria",
 });
@@ -33,7 +33,7 @@ export default async function RecoveryCleaningRoute() {
             "@type": "Service",
             areaServed: { "@type": "City", name: "Birmingham" },
             description:
-              "Cleaning that adapts when life does — with more personal consideration.",
+              "Cleaning that adapts when life does, with more personal consideration.",
             name: "Recovery cleaning",
             provider: {
               "@type": "Organization",

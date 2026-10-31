@@ -14,7 +14,7 @@ function isReload() {
 
 /**
  * Soft scroll to top on refresh and client navigations.
- * Lets the browser restore position briefly on reload, then eases up —
+ * Lets the browser restore position briefly on reload, then eases up , 
  * same gentle feel as page enter transitions.
  */
 export function ScrollToTopOnLoad() {

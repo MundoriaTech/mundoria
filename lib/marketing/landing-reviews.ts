@@ -15,7 +15,7 @@ export const landingReviewPlaceholders: LandingReview[] = [
     id: "review-maya",
     name: "Maya",
     quote:
-      "Booked a fortnightly clean in a few minutes. Updates were clear and the checklist made the finish feel transparent — not a rushed wipe.",
+      "Booked a fortnightly clean in a few minutes. Updates were clear and the checklist made the finish feel transparent, not a rushed wipe.",
   },
   {
     detail: "Short-let host · Jewellery Quarter",
@@ -64,7 +64,7 @@ export const landingReviewPlaceholders: LandingReview[] = [
     id: "review-fatima",
     name: "Fatima",
     quote:
-      "Prefer the same cleaner when we can — communication stays in the app and the house always feels looked after.",
+      "Prefer the same cleaner when we can, communication stays in the app and the house always feels looked after.",
   },
   {
     detail: "One-off clean · Digbeth",

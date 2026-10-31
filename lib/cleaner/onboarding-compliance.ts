@@ -12,14 +12,14 @@ export const INSURANCE_COVER_MODEL_COPY =
   "Mundoria requires you to arrange your own Public Liability Insurance (minimum £1 million for standard domestic cleaning).";
 
 /** Minimum upload size before we flag a document as possibly unreadable. */
-export const MIN_PROOF_BYTES = 8 * 1024; // 8 KB — tiny files are usually blank/corrupt
+export const MIN_PROOF_BYTES = 8 * 1024; // 8 KB, tiny files are usually blank/corrupt
 
 export type DocumentQualityAssessment = {
   ok: boolean;
   reason?: "too_small" | "empty";
 };
 
-/** Best-effort heuristics only — not OCR. Flags uploads for human review. */
+/** Best-effort heuristics only, not OCR. Flags uploads for human review. */
 export function assessDocumentFile(file: File): DocumentQualityAssessment {
   if (!file || file.size <= 0) return { ok: false, reason: "empty" };
   if (file.size < MIN_PROOF_BYTES) return { ok: false, reason: "too_small" };
@@ -155,7 +155,7 @@ export const INSURANCE_FAQS = [
     q: "Can I use insurance I already have?",
   },
   {
-    a: "Public Liability can help if you accidentally damage a customer’s belongings while working, subject to your policy wording, exclusions and excess. It is not a guarantee for every claim — always read your certificate.",
+    a: "Public Liability can help if you accidentally damage a customer’s belongings while working, subject to your policy wording, exclusions and excess. It is not a guarantee for every claim, always read your certificate.",
     q: "Does PL cover broken belongings?",
   },
   {
@@ -192,7 +192,7 @@ export const EQUIPMENT_FAQS = [
 
 export const PAYOUT_FAQS = [
   {
-    a: "Your earnings will be paid according to Mundoria's payment schedule, which is set out in your cleaner agreement. Choose weekly or monthly as your preference — exact timing also depends on Stripe once your account is active.",
+    a: "Your earnings will be paid according to Mundoria's payment schedule, which is set out in your cleaner agreement. Choose weekly or monthly as your preference, exact timing also depends on Stripe once your account is active.",
     q: "When will I get paid?",
   },
   {
@@ -291,7 +291,7 @@ export const EMERGENCY_FAQS = [
   },
 ] as const;
 
-/** Preferred weekly volume (guides matching — not a hard cap). */
+/** Preferred weekly volume (guides matching, not a hard cap). */
 export const PREFERRED_HOURS_BANDS = [
   { label: "Up to 10 hours", value: "up_to_10" },
   { label: "10–20 hours", value: "10_20" },
@@ -309,9 +309,9 @@ export const UTR_PROOF_TYPES = [
 
 export const SAFETY_GUIDELINES = [
   "Check booking details, address and access notes before you travel.",
-  "Only use products and equipment you understand — follow the labels.",
+  "Only use products and equipment you understand, follow the labels.",
   "If a property feels unsafe, leave and contact Mundoria support immediately.",
-  "Do not confront anyone about theft, aggression or disputes — prioritise your safety.",
+  "Do not confront anyone about theft, aggression or disputes, prioritise your safety.",
   "Report accidents, near-misses, injuries and property damage to Mundoria promptly.",
   "In a life-threatening emergency dial 999. For non-emergencies you can also use 101.",
   "Keep emergency contact details up to date in your Mundoria profile.",
@@ -391,7 +391,7 @@ export function parseCoverPounds(value: string): number | null {
     return Number.isFinite(amount) ? amount * 1_000_000 : null;
   }
 
-  // "24.1k" / "2500k" mean thousands of pounds — never treat as millions.
+  // "24.1k" / "2500k" mean thousands of pounds, never treat as millions.
   const thousandMatch = raw.match(/^(\d+(?:\.\d+)?)\s*k\b/);
   if (thousandMatch) {
     const amount = Number(thousandMatch[1]);

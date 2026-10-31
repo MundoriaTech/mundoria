@@ -1,4 +1,4 @@
-/** Shared landing nav metrics — safe to import from server or client components. */
+/** Shared landing nav metrics, safe to import from server or client components. */
 
 export const LANDING_NAV_TOP =
   "max(1.25rem, env(safe-area-inset-top, 0px) + 0.5rem)";

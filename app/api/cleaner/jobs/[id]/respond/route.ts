@@ -227,14 +227,14 @@ async function notifyCustomerProvisionalAccept(
   await Promise.all([
     sendPushNotification(
       booking.customer_id,
-      "Cleaner accepted — confirming payment",
+      "Cleaner accepted: confirming payment",
       `${firstName} accepted. We’re securing payment to confirm your visit.`,
       { booking_id: bookingId },
     ),
     admin.from("notifications").insert({
       body: `${firstName} accepted. We’re securing payment to confirm your visit.`,
       data: { booking_id: bookingId },
-      title: "Cleaner accepted — confirming payment",
+      title: "Cleaner accepted: confirming payment",
       type: "session_pending_payment",
       user_id: booking.customer_id,
     }),

@@ -92,7 +92,7 @@ export function RatingForm({
 
     if (result.heldForDispute) {
       setNotice(
-        "Thanks — this feedback is held for 48 hours so the cleaner can dispute it if needed.",
+        "Thanks, this feedback is held for 48 hours so the cleaner can dispute it if needed.",
       );
       setTimeout(onSubmitted, 1200);
       return;

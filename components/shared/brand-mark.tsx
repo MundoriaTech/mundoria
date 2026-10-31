@@ -39,7 +39,7 @@ export function BrandLogo({
 }: {
   className?: string;
   href?: string;
-  /** @deprecated Ignored — full wordmark image is used. */
+  /** @deprecated Ignored, full wordmark image is used. */
   markClassName?: string;
   showWordmark?: boolean;
   wordmarkClassName?: string;

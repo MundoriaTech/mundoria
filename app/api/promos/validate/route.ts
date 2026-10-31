@@ -24,7 +24,7 @@ const schema = bookingDraftSchema
   })
   .extend({
     code: z.string().trim().min(1).max(40),
-    /** Optional — formula hours used when the customer has not chosen a length yet. */
+    /** Optional, formula hours used when the customer has not chosen a length yet. */
     estimatedDurationHours: z.number().min(1).max(12).nullable().optional(),
     /** Needed so regular + one-off uses the one-off rate card. */
     isRecurring: z.boolean().optional().default(true),

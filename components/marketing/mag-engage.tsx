@@ -82,7 +82,7 @@ export function MagEngageBand({ className }: { className?: string }) {
             Follow us
           </h2>
           <p className="mt-4 max-w-md text-base leading-7 text-[#5a5470]">
-            Mag moments, home tips and Birmingham life — wherever you scroll.
+            Mag moments, home tips and Birmingham life, wherever you scroll.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             {SOCIAL.map(({ Icon, href, label, className: tint }) => (
@@ -120,7 +120,7 @@ export function MagEngageBand({ className }: { className?: string }) {
 
           {status === "done" ? (
             <p className="mt-8 text-base font-semibold text-[#2f6f6a]">
-              You’re subscribed — thanks for joining.
+              You’re subscribed, thanks for joining.
             </p>
           ) : (
             <form className="mt-8 flex flex-col gap-3" onSubmit={onSubmit}>

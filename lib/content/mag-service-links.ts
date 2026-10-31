@@ -34,7 +34,7 @@ export function serviceCityMoneyPath(serviceSlug: string) {
   return servicePlacePath(serviceSlug);
 }
 
-/** Insertable closing CTA for Mag drafts — service page + city page + booking. */
+/** Insertable closing CTA for Mag drafts, service page + city page + booking. */
 export function magMoneyPageCtaMarkdown(serviceSlug: string, label: string) {
   const servicePath = serviceMoneyPath(serviceSlug);
   const cityPath = serviceCityMoneyPath(serviceSlug);

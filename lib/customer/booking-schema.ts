@@ -89,7 +89,7 @@ export const bookingDraftSchema = z.object({
     .max(6, "Please choose up to 7 time slots (one preferred, plus alternatives).")
     .default([]),
   estimatedDurationHours: z.number().min(1).max(12),
-  /** Draft room counts from the rooms step — preferred over saved address for pricing. */
+  /** Draft room counts from the rooms step, preferred over saved address for pricing. */
   numBedrooms: z.number().int().min(0).nullable().optional(),
   numBathrooms: z.number().int().min(0).nullable().optional(),
   otherRoomTypes: z.array(z.string().trim().min(1)).max(20).default([]),
@@ -119,11 +119,11 @@ export const bookingDraftSchema = z.object({
       }),
     )
     .default([]),
-  /** Existing Stripe PaymentMethod on the customer — reuse at checkout. */
+  /** Existing Stripe PaymentMethod on the customer, reuse at checkout. */
   paymentMethodId: z.string().min(1).optional(),
 });
 
 export const createBookingSchema = bookingDraftSchema.extend({
-  /** Stripe SetupIntent id — card saved at book; hold happens later. */
+  /** Stripe SetupIntent id, card saved at book; hold happens later. */
   setupIntentId: z.string().min(1),
 });

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const NAV_SCROLL_AT = 48;
-/** Match Tailwind `lg` — scroll-hide only on desktop; mobile keeps the bar pinned. */
+/** Match Tailwind `lg`, scroll-hide only on desktop; mobile keeps the bar pinned. */
 const DESKTOP_MIN_WIDTH = "(min-width: 1024px)";
 
 /** Hide sticky nav on scroll down (desktop only); keep visible while `paused`. */

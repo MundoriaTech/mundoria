@@ -399,7 +399,7 @@ export function DbsComplianceStep({
           <div className="space-y-3">
             <p className="text-xs leading-5 text-[#8b8798]">
               Upload a PDF or clear photos. One file is enough for most Basic
-              DBS certificates — add more below if you photographed each page
+              DBS certificates, add more below if you photographed each page
               separately.
             </p>
             <DocumentUpload
@@ -766,7 +766,7 @@ export function InsuranceComplianceStep({
           </SectionHeading>
           <ul className="space-y-3">
             {[
-              "Look for “Public Liability” on your certificate — not only home contents.",
+              "Look for “Public Liability” on your certificate, not only home contents.",
               "Confirm the policy covers professional domestic cleaning work.",
               "If you’re still unsure, ask your provider before uploading.",
             ].map((item) => (
@@ -943,7 +943,7 @@ export function EquipmentComplianceStep({
             value: "yes",
           },
           {
-            hint: "You have some products — add details below if useful.",
+            hint: "You have some products, add details below if useful.",
             label: "Some",
             value: "some",
           },
@@ -984,7 +984,7 @@ export function EquipmentComplianceStep({
             value: "yes",
           },
           {
-            hint: "You have part of a kit — we’ll match with that in mind.",
+            hint: "You have part of a kit, we’ll match with that in mind.",
             label: "Some",
             value: "some",
           },

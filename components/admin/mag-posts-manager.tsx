@@ -11,7 +11,7 @@ import type { MagPostAdminRow } from "@/lib/content/mag-admin";
 import { cn } from "@/lib/utils";
 
 function formatDate(iso: string | null) {
-  if (!iso) return "—";
+  if (!iso) return ", ";
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -73,7 +73,7 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
               Editorial desk
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-white/70">
-              Draft, preview, and publish guides for the Mag — same flow as a
+              Draft, preview, and publish guides for the Mag, same flow as a
               proper magazine CMS.
             </p>
           </div>

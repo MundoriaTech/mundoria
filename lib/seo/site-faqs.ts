@@ -36,7 +36,7 @@ function uniqueFaqs(items: SiteFaqItem[]): SiteFaqItem[] {
   return result;
 }
 
-/** Site-wide FAQ catalogue — full category list with answers filled over time. */
+/** Site-wide FAQ catalogue, full category list with answers filled over time. */
 export const SITE_FAQ_SECTIONS: SiteFaqSection[] = SITE_FAQ_CATALOGUE.filter(
   (section) => section.items.length > 0,
 );

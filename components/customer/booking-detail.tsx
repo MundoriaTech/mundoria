@@ -412,7 +412,7 @@ export function BookingDetail({
         >
           {booking.payment_preauth_failed_at ? (
             <>
-              <p className="font-semibold">Cancelled — payment hold failed</p>
+              <p className="font-semibold">Cancelled: payment hold failed</p>
               <p className="mt-1 leading-6">
                 {booking.cancellation_reason ??
                   "We could not place a payment hold on your card, so this booking was cancelled free of charge. Update your payment method and book again when you are ready."}
@@ -508,7 +508,7 @@ export function BookingDetail({
       cleanerVisible &&
       ["confirmed", "cleaner_en_route"].includes(booking.status) ? (
         <Notice
-          body="Backup professionals are ready if anything changes. You won’t see operational detail — just a protected booking."
+          body="Backup professionals are ready if anything changes. You won’t see operational detail, just a protected booking."
           title="Your booking is protected"
         />
       ) : null}
@@ -932,7 +932,7 @@ export function BookingDetail({
             success({
               kind: "sent",
               title: "Card saved",
-              note: "We’re looking for your cleaner — you’ll see confirmation once they accept.",
+              note: "We’re looking for your cleaner, you’ll see confirmation once they accept.",
             });
             router.refresh();
           }}

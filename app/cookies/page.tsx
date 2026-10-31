@@ -67,7 +67,7 @@ const sections: LegalSection[] = [
 export default function CookiesPage() {
   return (
     <LegalPage
-      intro="A short summary of the cookie categories Mundoria uses and how to give or withdraw consent — aligned with the choices in our cookie banner."
+      intro="A short summary of the cookie categories Mundoria uses and how to give or withdraw consent, aligned with the choices in our cookie banner."
       lastUpdated="7 September 2026"
       sections={sections}
       title="Cookie management policy"

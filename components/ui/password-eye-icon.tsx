@@ -29,16 +29,16 @@ export function PasswordEyeIcon({
           strokeLinejoin="round"
           strokeWidth={2}
         >
-          {/* Clean almond — no brow / lashes / exterior ornaments */}
+          {/* Clean almond, no brow / lashes / exterior ornaments */}
           <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" />
 
           {/* Iris life */}
           <g className="password-eye-iris origin-center">
             {/* Outer iris ring */}
             <circle cx="12" cy="12" r="3.15" />
-            {/* Inner iris ring — depth */}
+            {/* Inner iris ring, depth */}
             <circle cx="12" cy="12" r="2.15" strokeWidth={1.35} />
-            {/* Pupil — slightly alert, drifts via CSS */}
+            {/* Pupil, slightly alert, drifts via CSS */}
             <g className="password-eye-pupil origin-center">
               <circle
                 cx="12.35"
@@ -47,7 +47,7 @@ export function PasswordEyeIcon({
                 r="1.35"
                 stroke="none"
               />
-              {/* Catchlight speck — punched via overlapping lighter feel:
+              {/* Catchlight speck, punched via overlapping lighter feel:
                   small stroke arc on the pupil edge */}
               <path
                 d="M11.55 11.15c.2-.35.55-.5.9-.4"

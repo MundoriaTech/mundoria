@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       returnTo = body.returnTo;
     }
   } catch {
-    // Optional body — default return path is profile.
+    // Optional body, default return path is profile.
   }
 
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;

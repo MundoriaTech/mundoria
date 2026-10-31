@@ -297,7 +297,7 @@ export interface BookingDraft {
   preferSameCleaner: boolean;
   /** When rebooking: keep this cleaner preferred for matching, if available. */
   preferredCleanerId: string | null;
-  /** Explicit rebook answer — null until the customer chooses. */
+  /** Explicit rebook answer, null until the customer chooses. */
   rebookCleanerChoice: "same" | "new" | null;
   /** Extra visit dates when recurrencePattern is custom. */
   customRecurrenceDates: string[];

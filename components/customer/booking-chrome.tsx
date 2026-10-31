@@ -8,7 +8,7 @@ import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
-/** Booking chrome — Back · Logo · Sign in for guests */
+/** Booking chrome. Back · Logo · Sign in for guests */
 export function BookingChrome({
   backDisabled = false,
   children,
@@ -113,7 +113,7 @@ export function BookingChrome({
   );
 }
 
-/** Booking wash — a touch lighter than the landing cream panel. */
+/** Booking wash, a touch lighter than the landing cream panel. */
 export const BOOKING_BUTTER = "#f9f6ef";
 export const BOOKING_PURPLE = "#6a45b8";
 export const BOOKING_PURPLE_HOVER = "#5a38a3";

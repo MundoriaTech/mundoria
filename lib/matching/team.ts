@@ -71,14 +71,14 @@ export async function offerTeamSlots({
     await sendPushNotification(
       cleanerId,
       "Team office job",
-      `Secondary slot open — about ${formatMoney(sharePence)}.`,
+      `Secondary slot open, about ${formatMoney(sharePence)}.`,
       { booking_id: bookingId },
     );
   }
 
   await alertAdmins(
     "multi_cleaner_job",
-    "Multi-cleaner office job — team slots open",
+    "Multi-cleaner office job, team slots open",
     `Booking ${bookingId.slice(0, 8)} needs ${stillOpen} more cleaner(s). Primary matched; secondaries invited to claim.`,
     {
       allocated_cleaners: allocatedCleaners,

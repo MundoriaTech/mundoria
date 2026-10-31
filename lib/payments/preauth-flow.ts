@@ -444,7 +444,7 @@ export async function runAuthorizationAttempt(
       return cancelUnpaidAwaitingPayment(
         bookingId,
         result.requiresAction
-          ? "Your bank needs extra confirmation before we can hold the payment. This booking was cancelled free of charge — update your card and book again."
+          ? "Your bank needs extra confirmation before we can hold the payment. This booking was cancelled free of charge. Update your card and book again."
           : AUTH_FAIL_CANCEL_REASON,
       );
     }
@@ -511,7 +511,7 @@ export async function runAuthorizationAttempt(
   };
 }
 
-/** Customer updated their card — clear stop flag and retry immediately. */
+/** Customer updated their card, clear stop flag and retry immediately. */
 export async function retryAuthAfterCardUpdate(
   bookingId: string,
 ): Promise<AuthAttemptResult> {
@@ -610,7 +610,7 @@ async function promoteToConfirmed(bookingId: string) {
     .maybeSingle();
 
   if (!booking) {
-    // Already confirmed or race — ensure status if held.
+    // Already confirmed or race, ensure status if held.
     await admin
       .from("bookings")
       .update({ status: "confirmed" })
@@ -763,13 +763,13 @@ export async function cancelUnpaidAwaitingPayment(
     await createInAppNotification(
       booking.customer_id,
       "payment_failed",
-      "Booking cancelled — payment not secured",
+      "Booking cancelled: payment not secured",
       reason,
       { booking_id: bookingId },
     );
     await sendPushNotification(
       booking.customer_id,
-      "Booking cancelled — payment not secured",
+      "Booking cancelled: payment not secured",
       reason,
       { booking_id: bookingId },
     );
@@ -831,7 +831,7 @@ async function notifyCleanerPendingPayment(cleanerId: string, bookingId: string)
   await createInAppNotification(
     cleanerId,
     "job_pending_payment",
-    "Accepted — confirming payment",
+    "Accepted: confirming payment",
     "Thanks for accepting. We’re securing the customer payment before this visit is fully confirmed.",
     { booking_id: bookingId },
   );

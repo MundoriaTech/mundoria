@@ -44,7 +44,7 @@ export function PayoutsTable({ payouts }: { payouts: AdminPayoutRow[] }) {
                   {item.cleaner?.full_name ?? "Cleaner"}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {item.period_start} – {item.period_end}
+                  {item.period_start}, {item.period_end}
                 </p>
               </div>
               <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-xs capitalize">
@@ -85,7 +85,7 @@ export function PayoutsTable({ payouts }: { payouts: AdminPayoutRow[] }) {
           <tr className="border-t" key={item.id}>
             <td className="p-3">{item.cleaner?.full_name}</td>
             <td>
-              {item.period_start} – {item.period_end}
+              {item.period_start}, {item.period_end}
             </td>
             <td>{item.total_jobs}</td>
             <td>{formatMoney(item.gross_amount)}</td>

@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-/** Stars + “Check reviews” — stacked in flow on mobile, top-right from sm up. */
+/** Stars + “Check reviews”, stacked in flow on mobile, top-right from sm up. */
 export function HeroReviewsLink({
   className,
   tone = "light",

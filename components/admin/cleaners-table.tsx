@@ -191,7 +191,7 @@ export function CleanersTable({
                     <span>
                       {STATUS_LABEL[status ?? ""] ??
                         status?.replaceAll("_", " ") ??
-                        "—"}
+                        ", "}
                     </span>
                     <span>
                       Score {cleaner.cleaner_profiles?.medallion_score ?? 0}
@@ -258,7 +258,7 @@ export function CleanersTable({
                     {areas ? (
                       <span className="line-clamp-2">{areas}</span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">, </span>
                     )}
                   </td>
                   <td>
@@ -276,7 +276,7 @@ export function CleanersTable({
                   <td>
                     {STATUS_LABEL[cleaner.cleaner_profiles?.status ?? ""] ??
                       cleaner.cleaner_profiles?.status?.replaceAll("_", " ") ??
-                      "—"}
+                      ", "}
                     {cleaner.cleaner_profiles?.onboarding_complete === false ? (
                       <span className="mt-1 block text-xs text-muted-foreground">
                         Onboarding incomplete

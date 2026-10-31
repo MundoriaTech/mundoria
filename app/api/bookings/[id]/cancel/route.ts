@@ -130,7 +130,7 @@ export async function POST(
       );
     }
   } else if (fee > 0 && booking.stripe_payment_method_id) {
-    // No hold yet — charge the cancellation fee off-session from the saved card.
+    // No hold yet, charge the cancellation fee off-session from the saved card.
     try {
       const adminClient = createAdminClient();
       const { data: profile } = await adminClient

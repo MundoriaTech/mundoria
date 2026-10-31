@@ -36,7 +36,7 @@ const LOCATION_FAQS = (place: string) =>
     },
     {
       answer:
-        "Estimates depend on service, property size, cleaning standard, schedule and add-ons. You’ll see a clear price before checkout — never a surprise fee after you book.",
+        "Estimates depend on service, property size, cleaning standard, schedule and add-ons. You’ll see a clear price before checkout, never a surprise fee after you book.",
       question: `How much is a Mundoria cleaner in ${place}?`,
     },
     {
@@ -112,7 +112,7 @@ export function LocationHowToBook({
     "Choose your service and cleaning standard",
     "Add property details, duration and any add-ons",
     "Pick a date and time that works for you",
-    "Pay securely — we hold payment until the clean is done",
+    "Pay securely, we hold payment until the clean is done",
   ];
   return (
     <BrandedSection tone="lavender">
@@ -149,7 +149,7 @@ export function LocationFaqBlock({
   return (
     <BrandedSection>
       <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-        Frequently asked questions — {place}
+        Frequently asked questions, {place}
       </h2>
       <div className="mt-8 space-y-3">
         {faqs.map((item) => (

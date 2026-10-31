@@ -469,7 +469,7 @@ export async function POST(request: Request) {
   if (!exam.passed) {
     return NextResponse.json(
       {
-        error: `Skills check: you scored ${exam.score}/${exam.total}. You need at least ${SKILLS_EXAM_PASS_SCORE}/${SKILLS_EXAM_QUESTIONS.length} to continue — review the questions and try again.`,
+        error: `Skills check: you scored ${exam.score}/${exam.total}. You need at least ${SKILLS_EXAM_PASS_SCORE}/${SKILLS_EXAM_QUESTIONS.length} to continue, review the questions and try again.`,
       },
       { status: 400 },
     );
@@ -778,7 +778,7 @@ export async function POST(request: Request) {
     user.id,
     "cleaner_application_submitted",
     "Application submitted",
-    `Thanks — your application ${applicationReference} is under review. You can track progress in your dashboard.`,
+    `Thanks, your application ${applicationReference} is under review. You can track progress in your dashboard.`,
     { application_reference: applicationReference },
   );
   try {

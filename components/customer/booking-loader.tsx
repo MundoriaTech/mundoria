@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-/** WeCasa-style dual-ring spinner — Mundoria purple + orange. */
+/** WeCasa-style dual-ring spinner. Mundoria purple + orange. */
 export function BookingSpinner({
   className,
   size = "md",

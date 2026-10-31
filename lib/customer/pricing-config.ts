@@ -26,7 +26,7 @@ export type ServicePricingConfig = {
 };
 
 /**
- * In-code defaults — one rate per service.
+ * In-code defaults, one rate per service.
  * Heavier products (deep clean, move-in, etc.) use a higher £/h than routine regular.
  */
 export const DEFAULT_SERVICE_PRICING: ServicePricingConfig = {

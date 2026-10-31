@@ -90,7 +90,7 @@ export function IncidentsTable({ rows }: { rows: IncidentRow[] }) {
                     Flagged
                   </span>
                 ) : (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground">, </span>
                 )}
               </td>
             </tr>

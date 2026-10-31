@@ -47,7 +47,7 @@ export function placePhotoHero(
       image: "/images/marketing/landing/commercial-hero.jpg",
       overlay: "wash",
       subtitle:
-        "Offices, retail, education and communal spaces — cleaned without the chase",
+        "Offices, retail, education and communal spaces, cleaned without the chase",
       title: `Workspace Cleaning in ${name}`,
     };
   }
@@ -73,12 +73,12 @@ export function placePhotoHero(
       bullets: [
         "Cleaning that adapts when life does",
         "Share preferences before the cleaner arrives",
-        "Still cleaning — not healthcare or personal care",
+        "Still cleaning, not healthcare or personal care",
       ],
       image: "/images/marketing/landing/recovery-hero.jpg",
       overlay: "wash",
       subtitle:
-        "Cleaning that adapts when life does — with a little more consideration",
+        "Cleaning that adapts when life does, with a little more consideration",
       title: `Recovery cleaning in ${name}`,
     };
   }

@@ -58,7 +58,7 @@ export function ConnectPayoutCard({
       </h2>
       <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c5670]">
         Connect Stripe Express with your UK bank details so Mundoria can send
-        earnings from completed cleans. Bank details stay with Stripe — we never
+        earnings from completed cleans. Bank details stay with Stripe, we never
         ask for your sort code or account number here.
       </p>
       <Button

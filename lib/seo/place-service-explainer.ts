@@ -12,37 +12,37 @@ export function placeServiceExplainerItems(place: string): PlaceServiceExplainer
   const items: Array<{ explanation: string; href: string; name: string }> = [
     {
       explanation:
-        "Scheduled home cleans on a rhythm you choose — kitchens, bathrooms and living areas kept fresh without chasing each visit yourself.",
+        "Scheduled home cleans on a rhythm you choose, kitchens, bathrooms and living areas kept fresh without chasing each visit yourself.",
       href: "/cleaning/regular-cleaning",
       name: "Regular cleaning",
     },
     {
       explanation:
-        "A more thorough reset for buildup, neglected rooms or before guests — extra attention on kitchens, bathrooms and detail work beyond a routine wipe-down.",
+        "A more thorough reset for buildup, neglected rooms or before guests, extra attention on kitchens, bathrooms and detail work beyond a routine wipe-down.",
       href: "/cleaning/deep-cleaning",
       name: "Deep cleaning",
     },
     {
       explanation:
-        "Move-out cleans aimed at landlord and agent standards — bathrooms, kitchen, floors and visible areas ready for inventory and deposit handover.",
+        "Move-out cleans aimed at landlord and agent standards, bathrooms, kitchen, floors and visible areas ready for inventory and deposit handover.",
       href: "/cleaning/end-of-tenancy-cleaning",
       name: "End-of-tenancy cleaning",
     },
     {
       explanation:
-        "Turnover cleans between guests — beds reset, bathrooms sanitised, kitchen touched up and bins emptied so check-in day feels guest-ready.",
+        "Turnover cleans between guests, beds reset, bathrooms sanitised, kitchen touched up and bins emptied so check-in day feels guest-ready.",
       href: "/cleaning/airbnb-shortlet-cleaning",
       name: "Airbnb and short-let cleaning",
     },
     {
       explanation:
-        "Workplace and front-of-house cleaning for offices, studios, retail and hospitality — clear scope, secure payment and live booking status.",
+        "Workplace and front-of-house cleaning for offices, studios, retail and hospitality, clear scope, secure payment and live booking status.",
       href: "/cleaning/commercial",
       name: "Workspace cleaning",
     },
     {
       explanation:
-        "Home cleaning with extra personal consideration when life is harder — pregnancy, postpartum, illness, injury, hospital discharge or bereavement. Cleaning support, not healthcare.",
+        "Home cleaning with extra personal consideration when life is harder, pregnancy, postpartum, illness, injury, hospital discharge or bereavement. Cleaning support, not healthcare.",
       href: "/cleaning/recovery",
       name: "Recovery cleaning",
     },

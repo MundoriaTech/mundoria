@@ -4,7 +4,7 @@ import { useId } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** Mundoria cookie palette — warm baked golds. */
+/** Mundoria cookie palette, warm baked golds. */
 const COOKIE = {
   center: "#f7e4a8",
   mid: "#f0cf7a",
@@ -75,11 +75,11 @@ export function CartoonCookieIcon({
   const edgeGradientId = useId();
   const clipId = `${bodyGradientId}-clip`;
 
-  /** Slightly irregular baked disc — reads round at a glance, wobbly up close. */
+  /** Slightly irregular baked disc, reads round at a glance, wobbly up close. */
   const cookieBody =
     "M32 9.5 C41.2 8.2 50.8 12.8 54.8 21.2 C58.8 29.6 57.2 40.2 50.6 47.4 C44 54.6 33.8 57.4 24.2 54.6 C14.6 51.8 8.2 43.4 8.6 33.4 C9 23.4 16.4 14.4 25.6 11.2 C27.4 10.5 29.6 9.8 32 9.5 Z";
 
-  /** Bite taken from the upper-right — inner edge + crumbs. */
+  /** Bite taken from the upper-right, inner edge + crumbs. */
   const biteCutout =
     "M44.5 12.5 C48.8 11.8 52.8 14.6 54.2 18.8 C55.4 22.4 53.8 25.8 50.8 27.2 C47.6 28.6 44.2 27.4 42.6 24.6 C41.2 22.2 42.2 18.8 44.5 12.5 Z";
 
@@ -117,7 +117,7 @@ export function CartoonCookieIcon({
         </clipPath>
       </defs>
 
-      {/* Hard contact shadow — no CSS blur */}
+      {/* Hard contact shadow, no CSS blur */}
       <ellipse
         cx="32"
         cy="55.5"
@@ -136,7 +136,7 @@ export function CartoonCookieIcon({
         strokeWidth="2.2"
       />
 
-      {/* Baked surface sheen — kept light so it does not wash out */}
+      {/* Baked surface sheen, kept light so it does not wash out */}
       <path d={cookieBody} fill={`url(#${edgeGradientId})`} opacity="0.4" />
 
       {/* Subtle crack / bake lines */}
@@ -151,7 +151,7 @@ export function CartoonCookieIcon({
         <path d="M26 18 C28 20 27 23 25 24" strokeWidth="0.8" />
       </g>
 
-      {/* Chocolate chips — domed, embedded in the dough */}
+      {/* Chocolate chips, domed, embedded in the dough */}
       <Chip cx={21} cy={27} r={4.1} rotate={-12} />
       <Chip cx={34} cy={22} r={3.6} rotate={8} />
       <Chip cx={27} cy={38} r={3.9} rotate={-22} />
@@ -159,7 +159,7 @@ export function CartoonCookieIcon({
       <Chip cx={16} cy={40} r={2.9} rotate={6} />
       <Chip cx={45} cy={44} r={2.6} rotate={-8} />
 
-      {/* Bite mark — exposes lighter inner crumb */}
+      {/* Bite mark, exposes lighter inner crumb */}
       <path
         d={biteCutout}
         fill={COOKIE.center}
