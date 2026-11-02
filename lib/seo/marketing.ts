@@ -443,6 +443,21 @@ export function postcodePath(prefix: string) {
   return `/cleaners/${LAUNCH_CITY.slug}/${slug}`;
 }
 
+/**
+ * District SEO pages are thin companions of a neighbourhood hub.
+ * Only index when that hub exists in `BIRMINGHAM_AREAS` (otherwise they 404).
+ */
+export function indexableBirminghamPostcodes() {
+  return BIRMINGHAM_POSTCODES.filter((item) =>
+    Boolean(birminghamAreaBySlug(item.areaSlug)),
+  );
+}
+
+export function isIndexablePostcodeDistrict(prefix: string) {
+  const district = birminghamPostcode(prefix);
+  return Boolean(district && birminghamAreaBySlug(district.areaSlug));
+}
+
 /** `harborne-b17` or a legacy bare `b17`. */
 export function districtFromAreaParam(param: string) {
   const bare = birminghamPostcode(param);

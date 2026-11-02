@@ -12,9 +12,9 @@ import {
 import { isStandaloneTownSlug } from "@/lib/seo/canonical";
 import {
   BIRMINGHAM_AREAS,
-  BIRMINGHAM_POSTCODES,
   LAUNCH_CITY,
   MARKETING_CATEGORY_PATHS,
+  indexableBirminghamPostcodes,
   indexableMarketingServices,
   postcodePath,
 } from "@/lib/seo/marketing";
@@ -72,7 +72,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
-  const postcodeRoutes = BIRMINGHAM_POSTCODES.map((item) => ({
+  // Only districts whose parent neighbourhood hub exists (avoids sitemap 404s).
+  const postcodeRoutes = indexableBirminghamPostcodes().map((item) => ({
     changeFrequency: "weekly" as const,
     lastModified: now,
     priority: 0.55,

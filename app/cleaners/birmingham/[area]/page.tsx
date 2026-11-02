@@ -14,10 +14,12 @@ import {
 } from "@/lib/seo/birmingham-coverage";
 import { cleanerPlacePath, isStandaloneTownSlug } from "@/lib/seo/canonical";
 import {
-  BIRMINGHAM_POSTCODES,
+  LAUNCH_CITY,
   birminghamAreaBySlug,
   districtFromAreaParam,
   districtLinkLabel,
+  indexableBirminghamPostcodes,
+  isIndexablePostcodeDistrict,
   postcodePath,
 } from "@/lib/seo/marketing";
 import {
@@ -34,13 +36,21 @@ type PageProps = {
   searchParams?: { category?: string | string[]; service?: string | string[] };
 };
 
+/** Districts without a neighbourhood hub redirect to a real place page, or the city hub. */
+function redirectOrphanPostcodeDistrict(areaSlug: string): never {
+  if (birminghamAreaBySlug(areaSlug) || birminghamCoveragePlaceBySlug(areaSlug)) {
+    permanentRedirect(cleanerPlacePath(areaSlug));
+  }
+  permanentRedirect(`/cleaners/${LAUNCH_CITY.slug}`);
+}
+
 /** Coverage places beyond the core neighbourhoods render on demand. */
 export const dynamicParams = true;
 
 export function generateStaticParams() {
   return [
     ...priorityBirminghamAreaSlugs().map((area) => ({ area })),
-    ...BIRMINGHAM_POSTCODES.map((item) => ({
+    ...indexableBirminghamPostcodes().map((item) => ({
       area: `${item.areaSlug}-${item.prefix.toLowerCase()}`,
     })),
   ];
@@ -49,6 +59,11 @@ export function generateStaticParams() {
 export function generateMetadata({ params, searchParams }: PageProps): Metadata {
   const parsed = districtFromAreaParam(params.area);
   if (parsed) {
+    // Orphan district URLs (no neighbourhood hub) must not stay as soft-404 pages.
+    if (!isIndexablePostcodeDistrict(parsed.district.prefix)) {
+      redirectOrphanPostcodeDistrict(parsed.district.areaSlug);
+    }
+    if (parsed.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
     const label = districtLinkLabel(parsed.district.prefix);
     return buildPageMetadata({
       description: `Cleaners in ${label}, Birmingham. Book with a clear estimate before you pay.`,
@@ -81,8 +96,13 @@ export default async function BirminghamAreaPage({
   searchParams,
 }: PageProps) {
   const parsed = districtFromAreaParam(params.area);
-  if (parsed?.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
-  if (parsed) return <PostcodeDistrictPage prefix={parsed.district.prefix} />;
+  if (parsed) {
+    if (!isIndexablePostcodeDistrict(parsed.district.prefix)) {
+      redirectOrphanPostcodeDistrict(parsed.district.areaSlug);
+    }
+    if (parsed.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
+    return <PostcodeDistrictPage prefix={parsed.district.prefix} />;
+  }
 
   if (isStandaloneTownSlug(params.area)) {
     const focus = readPlacePageFocus(searchParams ?? {});
