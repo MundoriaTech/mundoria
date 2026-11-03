@@ -55,7 +55,10 @@ export function SignupForm({
   const [otpCode, setOtpCode] = useState("");
   const [otpDevCode, setOtpDevCode] = useState<string | null>(null);
   const [otpBusy, setOtpBusy] = useState(false);
-  const [otpMessage, setOtpMessage] = useState<string | null>(null);
+  const [otpHint, setOtpHint] = useState(
+    "Type the 6-digit code below. It expires in 15 minutes.",
+  );
+  const [otpNotice, setOtpNotice] = useState<string | null>(null);
   const nextPath =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
       ? redirectTo
@@ -169,7 +172,7 @@ export function SignupForm({
       if (!response.ok || result.error) {
         throw new Error(result.error ?? "Unable to resend the code");
       }
-      setOtpMessage(result.message ?? "We sent a new code.");
+      setOtpNotice(result.message ?? "We sent a new code.");
       setOtpDevCode(result.devCode ?? null);
     } catch (error) {
       setFormError(
@@ -210,7 +213,11 @@ export function SignupForm({
         const email = (result.email ?? values.email).trim().toLowerCase();
         setOtpEmail(email);
         setOtpPassword(values.password);
-        setOtpMessage(result.message ?? "We sent a 6-digit code to your email.");
+        setOtpHint(
+          result.message ??
+            "Type the 6-digit code below. It expires in 15 minutes.",
+        );
+        setOtpNotice(null);
         setOtpDevCode(result.devCode ?? null);
         setOtpCode("");
         return;
@@ -267,10 +274,7 @@ export function SignupForm({
             Enter the code we emailed you
           </p>
           <p className="mt-2 break-all font-medium text-[#312c79]">{otpEmail}</p>
-          <p className="mt-2 leading-6 text-[#5a5470]">
-            {otpMessage ??
-              "Open your inbox and type the 6-digit code below. It expires in 15 minutes."}
-          </p>
+          <p className="mt-2 leading-6 text-[#5a5470]">{otpHint}</p>
           {otpDevCode ? (
             <p className="mt-3 rounded-xl bg-white/80 px-3 py-2 font-mono text-xs text-[#9a3412]">
               Dev code: <span className="font-semibold">{otpDevCode}</span>
@@ -297,7 +301,10 @@ export function SignupForm({
           {otpBusy ? "Verifying…" : "Verify and create account"}
         </Button>
 
-        <div className="flex flex-col items-center gap-3 text-sm">
+        <div className="flex flex-col items-center gap-2 text-sm">
+          {otpNotice ? (
+            <p className="text-center text-[#5a5470]">{otpNotice}</p>
+          ) : null}
           <button
             className="font-semibold text-[#291845] underline-offset-2 hover:underline disabled:opacity-50"
             disabled={otpBusy}
@@ -314,7 +321,10 @@ export function SignupForm({
               setOtpPassword(null);
               setOtpCode("");
               setOtpDevCode(null);
-              setOtpMessage(null);
+              setOtpHint(
+                "Type the 6-digit code below. It expires in 15 minutes.",
+              );
+              setOtpNotice(null);
               setFormError(null);
             }}
             type="button"
