@@ -55,9 +55,6 @@ export function SignupForm({
   const [otpCode, setOtpCode] = useState("");
   const [otpDevCode, setOtpDevCode] = useState<string | null>(null);
   const [otpBusy, setOtpBusy] = useState(false);
-  const [otpHint, setOtpHint] = useState(
-    "Type the 6-digit code below. It expires in 15 minutes.",
-  );
   const [otpNotice, setOtpNotice] = useState<string | null>(null);
   const nextPath =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
@@ -213,10 +210,6 @@ export function SignupForm({
         const email = (result.email ?? values.email).trim().toLowerCase();
         setOtpEmail(email);
         setOtpPassword(values.password);
-        setOtpHint(
-          result.message ??
-            "Type the 6-digit code below. It expires in 15 minutes.",
-        );
         setOtpNotice(null);
         setOtpDevCode(result.devCode ?? null);
         setOtpCode("");
@@ -270,11 +263,9 @@ export function SignupForm({
       <div className="space-y-6">
         <FormStatus message={formError} title="Couldn’t verify your email" />
         <div className="rounded-2xl border border-[#e8def8] bg-[#f7f3ff] px-4 py-4 text-sm text-[#1c133b]">
-          <p className="text-base font-semibold tracking-tight">
-            Enter the code we emailed you
+          <p className="leading-6 text-[#5a5470]">
+            Check your email for the code we already sent.
           </p>
-          <p className="mt-2 break-all font-medium text-[#312c79]">{otpEmail}</p>
-          <p className="mt-2 leading-6 text-[#5a5470]">{otpHint}</p>
           {otpDevCode ? (
             <p className="mt-3 rounded-xl bg-white/80 px-3 py-2 font-mono text-xs text-[#9a3412]">
               Dev code: <span className="font-semibold">{otpDevCode}</span>
@@ -321,9 +312,6 @@ export function SignupForm({
               setOtpPassword(null);
               setOtpCode("");
               setOtpDevCode(null);
-              setOtpHint(
-                "Type the 6-digit code below. It expires in 15 minutes.",
-              );
               setOtpNotice(null);
               setFormError(null);
             }}

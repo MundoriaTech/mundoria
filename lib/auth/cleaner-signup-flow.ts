@@ -162,7 +162,7 @@ export async function startCleanerEmailSignupOtp(input: {
       error: null,
       message: input.resend
         ? "We sent a new code."
-        : "Type the 6-digit code below. It expires in 15 minutes.",
+        : "Check your email for the code we already sent.",
       requiresEmailOtp: true as const,
       status: 200 as const,
     };
@@ -173,7 +173,7 @@ export async function startCleanerEmailSignupOtp(input: {
     error: null,
     message: input.resend
       ? "We sent a new code."
-      : "Type the 6-digit code below. It expires in 15 minutes.",
+      : "Check your email for the code we already sent.",
     requiresEmailOtp: true as const,
     status: 200 as const,
   };
