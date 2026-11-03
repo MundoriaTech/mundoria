@@ -178,11 +178,7 @@ export async function POST(request: Request) {
   await trackUserActivity({
     eventName: "signed_up",
     metadata: { bookingCheckout: bookingCheckoutSignup, role },
-    path: bookingCheckoutSignup
-      ? "/booking/new"
-      : role === "cleaner"
-        ? "/signup/cleaner"
-        : "/signup",
+    path: bookingCheckoutSignup ? "/booking/new" : "/signup",
     userId: user.id,
   });
 
