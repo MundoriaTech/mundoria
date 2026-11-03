@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -9,6 +10,7 @@ import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = buildPrivateMetadata("Admin");
 
@@ -17,6 +19,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  noStore();
   const session = createServerClient();
   const {
     data: { user },

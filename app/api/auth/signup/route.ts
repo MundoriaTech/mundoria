@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
-import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
+import { startCleanerEmailSignupOtp } from "@/lib/auth/cleaner-signup-flow";
 import { safeRedirectPath } from "@/lib/auth/redirects";
 import { signupSchema } from "@/lib/auth/schemas";
 import {
@@ -34,7 +34,6 @@ export async function POST(request: Request) {
     marketing_opt_in,
   } = parsed.data;
   const email = parsed.data.email.trim().toLowerCase();
-  const avatarUrl = role === "cleaner" ? pickDefaultAvatar(email).src : undefined;
   const admin = createAdminClient();
   const appUrl = resolveAppUrl(request);
   const defaultNext = role === "cleaner" ? "/cleaner/dashboard" : "/dashboard";
@@ -43,11 +42,46 @@ export async function POST(request: Request) {
   const nextPath = safeRedirectPath(requestedNext, defaultNext);
   const bookingCheckoutSignup =
     role === "customer" && nextPath.startsWith("/booking");
+
+  // Cleaners: email OTP before account creation (bots never reach profiles).
+  if (role === "cleaner") {
+    try {
+      const otp = await startCleanerEmailSignupOtp({
+        appUrl,
+        payload: {
+          email,
+          full_name,
+          marketing_opt_in: Boolean(marketing_opt_in),
+          nextPath,
+          password,
+          phone: phone.trim(),
+        },
+        request,
+      });
+      if (otp.error) {
+        return NextResponse.json({ error: otp.error }, { status: otp.status });
+      }
+      return NextResponse.json({
+        devCode: "devCode" in otp ? otp.devCode : undefined,
+        email: otp.email,
+        message: otp.message,
+        requiresEmailOtp: true,
+        role: "cleaner",
+      });
+    } catch (otpError) {
+      Sentry.captureException(otpError);
+      return NextResponse.json(
+        { error: "Unable to start email verification. Try again shortly." },
+        { status: 500 },
+      );
+    }
+  }
+
   /**
    * Customers (booking + standalone): Wecasa-style soft confirm, sign-in ready
-   * immediately; confirm mail stays out-of-band. Cleaners still hard-confirm.
+   * immediately; confirm mail stays out-of-band.
    */
-  const softEmailConfirm = role === "customer";
+  const softEmailConfirm = true;
   /** Confirm-link landing stays out of the booking funnel. */
   const confirmNextPath = bookingCheckoutSignup ? "/dashboard" : nextPath;
   const emailRedirectTo = `${appUrl}/auth/callback?type=signup&next=${encodeURIComponent(confirmNextPath)}`;
@@ -57,7 +91,6 @@ export async function POST(request: Request) {
     email_confirm: softEmailConfirm,
     password,
     user_metadata: {
-      avatar_url: avatarUrl,
       full_name,
       marketing_opt_in: Boolean(marketing_opt_in),
       phone: phone.trim(),

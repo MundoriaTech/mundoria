@@ -213,6 +213,14 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  // Admin lists must not be served from CDN/browser HTTP cache.
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    response.headers.set(
+      "Cache-Control",
+      "private, no-store, max-age=0, must-revalidate",
+    );
+  }
+
   return response;
 }
 

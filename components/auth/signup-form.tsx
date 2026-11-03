@@ -28,10 +28,14 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/types/auth";
 
 interface SignupResponse {
+  devCode?: string;
+  email?: string;
   error?: string;
   hasSession?: boolean;
+  message?: string;
   referralPromoCode?: string | null;
   requiresEmailConfirmation?: boolean;
+  requiresEmailOtp?: boolean;
   role?: UserRole;
 }
 
@@ -45,6 +49,12 @@ export function SignupForm({
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [nationalNumber, setNationalNumber] = useState("");
+  const [otpEmail, setOtpEmail] = useState<string | null>(null);
+  const [otpPassword, setOtpPassword] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpDevCode, setOtpDevCode] = useState<string | null>(null);
+  const [otpBusy, setOtpBusy] = useState(false);
+  const [otpMessage, setOtpMessage] = useState<string | null>(null);
   const nextPath =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
       ? redirectTo
@@ -102,6 +112,70 @@ export function SignupForm({
     }
   }, [role, setValue]);
 
+  async function finishCleanerSession(email: string, password: string) {
+    const supabase = createBrowserClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (signInError) {
+      rememberSignupEmail(email);
+      router.replace("/login/cleaner");
+      return;
+    }
+    router.replace(dashboardForRole("cleaner"));
+    router.refresh();
+  }
+
+  async function verifyOtp() {
+    if (!otpEmail || !otpPassword) return;
+    setFormError(null);
+    setOtpBusy(true);
+    try {
+      const response = await fetch("/api/auth/signup/verify-otp", {
+        body: JSON.stringify({ code: otpCode, email: otpEmail }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const result = (await parseSignupResponse(response)) as SignupResponse;
+      if (!response.ok || result.error) {
+        throw new Error(result.error ?? "Unable to verify that code");
+      }
+      await finishCleanerSession(otpEmail, otpPassword);
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Unable to verify that code",
+      );
+    } finally {
+      setOtpBusy(false);
+    }
+  }
+
+  async function resendOtp() {
+    if (!otpEmail) return;
+    setFormError(null);
+    setOtpBusy(true);
+    try {
+      const response = await fetch("/api/auth/signup/resend-otp", {
+        body: JSON.stringify({ email: otpEmail }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const result = (await parseSignupResponse(response)) as SignupResponse;
+      if (!response.ok || result.error) {
+        throw new Error(result.error ?? "Unable to resend the code");
+      }
+      setOtpMessage(result.message ?? "We sent a new code.");
+      setOtpDevCode(result.devCode ?? null);
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Unable to resend the code",
+      );
+    } finally {
+      setOtpBusy(false);
+    }
+  }
+
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
 
@@ -126,6 +200,16 @@ export function SignupForm({
           "mundoria-welcome-promo",
           result.referralPromoCode,
         );
+      }
+
+      if (result.requiresEmailOtp) {
+        const email = (result.email ?? values.email).trim().toLowerCase();
+        setOtpEmail(email);
+        setOtpPassword(values.password);
+        setOtpMessage(result.message ?? "We sent a 6-digit code to your email.");
+        setOtpDevCode(result.devCode ?? null);
+        setOtpCode("");
+        return;
       }
 
       if (result.requiresEmailConfirmation) {
@@ -169,6 +253,70 @@ export function SignupForm({
   }, () => {
     setFormError("Please check the highlighted fields and try again.");
   });
+
+  if (otpEmail) {
+    return (
+      <div className="space-y-5">
+        <FormStatus message={formError} title="Couldn’t verify your email" />
+        <div className="rounded-2xl border border-[#e8def8] bg-white px-4 py-3 text-sm text-[#1c133b]">
+          <p className="font-semibold">Check your email</p>
+          <p className="mt-1 break-all text-muted-foreground">{otpEmail}</p>
+          <p className="mt-2 text-muted-foreground">
+            {otpMessage ?? "Enter the 6-digit code we sent."}
+          </p>
+          {otpDevCode ? (
+            <p className="mt-2 text-xs text-[#9a3412]">
+              Dev code: <span className="font-semibold">{otpDevCode}</span>
+            </p>
+          ) : null}
+        </div>
+        <FormField htmlFor="signup_otp" label="Verification code">
+          <Input
+            autoComplete="one-time-code"
+            id="signup_otp"
+            inputMode="numeric"
+            maxLength={8}
+            onChange={(event) =>
+              setOtpCode(event.target.value.replace(/[^\d]/g, "").slice(0, 6))
+            }
+            placeholder="6-digit code"
+            value={otpCode}
+          />
+        </FormField>
+        <Button
+          className="w-full"
+          disabled={otpBusy || otpCode.length !== 6}
+          onClick={() => void verifyOtp()}
+          type="button"
+        >
+          {otpBusy ? "Verifying…" : "Verify and create account"}
+        </Button>
+        <button
+          className="w-full text-sm font-semibold text-[#291845] underline-offset-2 hover:underline disabled:opacity-50"
+          disabled={otpBusy}
+          onClick={() => void resendOtp()}
+          type="button"
+        >
+          Resend code
+        </button>
+        <button
+          className="w-full text-sm text-muted-foreground underline-offset-2 hover:underline"
+          disabled={otpBusy}
+          onClick={() => {
+            setOtpEmail(null);
+            setOtpPassword(null);
+            setOtpCode("");
+            setOtpDevCode(null);
+            setOtpMessage(null);
+            setFormError(null);
+          }}
+          type="button"
+        >
+          Use a different email
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,8 +396,12 @@ export function SignupForm({
 
         <Button className="w-full" disabled={isSubmitting} type="submit">
           {isSubmitting
-            ? "Creating account…"
-            : "Create account"}
+            ? role === "cleaner"
+              ? "Sending code…"
+              : "Creating account…"
+            : role === "cleaner"
+              ? "Continue"
+              : "Create account"}
         </Button>
       </form>
     </div>

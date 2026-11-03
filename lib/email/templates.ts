@@ -17,6 +17,7 @@ export type EmailTemplateId =
   | "auth.password_changed"
   | "auth.password_reset"
   | "auth.signup_confirmation"
+  | "auth.signup_otp"
   | "auth.welcome"
   | "cleaner.application_approved"
   | "cleaner.application_needs_info"
@@ -128,6 +129,18 @@ function resolveTemplate(
         title: "Confirm your email",
         tone: "security",
       };
+    case "auth.signup_otp": {
+      const otpCode = string(data.otpCode) || "------";
+      return {
+        body: "Enter this code on the Mundoria signup screen to finish creating your cleaner account. It expires in 15 minutes. If you did not try to sign up, you can ignore this email.",
+        cards: [{ label: "Verification code", value: otpCode }],
+        intro: firstName ? `Hello ${firstName},` : "Hello,",
+        preview: `Your Mundoria code is ${otpCode}`,
+        subject: `${otpCode} is your Mundoria verification code`,
+        title: "Your verification code",
+        tone: "security",
+      };
+    }
     case "auth.password_reset":
       return {
         body:
