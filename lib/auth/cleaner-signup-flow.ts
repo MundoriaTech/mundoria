@@ -24,6 +24,7 @@ import { syncSignupToZoho } from "@/lib/zoho/crm";
 
 type ChallengeRow = {
   attempts: number;
+  code_hash: string;
   created_at: string;
   email: string;
   email_normalized: string;
