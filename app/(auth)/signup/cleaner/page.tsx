@@ -1,33 +1,15 @@
-import Link from "next/link";
-
-import { AuthShell } from "@/components/auth/auth-shell";
-import { SignupForm } from "@/components/auth/signup-form";
+import { CleanerSignupFlow } from "@/components/auth/cleaner-signup-flow";
+import { getMarketingViewer } from "@/components/marketing/marketing-shell";
+import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata = {
   title: "Create cleaner account",
 };
 
-export default function CleanerSignupPage() {
-  return (
-    <AuthShell
-      description="Join Mundoria as an independent cleaning professional."
-      footer={
-        <>
-          Already have an account?{" "}
-          <Link className="font-semibold text-[#291845] hover:underline" href="/login/cleaner">
-            Sign in
-          </Link>
-          <span className="mt-2 block text-sm text-muted-foreground">
-            Looking to book a cleaner?{" "}
-            <Link className="font-semibold text-[#291845] hover:underline" href="/signup">
-              Create a customer account
-            </Link>
-          </span>
-        </>
-      }
-      title="Create your cleaner account"
-    >
-      <SignupForm role="cleaner" />
-    </AuthShell>
-  );
+export default async function CleanerSignupPage() {
+  const configured = hasSupabasePublicConfig();
+  const bookingHref = configured ? "/booking/new" : "/setup";
+  const viewer = await getMarketingViewer();
+
+  return <CleanerSignupFlow bookingHref={bookingHref} viewer={viewer} />;
 }

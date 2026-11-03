@@ -41,9 +41,11 @@ interface SignupResponse {
 }
 
 export function SignupForm({
+  onAccountReady,
   redirectTo,
   role,
 }: {
+  onAccountReady?: (account: { email: string; password: string }) => void;
   redirectTo?: string;
   role: Extract<UserRole, "customer" | "cleaner">;
 }) {
@@ -164,6 +166,10 @@ export function SignupForm({
           throw new Error(result.error ?? "Unable to verify that code");
         }
         setOtpBusy(false);
+        if (onAccountReady) {
+          onAccountReady({ email: otpEmail, password: otpPassword });
+          return;
+        }
         setOtpSuccess(true);
       } catch (error) {
         otpVerifyLock.current = false;
@@ -174,7 +180,7 @@ export function SignupForm({
         setOtpBusy(false);
       }
     },
-    [otpCode, otpEmail, otpPassword],
+    [onAccountReady, otpCode, otpEmail, otpPassword],
   );
 
   async function resendOtp() {
