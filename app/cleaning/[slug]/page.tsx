@@ -36,7 +36,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   return buildPageMetadata({
     description: service.seoDescription,
     path: `/cleaning/${service.slug}`,
-    title: `${service.label} | Mundoria`,
+    title: service.seoTitle ?? `${service.label} | Mundoria`,
   });
 }
 

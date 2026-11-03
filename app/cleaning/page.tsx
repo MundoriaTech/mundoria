@@ -3,14 +3,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ServicesIndexPage } from "@/components/marketing/services/services-index-page";
+import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
+const cleaningCopy = onpageCopyForPath("/cleaning")!;
+
 export const metadata: Metadata = buildPageMetadata({
-  description:
-    "Browse Mundoria cleaning services, residential, commercial, guest turns and recovery cleaning. Get a quote online and book with clear next steps.",
+  description: cleaningCopy.description,
   path: "/cleaning",
-  title: "Cleaning Services | Mundoria",
+  title: cleaningCopy.title,
 });
 
 export default function CleaningIndexPage() {

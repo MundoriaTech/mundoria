@@ -6,9 +6,12 @@ import { LandingPurpleField } from "@/components/marketing/landing/landing-purpl
 import { ServiceCategoriesSection } from "@/components/marketing/landing/service-categories-section";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
+import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { homePageStructuredData } from "@/lib/seo/structured-data";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+
+const homeCopy = onpageCopyForPath("/")!;
 
 const PopularServicesSection = nextDynamic(() =>
   import("@/components/marketing/landing/popular-services-section").then(
@@ -41,10 +44,9 @@ const CoverageSection = nextDynamic(() =>
 );
 
 export const metadata: Metadata = buildPageMetadata({
-  description:
-    "Book certified UK cleaning professionals for homes, workplaces, short lets, moving home and recovery support with Mundoria.",
+  description: homeCopy.description,
   path: "/",
-  title: "Mundoria UK | Trusted cleaning, beautifully managed",
+  title: homeCopy.title,
 });
 
 export const dynamic = "force-dynamic";

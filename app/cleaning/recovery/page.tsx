@@ -8,14 +8,16 @@ import {
 import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
 import { RecoveryCleaningPage } from "@/components/marketing/recovery/recovery-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
+const recoveryCopy = onpageCopyForPath("/cleaning/recovery")!;
+
 export const metadata: Metadata = buildPageMetadata({
-  description:
-    "Recovery cleaning: personalised cleaning support for pregnancy, postpartum, illness, injury, hospital discharge and bereavement. Cleaning, not healthcare.",
+  description: recoveryCopy.description,
   path: "/cleaning/recovery",
-  title: "Recovery cleaning | Mundoria",
+  title: recoveryCopy.title,
 });
 
 export default async function RecoveryCleaningRoute() {

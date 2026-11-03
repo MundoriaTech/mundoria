@@ -8,14 +8,16 @@ import {
 import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
 import { ResidentialCleaningPage } from "@/components/marketing/residential/residential-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
+const residentialCopy = onpageCopyForPath("/cleaning/residential")!;
+
 export const metadata: Metadata = buildPageMetadata({
-  description:
-    "Residential cleaning with Mundoria: regular, deep and one-off cleans with clear pricing and vetted cleaners in Birmingham.",
+  description: residentialCopy.description,
   path: "/cleaning/residential",
-  title: "Residential Cleaning | Mundoria",
+  title: residentialCopy.title,
 });
 
 export default async function ResidentialCleaningRoute() {

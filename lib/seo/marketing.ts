@@ -6,6 +6,7 @@ import {
   servicesForCategory,
 } from "@/lib/customer/services";
 import { isIndexableServiceSlug } from "@/lib/seo/canonical";
+import { onpageCopyForServiceSlug } from "@/lib/seo/onpage-copy";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
 export type MarketingService = {
@@ -17,6 +18,8 @@ export type MarketingService = {
   intro: string;
   label: string;
   seoDescription: string;
+  /** Optional index title from OnPage SEO sheet. */
+  seoTitle?: string;
   slug: string;
   value: ServiceType;
 };
@@ -50,6 +53,7 @@ export const MARKETING_SERVICES: MarketingService[] = SERVICES.map((service) => 
   )!;
   const slug =
     SERVICE_SLUG_OVERRIDES[service.value] ?? toSlug(service.label);
+  const onpage = onpageCopyForServiceSlug(slug);
   return {
     bookingHref: `/booking/new?service=${service.value}`,
     category: service.category,
@@ -58,7 +62,10 @@ export const MARKETING_SERVICES: MarketingService[] = SERVICES.map((service) => 
     fromPrice: formatHourlyRate(indicativeHourlyRatePence(service.value)),
     intro: `${service.label} with Mundoria. Clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
     label: service.label,
-    seoDescription: `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${formatHourlyRate(indicativeHourlyRatePence(service.value))}.`,
+    seoDescription:
+      onpage?.description ??
+      `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${formatHourlyRate(indicativeHourlyRatePence(service.value))}.`,
+    seoTitle: onpage?.title,
     slug,
     value: service.value,
   };

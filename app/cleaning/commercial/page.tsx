@@ -8,14 +8,16 @@ import {
 import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
 import { CommercialCleaningPage } from "@/components/marketing/commercial/commercial-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
+const commercialCopy = onpageCopyForPath("/cleaning/commercial")!;
+
 export const metadata: Metadata = buildPageMetadata({
-  description:
-    "Workspace cleaning with Mundoria: office, retail & hospitality, educational and communal area cleans with clear pricing and vetted cleaners in Birmingham.",
+  description: commercialCopy.description,
   path: "/cleaning/commercial",
-  title: "Workspace Cleaning | Mundoria",
+  title: commercialCopy.title,
 });
 
 export default async function CommercialCleaningRoute() {
