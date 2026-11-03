@@ -13,6 +13,7 @@ export default function CleanerLoginPage({
   searchParams,
 }: {
   searchParams: {
+    created?: string;
     email?: string;
     error?: string;
     message?: string;
@@ -23,6 +24,7 @@ export default function CleanerLoginPage({
   if (searchParams.email) {
     const params = new URLSearchParams();
     if (searchParams.verify === "1") params.set("verify", "1");
+    if (searchParams.created === "1") params.set("created", "1");
     if (searchParams.redirectTo) params.set("redirectTo", searchParams.redirectTo);
     if (searchParams.message) params.set("message", searchParams.message);
     if (searchParams.error) params.set("error", searchParams.error);
@@ -55,7 +57,9 @@ export default function CleanerLoginPage({
         initialMessage={
           searchParams.verify === "1"
             ? SIGNUP_VERIFY_MESSAGE
-            : searchParams.message
+            : searchParams.created === "1"
+              ? "Your cleaner account is ready. Sign in to continue."
+              : searchParams.message
         }
         redirectTo={searchParams.redirectTo ?? "/cleaner/dashboard"}
         requiredRole="cleaner"

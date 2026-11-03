@@ -18,6 +18,7 @@ import {
 import { pickDefaultAvatar } from "@/lib/avatars/default-pack";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
+import { sendAccountWelcomeIfNeeded } from "@/lib/auth/welcome-email";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncSignupToZoho } from "@/lib/zoho/crm";
@@ -283,6 +284,24 @@ export async function verifyCleanerEmailSignupOtp(input: {
     path: "/signup/cleaner",
     userId: user.id,
   });
+
+  // Cleaner welcome (OTP already proved the email, so no confirm-link step).
+  try {
+    await sendAccountWelcomeIfNeeded({
+      actionLabel: "Continue cleaner onboarding",
+      actionUrl: `${input.appUrl}/cleaner/dashboard`,
+      appUrl: input.appUrl,
+      email,
+      emailConfirmedAt: new Date().toISOString(),
+      fullName: payload.full_name,
+      metadata: user.user_metadata as Record<string, unknown> | undefined,
+      profileExisted: false,
+      role: "cleaner",
+      userId: user.id,
+    });
+  } catch (welcomeError) {
+    Sentry.captureException(welcomeError);
+  }
 
   await notifyAdminUserSignedUp({
     appUrl: input.appUrl,

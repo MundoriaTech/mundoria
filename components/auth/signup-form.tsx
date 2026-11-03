@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
@@ -56,6 +56,8 @@ export function SignupForm({
   const [otpDevCode, setOtpDevCode] = useState<string | null>(null);
   const [otpBusy, setOtpBusy] = useState(false);
   const [otpNotice, setOtpNotice] = useState<string | null>(null);
+  const [otpSuccess, setOtpSuccess] = useState(false);
+  const otpVerifyLock = useRef(false);
   const nextPath =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
       ? redirectTo
@@ -113,47 +115,57 @@ export function SignupForm({
     }
   }, [role, setValue]);
 
-  async function finishCleanerSession(email: string, password: string) {
-    const supabase = createBrowserClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (signInError) {
-      rememberSignupEmail(email);
-      router.replace("/login/cleaner");
-      return;
-    }
-    router.replace(dashboardForRole("cleaner"));
-    router.refresh();
-  }
-
-  async function verifyOtp(codeOverride?: string) {
-    if (!otpEmail || !otpPassword) return;
-    const code = (codeOverride ?? otpCode).replace(/\D/g, "").slice(0, 6);
-    if (code.length !== 6) return;
-    setFormError(null);
-    setOtpBusy(true);
-    try {
-      const response = await fetch("/api/auth/signup/verify-otp", {
-        body: JSON.stringify({ code, email: otpEmail }),
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
+  const finishCleanerSession = useCallback(
+    async (email: string, password: string) => {
+      const supabase = createBrowserClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      const result = (await parseSignupResponse(response)) as SignupResponse;
-      if (!response.ok || result.error) {
-        throw new Error(result.error ?? "Unable to verify that code");
+      if (signInError) {
+        rememberSignupEmail(email);
+        router.replace("/login/cleaner?created=1");
+        return;
       }
-      await finishCleanerSession(otpEmail, otpPassword);
-    } catch (error) {
-      setFormError(
-        error instanceof Error ? error.message : "Unable to verify that code",
-      );
-      setOtpCode("");
-    } finally {
-      setOtpBusy(false);
-    }
-  }
+      router.replace(`${dashboardForRole("cleaner")}?welcome=1`);
+      router.refresh();
+    },
+    [router],
+  );
+
+  const verifyOtp = useCallback(
+    async (codeOverride?: string) => {
+      if (!otpEmail || !otpPassword || otpVerifyLock.current) return;
+      const code = (codeOverride ?? otpCode).replace(/\D/g, "").slice(0, 6);
+      if (code.length !== 6) return;
+      otpVerifyLock.current = true;
+      setFormError(null);
+      setOtpBusy(true);
+      try {
+        const response = await fetch("/api/auth/signup/verify-otp", {
+          body: JSON.stringify({ code, email: otpEmail }),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        });
+        const result = (await parseSignupResponse(response)) as SignupResponse;
+        if (!response.ok || result.error) {
+          throw new Error(result.error ?? "Unable to verify that code");
+        }
+        setOtpSuccess(true);
+        // Brief confirmation before moving into the cleaner app.
+        await new Promise((resolve) => window.setTimeout(resolve, 1200));
+        await finishCleanerSession(otpEmail, otpPassword);
+      } catch (error) {
+        otpVerifyLock.current = false;
+        setFormError(
+          error instanceof Error ? error.message : "Unable to verify that code",
+        );
+        setOtpCode("");
+        setOtpBusy(false);
+      }
+    },
+    [finishCleanerSession, otpCode, otpEmail, otpPassword],
+  );
 
   async function resendOtp() {
     if (!otpEmail) return;
@@ -259,6 +271,27 @@ export function SignupForm({
   });
 
   if (otpEmail) {
+    if (otpSuccess) {
+      return (
+        <div className="space-y-5">
+          <FormStatus
+            message="Your cleaner account has been created. Taking you to your dashboard…"
+            tone="success"
+          />
+          <Button
+            className="w-full"
+            onClick={() => {
+              if (!otpEmail || !otpPassword) return;
+              void finishCleanerSession(otpEmail, otpPassword);
+            }}
+            type="button"
+          >
+            Continue
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-6">
         <FormStatus message={formError} title="Couldn’t verify your email" />
@@ -281,6 +314,11 @@ export function SignupForm({
             onComplete={(code) => void verifyOtp(code)}
             value={otpCode}
           />
+          {otpBusy ? (
+            <p className="text-sm text-[#5a5470]" role="status">
+              Verifying your code…
+            </p>
+          ) : null}
         </div>
 
         <Button
@@ -308,11 +346,13 @@ export function SignupForm({
             className="text-muted-foreground underline-offset-2 hover:underline"
             disabled={otpBusy}
             onClick={() => {
+              otpVerifyLock.current = false;
               setOtpEmail(null);
               setOtpPassword(null);
               setOtpCode("");
               setOtpDevCode(null);
               setOtpNotice(null);
+              setOtpSuccess(false);
               setFormError(null);
             }}
             type="button"

@@ -12,6 +12,10 @@ import { cn } from "@/lib/utils";
 
 const DIGIT_COUNT = 6;
 
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, "").slice(0, DIGIT_COUNT);
+}
+
 export function OtpInput({
   autoFocus = true,
   disabled,
@@ -27,44 +31,41 @@ export function OtpInput({
 }) {
   const baseId = useId();
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const completedFor = useRef<string | null>(null);
   const digits = Array.from({ length: DIGIT_COUNT }, (_, index) => value[index] ?? "");
 
   useEffect(() => {
     if (!autoFocus || disabled) return;
-    inputsRef.current[0]?.focus();
-  }, [autoFocus, disabled]);
+    inputsRef.current[Math.min(value.length, DIGIT_COUNT - 1)]?.focus();
+  }, [autoFocus, disabled, value.length]);
 
-  function setDigit(index: number, digit: string) {
-    const next = digits.map((current, i) => (i === index ? digit : current));
-    const joined = next.join("").slice(0, DIGIT_COUNT);
-    onChange(joined);
-    if (joined.length === DIGIT_COUNT) onComplete?.(joined);
-  }
+  useEffect(() => {
+    if (value.length !== DIGIT_COUNT) {
+      completedFor.current = null;
+      return;
+    }
+    if (completedFor.current === value) return;
+    completedFor.current = value;
+    onComplete?.(value);
+  }, [onComplete, value]);
 
-  function applyCode(raw: string, startIndex = 0) {
-    const cleaned = raw.replace(/\D/g, "").slice(0, DIGIT_COUNT - startIndex);
-    if (!cleaned) return;
-    const next = [...digits];
-    cleaned.split("").forEach((digit, offset) => {
-      next[startIndex + offset] = digit;
-    });
-    const joined = next.join("").slice(0, DIGIT_COUNT);
-    onChange(joined);
-    const focusIndex = Math.min(startIndex + cleaned.length, DIGIT_COUNT - 1);
-    inputsRef.current[focusIndex]?.focus();
-    if (joined.length === DIGIT_COUNT) onComplete?.(joined);
+  function commit(nextRaw: string, focusIndex?: number) {
+    const next = onlyDigits(nextRaw);
+    onChange(next);
+    if (typeof focusIndex === "number") {
+      inputsRef.current[Math.min(focusIndex, DIGIT_COUNT - 1)]?.focus();
+    }
   }
 
   function onKeyDown(index: number, event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Backspace") {
       event.preventDefault();
       if (digits[index]) {
-        setDigit(index, "");
+        commit(`${value.slice(0, index)}${value.slice(index + 1)}`);
         return;
       }
       if (index > 0) {
-        setDigit(index - 1, "");
-        inputsRef.current[index - 1]?.focus();
+        commit(value.slice(0, index - 1) + value.slice(index), index - 1);
       }
       return;
     }
@@ -76,19 +77,27 @@ export function OtpInput({
     if (event.key === "ArrowRight" && index < DIGIT_COUNT - 1) {
       event.preventDefault();
       inputsRef.current[index + 1]?.focus();
+      return;
+    }
+    if (event.key === "Enter" && value.length === DIGIT_COUNT) {
+      event.preventDefault();
+      onComplete?.(value);
     }
   }
 
   function onPaste(index: number, event: ClipboardEvent<HTMLInputElement>) {
     event.preventDefault();
-    applyCode(event.clipboardData.getData("text"), index);
+    const pasted = onlyDigits(event.clipboardData.getData("text"));
+    if (!pasted) return;
+    const prefix = value.slice(0, index);
+    commit(prefix + pasted, index + pasted.length);
   }
 
   return (
     <div
+      aria-label="Verification code"
       className="flex justify-between gap-2 sm:gap-2.5"
       role="group"
-      aria-label="Verification code"
     >
       {digits.map((digit, index) => (
         <input
@@ -106,20 +115,18 @@ export function OtpInput({
           key={`${baseId}-${index}`}
           maxLength={1}
           onChange={(event) => {
-            const next = event.target.value.replace(/\D/g, "");
-            if (!next) {
-              setDigit(index, "");
+            const typed = onlyDigits(event.target.value);
+            if (!typed) {
+              commit(`${value.slice(0, index)}${value.slice(index + 1)}`, index);
               return;
             }
-            // Mobile autofill / rapid input may drop multiple chars in one box.
-            if (next.length > 1) {
-              applyCode(next, index);
+            if (typed.length > 1) {
+              commit(value.slice(0, index) + typed, index + typed.length);
               return;
             }
-            setDigit(index, next);
-            if (index < DIGIT_COUNT - 1) {
-              inputsRef.current[index + 1]?.focus();
-            }
+            const next =
+              value.slice(0, index) + typed + value.slice(index + 1);
+            commit(next, index < DIGIT_COUNT - 1 ? index + 1 : index);
           }}
           onFocus={(event) => event.currentTarget.select()}
           onKeyDown={(event) => onKeyDown(index, event)}
