@@ -57,6 +57,7 @@ export function SignupForm({
   const [otpBusy, setOtpBusy] = useState(false);
   const [otpNotice, setOtpNotice] = useState<string | null>(null);
   const [otpSuccess, setOtpSuccess] = useState(false);
+  const [otpContinuing, setOtpContinuing] = useState(false);
   const otpVerifyLock = useRef(false);
   const nextPath =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
@@ -117,18 +118,29 @@ export function SignupForm({
 
   const finishCleanerSession = useCallback(
     async (email: string, password: string) => {
-      const supabase = createBrowserClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) {
-        rememberSignupEmail(email);
-        router.replace("/login/cleaner?created=1");
-        return;
+      setOtpContinuing(true);
+      setFormError(null);
+      try {
+        const supabase = createBrowserClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInError) {
+          rememberSignupEmail(email);
+          router.replace("/login/cleaner?created=1");
+          return;
+        }
+        router.replace(`${dashboardForRole("cleaner")}?welcome=1`);
+        router.refresh();
+      } catch (error) {
+        setOtpContinuing(false);
+        setFormError(
+          error instanceof Error
+            ? error.message
+            : "Unable to open your dashboard. Try signing in.",
+        );
       }
-      router.replace(`${dashboardForRole("cleaner")}?welcome=1`);
-      router.refresh();
     },
     [router],
   );
@@ -151,10 +163,8 @@ export function SignupForm({
         if (!response.ok || result.error) {
           throw new Error(result.error ?? "Unable to verify that code");
         }
+        setOtpBusy(false);
         setOtpSuccess(true);
-        // Brief confirmation before moving into the cleaner app.
-        await new Promise((resolve) => window.setTimeout(resolve, 1200));
-        await finishCleanerSession(otpEmail, otpPassword);
       } catch (error) {
         otpVerifyLock.current = false;
         setFormError(
@@ -164,7 +174,7 @@ export function SignupForm({
         setOtpBusy(false);
       }
     },
-    [finishCleanerSession, otpCode, otpEmail, otpPassword],
+    [otpCode, otpEmail, otpPassword],
   );
 
   async function resendOtp() {
@@ -273,20 +283,30 @@ export function SignupForm({
   if (otpEmail) {
     if (otpSuccess) {
       return (
-        <div className="space-y-5">
-          <FormStatus
-            message="Your cleaner account has been created. Taking you to your dashboard…"
-            tone="success"
-          />
+        <div className="space-y-6">
+          <FormStatus message={formError} title="Couldn’t open your dashboard" />
+          <div className="rounded-2xl border border-[#d9f0df] bg-[#f3fbf5] px-5 py-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#1f7a45] text-lg font-semibold text-white">
+              ✓
+            </div>
+            <h2 className="mt-4 text-xl font-semibold tracking-tight text-[#1c133b]">
+              Your cleaner account is ready
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+              You’re verified. Open your dashboard when you’re ready to start
+              onboarding.
+            </p>
+          </div>
           <Button
             className="w-full"
+            disabled={otpContinuing || !otpEmail || !otpPassword}
             onClick={() => {
               if (!otpEmail || !otpPassword) return;
               void finishCleanerSession(otpEmail, otpPassword);
             }}
             type="button"
           >
-            Continue
+            {otpContinuing ? "Opening dashboard…" : "Go to dashboard"}
           </Button>
         </div>
       );
