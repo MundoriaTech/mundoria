@@ -8,6 +8,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { AuthSignupLegal } from "@/components/auth/auth-signup-legal";
 import { FormField } from "@/components/auth/form-field";
+import { OtpInput } from "@/components/auth/otp-input";
 import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { FormStatus } from "@/components/auth/form-status";
 import { OAuthButton } from "@/components/auth/oauth-button";
@@ -127,13 +128,15 @@ export function SignupForm({
     router.refresh();
   }
 
-  async function verifyOtp() {
+  async function verifyOtp(codeOverride?: string) {
     if (!otpEmail || !otpPassword) return;
+    const code = (codeOverride ?? otpCode).replace(/\D/g, "").slice(0, 6);
+    if (code.length !== 6) return;
     setFormError(null);
     setOtpBusy(true);
     try {
       const response = await fetch("/api/auth/signup/verify-otp", {
-        body: JSON.stringify({ code: otpCode, email: otpEmail }),
+        body: JSON.stringify({ code, email: otpEmail }),
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });
@@ -146,6 +149,7 @@ export function SignupForm({
       setFormError(
         error instanceof Error ? error.message : "Unable to verify that code",
       );
+      setOtpCode("");
     } finally {
       setOtpBusy(false);
     }
@@ -256,33 +260,34 @@ export function SignupForm({
 
   if (otpEmail) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-6">
         <FormStatus message={formError} title="Couldn’t verify your email" />
-        <div className="rounded-2xl border border-[#e8def8] bg-white px-4 py-3 text-sm text-[#1c133b]">
-          <p className="font-semibold">Check your email</p>
-          <p className="mt-1 break-all text-muted-foreground">{otpEmail}</p>
-          <p className="mt-2 text-muted-foreground">
-            {otpMessage ?? "Enter the 6-digit code we sent."}
+        <div className="rounded-2xl border border-[#e8def8] bg-[#f7f3ff] px-4 py-4 text-sm text-[#1c133b]">
+          <p className="text-base font-semibold tracking-tight">
+            Enter the code we emailed you
+          </p>
+          <p className="mt-2 break-all font-medium text-[#312c79]">{otpEmail}</p>
+          <p className="mt-2 leading-6 text-[#5a5470]">
+            {otpMessage ??
+              "Open your inbox and type the 6-digit code below. It expires in 15 minutes."}
           </p>
           {otpDevCode ? (
-            <p className="mt-2 text-xs text-[#9a3412]">
+            <p className="mt-3 rounded-xl bg-white/80 px-3 py-2 font-mono text-xs text-[#9a3412]">
               Dev code: <span className="font-semibold">{otpDevCode}</span>
             </p>
           ) : null}
         </div>
-        <FormField htmlFor="signup_otp" label="Verification code">
-          <Input
-            autoComplete="one-time-code"
-            id="signup_otp"
-            inputMode="numeric"
-            maxLength={8}
-            onChange={(event) =>
-              setOtpCode(event.target.value.replace(/[^\d]/g, "").slice(0, 6))
-            }
-            placeholder="6-digit code"
+
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-[#1c133b]">Verification code</p>
+          <OtpInput
+            disabled={otpBusy}
+            onChange={setOtpCode}
+            onComplete={(code) => void verifyOtp(code)}
             value={otpCode}
           />
-        </FormField>
+        </div>
+
         <Button
           className="w-full"
           disabled={otpBusy || otpCode.length !== 6}
@@ -291,29 +296,32 @@ export function SignupForm({
         >
           {otpBusy ? "Verifying…" : "Verify and create account"}
         </Button>
-        <button
-          className="w-full text-sm font-semibold text-[#291845] underline-offset-2 hover:underline disabled:opacity-50"
-          disabled={otpBusy}
-          onClick={() => void resendOtp()}
-          type="button"
-        >
-          Resend code
-        </button>
-        <button
-          className="w-full text-sm text-muted-foreground underline-offset-2 hover:underline"
-          disabled={otpBusy}
-          onClick={() => {
-            setOtpEmail(null);
-            setOtpPassword(null);
-            setOtpCode("");
-            setOtpDevCode(null);
-            setOtpMessage(null);
-            setFormError(null);
-          }}
-          type="button"
-        >
-          Use a different email
-        </button>
+
+        <div className="flex flex-col items-center gap-3 text-sm">
+          <button
+            className="font-semibold text-[#291845] underline-offset-2 hover:underline disabled:opacity-50"
+            disabled={otpBusy}
+            onClick={() => void resendOtp()}
+            type="button"
+          >
+            Resend code
+          </button>
+          <button
+            className="text-muted-foreground underline-offset-2 hover:underline"
+            disabled={otpBusy}
+            onClick={() => {
+              setOtpEmail(null);
+              setOtpPassword(null);
+              setOtpCode("");
+              setOtpDevCode(null);
+              setOtpMessage(null);
+              setFormError(null);
+            }}
+            type="button"
+          >
+            Use a different email
+          </button>
+        </div>
       </div>
     );
   }
