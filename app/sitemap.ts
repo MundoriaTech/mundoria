@@ -25,7 +25,7 @@ import { absoluteUrl } from "@/lib/seo/site";
 
 /**
  * Lean sitemap: one page per service intent + one page per area.
- * Compound zone hubs (/wider/{zone}) are included; service×area matrix is not.
+ * Compound zone hubs (readable slugs) are included; service×area matrix is not.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

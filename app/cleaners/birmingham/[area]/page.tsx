@@ -5,12 +5,16 @@ import { CityLocationPage } from "@/components/marketing/city-location-page";
 import { PostcodeDistrictPage } from "@/components/marketing/postcode-district-page";
 import {
   BIRMINGHAM_COVERAGE_ZONES,
+  BIRMINGHAM_NEARBY_ZONE_ID,
+  birminghamCompoundZones,
   birminghamCoveragePlaceBySlug,
+  birminghamCoverageZoneByHubSlug,
   birminghamCoverageZoneById,
   coverageAreaHref,
   coverageAreaSlug,
   coverageFocusSearch,
   coverageZoneHref,
+  coverageZoneHubSlug,
 } from "@/lib/seo/birmingham-coverage";
 import { cleanerPlacePath, isStandaloneTownSlug } from "@/lib/seo/canonical";
 import {
@@ -59,6 +63,9 @@ export const dynamicParams = true;
 export function generateStaticParams() {
   return [
     ...priorityBirminghamAreaSlugs().map((area) => ({ area })),
+    ...birminghamCompoundZones().map((zone) => ({
+      area: coverageZoneHubSlug(zone),
+    })),
     ...indexableBirminghamPostcodes().map((item) => ({
       area: `${item.areaSlug}-${item.prefix.toLowerCase()}`,
     })),
@@ -85,7 +92,8 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
   }
   const area = birminghamAreaBySlug(params.area);
   const coverage = birminghamCoveragePlaceBySlug(params.area);
-  const name = area?.name ?? coverage?.label;
+  const zoneHub = birminghamCoverageZoneByHubSlug(params.area);
+  const name = area?.name ?? coverage?.label ?? zoneHub?.label;
   if (!name) return {};
   const focus = readPlacePageFocus(searchParams ?? {});
   const title = cleaningPlaceTitle({
@@ -94,11 +102,14 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
     preposition: "in",
     serviceLabel: focus.serviceLabel,
   });
+  const pathSlug =
+    area?.slug ?? coverage?.slug ?? (zoneHub ? coverageZoneHubSlug(zoneHub) : null);
+  if (!pathSlug) return {};
   return buildPageMetadata({
-    description: coverage?.note
-      ? `${title} (${coverage.note}). Book with a clear estimate before you pay.`
+    description: coverage?.note ?? zoneHub?.note
+      ? `${title} (${coverage?.note ?? zoneHub?.note}). Book with a clear estimate before you pay.`
       : `${title}. Book with a clear estimate before you pay.`,
-    path: cleanerPlacePath(area?.slug ?? coverage!.slug),
+    path: cleanerPlacePath(pathSlug),
     title: `${title} | Mundoria`,
   });
 }
@@ -132,13 +143,40 @@ export default async function BirminghamAreaPage({
 
   const area = birminghamAreaBySlug(params.area);
   const coverage = birminghamCoveragePlaceBySlug(params.area);
-  if (!area && !coverage) notFound();
+  const zoneHub = birminghamCoverageZoneByHubSlug(params.area);
+  if (!area && !coverage && !zoneHub) notFound();
+
+  const focus = readPlacePageFocus(searchParams ?? {});
+  const bookingHref = bookingHrefForFocus(hasSupabasePublicConfig(), focus);
+
+  if (zoneHub && !area && !coverage) {
+    const slug = coverageZoneHubSlug(zoneHub);
+    return (
+      <CityLocationPage
+        bookingHref={bookingHref}
+        focus={focus}
+        name={zoneHub.label}
+        path={`${cleanerPlacePath(slug)}${coverageFocusSearch(focus)}`}
+        placeLinks={zoneHub.areas.map((item) => ({
+          href: coverageAreaHref(item, focus),
+          label: item.label,
+        }))}
+        placesNote={zoneHub.note}
+        regionLabel="Birmingham"
+        surroundingLinks={BIRMINGHAM_COVERAGE_ZONES.filter(
+          (item) =>
+            item.id !== zoneHub.id && item.id !== BIRMINGHAM_NEARBY_ZONE_ID,
+        ).map((item) => ({
+          href: coverageZoneHref(item.id, focus),
+          label: item.label,
+        }))}
+      />
+    );
+  }
 
   const name = area?.name ?? coverage!.label;
   const slug = area?.slug ?? coverage!.slug;
   const zone = coverage ? birminghamCoverageZoneById(coverage.zoneId) : null;
-  const focus = readPlacePageFocus(searchParams ?? {});
-  const bookingHref = bookingHrefForFocus(hasSupabasePublicConfig(), focus);
 
   return (
     <CityLocationPage
@@ -161,7 +199,8 @@ export default async function BirminghamAreaPage({
       surroundingLinks={
         zone
           ? BIRMINGHAM_COVERAGE_ZONES.filter(
-              (item) => item.id !== zone.id && item.id !== "border",
+              (item) =>
+                item.id !== zone.id && item.id !== BIRMINGHAM_NEARBY_ZONE_ID,
             ).map((item) => ({
               href: coverageZoneHref(item.id, focus),
               label: item.label,

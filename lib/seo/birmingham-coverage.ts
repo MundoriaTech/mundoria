@@ -385,9 +385,37 @@ export function coveragePlaceHref(
   return `${cleanerPlacePath(place.slug)}${coverageFocusSearch(focus)}`;
 }
 
+function zoneMatchesExistingPlace(zone: BirminghamCoverageZone) {
+  return birminghamCoveragePlaces().some(
+    (place) => place.label.toLowerCase() === zone.label.toLowerCase(),
+  );
+}
+
+/** Readable hub slug for compound zones, e.g. `edgbaston-and-harborne`. */
+export function coverageZoneHubSlug(zone: BirminghamCoverageZone) {
+  return coverageSlug(zone.label);
+}
+
+/** Town zones with compound labels that need their own hub page. */
+export function birminghamCompoundZones() {
+  return birminghamTownZones().filter((zone) => !zoneMatchesExistingPlace(zone));
+}
+
+export function birminghamCompoundZoneIds() {
+  return birminghamCompoundZones().map((zone) => zone.id);
+}
+
+export function birminghamCoverageZoneByHubSlug(slug: string) {
+  return (
+    birminghamCompoundZones().find(
+      (zone) => coverageZoneHubSlug(zone) === slug,
+    ) ?? null
+  );
+}
+
 /**
  * Path for a coverage zone hub.
- * Single-name zones reuse the matching place page; compound zones use /wider/{id}.
+ * Single-name zones reuse the matching place page; compound zones use a readable slug.
  */
 export function coverageZonePath(zoneId: string): string {
   const zone = birminghamCoverageZoneById(zoneId);
@@ -398,23 +426,16 @@ export function coverageZonePath(zoneId: string): string {
     (place) => place.label.toLowerCase() === zone.label.toLowerCase(),
   );
   if (matchingPlace) return cleanerPlacePath(matchingPlace.slug);
-  return `/cleaners/${LAUNCH_CITY.slug}/wider/${zone.id}`;
+  return cleanerPlacePath(coverageZoneHubSlug(zone));
 }
 
 export function coverageZoneHref(zoneId: string, focus?: CoverageLinkFocus) {
   return `${coverageZonePath(zoneId)}${coverageFocusSearch(focus)}`;
 }
 
-/** Town zones that need a dedicated /wider hub (compound labels). */
-export function birminghamCompoundZoneIds() {
-  return birminghamTownZones()
-    .filter((zone) => {
-      const matchingPlace = birminghamCoveragePlaces().find(
-        (place) => place.label.toLowerCase() === zone.label.toLowerCase(),
-      );
-      return !matchingPlace;
-    })
-    .map((zone) => zone.id);
+/** Legacy `/wider/{zoneId}` path — keep only for permanent redirects. */
+export function coverageZoneLegacyWiderPath(zoneId: string): string {
+  return `/cleaners/${LAUNCH_CITY.slug}/wider/${zoneId}`;
 }
 
 /** Unique places. The same slug keeps the first town’s page. */
