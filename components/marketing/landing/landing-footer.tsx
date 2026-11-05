@@ -125,10 +125,7 @@ export function LandingFooter({
             <p>© 2026 {MUNDORIA_IDENTITY.legalName}. All rights reserved.</p>
             <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
               {MUNDORIA_IDENTITY.legalName} is a company registered in England
-              and Wales (Company No. {MUNDORIA_IDENTITY.companyNumber}). Registered
-              office: {MUNDORIA_IDENTITY.address.street},{" "}
-              {MUNDORIA_IDENTITY.address.locality},{" "}
-              {MUNDORIA_IDENTITY.address.postcode}. Tel: {MUNDORIA_IDENTITY.phone}
+              and Wales. Tel: {MUNDORIA_IDENTITY.phone}
             </p>
             <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
               Cleaners on Mundoria are independent contractors. Availability,

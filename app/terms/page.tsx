@@ -13,7 +13,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 const sections: LegalSection[] = [
   {
-    body: `These terms apply when you access or use Mundoria as a customer, cleaner or administrator. Mundoria is operated by ${MUNDORIA_IDENTITY.legalName}, a company registered in England and Wales (Company No. ${MUNDORIA_IDENTITY.companyNumber}) with its registered office at ${MUNDORIA_IDENTITY.address.street}, ${MUNDORIA_IDENTITY.address.locality}, ${MUNDORIA_IDENTITY.address.postcode}.`,
+    body: `These terms apply when you access or use Mundoria as a customer, cleaner or administrator. Mundoria is operated by ${MUNDORIA_IDENTITY.legalName}, a company registered in England and Wales.`,
     title: "About these terms",
   },
   {
