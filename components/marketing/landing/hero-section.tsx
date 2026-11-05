@@ -85,9 +85,9 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
           <h1 className="max-w-[18rem] text-balance text-[clamp(1.85rem,7.4vw,3.75rem)] font-bold leading-[1.05] tracking-[-0.045em] text-white sm:max-w-[34rem]">
             Book Trusted
             <br />
-            Home Cleaning
+            House Cleaners in
             <br />
-            Service in Minutes
+            Birmingham in Minutes
           </h1>
           <Link
             className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:brightness-95 touch-manipulation sm:mt-8 sm:h-12 sm:px-8 sm:text-[15px]"

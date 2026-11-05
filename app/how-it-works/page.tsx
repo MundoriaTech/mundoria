@@ -46,13 +46,13 @@ export default function HowItWorksPage() {
           className="relative mx-auto w-full max-w-[1320px] px-4 pb-16 sm:px-6 lg:hidden"
           style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2.5rem)` }}
         >
-          <h1 className="max-w-sm text-[2.65rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[#504477]">
+          <div className="max-w-sm text-[2.65rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[#504477]">
             How
             <br />
             Mundoria
             <br />
             works
-          </h1>
+          </div>
           <p className="mt-4 max-w-[17rem] text-sm leading-6 text-[#1a191d]">
             Mundoria is designed so customers never feel like they’re filling
             in an insurance form, tell us what you need, see a clear estimate,
@@ -81,11 +81,7 @@ export default function HowItWorksPage() {
           <div className="absolute inset-y-0 left-1/2 w-full max-w-[1320px] -translate-x-1/2">
           <div className="absolute left-8 top-[11%] flex h-[82%] w-[26rem] flex-col justify-center xl:left-10">
           <h1 className="font-semibold leading-none tracking-[-0.04em] text-[#504477] [font-size:clamp(2.4rem,3.95vw,4.75rem)]">
-            How
-            <br />
-            Mundoria
-            <br />
-            works
+            How Mundoria works
           </h1>
           <p className="mt-5 leading-[1.45] text-[#1a191d] [font-size:clamp(0.85rem,1.02vw,1.22rem)]">
             Mundoria is designed so customers never feel like they’re filling

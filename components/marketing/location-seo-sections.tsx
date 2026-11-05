@@ -17,6 +17,7 @@ import {
   coverageZoneHref,
   type CoverageLinkFocus,
 } from "@/lib/seo/birmingham-coverage";
+import { isIndexableAreaSlug } from "@/lib/seo/canonical";
 import {
   cleaningPlaceIntro,
   cleaningPlaceTitle,
@@ -213,12 +214,16 @@ export function LocationNearPlacePills({
     category: categoryFocus,
     serviceSlug,
   };
-  const items =
+  const items = (
     links ??
     birminghamTownZones().map((zone) => ({
       href: coverageZoneHref(zone.id, focus),
       label: zone.label,
-    }));
+    }))
+  ).filter((item) => {
+    const slug = item.href.split("/").pop()?.split("?")[0];
+    return !slug || isIndexableAreaSlug(slug);
+  });
   const nearbyZone = birminghamNearbyZone();
   const nearbyPlaces = showNearbyTowns
     ? (nearbyZone?.areas ?? []).map((area) => ({

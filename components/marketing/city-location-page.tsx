@@ -44,6 +44,7 @@ export async function CityLocationPage({
   name,
   path,
   placeLinks,
+  allAreasCovered,
   placesNote,
   regionLabel = "Birmingham",
   showNearbyTowns = false,
@@ -54,6 +55,7 @@ export async function CityLocationPage({
   name: string;
   path: string;
   placeLinks?: Array<{ href: string; label: string }>;
+  allAreasCovered?: string[];
   placesNote?: string;
   /** Local authority / city for schema, omit Birmingham for Solihull, Sandwell towns, etc. */
   regionLabel?: string | null;
@@ -158,6 +160,7 @@ export async function CityLocationPage({
           cleanerLimit={18}
           place={name}
           placeLinks={placeLinks}
+          allAreasCovered={allAreasCovered}
           placePath={path.split("?")[0] || path}
           placesNote={placesNote}
           serviceFocus={service ?? undefined}

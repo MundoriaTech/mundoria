@@ -7,12 +7,9 @@ import { ServiceCategoriesSection } from "@/components/marketing/landing/service
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { getPublicMarketingServices } from "@/lib/seo/marketing";
-import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { homePageStructuredData } from "@/lib/seo/structured-data";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
-
-const homeCopy = onpageCopyForPath("/")!;
 
 const PopularServicesSection = nextDynamic(() =>
   import("@/components/marketing/landing/popular-services-section").then(
@@ -45,9 +42,9 @@ const CoverageSection = nextDynamic(() =>
 );
 
 export const metadata: Metadata = buildPageMetadata({
-  description: homeCopy.description,
+  description: "Book vetted house cleaners in Birmingham from £22/h. Regular, deep, end of tenancy and Airbnb cleaning with live status and secure payment.",
   path: "/",
-  title: homeCopy.title,
+  title: "House Cleaners Birmingham from £22/h",
 });
 
 export const dynamic = "force-dynamic";

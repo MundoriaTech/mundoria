@@ -14,6 +14,7 @@ import {
   popularMarketingServices,
   servicePlacePath,
 } from "@/lib/seo/marketing";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 
 export function LandingFooter({
   cleanerHref,
@@ -121,7 +122,14 @@ export function LandingFooter({
         <FooterPayments />
         <div className="flex flex-col gap-5 pt-8 text-base font-medium text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p>© 2026 Mundoria UK. All rights reserved.</p>
+            <p>© 2026 {MUNDORIA_IDENTITY.legalName}. All rights reserved.</p>
+            <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
+              {MUNDORIA_IDENTITY.legalName} is a company registered in England
+              and Wales (Company No. {MUNDORIA_IDENTITY.companyNumber}). Registered
+              office: {MUNDORIA_IDENTITY.address.street},{" "}
+              {MUNDORIA_IDENTITY.address.locality},{" "}
+              {MUNDORIA_IDENTITY.address.postcode}. Tel: {MUNDORIA_IDENTITY.phone}
+            </p>
             <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
               Cleaners on Mundoria are independent contractors. Availability,
               pricing and coverage may vary by location and service type.

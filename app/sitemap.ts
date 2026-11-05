@@ -11,7 +11,7 @@ import {
   coveragePlaceHref,
   coverageZonePath,
 } from "@/lib/seo/birmingham-coverage";
-import { isStandaloneTownSlug } from "@/lib/seo/canonical";
+import { isStandaloneTownSlug, isIndexableAreaSlug } from "@/lib/seo/canonical";
 import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
@@ -84,14 +84,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const knownAreaSlugs = new Set(BIRMINGHAM_AREAS.map((area) => area.slug));
   const areaRoutes = [
-    ...BIRMINGHAM_AREAS.map((area) => ({
-      changeFrequency: "weekly" as const,
-      lastModified: now,
-      priority: 0.7,
-      url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`),
-    })),
+    ...BIRMINGHAM_AREAS.filter((area) => isIndexableAreaSlug(area.slug)).map(
+      (area) => ({
+        changeFrequency: "weekly" as const,
+        lastModified: now,
+        priority: 0.7,
+        url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`),
+      }),
+    ),
     ...birminghamCoveragePlaces()
-      .filter((place) => !knownAreaSlugs.has(place.slug))
+      .filter(
+        (place) =>
+          !knownAreaSlugs.has(place.slug) && isIndexableAreaSlug(place.slug),
+      )
       .map((place) => ({
         changeFrequency: "weekly" as const,
         lastModified: now,

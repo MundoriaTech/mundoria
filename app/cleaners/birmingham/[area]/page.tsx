@@ -16,7 +16,12 @@ import {
   coverageZoneHref,
   coverageZoneHubSlug,
 } from "@/lib/seo/birmingham-coverage";
-import { cleanerPlacePath, isStandaloneTownSlug } from "@/lib/seo/canonical";
+import {
+  cleanerPlacePath,
+  isStandaloneTownSlug,
+  SEO_AREA_REDIRECTS,
+  canonicalAreaPath,
+} from "@/lib/seo/canonical";
 import {
   LAUNCH_CITY,
   birminghamAreaBySlug,
@@ -81,14 +86,18 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
     }
     if (parsed.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
     const label = districtLinkLabel(parsed.district.prefix);
+    const title = `House Cleaners in ${label}, Birmingham`;
     return buildPageMetadata({
-      description: `Cleaners in ${label}, Birmingham. Book with a clear estimate before you pay.`,
+      description: `Vetted house cleaners in ${label}, ${parsed.district.prefix} from £22/h. Regular, deep and end of tenancy cleans. Instant estimate, book online in minutes.`,
       path: postcodePath(parsed.district.prefix),
-      title: `Cleaners in ${label}, Birmingham`,
+      title: `${title} | From £22/h – Mundoria`,
     });
   }
   if (params.area === LEGACY_CITY_CENTRE_SLUG) {
     permanentRedirect(cleanerPlacePath(CITY_CENTRE_PLACE_SLUG));
+  }
+  if (params.area in SEO_AREA_REDIRECTS) {
+    permanentRedirect(canonicalAreaPath(params.area));
   }
   const area = birminghamAreaBySlug(params.area);
   const coverage = birminghamCoveragePlaceBySlug(params.area);
@@ -106,11 +115,9 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
     area?.slug ?? coverage?.slug ?? (zoneHub ? coverageZoneHubSlug(zoneHub) : null);
   if (!pathSlug) return {};
   return buildPageMetadata({
-    description: coverage?.note ?? zoneHub?.note
-      ? `${title} (${coverage?.note ?? zoneHub?.note}). Book with a clear estimate before you pay.`
-      : `${title}. Book with a clear estimate before you pay.`,
+    description: `${title}. Vetted independent cleaners, from £22/h. Clear estimate before you book, live updates. Book online in minutes.`,
     path: cleanerPlacePath(pathSlug),
-    title: `${title} | Mundoria`,
+    title: `${title} | From £22/h – Mundoria`,
   });
 }
 
@@ -141,6 +148,11 @@ export default async function BirminghamAreaPage({
     );
   }
 
+  if (params.area in SEO_AREA_REDIRECTS) {
+    const focus = readPlacePageFocus(searchParams ?? {});
+    permanentRedirect(`${canonicalAreaPath(params.area)}${coverageFocusSearch(focus)}`);
+  }
+
   const area = birminghamAreaBySlug(params.area);
   const coverage = birminghamCoveragePlaceBySlug(params.area);
   const zoneHub = birminghamCoverageZoneByHubSlug(params.area);
@@ -157,6 +169,7 @@ export default async function BirminghamAreaPage({
         focus={focus}
         name={zoneHub.label}
         path={`${cleanerPlacePath(slug)}${coverageFocusSearch(focus)}`}
+        allAreasCovered={zoneHub.areas.map((item) => item.label)}
         placeLinks={zoneHub.areas.map((item) => ({
           href: coverageAreaHref(item, focus),
           label: item.label,

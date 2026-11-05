@@ -16,6 +16,180 @@ export const SEO_SERVICE_REDIRECTS: Record<string, string> = {
   "same-day-cleaning": "one-off-cleaning",
 };
 
+/**
+ * Area consolidation map.
+ * Thin / duplicate area pages redirect to these high-authority hubs.
+ */
+export const SEO_AREA_REDIRECTS: Record<string, string> = {
+  // Central Hub
+  digbeth: "birmingham-city-centre",
+  eastside: "birmingham-city-centre",
+  southside: "birmingham-city-centre",
+  "chinese-quarter": "birmingham-city-centre",
+  "gay-village": "birmingham-city-centre",
+  "colmore-business-district": "birmingham-city-centre",
+  brindleyplace: "birmingham-city-centre",
+  "broad-street": "birmingham-city-centre",
+  westside: "birmingham-city-centre",
+  ladywood: "birmingham-city-centre",
+  "lee-bank": "birmingham-city-centre",
+  "park-central": "birmingham-city-centre",
+  "attwood-green": "birmingham-city-centre",
+  highgate: "birmingham-city-centre",
+  bordesley: "birmingham-city-centre",
+  "five-ways": "birmingham-city-centre",
+  "gun-quarter": "birmingham-city-centre",
+  newtown: "birmingham-city-centre",
+
+  // West Hub (Edgbaston / Harborne)
+  "north-edgbaston": "edgbaston-and-harborne",
+  "chad-valley": "edgbaston-and-harborne",
+  "calthorpe-estate": "edgbaston-and-harborne",
+  "moor-pool": "edgbaston-and-harborne",
+  summerfield: "edgbaston-and-harborne",
+  "rotton-park": "edgbaston-and-harborne",
+  "winson-green": "edgbaston-and-harborne",
+  soho: "edgbaston-and-harborne",
+  "cape-hill": "edgbaston-and-harborne",
+  "bearwood-sandwell": "edgbaston-and-harborne",
+  quinton: "edgbaston-and-harborne",
+  "bartley-green": "edgbaston-and-harborne",
+  woodgate: "edgbaston-and-harborne",
+  california: "selly-oak-and-bournville", // California is also in south-west, map to the hub
+
+  // South-West Hub (Selly Oak / Bournville)
+  "selly-park": "selly-oak-and-bournville",
+  bournbrook: "selly-oak-and-bournville",
+  cotteridge: "selly-oak-and-bournville",
+  stirchley: "selly-oak-and-bournville",
+  "weoley-castle": "selly-oak-and-bournville",
+  "weoley-hill": "selly-oak-and-bournville",
+  northfield: "selly-oak-and-bournville",
+  longbridge: "selly-oak-and-bournville",
+  "west-heath": "selly-oak-and-bournville",
+  "kings-norton": "selly-oak-and-bournville",
+  hawkesley: "selly-oak-and-bournville",
+  monyhull: "selly-oak-and-bournville",
+  "druids-heath": "selly-oak-and-bournville",
+  frankley: "selly-oak-and-bournville",
+  "new-frankley": "selly-oak-and-bournville",
+  rednal: "selly-oak-and-bournville",
+  rubery: "selly-oak-and-bournville",
+  "turves-green": "selly-oak-and-bournville",
+  "shenley-fields": "selly-oak-and-bournville",
+  "shenley-green": "selly-oak-and-bournville",
+  "allens-cross": "selly-oak-and-bournville",
+
+  // South Hub (Moseley / Kings Heath)
+  "balsall-heath": "moseley-and-kings-heath",
+  sparkbrook: "moseley-and-kings-heath",
+  sparkhill: "moseley-and-kings-heath",
+  springfield: "moseley-and-kings-heath",
+  "hall-green": "moseley-and-kings-heath",
+  "wake-green": "moseley-and-kings-heath",
+  billesley: "moseley-and-kings-heath",
+  brandwood: "moseley-and-kings-heath",
+  "yardley-wood": "moseley-and-kings-heath",
+  warstock: "moseley-and-kings-heath",
+  "highters-heath": "moseley-and-kings-heath",
+  maypole: "moseley-and-kings-heath",
+  "brook-lane": "moseley-and-kings-heath",
+  "cole-valley": "moseley-and-kings-heath",
+  tyseley: "moseley-and-kings-heath",
+  "acocks-green": "moseley-and-kings-heath",
+
+  // North-West Hub (Aston / Handsworth)
+  "aston-manor": "aston-and-handsworth",
+  birchfield: "aston-and-handsworth",
+  witton: "aston-and-handsworth",
+  lozells: "aston-and-handsworth",
+  "handsworth-wood": "aston-and-handsworth",
+  "perry-barr": "aston-and-handsworth",
+  "perry-hall": "aston-and-handsworth",
+  "great-barr": "aston-and-handsworth",
+  hamstead: "aston-and-handsworth",
+  kingstanding: "aston-and-handsworth",
+  oscott: "aston-and-handsworth",
+  "old-oscott": "aston-and-handsworth",
+  "new-oscott": "aston-and-handsworth",
+  queslett: "aston-and-handsworth",
+  "tower-hill": "aston-and-handsworth",
+  "perry-beeches": "aston-and-handsworth",
+  "college-road": "aston-and-handsworth",
+  brookvale: "aston-and-handsworth",
+  holford: "aston-and-handsworth",
+  holyhead: "aston-and-handsworth",
+
+  // North-East Hub (Erdington)
+  "gravelly-hill": "erdington-and-north-east-birmingham",
+  "stockland-green": "erdington-and-north-east-birmingham",
+  "short-heath": "erdington-and-north-east-birmingham",
+  "perry-common": "erdington-and-north-east-birmingham",
+  "pype-hayes": "erdington-and-north-east-birmingham",
+  tyburn: "erdington-and-north-east-birmingham",
+  "castle-vale": "erdington-and-north-east-birmingham",
+  bromford: "erdington-and-north-east-birmingham",
+  "birches-green": "erdington-and-north-east-birmingham",
+  "spring-hill": "erdington-and-north-east-birmingham",
+  "chester-road": "erdington-and-north-east-birmingham",
+  "minworth-birmingham-side": "erdington-and-north-east-birmingham",
+  "the-gardens": "erdington-and-north-east-birmingham",
+  "lyndhurst-estate": "erdington-and-north-east-birmingham",
+
+  // East Hub (Alum Rock / Hodge Hill)
+  saltley: "alum-rock-and-hodge-hill",
+  "washwood-heath": "alum-rock-and-hodge-hill",
+  "ward-end": "alum-rock-and-hodge-hill",
+  "shard-end": "alum-rock-and-hodge-hill",
+  "tile-cross": "alum-rock-and-hodge-hill",
+  "glebe-farm": "alum-rock-and-hodge-hill",
+  stechford: "alum-rock-and-hodge-hill",
+  "kitts-green": "alum-rock-and-hodge-hill",
+  "lea-village": "alum-rock-and-hodge-hill",
+  "garretts-green": "alum-rock-and-hodge-hill",
+  "bordesley-green": "alum-rock-and-hodge-hill",
+  "small-heath": "alum-rock-and-hodge-hill",
+  nechells: "alum-rock-and-hodge-hill",
+  duddeston: "alum-rock-and-hodge-hill",
+  vauxhall: "alum-rock-and-hodge-hill",
+  ashted: "alum-rock-and-hodge-hill",
+  heartlands: "alum-rock-and-hodge-hill",
+  pelham: "alum-rock-and-hodge-hill",
+
+  // South-East Hub (Yardley / Sheldon)
+  "south-yardley": "yardley-and-sheldon",
+  "yardley-east": "yardley-and-sheldon",
+  "yardley-west": "yardley-and-sheldon",
+  sheldon: "yardley-and-sheldon",
+  gilbertstone: "yardley-and-sheldon",
+  "lyndon-green": "yardley-and-sheldon",
+  "wells-green": "yardley-and-sheldon",
+  "hay-mills": "yardley-and-sheldon",
+  "olton-boulevard-east": "yardley-and-sheldon",
+
+  // Sutton Hub
+  "four-oaks": "sutton-coldfield",
+  "mere-green": "sutton-coldfield",
+  "little-aston": "sutton-coldfield",
+  streetly: "sutton-coldfield",
+  boldmere: "sutton-coldfield",
+  "wylde-green": "sutton-coldfield",
+  walmley: "sutton-coldfield",
+  "new-hall": "sutton-coldfield",
+  reddicap: "sutton-coldfield",
+  roughley: "sutton-coldfield",
+  "hill-hook": "sutton-coldfield",
+  "doe-bank": "sutton-coldfield",
+  "whitehouse-common": "sutton-coldfield",
+  "falcon-lodge": "sutton-coldfield",
+  maney: "sutton-coldfield",
+  "banners-gate": "sutton-coldfield",
+  plantsbrook: "sutton-coldfield",
+  "sutton-park": "sutton-coldfield",
+  langley: "sutton-coldfield",
+  minworth: "sutton-coldfield",
+};
+
 /** Path for a marketing service slug after canonicalisation. */
 export function canonicalCleaningPath(slug: string): string {
   const target = SEO_SERVICE_REDIRECTS[slug] ?? slug;
@@ -26,6 +200,20 @@ export function canonicalCleaningPath(slug: string): string {
 /** Whether this marketing slug should appear in the sitemap as its own page. */
 export function isIndexableServiceSlug(slug: string): boolean {
   return !(slug in SEO_SERVICE_REDIRECTS);
+}
+
+/** Whether this area slug is a high-authority hub that should be indexed. */
+export function isIndexableAreaSlug(slug: string): boolean {
+  return !(slug in SEO_AREA_REDIRECTS);
+}
+
+/** Path for a marketing area slug after canonicalisation. */
+export function canonicalAreaPath(slug: string): string {
+  const target = SEO_AREA_REDIRECTS[slug] ?? slug;
+  if (STANDALONE_TOWN_SLUGS.has(target)) {
+    return `/cleaners/${target}`;
+  }
+  return `/cleaners/birmingham/${target}`;
 }
 
 /**

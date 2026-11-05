@@ -136,6 +136,8 @@ export async function LaunchCityHubSections({
   showReviews?: boolean;
   place?: string;
   placeLinks?: Array<{ href: string; label: string }>;
+  /** Full list of all areas covered, including those that redirect. Used for text SEO. */
+  allAreasCovered?: string[];
   /** Current place URL (no query). Category service cards deep-link here with ?service=. */
   placePath?: string;
   placesNote?: string;
@@ -163,6 +165,10 @@ export async function LaunchCityHubSections({
     ? CATEGORY_SERVICE_TITLE[categoryFocus]
     : null;
   const listNearbyTowns = showNearbyTowns || !placeLinks;
+
+  const areasCoveredText = allAreasCovered?.length
+    ? `Mundoria provides vetted cleaners across ${place}, including ${allAreasCovered.join(", ")} and surrounding postcodes.`
+    : null;
 
   return (
     <>
@@ -228,6 +234,15 @@ export async function LaunchCityHubSections({
       ) : null}
 
       {showReviews ? <LocationReviews place={place} reviews={reviews} /> : null}
+
+      {areasCoveredText ? (
+        <BrandedSection tone="cream">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            Cleaning coverage in {place}
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-[#5a5470]">{areasCoveredText}</p>
+        </BrandedSection>
+      ) : null}
 
       <LocationNearPlacePills
         categoryFocus={categoryFocus}

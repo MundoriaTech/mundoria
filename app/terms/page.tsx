@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
 import { buildPageMetadata } from "@/lib/seo/site";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
@@ -12,8 +13,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 const sections: LegalSection[] = [
   {
-    body:
-      "These terms apply when you access or use Mundoria as a customer, cleaner or administrator. Before public launch, have these terms reviewed and replace this placeholder with the registered legal entity that operates Mundoria.",
+    body: `These terms apply when you access or use Mundoria as a customer, cleaner or administrator. Mundoria is operated by ${MUNDORIA_IDENTITY.legalName}, a company registered in England and Wales (Company No. ${MUNDORIA_IDENTITY.companyNumber}) with its registered office at ${MUNDORIA_IDENTITY.address.street}, ${MUNDORIA_IDENTITY.address.locality}, ${MUNDORIA_IDENTITY.address.postcode}.`,
     title: "About these terms",
   },
   {
@@ -94,8 +94,7 @@ const sections: LegalSection[] = [
     title: "Governing law",
   },
   {
-    body:
-      "Questions about these terms can be sent through Contact us chat on the website, or via the Help Centre.",
+    body: `Questions about these terms can be sent to ${MUNDORIA_IDENTITY.supportEmail}, through Contact us chat on the website, or via the Help Centre.`,
     title: "Contact",
   },
 ];

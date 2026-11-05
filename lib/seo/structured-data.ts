@@ -5,7 +5,8 @@ import {
   popularMarketingServices,
   type MarketingService,
 } from "@/lib/seo/marketing";
-import { SUPPORT_EMAIL, absoluteUrl } from "@/lib/seo/site";
+import { absoluteUrl } from "@/lib/seo/site";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 
 export function organizationSchema() {
   return {
@@ -14,15 +15,17 @@ export function organizationSchema() {
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
-      email: SUPPORT_EMAIL,
+      email: MUNDORIA_IDENTITY.supportEmail,
+      telephone: MUNDORIA_IDENTITY.phone,
       url: absoluteUrl("/help"),
     },
     description:
       "Mundoria connects UK customers with independent cleaning professionals for homes, workplaces and short-term rentals.",
-    email: SUPPORT_EMAIL,
+    email: MUNDORIA_IDENTITY.supportEmail,
+    legalName: MUNDORIA_IDENTITY.legalName,
     logo: absoluteUrl("/images/brand/mundoria-wordmark.png"),
-    name: "Mundoria UK",
-    sameAs: [],
+    name: "Mundoria",
+    sameAs: MUNDORIA_IDENTITY.socials,
     url: absoluteUrl("/"),
   };
 }
@@ -34,10 +37,10 @@ export function webSiteSchema() {
     description:
       "Book certified UK cleaning professionals with live booking status, messaging and secure payment.",
     inLanguage: "en-GB",
-    name: "Mundoria UK",
+    name: "Mundoria",
     publisher: {
       "@type": "Organization",
-      name: "Mundoria UK",
+      name: MUNDORIA_IDENTITY.legalName,
     },
     url: absoluteUrl("/"),
   };
@@ -49,16 +52,19 @@ export function localBusinessSchema() {
     "@type": "LocalBusiness",
     address: {
       "@type": "PostalAddress",
-      addressCountry: "GB",
-      addressLocality: "Birmingham",
+      addressCountry: MUNDORIA_IDENTITY.address.country,
+      addressLocality: MUNDORIA_IDENTITY.address.locality,
+      postalCode: MUNDORIA_IDENTITY.address.postcode,
+      streetAddress: MUNDORIA_IDENTITY.address.street,
     },
     areaServed: BIRMINGHAM_AREAS.map((area) => ({
       "@type": "Place",
       name: `${area.name}, Birmingham, UK`,
     })),
     description: LAUNCH_CITY.seoDescription,
-    email: SUPPORT_EMAIL,
-    name: "Mundoria UK",
+    email: MUNDORIA_IDENTITY.supportEmail,
+    name: "Mundoria",
+    telephone: MUNDORIA_IDENTITY.phone,
     url: absoluteUrl("/"),
   };
 }
@@ -81,7 +87,7 @@ export function serviceListSchema(servicesList?: MarketingService[]) {
         name: service.label,
         provider: {
           "@type": "Organization",
-          name: "Mundoria UK",
+          name: MUNDORIA_IDENTITY.legalName,
         },
         url: absoluteUrl(`/cleaning/${service.slug}`),
       },
@@ -111,7 +117,7 @@ export function allServicesStructuredData(
     name: service.label,
     provider: {
       "@type": "Organization",
-      name: "Mundoria UK",
+      name: MUNDORIA_IDENTITY.legalName,
     },
     url: absoluteUrl(`/cleaning/${service.slug}`),
   }));
