@@ -3,6 +3,7 @@ import {
   LAUNCH_CITY,
   MARKETING_SERVICES,
   popularMarketingServices,
+  type MarketingService,
 } from "@/lib/seo/marketing";
 import { SUPPORT_EMAIL, absoluteUrl } from "@/lib/seo/site";
 
@@ -62,8 +63,8 @@ export function localBusinessSchema() {
   };
 }
 
-export function serviceListSchema() {
-  const services = popularMarketingServices(6);
+export function serviceListSchema(servicesList?: MarketingService[]) {
+  const services = popularMarketingServices(6, servicesList);
 
   return {
     "@context": "https://schema.org",
@@ -91,17 +92,19 @@ export function serviceListSchema() {
   };
 }
 
-export function homePageStructuredData() {
+export function homePageStructuredData(servicesList?: MarketingService[]) {
   return [
     organizationSchema(),
     webSiteSchema(),
     localBusinessSchema(),
-    serviceListSchema(),
+    serviceListSchema(servicesList),
   ];
 }
 
-export function allServicesStructuredData() {
-  return MARKETING_SERVICES.map((service) => ({
+export function allServicesStructuredData(
+  servicesList: MarketingService[] = MARKETING_SERVICES,
+) {
+  return servicesList.map((service) => ({
     "@context": "https://schema.org",
     "@type": "Service",
     description: service.seoDescription,

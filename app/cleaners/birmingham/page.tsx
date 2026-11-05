@@ -8,6 +8,7 @@ import {
 import { LaunchCityHubSections } from "@/components/marketing/launch-city-hub-sections";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlaceMapHero } from "@/components/marketing/place-map-hero";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { birminghamPlaceFaqSchemaAnswers } from "@/lib/seo/birmingham-place-faqs";
 import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
@@ -22,6 +23,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default async function BirminghamCleanersPage() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
+  const pricing = await loadServicePricing();
 
   return (
     <MarketingShell>
@@ -64,13 +66,14 @@ export default async function BirminghamCleanersPage() {
           {
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            mainEntity: birminghamPlaceFaqSchemaAnswers("Birmingham").map(
-              (item) => ({
-                "@type": "Question",
-                acceptedAnswer: { "@type": "Answer", text: item.answer },
-                name: item.question,
-              }),
-            ),
+            mainEntity: birminghamPlaceFaqSchemaAnswers(
+              "Birmingham",
+              pricing,
+            ).map((item) => ({
+              "@type": "Question",
+              acceptedAnswer: { "@type": "Answer", text: item.answer },
+              name: item.question,
+            })),
           },
         ]}
       />

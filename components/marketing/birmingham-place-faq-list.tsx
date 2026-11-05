@@ -6,6 +6,7 @@ import {
   PlaceServiceExplainerIntro,
   PlaceServiceExplainerList,
 } from "@/components/marketing/place-service-explainer-list";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
 import {
   BIRMINGHAM_SERVICE_FAQ_LINKS,
   birminghamPlaceFaqEntries,
@@ -19,7 +20,7 @@ import { LAUNCH_CITY } from "@/lib/seo/marketing";
 const linkClass =
   "font-semibold text-[#6a45b8] underline-offset-2 hover:underline";
 
-export function BirminghamPlaceFaqList({
+export async function BirminghamPlaceFaqList({
   bookingHref,
   place = "Birmingham",
   title,
@@ -29,7 +30,7 @@ export function BirminghamPlaceFaqList({
   title?: string;
 }) {
   const { deep } = BIRMINGHAM_SERVICE_FAQ_LINKS;
-  const entries = birminghamPlaceFaqEntries(place);
+  const entries = birminghamPlaceFaqEntries(place, await loadServicePricing());
 
   const richAnswers: Record<string, ReactNode> = {
     [entries[0]!.question]: (

@@ -1,8 +1,12 @@
 import {
+  DEFAULT_SERVICE_PRICING,
+  loadServicePricing,
+  type ServicePricingConfig,
+} from "@/lib/customer/pricing-config";
+import { fromRateLabel } from "@/lib/customer/published-pricing";
+import {
   SERVICE_CATEGORIES,
   SERVICES,
-  formatHourlyRate,
-  indicativeHourlyRatePence,
   servicesForCategory,
 } from "@/lib/customer/services";
 import { isIndexableServiceSlug } from "@/lib/seo/canonical";
@@ -47,32 +51,54 @@ const SERVICE_SLUG_OVERRIDES: Partial<Record<ServiceType, string>> = {
   holiday_let: "holiday-let-cleaning",
 };
 
-export const MARKETING_SERVICES: MarketingService[] = SERVICES.map((service) => {
-  const category = SERVICE_CATEGORIES.find(
-    (item) => item.value === service.category,
-  )!;
-  const slug =
-    SERVICE_SLUG_OVERRIDES[service.value] ?? toSlug(service.label);
-  const onpage = onpageCopyForServiceSlug(slug);
-  return {
-    bookingHref: `/booking/new?service=${service.value}`,
-    category: service.category,
-    categoryLabel: category.label,
-    description: service.description,
-    fromPrice: formatHourlyRate(indicativeHourlyRatePence(service.value)),
-    intro: `${service.label} with Mundoria. Clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
-    label: service.label,
-    seoDescription:
-      onpage?.description ??
-      `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${formatHourlyRate(indicativeHourlyRatePence(service.value))}.`,
-    seoTitle: onpage?.title,
-    slug,
-    value: service.value,
-  };
-});
+/** Build marketing service rows with live (or default) rate-card prices. */
+export function marketingServicesWithPricing(
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+): MarketingService[] {
+  return SERVICES.map((service) => {
+    const category = SERVICE_CATEGORIES.find(
+      (item) => item.value === service.category,
+    )!;
+    const slug =
+      SERVICE_SLUG_OVERRIDES[service.value] ?? toSlug(service.label);
+    const onpage = onpageCopyForServiceSlug(slug);
+    const fromPrice = fromRateLabel(service.value, pricing);
+    return {
+      bookingHref: `/booking/new?service=${service.value}`,
+      category: service.category,
+      categoryLabel: category.label,
+      description: service.description,
+      fromPrice,
+      intro: `${service.label} with Mundoria. Clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
+      label: service.label,
+      seoDescription:
+        onpage?.description ??
+        `${service.description} Book ${service.label.toLowerCase()} online with Mundoria. From ${fromPrice}.`,
+      seoTitle: onpage?.title,
+      slug,
+      value: service.value,
+    };
+  });
+}
 
-export function marketingServiceBySlug(slug: string) {
-  return MARKETING_SERVICES.find((service) => service.slug === slug) ?? null;
+/** Default-priced catalogue for static params / identity lookups. */
+export const MARKETING_SERVICES: MarketingService[] =
+  marketingServicesWithPricing(DEFAULT_SERVICE_PRICING);
+
+/** Marketing services with admin Settings rates applied. */
+export async function getMarketingServices() {
+  return marketingServicesWithPricing(await loadServicePricing());
+}
+
+export function marketingServiceBySlug(
+  slug: string,
+  services: MarketingService[] = MARKETING_SERVICES,
+) {
+  return services.find((service) => service.slug === slug) ?? null;
+}
+
+export async function getMarketingServiceBySlug(slug: string) {
+  return marketingServiceBySlug(slug, await getMarketingServices());
 }
 
 export function isPublicMarketingService(service: MarketingService) {
@@ -80,18 +106,30 @@ export function isPublicMarketingService(service: MarketingService) {
 }
 
 /** Services customers can book. Hidden catalogue leftovers stay off location URLs. */
-export function publicMarketingServices() {
-  return MARKETING_SERVICES.filter(isPublicMarketingService);
+export function publicMarketingServices(
+  services: MarketingService[] = MARKETING_SERVICES,
+) {
+  return services.filter(isPublicMarketingService);
+}
+
+export async function getPublicMarketingServices() {
+  return publicMarketingServices(await getMarketingServices());
 }
 
 /**
  * Services that keep their own indexable `/cleaning/{slug}` page.
  * Duplicates (move-out twin, holiday-let twin, etc.) redirect to a canonical slug.
  */
-export function indexableMarketingServices() {
-  return publicMarketingServices().filter((service) =>
+export function indexableMarketingServices(
+  services: MarketingService[] = MARKETING_SERVICES,
+) {
+  return publicMarketingServices(services).filter((service) =>
     isIndexableServiceSlug(service.slug),
   );
+}
+
+export async function getIndexableMarketingServices() {
+  return indexableMarketingServices(await getMarketingServices());
 }
 
 /**
@@ -139,8 +177,15 @@ export function servicePlaceFaqs(service: MarketingService, place: string) {
   ];
 }
 
-export function marketingServicesByCategory(category: ServiceCategory) {
-  return MARKETING_SERVICES.filter((service) => service.category === category);
+export function marketingServicesByCategory(
+  category: ServiceCategory,
+  services: MarketingService[] = MARKETING_SERVICES,
+) {
+  return services.filter((service) => service.category === category);
+}
+
+export async function getMarketingServicesByCategory(category: ServiceCategory) {
+  return marketingServicesByCategory(category, await getMarketingServices());
 }
 
 export const LAUNCH_CITY = {
@@ -613,7 +658,10 @@ export const HOW_IT_WORKS_STEPS = [
   },
 ] as const;
 
-export function popularMarketingServices(limit = 6) {
+export function popularMarketingServices(
+  limit = 6,
+  services: MarketingService[] = MARKETING_SERVICES,
+) {
   const preferred: ServiceType[] = [
     "regular",
     "deep_clean",
@@ -623,7 +671,7 @@ export function popularMarketingServices(limit = 6) {
     "move_in",
   ];
   return preferred
-    .map((value) => MARKETING_SERVICES.find((service) => service.value === value))
+    .map((value) => services.find((service) => service.value === value))
     .filter((service): service is MarketingService => Boolean(service))
     .slice(0, limit);
 }

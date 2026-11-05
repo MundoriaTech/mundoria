@@ -14,6 +14,8 @@ import {
   isIndexableServiceSlug,
 } from "@/lib/seo/canonical";
 import {
+  getMarketingServiceBySlug,
+  getMarketingServices,
   indexableMarketingServices,
   marketingServiceBySlug,
 } from "@/lib/seo/marketing";
@@ -29,9 +31,11 @@ export function generateStaticParams() {
   return indexableMarketingServices().map((service) => ({ slug: service.slug }));
 }
 
-export function generateMetadata({ params }: PageProps): Metadata {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   if (!isIndexableServiceSlug(params.slug)) return {};
-  const service = marketingServiceBySlug(params.slug);
+  const service = await getMarketingServiceBySlug(params.slug);
   if (!service) return {};
   return buildPageMetadata({
     description: service.seoDescription,
@@ -40,12 +44,13 @@ export function generateMetadata({ params }: PageProps): Metadata {
   });
 }
 
-export default function CleaningServicePage({ params }: PageProps) {
+export default async function CleaningServicePage({ params }: PageProps) {
   if (!isIndexableServiceSlug(params.slug)) {
     permanentRedirect(canonicalCleaningPath(params.slug));
   }
 
-  const service = marketingServiceBySlug(params.slug);
+  const priced = await getMarketingServices();
+  const service = marketingServiceBySlug(params.slug, priced);
   if (!service) notFound();
 
   const configured = hasSupabasePublicConfig();
@@ -70,7 +75,7 @@ export default function CleaningServicePage({ params }: PageProps) {
       />
       <ServiceCategoryMarketingPage
         bookingHref={bookingHref}
-        config={serviceDetailConfig(service)}
+        config={serviceDetailConfig(service, priced)}
       />
       <ServiceCityCoverage service={service} />
       {magCategory ? (

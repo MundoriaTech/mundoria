@@ -56,8 +56,9 @@ export function marketingServiceCardImage(service: MarketingService) {
 
 export function serviceDetailConfig(
   service: MarketingService,
+  pricedServices?: MarketingService[],
 ): ServiceCategoryMarketingConfig {
-  const siblings = publicMarketingServices().filter(
+  const siblings = publicMarketingServices(pricedServices).filter(
     (item) => item.category === service.category && item.slug !== service.slug,
   );
   const cards =

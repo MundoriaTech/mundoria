@@ -8,6 +8,8 @@ import {
 import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
 import { ResidentialCleaningPage } from "@/components/marketing/residential/residential-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
+import { houseCleaningFromLabel } from "@/lib/customer/published-pricing";
 import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
@@ -25,6 +27,7 @@ export default async function ResidentialCleaningRoute() {
   const bookingHref = configured
     ? "/booking/new?category=residential&returnTo=/cleaning/residential"
     : "/setup";
+  const fromRateLabel = houseCleaningFromLabel(await loadServicePricing());
 
   return (
     <MarketingShell>
@@ -47,10 +50,13 @@ export default async function ResidentialCleaningRoute() {
             },
             url: absoluteUrl("/cleaning/residential"),
           },
-          launchCityFaqJsonLd(),
+          await launchCityFaqJsonLd(),
         ]}
       />
-      <ResidentialCleaningPage bookingHref={bookingHref} />
+      <ResidentialCleaningPage
+        bookingHref={bookingHref}
+        fromRateLabel={fromRateLabel}
+      />
       <BrandedPageWash>
         <LaunchCityHubSections
           bookingHref={bookingHref}

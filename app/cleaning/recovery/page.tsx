@@ -44,7 +44,7 @@ export default async function RecoveryCleaningRoute() {
             },
             url: absoluteUrl("/cleaning/recovery"),
           },
-          launchCityFaqJsonLd(),
+          await launchCityFaqJsonLd(),
         ]}
       />
       <RecoveryCleaningPage bookingHref={bookingHref} />

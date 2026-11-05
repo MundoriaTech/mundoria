@@ -47,7 +47,7 @@ export default async function CommercialCleaningRoute() {
             },
             url: absoluteUrl("/cleaning/commercial"),
           },
-          launchCityFaqJsonLd(),
+          await launchCityFaqJsonLd(),
         ]}
       />
       <CommercialCleaningPage bookingHref={bookingHref} />

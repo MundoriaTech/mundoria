@@ -23,7 +23,9 @@ import {
 } from "@/lib/customer/office-pricing";
 import {
   DEFAULT_SERVICE_PRICING,
+  equipmentSupplyFromPricing,
   flatAddOnAmountFromPricing,
+  productSupplyFromPricing,
   scheduleMultiplierFromPricing,
   type ServicePricingConfig,
 } from "@/lib/customer/pricing-config";
@@ -668,6 +670,20 @@ export function availableAddOns(serviceType: ServiceType) {
     const categoryMatch = addOn.categories?.includes(service.category) ?? false;
     return serviceMatch || categoryMatch;
   });
+}
+
+/** Add-on description with live admin supply rates for product/equipment kits. */
+export function describeServiceAddOn(
+  addOn: ServiceAddOnDefinition,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+) {
+  if (addOn.id === "cleaning_products") {
+    return `Cleaner brings the Mundoria product kit (${formatHourlyRate(productSupplyFromPricing(pricing, "residential"))} home, ${formatHourlyRate(productSupplyFromPricing(pricing, "commercial"))} commercial).`;
+  }
+  if (addOn.id === "cleaning_equipment") {
+    return `Cleaner brings the Mundoria equipment kit (${formatHourlyRate(equipmentSupplyFromPricing(pricing, "regular"))}, or ${formatHourlyRate(equipmentSupplyFromPricing(pricing, "deep_clean"))} for deep cleaning).`;
+  }
+  return addOn.description;
 }
 
 export type AddOnPriceContext = {

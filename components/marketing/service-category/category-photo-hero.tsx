@@ -5,7 +5,15 @@ import { Check } from "lucide-react";
 import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
-import { marketingServiceBySlug } from "@/lib/seo/marketing";
+import {
+  DEFAULT_SERVICE_PRICING,
+  type ServicePricingConfig,
+} from "@/lib/customer/pricing-config";
+import { houseCleaningFromLabel } from "@/lib/customer/published-pricing";
+import {
+  marketingServiceBySlug,
+  type MarketingService,
+} from "@/lib/seo/marketing";
 import type { PlacePageFocus } from "@/lib/seo/place-page-focus";
 import { serviceDetailConfig } from "@/lib/seo/service-detail-config";
 
@@ -21,11 +29,13 @@ type PlacePhotoHero = {
 export function placePhotoHero(
   name: string,
   focus?: PlacePageFocus,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+  services?: MarketingService[],
 ): PlacePhotoHero | null {
   if (focus?.serviceSlug) {
-    const service = marketingServiceBySlug(focus.serviceSlug);
+    const service = marketingServiceBySlug(focus.serviceSlug, services);
     if (!service) return null;
-    const config = serviceDetailConfig(service);
+    const config = serviceDetailConfig(service, services);
     return {
       bookCta: config.bookCta,
       bullets: config.bullets,
@@ -56,7 +66,7 @@ export function placePhotoHero(
     return {
       bookCta: "Book house cleaning",
       bullets: [
-        "Cleaning from £22/h",
+        `Cleaning from ${houseCleaningFromLabel(pricing)}`,
         "Book once or schedule regularly",
         "Reliable, vetted cleaners you can trust",
       ],

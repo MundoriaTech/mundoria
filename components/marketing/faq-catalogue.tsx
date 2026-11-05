@@ -21,19 +21,24 @@ import {
   softScrollToTop,
 } from "@/lib/soft-scroll-to-top";
 
-function filterSections(query: string): SiteFaqSection[] {
+function filterSections(
+  query: string,
+  catalogue: SiteFaqSection[] = SITE_FAQ_SECTIONS,
+): SiteFaqSection[] {
   const normalized = query.trim().toLowerCase();
-  if (!normalized) return SITE_FAQ_SECTIONS;
+  if (!normalized) return catalogue;
 
   const terms = normalized.split(/\s+/).filter(Boolean);
 
-  return SITE_FAQ_SECTIONS.map((section) => {
-    const items = section.items.filter((item) => {
-      const haystack = `${item.question} ${item.answer}`.toLowerCase();
-      return terms.every((term) => haystack.includes(term));
-    });
-    return { ...section, items };
-  }).filter((section) => section.items.length > 0);
+  return catalogue
+    .map((section) => {
+      const items = section.items.filter((item) => {
+        const haystack = `${item.question} ${item.answer}`.toLowerCase();
+        return terms.every((term) => haystack.includes(term));
+      });
+      return { ...section, items };
+    })
+    .filter((section) => section.items.length > 0);
 }
 
 function groupSections(sections: SiteFaqSection[]) {
@@ -101,13 +106,18 @@ function openFaqTarget(id: string) {
   return true;
 }
 
-export function FaqCatalogue() {
+export function FaqCatalogue({
+  sections: catalogueSections = SITE_FAQ_SECTIONS,
+}: {
+  /** Prefer live admin-priced answers from the server FAQ page. */
+  sections?: SiteFaqSection[];
+}) {
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const hashId = useFaqHash();
   const sections = useMemo(
-    () => filterSections(deferredQuery),
-    [deferredQuery],
+    () => filterSections(deferredQuery, catalogueSections),
+    [catalogueSections, deferredQuery],
   );
   const jumpGroups = useMemo(() => groupSections(sections), [sections]);
   const totalAnswers = sections.reduce(

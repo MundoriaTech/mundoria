@@ -1,7 +1,19 @@
+import {
+  DEFAULT_SERVICE_PRICING,
+  type ServicePricingConfig,
+} from "@/lib/customer/pricing-config";
+import {
+  placePricingSchemaAnswer,
+  placeSuppliesSchemaAnswer,
+} from "@/lib/customer/published-pricing";
 import { placeServiceExplainerSchemaText } from "@/lib/seo/place-service-explainer";
+
 /** Plain-text FAQ answers for JSON-LD (matches on-page linked copy). */
-export function birminghamPlaceFaqSchemaAnswers(place: string) {
-  return birminghamPlaceFaqEntries(place).map((item) => ({
+export function birminghamPlaceFaqSchemaAnswers(
+  place: string,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+) {
+  return birminghamPlaceFaqEntries(place, pricing).map((item) => ({
     question: item.question,
     answer: item.schemaAnswer,
   }));
@@ -63,7 +75,10 @@ export type BirminghamPlaceFaqEntry = {
   schemaAnswer: string;
 };
 
-export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntry[] {
+export function birminghamPlaceFaqEntries(
+  place: string,
+  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
+): BirminghamPlaceFaqEntry[] {
   return [
     {
       question: `What cleaning services does Mundoria offer in ${place}?`,
@@ -93,8 +108,7 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
     },
     {
       question: `What do most cleaners charge per hour in ${place}?`,
-      schemaAnswer:
-        "Local cleaner rates vary by experience and whether you book an independent or a company. Mundoria pricing starts from £22 per hour for Essential regular cleans (and from £23 per hour for recovery support), with a clear estimate for your home size and service before you confirm, not an open-ended hourly quote after the visit.",
+      schemaAnswer: placePricingSchemaAnswer(pricing),
     },
     {
       question: `How much does Mundoria cleaning cost in ${place}?`,
@@ -107,8 +121,7 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
     },
     {
       question: "Do I need to provide cleaning supplies?",
-      schemaAnswer:
-        "You can use your own products and equipment, or add Mundoria cleaning products (£2/h home) and cleaning equipment (£3/h, or £5/h for deep cleaning) when you book. Share fragrance-free or allergy notes in the booking instructions.",
+      schemaAnswer: placeSuppliesSchemaAnswer(pricing),
     },
     {
       question: "What is the Mundoria cancellation policy?",

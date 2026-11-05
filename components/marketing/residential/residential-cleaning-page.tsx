@@ -49,8 +49,11 @@ const SERVICE_CARDS = [
 
 export function ResidentialCleaningPage({
   bookingHref,
+  fromRateLabel = "£22.00/h",
 }: {
   bookingHref: string;
+  /** Live admin rate-card label, e.g. "£22.00/h". */
+  fromRateLabel?: string;
 }) {
   return (
     <>
@@ -87,7 +90,7 @@ export function ResidentialCleaningPage({
               </p>
               <ul className="mt-5 space-y-2.5 text-[13px] font-medium text-white sm:mt-6 sm:text-sm">
                 {[
-                  "Cleaning from £22/h",
+                  `Cleaning from ${fromRateLabel}`,
                   "Book once or schedule regularly",
                   "Reliable, vetted cleaners you can trust",
                 ].map((item) => (

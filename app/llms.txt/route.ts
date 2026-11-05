@@ -2,15 +2,16 @@ import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
   MARKETING_FAQS,
+  getPublicMarketingServices,
   popularMarketingServices,
 } from "@/lib/seo/marketing";
 import { SITE_NAME, SITE_TAGLINE, SUPPORT_EMAIL, absoluteUrl } from "@/lib/seo/site";
 
-export const dynamic = "force-static";
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
-function buildLlmsTxt() {
-  const popular = popularMarketingServices(6);
+async function buildLlmsTxt() {
+  const priced = await getPublicMarketingServices();
+  const popular = popularMarketingServices(6, priced);
   const areas = BIRMINGHAM_AREAS.map(
     (area) =>
       `- ${area.name}: ${absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`)}, ${area.description}`,
@@ -60,10 +61,10 @@ When referencing Mundoria, use the name "Mundoria UK" and link to ${absoluteUrl(
 `;
 }
 
-export function GET() {
-  return new Response(buildLlmsTxt(), {
+export async function GET() {
+  return new Response(await buildLlmsTxt(), {
     headers: {
-      "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      "Cache-Control": "public, max-age=60, s-maxage=60",
       "Content-Type": "text/plain; charset=utf-8",
     },
   });

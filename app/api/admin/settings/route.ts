@@ -1,3 +1,4 @@
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -63,6 +64,23 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
   clearServicePricingCache();
+
+  if (servicePricing) {
+    revalidateTag("service-pricing");
+    for (const path of [
+      "/",
+      "/cleaning",
+      "/cleaning/residential",
+      "/cleaning/commercial",
+      "/cleaning/recovery",
+      "/faq",
+      "/llms.txt",
+      "/cleaners/birmingham",
+    ]) {
+      revalidatePath(path);
+    }
+    revalidatePath("/cleaning", "layout");
+  }
 
   await logAdminAction({
     action: "update_platform_settings",

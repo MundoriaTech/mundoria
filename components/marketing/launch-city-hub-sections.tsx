@@ -285,14 +285,18 @@ export async function LaunchCityHubSections({
   );
 }
 
-export function launchCityFaqJsonLd(place: string = PLACE) {
+export async function launchCityFaqJsonLd(place: string = PLACE) {
+  const { loadServicePricing } = await import("@/lib/customer/pricing-config");
+  const pricing = await loadServicePricing();
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: birminghamPlaceFaqSchemaAnswers(place).map((item) => ({
-      "@type": "Question",
-      acceptedAnswer: { "@type": "Answer", text: item.answer },
-      name: item.question,
-    })),
+    mainEntity: birminghamPlaceFaqSchemaAnswers(place, pricing).map(
+      (item) => ({
+        "@type": "Question",
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+        name: item.question,
+      }),
+    ),
   };
 }

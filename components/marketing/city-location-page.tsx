@@ -8,7 +8,12 @@ import { placePhotoHero } from "@/components/marketing/service-category/category
 import { PlaceFeatureBand } from "@/components/marketing/service-category/place-feature-band";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlaceMapHero } from "@/components/marketing/place-map-hero";
-import { LAUNCH_CITY, marketingServiceBySlug } from "@/lib/seo/marketing";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
+import {
+  getMarketingServices,
+  LAUNCH_CITY,
+  marketingServiceBySlug,
+} from "@/lib/seo/marketing";
 import {
   cleaningPlaceTitle,
   type PlacePageFocus,
@@ -55,8 +60,12 @@ export async function CityLocationPage({
   showNearbyTowns?: boolean;
   surroundingLinks?: Array<{ href: string; label: string }>;
 }) {
+  const [pricing, pricedServices] = await Promise.all([
+    loadServicePricing(),
+    getMarketingServices(),
+  ]);
   const service = focus?.serviceSlug
-    ? marketingServiceBySlug(focus.serviceSlug)
+    ? marketingServiceBySlug(focus.serviceSlug, pricedServices)
     : null;
   const categoryFocus =
     focus?.category ??
@@ -72,7 +81,7 @@ export async function CityLocationPage({
     serviceLabel: focus?.serviceLabel,
   });
 
-  const photo = placePhotoHero(name, focus);
+  const photo = placePhotoHero(name, focus, pricing, pricedServices);
 
   return (
     <MarketingShell>
@@ -118,7 +127,7 @@ export async function CityLocationPage({
             },
             url: absoluteUrl(path),
           },
-          ...(focus?.serviceSlug ? [] : [launchCityFaqJsonLd(name)]),
+          ...(focus?.serviceSlug ? [] : [await launchCityFaqJsonLd(name)]),
         ]}
       />
       {photo ? (

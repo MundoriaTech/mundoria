@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { FaqCatalogue } from "@/components/marketing/faq-catalogue";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { allSiteFaqs } from "@/lib/seo/site-faqs";
+import { getAllSiteFaqs, getSiteFaqSections } from "@/lib/seo/site-faqs";
 import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -12,8 +12,11 @@ export const metadata: Metadata = buildPageMetadata({
   title: "FAQ | Mundoria",
 });
 
-export default function FaqPage() {
-  const faqs = allSiteFaqs();
+export default async function FaqPage() {
+  const [sections, faqs] = await Promise.all([
+    getSiteFaqSections(),
+    getAllSiteFaqs(),
+  ]);
 
   return (
     <>
@@ -32,7 +35,7 @@ export default function FaqPage() {
         }}
       />
 
-      <FaqCatalogue />
+      <FaqCatalogue sections={sections} />
     </>
   );
 }

@@ -23,10 +23,10 @@ import {
 } from "@/lib/seo/birmingham-directory";
 import {
   BIRMINGHAM_AREAS,
+  getPublicMarketingServices,
   LAUNCH_CITY,
   type MarketingArea,
   type MarketingService,
-  publicMarketingServices,
   servicePlacePath,
 } from "@/lib/seo/marketing";
 import {
@@ -49,7 +49,7 @@ export async function ServicePlacePage({
   const path = servicePlacePath(service.slug, area?.slug);
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? service.bookingHref : "/setup";
-  const siblings = publicMarketingServices().filter(
+  const siblings = (await getPublicMarketingServices()).filter(
     (item) => item.category === service.category && item.slug !== service.slug,
   );
   const otherAreas = area

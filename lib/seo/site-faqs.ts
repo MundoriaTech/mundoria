@@ -1,4 +1,9 @@
 import {
+  loadServicePricing,
+  type ServicePricingConfig,
+} from "@/lib/customer/pricing-config";
+import { applyPricingFaqOverrides } from "@/lib/customer/published-pricing";
+import {
   FAQ_NAV_GROUPS,
   SITE_FAQ_CATALOGUE,
 } from "@/lib/seo/site-faq-catalogue";
@@ -41,8 +46,28 @@ export const SITE_FAQ_SECTIONS: SiteFaqSection[] = SITE_FAQ_CATALOGUE.filter(
   (section) => section.items.length > 0,
 );
 
-export function allSiteFaqs(): SiteFaqItem[] {
-  return uniqueFaqs(SITE_FAQ_SECTIONS.flatMap((section) => section.items));
+/** Apply admin rate-card amounts to FAQ answers that mention £/h pricing. */
+export function siteFaqSectionsWithPricing(
+  pricing: ServicePricingConfig,
+): SiteFaqSection[] {
+  return SITE_FAQ_SECTIONS.map((section) => ({
+    ...section,
+    items: applyPricingFaqOverrides(section.items, pricing),
+  }));
+}
+
+export async function getSiteFaqSections() {
+  return siteFaqSectionsWithPricing(await loadServicePricing());
+}
+
+export function allSiteFaqs(
+  sections: SiteFaqSection[] = SITE_FAQ_SECTIONS,
+): SiteFaqItem[] {
+  return uniqueFaqs(sections.flatMap((section) => section.items));
+}
+
+export async function getAllSiteFaqs() {
+  return allSiteFaqs(await getSiteFaqSections());
 }
 
 /** Stable in-page anchor for a FAQ question. */

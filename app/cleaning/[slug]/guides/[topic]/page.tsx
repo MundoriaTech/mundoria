@@ -13,8 +13,8 @@ import {
   MarketingShell,
 } from "@/components/marketing/marketing-shell";
 import {
+  getMarketingServiceBySlug,
   indexableMarketingServices,
-  marketingServiceBySlug,
 } from "@/lib/seo/marketing";
 import {
   SERVICE_GUIDE_TOPICS,
@@ -37,8 +37,10 @@ export function generateStaticParams() {
   );
 }
 
-export function generateMetadata({ params }: PageProps): Metadata {
-  const service = marketingServiceBySlug(params.slug);
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const service = await getMarketingServiceBySlug(params.slug);
   if (!service || !isServiceGuideTopic(params.topic)) {
     return {};
   }
@@ -50,8 +52,8 @@ export function generateMetadata({ params }: PageProps): Metadata {
   });
 }
 
-export default function ServiceGuidePage({ params }: PageProps) {
-  const service = marketingServiceBySlug(params.slug);
+export default async function ServiceGuidePage({ params }: PageProps) {
+  const service = await getMarketingServiceBySlug(params.slug);
   if (!service || !isServiceGuideTopic(params.topic)) {
     notFound();
   }

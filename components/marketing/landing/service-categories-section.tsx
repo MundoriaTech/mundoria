@@ -108,8 +108,11 @@ const GROUPS = [
 
 export function ServiceCategoriesSection({
   bookingHref,
+  fromPriceBySlug,
 }: {
   bookingHref: string;
+  /** Live admin from-prices keyed by marketing slug. */
+  fromPriceBySlug?: Record<string, string>;
 }) {
   const [activeId, setActiveId] = useState<(typeof GROUPS)[number]["id"]>("home");
   const [openLabel, setOpenLabel] = useState<string | null>(null);
@@ -186,6 +189,8 @@ export function ServiceCategoriesSection({
                 const open = openLabel === item.label;
                 const slug = item.href.replace(/^\/cleaning\//, "").split("/")[0] ?? "";
                 const service = marketingServiceBySlug(slug);
+                const fromPrice =
+                  fromPriceBySlug?.[slug] ?? service?.fromPrice ?? null;
                 const bookHref =
                   setupOnly || !service ? bookingHref : service.bookingHref;
                 const panelId = `category-actions-${slug}`;
@@ -207,9 +212,9 @@ export function ServiceCategoriesSection({
                           <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#2a2158] sm:text-[17px]">
                             {item.label}
                           </span>
-                          {service?.fromPrice ? (
+                          {fromPrice ? (
                             <span className="shrink-0 pt-0.5 text-sm font-semibold tabular-nums text-[#2a2158] sm:text-[15px]">
-                              From {service.fromPrice}
+                              From {fromPrice}
                             </span>
                           ) : null}
                         </span>

@@ -111,6 +111,7 @@ import { LazyImage } from "@/components/shared/lazy-image";
 import {
   addOnAmountPence,
   availableAddOns,
+  describeServiceAddOn,
   estimateDuration,
   estimatePriceBreakdown,
   formatHourlyRate,
@@ -1867,6 +1868,7 @@ export function BookingWizard({
               ? undefined
               : (serviceType) => selectService(serviceType)
           }
+          pricing={pricing}
           update={update}
           onSelect={(addressId) => {
             update("addressId", addressId);
@@ -2377,12 +2379,14 @@ function ServicePickerStep({
   focusServices,
   lockedCategory,
   onSelectService,
+  pricing = DEFAULT_SERVICE_PRICING,
   selectedCategory,
   selectedService,
 }: {
   focusServices?: ServiceType[];
   lockedCategory?: ServiceCategory | null;
   onSelectService: (service: ServiceType) => void;
+  pricing?: ServicePricingConfig;
   selectedCategory: ServiceCategory | null;
   selectedService: ServiceType | null;
 }) {
@@ -2515,7 +2519,7 @@ function ServicePickerStep({
                             </p>
                             <p className="shrink-0 text-sm font-bold tabular-nums text-[#1c133b]">
                               {formatHourlyRate(
-                                indicativeHourlyRatePence(item.value),
+                                indicativeHourlyRatePence(item.value, pricing),
                               )}
                             </p>
                           </div>
@@ -2685,6 +2689,7 @@ function AddressStep({
   onSaved,
   onSelect,
   onSelectService,
+  pricing = DEFAULT_SERVICE_PRICING,
   proName,
   selectedCategory = null,
   selectedId,
@@ -2707,6 +2712,7 @@ function AddressStep({
   onSaved: (address: Address) => void;
   onSelect: (addressId: string | null) => void;
   onSelectService?: (service: ServiceType) => void;
+  pricing?: ServicePricingConfig;
   proName?: string | null;
   selectedCategory?: ServiceCategory | null;
   selectedId: string | null;
@@ -2737,6 +2743,7 @@ function AddressStep({
           focusServices={focusServices}
           lockedCategory={lockedCategory}
           onSelectService={onSelectService}
+          pricing={pricing}
           selectedCategory={selectedCategory}
           selectedService={selectedService}
         />
@@ -2879,7 +2886,7 @@ function AddressStep({
 
       {selectedService ? (
         <div className="mt-10 border-t border-[#eeeef1] pt-8">
-          <AddOnsStep draft={draft} update={update} />
+          <AddOnsStep draft={draft} pricing={pricing} update={update} />
         </div>
       ) : null}
 
@@ -3227,9 +3234,11 @@ function PetsSection({
 
 function AddOnsStep({
   draft,
+  pricing = DEFAULT_SERVICE_PRICING,
   update,
 }: {
   draft: BookingDraft;
+  pricing?: ServicePricingConfig;
   update: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
@@ -3261,6 +3270,7 @@ function AddOnsStep({
                     otherRooms: draft.otherRoomTypes.length,
                   },
                 ),
+          pricing,
           serviceType: draft.serviceType,
           standard,
         }
@@ -3274,7 +3284,7 @@ function AddOnsStep({
   }
 
   const detailCopy = detailAddOn
-    ? (detailAddOn.detail ?? detailAddOn.description)
+    ? (detailAddOn.detail ?? describeServiceAddOn(detailAddOn, pricing))
     : null;
 
   return (
