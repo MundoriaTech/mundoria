@@ -8,6 +8,7 @@ import {
   Gauge,
   Inbox,
   LogOut,
+  MailWarning,
   MapPinned,
   Menu,
   MessageSquare,
@@ -50,6 +51,14 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
     items: [
       { href: "/admin/dashboard", icon: Gauge, label: "Dashboard" },
       { href: "/admin/bookings", icon: BookOpenCheck, label: "Bookings" },
+      {
+        href: "/admin/abandoned-bookings",
+        icon: MailWarning,
+        label: "Abandoned bookings",
+        match: (pathname) =>
+          pathname === "/admin/abandoned-bookings" ||
+          pathname.startsWith("/admin/abandoned-bookings/"),
+      },
       {
         href: "/admin/inbox",
         icon: Inbox,
