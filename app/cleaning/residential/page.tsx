@@ -38,8 +38,8 @@ export default async function ResidentialCleaningRoute() {
               name: "Birmingham",
             },
             description:
-              "Residential cleaning for everyday homes, deep resets and flexible one-off visits.",
-            name: "Residential Cleaning",
+              "House cleaning for everyday homes, deep resets and flexible one-off visits.",
+            name: "House Cleaning",
             provider: {
               "@type": "Organization",
               name: "Mundoria",

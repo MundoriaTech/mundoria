@@ -31,7 +31,7 @@ export function hourlyRatePence(
   return hourlyRateFromPricing(pricing, serviceType, standard);
 }
 
-/** Product supply: £2/h residential-family categories, £3/h commercial. */
+/** Product supply: £2/h house/family categories, £3/h commercial. */
 export function productSupplyRatePence(
   category: ServiceCategory,
   pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
@@ -125,7 +125,7 @@ export const SUPPLY_KITS: Record<
   },
   deep_residential: {
     id: "deep_residential",
-    title: "Residential deep-clean kit",
+    title: "House deep-clean kit",
     products: [
       "Multi-surface cleaner",
       "Heavy-duty degreaser",

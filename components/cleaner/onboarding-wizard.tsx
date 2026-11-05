@@ -159,12 +159,12 @@ const MAIN_SERVICE_CATEGORIES = [
 
 const MAIN_CATEGORY_LABEL: Record<(typeof MAIN_SERVICE_CATEGORIES)[number], string> =
   {
-    residential: "Residential",
+    residential: "House",
     commercial: "Workspace",
     recovery: "Recovery",
   };
 
-/** Moving + short-let sit under Residential for cleaners (not separate pillars). */
+/** Moving + short-let sit under House for cleaners (not separate pillars). */
 const RESIDENTIAL_BUCKET = new Set<ServiceCategory>([
   "residential",
   "moving_home",

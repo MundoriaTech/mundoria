@@ -80,7 +80,7 @@ export function LocationWhatsCovered({ place }: { place: string }) {
       </h2>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470]">
         Exact scope depends on your service and cleaning standard. Typical
-        residential visits include:
+        house cleaning visits include:
       </p>
       <ul className="mt-6 list-disc space-y-2 pl-5 text-sm leading-7 text-[#5a5470]">
         {houseCleanCoveredPoints().map((item) => (

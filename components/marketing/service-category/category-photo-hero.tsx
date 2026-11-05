@@ -54,7 +54,7 @@ export function placePhotoHero(
 
   if (focus?.category === "residential") {
     return {
-      bookCta: "Book residential cleaning",
+      bookCta: "Book house cleaning",
       bullets: [
         "Cleaning from £22/h",
         "Book once or schedule regularly",
@@ -63,7 +63,7 @@ export function placePhotoHero(
       image: "/images/marketing/landing/residential-hero.jpg",
       overlay: "soft",
       subtitle: "Everyday homes, deep resets and flexible one-off cleans",
-      title: `Residential Cleaning in ${name}`,
+      title: `House Cleaning in ${name}`,
     };
   }
 

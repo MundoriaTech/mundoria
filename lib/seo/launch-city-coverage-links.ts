@@ -4,11 +4,11 @@ import { LAUNCH_CITY } from "@/lib/seo/marketing";
 export const LAUNCH_CITY_COVERAGE_GROUPS = [
   {
     id: "residential",
-    heading: "Residential cleaning",
+    heading: "House cleaning",
     links: [
       {
         href: "/cleaning/residential",
-        label: `Residential cleaning in ${LAUNCH_CITY.name}`,
+        label: `House cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
   },

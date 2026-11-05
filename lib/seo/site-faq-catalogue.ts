@@ -451,7 +451,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does a deep clean include built-up grease?",
         answer:
-          "Yes, built-up household grease can be part of a deep clean, particularly in kitchens.\n\nThat may include suitable worktops, splashbacks, cupboard fronts, hob surrounds and other accessible areas where grease has accumulated.\n\nThe cleaner will use products appropriate to the surface.\nIf grease is extremely heavy or involves specialist commercial-style treatment, it may sit outside the standard residential deep-clean scope.",
+          "Yes, built-up household grease can be part of a deep clean, particularly in kitchens.\n\nThat may include suitable worktops, splashbacks, cupboard fronts, hob surrounds and other accessible areas where grease has accumulated.\n\nThe cleaner will use products appropriate to the surface.\nIf grease is extremely heavy or involves specialist commercial-style treatment, it may sit outside the standard house deep-clean scope.",
       },
       {
         question: "Does a deep clean include oven cleaning?",
@@ -471,7 +471,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does a deep clean include specialist cleaning?",
         answer:
-          "No.\n\nMundoria's residential deep cleaning is still household cleaning, just at a more detailed level.\nWe are not currently offering specialist cleaning services as part of the deep-clean package.\n\nThat means the service focuses on detailed cleaning using standard professional household products and equipment rather than specialist machinery or specialist remediation work.",
+          "No.\n\nMundoria's house deep cleaning is still household cleaning, just at a more detailed level.\nWe are not currently offering specialist cleaning services as part of the deep-clean package.\n\nThat means the service focuses on detailed cleaning using standard professional household products and equipment rather than specialist machinery or specialist remediation work.",
       },
       {
         question: "Does Mundoria offer carpet extraction?",
@@ -501,7 +501,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What is not included in a Mundoria deep clean?",
         answer:
-          "A Mundoria deep clean does not currently include specialist services such as carpet extraction, specialist upholstery cleaning, major mould remediation, biohazard cleaning, pest-related cleaning, specialist floor restoration or other work requiring specialist machinery or specialist remediation.\n\nHeavy furniture moving is also not something customers should assume is included.\n\nSome detailed tasks, such as oven interiors or inside cupboards, should be selected or agreed in advance rather than assumed to form part of every booking.\n\nThe simplest rule is this:\nIf something requires specialist machinery, specialist treatment or work outside normal residential cleaning, it is not currently part of Mundoria's deep-clean service.",
+          "A Mundoria deep clean does not currently include specialist services such as carpet extraction, specialist upholstery cleaning, major mould remediation, biohazard cleaning, pest-related cleaning, specialist floor restoration or other work requiring specialist machinery or specialist remediation.\n\nHeavy furniture moving is also not something customers should assume is included.\n\nSome detailed tasks, such as oven interiors or inside cupboards, should be selected or agreed in advance rather than assumed to form part of every booking.\n\nThe simplest rule is this:\nIf something requires specialist machinery, specialist treatment or work outside normal house cleaning, it is not currently part of Mundoria's deep-clean service.",
       },
       {
         question: "Do cleaners bring products for a deep clean?",
@@ -1522,7 +1522,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I get a quote before booking?",
         answer:
-          "Yes.\n\nThe booking journey should give you an expected price based on the information you provide before you commit.\n\nFor straightforward residential bookings, this can usually be calculated from the service, estimated hours and any products or equipment you select.\n\nFor larger or more complex commercial bookings, we may need additional information before giving you a reliable price.\n\nThe aim is to give you something meaningful, not simply call an unrealistic number a \"quote\".",
+          "Yes.\n\nThe booking journey should give you an expected price based on the information you provide before you commit.\n\nFor straightforward house cleaning bookings, this can usually be calculated from the service, estimated hours and any products or equipment you select.\n\nFor larger or more complex commercial bookings, we may need additional information before giving you a reliable price.\n\nThe aim is to give you something meaningful, not simply call an unrealistic number a \"quote\".",
       },
       {
         question: "Can businesses request a commercial quote?",
@@ -1619,7 +1619,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I get a receipt or invoice?",
         answer:
-          "Yes.\n\nCustomers should be able to receive a record of what they have paid for.\n\nThat should include the booking details, amount paid and any applicable product, equipment or other charges.\n\nThe exact format may depend on whether the booking is residential or commercial, but customers should not have to chase for basic proof of payment.",
+          "Yes.\n\nCustomers should be able to receive a record of what they have paid for.\n\nThat should include the booking details, amount paid and any applicable product, equipment or other charges.\n\nThe exact format may depend on whether the booking is house cleaning or commercial, but customers should not have to chase for basic proof of payment.",
       },
       {
         question: "Can businesses receive invoices?",

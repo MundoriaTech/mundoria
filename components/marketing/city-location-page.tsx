@@ -26,7 +26,7 @@ function heroEyebrow(name: string, focus?: PlacePageFocus) {
       : focus?.category === "recovery"
         ? "Recovery"
         : focus?.category === "residential"
-          ? "Residential"
+          ? "House"
           : null;
   return lead
     ? `${lead} · ${name} · From clear online estimates`
@@ -136,8 +136,8 @@ export async function CityLocationPage({
           eyebrow={heroEyebrow(name, focus)}
           primaryHref={bookingHref}
           primaryLabel={`Book in ${name}`}
-          secondaryHref="/cleaning"
-          secondaryLabel="Browse services"
+          secondaryHref={bookingHref}
+          secondaryLabel="Get a quote"
           title={title}
         />
       )}

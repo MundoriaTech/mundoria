@@ -347,9 +347,9 @@ const BIRMINGHAM_POSTCODE_ZONE_ORDER: BirminghamPostcodeDistrict["zoneId"][] = [
 export const BIRMINGHAM_POSTCODES: readonly BirminghamPostcodeDistrict[] = [
   // Birmingham City Centre
   { areaSlug: "jewellery-quarter", name: "City Centre", prefix: "B1", zoneId: "central" },
-  { areaSlug: "city-centre", name: "City Centre", prefix: "B2", zoneId: "central" },
+  { areaSlug: "birmingham-city-centre", name: "City Centre", prefix: "B2", zoneId: "central" },
   { areaSlug: "jewellery-quarter", name: "City Centre", prefix: "B3", zoneId: "central" },
-  { areaSlug: "city-centre", name: "City Centre", prefix: "B4", zoneId: "central" },
+  { areaSlug: "birmingham-city-centre", name: "City Centre", prefix: "B4", zoneId: "central" },
   { areaSlug: "digbeth", name: "Digbeth & Highgate", prefix: "B5", zoneId: "central" },
   // Edgbaston & Harborne
   { areaSlug: "edgbaston", name: "Edgbaston", prefix: "B15", zoneId: "west" },
@@ -474,8 +474,18 @@ export function districtFromAreaParam(param: string) {
   if (!match) return null;
   const district = birminghamPostcode(match[2] ?? "");
   const slug = (match[1] ?? "").toLowerCase();
-  if (!district || district.areaSlug !== slug) return null;
-  return { district, legacy: false as const };
+  if (!district) return null;
+  if (district.areaSlug === slug) {
+    return { district, legacy: false as const };
+  }
+  // Pre-rename City Centre district URLs used areaSlug `city-centre`.
+  if (
+    slug === "city-centre" &&
+    district.areaSlug === "birmingham-city-centre"
+  ) {
+    return { district, legacy: true as const };
+  }
+  return null;
 }
 
 export function districtLinkLabel(prefix: string) {
@@ -586,7 +596,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
 
 export const HOW_IT_WORKS_STEPS = [
   {
-    body: "Choose residential, moving home, short-let, commercial or recovery support, then the specific service you need.",
+    body: "Choose house cleaning, moving home, short-let, commercial or recovery support, then the specific service you need.",
     title: "Pick your service",
   },
   {

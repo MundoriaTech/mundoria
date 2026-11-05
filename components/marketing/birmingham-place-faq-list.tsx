@@ -42,7 +42,7 @@ export function BirminghamPlaceFaqList({
       <>
         <p>
           Exact scope depends on your service and cleaning standard. Typical
-          residential visits include:
+          house cleaning visits include:
         </p>
         <ul className="mt-2.5 list-disc space-y-1.5 pl-5">
           {houseCleanCoveredPoints().map((point) => (

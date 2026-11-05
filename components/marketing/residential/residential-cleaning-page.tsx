@@ -89,7 +89,7 @@ export function ResidentialCleaningPage({
 
             <div className="max-w-xl pb-2 sm:pb-4 sm:pr-44">
               <h1 className="text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl lg:text-[3.25rem]">
-                Residential Cleaning
+                House Cleaning
               </h1>
               <p className="mt-3 max-w-md text-pretty text-[14px] font-normal leading-6 text-white/95 sm:mt-4 sm:text-base sm:leading-7">
                 Everyday homes, deep resets and flexible one-off cleans
@@ -112,7 +112,7 @@ export function ResidentialCleaningPage({
                 className="mt-6 hidden h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-[#1c133b] transition hover:bg-white/90 md:inline-flex sm:mt-8"
                 href={bookingHref}
               >
-                Book residential cleaning
+                Book house cleaning
               </Link>
             </div>
           </div>
@@ -125,7 +125,7 @@ export function ResidentialCleaningPage({
         <div className="mx-auto max-w-6xl">
           <div className="flex items-end justify-between gap-4">
             <h2 className="max-w-md text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-              Choose your residential cleaning service
+              Choose your house cleaning service
             </h2>
             <div className="flex shrink-0 gap-2 lg:hidden">
               <button

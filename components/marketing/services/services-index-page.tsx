@@ -72,7 +72,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
       description:
         "Homes, flats and guest turns, everyday upkeep through to deeper resets.",
       href: "/cleaning/residential",
-      label: "Residential Cleaning",
+      label: "House Cleaning",
       soft: "#efe6ff",
       services: [
         bookable("regular", bookingHref),

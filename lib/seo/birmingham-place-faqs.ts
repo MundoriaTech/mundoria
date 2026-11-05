@@ -14,7 +14,7 @@ export function whyChooseMundoriaPoints() {
     "Secure online payment held until the job is completed to your checklist.",
     "Live status from matching through arrival and completion in your account.",
     "Flexible scheduling with free cancellation more than 24 hours before the visit.",
-    "Residential, commercial, short-let, move and Recovery services in one booking flow.",
+    "House, commercial, short-let, move and Recovery services in one booking flow.",
     "Add-ons such as oven, fridge, ironing and cleaning products when you need them.",
     "Customer support and help articles when you want guidance before you book.",
   ] as const;
@@ -32,7 +32,7 @@ export function houseCleanCoveredPoints() {
 }
 
 export function houseCleanCoveredSchemaAnswer() {
-  return `Exact scope depends on your service and cleaning standard. Typical residential visits include: ${houseCleanCoveredPoints().join(" ")}`;
+  return `Exact scope depends on your service and cleaning standard. Typical house cleaning visits include: ${houseCleanCoveredPoints().join(" ")}`;
 }
 
 export function bookCleanerSteps(place: string) {

@@ -36,10 +36,19 @@ type PageProps = {
   searchParams?: { category?: string | string[]; service?: string | string[] };
 };
 
+/** Legacy postcode areaSlug before Birmingham City Centre was unified. */
+const LEGACY_CITY_CENTRE_SLUG = "city-centre";
+const CITY_CENTRE_PLACE_SLUG = "birmingham-city-centre";
+
 /** Districts without a neighbourhood hub redirect to a real place page, or the city hub. */
 function redirectOrphanPostcodeDistrict(areaSlug: string): never {
-  if (birminghamAreaBySlug(areaSlug) || birminghamCoveragePlaceBySlug(areaSlug)) {
-    permanentRedirect(cleanerPlacePath(areaSlug));
+  const resolved =
+    areaSlug === LEGACY_CITY_CENTRE_SLUG ? CITY_CENTRE_PLACE_SLUG : areaSlug;
+  if (
+    birminghamAreaBySlug(resolved) ||
+    birminghamCoveragePlaceBySlug(resolved)
+  ) {
+    permanentRedirect(cleanerPlacePath(resolved));
   }
   permanentRedirect(`/cleaners/${LAUNCH_CITY.slug}`);
 }
@@ -70,6 +79,9 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
       path: postcodePath(parsed.district.prefix),
       title: `Cleaners in ${label}, Birmingham`,
     });
+  }
+  if (params.area === LEGACY_CITY_CENTRE_SLUG) {
+    permanentRedirect(cleanerPlacePath(CITY_CENTRE_PLACE_SLUG));
   }
   const area = birminghamAreaBySlug(params.area);
   const coverage = birminghamCoveragePlaceBySlug(params.area);
@@ -108,6 +120,13 @@ export default async function BirminghamAreaPage({
     const focus = readPlacePageFocus(searchParams ?? {});
     permanentRedirect(
       `${cleanerPlacePath(params.area)}${coverageFocusSearch(focus)}`,
+    );
+  }
+
+  if (params.area === LEGACY_CITY_CENTRE_SLUG) {
+    const focus = readPlacePageFocus(searchParams ?? {});
+    permanentRedirect(
+      `${cleanerPlacePath(CITY_CENTRE_PLACE_SLUG)}${coverageFocusSearch(focus)}`,
     );
   }
 

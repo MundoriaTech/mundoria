@@ -6,8 +6,10 @@ import {
   listPublishedHelpArticles,
 } from "@/lib/content/editorial";
 import {
+  birminghamCompoundZoneIds,
   birminghamCoveragePlaces,
   coveragePlaceHref,
+  coverageZonePath,
 } from "@/lib/seo/birmingham-coverage";
 import { isStandaloneTownSlug } from "@/lib/seo/canonical";
 import {
@@ -23,7 +25,7 @@ import { absoluteUrl } from "@/lib/seo/site";
 
 /**
  * Lean sitemap: one page per service intent + one page per area.
- * No service×area matrix, no wider-zone duplicates.
+ * Compound zone hubs (/wider/{zone}) are included; service×area matrix is not.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -96,6 +98,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: isStandaloneTownSlug(place.slug) ? 0.65 : 0.55,
         url: absoluteUrl(coveragePlaceHref(place)),
       })),
+    ...birminghamCompoundZoneIds().map((zoneId) => ({
+      changeFrequency: "weekly" as const,
+      lastModified: now,
+      priority: 0.6,
+      url: absoluteUrl(coverageZonePath(zoneId)),
+    })),
   ];
 
   const [posts, collections, articles] = await Promise.all([

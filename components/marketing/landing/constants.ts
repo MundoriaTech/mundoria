@@ -23,7 +23,7 @@ export const landingCategoryNav = [
     bookLabel: "Book a home clean",
     description: "Homes, flats and family spaces",
     href: "/cleaning/residential",
-    pageLabel: "See residential services",
+    pageLabel: "See house cleaning services",
     items: [
       {
         description: "A repeating clean on your schedule",
@@ -51,7 +51,7 @@ export const landingCategoryNav = [
         label: "Airbnb / short let",
       },
     ],
-    label: "Residential",
+    label: "House",
     notes: [
       "Clear estimates before you book",
       "One visit, or a regular schedule",
@@ -136,7 +136,7 @@ export const landingServicesMenu = {
     {
       description: "Homes, flats and family spaces",
       href: "/cleaning/residential",
-      label: "Residential",
+      label: "House",
     },
     {
       description: "Offices, retail and workplaces",

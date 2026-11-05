@@ -58,7 +58,7 @@ const SERVICES_ALREADY_ON_PAGE = {
 const CATEGORY_SERVICE_TITLE = {
   commercial: "Choose your workspace cleaning service",
   recovery: "Choose your recovery cleaning service",
-  residential: "Choose your residential cleaning service",
+  residential: "Choose your house cleaning service",
 } as const;
 
 const DIFFERENT_SERVICE_ORDER = [

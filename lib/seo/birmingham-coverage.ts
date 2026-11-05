@@ -310,6 +310,9 @@ export const BIRMINGHAM_COVERAGE_ZONES: readonly BirminghamCoverageZone[] = [
       "West Bromwich",
       "Rowley Regis",
       "Halesowen",
+      "Cradley Heath",
+      "Coleshill",
+      "Water Orton",
       "Walsall",
       "Aldridge",
     ),
@@ -382,9 +385,36 @@ export function coveragePlaceHref(
   return `${cleanerPlacePath(place.slug)}${coverageFocusSearch(focus)}`;
 }
 
-/** Wider-zone hubs collapse to the city cleaners page, kept for legacy callers. */
-export function coverageZoneHref(_zoneId: string, focus?: CoverageLinkFocus) {
-  return `/cleaners/${LAUNCH_CITY.slug}${coverageFocusSearch(focus)}`;
+/**
+ * Path for a coverage zone hub.
+ * Single-name zones reuse the matching place page; compound zones use /wider/{id}.
+ */
+export function coverageZonePath(zoneId: string): string {
+  const zone = birminghamCoverageZoneById(zoneId);
+  if (!zone || zone.id === BIRMINGHAM_NEARBY_ZONE_ID) {
+    return `/cleaners/${LAUNCH_CITY.slug}`;
+  }
+  const matchingPlace = birminghamCoveragePlaces().find(
+    (place) => place.label.toLowerCase() === zone.label.toLowerCase(),
+  );
+  if (matchingPlace) return cleanerPlacePath(matchingPlace.slug);
+  return `/cleaners/${LAUNCH_CITY.slug}/wider/${zone.id}`;
+}
+
+export function coverageZoneHref(zoneId: string, focus?: CoverageLinkFocus) {
+  return `${coverageZonePath(zoneId)}${coverageFocusSearch(focus)}`;
+}
+
+/** Town zones that need a dedicated /wider hub (compound labels). */
+export function birminghamCompoundZoneIds() {
+  return birminghamTownZones()
+    .filter((zone) => {
+      const matchingPlace = birminghamCoveragePlaces().find(
+        (place) => place.label.toLowerCase() === zone.label.toLowerCase(),
+      );
+      return !matchingPlace;
+    })
+    .map((zone) => zone.id);
 }
 
 /** Unique places. The same slug keeps the first town’s page. */

@@ -117,7 +117,7 @@ export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
     description:
       "Regular, one-off, move-in/out and end of tenancy cleans for the home.",
     icon: Home,
-    label: "Residential Cleaning",
+    label: "House Cleaning",
     value: "residential",
   },
   {

@@ -21,8 +21,8 @@ export const ONPAGE_PATH_COPY: Record<string, OnpageCopy> = {
     title: "Best Cleaning Services in Birmingham | Mundoria",
   },
   "/cleaning/residential": {
-    description: `Looking for top-rated residential cleaning services in Birmingham? Choose Mundoria for reliable home cleaning. Call ${SUPPORT_PHONE} to book today!`,
-    title: "Best Residential Cleaning Services Birmingham | Mundoria",
+    description: `Looking for top-rated house cleaning services in Birmingham? Choose Mundoria for reliable home cleaning. Call ${SUPPORT_PHONE} to book today!`,
+    title: "Best House Cleaning Services Birmingham | Mundoria",
   },
   "/cleaning/commercial": {
     description: `Need top-rated commercial cleaning in Birmingham? Choose Mundoria for reliable office and business cleaning. Call ${SUPPORT_PHONE} to book today!`,

@@ -15,7 +15,7 @@ const GROUPS = [
     imageAlt: "Purple-gloved hands spraying cleaner onto a cloth for a home clean",
     imageClassName: "object-[center_35%]",
     intro: "Scheduled upkeep, a one-off visit, a move, or a home ready for guests.",
-    label: "Residential",
+    label: "House",
     items: [
       {
         description: "Everyday upkeep, on a schedule that works for you.",
