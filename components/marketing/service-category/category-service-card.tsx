@@ -10,6 +10,17 @@ import { cn } from "@/lib/utils";
 const overlayLinkClass =
   "inline-flex h-9 items-center justify-center rounded-full px-3.5 text-[13px] font-semibold transition";
 
+function serviceSlugFromCardHref(href: string) {
+  try {
+    const url = new URL(href, "https://www.mundoria.co.uk");
+    const fromQuery = url.searchParams.get("service");
+    if (fromQuery) return fromQuery;
+  } catch {
+    // Fall through to path parsing for relative /cleaning/{slug} hrefs.
+  }
+  return href.replace(/^\/cleaning\//, "").split(/[/?#]/)[0] ?? "";
+}
+
 export function CategoryServiceCard({
   bookingHref,
   className,
@@ -27,7 +38,7 @@ export function CategoryServiceCard({
   objectPosition?: string;
   sizes: string;
 }) {
-  const slug = href.replace(/^\/cleaning\//, "").split("/")[0] ?? "";
+  const slug = serviceSlugFromCardHref(href);
   const service = marketingServiceBySlug(slug);
   const bookHref =
     bookingHref === "/setup" || !service ? bookingHref : service.bookingHref;

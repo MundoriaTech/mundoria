@@ -8,6 +8,7 @@ import {
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
+import { CategoryServicesCarousel } from "@/components/marketing/service-category/category-services-carousel";
 import {
   LocationFeaturedCleaners,
   LocationNearPlacePills,
@@ -118,6 +119,7 @@ export async function LaunchCityHubSections({
   showReviews = true,
   place = PLACE,
   placeLinks,
+  placePath,
   placesNote,
   showNearbyTowns = false,
   surroundingLinks,
@@ -134,6 +136,8 @@ export async function LaunchCityHubSections({
   showReviews?: boolean;
   place?: string;
   placeLinks?: Array<{ href: string; label: string }>;
+  /** Current place URL (no query). Category service cards deep-link here with ?service=. */
+  placePath?: string;
   placesNote?: string;
   showNearbyTowns?: boolean;
   surroundingLinks?: Array<{ href: string; label: string }>;
@@ -164,21 +168,29 @@ export async function LaunchCityHubSections({
     <>
       {categoryServiceTitle && categoryServices.length ? (
         <BrandedSection>
-          <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-            {categoryServiceTitle}
-          </h2>
-          <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden">
+          <CategoryServicesCarousel
+            label="services"
+            title={
+              <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+                {categoryServiceTitle}
+              </h2>
+            }
+          >
             {categoryServices.map((service) => (
               <CategoryServiceCard
                 bookingHref={bookingHref}
-                href={serviceCardHref(service.slug)}
+                href={
+                  placePath
+                    ? `${placePath}?service=${encodeURIComponent(service.slug)}`
+                    : serviceCardHref(service.slug)
+                }
                 image={marketingServiceCardImage(service)}
                 key={service.slug}
                 label={`${service.label} in ${place}`}
                 sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
               />
             ))}
-          </div>
+          </CategoryServicesCarousel>
         </BrandedSection>
       ) : null}
 
@@ -192,10 +204,15 @@ export async function LaunchCityHubSections({
 
       {showLookingForDifferent && lookingFor.length ? (
         <BrandedSection tone="lavender">
-          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-            Looking for something different in cleaning?
-          </h2>
-          <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden">
+          <CategoryServicesCarousel
+            fadeFromClassName="from-[#f3eef8]"
+            label="other services"
+            title={
+              <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+                Looking for something different in cleaning?
+              </h2>
+            }
+          >
             {lookingFor.map((service) => (
               <CategoryServiceCard
                 bookingHref={bookingHref}
@@ -206,7 +223,7 @@ export async function LaunchCityHubSections({
                 sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
               />
             ))}
-          </div>
+          </CategoryServicesCarousel>
         </BrandedSection>
       ) : null}
 

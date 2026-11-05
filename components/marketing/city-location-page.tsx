@@ -149,9 +149,10 @@ export async function CityLocationPage({
           cleanerLimit={18}
           place={name}
           placeLinks={placeLinks}
+          placePath={path.split("?")[0] || path}
           placesNote={placesNote}
           serviceFocus={service ?? undefined}
-          showAreaCards={!focus?.category && !focus?.serviceSlug}
+          showAreaCards={false}
           showCategoryServices={Boolean(focus?.category)}
           showFaqs={!focus?.serviceSlug}
           showNearbyTowns={showNearbyTowns}
