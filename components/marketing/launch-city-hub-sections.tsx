@@ -167,7 +167,7 @@ export async function LaunchCityHubSections({
           <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             {categoryServiceTitle}
           </h2>
-          <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0">
+          <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden">
             {categoryServices.map((service) => (
               <CategoryServiceCard
                 bookingHref={bookingHref}
@@ -195,7 +195,7 @@ export async function LaunchCityHubSections({
           <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
             Looking for something different in cleaning?
           </h2>
-          <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0">
+          <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden">
             {lookingFor.map((service) => (
               <CategoryServiceCard
                 bookingHref={bookingHref}

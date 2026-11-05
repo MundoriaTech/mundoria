@@ -74,7 +74,7 @@ export function PlaceMapHero({
         <div className="relative">
           {showReviews ? <HeroReviewsLink tone="dark" /> : null}
 
-          <div className={showReviews ? "max-w-[34rem] sm:pr-44" : "max-w-[34rem]"}>
+          <div className={showReviews ? "max-w-[42rem] sm:pr-44" : "max-w-[42rem]"}>
             {eyebrow ? (
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[#823fb2]">
                 {eyebrow}
