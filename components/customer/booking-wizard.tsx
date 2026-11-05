@@ -2874,10 +2874,10 @@ function AddressStep({
               value={bedrooms}
             />
             <RoomCountStepper
-              label="Toilets"
+              label="Bathrooms"
               onChange={onBathrooms}
-              unitPlural="toilets"
-              unitSingular="toilet"
+              unitPlural="bathrooms"
+              unitSingular="bathroom"
               value={bathrooms}
             />
           </div>
@@ -2965,7 +2965,7 @@ function OfficeSpacesStep({
   spaces: OfficeSpaceDraft[];
 }) {
   const rooms = quantityOf(spaces, "office_work_area");
-  const toilets = quantityOf(spaces, "toilet");
+  const bathrooms = quantityOf(spaces, "toilet");
   const size =
     spaces.find((space) => space.spaceType === "office_work_area")?.size ??
     "medium";
@@ -2979,7 +2979,7 @@ function OfficeSpacesStep({
 
   function setCore(
     nextRooms: number,
-    nextToilets: number,
+    nextBathrooms: number,
     nextSize: Exclude<OfficeSpaceSize, "not_sure">,
     advance = false,
   ) {
@@ -2993,7 +2993,7 @@ function OfficeSpacesStep({
         size: nextSize,
         spaceType: "office_work_area",
       },
-      { quantity: nextToilets, size: "small", spaceType: "toilet" },
+      { quantity: nextBathrooms, size: "small", spaceType: "toilet" },
       ...extras,
     ]);
     if (advance && nextRooms > 0) onComplete?.();
@@ -3013,20 +3013,20 @@ function OfficeSpacesStep({
         How big is the office?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        Tell us how many rooms and toilets there are, and roughly how big the
+        Tell us how many rooms and bathrooms there are, and roughly how big the
         work area is. Mundoria uses that to work out the time.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <CountField
           label="Rooms"
-          onChange={(value) => setCore(value, toilets, workSize)}
+          onChange={(value) => setCore(value, bathrooms, workSize)}
           value={rooms}
         />
         <CountField
-          label="Toilets"
+          label="Bathrooms"
           onChange={(value) => setCore(rooms, value, workSize)}
-          value={toilets}
+          value={bathrooms}
         />
       </div>
 
@@ -3047,7 +3047,7 @@ function OfficeSpacesStep({
               )}
               key={option.value}
               onClick={() =>
-                setCore(Math.max(rooms, 1), toilets, option.value, true)
+                setCore(Math.max(rooms, 1), bathrooms, option.value, true)
               }
               type="button"
             >
@@ -3232,6 +3232,8 @@ function PetsSection({
   );
 }
 
+const SUPPLY_ADD_ON_IDS = new Set(["cleaning_products", "cleaning_equipment"]);
+
 function AddOnsStep({
   draft,
   pricing = DEFAULT_SERVICE_PRICING,
@@ -3246,6 +3248,8 @@ function AddOnsStep({
 }) {
   const [detailAddOnId, setDetailAddOnId] = useState<string | null>(null);
   const addOns = draft.serviceType ? availableAddOns(draft.serviceType) : [];
+  const supplyAddOns = addOns.filter((addOn) => SUPPLY_ADD_ON_IDS.has(addOn.id));
+  const extraAddOns = addOns.filter((addOn) => !SUPPLY_ADD_ON_IDS.has(addOn.id));
   const detailAddOn = detailAddOnId
     ? addOns.find((item) => item.id === detailAddOnId)
     : null;
@@ -3283,6 +3287,86 @@ function AddOnsStep({
     update("selectedAddOns", Array.from(selected));
   }
 
+  function priceLabelFor(addOn: (typeof addOns)[number]) {
+    if (!addOnPriceContext || addOn.freeDuration) return null;
+    if (addOn.hourly) {
+      return formatHourlyRate(
+        addOnAmountPence(addOn, { ...addOnPriceContext, durationHours: 1 }),
+      );
+    }
+    const amount = addOnAmountPence(addOn, addOnPriceContext);
+    return amount > 0 ? `+${formatMoney(amount)}` : null;
+  }
+
+  function renderAddOnCard(
+    addOn: (typeof addOns)[number],
+    options?: { showPrice?: boolean },
+  ) {
+    const selected = draft.selectedAddOns.includes(addOn.id);
+    const icon = ADD_ON_ICONS[addOn.id];
+    const AddOnIcon = icon?.Icon;
+    const imageSrc = ADD_ON_IMAGES[addOn.id];
+    const priceLabel = options?.showPrice ? priceLabelFor(addOn) : null;
+    return (
+      <div className="relative min-w-0" key={addOn.id}>
+        <button
+          aria-label={
+            priceLabel ? `${addOn.label}, ${priceLabel}` : addOn.label
+          }
+          aria-pressed={selected}
+          className={cn(
+            "flex w-full flex-col items-center rounded-2xl border-2 border-transparent bg-white px-2 pb-2.5 pt-3 text-center transition touch-manipulation hover:bg-[#f8f5ff]",
+            selected && "border-[#6a45b8] bg-white",
+          )}
+          onClick={() => toggleAddOn(addOn.id)}
+          type="button"
+        >
+          <span className="relative flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
+            {imageSrc ? (
+              <Image
+                alt=""
+                className="h-full w-full scale-110 object-contain"
+                height={160}
+                src={imageSrc}
+                width={160}
+              />
+            ) : AddOnIcon ? (
+              <span className="inline-flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-[#1c133b] bg-[#efe6ff] sm:h-20 sm:w-20">
+                <AddOnIcon
+                  aria-hidden
+                  className={cn("h-8 w-8 sm:h-10 sm:w-10", icon?.className)}
+                  weight="duotone"
+                />
+              </span>
+            ) : (
+              <span className="h-16 w-16 rounded-full border-[3px] border-[#1c133b] bg-[#efe6ff] sm:h-20 sm:w-20" />
+            )}
+          </span>
+          <span className="mt-2 line-clamp-2 min-h-[2.5rem] text-xs font-semibold leading-tight text-[#1c133b]">
+            {addOn.label}
+          </span>
+          {priceLabel ? (
+            <span className="mt-0.5 text-xs font-bold tabular-nums text-[#6a45b8]">
+              {priceLabel}
+            </span>
+          ) : null}
+        </button>
+        <button
+          aria-label={`About ${addOn.label}`}
+          className="absolute right-0.5 top-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#6a45b8] shadow-sm touch-manipulation hover:bg-[#f8f5ff]"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setDetailAddOnId(addOn.id);
+          }}
+          type="button"
+        >
+          <Info className="h-4 w-4" strokeWidth={2.25} />
+        </button>
+      </div>
+    );
+  }
+
   const detailCopy = detailAddOn
     ? (detailAddOn.detail ?? describeServiceAddOn(detailAddOn, pricing))
     : null;
@@ -3295,71 +3379,43 @@ function AddOnsStep({
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
         Tap extras you want. Details are behind the info icon.
       </p>
-      {addOns.length ? (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-3">
-          {addOns.map((addOn) => {
-            const selected = draft.selectedAddOns.includes(addOn.id);
-            const icon = ADD_ON_ICONS[addOn.id];
-            const AddOnIcon = icon?.Icon;
-            const imageSrc = ADD_ON_IMAGES[addOn.id];
-            return (
-              <div className="relative min-w-0" key={addOn.id}>
-                <button
-                  aria-label={addOn.label}
-                  aria-pressed={selected}
-                  className={cn(
-                    "flex w-full flex-col items-center rounded-2xl border-2 border-transparent bg-white px-2 pb-2.5 pt-3 text-center transition touch-manipulation hover:bg-[#f8f5ff]",
-                    selected && "border-[#6a45b8] bg-white",
-                  )}
-                  onClick={() => toggleAddOn(addOn.id)}
-                  type="button"
-                >
-                  <span className="relative flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
-                    {imageSrc ? (
-                      <Image
-                        alt=""
-                        className="h-full w-full scale-110 object-contain"
-                        height={160}
-                        src={imageSrc}
-                        width={160}
-                      />
-                    ) : AddOnIcon ? (
-                      <span className="inline-flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-[#1c133b] bg-[#efe6ff] sm:h-20 sm:w-20">
-                        <AddOnIcon
-                          aria-hidden
-                          className={cn("h-8 w-8 sm:h-10 sm:w-10", icon?.className)}
-                          weight="duotone"
-                        />
-                      </span>
-                    ) : (
-                      <span className="h-16 w-16 rounded-full border-[3px] border-[#1c133b] bg-[#efe6ff] sm:h-20 sm:w-20" />
-                    )}
-                  </span>
-                  <span className="mt-2 line-clamp-2 min-h-[2.5rem] text-xs font-semibold leading-tight text-[#1c133b]">
-                    {addOn.label}
-                  </span>
-                </button>
-                <button
-                  aria-label={`About ${addOn.label}`}
-                  className="absolute right-0.5 top-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#6a45b8] shadow-sm touch-manipulation hover:bg-[#f8f5ff]"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setDetailAddOnId(addOn.id);
-                  }}
-                  type="button"
-                >
-                  <Info className="h-4 w-4" strokeWidth={2.25} />
-                </button>
-              </div>
-            );
-          })}
+
+      {supplyAddOns.length ? (
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold text-[#1c133b]">
+            Cleaning products &amp; equipment
+          </h3>
+          {/* <p className="mt-1 text-sm leading-5 text-[#5a5470]">
+            Optional Mundoria kits, charged by the hour while the cleaner is on
+            site.
+          </p> */}
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:max-w-md sm:gap-3">
+            {supplyAddOns.map((addOn) =>
+              renderAddOnCard(addOn, { showPrice: true }),
+            )}
+          </div>
         </div>
-      ) : (
+      ) : null}
+
+      {extraAddOns.length ? (
+        <div className={cn(supplyAddOns.length ? "mt-8" : "mt-6")}>
+          {supplyAddOns.length ? (
+            <h3 className="mb-3 text-sm font-semibold text-[#1c133b]">
+              Other extras
+            </h3>
+          ) : null}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-3">
+            {extraAddOns.map((addOn) => renderAddOnCard(addOn))}
+          </div>
+        </div>
+      ) : null}
+
+      {!addOns.length ? (
         <p className="mt-8 text-sm text-[#5a5470]">
           No extras for this service.
         </p>
-      )}
+      ) : null}
+
       {detailAddOn && detailCopy ? (
         <AppModal
           onClose={() => setDetailAddOnId(null)}
@@ -3397,14 +3453,14 @@ function AddOnsStep({
           </div>
         </AppModal>
       ) : null}
-      {addOns.length ? (
+      {supplyAddOns.length ? (
         <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#efe6ff] px-4 py-3 text-sm text-[#3b3358]">
           <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[11px] font-bold text-white">
             i
           </span>
           <p>
-            Your estimate covers labour for the session. Add cleaning products or
-            equipment if you want the cleaner to bring the Mundoria kit.
+            Your estimate covers labour for the session. Add products or
+            equipment only if you want the cleaner to bring the Mundoria kit.
           </p>
         </div>
       ) : null}
@@ -3424,7 +3480,7 @@ function RecoveryPreferencesStep({
 }) {
   const priorityAreas = [
     "Kitchen",
-    "Toilets",
+    "Bathrooms",
     "Bedrooms",
     "Living areas",
     "Hallways / access",

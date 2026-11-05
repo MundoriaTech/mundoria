@@ -116,7 +116,7 @@ export const OFFICE_SPACE_OPTIONS: Array<{
     value: "meeting_room",
   },
   {
-    label: "Toilets / Washrooms",
+    label: "Bathrooms / Washrooms",
     sizeBands: {
       large: "21 to 35m²",
       medium: "11 to 20m²",

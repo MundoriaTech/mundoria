@@ -800,8 +800,11 @@ export function estimateDuration(
   const bedrooms = options?.bedrooms ?? 1;
   const bathrooms = options?.bathrooms ?? 1;
   const otherRooms = options?.otherRooms ?? 0;
+  // Base service duration already covers 1 bedroom + 1 bathroom.
   const roomExtra =
-    Math.max(0, bedrooms - 1) * 0.55 + bathrooms * 0.36 + otherRooms * 0.27;
+    Math.max(0, bedrooms - 1) * 0.55 +
+    Math.max(0, bathrooms - 1) * 0.36 +
+    otherRooms * 0.27;
   const propertyMultiplier =
     options?.propertyType === "office"
       ? 1.35
@@ -809,10 +812,11 @@ export function estimateDuration(
         ? 1.1
         : 1;
 
-  return Number(
-    ((service.duration + standardExtra + addOnExtra + roomExtra) *
-      propertyMultiplier).toFixed(2),
-  );
+  const hours =
+    (service.duration + standardExtra + addOnExtra + roomExtra) *
+    propertyMultiplier;
+  // Never recommend under 2 hours for a home clean (1 bed / 1 bathroom floor).
+  return Number(Math.max(2, hours).toFixed(2));
 }
 
 export type EstimatePriceOptions = {

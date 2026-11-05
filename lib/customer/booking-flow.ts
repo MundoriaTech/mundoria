@@ -440,10 +440,10 @@ export function durationSummary(args: {
       : "";
   const propertyHint =
     beds <= 1 && baths <= 1 && other === 0
-      ? "Recommended for a studio or 1-bed with 1 toilet"
+      ? "Recommended for a studio or 1-bed with 1 bathroom"
       : beds <= 2
-        ? `Recommended for about ${beds} bedroom${beds === 1 ? "" : "s"}, ${baths} toilet${baths === 1 ? "" : "s"}${otherBit}`
-        : `Based on ${beds} bedrooms, ${baths} toilet${baths === 1 ? "" : "s"}${otherBit}`;
+        ? `Recommended for about ${beds} bedroom${beds === 1 ? "" : "s"}, ${baths} bathroom${baths === 1 ? "" : "s"}${otherBit}`
+        : `Based on ${beds} bedrooms, ${baths} bathroom${baths === 1 ? "" : "s"}${otherBit}`;
 
   return {
     hours,
