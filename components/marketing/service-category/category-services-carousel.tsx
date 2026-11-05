@@ -51,33 +51,7 @@ export function CategoryServicesCarousel({
 
   return (
     <div>
-      <div className="flex items-end justify-between gap-4">
-        <div className="min-w-0 flex-1">{title}</div>
-        <div className="flex shrink-0 gap-2">
-          <button
-            aria-label={`Previous ${label}`}
-            className={cn(
-              "inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-lg leading-none text-[#1c133b] shadow-sm transition hover:bg-[#f7f2fc]",
-              !canScrollLeft && "pointer-events-none opacity-35",
-            )}
-            onClick={() => scrollCarousel(-1)}
-            type="button"
-          >
-            ‹
-          </button>
-          <button
-            aria-label={`Next ${label}`}
-            className={cn(
-              "inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-lg leading-none text-[#1c133b] shadow-sm transition hover:bg-[#f7f2fc]",
-              !canScrollRight && "pointer-events-none opacity-35",
-            )}
-            onClick={() => scrollCarousel(1)}
-            type="button"
-          >
-            ›
-          </button>
-        </div>
-      </div>
+      <div>{title}</div>
 
       <div className="relative mt-8">
         <div
@@ -87,14 +61,36 @@ export function CategoryServicesCarousel({
         >
           {children}
         </div>
+
+        {canScrollLeft ? (
+          <button
+            aria-label={`Previous ${label}`}
+            className="absolute left-0 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#e8def8] bg-white text-lg leading-none text-[#1c133b] shadow-md transition hover:bg-[#f7f2fc]"
+            onClick={() => scrollCarousel(-1)}
+            type="button"
+          >
+            ‹
+          </button>
+        ) : null}
+
         {canScrollRight ? (
-          <div
-            aria-hidden
-            className={cn(
-              "pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l to-transparent sm:w-16",
-              fadeFromClassName,
-            )}
-          />
+          <>
+            <div
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l to-transparent sm:w-16",
+                fadeFromClassName,
+              )}
+            />
+            <button
+              aria-label={`Next ${label}`}
+              className="absolute right-0 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#e8def8] bg-white text-lg leading-none text-[#1c133b] shadow-md transition hover:bg-[#f7f2fc]"
+              onClick={() => scrollCarousel(1)}
+              type="button"
+            >
+              ›
+            </button>
+          </>
         ) : null}
       </div>
     </div>

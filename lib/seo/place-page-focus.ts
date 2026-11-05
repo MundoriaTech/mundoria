@@ -40,7 +40,7 @@ export function cleaningPlaceTitle({
   if (category === "commercial") return `Workspace cleaners ${preposition} ${place}`;
   if (category === "recovery") return `Recovery cleaners ${preposition} ${place}`;
   if (category === "residential" || preposition === "in") {
-    return `Domestic cleaners ${preposition} ${place}`;
+    return `House cleaners ${preposition} ${place}`;
   }
   return `Cleaners near ${place}`;
 }
@@ -65,7 +65,7 @@ export function cleaningPlaceIntro({
     return `Recovery cleaning is available in these ${where} and their surroundings:`;
   }
   if (category === "residential") {
-    return `Domestic cleaning is available in these ${where} and their surroundings:`;
+    return `House cleaning is available in these ${where} and their surroundings:`;
   }
   return `Mundoria cleaners are available in these ${where} and their surroundings:`;
 }
@@ -87,7 +87,7 @@ export function surroundingTownsIntro({
     return "Recovery cleaning is also available in these surrounding towns:";
   }
   if (category === "residential") {
-    return "Domestic cleaning is also available in these surrounding towns:";
+    return "House cleaning is also available in these surrounding towns:";
   }
   return "Mundoria cleaners are also available in these surrounding towns:";
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 
 import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
@@ -12,8 +12,8 @@ import { LocationStickyBookBar } from "@/components/marketing/location-sticky-bo
 import { MarketingFaqColumnsSection } from "@/components/marketing/marketing-faq-columns-section";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
+import { CategoryServicesCarousel } from "@/components/marketing/service-category/category-services-carousel";
 import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
-import { cn } from "@/lib/utils";
 
 export type CategoryServiceCard = {
   href: string;
@@ -39,7 +39,6 @@ export type ServiceCategoryMarketingConfig = {
   faqVariant?: "brand" | "service";
   heroImage: string;
   serviceCards: CategoryServiceCard[];
-  servicesGridClassName?: string;
   servicesTitle: string;
   subtitle: string;
   title: string;
@@ -58,7 +57,6 @@ export function ServiceCategoryMarketingPage({
   /** Set false when a parent route adds location reviews (e.g. Birmingham hub). */
   showReviews?: boolean;
 }) {
-  const carouselRef = useRef<HTMLDivElement>(null);
   const {
     bookCta,
     bullets,
@@ -66,18 +64,10 @@ export function ServiceCategoryMarketingPage({
     faqsTitle = "Mundoria FAQ",
     faqVariant = "brand",
     heroImage,
-    servicesGridClassName,
     servicesTitle,
     subtitle,
     title,
   } = config;
-
-  function scrollCarousel(direction: 1 | -1) {
-    const node = carouselRef.current;
-    if (!node) return;
-    const amount = Math.min(320, node.clientWidth * 0.8);
-    node.scrollBy({ behavior: "smooth", left: direction * amount });
-  }
 
   return (
     <>
@@ -135,14 +125,30 @@ export function ServiceCategoryMarketingPage({
 
       <PhotoFeatureBand />
 
-      <CategoryServicesSection
-        bookingHref={bookingHref}
-        carouselRef={carouselRef}
-        gridClassName={servicesGridClassName}
-        onScroll={scrollCarousel}
-        services={config.serviceCards}
-        title={servicesTitle}
-      />
+      <section className="px-4 py-10 sm:px-8 sm:py-14">
+        <div className="mx-auto max-w-6xl">
+          <CategoryServicesCarousel
+            label="services"
+            title={
+              <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+                {servicesTitle}
+              </h2>
+            }
+          >
+            {config.serviceCards.map((service) => (
+              <CategoryServiceCard
+                bookingHref={bookingHref}
+                href={service.href}
+                image={service.image}
+                key={service.label}
+                label={service.label}
+                objectPosition={service.objectPosition}
+                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
+              />
+            ))}
+          </CategoryServicesCarousel>
+        </div>
+      </section>
 
       {showReviews ? <ReviewsSection /> : null}
 
@@ -201,73 +207,5 @@ export function ServiceCategoryMarketingPage({
         label={bookCta || "Book my cleaning"}
       />
     </>
-  );
-}
-
-function CategoryServicesSection({
-  bookingHref,
-  carouselRef,
-  gridClassName,
-  onScroll,
-  services,
-  title,
-}: {
-  bookingHref: string;
-  carouselRef: React.RefObject<HTMLDivElement>;
-  gridClassName?: string;
-  onScroll: (direction: 1 | -1) => void;
-  services: CategoryServiceCard[];
-  title: string;
-}) {
-  const defaultGrid = "lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible";
-
-  return (
-    <section className="px-4 py-10 sm:px-8 sm:py-14">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex items-end justify-between gap-4">
-          <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-            {title}
-          </h2>
-          <div className="flex shrink-0 gap-2 lg:hidden">
-            <button
-              aria-label="Previous services"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-[#1c133b] shadow-sm transition hover:bg-[#f7f2fc]"
-              onClick={() => onScroll(-1)}
-              type="button"
-            >
-              ‹
-            </button>
-            <button
-              aria-label="Next services"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e8def8] bg-white text-[#1c133b] shadow-sm transition hover:bg-[#f7f2fc]"
-              onClick={() => onScroll(1)}
-              type="button"
-            >
-              ›
-            </button>
-          </div>
-        </div>
-
-        <div
-          className={cn(
-            "mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden lg:overflow-visible lg:pb-0",
-            gridClassName ?? defaultGrid,
-          )}
-          ref={carouselRef}
-        >
-          {services.map((service) => (
-            <CategoryServiceCard
-              bookingHref={bookingHref}
-              href={service.href}
-              image={service.image}
-              key={service.label}
-              label={service.label}
-              objectPosition={service.objectPosition}
-              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
-            />
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }

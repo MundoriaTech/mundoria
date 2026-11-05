@@ -175,8 +175,6 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
       label: "Bereavement Support Cleaning",
     },
   ],
-  servicesGridClassName:
-    "lg:flex-wrap lg:justify-center lg:gap-5 lg:overflow-visible",
   servicesTitle: "Choose your recovery cleaning service",
   subtitle: "Cleaning that adapts when life does, with a little more consideration",
   title: "Recovery cleaning",

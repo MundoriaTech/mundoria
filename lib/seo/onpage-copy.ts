@@ -17,7 +17,7 @@ export const ONPAGE_PATH_COPY: Record<string, OnpageCopy> = {
     title: "Best Cleaning Services in Birmingham | Mundoria",
   },
   "/cleaning": {
-    description: `Book top-rated domestic, office, deep, end of tenancy and Airbnb cleaning services in Birmingham with Mundoria. Get a quote today or call ${SUPPORT_PHONE}.`,
+    description: `Book top-rated house, office, deep, end of tenancy and Airbnb cleaning services in Birmingham with Mundoria. Get a quote today or call ${SUPPORT_PHONE}.`,
     title: "Best Cleaning Services in Birmingham | Mundoria",
   },
   "/cleaning/residential": {
@@ -91,6 +91,10 @@ export const ONPAGE_SERVICE_COPY: Record<string, OnpageCopy> = {
   "hospital-discharge-home-cleaning": {
     description: `Need reliable hospital discharge home cleaning in Birmingham? Choose Mundoria for professional home cleaning. Call ${SUPPORT_PHONE} to book today!`,
     title: "Best Hospital Discharge Home Cleaning Birmingham | Mundoria",
+  },
+  "bereavement-support-cleaning": {
+    description: `Need reliable bereavement support cleaning in Birmingham? Choose Mundoria for considerate, professional home cleaning. Call ${SUPPORT_PHONE} today!`,
+    title: "Best Bereavement Support Cleaning Birmingham | Mundoria",
   },
 };
 

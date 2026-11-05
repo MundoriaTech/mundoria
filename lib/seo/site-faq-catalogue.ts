@@ -1297,7 +1297,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can Mundoria provide medical-grade cleaning?",
         answer:
-          "No.\n\nMundoria does not currently provide medical-grade cleaning or specialist healthcare-environment cleaning.\n\nRecovery Cleaning is domestic cleaning designed around a person's circumstances.\n\nIt should not be confused with clinical decontamination, hospital cleaning or any service requiring specialist healthcare protocols.",
+          "No.\n\nMundoria does not currently provide medical-grade cleaning or specialist healthcare-environment cleaning.\n\nRecovery Cleaning is house cleaning designed around a person's circumstances.\n\nIt should not be confused with clinical decontamination, hospital cleaning or any service requiring specialist healthcare protocols.",
       },
       {
         question: "Can Mundoria provide clinical cleaning?",

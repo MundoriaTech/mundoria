@@ -78,7 +78,7 @@ export function birminghamPlaceFaqEntries(place: string): BirminghamPlaceFaqEntr
       schemaAnswer: bookCleanerSchemaAnswer(place),
     },
     {
-      question: `Why choose Mundoria for domestic cleaning in ${place}?`,
+      question: `Why choose Mundoria for house cleaning in ${place}?`,
       schemaAnswer: whyChooseMundoriaSchemaAnswer(place),
     },
     {

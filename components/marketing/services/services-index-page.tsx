@@ -81,9 +81,9 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
         ...pageOnly(bookingHref, [
           {
             description:
-              "Routine domestic cleaning for kitchens, living areas and bathrooms.",
+              "Routine house cleaning for kitchens, living areas and bathrooms.",
             href: "/cleaning/regular-cleaning",
-            label: "Domestic Cleaning",
+            label: "House Cleaning",
             seedService: "regular",
           },
           {

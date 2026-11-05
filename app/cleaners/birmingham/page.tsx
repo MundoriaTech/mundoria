@@ -85,7 +85,7 @@ export default async function BirminghamCleanersPage() {
         primaryHref={bookingHref}
         primaryLabel="Book in Birmingham"
         showReviews
-        title="Domestic cleaners in Birmingham"
+        title="House cleaners in Birmingham"
       />
 
       <BrandedPageWash>
