@@ -14,7 +14,7 @@ const GROUPS = [
     image: "/images/marketing/landing/residential-hero.jpg",
     imageAlt: "Purple-gloved hands spraying cleaner onto a cloth for a home clean",
     imageClassName: "object-[center_35%]",
-    intro: "Scheduled upkeep, a one-off visit, a move, or a home ready for guests.",
+    intro: "Come home to a clean space, without doing it all yourself.",
     label: "House",
     items: [
       {
@@ -43,17 +43,22 @@ const GROUPS = [
         label: "Airbnb/Shortlet",
       },
     ],
+    notes: [
+      "Cleaning from £22 an hour",
+      "Book a one-off clean or schedule it regularly",
+      "We’ll match you with a vetted cleaner",
+    ],
   },
   {
     id: "workplace",
     image: "/images/marketing/landing/commercial-hero.jpg",
     imageAlt: "A cleaner in pink gloves wiping a table with spray and cloth",
     imageClassName: "object-[center_28%]",
-    intro: "Desks, shop floors, classrooms and the shared spaces between them.",
+    intro: "You’ve got a business to run. Let us handle the cleaning for your office, shop, school or shared space.",
     label: "Workspace",
     items: [
       {
-        description: "Desks, toilets and shared rooms.",
+        description: "Desks, bathrooms and shared rooms.",
         href: "/cleaning/office-cleaning",
         label: "Office cleaning",
       },
@@ -73,13 +78,18 @@ const GROUPS = [
         label: "Communal areas",
       },
     ],
+    notes: [
+      "Book a one-off clean or schedule it regularly",
+      "See your estimated price before you book",
+      "We’ll match you with a vetted cleaner",
+    ],
   },
   {
     id: "recovery",
     image: "/images/marketing/landing/recovery-hero.jpg",
     imageAlt: "A cleaner scrubbing the floor with spray and brush",
     imageClassName: "object-[center_30%]",
-    intro: "Practical cleaning support when life at home changes.",
+    intro: "When you need time to rest, let us take care of the cleaning.",
     label: "Recovery",
     items: [
       {
@@ -102,6 +112,11 @@ const GROUPS = [
         href: "/cleaning/bereavement-support-cleaning",
         label: "Bereavement support",
       },
+    ],
+    notes: [
+      "Get help keeping your space clean while you recover",
+      "Tell us what you need before your cleaner arrives",
+      "Help with cleaning, not medical or personal care",
     ],
   },
 ] as const;
@@ -131,7 +146,7 @@ export function ServiceCategoriesSection({
     >
       <div className="mx-auto max-w-6xl rounded-[1.35rem] bg-[#f6f1e7] px-4 py-5 shadow-[0_24px_60px_rgba(28,19,59,0.18)] sm:rounded-[2rem] sm:px-8 sm:py-9 lg:px-10 lg:py-10">
         <h2 className="text-balance text-[1.45rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-          A clean for every kind of day.
+          What kind of cleaning do you need?
         </h2>
 
         <div

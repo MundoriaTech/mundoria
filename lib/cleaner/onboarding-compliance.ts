@@ -339,7 +339,7 @@ export const EQUIPMENT_ITEMS = [
 export const PRODUCT_ITEMS = [
   "Multi-purpose cleaner",
   "Bathroom cleaner",
-  "Toilet cleaner",
+  "Bathroom cleaner/descaler",
   "Kitchen degreaser",
   "Glass cleaner",
   "Floor cleaner",

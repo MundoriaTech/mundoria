@@ -95,8 +95,8 @@ const INCLUDED: Partial<
         description: "hoovering and mopping of the rooms included in the visit.",
       },
       {
-        name: "Bathroom and toilet cleaning",
-        description: "sinks, toilets, showers and surfaces left hygienic.",
+        name: "Bathroom cleaning",
+        description: "sinks, showers and surfaces left hygienic.",
       },
       {
         name: "Kitchen cleaning",
@@ -183,7 +183,7 @@ const INCLUDED: Partial<
         description: "cupboards, hob, sink and visible appliance exteriors.",
       },
       {
-        name: "Bathrooms and toilets",
+        name: "Bathrooms",
         description: "a thorough clean ready for inspection.",
       },
       {
@@ -269,7 +269,7 @@ const INCLUDED: Partial<
       },
       {
         name: "Washrooms",
-        description: "toilets and sinks left hygienic for the working day.",
+        description: "bathrooms and sinks left hygienic for the working day.",
       },
     ],
   },

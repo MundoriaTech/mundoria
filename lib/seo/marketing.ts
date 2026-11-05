@@ -641,7 +641,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
 
 export const HOW_IT_WORKS_STEPS = [
   {
-    body: "Choose house cleaning, moving home, short-let, commercial or recovery support, then the specific service you need.",
+    body: "Choose house cleaning, moving home, short-let, workspace or recovery support, then the specific service you need.",
     title: "Pick your service",
   },
   {

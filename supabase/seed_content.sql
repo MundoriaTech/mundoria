@@ -17,7 +17,7 @@ insert into public.help_articles (collection_id, title, slug, summary, body, sor
   'How do I book a cleaner on Mundoria?',
   'how-do-i-book',
   'From postcode to payment in a few guided steps.',
-  E'## Book in minutes\n- Open Book a clean and enter your postcode.\n- Choose a service and cleaning standard.\n- Add rooms or commercial spaces, duration and add-ons.\n- Pick a date and time, then pay securely.\n\n## After you book\nWe match a suitable cleaner. You will see live status through arrival, checklist completion and confirmation.\n\n> Tip: for Recovery cleans, use the Preferences step to share fragrance-free and priority-room notes.',
+  E'## Book in minutes\n- Open Book a clean and enter your postcode.\n- Choose a service and cleaning standard.\n- Add rooms or workspace areas, duration and add-ons.\n- Pick a date and time, then pay securely.\n\n## After you book\nWe match a suitable cleaner. You will see live status through arrival, checklist completion and confirmation.\n\n> Tip: for Recovery cleans, use the Preferences step to share fragrance-free and priority-room notes.',
   10
 ),
 (

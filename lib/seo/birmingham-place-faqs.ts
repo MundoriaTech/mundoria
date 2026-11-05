@@ -26,7 +26,7 @@ export function whyChooseMundoriaPoints() {
     "Secure online payment held until the job is completed to your checklist.",
     "Live status from matching through arrival and completion in your account.",
     "Flexible scheduling with free cancellation more than 24 hours before the visit.",
-    "House, commercial, short-let, move and Recovery services in one booking flow.",
+    "House, workspace, short-let, move and Recovery services in one booking flow.",
     "Add-ons such as oven, fridge, ironing and cleaning products when you need them.",
     "Customer support and help articles when you want guidance before you book.",
   ] as const;
@@ -35,7 +35,7 @@ export function whyChooseMundoriaPoints() {
 export function houseCleanCoveredPoints() {
   return [
     "Hoovering and floor care for hard floors and carpets in agreed rooms",
-    "Bathroom cleaning, sinks, toilets and visible fixtures; mirrors streak-free",
+    "Bathroom cleaning, sinks and visible fixtures; mirrors streak-free",
     "Kitchen surfaces, sink and hob wipe-down (oven deep-clean as an add-on)",
     "Dusting and surface wipe of reachable furniture and ledges",
     "Emptying bins and light tidy of clutter-free areas",

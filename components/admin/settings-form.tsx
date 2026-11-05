@@ -221,7 +221,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               value={penceToPoundsInput(pricing.supply.productsResidential)}
             />
           </Field>
-          <Field label="Cleaning products (commercial)">
+          <Field label="Cleaning products (workspace)">
             <Input
               min={0}
               onChange={(event) =>

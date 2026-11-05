@@ -426,7 +426,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does a deep clean include bathrooms?",
         answer:
-          "Yes.\n\nBathrooms are often one of the areas that benefit most from deep cleaning because soap residue, limescale and general build-up can accumulate gradually.\n\nA deep clean can give more attention to baths, showers, basins, taps, toilets, tiles, floors and other agreed bathroom surfaces.\n\nThe cleaner will use products appropriate for the surfaces being cleaned.",
+          "Yes.\n\nBathrooms are often one of the areas that benefit most from deep cleaning because soap residue, limescale and general build-up can accumulate gradually.\n\nA deep clean can give more attention to baths, showers, basins, taps, bathrooms, tiles, floors and other agreed bathroom surfaces.\n\nThe cleaner will use products appropriate for the surfaces being cleaned.",
       },
       {
         question: "Does a deep clean include skirting boards?",
@@ -451,7 +451,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does a deep clean include built-up grease?",
         answer:
-          "Yes, built-up household grease can be part of a deep clean, particularly in kitchens.\n\nThat may include suitable worktops, splashbacks, cupboard fronts, hob surrounds and other accessible areas where grease has accumulated.\n\nThe cleaner will use products appropriate to the surface.\nIf grease is extremely heavy or involves specialist commercial-style treatment, it may sit outside the standard house deep-clean scope.",
+          "Yes, built-up household grease can be part of a deep clean, particularly in kitchens.\n\nThat may include suitable worktops, splashbacks, cupboard fronts, hob surrounds and other accessible areas where grease has accumulated.\n\nThe cleaner will use products appropriate to the surface.\nIf grease is extremely heavy or involves specialist treatment, it may sit outside the standard house deep-clean scope.",
       },
       {
         question: "Does a deep clean include oven cleaning?",
@@ -779,22 +779,22 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What is regular office cleaning?",
         answer:
-          "Regular office cleaning is ongoing cleaning designed to keep a workplace consistently looked after.\n\nIt usually focuses on the areas that are used every day, such as desks and accessible surfaces, floors, kitchens, toilets, reception areas, meeting rooms and bins.\n\nThe idea is not to wait until the office looks tired.\nIt is to keep the space at a comfortable, presentable standard through a regular schedule.\n\nDepending on the workplace, that might mean daily cleaning, several visits a week or a weekly clean.",
+          "Regular office cleaning is ongoing cleaning designed to keep a workplace consistently looked after.\n\nIt usually focuses on the areas that are used every day, such as desks and accessible surfaces, floors, kitchens, bathrooms, reception areas, meeting rooms and bins.\n\nThe idea is not to wait until the office looks tired.\nIt is to keep the space at a comfortable, presentable standard through a regular schedule.\n\nDepending on the workplace, that might mean daily cleaning, several visits a week or a weekly clean.",
       },
       {
         question: "What is office deep cleaning?",
         answer:
-          "Office deep cleaning is a more detailed clean for workplaces that need more than their normal routine.\n\nIt can be useful where there is heavier build-up, where certain areas have not had detailed attention for some time, or when the office needs a proper reset.\n\nThat may include more detailed work around kitchens, washrooms, skirting boards, doors, frames, fixtures, high-touch areas and other agreed parts of the workplace.\n\nIt is still commercial cleaning, but with more time and attention given to the detail.",
+          "Office deep cleaning is a more detailed clean for workplaces that need more than their normal routine.\n\nIt can be useful where there is heavier build-up, where certain areas have not had detailed attention for some time, or when the office needs a proper reset.\n\nThat may include more detailed work around kitchens, washrooms, skirting boards, doors, frames, fixtures, high-touch areas and other agreed parts of the workplace.\n\nIt is still workspace cleaning, but with more time and attention given to the detail.",
       },
       {
         question: "What is included in regular office cleaning?",
         answer:
-          "Regular office cleaning can include the everyday areas needed to keep the workplace in good order.\n\nThat may include accessible desks and surfaces, meeting rooms, reception areas, staff kitchens, toilets and washrooms, floors, communal spaces, bins and agreed high-touch areas.\n\nThe exact scope should be agreed around the site.\nOne office may need more attention in shared kitchens and toilets. Another may care most about client-facing areas such as reception and meeting rooms.\n\nThe point is to create a routine that fits how the workplace is actually used.",
+          "Regular office cleaning can include the everyday areas needed to keep the workplace in good order.\n\nThat may include accessible desks and surfaces, meeting rooms, reception areas, staff kitchens, bathrooms and washrooms, floors, communal spaces, bins and agreed high-touch areas.\n\nThe exact scope should be agreed around the site.\nOne office may need more attention in shared kitchens and bathrooms. Another may care most about client-facing areas such as reception and meeting rooms.\n\nThe point is to create a routine that fits how the workplace is actually used.",
       },
       {
         question: "What is included in office deep cleaning?",
         answer:
-          "Office deep cleaning can include more detailed attention to the parts of the workplace that routine cleaning may not cover as thoroughly every time.\n\nThat may include built-up dirt, heavier kitchen cleaning, washroom detail, doors and frames, skirting boards, fixtures, edges, accessible surfaces, high-touch areas and other agreed areas.\n\nThe exact scope depends on the size and condition of the office and what you want prioritised.\nDeep cleaning does not automatically include specialist commercial services or specialist machinery.",
+          "Office deep cleaning can include more detailed attention to the parts of the workplace that routine cleaning may not cover as thoroughly every time.\n\nThat may include built-up dirt, heavier kitchen cleaning, washroom detail, doors and frames, skirting boards, fixtures, edges, accessible surfaces, high-touch areas and other agreed areas.\n\nThe exact scope depends on the size and condition of the office and what you want prioritised.\nDeep cleaning does not automatically include specialist workspace services or specialist machinery.",
       },
       {
         question:
@@ -805,7 +805,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How often should an office be cleaned?",
         answer:
-          "There is no single answer that suits every office.\n\nA busy workplace with lots of staff, shared toilets, kitchens and regular visitors may need cleaning every day.\nA smaller office used by only a few people may be perfectly comfortable with cleaning once or twice a week.\n\nThe right frequency depends on things like staff numbers, footfall, the type of workplace, how often shared facilities are used and the standard you want to maintain.\nWe would rather recommend a schedule around the actual office than automatically suggest the most frequent option.",
+          "There is no single answer that suits every office.\n\nA busy workplace with lots of staff, shared bathrooms, kitchens and regular visitors may need cleaning every day.\nA smaller office used by only a few people may be perfectly comfortable with cleaning once or twice a week.\n\nThe right frequency depends on things like staff numbers, footfall, the type of workplace, how often shared facilities are used and the standard you want to maintain.\nWe would rather recommend a schedule around the actual office than automatically suggest the most frequent option.",
       },
       {
         question: "Can I book daily office cleaning?",
@@ -840,23 +840,23 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How is office cleaning priced?",
         answer:
-          "Office cleaning is generally priced around the amount of cleaning time required, the type of service and any products or equipment supplied.\n\nRegular office cleaning starts from the relevant commercial rate, while office deep cleaning is priced higher because it requires more detailed work and usually more time.\n\nLarger or more complex workplaces may be better assessed through an estimated total based on the expected cleaner-hours rather than looking only at a single hourly figure.\nThe important thing is that the basis of the price should make sense before the booking is confirmed.",
+          "Office cleaning is generally priced around the amount of cleaning time required, the type of service and any products or equipment supplied.\n\nRegular office cleaning starts from the relevant workspace rate, while office deep cleaning is priced higher because it requires more detailed work and usually more time.\n\nLarger or more complex workplaces may be better assessed through an estimated total based on the expected cleaner-hours rather than looking only at a single hourly figure.\nThe important thing is that the basis of the price should make sense before the booking is confirmed.",
       },
       {
         question:
           "How do you estimate how many cleaning hours an office needs?",
         answer:
-          "We look at the size and layout of the office, the number of rooms, toilets, kitchens, meeting rooms and shared spaces, as well as how heavily the workplace is used.\n\nThe condition of the site also matters.\nA small, well-maintained office may need relatively little time.\nA larger workplace with several washrooms, kitchens and busy communal spaces will naturally need more.\n\nFor bigger sites, we may also consider whether the work is better carried out by more than one professional rather than simply extending one person's shift.",
+          "We look at the size and layout of the office, the number of rooms, bathrooms, kitchens, meeting rooms and shared spaces, as well as how heavily the workplace is used.\n\nThe condition of the site also matters.\nA small, well-maintained office may need relatively little time.\nA larger workplace with several washrooms, kitchens and busy communal spaces will naturally need more.\n\nFor bigger sites, we may also consider whether the work is better carried out by more than one professional rather than simply extending one person's shift.",
       },
       {
-        question: "Do commercial cleaners bring products?",
+        question: "Do workspace cleaners bring products?",
         answer:
-          "They can, if the product-supply option is selected.\n\nFor commercial cleaning, the products required may include suitable multi-surface cleaner, disinfectant, glass cleaner, floor cleaner, bathroom products, limescale remover, kitchen degreaser and other standard products needed for the agreed work.\n\nYou can also provide suitable products at the workplace if you prefer.\nIf there are product restrictions, allergies or site-specific requirements, tell us beforehand.",
+          "They can, if the product-supply option is selected.\n\nFor workspace cleaning, the products required may include suitable multi-surface cleaner, disinfectant, glass cleaner, floor cleaner, bathroom products, limescale remover, kitchen degreaser and other standard products needed for the agreed work.\n\nYou can also provide suitable products at the workplace if you prefer.\nIf there are product restrictions, allergies or site-specific requirements, tell us beforehand.",
       },
       {
-        question: "Do commercial cleaners bring equipment?",
+        question: "Do workspace cleaners bring equipment?",
         answer:
-          "They can, if the equipment-supply option is selected.\n\nStandard commercial cleaning equipment may include a suitable vacuum cleaner, mop and bucket, flat mop, microfibre cloths, dusting tools, squeegee, brushes, bin bags and wet-floor warning signs.\n\nSpecialist machinery is not part of Mundoria's current standard commercial cleaning service.\nIf the workplace already has suitable equipment, you can choose to provide it.",
+          "They can, if the equipment-supply option is selected.\n\nStandard workspace cleaning equipment may include a suitable vacuum cleaner, mop and bucket, flat mop, microfibre cloths, dusting tools, squeegee, brushes, bin bags and wet-floor warning signs.\n\nSpecialist machinery is not part of Mundoria's current standard workspace cleaning service.\nIf the workplace already has suitable equipment, you can choose to provide it.",
       },
       {
         question: "Can we provide our own products and equipment?",
@@ -874,9 +874,9 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
           "Yes.\n\nOffice kitchens and break areas can be included.\nRegular cleaning may cover worktops, sinks, accessible surfaces, cupboard fronts, floors and other routine areas.\nMore detailed kitchen work may be included as part of an office deep clean where agreed.\n\nPersonal food, crockery and belongings should not be assumed to be part of the cleaning unless that has been specifically arranged.",
       },
       {
-        question: "Can Mundoria clean toilets and washrooms?",
+        question: "Can Mundoria clean bathrooms and washrooms?",
         answer:
-          "Yes.\n\nToilets and washrooms are usually one of the most important parts of a commercial cleaning routine.\nCleaning can include toilets, basins, taps, floors, mirrors and other agreed surfaces.\n\nFor busy workplaces, washrooms may need more frequent attention than other areas of the office.\nThe cleaning schedule should reflect that rather than treating every part of the building exactly the same.",
+          "Yes.\n\nBathrooms and washrooms are usually one of the most important parts of a workspace cleaning routine.\nCleaning can include bathrooms, basins, taps, floors, mirrors and other agreed surfaces.\n\nFor busy workplaces, washrooms may need more frequent attention than other areas of the office.\nThe cleaning schedule should reflect that rather than treating every part of the building exactly the same.",
       },
       {
         question: "Can Mundoria clean receptions and waiting areas?",
@@ -891,7 +891,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can Mundoria empty office bins?",
         answer:
-          "Yes.\n\nEmptying ordinary office waste bins can form part of regular commercial cleaning.\nIf your workplace has specific waste-separation requirements, recycling rules or designated disposal points, provide those instructions.\n\nHazardous, clinical or specialist waste is outside Mundoria's normal commercial cleaning scope.",
+          "Yes.\n\nEmptying ordinary office waste bins can form part of regular workspace cleaning.\nIf your workplace has specific waste-separation requirements, recycling rules or designated disposal points, provide those instructions.\n\nHazardous, clinical or specialist waste is outside Mundoria's normal workspace cleaning scope.",
       },
       {
         question: "Can Mundoria clean high-touch areas?",
@@ -904,12 +904,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
           "Standard vacuuming can be included.\n\nMundoria does not currently offer specialist carpet extraction or machine-based carpet cleaning.\n\nIf carpets need normal vacuuming as part of the office clean, that is within scope.\nIf they require stain extraction, deep machine cleaning or specialist restoration, you would need a specialist provider.",
       },
       {
-        question: "Does Mundoria offer specialist commercial cleaning?",
+        question: "Does Mundoria offer specialist workspace cleaning?",
         answer:
-          "Not currently.\n\nMundoria's commercial services focus on standard and deep workplace cleaning using suitable everyday commercial products and equipment.\nWe are not currently offering specialist services such as carpet extraction, upholstery extraction, industrial floor restoration, biohazard cleaning, specialist decontamination or major mould remediation.\n\nWe would rather be clear about what we do well than pretend every type of commercial cleaning sits under one service.",
+          "Not currently.\n\nMundoria's workspace services focus on standard and deep workplace cleaning using suitable everyday workspace products and equipment.\nWe are not currently offering specialist services such as carpet extraction, upholstery extraction, industrial floor restoration, biohazard cleaning, specialist decontamination or major mould remediation.\n\nWe would rather be clear about what we do well than pretend every type of workspace cleaning sits under one service.",
       },
       {
-        question: "Can Mundoria provide recurring commercial cleaning?",
+        question: "Can Mundoria provide recurring workspace cleaning?",
         answer:
           "Yes.\n\nRecurring cleaning can be arranged around the needs of the workplace and available professionals.\nThat might mean daily, several times a week, weekly or another suitable routine.\n\nFor ongoing cleaning, the schedule can also be reviewed if the office changes.\nA growing team, more visitors or heavier use of shared facilities may mean the original routine eventually needs adjusting.",
       },
@@ -917,7 +917,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
         question:
           "Can Mundoria create a cleaning schedule around our opening hours?",
         answer:
-          "Yes.\n\nThat is exactly how commercial cleaning should be approached.\nA workplace that opens to customers at 8am has different needs from an office that is empty after 6pm.\n\nTell us your opening hours, busy periods, access restrictions and any times when cleaning would be disruptive.\nFrom there, the booking can be arranged around what is practical for the business.\n\nThe aim is not simply to fit cleaning into an available slot.\nIt is to make it fit around the way the workplace actually runs.",
+          "Yes.\n\nThat is exactly how workspace cleaning should be approached.\nA workplace that opens to customers at 8am has different needs from an office that is empty after 6pm.\n\nTell us your opening hours, busy periods, access restrictions and any times when cleaning would be disruptive.\nFrom there, the booking can be arranged around what is practical for the business.\n\nThe aim is not simply to fit cleaning into an available slot.\nIt is to make it fit around the way the workplace actually runs.",
       },
     ],
   },
@@ -929,7 +929,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does Mundoria clean retail spaces?",
         answer:
-          "Yes.\n\nMundoria can be used for retail spaces that need regular cleaning, one-off cleaning or a deeper clean.\n\nThat could include smaller independent shops, larger retail units, customer-facing spaces, staff areas, entrances, floors, toilets and other agreed parts of the premises.\n\nThe cleaning should be arranged around how the space is actually used, not around a generic commercial checklist.",
+          "Yes.\n\nMundoria can be used for retail spaces that need regular cleaning, one-off cleaning or a deeper clean.\n\nThat could include smaller independent shops, larger retail units, customer-facing spaces, staff areas, entrances, floors, bathrooms and other agreed parts of the premises.\n\nThe cleaning should be arranged around how the space is actually used, not around a generic workspace checklist.",
       },
       {
         question: "Does Mundoria clean shops?",
@@ -939,12 +939,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does Mundoria clean cafés?",
         answer:
-          "Yes, within Mundoria's standard commercial cleaning scope.\n\nThat can include customer seating areas, floors, accessible surfaces, toilets, entrances and staff areas.\n\nKitchen or food-preparation areas can also be included where the work falls within normal cleaning and the site has made clear what can and cannot be touched.\n\nMundoria is not currently offering specialist kitchen extraction, grease-trap, duct or other specialist hospitality cleaning.",
+          "Yes, within Mundoria's standard workspace cleaning scope.\n\nThat can include customer seating areas, floors, accessible surfaces, bathrooms, entrances and staff areas.\n\nKitchen or food-preparation areas can also be included where the work falls within normal cleaning and the site has made clear what can and cannot be touched.\n\nMundoria is not currently offering specialist kitchen extraction, grease-trap, duct or other specialist hospitality cleaning.",
       },
       {
         question: "Does Mundoria clean hospitality premises?",
         answer:
-          "Yes.\n\nMundoria can support suitable hospitality spaces with regular cleaning, one-off cleaning and deeper cleaning.\n\nThat may include cafés, smaller hospitality venues, shared customer areas, toilets, entrances, staff spaces and other agreed parts of the premises.\n\nBecause hospitality businesses can vary a lot, the booking should reflect the actual site, opening hours, footfall and areas that need attention.",
+          "Yes.\n\nMundoria can support suitable hospitality spaces with regular cleaning, one-off cleaning and deeper cleaning.\n\nThat may include cafés, smaller hospitality venues, shared customer areas, bathrooms, entrances, staff spaces and other agreed parts of the premises.\n\nBecause hospitality businesses can vary a lot, the booking should reflect the actual site, opening hours, footfall and areas that need attention.",
       },
       {
         question: "Can cleaning happen before opening?",
@@ -967,9 +967,9 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
           "Yes.\n\nStaff rooms, break areas, back-office spaces, staff kitchens and other agreed areas can be included.\n\nThese areas may not be visible to customers, but they still matter to the people working there every day.\n\nIf there are lockers, personal belongings or restricted areas, make clear what should and should not be cleaned.",
       },
       {
-        question: "Can Mundoria clean toilets and washrooms?",
+        question: "Can Mundoria clean bathrooms and washrooms?",
         answer:
-          "Yes.\n\nToilets and washrooms can form part of regular retail and hospitality cleaning.\n\nThat may include toilets, basins, taps, mirrors, floors and other agreed surfaces.\n\nFor busier sites, washrooms may need more frequent attention than other areas.\n\nThe cleaning schedule should reflect actual use rather than assuming every part of the premises needs the same routine.",
+          "Yes.\n\nBathrooms and washrooms can form part of regular retail and hospitality cleaning.\n\nThat may include bathrooms, basins, taps, mirrors, floors and other agreed surfaces.\n\nFor busier sites, washrooms may need more frequent attention than other areas.\n\nThe cleaning schedule should reflect actual use rather than assuming every part of the premises needs the same routine.",
       },
       {
         question: "Can Mundoria clean floors and entrances?",
@@ -984,12 +984,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can Mundoria provide one-off deep cleaning for retail spaces?",
         answer:
-          "Yes.\n\nA deeper one-off clean can be useful when the premises need more attention than the normal routine provides.\n\nThat might include built-up dirt, more detailed work around floors, toilets, staff areas, entrances, fixtures, doors, skirting and other agreed areas.\n\nIt can also make sense before reopening, after a busy period or when the site simply needs a reset.\n\nSpecialist commercial cleaning, such as industrial floor restoration, specialist extraction, biohazard cleaning or major mould remediation, is not currently part of Mundoria's service.",
+          "Yes.\n\nA deeper one-off clean can be useful when the premises need more attention than the normal routine provides.\n\nThat might include built-up dirt, more detailed work around floors, bathrooms, staff areas, entrances, fixtures, doors, skirting and other agreed areas.\n\nIt can also make sense before reopening, after a busy period or when the site simply needs a reset.\n\nSpecialist workspace cleaning, such as industrial floor restoration, specialist extraction, biohazard cleaning or major mould remediation, is not currently part of Mundoria's service.",
       },
       {
         question: "How is retail and hospitality cleaning priced?",
         answer:
-          "Pricing depends on the type of clean, the size of the premises, how much time is likely to be needed and whether products or equipment are being supplied.\n\nA small retail unit that needs routine weekly cleaning is a very different job from a larger hospitality space with customer areas, washrooms and heavier daily footfall.\n\nFor that reason, Mundoria can estimate the cleaner-hours required rather than treating every premises as though it should cost the same.\n\nRegular retail and hospitality cleaning starts from the relevant commercial rate, while deeper cleaning is priced higher because it requires more detailed work and usually more time.\n\nThe aim is for the price to make sense against the work involved, rather than feel like a number pulled from nowhere.",
+          "Pricing depends on the type of clean, the size of the premises, how much time is likely to be needed and whether products or equipment are being supplied.\n\nA small retail unit that needs routine weekly cleaning is a very different job from a larger hospitality space with customer areas, washrooms and heavier daily footfall.\n\nFor that reason, Mundoria can estimate the cleaner-hours required rather than treating every premises as though it should cost the same.\n\nRegular retail and hospitality cleaning starts from the relevant workspace rate, while deeper cleaning is priced higher because it requires more detailed work and usually more time.\n\nThe aim is for the price to make sense against the work involved, rather than feel like a number pulled from nowhere.",
       },
     ],
   },
@@ -1001,12 +1001,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does Mundoria clean educational facilities?",
         answer:
-          "Yes.\n\nMundoria can provide cleaning for suitable educational spaces where the work falls within our normal commercial cleaning scope.\n\nThat can include routine cleaning, recurring cleaning and deeper cleaning for areas used by students, staff and visitors.\n\nBecause educational environments can be busy and sensitive spaces, the booking needs to reflect how the site actually operates, including access, opening hours, room use and any areas that should not be entered.",
+          "Yes.\n\nMundoria can provide cleaning for suitable educational spaces where the work falls within our normal workspace cleaning scope.\n\nThat can include routine cleaning, recurring cleaning and deeper cleaning for areas used by students, staff and visitors.\n\nBecause educational environments can be busy and sensitive spaces, the booking needs to reflect how the site actually operates, including access, opening hours, room use and any areas that should not be entered.",
       },
       {
         question: "What types of educational spaces can Mundoria clean?",
         answer:
-          "Mundoria can support suitable spaces such as classrooms, staff rooms, offices, toilets, corridors, reception areas and other agreed communal areas.\n\nThe exact scope depends on the site.\n\nA small nursery or training centre may need something very different from a larger school or college building, so we would not treat every educational facility as the same kind of job.\n\nThe booking should be built around the actual premises and the areas that need attention.",
+          "Mundoria can support suitable spaces such as classrooms, staff rooms, offices, bathrooms, corridors, reception areas and other agreed communal areas.\n\nThe exact scope depends on the site.\n\nA small nursery or training centre may need something very different from a larger school or college building, so we would not treat every educational facility as the same kind of job.\n\nThe booking should be built around the actual premises and the areas that need attention.",
       },
       {
         question: "Can Mundoria clean classrooms?",
@@ -1019,9 +1019,9 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
           "Yes.\n\nStaff rooms, offices and other employee areas can be included as part of the booking.\n\nThat may include floors, accessible surfaces, kitchen or break areas and other agreed spaces.\n\nIf there are personal belongings, confidential documents or staff-only areas with specific rules, those details should be provided in advance.",
       },
       {
-        question: "Can Mundoria clean toilets and communal areas?",
+        question: "Can Mundoria clean bathrooms and communal areas?",
         answer:
-          "Yes.\n\nToilets, washrooms, corridors, entrances and other shared areas can be included.\n\nThese spaces often need more frequent attention because they are used by many people throughout the day.\n\nThe cleaning schedule should reflect actual use rather than assuming every room needs the same frequency.\n\nA quiet office may need less attention than a busy corridor or washroom.",
+          "Yes.\n\nBathrooms, washrooms, corridors, entrances and other shared areas can be included.\n\nThese spaces often need more frequent attention because they are used by many people throughout the day.\n\nThe cleaning schedule should reflect actual use rather than assuming every room needs the same frequency.\n\nA quiet office may need less attention than a busy corridor or washroom.",
       },
       {
         question: "Can cleaning take place outside teaching hours?",
@@ -1046,7 +1046,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How is educational facility cleaning priced?",
         answer:
-          "Pricing depends on the size of the premises, the number of rooms and shared areas, the level of use, how often cleaning is required and whether products or equipment are being supplied.\n\nA small training centre with a few rooms is a very different job from a larger school with several classrooms, toilets, corridors and staff areas.\n\nFor that reason, Mundoria looks at the expected cleaner-hours and the actual scope of the site rather than applying one flat price to every educational facility.\n\nRegular educational cleaning starts from the relevant commercial rate, while deeper cleaning is priced higher because it usually needs more time and more detailed work.\n\nThe aim is to make the price reflect the real work involved.",
+          "Pricing depends on the size of the premises, the number of rooms and shared areas, the level of use, how often cleaning is required and whether products or equipment are being supplied.\n\nA small training centre with a few rooms is a very different job from a larger school with several classrooms, bathrooms, corridors and staff areas.\n\nFor that reason, Mundoria looks at the expected cleaner-hours and the actual scope of the site rather than applying one flat price to every educational facility.\n\nRegular educational cleaning starts from the relevant workspace rate, while deeper cleaning is priced higher because it usually needs more time and more detailed work.\n\nThe aim is to make the price reflect the real work involved.",
       },
     ],
   },
@@ -1058,7 +1058,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does Mundoria clean communal areas?",
         answer:
-          "Yes.\n\nMundoria can provide cleaning for shared residential and managed spaces where the work falls within our normal commercial cleaning scope.\n\nThat can include entrances, hallways, staircases, lifts, shared floors and other agreed communal areas.\n\nBecause these spaces are used by different people throughout the day, the cleaning should be built around the way the building is actually used rather than treated like a private home.",
+          "Yes.\n\nMundoria can provide cleaning for shared residential and managed spaces where the work falls within our normal workspace cleaning scope.\n\nThat can include entrances, hallways, staircases, lifts, shared floors and other agreed communal areas.\n\nBecause these spaces are used by different people throughout the day, the cleaning should be built around the way the building is actually used rather than treated like a private home.",
       },
       {
         question: "What types of communal areas can Mundoria clean?",
@@ -1113,7 +1113,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How is communal-area cleaning priced?",
         answer:
-          "Pricing depends on the size of the building, the number of shared areas, the amount of cleaning time required, how often the service is needed and whether products or equipment are being supplied.\n\nA small apartment block with one entrance and one staircase is a very different job from a larger residential development with several floors, lifts and multiple shared areas.\n\nFor that reason, Mundoria looks at the expected cleaner-hours and the actual scope of the building rather than applying one flat price to every property.\n\nRegular communal-area cleaning starts from the relevant commercial rate, while deeper or more detailed cleaning is priced higher because it usually requires more time and attention.",
+          "Pricing depends on the size of the building, the number of shared areas, the amount of cleaning time required, how often the service is needed and whether products or equipment are being supplied.\n\nA small apartment block with one entrance and one staircase is a very different job from a larger residential development with several floors, lifts and multiple shared areas.\n\nFor that reason, Mundoria looks at the expected cleaner-hours and the actual scope of the building rather than applying one flat price to every property.\n\nRegular communal-area cleaning starts from the relevant workspace rate, while deeper or more detailed cleaning is priced higher because it usually requires more time and attention.",
       },
     ],
   },
@@ -1359,17 +1359,17 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How much does equipment supply cost?",
         answer:
-          "For Regular Home Cleaning, Mundoria currently charges an additional £3 per hour where equipment is supplied.\n\nThe charge can vary for other services because a deep clean or commercial clean may need a broader range of standard equipment.\n\nIf you choose to have Mundoria supply both products and equipment, both charges should be shown clearly before you confirm the booking.",
+          "For Regular Home Cleaning, Mundoria currently charges an additional £3 per hour where equipment is supplied.\n\nThe charge can vary for other services because a deep clean or workspace clean may need a broader range of standard equipment.\n\nIf you choose to have Mundoria supply both products and equipment, both charges should be shown clearly before you confirm the booking.",
       },
       {
         question: "What cleaning products does Mundoria normally use?",
         answer:
-          "The exact products depend on the type of clean and the surfaces in the property.\n\nFor regular home cleaning, that may include suitable multi-surface cleaner, bathroom and toilet cleaner, glass and mirror cleaner, kitchen degreaser, floor cleaner, limescale remover, disinfectant, washing-up liquid, white vinegar, bicarbonate of soda and scouring cream.\n\nNot every product is used on every surface.\n\nFor example, some products that work well on one material may damage another.\n\nThe cleaner should use products appropriately rather than treating every surface in the home the same way.",
+          "The exact products depend on the type of clean and the surfaces in the property.\n\nFor regular home cleaning, that may include suitable multi-surface cleaner, bathroom cleaner, glass and mirror cleaner, kitchen degreaser, floor cleaner, limescale remover, disinfectant, washing-up liquid, white vinegar, bicarbonate of soda and scouring cream.\n\nNot every product is used on every surface.\n\nFor example, some products that work well on one material may damage another.\n\nThe cleaner should use products appropriately rather than treating every surface in the home the same way.",
       },
       {
         question: "What equipment does a cleaner normally need?",
         answer:
-          "For a typical home clean, standard equipment may include a vacuum cleaner, mop, bucket, microfibre cloths, sponges, dusting tools, a squeegee and other basic cleaning tools.\n\nA deep clean may need additional detail brushes, scrubbing tools or other standard equipment.\n\nCommercial bookings can also require things like colour-coded cloths and wet-floor warning signs.\n\nThe exact kit depends on the service being carried out.",
+          "For a typical home clean, standard equipment may include a vacuum cleaner, mop, bucket, microfibre cloths, sponges, dusting tools, a squeegee and other basic cleaning tools.\n\nA deep clean may need additional detail brushes, scrubbing tools or other standard equipment.\n\nWorkspace bookings can also require things like colour-coded cloths and wet-floor warning signs.\n\nThe exact kit depends on the service being carried out.",
       },
       {
         question: "Can I ask the cleaner to use my own products?",
@@ -1408,9 +1408,9 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       },
       {
         question:
-          "Are commercial-cleaning products different from home-cleaning products?",
+          "Are workspace-cleaning products different from home-cleaning products?",
         answer:
-          "They can be.\n\nCommercial spaces may have different floor types, larger shared areas, busier washrooms and higher footfall than a typical home.\n\nThat can affect the products and equipment needed.\n\nFor example, commercial cleaning may involve more frequent disinfecting of shared touchpoints, larger floor areas and colour-coded cleaning materials to help keep different areas separate.\n\nThe products used should still be appropriate for the site and the agreed cleaning scope.",
+          "They can be.\n\nWorkspace spaces may have different floor types, larger shared areas, busier washrooms and higher footfall than a typical home.\n\nThat can affect the products and equipment needed.\n\nFor example, workspace cleaning may involve more frequent disinfecting of shared touchpoints, larger floor areas and colour-coded cleaning materials to help keep different areas separate.\n\nThe products used should still be appropriate for the site and the agreed cleaning scope.",
       },
       {
         question: "Does Mundoria provide specialist equipment?",
@@ -1442,12 +1442,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How much does Mundoria cost?",
         answer:
-          "Mundoria pricing depends on the type of cleaning you choose, how much time the job is expected to need and whether you want products or equipment supplied.\n\nFor home cleaning, our current rates start from:\n\nRegular Home Cleaning: £22 per hour\n\nDeep Cleaning: £26 per hour\n\nOne-Off Cleaning: £22 per hour for a standard clean or £26 per hour for a deeper clean\n\nApartment & Flat Cleaning: £25 per hour\n\nMove-In Cleaning: £26 per hour\n\nMove-Out Cleaning: £26 per hour\n\nEnd of Tenancy Cleaning: £26 per hour\n\nRecovery Cleaning currently starts from £23 per hour for standard cleaning and £27 per hour for deeper cleaning.\n\nCommercial services are priced separately because workplaces vary much more in size, layout and cleaning requirements. Regular Office Cleaning currently starts from £25 per cleaner-hour, while Office Deep Cleaning starts from £30 per cleaner-hour.\n\nAny additional cost for products or equipment should be shown before you confirm the booking.\n\nThe idea is simple: you should be able to understand where the price comes from.",
+          "Mundoria pricing depends on the type of cleaning you choose, how much time the job is expected to need and whether you want products or equipment supplied.\n\nFor home cleaning, our current rates start from:\n\nRegular Home Cleaning: £22 per hour\n\nDeep Cleaning: £26 per hour\n\nOne-Off Cleaning: £22 per hour for a standard clean or £26 per hour for a deeper clean\n\nApartment & Flat Cleaning: £25 per hour\n\nMove-In Cleaning: £26 per hour\n\nMove-Out Cleaning: £26 per hour\n\nEnd of Tenancy Cleaning: £26 per hour\n\nRecovery Cleaning currently starts from £23 per hour for standard cleaning and £27 per hour for deeper cleaning.\n\nWorkspace services are priced separately because workplaces vary much more in size, layout and cleaning requirements. Regular Office Cleaning currently starts from £25 per cleaner-hour, while Office Deep Cleaning starts from £30 per cleaner-hour.\n\nAny additional cost for products or equipment should be shown before you confirm the booking.\n\nThe idea is simple: you should be able to understand where the price comes from.",
       },
       {
         question: "How does Mundoria calculate prices?",
         answer:
-          "We start with the type of cleaning you need and the amount of cleaning time the property is likely to require.\n\nThe size of the space matters, but it is not the only thing we consider.\n\nThe number of bathrooms, kitchens, bedrooms or work areas can make a difference. So can the condition of the property, the level of cleaning required and any particular priorities you have given us.\n\nIf you choose to have Mundoria supply products or equipment, those costs are then added separately where applicable.\n\nFor larger commercial properties, we may look at the total number of cleaner-hours needed rather than simply treating the site as one long appointment.\n\nThe price should reflect the work involved, not just the postcode or the number of bedrooms.",
+          "We start with the type of cleaning you need and the amount of cleaning time the property is likely to require.\n\nThe size of the space matters, but it is not the only thing we consider.\n\nThe number of bathrooms, kitchens, bedrooms or work areas can make a difference. So can the condition of the property, the level of cleaning required and any particular priorities you have given us.\n\nIf you choose to have Mundoria supply products or equipment, those costs are then added separately where applicable.\n\nFor larger workplaces, we may look at the total number of cleaner-hours needed rather than simply treating the site as one long appointment.\n\nThe price should reflect the work involved, not just the postcode or the number of bedrooms.",
       },
       {
         question: "Why does Mundoria charge by time?",
@@ -1462,7 +1462,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How do you estimate how long my clean will take?",
         answer:
-          "We use the information you provide about the property and the service you have chosen.\n\nThat can include the number of bedrooms and bathrooms, the size of the property, the type of cleaning, the condition of the space and the areas you want prioritised.\n\nFor commercial bookings, we may also consider things like the number of offices, meeting rooms, toilets, kitchens, communal areas and overall floor space.\n\nThe estimate is there to give the cleaner enough time to do the job properly.\n\nIt should not be a race against the clock.",
+          "We use the information you provide about the property and the service you have chosen.\n\nThat can include the number of bedrooms and bathrooms, the size of the property, the type of cleaning, the condition of the space and the areas you want prioritised.\n\nFor workspace bookings, we may also consider things like the number of offices, meeting rooms, bathrooms, kitchens, communal areas and overall floor space.\n\nThe estimate is there to give the cleaner enough time to do the job properly.\n\nIt should not be a race against the clock.",
       },
       {
         question: "What happens if my clean takes longer than estimated?",
@@ -1487,12 +1487,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Are products charged separately?",
         answer:
-          "Yes, where you choose Mundoria to supply them.\n\nFor Regular Home Cleaning, product supply currently adds £2 per hour.\n\nDeep cleaning and commercial bookings can require a broader range of products, so the applicable product charge may be different.\n\nIf you already have suitable products and prefer the cleaner to use them, you can provide your own and avoid the product-supply charge.\n\nThe relevant cost should always be visible before you book.",
+          "Yes, where you choose Mundoria to supply them.\n\nFor Regular Home Cleaning, product supply currently adds £2 per hour.\n\nDeep cleaning and workspace bookings can require a broader range of products, so the applicable product charge may be different.\n\nIf you already have suitable products and prefer the cleaner to use them, you can provide your own and avoid the product-supply charge.\n\nThe relevant cost should always be visible before you book.",
       },
       {
         question: "Is equipment charged separately?",
         answer:
-          "Yes, where you choose Mundoria to provide it.\n\nFor Regular Home Cleaning, equipment supply currently adds £3 per hour.\n\nDifferent services may need different equipment, particularly deep or commercial cleaning, so the applicable charge can vary.\n\nIf suitable equipment is already available at the property, you can choose to provide it yourself.",
+          "Yes, where you choose Mundoria to provide it.\n\nFor Regular Home Cleaning, equipment supply currently adds £3 per hour.\n\nDifferent services may need different equipment, particularly deep or workspace cleaning, so the applicable charge can vary.\n\nIf suitable equipment is already available at the property, you can choose to provide it yourself.",
       },
       {
         question: "Are there hidden fees?",
@@ -1522,17 +1522,17 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I get a quote before booking?",
         answer:
-          "Yes.\n\nThe booking journey should give you an expected price based on the information you provide before you commit.\n\nFor straightforward house cleaning bookings, this can usually be calculated from the service, estimated hours and any products or equipment you select.\n\nFor larger or more complex commercial bookings, we may need additional information before giving you a reliable price.\n\nThe aim is to give you something meaningful, not simply call an unrealistic number a \"quote\".",
+          "Yes.\n\nThe booking journey should give you an expected price based on the information you provide before you commit.\n\nFor straightforward house cleaning bookings, this can usually be calculated from the service, estimated hours and any products or equipment you select.\n\nFor larger or more complex workspace bookings, we may need additional information before giving you a reliable price.\n\nThe aim is to give you something meaningful, not simply call an unrealistic number a \"quote\".",
       },
       {
-        question: "Can businesses request a commercial quote?",
+        question: "Can businesses request a workspace quote?",
         answer:
-          "Yes.\n\nBusinesses can provide details about their premises, cleaning requirements, preferred frequency and opening hours so the work can be assessed properly.\n\nFor larger offices, retail spaces, educational facilities or communal buildings, a commercial quote may make more sense than asking the customer to guess how many hours they need.\n\nOnce the scope is understood, Mundoria can estimate the cleaner-hours and expected cost.",
+          "Yes.\n\nBusinesses can provide details about their premises, cleaning requirements, preferred frequency and opening hours so the work can be assessed properly.\n\nFor larger offices, retail spaces, educational facilities or communal buildings, a workspace quote may make more sense than asking the customer to guess how many hours they need.\n\nOnce the scope is understood, Mundoria can estimate the cleaner-hours and expected cost.",
       },
       {
-        question: "Why are some commercial prices listed as “from” a certain amount?",
+        question: "Why are some workspace prices listed as “from” a certain amount?",
         answer:
-          "Because commercial properties vary too much for one hourly figure to describe every job accurately.\n\nA small office with six desks and one toilet is not the same cleaning job as a workplace with several meeting rooms, kitchens, washrooms and dozens of employees.\n\n\"From\" gives you the starting rate for that type of service while allowing the actual booking to reflect the premises and work involved.\n\nIt is not intended to be a vague way of hiding the real price.\n\nThe final cost should still be explained before you confirm the booking.",
+          "Because workspace premises vary too much for one hourly figure to describe every job accurately.\n\nA small office with six desks and one bathroom is not the same cleaning job as a workplace with several meeting rooms, kitchens, washrooms and dozens of employees.\n\n\"From\" gives you the starting rate for that type of service while allowing the actual booking to reflect the premises and work involved.\n\nIt is not intended to be a vague way of hiding the real price.\n\nThe final cost should still be explained before you confirm the booking.",
       },
       {
         question: "How much is Regular Home Cleaning?",
@@ -1619,12 +1619,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I get a receipt or invoice?",
         answer:
-          "Yes.\n\nCustomers should be able to receive a record of what they have paid for.\n\nThat should include the booking details, amount paid and any applicable product, equipment or other charges.\n\nThe exact format may depend on whether the booking is house cleaning or commercial, but customers should not have to chase for basic proof of payment.",
+          "Yes.\n\nCustomers should be able to receive a record of what they have paid for.\n\nThat should include the booking details, amount paid and any applicable product, equipment or other charges.\n\nThe exact format may depend on whether the booking is house cleaning or workspace, but customers should not have to chase for basic proof of payment.",
       },
       {
         question: "Can businesses receive invoices?",
         answer:
-          "Yes.\n\nBusinesses using Mundoria should be able to receive invoices or appropriate payment records for their bookings.\n\nWhere required, the invoice can include the relevant business details associated with the booking.\n\nFor recurring commercial cleaning, it is especially important that billing remains clear and easy to reconcile.",
+          "Yes.\n\nBusinesses using Mundoria should be able to receive invoices or appropriate payment records for their bookings.\n\nWhere required, the invoice can include the relevant business details associated with the booking.\n\nFor recurring workspace cleaning, it is especially important that billing remains clear and easy to reconcile.",
       },
       {
         question: "What happens if my payment fails?",
@@ -1701,7 +1701,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does Mundoria assess cleaning experience?",
         answer:
-          "Yes.\n\nWe look at relevant experience as part of deciding what types of bookings a professional should be able to accept.\n\nNot every type of cleaning is the same.\n\nSomeone may be very experienced with regular household cleaning but have little experience with end-of-tenancy work or commercial premises.\n\nThat is why Mundoria looks at the experience relevant to the service rather than treating \"cleaning experience\" as one broad category.",
+          "Yes.\n\nWe look at relevant experience as part of deciding what types of bookings a professional should be able to accept.\n\nNot every type of cleaning is the same.\n\nSomeone may be very experienced with regular household cleaning but have little experience with end-of-tenancy work or workspace premises.\n\nThat is why Mundoria looks at the experience relevant to the service rather than treating \"cleaning experience\" as one broad category.",
       },
       {
         question: "Does Mundoria check references?",
@@ -1736,12 +1736,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Are cleaners trained for specific types of cleaning?",
         answer:
-          "Yes.\n\nMundoria takes service type into account because different cleaning jobs require different levels of experience and understanding.\n\nRegular home cleaning is different from an end-of-tenancy clean.\n\nCommercial cleaning is different from cleaning a short-let between guests.\n\nRecovery Cleaning also requires professionals to understand the more sensitive circumstances that may sit around the booking, even though the service itself remains cleaning.\n\nThe aim is to make sure a professional is not accepting a type of job simply because the word \"cleaning\" appears in the title.",
+          "Yes.\n\nMundoria takes service type into account because different cleaning jobs require different levels of experience and understanding.\n\nRegular home cleaning is different from an end-of-tenancy clean.\n\nWorkspace cleaning is different from cleaning a short-let between guests.\n\nRecovery Cleaning also requires professionals to understand the more sensitive circumstances that may sit around the booking, even though the service itself remains cleaning.\n\nThe aim is to make sure a professional is not accepting a type of job simply because the word \"cleaning\" appears in the title.",
       },
       {
         question: "How does Mundoria decide which services a professional can accept?",
         answer:
-          "Mundoria looks at the information gathered during onboarding, including relevant experience, training, assessment and the professional's practical ability to carry out the service.\n\nThat helps determine which categories of work they are suited to accept.\n\nA professional may be approved for regular home cleaning but not yet for a more detailed commercial or end-of-tenancy service.\n\nThat can change as their experience and training develop.\n\nWe would rather match someone to work they are genuinely prepared for than make every booking available to every cleaner on the platform.",
+          "Mundoria looks at the information gathered during onboarding, including relevant experience, training, assessment and the professional's practical ability to carry out the service.\n\nThat helps determine which categories of work they are suited to accept.\n\nA professional may be approved for regular home cleaning but not yet for a more detailed workspace or end-of-tenancy service.\n\nThat can change as their experience and training develop.\n\nWe would rather match someone to work they are genuinely prepared for than make every booking available to every cleaner on the platform.",
       },
     ],
   },
@@ -2129,7 +2129,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What happens if there is a biohazard?",
         answer:
-          "Biohazard cleaning is outside Mundoria's current service scope.\n\nThat includes situations involving hazardous bodily fluids, dangerous contamination or other materials requiring specialist protective equipment, handling and disposal procedures.\n\nA specialist biohazard-cleaning provider should be used instead.\n\nCleaning professionals should not be expected to take on that kind of work as part of an ordinary home or commercial clean.",
+          "Biohazard cleaning is outside Mundoria's current service scope.\n\nThat includes situations involving hazardous bodily fluids, dangerous contamination or other materials requiring specialist protective equipment, handling and disposal procedures.\n\nA specialist biohazard-cleaning provider should be used instead.\n\nCleaning professionals should not be expected to take on that kind of work as part of an ordinary home or workspace clean.",
       },
       {
         question: "How quickly should I report a problem?",

@@ -27,7 +27,7 @@ import {
 const LOCATION_FAQS = (place: string) =>
   [
     {
-      answer: `Mundoria offers regular cleaning, one-off and deep cleans, end-of-tenancy / move cleans, Airbnb & short-let turnovers, commercial cleans and recovery cleaning across ${place}.`,
+      answer: `Mundoria offers regular cleaning, one-off and deep cleans, end-of-tenancy / move cleans, Airbnb & short-let turnovers, workspace cleans and recovery cleaning across ${place}.`,
       question: `What cleaning services does Mundoria offer in ${place}?`,
     },
     {
@@ -352,11 +352,10 @@ export function LocationFeaturedCleaners({
     <>
       <BrandedSection tone="cream">
         <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-          Independent cleaners near {place}
+          Your next cleaner could be right here.
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-          Vetted independent cleaners covering {place}, with ratings from
-          completed visits.
+          Find a vetted cleaner in {place}, with ratings from completed visits.
         </p>
         <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
       </BrandedSection>

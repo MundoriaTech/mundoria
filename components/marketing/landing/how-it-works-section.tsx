@@ -4,19 +4,19 @@ import { ScrollReveal } from "@/components/shared/scroll-reveal";
 
 const cards = [
   {
-    body: "From booking and matching to updates and payment, Mundoria keeps the important parts connected so you do not have to piece everything together yourself.",
+    body: "Book your clean, get updates and manage payments in one place. No back-and-forth. We’ll keep you posted.",
     icon: "/images/marketing/icons/plain/tools.png",
-    title: "Less to manage",
+    title: "We keep it simple",
   },
   {
-    body: "We estimate the time your clean is likely to need and show you what you are paying for before you book. Clear, understandable and without unnecessary surprises.",
+    body: "See the estimated time and price before you book, so you can choose what works for your budget.",
     icon: "/images/marketing/icons/plain/payouts.png",
-    title: "No mystery pricing",
+    title: "We keep prices clear",
   },
   {
-    body: "We consider the service, location, timing, preferences and the professional’s experience to help arrange a booking that makes practical sense.",
+    body: "We consider what you need, where and when, to help match you with an experienced cleaner.",
     icon: "/images/marketing/icons/plain/job-clarity.png",
-    title: "More thought behind the booking",
+    title: "We find the right fit",
   },
 ] as const;
 
@@ -36,7 +36,7 @@ export function HowItWorksSection() {
           Why Mundoria works
         </p>
         <h2 className="mt-5 max-w-[16rem] text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
-          A better way to get it sorted
+          You deserve a clean space without the hassle.
         </h2>
 
         <div className="mt-10 grid items-stretch gap-x-12 gap-y-8 px-6 sm:mt-12 sm:grid-cols-3 sm:gap-x-16 sm:px-8">

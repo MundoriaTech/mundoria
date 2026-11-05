@@ -25,8 +25,8 @@ export const ONPAGE_PATH_COPY: Record<string, OnpageCopy> = {
     title: "Best House Cleaning Services Birmingham | Mundoria",
   },
   "/cleaning/commercial": {
-    description: `Need top-rated commercial cleaning in Birmingham? Choose Mundoria for reliable office and business cleaning. Call ${SUPPORT_PHONE} to book today!`,
-    title: "Best Commercial Cleaning Services Birmingham | Mundoria",
+    description: `Need top-rated workspace cleaning in Birmingham? Choose Mundoria for reliable office and business cleaning. Call ${SUPPORT_PHONE} to book today!`,
+    title: "Best Workspace Cleaning Services Birmingham | Mundoria",
   },
   "/cleaning/recovery": {
     description: `Need reliable recovery cleaning in Birmingham? Choose Mundoria for professional, thorough cleaning services. Call ${SUPPORT_PHONE} today to book your service!`,
@@ -65,7 +65,7 @@ export const ONPAGE_SERVICE_COPY: Record<string, OnpageCopy> = {
     title: "Best Office Cleaning Services Birmingham | Mundoria",
   },
   "retail-and-hospitality-cleaning": {
-    description: `Need top-rated retail and hospitality cleaning in Birmingham? Choose Mundoria for reliable commercial cleaning. Call ${SUPPORT_PHONE} to book today!`,
+    description: `Need top-rated retail and hospitality cleaning in Birmingham? Choose Mundoria for reliable workspace cleaning. Call ${SUPPORT_PHONE} to book today!`,
     title: "Best Retail & Hospitality Cleaning | Mundoria Birmingham",
   },
   "educational-facility-cleaning": {

@@ -118,6 +118,7 @@ export async function LaunchCityHubSections({
   showLookingForDifferent = true,
   showReviews = true,
   place = PLACE,
+  allAreasCovered,
   placeLinks,
   placePath,
   placesNote,

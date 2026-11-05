@@ -37,7 +37,7 @@ export const HELP_ARTICLES = [
     body: `## Book in minutes
 1. Open Book a clean and enter your postcode.
 2. Choose a service and cleaning standard.
-3. Add rooms or commercial spaces, duration and add-ons.
+3. Add rooms or workspace areas, duration and add-ons.
 4. Pick a date and time, then pay securely.
 
 ## After you book
@@ -530,7 +530,7 @@ Independent cleaners should be registered as self-employed with HMRC. Mundoria m
   },
   {
     body: `## Services
-Pick the services you actually offer (residential, short lets, moving home, Recovery, and so on). Only select what you can deliver well.
+Pick the services you actually offer (house cleaning, short lets, moving home, Recovery, and so on). Only select what you can deliver well.
 
 ## Areas
 Add Birmingham neighbourhoods you can reliably cover. Over-stretching areas leads to late arrivals and declined jobs.`,

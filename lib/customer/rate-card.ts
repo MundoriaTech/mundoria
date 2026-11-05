@@ -31,7 +31,7 @@ export function hourlyRatePence(
   return hourlyRateFromPricing(pricing, serviceType, standard);
 }
 
-/** Product supply: £2/h house/family categories, £3/h commercial. */
+/** Product supply: £2/h house/family categories, £3/h workspace. */
 export function productSupplyRatePence(
   category: ServiceCategory,
   pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
@@ -64,7 +64,7 @@ export const SUPPLY_KITS: Record<
     title: "Regular clean kit",
     products: [
       "Multi-surface cleaner",
-      "Bathroom/toilet cleaner",
+      "Bathroom cleaner",
       "Glass & mirror cleaner",
       "Kitchen degreaser",
       "Floor cleaner",
@@ -88,13 +88,13 @@ export const SUPPLY_KITS: Record<
   },
   regular_commercial: {
     id: "regular_commercial",
-    title: "Regular commercial kit",
+    title: "Regular workspace kit",
     products: [
       "Multi-surface cleaner",
       "Disinfectant",
       "Glass & mirror cleaner",
       "Floor cleaner",
-      "Bathroom/toilet cleaner",
+      "Bathroom cleaner",
       "Limescale remover",
       "Kitchen degreaser",
       "Washing-up liquid",
@@ -104,7 +104,7 @@ export const SUPPLY_KITS: Record<
       "Air freshener or odour neutraliser, where suitable",
     ],
     equipment: [
-      "Commercial vacuum cleaner",
+      "Workspace vacuum cleaner",
       "Mop",
       "Bucket",
       "Flat mop",
@@ -130,7 +130,7 @@ export const SUPPLY_KITS: Record<
       "Multi-surface cleaner",
       "Heavy-duty degreaser",
       "Bathroom cleaner",
-      "Toilet cleaner/descaler",
+      "Bathroom cleaner/descaler",
       "Limescale remover",
       "Glass & mirror cleaner",
       "Floor cleaner",
@@ -174,12 +174,12 @@ export const SUPPLY_KITS: Record<
   },
   deep_commercial: {
     id: "deep_commercial",
-    title: "Commercial deep-clean kit",
+    title: "Workspace deep-clean kit",
     products: [
       "Multi-surface cleaner, general washable surfaces, cupboards, tables, worktops and furniture",
       "Heavy-duty degreaser, built-up grease around kitchens, cooker areas, extractor surrounds and other suitable surfaces",
       "Bathroom cleaner, baths, showers, basins and bathroom surfaces",
-      "Toilet cleaner/descaler, toilet bowls and appropriate sanitary surfaces",
+      "Bathroom cleaner/descaler, bathroom bowls and appropriate sanitary surfaces",
       "Limescale remover, taps, shower screens and hard-water build-up",
       "Glass & mirror cleaner, mirrors, internal glass and suitable polished surfaces",
       "Floor cleaner, appropriate to the flooring being cleaned",

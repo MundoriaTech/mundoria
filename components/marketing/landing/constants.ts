@@ -14,7 +14,7 @@ export const landingColors = {
   pageGradientEnd: "#f6f0ff",
 } as const;
 
-export const landingNavLinks = [["Mag", "/blog"]] as const;
+export const landingNavLinks: ReadonlyArray<readonly [label: string, href: string]> = [];
 
 /** The three main categories, each with its own menu. */
 export const landingCategoryNav = [
@@ -66,7 +66,7 @@ export const landingCategoryNav = [
     pageLabel: "See workspace services",
     items: [
       {
-        description: "Desks, toilets and shared rooms",
+        description: "Desks, bathrooms and shared rooms",
         href: "/cleaning/office-cleaning",
         label: "Office cleaning",
       },

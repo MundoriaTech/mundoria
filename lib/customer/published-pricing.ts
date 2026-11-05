@@ -57,7 +57,7 @@ export function cleaningProductsAddOnDescription(
   pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
 ) {
   const supply = supplyRateCopy(pricing);
-  return `Cleaner brings the Mundoria product kit (${supply.productsResidential} home, ${supply.productsCommercial} commercial).`;
+  return `Cleaner brings the Mundoria product kit (${supply.productsResidential} home, ${supply.productsCommercial} workspace).`;
 }
 
 export function cleaningEquipmentAddOnDescription(
@@ -109,7 +109,7 @@ export function buildPricingFaqAnswerOverrides(
       `Move-Out Cleaning: ${moveOut}\n\n` +
       `End of Tenancy Cleaning: ${eot}\n\n` +
       `Recovery Cleaning currently starts from ${recovery}.\n\n` +
-      `Commercial services are priced separately because workplaces vary much more in size, layout and cleaning requirements. Office Cleaning currently starts from ${office.replace(" per hour", " per cleaner-hour")}.\n\n` +
+      `Workspace services are priced separately because workplaces vary much more in size, layout and cleaning requirements. Office Cleaning currently starts from ${office.replace(" per hour", " per cleaner-hour")}.\n\n` +
       `Any additional cost for products or equipment should be shown before you confirm the booking.\n\n` +
       `The idea is simple: you should be able to understand where the price comes from.`,
 
@@ -122,7 +122,7 @@ export function buildPricingFaqAnswerOverrides(
     "Are products charged separately?":
       `Yes, where you choose Mundoria to supply them.\n\n` +
       `For Regular Home Cleaning, product supply currently adds ${productsHome} per hour.\n\n` +
-      `Commercial bookings use a commercial product supply rate (${supply.productsCommercial}).\n\n` +
+      `Workspace bookings use a workspace product supply rate (${supply.productsCommercial}).\n\n` +
       `If you already have suitable products and prefer the cleaner to use them, you can provide your own and avoid the product-supply charge.\n\n` +
       `The relevant cost should always be visible before you book.`,
 
@@ -177,7 +177,7 @@ export function buildPricingFaqAnswerOverrides(
 
     "How much does product supply cost?":
       `For Regular Home Cleaning, Mundoria currently charges an additional ${productsHome} per hour where cleaning products are supplied.\n\n` +
-      `Commercial product supply is currently ${supply.productsCommercial}.\n\n` +
+      `Workspace product supply is currently ${supply.productsCommercial}.\n\n` +
       `The price shown during booking should reflect the service you have selected.`,
 
     "How much does equipment supply cost?":

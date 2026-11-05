@@ -477,7 +477,7 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
       "commercial",
     ],
     description:
-      "Cleaner brings the Mundoria product kit (£2/h home, £3/h commercial).",
+      "Cleaner brings the Mundoria product kit (£2/h home, £3/h workspace).",
     detail:
       "This option covers cleaning products only. It does not include equipment such as a vacuum, mop or bucket.\n\nIf you choose cleaning products without equipment, you’ll need to make sure suitable cleaning equipment is available at the property.",
     hourly: "products",
@@ -678,7 +678,7 @@ export function describeServiceAddOn(
   pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
 ) {
   if (addOn.id === "cleaning_products") {
-    return `Cleaner brings the Mundoria product kit (${formatHourlyRate(productSupplyFromPricing(pricing, "residential"))} home, ${formatHourlyRate(productSupplyFromPricing(pricing, "commercial"))} commercial).`;
+    return `Cleaner brings the Mundoria product kit (${formatHourlyRate(productSupplyFromPricing(pricing, "residential"))} home, ${formatHourlyRate(productSupplyFromPricing(pricing, "commercial"))} workspace).`;
   }
   if (addOn.id === "cleaning_equipment") {
     return `Cleaner brings the Mundoria equipment kit (${formatHourlyRate(equipmentSupplyFromPricing(pricing, "regular"))}, or ${formatHourlyRate(equipmentSupplyFromPricing(pricing, "deep_clean"))} for deep cleaning).`;
