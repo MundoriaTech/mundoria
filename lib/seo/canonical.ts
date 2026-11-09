@@ -121,20 +121,20 @@ export const SEO_AREA_REDIRECTS: Record<string, string> = {
   holyhead: "aston-and-handsworth",
 
   // North-East Hub (Erdington)
-  "gravelly-hill": "erdington-and-north-east-birmingham",
-  "stockland-green": "erdington-and-north-east-birmingham",
-  "short-heath": "erdington-and-north-east-birmingham",
-  "perry-common": "erdington-and-north-east-birmingham",
-  "pype-hayes": "erdington-and-north-east-birmingham",
-  tyburn: "erdington-and-north-east-birmingham",
-  "castle-vale": "erdington-and-north-east-birmingham",
-  bromford: "erdington-and-north-east-birmingham",
-  "birches-green": "erdington-and-north-east-birmingham",
-  "spring-hill": "erdington-and-north-east-birmingham",
-  "chester-road": "erdington-and-north-east-birmingham",
-  "minworth-birmingham-side": "erdington-and-north-east-birmingham",
-  "the-gardens": "erdington-and-north-east-birmingham",
-  "lyndhurst-estate": "erdington-and-north-east-birmingham",
+  "gravelly-hill": "erdington",
+  "stockland-green": "erdington",
+  "short-heath": "erdington",
+  "perry-common": "erdington",
+  "pype-hayes": "erdington",
+  tyburn: "erdington",
+  "castle-vale": "erdington",
+  bromford: "erdington",
+  "birches-green": "erdington",
+  "spring-hill": "erdington",
+  "chester-road": "erdington",
+  "minworth-birmingham-side": "erdington",
+  "the-gardens": "erdington",
+  "lyndhurst-estate": "erdington",
 
   // East Hub (Alum Rock / Hodge Hill)
   saltley: "alum-rock-and-hodge-hill",
@@ -209,11 +209,7 @@ export function isIndexableAreaSlug(slug: string): boolean {
 
 /** Path for a marketing area slug after canonicalisation. */
 export function canonicalAreaPath(slug: string): string {
-  const target = SEO_AREA_REDIRECTS[slug] ?? slug;
-  if (STANDALONE_TOWN_SLUGS.has(target)) {
-    return `/cleaners/${target}`;
-  }
-  return `/cleaners/birmingham/${target}`;
+  return cleanerPlacePath(SEO_AREA_REDIRECTS[slug] ?? slug);
 }
 
 /**
@@ -248,6 +244,8 @@ export const STANDALONE_TOWN_SLUGS = new Set([
 ]);
 
 export function cleanerPlacePath(areaSlug: string): string {
+  // The city itself is the hub, not a place under it (/cleaners/birmingham/birmingham 404s).
+  if (areaSlug === "birmingham") return "/cleaners/birmingham";
   if (STANDALONE_TOWN_SLUGS.has(areaSlug)) {
     return `/cleaners/${areaSlug}`;
   }
@@ -256,4 +254,26 @@ export function cleanerPlacePath(areaSlug: string): string {
 
 export function isStandaloneTownSlug(slug: string): boolean {
   return STANDALONE_TOWN_SLUGS.has(slug);
+}
+
+/**
+ * Rewrite an internal link that points at a retired URL to its live
+ * canonical target, so editorial content (Mag posts, Help articles) never
+ * links through a redirect. External and unknown links pass through.
+ */
+export function canonicalInternalHref(href: string): string {
+  if (!href.startsWith("/")) return href;
+  const [pathAndQuery, hash = ""] = href.split("#");
+  const [path, query = ""] = pathAndQuery.split("?");
+  const suffix = `${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+
+  const service = path.match(/^\/cleaning\/([^/]+)\/?$/);
+  if (service && service[1] in SEO_SERVICE_REDIRECTS) {
+    return `${canonicalCleaningPath(service[1])}${suffix}`;
+  }
+  const area = path.match(/^\/cleaners\/birmingham\/([^/]+)\/?$/);
+  if (area && (area[1] in SEO_AREA_REDIRECTS || STANDALONE_TOWN_SLUGS.has(area[1]))) {
+    return `${canonicalAreaPath(area[1])}${suffix}`;
+  }
+  return href;
 }

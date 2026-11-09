@@ -11,6 +11,7 @@ import {
   type ConsentPreferences,
 } from "@/lib/analytics/consent";
 import {
+  allowsOptionalTags,
   analyticsConfigured,
   applyDefaultConsent,
   loadAnalyticsTags,
@@ -41,7 +42,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
     if (existing) {
       updateConsentMode(existing);
-      if (existing.analytics && analyticsConfigured()) {
+      if (allowsOptionalTags(existing) && analyticsConfigured()) {
         loadAnalyticsTags(existing);
       }
     }
@@ -72,7 +73,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     writeConsent(next);
     setPreferences(next);
     updateConsentMode(next);
-    if (next.analytics && analyticsConfigured()) {
+    if (allowsOptionalTags(next) && analyticsConfigured()) {
       loadAnalyticsTags(next);
     }
     setBannerOpen(false);

@@ -10,9 +10,16 @@ import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlaceMapHero } from "@/components/marketing/place-map-hero";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { birminghamPlaceFaqSchemaAnswers } from "@/lib/seo/birmingham-place-faqs";
-import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
+import { LAUNCH_CITY } from "@/lib/seo/marketing";
+import {
+  birminghamAreasServed,
+  organizationRef,
+} from "@/lib/seo/structured-data";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
 
 export const metadata: Metadata = buildPageMetadata({
   description: LAUNCH_CITY.seoDescription,
@@ -49,18 +56,12 @@ export default async function BirminghamCleanersPage() {
           },
           {
             "@context": "https://schema.org",
-            "@type": "LocalBusiness",
-            address: {
-              "@type": "PostalAddress",
-              addressLocality: "Birmingham",
-              addressCountry: "GB",
-            },
-            areaServed: BIRMINGHAM_AREAS.map((area) => ({
-              "@type": "Place",
-              name: area.name,
-            })),
+            "@type": "Service",
+            areaServed: birminghamAreasServed(),
             description: LAUNCH_CITY.seoDescription,
-            name: "Mundoria Birmingham",
+            name: "House cleaning in Birmingham",
+            provider: organizationRef(),
+            serviceType: "House cleaning",
             url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
           },
           {

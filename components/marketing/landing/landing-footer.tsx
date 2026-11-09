@@ -14,7 +14,10 @@ import {
   LAUNCH_CITY,
   popularMarketingServices,
 } from "@/lib/seo/marketing";
-import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
+import {
+  MUNDORIA_IDENTITY,
+  companyRegistrationSentence,
+} from "@/lib/seo/identity";
 
 export function LandingFooter({
   cleanerHref,
@@ -43,6 +46,7 @@ export function LandingFooter({
           href: canonicalCleaningPath(service.slug),
           label: service.label,
         })),
+        { href: "/cleaning/moving-home", label: "Moving home cleaning" },
       ],
       title: "Services",
     },
@@ -60,6 +64,7 @@ export function LandingFooter({
     },
     {
       links: [
+        { href: "/about", label: "About Mundoria" },
         { href: "/blog", label: "Mundoria Mag" },
         { href: "/how-it-works", label: "How it works" },
         { href: "/contact", label: "Contact us" },
@@ -124,8 +129,7 @@ export function LandingFooter({
           <div>
             <p>© 2026 {MUNDORIA_IDENTITY.legalName}. All rights reserved.</p>
             <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
-              {MUNDORIA_IDENTITY.legalName} is a company registered in England
-              and Wales. Tel: {MUNDORIA_IDENTITY.phone}
+              {companyRegistrationSentence()} Tel: {MUNDORIA_IDENTITY.phone}
             </p>
             <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
               Cleaners on Mundoria are independent contractors. Availability,

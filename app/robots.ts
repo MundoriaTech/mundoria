@@ -44,22 +44,30 @@ const PUBLIC_MARKETING_ALLOW = [
   "/blog",
   "/blog/",
   "/how-it-works",
+  "/about",
+  "/contact",
   "/for-cleaners",
   "/privacy",
   "/cookies",
   "/terms",
   "/llms.txt",
+  "/llms-full.txt",
 ] as const;
 
 const SEARCH_CRAWLERS = ["Googlebot", "Bingbot"] as const;
 
 const AI_CRAWLERS = [
   "GPTBot",
+  "OAI-SearchBot",
   "ChatGPT-User",
   "ClaudeBot",
+  "Claude-SearchBot",
+  "Claude-User",
   "anthropic-ai",
   "PerplexityBot",
+  "Perplexity-User",
   "Google-Extended",
+  "Applebot-Extended",
 ] as const;
 
 function marketingCrawlerRules(userAgents: readonly string[]) {
@@ -72,7 +80,6 @@ function marketingCrawlerRules(userAgents: readonly string[]) {
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    host: absoluteUrl("/"),
     rules: [
       {
         allow: "/",

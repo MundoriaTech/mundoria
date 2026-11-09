@@ -44,7 +44,7 @@ const GROUPS = [
       },
     ],
     notes: [
-      "Cleaning from £22 an hour",
+      "See your estimated price before you book",
       "Book a one-off clean or schedule it regularly",
       "We’ll match you with a vetted cleaner",
     ],

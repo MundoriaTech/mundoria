@@ -88,20 +88,26 @@ function resolveServiceHref(bookingBaseHref: string, serviceHref: string) {
 function PopularServiceCard({
   bookingBaseHref,
   className,
+  clone = false,
   onNavigate,
   service,
 }: {
   bookingBaseHref: string;
   className?: string;
+  /** Second copy used only for the seamless loop: hidden from assistive tech and parsers. */
+  clone?: boolean;
   onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void;
   service: PopularService;
 }) {
   const href = resolveServiceHref(bookingBaseHref, service.href);
   const label = service.title.replace("\n", " ");
+  const Title = clone ? "p" : "h3";
 
   return (
     <Link
+      aria-hidden={clone || undefined}
       aria-label={`Book ${label}`}
+      tabIndex={clone ? -1 : undefined}
       className={cn(
         "group relative block h-[280px] w-[min(78vw,15.5rem)] shrink-0 overflow-hidden rounded-[1.15rem] outline-none transition sm:h-[300px] sm:w-[16.5rem] sm:rounded-[1.25rem]",
         "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c133b]",
@@ -126,9 +132,9 @@ function PopularServiceCard({
       </div>
 
       <div className="absolute inset-x-0 bottom-0 px-4 pb-5 pt-3 sm:px-5 sm:pb-6 lg:px-6">
-        <h3 className="max-w-[13.5rem] whitespace-pre-line text-[1.2rem] font-medium leading-[1.08] text-[#e9e1fa] sm:text-[1.35rem] lg:text-[1.5rem] lg:leading-[1.1]">
+        <Title className="max-w-[13.5rem] whitespace-pre-line text-[1.2rem] font-medium leading-[1.08] text-[#e9e1fa] sm:text-[1.35rem] lg:text-[1.5rem] lg:leading-[1.1]">
           {service.title}
-        </h3>
+        </Title>
         <p className="mt-1.5 max-w-[13rem] text-[12px] font-light leading-[1.3] text-white sm:mt-2 sm:text-[13px]">
           {service.description}
         </p>
@@ -388,6 +394,7 @@ export function PopularServicesSection({
               {carouselServices.map((service, index) => (
                 <PopularServiceCard
                   bookingBaseHref={bookingBaseHref}
+                  clone={index >= popularServices.length}
                   key={`${service.title}-${index}`}
                   onNavigate={(event) => {
                     if (dragRef.current.moved) {

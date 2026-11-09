@@ -48,6 +48,10 @@ function apiKey() {
 
 function mapPlace(place: PlacePayload): GooglePlaceReviews | null {
   if (!place.rating || !place.userRatingCount) return null;
+  // Guard against a mis-set GOOGLE_PLACE_ID pointing at another business.
+  if (place.displayName?.text && !/mundoria/i.test(place.displayName.text)) {
+    return null;
+  }
   const reviews = (place.reviews ?? [])
     .map((review, index) => ({
       author: review.authorAttribution?.displayName?.trim() || "Google user",
@@ -109,10 +113,11 @@ async function findPlaceId(key: string) {
   const payload = (await response.json()) as {
     places?: Array<{ displayName?: { text?: string }; id?: string }>;
   };
-  const match =
-    payload.places?.find((place) =>
-      /mundoria/i.test(place.displayName?.text ?? ""),
-    ) ?? payload.places?.[0];
+  // Never fall back to the first search result: that can be a different
+  // business, whose rating and review count would then be shown as ours.
+  const match = payload.places?.find((place) =>
+    /mundoria/i.test(place.displayName?.text ?? ""),
+  );
   return match?.id ?? null;
 }
 

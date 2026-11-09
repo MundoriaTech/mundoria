@@ -28,7 +28,7 @@ function CleanerAvatar({ cleaner }: { cleaner: FeaturedCleanerCardData }) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        alt=""
+        alt={`Photo of ${cleaner.name}, a Mundoria cleaner`}
         className="h-12 w-12 shrink-0 rounded-full object-cover object-top ring-2 ring-[#c79c66] sm:h-14 sm:w-14"
         src={cleaner.avatarUrl}
       />

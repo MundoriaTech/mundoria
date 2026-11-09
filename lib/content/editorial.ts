@@ -14,10 +14,11 @@ export type BlogPost = {
   related_services: string[];
   slug: string;
   title: string;
+  updated_at?: string | null;
 };
 
 const BLOG_POST_SELECT =
-  "id,title,slug,excerpt,content,category,cover_url,author_name,published_at,created_at,related_services";
+  "id,title,slug,excerpt,content,category,cover_url,author_name,published_at,created_at,updated_at,related_services";
 
 function withBlogDefaults<T extends { category: string; related_services?: string[] | null }>(
   post: T,
@@ -186,10 +187,14 @@ export async function listPublishedHelpArticles(): Promise<
   try {
     const { data } = await supabase
       .from("help_articles")
-      .select("slug,title")
+      .select("slug,title,updated_at")
       .eq("published", true)
       .order("sort_order", { ascending: true });
-    return (data as Array<Pick<HelpArticle, "slug" | "title">>) ?? [];
+    return (
+      (data as Array<
+        Pick<HelpArticle, "slug" | "title"> & { updated_at?: string | null }
+      >) ?? []
+    );
   } catch {
     return [];
   }

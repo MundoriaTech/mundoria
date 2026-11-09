@@ -13,6 +13,10 @@ import { houseCleaningFromLabel } from "@/lib/customer/published-pricing";
 import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+import { organizationRef } from "@/lib/seo/structured-data";
+
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
 
 const residentialCopy = onpageCopyForPath("/cleaning/residential")!;
 
@@ -43,11 +47,7 @@ export default async function ResidentialCleaningRoute() {
             description:
               "House cleaning for everyday homes, deep resets and flexible one-off visits.",
             name: "House Cleaning",
-            provider: {
-              "@type": "Organization",
-              name: "Mundoria",
-              url: absoluteUrl("/"),
-            },
+            provider: organizationRef(),
             url: absoluteUrl("/cleaning/residential"),
           },
           await launchCityFaqJsonLd(),

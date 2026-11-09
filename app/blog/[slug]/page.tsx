@@ -18,7 +18,13 @@ import {
   renderEditorialBlocks,
 } from "@/lib/content/editorial";
 import { magThemeFor } from "@/lib/content/mag-theme";
-import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
+import {
+  MAX_TITLE_LENGTH,
+  absoluteUrl,
+  buildPageMetadata,
+  fullDescription,
+} from "@/lib/seo/site";
+import { organizationRef } from "@/lib/seo/structured-data";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
@@ -37,10 +43,15 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const post = await getBlogPostBySlug(params.slug);
   const headline = post?.title?.trim() || "Mundoria Mag";
+  const magTitle = `${headline} | Mundoria Mag`;
   return buildPageMetadata({
-    description: post?.excerpt?.trim() || headline,
+    description: fullDescription(
+      post?.excerpt?.trim() || headline,
+      "A Mundoria Mag guide from the Birmingham cleaning marketplace.",
+    ),
     path: `/blog/${post?.slug ?? params.slug}`,
-    title: `${headline} | Mundoria Mag`,
+    // Keep the Mag suffix only while the title still fits in search results.
+    title: magTitle.length <= MAX_TITLE_LENGTH ? magTitle : headline,
   });
 }
 
@@ -69,19 +80,30 @@ export default async function BlogPostPage({ params }: PageProps) {
           data={{
             "@context": "https://schema.org",
             "@type": "BlogPosting",
-            author: {
-              "@type": "Person",
-              name: post.author_name || "Mundoria",
-            },
+            author:
+              post.author_name && !/mundoria/i.test(post.author_name)
+                ? { "@type": "Person", name: post.author_name }
+                : organizationRef(),
+            dateModified:
+              post.updated_at ?? post.published_at ?? post.created_at,
             datePublished: post.published_at ?? post.created_at,
+            inLanguage: "en-GB",
             description: post.excerpt ?? post.title,
             headline: post.title,
-            image: post.cover_url ? [post.cover_url] : undefined,
+            image: post.cover_url
+              ? [
+                  post.cover_url.startsWith("http")
+                    ? post.cover_url
+                    : absoluteUrl(post.cover_url),
+                ]
+              : undefined,
             mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
             publisher: {
-              "@type": "Organization",
-              name: "Mundoria",
-              url: absoluteUrl("/"),
+              ...organizationRef(),
+              logo: {
+                "@type": "ImageObject",
+                url: absoluteUrl("/images/brand/mundoria-wordmark.png"),
+              },
             },
           }}
         />

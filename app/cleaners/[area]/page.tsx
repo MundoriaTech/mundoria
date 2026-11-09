@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CityLocationPage } from "@/components/marketing/city-location-page";
 import {
   birminghamCoveragePlaceBySlug,
+  BIRMINGHAM_NEARBY_ZONE_ID,
   birminghamCoverageZoneById,
   coverageAreaHref,
   coverageAreaSlug,
@@ -19,8 +20,12 @@ import {
   cleaningPlaceTitle,
   readPlacePageFocus,
 } from "@/lib/seo/place-page-focus";
-import { buildPageMetadata } from "@/lib/seo/site";
+import { nearestCoverageAreas } from "@/lib/seo/nearby-places";
+import { buildPageMetadata, fullDescription } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
 
 type PageProps = {
   params: { area: string };
@@ -44,9 +49,11 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
     serviceLabel: focus.serviceLabel,
   });
   return buildPageMetadata({
-    description: coverage.note
-      ? `${title} (${coverage.note}). Book with a clear estimate before you pay.`
-      : `${title}. Book with a clear estimate before you pay.`,
+    description: fullDescription(
+      coverage.note ? `${title} (${coverage.note})` : title,
+      `Vetted independent cleaners covering ${coverage.label} for regular, deep, end of tenancy and one-off cleans.`,
+      "See the price before you book.",
+    ),
     path: cleanerPlacePath(coverage.slug),
     title: `${title} | Mundoria`,
   });
@@ -73,7 +80,10 @@ export default function StandaloneTownCleanersPage({
       path={`${cleanerPlacePath(coverage.slug)}${coverageFocusSearch(focus)}`}
       placeLinks={
         zone
-          ? zone.areas
+          ? (zone.id === BIRMINGHAM_NEARBY_ZONE_ID
+              ? nearestCoverageAreas(coverage.label, zone.areas)
+              : zone.areas
+            )
               .filter((item) => coverageAreaSlug(item) !== coverage.slug)
               .map((item) => ({
                 href: coverageAreaHref(item, focus),

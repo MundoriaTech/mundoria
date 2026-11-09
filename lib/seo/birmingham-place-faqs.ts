@@ -44,13 +44,13 @@ export function houseCleanCoveredPoints() {
 }
 
 export function houseCleanCoveredSchemaAnswer() {
-  return `Exact scope depends on your service and cleaning standard. Typical house cleaning visits include: ${houseCleanCoveredPoints().join(" ")}`;
+  return `Exact scope depends on the service you choose. Typical house cleaning visits include: ${houseCleanCoveredPoints().join(" ")}`;
 }
 
 export function bookCleanerSteps(place: string) {
   return [
     `Open Mundoria booking and enter your postcode in ${place}`,
-    "Choose your service and cleaning standard",
+    "Choose your service and tell us about the property",
     "Add property details, duration and any add-ons",
     "Pick a date and time that works for you",
     "Pay securely, we hold payment until the clean is done",

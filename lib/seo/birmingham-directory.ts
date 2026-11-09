@@ -9,7 +9,6 @@ import {
   prefixesForArea,
 } from "@/lib/seo/marketing";
 import { bioWithCoverage, milesFromRadiusKm } from "@/lib/seo/cleaner-coverage";
-import { BIRMINGHAM_LOCATION_REVIEWS } from "@/lib/seo/location-social-proof";
 
 export type DirectoryCleaner = {
   areas: string;
@@ -327,20 +326,15 @@ export async function loadDirectoryReviews(options?: {
     .filter((review): review is DirectoryReview => Boolean(review));
 }
 
-export function reviewsOrFallback(
+/**
+ * Only reviews left by customers after a real, applied booking.
+ * There is deliberately no placeholder fallback: invented or curated
+ * testimonials presented as customer reviews are unlawful in the UK
+ * (DMCC Act 2024) and against Google's review policies.
+ */
+export function publishedReviews(
   live: DirectoryReview[] | null,
   limit = 6,
 ): DirectoryReview[] {
-  const seeded = live?.filter((review) => review.body.trim()) ?? [];
-  if (seeded.length >= 3) return seeded.slice(0, limit);
-  const extras = BIRMINGHAM_LOCATION_REVIEWS.filter(
-    (review) => !seeded.some((item) => item.body === review.body),
-  ).map((review) => ({
-    author: review.author,
-    body: review.body,
-    score: null,
-    service: review.service,
-    when: null,
-  }));
-  return [...seeded, ...extras].slice(0, limit);
+  return (live ?? []).filter((review) => review.body.trim()).slice(0, limit);
 }

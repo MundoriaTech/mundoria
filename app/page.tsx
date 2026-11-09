@@ -6,6 +6,8 @@ import { LandingPurpleField } from "@/components/marketing/landing/landing-purpl
 import { ServiceCategoriesSection } from "@/components/marketing/landing/service-categories-section";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
+import { houseCleaningFromLabel } from "@/lib/customer/published-pricing";
 import { getPublicMarketingServices } from "@/lib/seo/marketing";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { homePageStructuredData } from "@/lib/seo/structured-data";
@@ -41,13 +43,21 @@ const CoverageSection = nextDynamic(() =>
   ),
 );
 
-export const metadata: Metadata = buildPageMetadata({
-  description: "Book vetted house cleaners in Birmingham from £22/h. Regular, deep, end of tenancy and Airbnb cleaning with live status and secure payment.",
-  path: "/",
-  title: "House Cleaners Birmingham from £22/h",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  // Live admin rate card: the same figure the cards and booking flow use.
+  const from = houseCleaningFromLabel(await loadServicePricing());
+  return buildPageMetadata({
+    description: `Book vetted house cleaners in Birmingham from ${from}. Regular, deep, end of tenancy and Airbnb cleaning with live status and secure payment.`,
+    path: "/",
+    title: `House Cleaners Birmingham from ${from}`,
+  });
+}
 
-export const dynamic = "force-dynamic";
+/**
+ * Cached for 5 minutes instead of rendered on every request (the audit saw
+ * 12 s first responses). Rate-card changes appear within that window.
+ */
+export const revalidate = 300;
 
 export default async function HomePage() {
   const configured = hasSupabasePublicConfig();

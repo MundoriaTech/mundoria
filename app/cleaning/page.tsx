@@ -7,6 +7,9 @@ import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
+
 const cleaningCopy = onpageCopyForPath("/cleaning")!;
 
 export const metadata: Metadata = buildPageMetadata({

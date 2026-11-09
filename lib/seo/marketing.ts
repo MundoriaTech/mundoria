@@ -7,6 +7,7 @@ import { fromRateLabel } from "@/lib/customer/published-pricing";
 import {
   SERVICE_CATEGORIES,
   SERVICES,
+  indicativeHourlyRatePence,
   servicesForCategory,
 } from "@/lib/customer/services";
 import {
@@ -23,6 +24,8 @@ export type MarketingService = {
   categoryLabel: string;
   description: string;
   fromPrice: string;
+  /** Published hourly rate in pence (admin rate card), for schema offers. */
+  fromPricePence: number;
   intro: string;
   label: string;
   seoDescription: string;
@@ -65,15 +68,16 @@ export function marketingServicesWithPricing(
     )!;
     const slug =
       SERVICE_SLUG_OVERRIDES[service.value] ?? toSlug(service.label);
-    const onpage = onpageCopyForServiceSlug(slug);
     const fromPrice = fromRateLabel(service.value, pricing);
+    const onpage = onpageCopyForServiceSlug(slug, fromPrice);
     return {
       bookingHref: `/booking/new?service=${service.value}`,
       category: service.category,
       categoryLabel: category.label,
       description: service.description,
       fromPrice,
-      intro: `${service.label} with Mundoria. Clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
+      fromPricePence: indicativeHourlyRatePence(service.value, pricing),
+      intro:`${service.label} with Mundoria. Clear pricing, vetted cleaners and live booking status across Birmingham and supported UK areas.`,
       label: service.label,
       seoDescription:
         onpage?.description ??
@@ -171,7 +175,7 @@ export function serviceCardHref(serviceSlug: string) {
 export function servicePlaceFaqs(service: MarketingService, place: string) {
   return [
     {
-      answer: `${service.label} in ${place} starts from ${service.fromPrice}. The price you pay depends on property size, cleaning standard, schedule and any add-ons. Mundoria shows the estimate before you pay.`,
+      answer: `${service.label} in ${place} starts from ${service.fromPrice}. The price you pay depends on property size, timing and any add-ons. Mundoria shows the estimate before you pay.`,
       question: `How much does ${service.label.toLowerCase()} cost in ${place}?`,
     },
     {
@@ -611,7 +615,7 @@ export const FOR_CLEANERS_FAQS: Array<{ answer: string; question: string }> = [
 export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   {
     answer:
-      "Enter your postcode in the booking flow, choose a service and cleaning standard, see your estimate, pick a time and pay securely. Mundoria then matches a suitable cleaner.",
+      "Choose a service, enter your postcode and tell us about the property, see your price, pick a date and time, then save a card to confirm. Mundoria then matches a vetted cleaner who covers your area and keeps you updated until the clean is done.",
     question: "How does booking with Mundoria work?",
   },
   {
@@ -621,12 +625,12 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Your estimate is based on the service, cleaning standard, property size and any add-ons. You see the price before checkout, no surprise fees after you book.",
+      "Each service has an hourly rate. Your price is that rate multiplied by the hours your property needs (based on its size and condition), plus any add-ons such as cleaning products or equipment, and any early, evening or weekend timing. You see the full price before you confirm.",
     question: "How is pricing calculated?",
   },
   {
     answer:
-      "Payment is taken securely through Stripe. For most bookings, Mundoria authorises or collects payment through the platform, you never pay the cleaner directly.",
+      "You save a card when you book, so nothing is charged at that point. About 24 hours before the visit, once a cleaner is confirmed, a hold is placed on the card for the booking total. The payment is taken the day after the clean. Payments run through Stripe and you never pay the cleaner directly.",
     question: "When do I pay?",
   },
   {

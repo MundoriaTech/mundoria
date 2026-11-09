@@ -9,7 +9,7 @@ export const metadata: Metadata = buildPageMetadata({
   description:
     "Mundoria FAQ: booking, home and workspace cleaning, pricing, cleaners, cancellations, recovery and more.",
   path: "/faq",
-  title: "FAQ | Mundoria",
+  title: "FAQ: Booking, Prices and Payments | Mundoria",
 });
 
 export default async function FaqPage() {

@@ -25,6 +25,9 @@ const PUBLIC_MARKETING_PREFIXES = [
   "/help",
   "/blog",
   "/how-it-works",
+  "/about",
+  "/faq",
+  "/contact",
   "/for-cleaners",
   "/privacy",
   "/cookies",
@@ -36,6 +39,8 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/setup",
   "/robots.txt",
   "/sitemap.xml",
+  "/llms.txt",
+  "/llms-full.txt",
 ]);
 
 function pathMatches(pathname: string, prefixes: string[]) {

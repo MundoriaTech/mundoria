@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { CityLocationPage } from "@/components/marketing/city-location-page";
-import { PostcodeDistrictPage } from "@/components/marketing/postcode-district-page";
 import {
   BIRMINGHAM_COVERAGE_ZONES,
   BIRMINGHAM_NEARBY_ZONE_ID,
@@ -22,23 +21,25 @@ import {
   SEO_AREA_REDIRECTS,
   canonicalAreaPath,
 } from "@/lib/seo/canonical";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
+import { houseCleaningFromLabel } from "@/lib/customer/published-pricing";
 import {
   LAUNCH_CITY,
   birminghamAreaBySlug,
   districtFromAreaParam,
-  districtLinkLabel,
-  indexableBirminghamPostcodes,
-  isIndexablePostcodeDistrict,
-  postcodePath,
 } from "@/lib/seo/marketing";
 import {
   bookingHrefForFocus,
   cleaningPlaceTitle,
   readPlacePageFocus,
 } from "@/lib/seo/place-page-focus";
+import { nearestCoverageAreas } from "@/lib/seo/nearby-places";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { priorityBirminghamAreaSlugs } from "@/lib/seo/static-params";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
 
 type PageProps = {
   params: { area: string };
@@ -49,15 +50,20 @@ type PageProps = {
 const LEGACY_CITY_CENTRE_SLUG = "city-centre";
 const CITY_CENTRE_PLACE_SLUG = "birmingham-city-centre";
 
-/** Districts without a neighbourhood hub redirect to a real place page, or the city hub. */
-function redirectOrphanPostcodeDistrict(areaSlug: string): never {
+/**
+ * Postcode-district URLs (`harborne-b17`, bare `b17`) were thin, unlinked
+ * copies of their neighbourhood page, and districts sharing a neighbourhood
+ * had identical text (B1/B3, B15/B16). They all now redirect, in one hop, to
+ * the neighbourhood's final page, or the city hub when there is none.
+ */
+function redirectPostcodeDistrict(areaSlug: string): never {
   const resolved =
     areaSlug === LEGACY_CITY_CENTRE_SLUG ? CITY_CENTRE_PLACE_SLUG : areaSlug;
   if (
     birminghamAreaBySlug(resolved) ||
     birminghamCoveragePlaceBySlug(resolved)
   ) {
-    permanentRedirect(cleanerPlacePath(resolved));
+    permanentRedirect(canonicalAreaPath(resolved));
   }
   permanentRedirect(`/cleaners/${LAUNCH_CITY.slug}`);
 }
@@ -71,28 +77,15 @@ export function generateStaticParams() {
     ...birminghamCompoundZones().map((zone) => ({
       area: coverageZoneHubSlug(zone),
     })),
-    ...indexableBirminghamPostcodes().map((item) => ({
-      area: `${item.areaSlug}-${item.prefix.toLowerCase()}`,
-    })),
   ];
 }
 
-export function generateMetadata({ params, searchParams }: PageProps): Metadata {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps): Promise<Metadata> {
   const parsed = districtFromAreaParam(params.area);
-  if (parsed) {
-    // Orphan district URLs (no neighbourhood hub) must not stay as soft-404 pages.
-    if (!isIndexablePostcodeDistrict(parsed.district.prefix)) {
-      redirectOrphanPostcodeDistrict(parsed.district.areaSlug);
-    }
-    if (parsed.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
-    const label = districtLinkLabel(parsed.district.prefix);
-    const title = `House Cleaners in ${label}, Birmingham`;
-    return buildPageMetadata({
-      description: `Vetted house cleaners in ${label}, ${parsed.district.prefix} from £22/h. Regular, deep and end of tenancy cleans. Instant estimate, book online in minutes.`,
-      path: postcodePath(parsed.district.prefix),
-      title: `${title} | From £22/h – Mundoria`,
-    });
-  }
+  if (parsed) redirectPostcodeDistrict(parsed.district.areaSlug);
   if (params.area === LEGACY_CITY_CENTRE_SLUG) {
     permanentRedirect(cleanerPlacePath(CITY_CENTRE_PLACE_SLUG));
   }
@@ -114,10 +107,14 @@ export function generateMetadata({ params, searchParams }: PageProps): Metadata 
   const pathSlug =
     area?.slug ?? coverage?.slug ?? (zoneHub ? coverageZoneHubSlug(zoneHub) : null);
   if (!pathSlug) return {};
+  // Live admin rate card, so the title matches the cards and the booking flow.
+  const from = houseCleaningFromLabel(await loadServicePricing());
   return buildPageMetadata({
-    description: `${title}. Vetted independent cleaners, from £22/h. Clear estimate before you book, live updates. Book online in minutes.`,
+    description: `${title}. Vetted independent cleaners, house cleaning from ${from}. See the price before you book and follow your cleaner live.`,
     path: cleanerPlacePath(pathSlug),
-    title: `${title} | From £22/h – Mundoria`,
+    // The house-cleaning rate only belongs in the plain (unfocused) title.
+    title:
+      focus.category || focus.serviceLabel ? title : `${title} from ${from}`,
   });
 }
 
@@ -126,13 +123,7 @@ export default async function BirminghamAreaPage({
   searchParams,
 }: PageProps) {
   const parsed = districtFromAreaParam(params.area);
-  if (parsed) {
-    if (!isIndexablePostcodeDistrict(parsed.district.prefix)) {
-      redirectOrphanPostcodeDistrict(parsed.district.areaSlug);
-    }
-    if (parsed.legacy) permanentRedirect(postcodePath(parsed.district.prefix));
-    return <PostcodeDistrictPage prefix={parsed.district.prefix} />;
-  }
+  if (parsed) redirectPostcodeDistrict(parsed.district.areaSlug);
 
   if (isStandaloneTownSlug(params.area)) {
     const focus = readPlacePageFocus(searchParams ?? {});
@@ -199,7 +190,10 @@ export default async function BirminghamAreaPage({
       path={`${cleanerPlacePath(slug)}${coverageFocusSearch(focus)}`}
       placeLinks={
         zone
-          ? zone.areas
+          ? (zone.id === BIRMINGHAM_NEARBY_ZONE_ID
+              ? nearestCoverageAreas(name, zone.areas)
+              : zone.areas
+            )
               .filter((item) => coverageAreaSlug(item) !== slug)
               .map((item) => ({
                 href: coverageAreaHref(item, focus),

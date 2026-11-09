@@ -32,12 +32,12 @@ const LOCATION_FAQS = (place: string) =>
     },
     {
       answer:
-        "Enter your postcode, choose a service and cleaning standard, set duration and schedule, then pay securely. We match a suitable cleaner and keep you updated through arrival and completion.",
+        "Enter your postcode, choose a service, tell us about the property and pick a time, then save a card to confirm. We match a suitable cleaner and keep you updated through arrival and completion.",
       question: `How do I book a home cleaning session in ${place}?`,
     },
     {
       answer:
-        "Estimates depend on service, property size, cleaning standard, schedule and add-ons. You’ll see a clear price before checkout, never a surprise fee after you book.",
+        "Prices depend on the service, property size, timing and add-ons. You’ll see a clear price before checkout, never a surprise fee after you book.",
       question: `How much is a Mundoria cleaner in ${place}?`,
     },
     {
@@ -80,7 +80,7 @@ export function LocationWhatsCovered({ place }: { place: string }) {
         What’s covered in a Mundoria house clean in {place}?
       </h2>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5a5470]">
-        Exact scope depends on your service and cleaning standard. Typical
+        Exact scope depends on the service you choose. Typical
         house cleaning visits include:
       </p>
       <ul className="mt-6 list-disc space-y-2 pl-5 text-sm leading-7 text-[#5a5470]">
@@ -110,7 +110,7 @@ export function LocationHowToBook({
       </Link>{" "}
       and enter your postcode in {place}
     </>,
-    "Choose your service and cleaning standard",
+    "Choose your service and tell us about the property",
     "Add property details, duration and any add-ons",
     "Pick a date and time that works for you",
     "Pay securely, we hold payment until the clean is done",
@@ -373,7 +373,11 @@ export function LocationReviews({
   place: string;
   reviews: DirectoryReview[];
 }) {
-  if (!reviews.length) return null;
+  // Keep the #reviews anchor (hero "Read reviews" link) even before there
+  // are local reviews: the section then points to the Google listing only.
+  if (!reviews.length) {
+    return <ReviewsSection heading={heading ?? "Mundoria customer reviews"} />;
+  }
 
   return (
     <ReviewsSection
