@@ -149,7 +149,9 @@ export async function CityLocationPage({
             provider: organizationRef(),
             url: absoluteUrl(barePath),
           },
-          ...(focus?.serviceSlug ? [] : [await launchCityFaqJsonLd(name)]),
+          ...(focus?.serviceSlug
+            ? []
+            : [await launchCityFaqJsonLd(name, barePath)]),
         ]}
       />
       {photo ? (

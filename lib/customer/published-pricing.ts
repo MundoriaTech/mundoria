@@ -197,22 +197,3 @@ export function applyPricingFaqOverrides<T extends { answer: string; question: s
     return next ? { ...item, answer: next } : item;
   });
 }
-
-export function placePricingSchemaAnswer(
-  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
-) {
-  const regular = fromRateLabel("regular", pricing);
-  const recovery = fromRateLabel("pregnancy_support", pricing);
-  return (
-    `Local cleaner rates vary by experience and whether you book an independent or a company. ` +
-    `Mundoria pricing starts from ${regular} for regular house cleans (and from ${recovery} for recovery support), ` +
-    `with a clear estimate for your home size and service before you confirm, not an open-ended hourly quote after the visit.`
-  );
-}
-
-export function placeSuppliesSchemaAnswer(
-  pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
-) {
-  const supply = supplyRateCopy(pricing);
-  return `You can use your own products and equipment, or add Mundoria cleaning products (${supply.productsResidential} home) and cleaning equipment (${supply.equipmentDefault}, or ${supply.equipmentDeep} for deep cleaning) when you book. Share fragrance-free or allergy notes in the booking instructions.`;
-}

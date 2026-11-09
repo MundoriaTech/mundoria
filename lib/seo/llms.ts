@@ -11,6 +11,7 @@ import {
   coverageZonePath,
 } from "@/lib/seo/birmingham-coverage";
 import { isIndexableAreaSlug } from "@/lib/seo/canonical";
+import { faqSectionPath } from "@/lib/seo/faq-paths";
 import {
   MUNDORIA_IDENTITY,
   companyRegistrationSentence,
@@ -27,6 +28,7 @@ import {
   serviceGuidePath,
 } from "@/lib/seo/service-guides";
 import { absoluteUrl } from "@/lib/seo/site";
+import { SITE_FAQ_SECTIONS } from "@/lib/seo/site-faqs";
 
 /**
  * llms.txt / llms-full.txt for AI assistants and answer engines.
@@ -47,7 +49,9 @@ function factsSection(services: MarketingService[]) {
 - Where: ${LAUNCH_CITY.name} and nearby West Midlands towns (see "Areas covered").
 - Prices: each service has an hourly rate${regular ? `; house cleaning starts from ${regular.fromPrice}` : ""}. The total is the rate multiplied by the hours the property needs, plus any add-ons and early, evening or weekend timing. The full price is shown before the customer confirms.
 - Booking: choose a service, enter a postcode and property details, see the price, pick a date and time, then save a card to confirm.
-- Payment: nothing is charged when booking. About 24 hours before the visit, once a cleaner is confirmed, a hold is placed on the card; the payment is taken the day after the clean. Payments run through Stripe and customers never pay the cleaner directly.
+- Payment: nothing is charged when booking. From 48 hours before the visit, once a cleaner is assigned, a temporary hold is placed on the card; the payment is taken the day after the clean. If the hold cannot be placed by 24 hours before, the booking is cancelled free of charge. Payments run through Stripe and customers never pay the cleaner directly.
+- Cancellation: free 24 hours or more before the start time; the full booking price within 24 hours. Statutory consumer rights are unaffected.
+- Vetting: identity and right-to-work checks, a Basic DBS check, experience review, an interview with the Mundoria team, and at least £1 million Public Liability insurance (lapsed cover removes a cleaner from matching).
 - During the booking: live status (matched, on the way, in progress, done) and in-app messaging with the cleaner.
 - Reviews: Mundoria only publishes reviews written by customers after a completed booking.
 - Contact: ${office.supportEmail}, ${office.phone}, live chat on ${absoluteUrl("/contact")}.`;
@@ -171,6 +175,9 @@ ${places.join("\n")}
 ## Frequently asked questions
 ${faqLines()}
 - Full FAQ: ${absoluteUrl("/faq")}
+
+## FAQ topics
+${SITE_FAQ_SECTIONS.map((section) => `- ${section.title}: ${absoluteUrl(faqSectionPath(section.id))}\n  ${section.description}`).join("\n")}
 
 ## Help Centre articles
 ${articles.map((article) => `- ${article.title}: ${absoluteUrl(`/help/article/${article.slug}`)}`).join("\n")}
