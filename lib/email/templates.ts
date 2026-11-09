@@ -555,11 +555,11 @@ function resolveTemplate(
     case "cleaner.stripe_connect_reminder":
       return {
         body:
-          "Connect your Stripe Express account so Mundoria can schedule payouts after completed jobs.",
-        buttonHref: string(data.connectUrl) || `${appUrl}/cleaner/profile`,
-        buttonLabel: "Connect Stripe Express",
-        preview: "Connect Stripe to receive payouts.",
-        subject: "Connect Stripe to receive Mundoria payouts",
+          "Set up payouts in Mundoria so we can send earnings after completed jobs. Your bank details go straight to Stripe.",
+        buttonHref: string(data.connectUrl) || `${appUrl}/cleaner/dashboard`,
+        buttonLabel: "Set up payouts",
+        preview: "Set up payouts to get paid.",
+        subject: "Set up Mundoria payouts",
         title: "Set up payouts",
         tone: "warning",
       };

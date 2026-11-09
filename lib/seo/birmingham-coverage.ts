@@ -1,4 +1,7 @@
-import { cleanerPlacePath } from "@/lib/seo/canonical";
+import {
+  cleanerPlacePath,
+  SEO_SERVICE_REDIRECTS,
+} from "@/lib/seo/canonical";
 import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
 
 export type CoverageArea = {
@@ -72,7 +75,7 @@ export const BIRMINGHAM_COVERAGE_ZONES: readonly BirminghamCoverageZone[] = [
       {
         label: "Bearwood",
         note: "Sandwell, neighbouring area",
-        slug: "bearwood-sandwell",
+        slug: "bearwood",
       },
       ...places("Quinton", "Bartley Green", "Woodgate", "California"),
     ],
@@ -364,12 +367,20 @@ export function coverageAreaSlug(area: CoverageArea) {
 }
 
 export type CoverageLinkFocus = {
-  category?: "commercial" | "recovery" | "residential";
+  category?:
+    | "commercial"
+    | "moving_home"
+    | "recovery"
+    | "residential"
+    | "short_term_rental";
   serviceSlug?: string;
 };
 
 export function coverageFocusSearch(focus?: CoverageLinkFocus) {
-  if (focus?.serviceSlug) return `?service=${encodeURIComponent(focus.serviceSlug)}`;
+  if (focus?.serviceSlug) {
+    const slug = SEO_SERVICE_REDIRECTS[focus.serviceSlug] ?? focus.serviceSlug;
+    return `?service=${encodeURIComponent(slug)}`;
+  }
   if (focus?.category) return `?category=${focus.category}`;
   return "";
 }

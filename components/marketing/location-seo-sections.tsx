@@ -201,7 +201,7 @@ export function LocationNearPlacePills({
   showNearbyTowns = false,
   surroundingLinks,
 }: {
-  categoryFocus?: "commercial" | "recovery" | "residential";
+  categoryFocus?: CoverageLinkFocus["category"];
   links?: Array<{ href: string; label: string }>;
   place: string;
   placesNote?: string;

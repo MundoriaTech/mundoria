@@ -93,6 +93,37 @@ export function placePhotoHero(
     };
   }
 
+  if (focus?.category === "moving_home") {
+    return {
+      bookCta: "Book moving home cleaning",
+      bullets: [
+        "End of tenancy, move-in and move-out covered",
+        "Clear estimates before you book",
+        "Reliable, vetted cleaners you can trust",
+      ],
+      image: "/images/marketing/landing/category-moving-home.jpg",
+      overlay: "wash",
+      subtitle:
+        "End of tenancy, move-in and move-out, without another thing on your list",
+      title: `Moving Home Cleaning in ${name}`,
+    };
+  }
+
+  if (focus?.category === "short_term_rental") {
+    return {
+      bookCta: "Book short-let cleaning",
+      bullets: [
+        "Guest-ready turnovers built for hosts",
+        "Recurring host schedules",
+        "Reliable, vetted cleaners you can trust",
+      ],
+      image: "/images/marketing/landing/category-str.jpg",
+      overlay: "wash",
+      subtitle: "Guest-ready cleans for Airbnb, shortlets and serviced stays",
+      title: `Short-Let Cleaning in ${name}`,
+    };
+  }
+
   return null;
 }
 

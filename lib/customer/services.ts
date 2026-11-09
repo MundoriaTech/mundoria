@@ -116,8 +116,7 @@ export const CLEANING_STANDARDS: Array<{
 
 export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
   {
-    description:
-      "Regular, one-off, move-in/out and end of tenancy cleans for the home.",
+    description: "Regular, one-off and deep cleans for the home.",
     icon: Home,
     label: "House Cleaning",
     value: "residential",
@@ -162,7 +161,7 @@ export const SERVICES: ServiceDefinition[] = [
   },
   {
     basePrice: 11500,
-    category: "residential",
+    category: "moving_home",
     description:
       "A full reset when you are moving in or moving out, including handovers.",
     duration: 5,
@@ -174,7 +173,7 @@ export const SERVICES: ServiceDefinition[] = [
   },
   {
     basePrice: 11500,
-    category: "residential",
+    category: "moving_home",
     description: "A move-out clean for handovers and deposit confidence.",
     duration: 5,
     fixedStandard: "comprehensive",
@@ -207,7 +206,7 @@ export const SERVICES: ServiceDefinition[] = [
   },
   {
     basePrice: 12500,
-    category: "residential",
+    category: "moving_home",
     description: "Move-out cleaning designed for landlord and agent standards.",
     duration: 6,
     fixedStandard: "comprehensive",
@@ -228,7 +227,7 @@ export const SERVICES: ServiceDefinition[] = [
   },
   {
     basePrice: 6500,
-    category: "residential",
+    category: "short_term_rental",
     description: "Fast, guest-ready resets between Airbnb and shortlet stays.",
     duration: 3,
     icon: Hotel,
@@ -238,9 +237,10 @@ export const SERVICES: ServiceDefinition[] = [
   },
   {
     basePrice: 7000,
-    category: "residential",
+    category: "short_term_rental",
     description: "Guest-ready holiday let cleans with consistent presentation standards.",
     duration: 3,
+    hidden: true,
     icon: BedDouble,
     label: "Holiday Let Cleaning",
     recommendedStandard: "enhanced",

@@ -9,10 +9,10 @@ import {
 import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
+import { canonicalCleaningPath } from "@/lib/seo/canonical";
 import {
   LAUNCH_CITY,
   popularMarketingServices,
-  servicePlacePath,
 } from "@/lib/seo/marketing";
 import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 
@@ -40,7 +40,7 @@ export function LandingFooter({
       links: [
         { href: "/cleaning", label: "All services" },
         ...popularSeoServices.map((service) => ({
-          href: servicePlacePath(service.slug),
+          href: canonicalCleaningPath(service.slug),
           label: service.label,
         })),
       ],

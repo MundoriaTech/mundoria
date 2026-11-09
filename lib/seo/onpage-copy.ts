@@ -41,11 +41,11 @@ export const ONPAGE_SERVICE_COPY: Record<string, OnpageCopy> = {
     title: "Best Regular Cleaning Services Birmingham | Mundoria",
   },
   "deep-cleaning": {
-    description: `Need top-rated deep cleaning services in Birmingham? Choose Mundoria for thorough home and office cleaning. Call ${SUPPORT_PHONE} to book today!`,
+    description: `Need top-rated deep cleaning services in Birmingham? Choose Mundoria for thorough home cleaning that reaches the areas regular visits miss. Call ${SUPPORT_PHONE} to book today!`,
     title: "Best Deep Cleaning Services Birmingham | Mundoria",
   },
   "one-off-cleaning": {
-    description: `Need top-rated one-off cleaning in Birmingham? Choose Mundoria for reliable, professional home and office cleaning. Call ${SUPPORT_PHONE} to book today!`,
+    description: `Need top-rated one-off cleaning in Birmingham? Choose Mundoria for a reliable single-visit home clean when you need a reset. Call ${SUPPORT_PHONE} to book today!`,
     title: "Best One-Off Cleaning Services Birmingham | Mundoria",
   },
   "move-in-move-out-cleaning": {
@@ -85,11 +85,11 @@ export const ONPAGE_SERVICE_COPY: Record<string, OnpageCopy> = {
     title: "Best Pregnancy & Postpartum Cleaning Birmingham | Mundoria",
   },
   "illness-and-injury-recovery": {
-    description: `Need reliable illness and injury recovery cleaning in Birmingham? Choose Mundoria for professional home cleaning. Call ${SUPPORT_PHONE} to book today!`,
+    description: `Need illness or injury recovery cleaning in Birmingham? Choose Mundoria for a careful home reset while you focus on getting better. Call ${SUPPORT_PHONE} to book today!`,
     title: "Best Illness & Injury Recovery Cleaning Birmingham | Mundoria",
   },
   "hospital-discharge-home-cleaning": {
-    description: `Need reliable hospital discharge home cleaning in Birmingham? Choose Mundoria for professional home cleaning. Call ${SUPPORT_PHONE} to book today!`,
+    description: `Coming home after hospital in Birmingham? Choose Mundoria for a fresh, ready home before discharge day. Call ${SUPPORT_PHONE} to book today!`,
     title: "Best Hospital Discharge Home Cleaning Birmingham | Mundoria",
   },
   "bereavement-support-cleaning": {

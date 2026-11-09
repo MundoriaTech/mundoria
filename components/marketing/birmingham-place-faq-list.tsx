@@ -15,6 +15,7 @@ import {
   whyChooseMundoriaPoints,
 } from "@/lib/seo/birmingham-place-faqs";
 import { FAQ_LINKS } from "@/lib/seo/faq-links";
+import { cleanerPlacePath } from "@/lib/seo/canonical";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
 
 const linkClass =
@@ -23,10 +24,13 @@ const linkClass =
 export async function BirminghamPlaceFaqList({
   bookingHref,
   place = "Birmingham",
+  placePath,
   title,
 }: {
   bookingHref: string;
   place?: string;
+  /** Canonical place URL for “See cleaners in {place}” (no query). */
+  placePath?: string;
   title?: string;
 }) {
   const { deep } = BIRMINGHAM_SERVICE_FAQ_LINKS;
@@ -80,7 +84,10 @@ export async function BirminghamPlaceFaqList({
         </ol>
         <p className="mt-3">
           Ready to try Mundoria?{" "}
-          <Link className={linkClass} href={`/cleaners/${LAUNCH_CITY.slug}`}>
+          <Link
+            className={linkClass}
+            href={placePath ?? cleanerPlacePath(LAUNCH_CITY.slug)}
+          >
             See cleaners in {place}
           </Link>
           .

@@ -343,6 +343,8 @@ function hoursFaq(service: MarketingService): CategoryFaq {
   if (
     service.value === "deep_clean" ||
     service.value === "end_of_tenancy" ||
+    service.value === "move_in" ||
+    service.value === "move_out" ||
     service.category === "moving_home"
   ) {
     return faq(

@@ -117,7 +117,7 @@ export function birminghamPlaceFaqEntries(
     },
     {
       question: `Can I book a deep cleaning service in ${place}?`,
-      schemaAnswer: `Yes. Choose deep cleaning when you book or visit the deep cleaning Birmingham page. Add oven, fridge or interior windows if you want a heavier reset.`,
+      schemaAnswer: `Yes. Choose deep cleaning when you book or visit the deep cleaning page for ${place}. Add oven, fridge or interior windows if you want a heavier reset.`,
     },
     {
       question: "Do I need to provide cleaning supplies?",

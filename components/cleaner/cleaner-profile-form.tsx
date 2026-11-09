@@ -6,6 +6,10 @@ import { useState } from "react";
 
 import { ChangeEmailForm } from "@/components/auth/change-email-form";
 import { PhoneVerifyPanel } from "@/components/cleaner/phone-verify-panel";
+import {
+  StripeEmbeddedPayouts,
+  useStripeEmbeddedPayouts,
+} from "@/components/cleaner/stripe-embedded-payouts";
 import { ActionError, FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -39,8 +43,8 @@ export function CleanerProfileForm({
 }) {
   const router = useRouter();
   const { success } = useFeedback();
+  const payouts = useStripeEmbeddedPayouts();
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [stripeError, setStripeError] = useState<string | null>(null);
   const [profile, setProfile] = useState(initialProfile);
   const [verifiedPhone, setVerifiedPhone] = useState(() =>
     initialProfile.phone_verified_at
@@ -150,34 +154,10 @@ export function CleanerProfileForm({
   }
 
   async function connectStripe() {
-    setStripeError(null);
-    setStatus("Opening Stripe…");
-
-    try {
-      const response = await fetch(
-        profile.stripe_account_id
-          ? "/api/cleaner/stripe-dashboard"
-          : "/api/cleaner/stripe-connect",
-        { method: "POST" },
-      );
-      const result = (await parseJsonResponse(response)) as {
-        error?: string;
-        url?: string;
-      };
-
-      if (result.url) {
-        window.location.assign(result.url);
-        return;
-      }
-
-      setStripeError(result.error ?? "Try again in a moment.");
-      setStatus(null);
-    } catch (error) {
-      setStripeError(
-        error instanceof Error ? error.message : "Try again in a moment.",
-      );
-      setStatus(null);
-    }
+    setStatus(null);
+    await payouts.start(
+      cleaner.stripe_onboarding_complete ? "management" : "onboarding",
+    );
   }
 
   async function logout() {
@@ -447,23 +427,31 @@ export function CleanerProfileForm({
           <StatusRow label="Stripe" value={stripeLabel} />
           <p className="text-sm leading-6 text-[#5c5670]">
             {cleaner.status === "certified" || cleaner.status === "active"
-              ? "Pay is sent once Stripe Express is complete. You can also connect from your dashboard."
-              : "Connect Stripe after Mundoria approves your application. You’ll see a payout setup card on your dashboard."}
+              ? "Pay is sent once payout setup is complete. Bank details stay with Stripe."
+              : "Set up payouts after Mundoria approves your application. You’ll see a payout setup card on your dashboard."}
           </p>
           {cleaner.status === "certified" || cleaner.status === "active" ? (
             <Button
               className="h-11 w-full rounded-full border-[#e6e0f2] text-[#1c133b]"
+              disabled={payouts.busy}
               onClick={() => void connectStripe()}
               variant="outline"
             >
               <CreditCard className="mr-2 h-4 w-4" />
-              {profile.stripe_account_id
-                ? "Open Stripe Express"
-                : "Connect Stripe Express"}
+              {payouts.busy
+                ? "Loading…"
+                : cleaner.stripe_onboarding_complete
+                  ? "Manage payout details"
+                  : profile.stripe_account_id
+                    ? "Finish payout setup"
+                    : "Set up payouts"}
             </Button>
           ) : null}
-          {stripeError ? (
-            <ActionError message={stripeError} title="Couldn’t open Stripe" />
+          {payouts.error ? (
+            <ActionError
+              message={payouts.error}
+              title="Couldn’t open payout setup"
+            />
           ) : null}
         </Panel>
 
@@ -484,6 +472,17 @@ export function CleanerProfileForm({
           Log out
         </Button>
       </div>
+
+      <StripeEmbeddedPayouts
+        mode={payouts.mode}
+        onClose={payouts.close}
+        open={payouts.open}
+        title={
+          cleaner.stripe_onboarding_complete
+            ? "Manage payout details"
+            : "Set up your payouts"
+        }
+      />
     </div>
   );
 }
@@ -624,20 +623,4 @@ function StatusRow({ label, value }: { label: string; value: string }) {
       <span className="text-sm font-semibold text-[#1c133b]">{value}</span>
     </div>
   );
-}
-
-async function parseJsonResponse(response: Response) {
-  const contentType = response.headers.get("content-type");
-
-  if (contentType?.includes("application/json")) {
-    return response.json();
-  }
-
-  const text = await response.text();
-
-  return {
-    error:
-      text ||
-      `Request failed with status ${response.status}. Please try again.`,
-  };
 }

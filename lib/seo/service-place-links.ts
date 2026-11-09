@@ -1,13 +1,15 @@
 import {
   birminghamCoverageZoneById,
   birminghamTownZones,
+  coverageAreaHref,
   coverageAreaSlug,
+  coverageZoneHref,
 } from "@/lib/seo/birmingham-coverage";
-import { servicePlacePath, servicePlaceZonePath } from "@/lib/seo/marketing";
 
+/** Town / zone hubs for a service focus on place pages (not legacy service×geo URLs). */
 export function serviceTownLinks(serviceSlug: string) {
   return birminghamTownZones().map((zone) => ({
-    href: servicePlaceZonePath(serviceSlug, zone.id),
+    href: coverageZoneHref(zone.id, { serviceSlug }),
     label: zone.label,
   }));
 }
@@ -22,7 +24,7 @@ export function serviceInnerPlaceLinks(
   return zone.areas
     .filter((area) => coverageAreaSlug(area) !== exceptSlug)
     .map((area) => ({
-      href: servicePlacePath(serviceSlug, coverageAreaSlug(area)),
+      href: coverageAreaHref(area, { serviceSlug }),
       label: area.label,
     }));
 }
@@ -34,7 +36,7 @@ export function serviceSurroundingTownLinks(
   return birminghamTownZones()
     .filter((zone) => zone.id !== exceptZoneId)
     .map((zone) => ({
-      href: servicePlaceZonePath(serviceSlug, zone.id),
+      href: coverageZoneHref(zone.id, { serviceSlug }),
       label: zone.label,
     }));
 }

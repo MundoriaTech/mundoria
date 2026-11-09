@@ -245,7 +245,6 @@ export const STANDALONE_TOWN_SLUGS = new Set([
   "chelmsley-wood",
   "castle-bromwich",
   "bearwood",
-  "bearwood-sandwell",
 ]);
 
 export function cleanerPlacePath(areaSlug: string): string {

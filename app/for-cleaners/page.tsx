@@ -38,7 +38,7 @@ const benefits = [
     title: "Professional tools",
   },
   {
-    body: "Connect Stripe Express, choose weekly or monthly preference and track earnings in your cleaner dashboard.",
+    body: "Set up payouts in Mundoria, choose weekly or monthly preference and track earnings in your cleaner dashboard.",
     icon: "/images/marketing/icons/payouts.png",
     title: "Visible payouts",
   },

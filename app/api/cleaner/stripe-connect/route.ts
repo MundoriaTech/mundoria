@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       .single(),
     admin
       .from("cleaner_profiles")
-      .select("onboarding_complete, status")
+      .select("onboarding_complete, status, stripe_onboarding_complete")
       .eq("id", user.id)
       .maybeSingle(),
   ]);
@@ -52,44 +52,50 @@ export async function POST(request: Request) {
 
   let accountId = profile?.stripe_account_id as string | null;
 
-  if (!accountId) {
-    const account = await stripe.accounts.create({
-      business_type: "individual",
-      capabilities: {
-        card_payments: { requested: true },
-        transfers: { requested: true },
-      },
-      email: profile?.email,
-      metadata: { supabase_user_id: user.id },
-      type: "express",
-    });
-    accountId = account.id;
-    await admin
-      .from("profiles")
-      .update({ stripe_account_id: accountId })
-      .eq("id", user.id);
-  }
-
-  let returnTo = "/cleaner/profile";
   try {
-    const body = (await request.json()) as { returnTo?: string };
-    if (
-      body.returnTo === "/cleaner/dashboard" ||
-      body.returnTo === "/cleaner/earnings" ||
-      body.returnTo === "/cleaner/profile"
-    ) {
-      returnTo = body.returnTo;
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        business_type: "individual",
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+        country: "GB",
+        email: profile?.email,
+        metadata: { supabase_user_id: user.id },
+        type: "express",
+      });
+      accountId = account.id;
+      await admin
+        .from("profiles")
+        .update({ stripe_account_id: accountId })
+        .eq("id", user.id);
     }
-  } catch {
-    // Optional body, default return path is profile.
-  }
 
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const link = await stripe.accountLinks.create({
-    account: accountId,
-    refresh_url: `${origin}${returnTo}?stripe=refresh`,
-    return_url: `${origin}${returnTo}?stripe=complete`,
-    type: "account_onboarding",
-  });
-  return NextResponse.json({ url: link.url });
+    const session = await stripe.accountSessions.create({
+      account: accountId,
+      components: {
+        account_management: { enabled: true },
+        account_onboarding: { enabled: true },
+        notification_banner: { enabled: true },
+      },
+    });
+
+    return NextResponse.json({
+      clientSecret: session.client_secret,
+      stripeComplete: Boolean(cleaner.stripe_onboarding_complete),
+    });
+  } catch (error) {
+    Sentry.captureException(error);
+
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to start payout setup.",
+      },
+      { status: 400 },
+    );
+  }
 }

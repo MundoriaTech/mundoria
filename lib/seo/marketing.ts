@@ -9,7 +9,11 @@ import {
   SERVICES,
   servicesForCategory,
 } from "@/lib/customer/services";
-import { isIndexableServiceSlug } from "@/lib/seo/canonical";
+import {
+  canonicalCleaningPath,
+  isIndexableServiceSlug,
+  SEO_SERVICE_REDIRECTS,
+} from "@/lib/seo/canonical";
 import { onpageCopyForServiceSlug } from "@/lib/seo/onpage-copy";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
@@ -94,7 +98,15 @@ export function marketingServiceBySlug(
   slug: string,
   services: MarketingService[] = MARKETING_SERVICES,
 ) {
-  return services.find((service) => service.slug === slug) ?? null;
+  const canonical =
+    SEO_SERVICE_REDIRECTS[slug] ??
+    (slug.startsWith("/") ? null : slug);
+  const target = canonical && !canonical.startsWith("/") ? canonical : slug;
+  return (
+    services.find((service) => service.slug === target) ??
+    services.find((service) => service.slug === slug) ??
+    null
+  );
 }
 
 export async function getMarketingServiceBySlug(slug: string) {
@@ -153,7 +165,7 @@ export type ServiceCardLocation =
 
 /** Always the main service page, area pages link here; service pages link to areas. */
 export function serviceCardHref(serviceSlug: string) {
-  return `/cleaning/${serviceSlug}`;
+  return canonicalCleaningPath(serviceSlug);
 }
 
 export function servicePlaceFaqs(service: MarketingService, place: string) {
@@ -171,8 +183,8 @@ export function servicePlaceFaqs(service: MarketingService, place: string) {
       question: `What does ${service.label.toLowerCase()} cover in ${place}?`,
     },
     {
-      answer: `${service.label} is available across Birmingham, including the Jewellery Quarter, Edgbaston, Harborne, Moseley, Kings Heath and Selly Oak, when a cleaner covers that address.`,
-      question: `Where in Birmingham can I book ${service.label.toLowerCase()}?`,
+      answer: `${service.label} is available in ${place} and nearby covered postcodes when a cleaner covers that address.`,
+      question: `Where can I book ${service.label.toLowerCase()} near ${place}?`,
     },
   ];
 }
@@ -391,14 +403,14 @@ const BIRMINGHAM_POSTCODE_ZONE_ORDER: BirminghamPostcodeDistrict["zoneId"][] = [
 /** Districts cleaners can choose and customers can be matched into. */
 export const BIRMINGHAM_POSTCODES: readonly BirminghamPostcodeDistrict[] = [
   // Birmingham City Centre
-  { areaSlug: "jewellery-quarter", name: "City Centre", prefix: "B1", zoneId: "central" },
+  { areaSlug: "jewellery-quarter", name: "Jewellery Quarter", prefix: "B1", zoneId: "central" },
   { areaSlug: "birmingham-city-centre", name: "City Centre", prefix: "B2", zoneId: "central" },
-  { areaSlug: "jewellery-quarter", name: "City Centre", prefix: "B3", zoneId: "central" },
+  { areaSlug: "jewellery-quarter", name: "Jewellery Quarter", prefix: "B3", zoneId: "central" },
   { areaSlug: "birmingham-city-centre", name: "City Centre", prefix: "B4", zoneId: "central" },
   { areaSlug: "digbeth", name: "Digbeth & Highgate", prefix: "B5", zoneId: "central" },
   // Edgbaston & Harborne
   { areaSlug: "edgbaston", name: "Edgbaston", prefix: "B15", zoneId: "west" },
-  { areaSlug: "edgbaston", name: "Edgbaston & Ladywood", prefix: "B16", zoneId: "west" },
+  { areaSlug: "edgbaston", name: "Edgbaston", prefix: "B16", zoneId: "west" },
   { areaSlug: "harborne", name: "Harborne", prefix: "B17", zoneId: "west" },
   { areaSlug: "winson-green", name: "Winson Green & Hockley", prefix: "B18", zoneId: "west" },
   { areaSlug: "quinton", name: "Quinton & Bartley Green", prefix: "B32", zoneId: "west" },
@@ -462,7 +474,7 @@ export const BIRMINGHAM_POSTCODES: readonly BirminghamPostcodeDistrict[] = [
   { areaSlug: "west-bromwich", name: "West Bromwich North", prefix: "B71", zoneId: "border" },
   { areaSlug: "shirley", name: "Shirley", prefix: "B90", zoneId: "border" },
   { areaSlug: "solihull", name: "Solihull", prefix: "B91", zoneId: "border" },
-  { areaSlug: "olton", name: "Olton & Solihull", prefix: "B92", zoneId: "border" },
+  { areaSlug: "olton", name: "Olton", prefix: "B92", zoneId: "border" },
   { areaSlug: "knowle", name: "Knowle & Dorridge", prefix: "B93", zoneId: "border" },
   { areaSlug: "solihull", name: "Solihull South", prefix: "B94", zoneId: "border" },
 ];
@@ -581,7 +593,7 @@ export const FOR_CLEANERS_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Connect Stripe Express, choose a weekly or monthly payout preference and track earnings in your cleaner dashboard. Payouts are handled through Stripe Connect after jobs are completed.",
+      "Set up payouts in Mundoria, choose a weekly or monthly payout preference and track earnings in your cleaner dashboard. Payouts are handled through Stripe Connect after jobs are completed.",
     question: "How do payouts work?",
   },
   {

@@ -1,7 +1,7 @@
+import { canonicalCleaningPath } from "@/lib/seo/canonical";
 import {
   LAUNCH_CITY,
   publicMarketingServices,
-  servicePlacePath,
 } from "@/lib/seo/marketing";
 
 /** Public marketing services editors can attach to Mag posts. */
@@ -27,20 +27,16 @@ export function normalizeRelatedServices(value: unknown): string[] {
 }
 
 export function serviceMoneyPath(serviceSlug: string) {
-  return `/cleaning/${serviceSlug}`;
+  return canonicalCleaningPath(serviceSlug);
 }
 
-export function serviceCityMoneyPath(serviceSlug: string) {
-  return servicePlacePath(serviceSlug);
-}
-
-/** Insertable closing CTA for Mag drafts, service page + city page + booking. */
+/** Insertable closing CTA for Mag drafts: service page + city cleaners hub + booking. */
 export function magMoneyPageCtaMarkdown(serviceSlug: string, label: string) {
   const servicePath = serviceMoneyPath(serviceSlug);
-  const cityPath = serviceCityMoneyPath(serviceSlug);
+  const cityPath = `/cleaners/${LAUNCH_CITY.slug}`;
   return [
     "",
-    `Ready to book? See [${label}](${servicePath}), check [${label} in ${LAUNCH_CITY.name}](${cityPath}), or [start a booking](/booking/new).`,
+    `Ready to book? See [${label}](${servicePath}), browse [cleaners in ${LAUNCH_CITY.name}](${cityPath}), or [start a booking](/booking/new).`,
     "",
   ].join("\n");
 }

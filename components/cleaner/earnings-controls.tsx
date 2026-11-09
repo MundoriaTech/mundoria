@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import {
+  StripeEmbeddedPayouts,
+  useStripeEmbeddedPayouts,
+} from "@/components/cleaner/stripe-embedded-payouts";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -12,9 +16,9 @@ export function EarningsControls({
   preference: "weekly" | "monthly";
 }) {
   const { success, error: showError } = useFeedback();
+  const payouts = useStripeEmbeddedPayouts();
   const [value, setValue] = useState(preference);
   const [saving, setSaving] = useState(false);
-  const [opening, setOpening] = useState(false);
 
   async function change(next: "weekly" | "monthly") {
     setSaving(true);
@@ -47,59 +51,46 @@ export function EarningsControls({
     }
   }
 
-  async function openDashboard() {
-    setOpening(true);
-    try {
-      const response = await fetch("/api/cleaner/stripe-connect", {
-        body: JSON.stringify({ returnTo: "/cleaner/earnings" }),
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-      });
-      const json = (await response.json()) as { url?: string; error?: string };
-      if (!response.ok || !json.url) {
-        throw new Error(json.error ?? "Stripe Express is not ready yet.");
-      }
-      window.location.assign(json.url);
-    } catch (err) {
-      showError({
-        description:
-          err instanceof Error ? err.message : "Try again in a moment.",
-        onRetry: () => void openDashboard(),
-        title: "Couldn’t open Stripe",
-      });
-    } finally {
-      setOpening(false);
-    }
-  }
-
   return (
-    <div className="mt-6 rounded-2xl border bg-card p-4 sm:p-5">
-      <p className="text-sm font-medium text-foreground">Payout schedule</p>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Completed cleans are held until capture, then paid out on your schedule
-        via Stripe Express.
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {(["weekly", "monthly"] as const).map((option) => (
+    <>
+      <div className="mt-6 rounded-2xl border bg-card p-4 sm:p-5">
+        <p className="text-sm font-medium text-foreground">Payout schedule</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Completed cleans are held until capture, then paid out on your
+          schedule.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {(["weekly", "monthly"] as const).map((option) => (
+            <Button
+              className="capitalize"
+              disabled={saving}
+              key={option}
+              onClick={() => void change(option)}
+              size="sm"
+              variant={value === option ? "default" : "outline"}
+            >
+              {option}
+            </Button>
+          ))}
           <Button
-            className="capitalize"
-            disabled={saving}
-            key={option}
-            onClick={() => void change(option)}
-            size="sm"
-            variant={value === option ? "default" : "outline"}
+            disabled={payouts.busy}
+            onClick={() => void payouts.start("management")}
+            variant="link"
           >
-            {option}
+            {payouts.busy ? "Loading…" : "Manage payout details"}
           </Button>
-        ))}
-        <Button
-          disabled={opening}
-          onClick={() => void openDashboard()}
-          variant="link"
-        >
-          {opening ? "Opening…" : "Open Stripe Express"}
-        </Button>
+        </div>
+        {payouts.error ? (
+          <p className="mt-2 text-sm text-destructive">{payouts.error}</p>
+        ) : null}
       </div>
-    </div>
+
+      <StripeEmbeddedPayouts
+        mode={payouts.mode}
+        onClose={payouts.close}
+        open={payouts.open}
+        title="Manage payout details"
+      />
+    </>
   );
 }

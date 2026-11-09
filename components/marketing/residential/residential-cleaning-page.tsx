@@ -22,27 +22,15 @@ const SERVICE_CARDS = [
     objectPosition: "object-center",
   },
   {
-    href: "/cleaning/move-in-move-out-cleaning",
-    image: "/images/marketing/landing/moving-move-in.png",
-    label: "Move-in / move-out cleaning",
-    objectPosition: "object-center",
-  },
-  {
     href: "/cleaning/one-off-cleaning",
     image: "/images/marketing/landing/residential-one-off.png",
     label: "One-Off Cleaning",
     objectPosition: "object-center",
   },
   {
-    href: "/cleaning/end-of-tenancy-cleaning",
-    image: "/images/marketing/landing/moving-end-of-tenancy.png",
-    label: "End of Tenancy Cleaning",
-    objectPosition: "object-center",
-  },
-  {
-    href: "/cleaning/airbnb-shortlet-cleaning",
-    image: "/images/marketing/landing/str-airbnb.png",
-    label: "Airbnb/Shortlet Cleaning",
+    href: "/cleaning/deep-cleaning",
+    image: "/images/marketing/landing/residential-deep.jpg",
+    label: "Deep Cleaning",
     objectPosition: "object-center",
   },
 ] as const;

@@ -80,7 +80,7 @@ export function serviceDetailConfig(
     bookCta: `Book ${service.label.toLowerCase()}`,
     bullets: [
       `From ${service.fromPrice}`,
-      "Book once or schedule regularly",
+      scheduleBullet(service),
       "Reliable, vetted cleaners you can trust",
     ],
     faqs: serviceDetailFaqs(service),
@@ -92,4 +92,36 @@ export function serviceDetailConfig(
     subtitle: service.description,
     title: service.label,
   };
+}
+
+function scheduleBullet(service: MarketingService) {
+  if (service.value === "regular") {
+    return "Weekly, fortnightly or monthly schedules";
+  }
+  if (
+    service.category === "short_term_rental" ||
+    service.value === "airbnb_turnover" ||
+    service.value === "holiday_let" ||
+    service.value === "serviced_accommodation"
+  ) {
+    return "Turnovers timed around guest changeovers";
+  }
+  if (
+    service.category === "moving_home" ||
+    service.value === "move_in" ||
+    service.value === "move_out" ||
+    service.value === "end_of_tenancy"
+  ) {
+    return "Handover cleans sized to your checklist";
+  }
+  if (service.category === "recovery") {
+    return "Supportive home cleans when life changes";
+  }
+  if (service.value === "deep_clean" || service.value === "one_off") {
+    return "Book a single visit when you need a reset";
+  }
+  if (service.category === "commercial") {
+    return "One-off or recurring workplace schedules";
+  }
+  return "Clear estimate before you book";
 }

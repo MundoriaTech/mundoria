@@ -5,7 +5,13 @@ export type PlacePageFocus = CoverageLinkFocus & {
   serviceLabel?: string;
 };
 
-const CATEGORIES = ["commercial", "recovery", "residential"] as const;
+const CATEGORIES = [
+  "commercial",
+  "moving_home",
+  "recovery",
+  "residential",
+  "short_term_rental",
+] as const;
 
 export function readPlacePageFocus(searchParams: {
   category?: string | string[];
@@ -39,6 +45,12 @@ export function cleaningPlaceTitle({
   if (serviceLabel) return `${serviceLabel} ${preposition} ${place}`;
   if (category === "commercial") return `Workspace cleaners ${preposition} ${place}`;
   if (category === "recovery") return `Recovery cleaners ${preposition} ${place}`;
+  if (category === "moving_home") {
+    return `Moving home cleaners ${preposition} ${place}`;
+  }
+  if (category === "short_term_rental") {
+    return `Short-let cleaners ${preposition} ${place}`;
+  }
   if (category === "residential" || preposition === "in") {
     return `House cleaners ${preposition} ${place}`;
   }
@@ -67,6 +79,12 @@ export function cleaningPlaceIntro({
   if (category === "residential") {
     return `House cleaning is available in these ${where} and their surroundings:`;
   }
+  if (category === "moving_home") {
+    return `Moving home cleaning is available in these ${where} and their surroundings:`;
+  }
+  if (category === "short_term_rental") {
+    return `Short-let cleaning is available in these ${where} and their surroundings:`;
+  }
   return `Mundoria cleaners are available in these ${where} and their surroundings:`;
 }
 
@@ -88,6 +106,12 @@ export function surroundingTownsIntro({
   }
   if (category === "residential") {
     return "House cleaning is also available in these surrounding towns:";
+  }
+  if (category === "moving_home") {
+    return "Moving home cleaning is also available in these surrounding towns:";
+  }
+  if (category === "short_term_rental") {
+    return "Short-let cleaning is also available in these surrounding towns:";
   }
   return "Mundoria cleaners are also available in these surrounding towns:";
 }

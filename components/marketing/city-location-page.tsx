@@ -10,9 +10,11 @@ import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlaceMapHero } from "@/components/marketing/place-map-hero";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
 import {
+  birminghamAreaBySlug,
   getMarketingServices,
   LAUNCH_CITY,
   marketingServiceBySlug,
+  type MarketingArea,
 } from "@/lib/seo/marketing";
 import {
   cleaningPlaceTitle,
@@ -36,6 +38,12 @@ function heroEyebrow(name: string, focus?: PlacePageFocus) {
   return lead
     ? `${lead} · ${name} · From clear online estimates`
     : `${name} · From clear online estimates`;
+}
+
+function placeSlugFromPath(path: string) {
+  const bare = path.split("?")[0] || path;
+  const parts = bare.split("/").filter(Boolean);
+  return parts[parts.length - 1] ?? "";
 }
 
 export async function CityLocationPage({
@@ -66,6 +74,9 @@ export async function CityLocationPage({
     loadServicePricing(),
     getMarketingServices(),
   ]);
+  const barePath = path.split("?")[0] || path;
+  const placeSlug = placeSlugFromPath(barePath);
+  const priorityArea: MarketingArea | null = birminghamAreaBySlug(placeSlug);
   const service = focus?.serviceSlug
     ? marketingServiceBySlug(focus.serviceSlug, pricedServices)
     : null;
@@ -73,7 +84,9 @@ export async function CityLocationPage({
     focus?.category ??
     (service?.category === "commercial" ||
     service?.category === "residential" ||
-    service?.category === "recovery"
+    service?.category === "recovery" ||
+    service?.category === "moving_home" ||
+    service?.category === "short_term_rental"
       ? service.category
       : undefined);
   const title = cleaningPlaceTitle({
@@ -84,6 +97,16 @@ export async function CityLocationPage({
   });
 
   const photo = placePhotoHero(name, focus, pricing, pricedServices);
+  const isStandaloneTown = regionLabel === null;
+  const breadcrumbParent = isStandaloneTown
+    ? {
+        item: absoluteUrl("/cleaners"),
+        name: "Cleaners",
+      }
+    : {
+        item: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
+        name: "Cleaners in Birmingham",
+      };
 
   return (
     <MarketingShell>
@@ -101,13 +124,13 @@ export async function CityLocationPage({
               },
               {
                 "@type": "ListItem",
-                item: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
-                name: "Cleaners in Birmingham",
+                item: breadcrumbParent.item,
+                name: breadcrumbParent.name,
                 position: 2,
               },
               {
                 "@type": "ListItem",
-                item: absoluteUrl(path),
+                item: absoluteUrl(barePath),
                 name: title,
                 position: 3,
               },
@@ -120,14 +143,14 @@ export async function CityLocationPage({
               "@type": "Place",
               name: regionLabel ? `${name}, ${regionLabel}` : name,
             },
-            description: HERO_DESCRIPTION,
+            description: priorityArea?.seoIntro ?? HERO_DESCRIPTION,
             name: title,
             provider: {
               "@type": "Organization",
               name: "Mundoria",
               url: absoluteUrl("/"),
             },
-            url: absoluteUrl(path),
+            url: absoluteUrl(barePath),
           },
           ...(focus?.serviceSlug ? [] : [await launchCityFaqJsonLd(name)]),
         ]}
@@ -143,7 +166,7 @@ export async function CityLocationPage({
         />
       ) : (
         <PlaceMapHero
-          description={HERO_DESCRIPTION}
+          description={priorityArea?.seoIntro ?? HERO_DESCRIPTION}
           eyebrow={heroEyebrow(name, focus)}
           primaryHref={bookingHref}
           primaryLabel={`Book in ${name}`}
@@ -156,13 +179,22 @@ export async function CityLocationPage({
       <BrandedPageWash>
         <LaunchCityHubSections
           bookingHref={bookingHref}
-          categoryFocus={categoryFocus}
+          categoryFocus={
+            categoryFocus === "commercial" ||
+            categoryFocus === "recovery" ||
+            categoryFocus === "residential" ||
+            categoryFocus === "moving_home" ||
+            categoryFocus === "short_term_rental"
+              ? categoryFocus
+              : undefined
+          }
           cleanerLimit={18}
           place={name}
           placeLinks={placeLinks}
           allAreasCovered={allAreasCovered}
-          placePath={path.split("?")[0] || path}
+          placePath={barePath}
           placesNote={placesNote}
+          priorityArea={priorityArea ?? undefined}
           serviceFocus={service ?? undefined}
           showAreaCards={false}
           showCategoryServices={Boolean(focus?.category)}
