@@ -457,6 +457,12 @@ export async function POST(request: Request) {
     );
   }
 
+  if (Date.parse(parsed.data.interview_scheduled_at) <= Date.now()) {
+    return NextResponse.json(
+      { error: "That interview time has passed. Choose a new time." },
+      { status: 400 },
+    );
+  }
   const taken = await listTakenInterviewSlots(user.id);
   if (!isBookableInterviewSlot(parsed.data.interview_scheduled_at, taken)) {
     return NextResponse.json(

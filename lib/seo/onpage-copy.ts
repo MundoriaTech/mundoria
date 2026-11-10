@@ -37,7 +37,7 @@ export const ONPAGE_PATH_COPY: Record<string, OnpageCopy> = {
     title: "Workspace & Office Cleaning Birmingham | Mundoria",
   },
   "/cleaning/recovery": {
-    description: `Considerate home cleaning in Birmingham during pregnancy, after a birth, illness, injury, a hospital stay or a bereavement. Call ${SUPPORT_PHONE} to talk it through.`,
+    description: `Considerate home cleaning in Birmingham during pregnancy, after a birth, illness, injury, a hospital stay or a bereavement. Call ${SUPPORT_PHONE} to talk.`,
     title: "Recovery Cleaning Services in Birmingham | Mundoria",
   },
 };

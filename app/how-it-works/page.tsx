@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { HowItWorksCluster } from "@/components/marketing/how-it-works-cluster";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
@@ -13,7 +14,7 @@ import {
   howItWorksReturning,
   howItWorksSteps,
 } from "@/lib/seo/how-it-works";
-import { buildPageMetadata } from "@/lib/seo/site";
+import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 /** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
@@ -26,7 +27,7 @@ export const metadata: Metadata = buildPageMetadata({
   description:
     "How booking a cleaner with Mundoria works in eight steps: see the price first, nothing charged at booking, vetted cleaners and free cancellation 24 hours ahead.",
   path: "/how-it-works",
-  title: "How Mundoria Works | Mundoria",
+  title: "How Mundoria Works: Book a Cleaner in Birmingham",
 });
 
 export default async function HowItWorksPage() {
@@ -37,8 +38,37 @@ export default async function HowItWorksPage() {
   const bookingHref = configured ? "/booking/new" : "/setup";
   const cleanerHref = configured ? "/signup/cleaner" : "/setup";
 
+  const url = absoluteUrl("/how-it-works");
+
   return (
     <MarketingShell>
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            description:
+              "How to book a vetted independent cleaner in Birmingham with Mundoria, from choosing a service to paying after the clean.",
+            name: "How to book a cleaner with Mundoria",
+            step: steps.map((step, index) => ({
+              "@type": "HowToStep",
+              name: step.title,
+              position: index + 1,
+              text: step.body,
+              url: `${url}#journey-heading`,
+            })),
+            url,
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", item: absoluteUrl("/"), name: "Home", position: 1 },
+              { "@type": "ListItem", item: url, name: "How it works", position: 2 },
+            ],
+          },
+        ]}
+      />
       <section
         className="relative isolate overflow-hidden"
         style={{

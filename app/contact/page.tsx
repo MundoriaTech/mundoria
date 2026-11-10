@@ -3,14 +3,16 @@ import Link from "next/link";
 
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
-import { buildPageMetadata } from "@/lib/seo/site";
+import { JsonLd } from "@/components/marketing/json-ld";
+import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
+import { organizationRef } from "@/lib/seo/structured-data";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
     "Contact Mundoria: apply as a cleaner, reach the team for press, or open chat for help with booking and your account.",
   path: "/contact",
-  title: "Contact us | Mundoria",
+  title: "Contact Mundoria | Birmingham Cleaning Support",
 });
 
 export default function ContactPage() {
@@ -19,6 +21,17 @@ export default function ContactPage() {
 
   return (
     <MarketingShell>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          about: organizationRef(),
+          description:
+            "How to contact Mundoria for booking help, account support, press or cleaner applications.",
+          name: "Contact Mundoria",
+          url: absoluteUrl("/contact"),
+        }}
+      />
       <section className="bg-white px-4 pb-16 pt-10 sm:px-8 sm:pb-20 sm:pt-14">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-[2.75rem] font-semibold leading-none tracking-[-0.04em] text-[#c79c66] sm:text-[3.5rem]">

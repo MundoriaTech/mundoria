@@ -26,16 +26,18 @@ export function generateStaticParams() {
   return SITE_FAQ_SECTIONS.map((section) => ({ section: section.id }));
 }
 
+/** Longest title that fits: add the market, then the brand, while they fit. */
 function sectionTitle(title: string) {
-  const full = `${title} FAQ | Mundoria`;
-  return full.length <= MAX_TITLE_LENGTH ? full : `${title} FAQ`;
-}
-
-/** Keep meta descriptions under 160 characters, cut at a word boundary. */
-function clampDescription(text: string, max = 160) {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max - 1);
-  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,.;:\s]+$/, "")}…`;
+  const options = [
+    `${title} FAQ: Cleaners in Birmingham | Mundoria`,
+    `${title} FAQ | Mundoria Birmingham`,
+    `${title} FAQ | Mundoria`,
+    `${title} FAQ`,
+  ];
+  return (
+    options.find((option) => option.length <= MAX_TITLE_LENGTH) ??
+    options[options.length - 1]
+  );
 }
 
 export function generateMetadata({ params }: PageProps): Metadata {
@@ -46,8 +48,10 @@ export function generateMetadata({ params }: PageProps): Metadata {
     .map((item) => item.question)
     .join(" ");
   return buildPageMetadata({
-    description: clampDescription(
-      fullDescription(`${section.title}: ${section.description}`, questions),
+    // buildPageMetadata clamps this to 160 characters.
+    description: fullDescription(
+      `${section.title}: ${section.description}`,
+      questions,
     ),
     path: faqSectionPath(section.id),
     title: sectionTitle(section.title),
