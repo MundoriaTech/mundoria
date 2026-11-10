@@ -1,5 +1,7 @@
 /**
  * Seed Mundoria Mag + Help Centre content into hosted Supabase.
+ * WARNING: deletes and re-inserts ALL Mag posts, including ones edited in
+ * /admin/mag. To publish Help Centre changes only, use `npm run seed:help`.
  * Usage: node --env-file=.env.local scripts/seed-content.mjs
  */
 import { createClient } from "@supabase/supabase-js";

@@ -75,3 +75,11 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 - `/llms.txt` and `/llms-full.txt` are generated from the same data as the pages (`lib/seo/llms.ts`). Do not hand-edit facts there.
 - `robots.ts` allows the main AI crawlers on public pages only.
 - Keep answers direct: a question heading, then a one-paragraph answer that holds up when quoted on its own.
+
+## Help Centre
+
+- Articles live in `scripts/help-content.mjs` and are published with `npm run seed:help`. That command only touches the Help tables. `npm run seed:content` also deletes and re-inserts every Mag post, so never use it to publish Help changes.
+- Each article opens with a one-paragraph answer that stands on its own, then question headings. Aim for 300 to 500 words.
+- One line per paragraph: the renderer (`renderEditorialBlocks`) treats every line as a block.
+- Link two to four related articles (`/help/article/<slug>`) and the matching FAQ topic (`/faq/<section id>`). Every article should have at least two links from other articles.
+- Describe what the product does today, checked in code. When a feature does not exist (no self-service account deletion, no favourite cleaners), say so and give the real route, usually the support chat on `/contact`.
