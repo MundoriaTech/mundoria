@@ -5,7 +5,7 @@ import {
   MagNavbar,
   type MagNavCategory,
 } from "@/components/marketing/mag-navbar";
-import { SupportMessengerWidget } from "@/components/support/support-messenger";
+import { SupportMessengerLauncher } from "@/components/support/support-messenger-launcher";
 import {
   BLOG_CATEGORIES,
   listPublishedBlogPosts,
@@ -49,7 +49,7 @@ export async function MagShell({
       <MagNavbar bookingHref={bookingHref} categories={categories} />
       <main className="flex-1">{children}</main>
       <MagFooter bookingHref={bookingHref} />
-      <SupportMessengerWidget />
+      <SupportMessengerLauncher />
     </div>
   );
 }

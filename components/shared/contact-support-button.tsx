@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from "react";
 
-import { openSupportMessenger } from "@/components/support/support-messenger";
+import { openSupportMessenger } from "@/components/support/support-messenger-events";
 import { cn } from "@/lib/utils";
 
 type SupportTab = "home" | "messages" | "help";

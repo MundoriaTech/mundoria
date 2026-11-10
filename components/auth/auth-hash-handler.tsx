@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { createBrowserClient } from "@/lib/supabase/client";
-
 /**
  * Supabase sometimes returns recovery/invite tokens in the URL hash on the
  * Site URL (e.g. /#access_token=...&type=recovery) when the redirect allowlist
@@ -30,6 +28,9 @@ export function AuthHashHandler() {
     let cancelled = false;
 
     void (async () => {
+      // Imported here, not at the top: this handler is in the root layout, and
+      // a static import would put supabase-js on every public page.
+      const { createBrowserClient } = await import("@/lib/supabase/client");
       const supabase = createBrowserClient();
       const { error } = await supabase.auth.setSession({
         access_token: accessToken,

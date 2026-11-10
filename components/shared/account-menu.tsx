@@ -15,7 +15,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 export type AccountMenuItem = {
@@ -96,6 +95,8 @@ export function AccountMenu({
 
   async function logout() {
     setSigningOut(true);
+    // Loaded on demand so public pages that show this menu don't ship supabase-js up front.
+    const { createBrowserClient } = await import("@/lib/supabase/client");
     await createBrowserClient().auth.signOut();
     const loginPath = pathname.startsWith("/cleaner")
       ? "/login/cleaner"

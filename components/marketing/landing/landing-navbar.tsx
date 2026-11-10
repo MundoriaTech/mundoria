@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
@@ -12,7 +13,6 @@ import {
 } from "@/components/marketing/landing/nav-metrics";
 import { useLandingNavScrollHide } from "@/components/marketing/landing/use-nav-scroll-hide";
 import { MarketingMobileMenuSheet } from "@/components/marketing/marketing-mobile-menu";
-import { NotificationBell } from "@/components/shared/notification-bell";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   landingCategoryNav,
@@ -26,12 +26,31 @@ import {
 } from "@/components/shared/account-menu";
 import { dashboardForRole } from "@/lib/auth/redirects";
 import type { FaqNavMenu } from "@/lib/seo/site-faqs";
-import { createBrowserClient } from "@/lib/supabase/client";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 import { isUserRole, type Profile } from "@/types/auth";
 
 export type { FaqNavMenu };
+
+// Only signed-in visitors see the bell, so its code (and supabase-js) loads on demand.
+const NotificationBell = dynamic(
+  () =>
+    import("@/components/shared/notification-bell").then((module) => ({
+      default: module.NotificationBell,
+    })),
+  { ssr: false },
+);
+
+/**
+ * supabase-js keeps the session in `sb-<project>-auth-token` cookies (chunked
+ * as `.0`, `.1`, … when large). With none present the visitor is signed out,
+ * so the navbar can skip downloading and running the auth client entirely.
+ */
+function hasSupabaseSessionCookie() {
+  return document.cookie
+    .split(";")
+    .some((part) => /^\s*sb-[^=]*-auth-token(\.\d+)?=/.test(part));
+}
 
 type MarketingViewer = Pick<
   Profile,
@@ -89,7 +108,9 @@ export function LandingNavbar({
     let cancelled = false;
 
     async function loadViewer() {
+      if (!hasSupabaseSessionCookie()) return;
       try {
+        const { createBrowserClient } = await import("@/lib/supabase/client");
         const supabase = createBrowserClient();
         const {
           data: { user },

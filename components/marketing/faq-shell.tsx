@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { LandingFooter } from "@/components/marketing/landing/landing-footer";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
-import { SupportMessengerWidget } from "@/components/support/support-messenger";
+import { SupportMessengerLauncher } from "@/components/support/support-messenger-launcher";
 import { faqNavMenus } from "@/lib/seo/site-faqs";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
@@ -37,7 +37,7 @@ export function FaqShell({
       </main>
 
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
-      <SupportMessengerWidget />
+      <SupportMessengerLauncher />
     </div>
   );
 }

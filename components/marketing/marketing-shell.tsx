@@ -5,7 +5,7 @@ import { LandingFooter } from "@/components/marketing/landing/landing-footer";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
-import { SupportMessengerWidget } from "@/components/support/support-messenger";
+import { SupportMessengerLauncher } from "@/components/support/support-messenger-launcher";
 import { Button } from "@/components/ui/button";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
@@ -70,7 +70,7 @@ export async function MarketingShell({
       />
       {children}
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
-      <SupportMessengerWidget />
+      <SupportMessengerLauncher />
     </main>
   );
 }

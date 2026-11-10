@@ -12,47 +12,73 @@ import {
 const HERO_VIDEO = "/images/marketing/landing/hero-living-room.mp4";
 const HERO_POSTER = "/images/marketing/landing/hero-living-room-poster.jpg";
 
-/** Full-bleed living-room film, with the booking line set on the left. */
+/** The film only plays where it costs little: wider screens, motion allowed, no Save-Data. */
+function videoAllowed() {
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
+    .connection;
+  return (
+    window.matchMedia("(min-width: 640px)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+    !connection?.saveData
+  );
+}
+
+/**
+ * Full-bleed living-room film, with the booking line set on the left.
+ *
+ * The still is always rendered first through next/image (sized per device and
+ * served as AVIF/WebP), so it is the LCP element. The 1.3 MB film is only
+ * mounted after the page has loaded, on screens 640px and up, and fades in once
+ * it is actually playing. Phones keep the still: on a throttled mobile CPU the
+ * film was the main cause of the slow Lighthouse score.
+ */
 export function HeroSection({ bookingHref }: { bookingHref: string }) {
   const navBlock = `calc(${LANDING_NAV_TOP} + ${LANDING_NAV_PILL_H})`;
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduceMotion(motion.matches);
-    sync();
-    motion.addEventListener("change", sync);
-    return () => motion.removeEventListener("change", sync);
+    const start = () => {
+      if (videoAllowed()) setShowVideo(true);
+    };
+    if (document.readyState === "complete") {
+      start();
+      return;
+    }
+    window.addEventListener("load", start, { once: true });
+    return () => window.removeEventListener("load", start);
   }, []);
+
+  const mediaClass =
+    "object-cover object-[64%_38%] sm:object-[50%_42%] lg:object-[70%_center]";
 
   return (
     <section
       className="relative isolate min-h-[28rem] overflow-hidden sm:min-h-[36rem] lg:min-h-[52rem]"
       style={{ marginTop: `calc(-1 * ${navBlock})` }}
     >
-      {reduceMotion ? (
-        <Image
-          alt=""
-          className="object-cover object-[64%_38%] sm:object-[50%_42%] lg:object-[70%_center]"
-          fill
-          priority
-          sizes="100vw"
-          src={HERO_POSTER}
-        />
-      ) : (
+      <Image
+        alt=""
+        className={mediaClass}
+        fill
+        priority
+        sizes="100vw"
+        src={HERO_POSTER}
+      />
+      {showVideo ? (
         <video
           aria-hidden
           autoPlay
-          className="absolute inset-0 h-full w-full object-cover object-[64%_38%] sm:object-[50%_42%] lg:object-[70%_center]"
+          className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${mediaClass} ${playing ? "opacity-100" : "opacity-0"}`}
           loop
           muted
+          onPlaying={() => setPlaying(true)}
           playsInline
-          poster={HERO_POSTER}
-          preload="metadata"
+          preload="auto"
         >
           <source src={HERO_VIDEO} type="video/mp4" />
         </video>
-      )}
+      ) : null}
 
       {/* On a narrow screen the crop sits over the sofa, so the wash covers more of the frame. */}
       <div
