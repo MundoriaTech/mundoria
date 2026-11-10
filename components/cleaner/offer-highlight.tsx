@@ -66,7 +66,7 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
     <article className="overflow-hidden rounded-[1.75rem] border border-brand-line bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
       <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
             Waiting for you
           </p>
           <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">

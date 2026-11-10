@@ -184,7 +184,7 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-terracotta">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-terracotta-deep">
                     Independent cleaner · {area.name}
                   </p>
                   <h1 className="mt-2 text-[2.4rem] font-semibold leading-none tracking-[-0.045em] text-brand-ink sm:text-5xl">
@@ -257,7 +257,7 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                         </span>
                         {review.when ? ` · ${review.when}` : ""}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-brand-terracotta">
+                      <p className="mt-1 text-xs font-medium text-brand-terracotta-deep">
                         {review.service}
                       </p>
                     </li>

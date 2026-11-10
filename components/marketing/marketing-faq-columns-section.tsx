@@ -32,7 +32,7 @@ export function MarketingFaqColumnsSection({
         <h2
           className={cn(
             "text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] sm:text-2xl lg:text-[1.75rem]",
-            service ? "text-brand-ink" : "text-[#c45c3a]",
+            service ? "text-brand-ink" : "text-brand-terracotta-deep",
           )}
         >
           {title}

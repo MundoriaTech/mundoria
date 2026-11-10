@@ -38,9 +38,13 @@ const config: Config = {
           "purple-deep": "#5a38a3",
           violet: "#823fb2",
           muted: "#5a5470",
-          subtle: "#8b8798",
+          // Muted text. #6f6a82 meets WCAG AA (4.5:1) on white and the light brand surfaces; #8b8798 did not.
+          subtle: "#6f6a82",
           gold: "#c79c66",
+          // Gold and terracotta are for accents and dark backgrounds. On white or lavender, text uses the -deep shades (AA).
+          "gold-deep": "#8a6533",
           terracotta: "#d4694a",
+          "terracotta-deep": "#a8482b",
           peach: "#f0a888",
           "peach-light": "#ffc79f",
           cream: "#f9f6ef",

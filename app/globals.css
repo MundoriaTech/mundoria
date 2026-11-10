@@ -115,7 +115,7 @@
 
   input::placeholder,
   textarea::placeholder {
-    color: #8b8798;
+    color: #6f6a82;
   }
 
   input:not(.auth-inset-input):-webkit-autofill,

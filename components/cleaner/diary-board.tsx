@@ -534,7 +534,7 @@ export function DiaryBoard() {
 function Summary({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-3xl border border-brand-line bg-white px-4 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-brand-gold">{label}</p>
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-brand-gold-deep">{label}</p>
       <p className="mt-1 text-sm font-semibold leading-5 text-brand-ink">{value}</p>
     </div>
   );
@@ -584,7 +584,7 @@ function WeekGrid({
               )}
               key={date}
             >
-              <p className="text-[11px] uppercase tracking-[0.14em] text-[#8b849c]">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-brand-subtle">
                 {day.toLocaleDateString("en-GB", { weekday: "short" })}
               </p>
               <p className={cn("text-lg font-semibold", date === today ? "text-brand-indigo" : "text-brand-ink")}>
@@ -596,7 +596,7 @@ function WeekGrid({
         <div className="relative" style={{ height }}>
           {Array.from({ length: END_HOUR - START_HOUR }, (_, index) => (
             <span
-              className="absolute right-2 -translate-y-2 text-[10px] text-[#8b849c]"
+              className="absolute right-2 -translate-y-2 text-[10px] text-brand-subtle"
               key={index}
               style={{ top: index * HOUR_PX }}
             >
@@ -702,7 +702,7 @@ function DayAgenda({
         </p>
       ) : null}
       {empty ? (
-        <p className="mt-3 text-sm text-[#8b849c]">A clear day. New visits will show up here.</p>
+        <p className="mt-3 text-sm text-brand-subtle">A clear day. New visits will show up here.</p>
       ) : (
         <ul className="mt-3 space-y-2">
           {dayJobs.map((job) => (
@@ -773,7 +773,7 @@ function MonthGrid({
   ];
   return (
     <div className="rounded-3xl border border-brand-line bg-white p-3">
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium uppercase tracking-[0.12em] text-[#8b849c]">
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium uppercase tracking-[0.12em] text-brand-subtle">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <span key={day}>{day}</span>
         ))}

@@ -101,7 +101,7 @@ export default async function CleanerDashboardPage() {
           <div className="min-w-0 pb-1">
             <h1 className="text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-brand-ink sm:text-[2.35rem]">
               Welcome back,{" "}
-              <span className="font-normal text-brand-terracotta">{firstName}</span>.
+              <span className="font-normal text-brand-terracotta-deep">{firstName}</span>.
             </h1>
             <p className="mt-2 max-w-md text-[13px] font-light leading-5 text-[#5c5670] sm:text-[15px] sm:leading-7">
               {heroLine(hero.moment, streak)}
@@ -215,7 +215,7 @@ export default async function CleanerDashboardPage() {
       <section className="overflow-hidden rounded-[1.75rem] border border-[#e8e0d6]/80 bg-brand-cream-deep p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
               Medallion
             </p>
             <div className="mt-2">
@@ -307,7 +307,7 @@ function heroLine(moment: CleanerHeroMoment, streak: number) {
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-gold">
+      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-gold-deep">
         {label}
       </dt>
       <dd className="mt-1 truncate text-base font-semibold tracking-tight text-brand-ink sm:text-lg">

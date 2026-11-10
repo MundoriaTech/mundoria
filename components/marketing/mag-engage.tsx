@@ -75,7 +75,7 @@ export function MagEngageBand({ className }: { className?: string }) {
     >
       <div className="grid items-start gap-12 md:grid-cols-2 md:gap-16">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-terracotta">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-terracotta-deep">
             Social
           </p>
           <h2 className="mt-3 text-[2.5rem] font-black leading-[0.95] tracking-[-0.05em] text-brand-ink sm:text-[3.25rem]">
@@ -104,7 +104,7 @@ export function MagEngageBand({ className }: { className?: string }) {
         </div>
 
         <div>
-          <div className="inline-flex items-center gap-2 text-brand-terracotta">
+          <div className="inline-flex items-center gap-2 text-brand-terracotta-deep">
             <EnvelopeSimple className="h-5 w-5" weight="duotone" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em]">
               Inbox
@@ -147,7 +147,7 @@ export function MagEngageBand({ className }: { className?: string }) {
             </form>
           )}
           {status === "error" ? (
-            <p className="mt-2 text-sm text-brand-terracotta">
+            <p className="mt-2 text-sm text-brand-terracotta-deep">
               Enter a valid email address.
             </p>
           ) : null}

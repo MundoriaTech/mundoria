@@ -260,7 +260,7 @@ export function FaqCatalogue() {
                   <nav aria-label="On this page" className="mt-4 space-y-5">
                     {jumpGroups.map((group) => (
                       <div key={group.id}>
-                        <p className="px-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-gold">
+                        <p className="px-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-gold-deep">
                           {group.label}
                         </p>
                         <div className="mt-1.5 space-y-0.5">
