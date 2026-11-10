@@ -9,7 +9,7 @@ import { LaunchCityHubSections } from "@/components/marketing/launch-city-hub-se
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlaceMapHero } from "@/components/marketing/place-map-hero";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
-import { birminghamPlaceFaqSchemaAnswers } from "@/lib/seo/birmingham-place-faqs";
+import { locationFaqJsonLd, locationFaqs } from "@/lib/seo/location-faqs";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
 import {
   birminghamAreasServed,
@@ -64,18 +64,9 @@ export default async function BirminghamCleanersPage() {
             serviceType: "House cleaning",
             url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
           },
-          {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: birminghamPlaceFaqSchemaAnswers(
-              "Birmingham",
-              pricing,
-            ).map((item) => ({
-              "@type": "Question",
-              acceptedAnswer: { "@type": "Answer", text: item.answer },
-              name: item.question,
-            })),
-          },
+          locationFaqJsonLd(
+            locationFaqs({ kind: "city", place: "Birmingham" }, pricing),
+          ),
         ]}
       />
 

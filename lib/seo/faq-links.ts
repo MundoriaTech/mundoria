@@ -1,12 +1,12 @@
-import { faqItemAnchor } from "@/lib/seo/site-faqs";
+import { faqItemPath, faqSectionPath } from "@/lib/seo/faq-paths";
 
-/** Path to a specific FAQ answer (`/faq#…`). */
+/** Path to a specific FAQ answer (`/faq/<section>#…`). */
 export function faqItemHref(sectionId: string, question: string) {
-  return `/faq#${faqItemAnchor(sectionId, question)}`;
+  return faqItemPath(sectionId, question);
 }
 
 export function faqSectionHref(sectionId: string) {
-  return `/faq#${sectionId}`;
+  return faqSectionPath(sectionId);
 }
 
 /**

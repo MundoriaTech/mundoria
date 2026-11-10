@@ -75,3 +75,11 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 - `/llms.txt` and `/llms-full.txt` are generated from the same data as the pages (`lib/seo/llms.ts`). Do not hand-edit facts there.
 - `robots.ts` allows the main AI crawlers on public pages only.
 - Keep answers direct: a question heading, then a one-paragraph answer that holds up when quoted on its own.
+
+## FAQ, location answers and How it works
+
+- The FAQ catalogue is `lib/seo/site-faq-catalogue.ts`. `/faq` is a hub (search, topic cards, ten most-asked answers); each section has its own page at `/faq/<section id>` with its own FAQPage markup. Build links with `lib/seo/faq-paths.ts` or `FAQ_LINKS`, never hand-written hashes. Old `/faq#…` links are forwarded to the right topic page in the browser.
+- Any FAQ answer with a £ amount must be listed in `buildPricingFaqAnswerOverrides` (`lib/customer/published-pricing.ts`) so it follows the admin rate card.
+- Area, town and hub pages show `lib/seo/location-faqs.ts`: six core answers on every page (postcode, services, price, booking and confirmation, cleaner checks, cancellation) plus two local questions per neighbourhood hub, priority area or nearby town. Add local questions there; do not copy the core answers into new pages.
+- `/how-it-works` reads `lib/seo/how-it-works.ts`.
+- Live rules every answer must match: card saved at booking with no charge; a hold from 48 hours before once a cleaner is assigned (up to five attempts, cancelled free if not authorised by 24 hours before); payment taken the day after the clean; free cancellation 24 hours or more ahead, full price within 24 hours; at least £1 million Public Liability, Basic DBS, identity and right to work, and an interview before approval. Never describe a cleaner as trained, certified or referenced beyond what onboarding records.
