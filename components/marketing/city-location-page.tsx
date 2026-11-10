@@ -21,6 +21,7 @@ import {
   type PlacePageFocus,
 } from "@/lib/seo/place-page-focus";
 import { absoluteUrl } from "@/lib/seo/site";
+import { organizationRef } from "@/lib/seo/structured-data";
 
 const HERO_DESCRIPTION =
   "One-off or regular house cleaning with tried & vetted cleaners in your area, clear estimates from booking to checklist.";
@@ -145,11 +146,7 @@ export async function CityLocationPage({
             },
             description: priorityArea?.seoIntro ?? HERO_DESCRIPTION,
             name: title,
-            provider: {
-              "@type": "Organization",
-              name: "Mundoria",
-              url: absoluteUrl("/"),
-            },
+            provider: organizationRef(),
             url: absoluteUrl(barePath),
           },
           ...(focus?.serviceSlug ? [] : [await launchCityFaqJsonLd(name)]),

@@ -1,8 +1,12 @@
-import { Star } from "lucide-react";
+import { MessageSquareQuote } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-/** Stars + “Check reviews”, stacked in flow on mobile, top-right from sm up. */
+/**
+ * “Read customer reviews” jump link, stacked in flow on mobile, top-right from sm up.
+ * It deliberately shows no star rating or score: the only rating the site
+ * shows is the live one from Google, in the reviews section it links to.
+ */
 export function HeroReviewsLink({
   className,
   tone = "light",
@@ -21,18 +25,12 @@ export function HeroReviewsLink({
       )}
       href="#reviews"
     >
-      <span className="inline-flex shrink-0 text-[#c79c66]" aria-hidden>
-        {Array.from({ length: 5 }, (_, index) => (
-          <Star
-            className="h-3.5 w-3.5 fill-current"
-            key={index}
-            strokeWidth={0}
-          />
-        ))}
-      </span>
-      <span className="min-w-0">
-        4.8/5{" "}
-        <span className="underline underline-offset-2">Check reviews</span>
+      <MessageSquareQuote
+        aria-hidden
+        className="h-3.5 w-3.5 shrink-0 text-[#c79c66]"
+      />
+      <span className="min-w-0 underline underline-offset-2">
+        Read customer reviews
       </span>
     </a>
   );

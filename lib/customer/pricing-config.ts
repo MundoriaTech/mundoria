@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   CleaningStandard,
@@ -191,13 +193,39 @@ export function clearServicePricingCache() {
   cached = null;
 }
 
+/** Next.js Data Cache tag for the rate card; Admin settings revalidates it on save. */
+export const SERVICE_PRICING_CACHE_TAG = "service-pricing";
+
+/**
+ * Service-role reader for the rate card whose fetches are cached under
+ * SERVICE_PRICING_CACHE_TAG (5-minute ceiling). The generic admin client uses
+ * `no-store`, which would force every marketing page that shows a price to
+ * render on every request and break ISR. Saving prices in Admin settings
+ * calls revalidateTag, so marketing pages and the booking flow update together.
+ */
+function pricingReadClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: {
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          next: { revalidate: 300, tags: [SERVICE_PRICING_CACHE_TAG] },
+        }),
+    },
+  });
+}
+
 /** Load platform pricing (admin overrides merged onto defaults). */
 export async function loadServicePricing(): Promise<ServicePricingConfig> {
   if (cached && Date.now() - cached.at < CACHE_MS) {
     return cached.value;
   }
   try {
-    const admin = createAdminClient();
+    const admin = pricingReadClient() ?? createAdminClient();
     const { data } = await admin
       .from("platform_settings")
       .select("service_pricing")

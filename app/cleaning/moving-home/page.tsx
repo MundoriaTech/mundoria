@@ -6,6 +6,10 @@ import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+import { organizationRef } from "@/lib/seo/structured-data";
+
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
 
 export const metadata: Metadata = buildPageMetadata({
   description:
@@ -30,11 +34,7 @@ export default function MovingHomeCleaningRoute() {
           description:
             "End of tenancy, move-in and move-out cleaning for handovers.",
           name: "Moving Home Cleaning",
-          provider: {
-            "@type": "Organization",
-            name: "Mundoria",
-            url: absoluteUrl("/"),
-          },
+          provider: organizationRef(),
           url: absoluteUrl("/cleaning/moving-home"),
         }}
       />

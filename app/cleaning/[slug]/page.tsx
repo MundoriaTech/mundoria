@@ -8,6 +8,7 @@ import {
 import { JsonLd } from "@/components/marketing/json-ld";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ServiceCityCoverage } from "@/components/marketing/service-city-coverage";
+import { ServiceGuideLinks } from "@/components/marketing/service-guide-links";
 import { ServiceCategoryMarketingPage } from "@/components/marketing/service-category/service-category-marketing-page";
 import {
   canonicalCleaningPath,
@@ -20,8 +21,12 @@ import {
   marketingServiceBySlug,
 } from "@/lib/seo/marketing";
 import { serviceDetailConfig } from "@/lib/seo/service-detail-config";
-import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
+import { buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+import { serviceSchema } from "@/lib/seo/structured-data";
+
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
 
 type PageProps = {
   params: { slug: string };
@@ -60,23 +65,13 @@ export default async function CleaningServicePage({ params }: PageProps) {
   return (
     <MarketingShell>
       <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Service",
-          description: service.description,
-          name: service.label,
-          provider: {
-            "@type": "Organization",
-            name: "Mundoria",
-            url: absoluteUrl("/"),
-          },
-          url: absoluteUrl(`/cleaning/${service.slug}`),
-        }}
+        data={serviceSchema(service, { description: service.description })}
       />
       <ServiceCategoryMarketingPage
         bookingHref={bookingHref}
         config={serviceDetailConfig(service, priced)}
       />
+      <ServiceGuideLinks service={service} />
       <ServiceCityCoverage service={service} />
       {magCategory ? (
         <CategoryMagLinks category={magCategory} serviceSlug={service.slug} />

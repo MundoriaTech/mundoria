@@ -14,10 +14,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { GoogleReviewsButton } from "@/components/marketing/google-reviews-drawer";
 import { LazyImage } from "@/components/shared/lazy-image";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
-import {
-  landingReviewPlaceholders,
-  type LandingReview,
-} from "@/lib/marketing/landing-reviews";
+import type { LandingReview } from "@/lib/marketing/landing-reviews";
 
 const REVIEW_SMILEYS = {
   decorLeft: "/images/marketing/landing/happy_10760935 1.png",
@@ -96,12 +93,16 @@ function ReviewCard({
     >
       <div className="flex flex-1 flex-col px-6 pb-6 pt-7 sm:px-7">
         <div className="flex items-start justify-between gap-3">
-          <p
-            aria-hidden
-            className="text-sm tracking-[0.12em] text-[#c79c66]"
-          >
-            ★★★★★
-          </p>
+          {review.rating ? (
+            <p
+              aria-label={`Rated ${Math.round(review.rating)} out of 5`}
+              className="text-sm tracking-[0.12em] text-[#c79c66]"
+            >
+              {"★".repeat(Math.max(1, Math.min(5, Math.round(review.rating))))}
+            </p>
+          ) : (
+            <span />
+          )}
           <LazyImage
             alt=""
             className="shrink-0"
@@ -323,7 +324,7 @@ const DesktopReviewCarousel = forwardRef<
 
 export function ReviewsSection({
   heading = "What our customers say",
-  reviews = landingReviewPlaceholders,
+  reviews = [],
 }: {
   heading?: string;
   reviews?: LandingReview[];
@@ -399,8 +400,15 @@ export function ReviewsSection({
             {heading}
           </h2>
           <GoogleReviewsButton className="mt-4" />
+          {reviews.length ? null : (
+            <p className="mt-4 max-w-md text-pretty text-sm leading-6 text-[#5a5470]">
+              We only publish reviews written by customers after a completed
+              booking. Tap the Google badge to read what customers say there.
+            </p>
+          )}
         </ScrollReveal>
 
+        {reviews.length ? (
         <div className="mt-8 md:mt-14">
           <div className="hidden md:flex md:items-center md:gap-3 lg:gap-4">
             {reviews.length > DESKTOP_SET_SIZE ? (
@@ -475,6 +483,7 @@ export function ReviewsSection({
             ) : null}
           </div>
         </div>
+        ) : null}
       </div>
     </section>
   );

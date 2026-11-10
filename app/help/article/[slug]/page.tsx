@@ -7,17 +7,25 @@ import {
   BrandedSection,
 } from "@/components/marketing/branded-page-sections";
 import { EditorialBody } from "@/components/marketing/editorial-body";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import {
   getHelpArticleBySlug,
+  listHelpArticlesForCollection,
   renderEditorialBlocks,
 } from "@/lib/content/editorial";
+import { organizationRef } from "@/lib/seo/structured-data";
 import {
   helpThemeFor,
   helpTopicAccent,
   helpTopicPanel,
 } from "@/lib/content/help-theme";
-import { buildPageMetadata } from "@/lib/seo/site";
+import {
+  MAX_TITLE_LENGTH,
+  absoluteUrl,
+  buildPageMetadata,
+  fullDescription,
+} from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 
 type PageProps = { params: { slug: string } };
@@ -29,10 +37,15 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const article = await getHelpArticleBySlug(params.slug);
   if (!article) return {};
+  const helpTitle = `${article.title} | Mundoria Help`;
   return buildPageMetadata({
-    description: article.summary || article.title,
+    description: fullDescription(
+      article.summary || article.title,
+      `Answers from the Mundoria Help Centre${article.collection ? `, ${article.collection.title}` : ""}.`,
+      "Book and manage cleaning in Birmingham with Mundoria.",
+    ),
     path: `/help/article/${article.slug}`,
-    title: `${article.title} | Mundoria Help`,
+    title: helpTitle.length <= MAX_TITLE_LENGTH ? helpTitle : article.title,
   });
 }
 
@@ -45,9 +58,57 @@ export default async function HelpArticlePage({ params }: PageProps) {
   const panel = helpTopicPanel(collectionSlug, topic);
   const accent = helpTopicAccent(topic);
   const theme = helpThemeFor(collectionSlug);
+  // Every article links to its siblings, so none is only reachable from the sitemap.
+  const siblings = article.collection_id
+    ? (await listHelpArticlesForCollection(article.collection_id)).filter(
+        (item) => item.slug !== article.slug,
+      )
+    : [];
+  const related = [
+    ...siblings.filter((item) => topic && item.topic?.trim() === topic),
+    ...siblings.filter((item) => !topic || item.topic?.trim() !== topic),
+  ].slice(0, 6);
+  const articleUrl = absoluteUrl(`/help/article/${article.slug}`);
 
   return (
     <BrandedPageWash>
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", item: absoluteUrl("/help"), name: "Help Centre", position: 1 },
+              ...(article.collection
+                ? [
+                    {
+                      "@type": "ListItem",
+                      item: absoluteUrl(`/help/${article.collection.slug}`),
+                      name: article.collection.title,
+                      position: 2,
+                    },
+                  ]
+                : []),
+              {
+                "@type": "ListItem",
+                item: articleUrl,
+                name: article.title,
+                position: article.collection ? 3 : 2,
+              },
+            ],
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            author: organizationRef(),
+            description: article.summary || article.title,
+            headline: article.title,
+            inLanguage: "en-GB",
+            mainEntityOfPage: articleUrl,
+            publisher: organizationRef(),
+          },
+        ]}
+      />
       <section className={cn("relative px-4 pb-8 pt-10 sm:px-8 sm:pt-12 lg:px-12", panel)}>
         <div className="mx-auto max-w-3xl">
           <Link
@@ -86,6 +147,29 @@ export default async function HelpArticlePage({ params }: PageProps) {
 
       <BrandedSection className="!pt-8">
         <EditorialBody accent={accent} blocks={blocks} />
+
+        {related.length ? (
+          <nav
+            aria-label="Related help articles"
+            className="mx-auto mt-12 max-w-3xl"
+          >
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#1c133b]">
+              Related articles
+            </h2>
+            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+              {related.map((item) => (
+                <li key={item.slug}>
+                  <Link
+                    className="block rounded-xl border border-[#e8e1f3] bg-white px-4 py-3 text-sm font-medium text-[#1c133b] transition hover:border-[#6a45b8]"
+                    href={`/help/article/${item.slug}`}
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
 
         <div
           className={cn(

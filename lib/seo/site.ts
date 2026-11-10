@@ -69,7 +69,34 @@ export function absoluteUrl(path = "/") {
 export function brandedTitle(title: string) {
   const trimmed = title.trim();
   if (/\bMundoria\b/i.test(trimmed)) return trimmed;
-  return `${trimmed} | ${SITE_NAME}`;
+  const branded = `${trimmed} | ${SITE_NAME}`;
+  // Drop the brand suffix rather than let Google cut the title off.
+  return branded.length > MAX_TITLE_LENGTH ? trimmed : branded;
+}
+
+/**
+ * Last meaningful change to the programmatic marketing pages (services,
+ * areas, guides, legal). Bump this when their content or templates change,
+ * so sitemap `lastmod` stays truthful.
+ */
+export const MARKETING_CONTENT_UPDATED_AT = "2026-11-09";
+
+/** Titles longer than this are cut off in Google results. */
+export const MAX_TITLE_LENGTH = 60;
+
+/** Meta descriptions shorter than this read as thin; pad with a fallback. */
+export const MIN_DESCRIPTION_LENGTH = 110;
+
+/** Join a short description with extra context until it is a useful length. */
+export function fullDescription(primary: string, ...extras: string[]) {
+  let text = primary.trim();
+  for (const extra of extras) {
+    if (text.length >= MIN_DESCRIPTION_LENGTH) break;
+    const next = extra.trim();
+    if (!next) continue;
+    text = `${text.replace(/[.\s]*$/, ".")} ${next}`;
+  }
+  return text;
 }
 
 export function buildPageMetadata({

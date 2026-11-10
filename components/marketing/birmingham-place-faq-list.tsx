@@ -46,7 +46,7 @@ export async function BirminghamPlaceFaqList({
     [entries[1]!.question]: (
       <>
         <p>
-          Exact scope depends on your service and cleaning standard. Typical
+          Exact scope depends on the service you choose. Typical
           house cleaning visits include:
         </p>
         <ul className="mt-2.5 list-disc space-y-1.5 pl-5">

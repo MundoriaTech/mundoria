@@ -27,8 +27,8 @@ export function PlaceServiceExplainerIntro({ place }: { place: string }) {
   return (
     <>
       Mundoria connects you with independent cleaners for homes, guest turns,
-      workplaces and Recovery support across {place}. Each service has a dedicated{" "}
-      {place} page with clear from-prices and online booking:
+      workplaces and recovery support across {place}. Each service page shows
+      the from-price and lets you book online for an address in {place}:
     </>
   );
 }

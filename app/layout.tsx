@@ -4,10 +4,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
-import {
-  GoogleTagManagerHead,
-  GoogleTagManagerNoscript,
-} from "@/components/analytics/gtm-scripts";
 import { FeedbackProvider } from "@/components/shared/feedback-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
@@ -60,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={sora.variable} lang="en" suppressHydrationWarning>
+    <html className={sora.variable} lang="en-GB" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light" />
         <script
@@ -73,10 +69,8 @@ export default function RootLayout({
             __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','functionality_storage':'granted','security_storage':'granted','wait_for_update':500});`,
           }}
         />
-        <GoogleTagManagerHead />
       </head>
       <body className="font-sans antialiased">
-        <GoogleTagManagerNoscript />
         <ThemeProvider>
           <FeedbackProvider>
             <AnalyticsProvider>

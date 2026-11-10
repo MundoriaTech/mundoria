@@ -25,7 +25,7 @@ import {
   slicePage,
   totalPages,
 } from "@/lib/pagination";
-import { buildPageMetadata } from "@/lib/seo/site";
+import { buildPageMetadata, fullDescription } from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 
 type PageProps = {
@@ -41,7 +41,10 @@ export async function generateMetadata({
   const collection = await getHelpCollectionBySlug(params.collection);
   if (!collection) return {};
   return buildPageMetadata({
-    description: collection.description,
+    description: fullDescription(
+      collection.description,
+      "Step-by-step answers from the Mundoria Help Centre.",
+    ),
     path: `/help/${collection.slug}`,
     title: `${collection.title} | Mundoria Help`,
   });
@@ -80,7 +83,10 @@ export default async function HelpCollectionPage({
   const collection = await getHelpCollectionBySlug(params.collection);
   if (!collection) notFound();
   const articles = await listHelpArticlesForCollection(collection.id);
-  const helpPageSize = PAGE_SIZES.help;
+  // List every article on the collection page so each one has a crawlable
+  // internal link (paged lists left 19 articles linked from nowhere).
+  // Pagination only kicks in for unusually large collections.
+  const helpPageSize = Math.max(PAGE_SIZES.help, 60);
   const helpPages = totalPages(articles.length, helpPageSize);
   const helpPage = clampPage(parsePage(searchParams?.page), helpPages);
   const paginate = articles.length > helpPageSize;

@@ -16,19 +16,20 @@ import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
   MARKETING_CATEGORY_PATHS,
-  indexableBirminghamPostcodes,
   indexableMarketingServices,
-  postcodePath,
 } from "@/lib/seo/marketing";
 import { SERVICE_GUIDE_TOPICS, serviceGuidePath } from "@/lib/seo/service-guides";
-import { absoluteUrl } from "@/lib/seo/site";
+import { MARKETING_CONTENT_UPDATED_AT, absoluteUrl } from "@/lib/seo/site";
 
 /**
  * Lean sitemap: one page per service intent + one page per area.
  * Compound zone hubs (readable slugs) are included; service×area matrix is not.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
+  // Real dates only: marketing templates change on deploys that touch them,
+  // editorial rows carry their own updated_at. "Now" on every request told
+  // Google every URL changed every day, which makes lastmod meaningless.
+  const now = new Date(MARKETING_CONTENT_UPDATED_AT);
   const indexableServices = indexableMarketingServices();
 
   const staticRoutes = [
@@ -39,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/faq",
     "/blog",
     "/how-it-works",
+    "/about",
     "/for-cleaners",
     "/contact",
     "/privacy",
@@ -73,14 +75,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: absoluteUrl(serviceGuidePath(service.slug, topic)),
     })),
   );
-
-  // Only districts whose parent neighbourhood hub exists (avoids sitemap 404s).
-  const postcodeRoutes = indexableBirminghamPostcodes().map((item) => ({
-    changeFrequency: "weekly" as const,
-    lastModified: now,
-    priority: 0.55,
-    url: absoluteUrl(postcodePath(item.prefix)),
-  }));
 
   const knownAreaSlugs = new Set(BIRMINGHAM_AREAS.map((area) => area.slug));
   const areaRoutes = [
@@ -119,9 +113,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const blogRoutes = posts.map((post) => ({
     changeFrequency: "monthly" as const,
-    lastModified: post.published_at
-      ? new Date(post.published_at)
-      : new Date(post.created_at),
+    lastModified: new Date(
+      post.updated_at ?? post.published_at ?? post.created_at,
+    ),
     priority: 0.6,
     url: absoluteUrl(`/blog/${post.slug}`),
   }));
@@ -135,7 +129,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const helpArticleRoutes = articles.map((article) => ({
     changeFrequency: "monthly" as const,
-    lastModified: now,
+    lastModified: article.updated_at ? new Date(article.updated_at) : now,
     priority: 0.5,
     url: absoluteUrl(`/help/article/${article.slug}`),
   }));
@@ -145,7 +139,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...categoryRoutes,
     ...serviceRoutes,
     ...guideRoutes,
-    ...postcodeRoutes,
     ...areaRoutes,
     ...blogRoutes,
     ...helpCollectionRoutes,

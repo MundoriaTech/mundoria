@@ -141,8 +141,7 @@ export function CategoryPhotoHero({
     >
       <div className="absolute inset-0">
         <Image
-          alt=""
-          aria-hidden
+          alt={`${hero.title}: a Mundoria cleaner at work`}
           className="object-cover object-center"
           fill
           priority

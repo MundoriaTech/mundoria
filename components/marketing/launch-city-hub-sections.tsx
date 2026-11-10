@@ -17,11 +17,10 @@ import {
 import {
   loadDirectoryCleaners,
   loadDirectoryReviews,
-  reviewsOrFallback,
+  publishedReviews,
 } from "@/lib/seo/birmingham-directory";
 import { marketingServiceCardImage } from "@/lib/seo/service-detail-config";
 import { birminghamPlaceFaqSchemaAnswers } from "@/lib/seo/birmingham-place-faqs";
-import { BIRMINGHAM_LOCATION_CLEANERS } from "@/lib/seo/location-social-proof";
 import { canonicalCleaningPath } from "@/lib/seo/canonical";
 import {
   BIRMINGHAM_AREAS,
@@ -164,10 +163,9 @@ export async function LaunchCityHubSections({
     limit: cleanerLimit,
     serviceType: serviceFocus?.value,
   });
-  const featured = liveCleaners?.length
-    ? liveCleaners
-    : [...BIRMINGHAM_LOCATION_CLEANERS].slice(0, cleanerLimit);
-  const reviews = reviewsOrFallback(await loadDirectoryReviews({ limit: 9 }));
+  // Real, active cleaner profiles only. No invented fallback cleaners.
+  const featured = liveCleaners ?? [];
+  const reviews = publishedReviews(await loadDirectoryReviews({ limit: 9 }), 9);
   const lookingFor = differentCleaningServices(
     categoryFocus,
     serviceFocus?.slug,

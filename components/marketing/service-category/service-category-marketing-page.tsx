@@ -77,8 +77,7 @@ export function ServiceCategoryMarketingPage({
       >
         <div className="absolute inset-0">
           <Image
-            alt=""
-            aria-hidden
+            alt={`${title}: a Mundoria cleaner at work`}
             className="object-cover object-[center_30%]"
             fill
             priority

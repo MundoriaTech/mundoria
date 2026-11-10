@@ -1,5 +1,6 @@
 "use client";
 
+import { canonicalInternalHref } from "@/lib/seo/canonical";
 import { cn } from "@/lib/utils";
 
 type EditorialBlock = {
@@ -28,7 +29,7 @@ function formatInline(
   return withLinks.map((segment, segmentIndex) => {
     const linkMatch = segment.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (linkMatch) {
-      const href = linkMatch[2];
+      const href = canonicalInternalHref(linkMatch[2]);
       const label = linkMatch[1];
       if (onLinkClick) {
         return (

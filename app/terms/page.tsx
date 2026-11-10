@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
 import { buildPageMetadata } from "@/lib/seo/site";
-import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
+import {
+  MUNDORIA_IDENTITY,
+  companyRegistrationSentence,
+} from "@/lib/seo/identity";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
@@ -13,7 +16,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 const sections: LegalSection[] = [
   {
-    body: `These terms apply when you access or use Mundoria as a customer, cleaner or administrator. Mundoria is operated by ${MUNDORIA_IDENTITY.legalName}, a company registered in England and Wales.`,
+    body: `These terms apply when you access or use Mundoria as a customer, cleaner or administrator. Mundoria is operated by ${MUNDORIA_IDENTITY.legalName}. ${companyRegistrationSentence()}`,
     title: "About these terms",
   },
   {

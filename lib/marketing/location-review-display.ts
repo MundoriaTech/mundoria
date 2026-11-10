@@ -22,6 +22,7 @@ export function directoryReviewsToLandingReviews(
       id: `location-review-${index}-${review.body.slice(0, 16).replace(/\s+/g, "-")}`,
       name,
       quote: review.body,
+      rating: review.score,
     };
   });
 }

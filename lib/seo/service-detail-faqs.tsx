@@ -452,7 +452,7 @@ function costFaq(service: MarketingService): CategoryFaq {
     `How much does ${service.label.toLowerCase()} cost?`,
     <p>
       {service.label} starts from {service.fromPrice}. The estimate updates with
-      property size, duration, cleaning standard and any add-ons.{" "}
+      property size, duration and any add-ons.{" "}
       <FaqLink href={service.bookingHref}>See your price in booking</FaqLink>{" "}
       before you pay, no surprise extras on the day. More pricing detail is in
       the <FaqLink href={FAQ_LINKS.pricing}>FAQ</FaqLink> and{" "}

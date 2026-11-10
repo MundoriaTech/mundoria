@@ -103,9 +103,23 @@ export function loadGa4Direct() {
   return true;
 }
 
+/** Whether the visitor has allowed any optional tags (analytics or marketing). */
+export function allowsOptionalTags(preferences: ConsentPreferences) {
+  return preferences.analytics || preferences.marketing;
+}
+
+/**
+ * Load the tag container only after an optional-cookie choice.
+ * GTM is no longer bootstrapped in the document head: a container tag that
+ * ignores Consent Mode (for example an ads pixel) could otherwise fire before
+ * the visitor answers the banner, which UK PECR does not allow. Deferring the
+ * container also takes it off the critical path for first page load.
+ */
 export function loadAnalyticsTags(preferences: ConsentPreferences) {
-  if (!preferences.analytics) return;
-  // GTM is bootstrapped in layout; consent update unlocks tags inside the container.
-  if (getGtmId()) return;
-  loadGa4Direct();
+  if (!allowsOptionalTags(preferences)) return;
+  if (getGtmId()) {
+    loadGoogleTagManager();
+    return;
+  }
+  if (preferences.analytics) loadGa4Direct();
 }

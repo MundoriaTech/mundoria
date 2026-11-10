@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/marketing/json-ld";
+import { ServiceGuideLinks } from "@/components/marketing/service-guide-links";
 import {
   BrandedCtaBand,
   BrandedPageWash,
@@ -24,6 +25,9 @@ import {
 } from "@/lib/seo/service-guides";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+
+/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
+export const revalidate = 300;
 
 type PageProps = {
   params: { slug: string; topic: string };
@@ -48,7 +52,7 @@ export async function generateMetadata({
   return buildPageMetadata({
     description: guide.description,
     path: serviceGuidePath(service.slug, params.topic),
-    title: guide.title,
+    title: guide.metaTitle,
   });
 }
 
@@ -123,6 +127,7 @@ export default async function ServiceGuidePage({ params }: PageProps) {
             </Link>
           </p>
         </BrandedSection>
+        <ServiceGuideLinks current={params.topic} service={service} />
         <BrandedCtaBand
           body={`Book ${service.label.toLowerCase()} in Birmingham and see the price before you confirm.`}
           href={bookingHref}
