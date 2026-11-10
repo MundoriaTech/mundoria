@@ -112,10 +112,10 @@ export default async function AboutPage() {
             the full amount before you confirm.
           </p>
           <p className={bodyClass}>
-            Nothing is charged when you book. About 24 hours before the visit,
-            once a cleaner is confirmed, a hold is placed on your card, and the
-            payment is taken the day after the clean. You never pay the cleaner
-            directly.{" "}
+            Nothing is charged when you book. From 48 hours before the visit, once
+            a cleaner is assigned, a temporary hold is placed on your card, and the payment is taken the
+            day after the clean. Cancel 24 hours or more before and there is no
+            charge. You never pay the cleaner directly.{" "}
             <Link className={linkClass} href="/help/article/why-pay-in-advance">
               Why we hold payment in advance
             </Link>

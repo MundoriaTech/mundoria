@@ -20,8 +20,12 @@ import {
   publishedReviews,
 } from "@/lib/seo/birmingham-directory";
 import { marketingServiceCardImage } from "@/lib/seo/service-detail-config";
-import { birminghamPlaceFaqSchemaAnswers } from "@/lib/seo/birmingham-place-faqs";
-import { canonicalCleaningPath } from "@/lib/seo/canonical";
+import { canonicalCleaningPath, cleanerPlacePath } from "@/lib/seo/canonical";
+import {
+  locationFaqContext,
+  locationFaqJsonLd,
+  locationFaqs,
+} from "@/lib/seo/location-faqs";
 import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
@@ -310,23 +314,6 @@ export async function LaunchCityHubSections({
               ))}
             </ul>
           ) : null}
-          {priorityArea.faqs.length ? (
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {priorityArea.faqs.map((item) => (
-                <div
-                  className="rounded-2xl border border-[#ebe4da] bg-white/80 p-4"
-                  key={item.question}
-                >
-                  <p className="text-sm font-semibold text-[#1c133b]">
-                    {item.question}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-[#5a5470]">
-                    {item.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
         </BrandedSection>
       ) : null}
 
@@ -353,18 +340,13 @@ export async function LaunchCityHubSections({
   );
 }
 
-export async function launchCityFaqJsonLd(place: string = PLACE) {
+/** FAQPage JSON-LD matching the visible location FAQ for this place. */
+export async function launchCityFaqJsonLd(
+  place: string = PLACE,
+  placePath: string = cleanerPlacePath(LAUNCH_CITY.slug),
+) {
   const { loadServicePricing } = await import("@/lib/customer/pricing-config");
-  const pricing = await loadServicePricing();
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: birminghamPlaceFaqSchemaAnswers(place, pricing).map(
-      (item) => ({
-        "@type": "Question",
-        acceptedAnswer: { "@type": "Answer", text: item.answer },
-        name: item.question,
-      }),
-    ),
-  };
+  return locationFaqJsonLd(
+    locationFaqs(locationFaqContext(place, placePath), await loadServicePricing()),
+  );
 }

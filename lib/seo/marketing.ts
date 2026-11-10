@@ -220,12 +220,12 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     faqs: [
       {
         answer:
-          "Yes. Jewellery Quarter flats and short-lets are a core Mundoria focus, regular cleans, guest turnovers and one-off deep cleans with clear estimates.",
+          "Yes. Choose regular, one-off or deep cleaning for a flat or loft, or short-let cleaning for a turnaround between guests. Give the number of bedrooms and bathrooms and building access details so the estimate and arrival go smoothly.",
         question: "Can Mundoria clean apartments in the Jewellery Quarter?",
       },
       {
         answer:
-          "Same-day and next-day options appear when cleaner supply allows. Book early for weekend turnovers around city-centre check-outs.",
+          "You can request same-day or next-day cleaning, which is matched only when a cleaner is free, so it is not guaranteed. For weekend short-let turnarounds, booking a few days ahead gives the best chance of a match.",
         question: "How quickly can I book a city-centre cleaner?",
       },
     ],
@@ -245,12 +245,12 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     faqs: [
       {
         answer:
-          "Yes. Edgbaston bookings commonly cover family homes, HMOs and nearby student houses with regular, deep and end-of-tenancy options.",
+          "Yes. You can book regular, one-off, deep and end-of-tenancy cleaning for houses and flats in Edgbaston. The time estimate is based on the bedrooms, bathrooms and condition you enter.",
         question: "Does Mundoria cover family homes in Edgbaston?",
       },
       {
         answer:
-          "Share pet notes in the booking. Cleaners follow your preferences for closed doors, product sensitivity and which rooms to prioritise.",
+          "Yes. Add pet notes to the booking, such as which doors to keep closed and any rooms the pets should stay in. Cleaners follow those notes along with any product sensitivities.",
         question: "Can I book with pets in the home?",
       },
     ],
@@ -270,12 +270,12 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     faqs: [
       {
         answer:
-          "Weekly, fortnightly and monthly options are available where supply allows. You can also customise dates after choosing frequency.",
+          "Yes. Choose weekly, fortnightly or monthly visits. You can ask for the same cleaner each time, which Mundoria tries to keep but cannot guarantee, and you can stop future visits at any time.",
         question: "Can I set a recurring clean in Harborne?",
       },
       {
         answer:
-          "Yes. End-of-tenancy and move-out cleans are popular in Harborne for landlords and agents who need checklist-led handovers.",
+          "Yes. Book end of tenancy cleaning and add the agent's details to the access instructions if keys are collected from them. Mundoria does not hold customer keys itself.",
         question: "Do you offer end-of-tenancy cleaning in Harborne?",
       },
     ],
@@ -295,12 +295,12 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     faqs: [
       {
         answer:
-          "Yes. Moseley bookings suit independent homes, rentals and hosts who want checklist-led presentation without agency mark-ups.",
+          "Yes. Landlords, agents and tenants can book cleaning for a Moseley rental, including end of tenancy and move-in cleans. Whoever books needs authority to arrange access to the property.",
         question: "Is Mundoria available for Moseley rentals?",
       },
       {
         answer:
-          "Choose Enhanced or Comprehensive standards for a deeper finish, or add oven, fridge and interior windows as optional extras.",
+          "Book a deep clean rather than a regular one. You can also add extras such as inside the oven or fridge, which add time to the booking, and the price updates before you confirm.",
         question: "What if my Moseley home needs a deeper clean?",
       },
     ],
@@ -320,12 +320,12 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     faqs: [
       {
         answer:
-          "Yes. Kings Heath landlords and agents use Mundoria for end-of-tenancy, move-in and deep cleans with clear before-you-book pricing.",
+          "Yes. Landlords and agents can book end-of-tenancy, move-in and deep cleans for Kings Heath properties, with the full price shown before you confirm.",
         question: "Can landlords book Mundoria in Kings Heath?",
       },
       {
         answer:
-          "You manage eligible changes in your account. Fee windows are shown before you confirm, typically free more than 24 hours ahead.",
+          "The same rule applies everywhere: cancel or reschedule free of charge 24 hours or more before the start time; within 24 hours the full booking price is charged. You manage this in your Mundoria account.",
         question: "How do cancellations work for Kings Heath bookings?",
       },
     ],
@@ -345,12 +345,12 @@ export const BIRMINGHAM_AREAS: MarketingArea[] = [
     faqs: [
       {
         answer:
-          "Yes. Selly Oak is a priority area for student houses, HMOs and end-of-tenancy handovers around term dates.",
+          "Yes. You can book regular, one-off and end-of-tenancy cleaning for student houses and HMOs in Selly Oak. List any private rooms the cleaner should not enter in the booking notes.",
         question: "Does Mundoria clean student houses in Selly Oak?",
       },
       {
         answer:
-          "Book early near end of term. You’ll see available slots in the flow, with duration sized to bedrooms and bathrooms.",
+          "Book as early as you can before the end of term, when many tenancies end at once. The time estimate is sized to the bedrooms and bathrooms you enter, and your booking is confirmed once a cleaner accepts it.",
         question: "When should I book an end-of-tenancy clean in Selly Oak?",
       },
     ],
@@ -630,7 +630,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "You save a card when you book, so nothing is charged at that point. About 24 hours before the visit, once a cleaner is confirmed, a hold is placed on the card for the booking total. The payment is taken the day after the clean. Payments run through Stripe and you never pay the cleaner directly.",
+      "You save a card when you book, so nothing is charged at that point. From 48 hours before the visit, once a cleaner is assigned, a temporary hold is placed on the card for the booking total. The payment is taken the day after the clean. Cancel 24 hours or more before the start time and there is no charge. Payments run through Stripe and you never pay the cleaner directly.",
     question: "When do I pay?",
   },
   {
@@ -654,25 +654,6 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
     question: "How do I contact support?",
   },
 ];
-
-export const HOW_IT_WORKS_STEPS = [
-  {
-    body: "Choose house cleaning, moving home, short-let, workspace or recovery support, then the specific service you need.",
-    title: "Pick your service",
-  },
-  {
-    body: "Tell us about bedrooms, bathrooms and condition. Mundoria recommends the right standard and shows cleaner-time guidance.",
-    title: "Get a clear estimate",
-  },
-  {
-    body: "Choose a date and time with a realistic fulfilment path, then confirm and pay securely.",
-    title: "Book and pay",
-  },
-  {
-    body: "Track matching, arrival and completion. Confirm the checklist and rate when the job is done.",
-    title: "Follow every step",
-  },
-] as const;
 
 export function popularMarketingServices(
   limit = 6,

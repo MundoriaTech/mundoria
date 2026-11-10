@@ -20,7 +20,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Is Mundoria a cleaning company?",
         answer:
-          "Not in the traditional sense.\n\nMundoria is a platform that helps customers arrange and manage cleaning through independent cleaning professionals.\n\nBut we also do not want to be a directory that simply gives you someone's phone number and leaves you to figure out everything else.\n\nMundoria sits around the experience.\nWe help bring together the booking, the details of the job, your preferences, matching, communication, payment and support if something changes.\n\nThe cleaning itself is carried out by independent cleaning professionals who have gone through Mundoria's onboarding process, including the checks, insurance requirements and in-house training required for the types of bookings they take through the platform.\n\nSo while a traditional cleaning company may organise things for you manually, and a directory may simply introduce you to someone, Mundoria is designed to make the whole journey easier to arrange and manage in one place.",
+          "Not in the traditional sense.\n\nMundoria is a platform that helps customers arrange and manage cleaning through independent cleaning professionals.\n\nBut we also do not want to be a directory that simply gives you someone's phone number and leaves you to figure out everything else.\n\nMundoria sits around the experience.\nWe help bring together the booking, the details of the job, your preferences, matching, communication, payment and support if something changes.\n\nThe cleaning itself is carried out by independent cleaning professionals who have passed Mundoria's approval process: identity and right-to-work checks, a Basic DBS check, an experience review, an interview with the Mundoria team and at least £1 million of Public Liability insurance.\n\nSo while a traditional cleaning company may organise things for you manually, and a directory may simply introduce you to someone, Mundoria is designed to make the whole journey easier to arrange and manage in one place.",
       },
       {
         question: "How does Mundoria work?",
@@ -46,7 +46,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
         question:
           "What makes Mundoria different from a traditional cleaning company?",
         answer:
-          "For us, the difference is less about claiming that we have invented a new kind of cleaning and more about how the experience around the cleaning works.\n\nWe want it to be easy to arrange in the first place. You should be able to tell us what you need, understand the basis of your price, add the details that matter to you and manage the important parts without spending your day making calls and chasing messages.\n\nWe also recognise that people do not all live the same way.\nA family that wants weekly cleaning has different needs from somebody moving out of a flat. Someone preparing for a new baby may need a different experience from an office manager arranging workplace cleaning. Someone returning from hospital may have different priorities again.\n\nMundoria is designed to make room for those differences.\n\nThere is also work happening behind the booking. Cleaning professionals go through Mundoria's onboarding process, including DBS checks, relevant due diligence, insurance requirements, experience review and in-house training for the services they intend to carry out.\n\nMatching can consider more than who happens to be free, and if a professional becomes unavailable, the aim is for the booking to enter a replacement process where possible rather than simply leaving you to start again.\n\nPricing is another part of it. We want customers to understand what they are paying for, with cleaning time and any selected products or equipment made clear during the booking.\n\nNone of those things individually need to feel revolutionary.\nPut together, they should make cleaning feel much easier to live with.",
+          "For us, the difference is less about claiming that we have invented a new kind of cleaning and more about how the experience around the cleaning works.\n\nWe want it to be easy to arrange in the first place. You should be able to tell us what you need, understand the basis of your price, add the details that matter to you and manage the important parts without spending your day making calls and chasing messages.\n\nWe also recognise that people do not all live the same way.\nA family that wants weekly cleaning has different needs from somebody moving out of a flat. Someone preparing for a new baby may need a different experience from an office manager arranging workplace cleaning. Someone returning from hospital may have different priorities again.\n\nMundoria is designed to make room for those differences.\n\nThere is also work happening behind the booking. Before a cleaning professional can take bookings, Mundoria checks their identity and right to work, reviews a Basic DBS certificate, looks at their experience and requires at least £1 million of Public Liability insurance. Each professional also has an interview with the Mundoria team before approval.\n\nMatching can consider more than who happens to be free, and if a professional becomes unavailable, the aim is for the booking to enter a replacement process where possible rather than simply leaving you to start again.\n\nPricing is another part of it. We want customers to understand what they are paying for, with cleaning time and any selected products or equipment made clear during the booking.\n\nNone of those things individually need to feel revolutionary.\nPut together, they should make cleaning feel much easier to live with.",
       },
       {
         question: "Can I use Mundoria for both my home and workplace?",
@@ -1614,7 +1614,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "When will I be charged?",
         answer:
-          "When you book, Mundoria saves your card, there is no charge and no hold at that moment.\n\nAbout 24 hours before your clean (once a cleaner has confirmed), we place a hold for the booking amount. That reserves the funds but is not the final charge yet.\n\nPayment is captured the next calendar day after the clean is completed.\n\nIf the booking is cancelled under the free-cancellation window, any authorisation is released. If a cancellation fee applies, that is handled according to the cancellation terms.",
+          "Not when you book. At checkout Mundoria saves your card securely with Stripe. There is no charge and no hold at that point.\n\nFrom 48 hours before your clean, once a cleaner has been assigned, we place a temporary hold (an authorisation) for the booking amount. If no cleaner can take the booking, no hold is placed and you are not charged. This may show as a pending amount in your banking app. It reserves the funds but is not the final charge.\n\nThe payment is taken the next UK calendar day after the clean.\n\nIf you cancel 24 hours or more before the start time, there is no charge and any hold is released. Card providers can take a few days to remove a pending amount from your statement.",
       },
       {
         question: "Can I get a receipt or invoice?",
@@ -1629,7 +1629,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What happens if my payment fails?",
         answer:
-          "If we cannot place the pre-clean payment hold, the booking is cancelled free of charge.\n\nThat can happen when a card has expired, the bank declines the hold, there are insufficient funds, or extra bank confirmation is required for an off-session charge.\n\nWe will notify you so you can update your payment method and book again. We do not want a cleaner travelling to a visit that has not been properly authorised.\n\nNo charge is taken when a hold fails before the clean.",
+          "If the hold cannot be placed, we will let you know so you can update your payment method. We try again up to five times between 48 and 24 hours before the clean.\n\nThat can happen when a card has expired, the bank declines the hold, there are not enough funds, or the bank wants extra confirmation for a payment made while you are not in the app.\n\nIf the hold still cannot be placed 24 hours before the clean, the booking is cancelled free of charge. We do not want a cleaner travelling to a visit that has not been properly authorised, and no cancellation fee applies when a booking is cancelled for this reason.",
       },
       {
         question: "Can I update my payment method?",
@@ -1644,7 +1644,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I get a refund if my booking is cancelled?",
         answer:
-          "That depends on when the booking is cancelled and who cancelled it.\n\nIf you cancel:\n\n• 24 hours or more before the start time: no cancellation fee, and any payment authorisation is released\n• Less than 24 hours before the start time: the full booking amount is retained\n\nIf Mundoria or the assigned professional cannot fulfil the booking and no suitable replacement is arranged, the payment is handled under the cancellation and replacement process rather than leaving you without a clear next step.\n\nThe same notice windows are shown in the booking and cancellation journey.",
+          "That depends on who cancelled and when.\n\nIf you cancel:\n• 24 hours or more before the start time: no charge, and any payment hold is released\n• Less than 24 hours before the start time: the full booking price is charged\n\nIf Mundoria or the assigned professional cannot carry out the booking and no suitable replacement is arranged, you are not charged for cleaning that did not happen. Any hold is released, or a payment already taken is refunded.\n\nCard providers can take a few days to remove a pending amount or show a refund. Your statutory consumer rights are not affected.",
       },
     ],
   },
@@ -1671,32 +1671,32 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "How does someone become a Mundoria cleaning professional?",
         answer:
-          "Joining Mundoria involves more than creating a profile.\n\nApplicants go through a structured onboarding process designed to help Mundoria understand who they are, whether they are eligible to work, what experience they have and which services they are genuinely suited to carry out.\n\nThat process can include identity checks, right-to-work information where applicable, UTR details where relevant, DBS checks, references, insurance requirements, experience review and an appointment with the Mundoria team.\n\nProfessionals also complete Mundoria's in-house training and assessment before being approved for the relevant types of bookings.\n\nThe purpose is not to create paperwork for the sake of it.\n\nIt is to make sure there is real due diligence behind the person being matched to a customer's space.",
+          "Joining Mundoria involves more than creating a profile.\n\nApplicants go through a structured onboarding process designed to help Mundoria understand who they are, whether they are eligible to work, what experience they have and which services they are genuinely suited to carry out.\n\nThat process can include identity checks, right-to-work information where applicable, UTR details where relevant, a Basic DBS check, insurance requirements, experience review and an appointment with the Mundoria team.\n\nThe appointment is an interview covering Mundoria's service standards, conduct, customer privacy and safety, and it must be passed before a professional is approved for the relevant types of bookings. Insurance must be at least £1 million Public Liability.\n\nThe purpose is not to create paperwork for the sake of it.\n\nIt is to make sure there is real due diligence behind the person being matched to a customer's space.",
       },
       {
         question: "Are Mundoria cleaners vetted?",
         answer:
-          "Yes.\n\nMundoria carries out a structured vetting and onboarding process before a professional can begin taking suitable bookings.\n\nThat can include identity verification, eligibility checks, DBS checks, relevant experience, references, insurance requirements, right-to-work information where applicable and other onboarding documentation.\n\nWe also assess whether the professional is suited to the particular types of cleaning they want to carry out.\n\nVetting does not mean making unrealistic promises about human behaviour.\n\nIt means doing sensible due diligence before someone is allowed onto the platform.",
+          "Yes.\n\nMundoria carries out a structured vetting and onboarding process before a professional can begin taking suitable bookings.\n\nThat can include identity verification, eligibility checks, DBS checks, relevant experience, insurance requirements, right-to-work information where applicable and other onboarding documentation.\n\nWe also assess whether the professional is suited to the particular types of cleaning they want to carry out.\n\nVetting does not mean making unrealistic promises about human behaviour.\n\nIt means doing sensible due diligence before someone is allowed onto the platform.",
       },
       {
         question: "Does Mundoria carry out DBS checks?",
         answer:
-          "Yes.\n\nDBS checks form part of Mundoria's onboarding process.\n\nThis is particularly important because cleaning professionals may be entering private homes, workplaces and other spaces where customers reasonably expect a higher level of due diligence.\n\nWhere a particular setting has additional safeguarding requirements, those should also be considered separately.",
+          "Yes. A Basic DBS check is part of Mundoria's onboarding, and a professional's profile is not fully activated until their DBS certificate has been reviewed.\n\nThis matters because cleaning professionals may be entering private homes, workplaces and other spaces where customers reasonably expect a higher level of care.\n\nA DBS certificate is one part of the picture rather than proof that someone is risk-free, which is why it sits alongside identity, right-to-work, experience and insurance checks. Where a setting has its own safeguarding requirements, tell us before the booking so they can be considered.",
       },
       {
         question: "Are Mundoria cleaners insured?",
         answer:
-          "Cleaning professionals are required to have appropriate insurance before taking relevant bookings through Mundoria.\n\nInsurance is part of the onboarding and compliance process rather than something we expect customers to investigate themselves.\n\nThe type of cover required should be appropriate to the work being carried out.",
+          "Yes. Every cleaning professional approved for bookings must hold at least £1 million of Public Liability insurance suitable for the cleaning they take on.\n\nThe certificate, the amount of cover and the expiry date are checked during onboarding. Professionals are reminded before their cover runs out, and anyone whose insurance lapses is removed from matching until they upload a renewed certificate.\n\nPublic Liability insurance is a minimum standard, not a promise that every incident is covered. Whether a particular claim is covered depends on the policy wording, its exclusions and what actually happened.",
       },
       {
         question: "Do Mundoria cleaners receive training?",
         answer:
-          "Yes.\n\nMundoria includes training as part of the onboarding process.\n\nThe aim is to make sure professionals understand the standards expected on the platform, how different services work and what customers should reasonably expect during a booking.\n\nTraining also helps create more consistency across areas such as communication, cleaning standards, handling customer preferences and understanding the limits of the service.",
+          "Every professional has an interview with the Mundoria team before they are approved, and they must pass it before they can take bookings.\n\nIt covers how Mundoria expects a booking to be handled: service standards, communication, customer privacy, safe use of products, what to do if something goes wrong and the limits of each service.\n\nWe describe a professional as trained only for what they have actually completed with us. Mundoria's induction is not an external qualification or certification.",
       },
       {
         question: "Does Mundoria provide in-house training?",
         answer:
-          "Yes.\n\nMundoria provides its own in-house training and assessment before professionals are approved for suitable types of work.\n\nThis matters because experience alone does not automatically mean someone understands how Mundoria expects a booking to be handled.\n\nThe training helps bring professionals onto the same page around service standards, customer expectations and how the platform works.",
+          "Mundoria runs its own induction for professionals. Each one has an interview with the Mundoria team covering service standards, professional conduct, customer privacy, safety and how the platform works, and must pass it before taking bookings.\n\nThis matters because experience alone does not automatically mean someone understands how Mundoria expects a booking to be handled.\n\nIt is Mundoria's own induction, not a formal external certification, and we only describe a professional as trained for what they have actually completed.",
       },
       {
         question: "Does Mundoria assess cleaning experience?",
@@ -1721,7 +1721,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does Mundoria check whether professionals are insured?",
         answer:
-          "Yes.\n\nAppropriate insurance is one of the requirements Mundoria checks as part of the professional onboarding process.\n\nProfessionals should not simply state that they are insured and move on.\n\nThe relevant documentation needs to be provided and reviewed as part of their eligibility to take bookings through the platform.",
+          "Yes. Professionals cannot simply tell us they are insured. They upload their certificate, and Mundoria checks the named policyholder, the amount of cover (at least £1 million Public Liability) and the dates the policy is valid.\n\nInsurance is tracked after approval too. When a policy reaches its expiry date, the professional is removed from matching until a renewed certificate has been provided.\n\nPublic Liability insurance is a minimum standard, not a promise that every incident is covered. Whether a particular claim is covered depends on the policy wording, its exclusions and what actually happened.",
       },
       {
         question: "Does Mundoria check UTR details where relevant?",
@@ -1731,12 +1731,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can anyone simply sign up and start taking bookings?",
         answer:
-          "No.\n\nSomeone can apply to join Mundoria, but that does not mean they immediately become available to customers.\n\nThey need to complete the relevant onboarding process first.\n\nThat includes the required checks, documents, training and assessment.\n\nOnly after the necessary requirements have been completed can the professional become eligible for suitable bookings.\n\nFor us, there is an important difference between signing up and being approved to work through Mundoria.",
+          "No.\n\nSomeone can apply to join Mundoria, but that does not mean they immediately become available to customers.\n\nThey need to complete the relevant onboarding process first.\n\nThat includes the required checks, documents, insurance and an interview with the Mundoria team.\n\nOnly after the necessary requirements have been completed can the professional become eligible for suitable bookings.\n\nFor us, there is an important difference between signing up and being approved to work through Mundoria.",
       },
       {
         question: "Are cleaners trained for specific types of cleaning?",
         answer:
-          "Yes.\n\nMundoria takes service type into account because different cleaning jobs require different levels of experience and understanding.\n\nRegular home cleaning is different from an end-of-tenancy clean.\n\nWorkspace cleaning is different from cleaning a short-let between guests.\n\nRecovery Cleaning also requires professionals to understand the more sensitive circumstances that may sit around the booking, even though the service itself remains cleaning.\n\nThe aim is to make sure a professional is not accepting a type of job simply because the word \"cleaning\" appears in the title.",
+          "Mundoria takes service type into account because different cleaning jobs need different experience.\n\nRegular home cleaning is different from an end-of-tenancy clean. Workspace cleaning is different from turning around a short-let between guests. Recovery Cleaning also needs professionals who understand the more sensitive circumstances around the booking, even though the service itself is still cleaning.\n\nProfessionals tell us which services they offer and their relevant experience, and this is reviewed during onboarding. Choosing a service on a profile is not treated as proof of competence on its own, and matching also looks at experience, reliability and the job itself.",
       },
       {
         question: "How does Mundoria decide which services a professional can accept?",
@@ -1830,27 +1830,27 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Is it safe to book through Mundoria?",
         answer:
-          "Mundoria puts a structured process around who can take bookings, how payments are handled and what information sits behind the booking.\n\nCleaning professionals go through onboarding, identity and eligibility checks, DBS checks, insurance requirements, experience review and Mundoria's in-house training and assessment before becoming eligible for suitable work.\n\nPayments are handled through the platform using Stripe rather than through private arrangements between customers and cleaners.\n\nNo platform can honestly promise that risk disappears completely.\n\nWhat we can do is put sensible checks, clear processes and support around the booking so customers are not simply inviting an unknown person into their home with no information behind them.",
+          "Mundoria puts a structured process around who can take bookings, how payments are handled and what information sits behind each booking.\n\nBefore a professional can take bookings, Mundoria checks their identity and right to work, reviews a Basic DBS certificate, looks at their experience, holds an interview with them and requires at least £1 million of Public Liability insurance.\n\nPayments are handled through the platform using Stripe rather than through private arrangements between customers and cleaners.\n\nNo vetting process removes every risk. What we can do is put sensible checks, clear processes and a route for reporting concerns around the booking, so you are not simply inviting an unknown person into your home with nothing behind them.",
       },
       {
         question: "What checks does Mundoria carry out on cleaners?",
         answer:
-          "Mundoria's onboarding process can include identity verification, right-to-work information where applicable, UTR details where relevant, DBS checks, references, insurance requirements, experience review and an appointment with the Mundoria team.\n\nProfessionals also complete Mundoria's in-house training and assessment before being approved for suitable service categories.\n\nThe purpose is straightforward.\n\nWe want to understand who the person is, whether they are eligible to work, whether they have the experience they claim to have and whether they are suited to the types of bookings they want to accept.",
+          "Before a cleaning professional can take bookings through Mundoria, we check:\n• identity\n• right to work in the UK\n• a Basic DBS certificate\n• relevant cleaning experience\n• Public Liability insurance of at least £1 million, including the expiry date\n• UTR details where relevant for self-employment\n\nEach professional also has an interview with the Mundoria team before approval.\n\nThe purpose is straightforward. We want to know who the person is, whether they can legally work, whether they have the experience they claim and whether they are suited to the bookings they want to accept. Insurance is tracked after approval too: lapsed cover removes a professional from matching until it is renewed.",
       },
       {
         question: "Are cleaners DBS checked?",
         answer:
-          "Yes.\n\nDBS checks form part of Mundoria's onboarding process.\n\nThat is particularly important because professionals may be entering private homes, workplaces and other spaces where customers reasonably expect proper due diligence.\n\nA DBS check is one part of the wider onboarding process, not the only thing Mundoria relies on.",
+          "Yes. A Basic DBS check is part of Mundoria's onboarding, and a cleaning professional's profile is not fully activated until their DBS certificate has been reviewed.\n\nIt sits alongside identity, right-to-work, experience and insurance checks. A DBS certificate on its own does not prove that someone is risk-free, which is why it is one part of a wider approval process.\n\nSome settings, such as schools, may have their own safeguarding requirements. Tell us about those before the booking so they can be considered.",
       },
       {
         question: "Are cleaners insured?",
         answer:
-          "Professionals are required to have appropriate insurance before taking relevant bookings through Mundoria.\n\nInsurance is checked as part of the onboarding and compliance process.\n\nThe cover needs to be suitable for the kind of cleaning work the professional intends to carry out.\n\nWe do not want customers to have to investigate that themselves each time they make a booking.",
+          "Yes. Mundoria requires every professional approved to take bookings to hold at least £1 million of Public Liability insurance suitable for the work they accept.\n\nThe certificate, the amount of cover and the expiry date are checked during onboarding. Anyone whose cover expires is removed from matching until they upload a renewed certificate, so you do not need to investigate it yourself each time you book.\n\nPublic Liability insurance is a minimum standard, not a promise that every incident is covered. Whether a particular claim is covered depends on the policy wording, its exclusions and what actually happened.",
       },
       {
         question: "How does Mundoria protect customers?",
         answer:
-          "Protection starts before the clean happens.\n\nMundoria carries out onboarding and due diligence on professionals, keeps the booking information connected in one place, processes payments through Stripe and provides a route for customers to report issues if something goes wrong.\n\nMatching also considers more than simple availability.\n\nExperience, reliability, location and other practical factors can all affect whether someone is suitable for a booking.\n\nThe point is not to create the impression that nothing can ever go wrong.\n\nIt is to make sure there is a real process around the booking if something does.",
+          "Protection starts before the clean happens.\n\nCleaning professionals go through identity and right-to-work checks, a Basic DBS check, an experience review and an interview with the Mundoria team before they can take bookings. Every approved professional must hold at least £1 million of Public Liability insurance, and anyone whose cover expires is removed from matching until it is renewed.\n\nPayments go through the platform using Stripe rather than private arrangements, so every booking has a clear record. Matching considers experience, reliability and location as well as availability.\n\nIf something goes wrong, you can report it through Mundoria and it is reviewed on its facts. No platform can honestly promise that nothing will ever go wrong, and insurance does not cover every kind of loss. What we can promise is a real process around the booking if something does.",
       },
       {
         question: "How does Mundoria handle payments safely?",
@@ -1917,22 +1917,22 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I cancel my booking?",
         answer:
-          "Yes.\n\nIf your plans change, you can cancel your booking through the Mundoria booking process.\n\nThe exact outcome will depend on how close the cancellation is to the scheduled clean and the cancellation terms that apply at the time.\n\nWe want those rules to be clear before you book, not something you only discover when you try to cancel.",
+          "Yes. You can cancel through your Mundoria booking.\n\n• 24 hours or more before the start time: free, and any payment hold is released\n• Less than 24 hours before the start time: the full booking price is charged\n\nThe same rule is shown before you book and again when you cancel. Your statutory consumer rights are not affected.",
       },
       {
         question: "Can I reschedule my booking?",
         answer:
-          "Yes, where another suitable date and time is available.\n\nIf something changes and you still want the clean, rescheduling may make more sense than cancelling altogether.\n\nThe earlier you make the change, the easier it is to find another suitable slot and update the professional's schedule.\n\nAny applicable rescheduling terms should be shown clearly before the change is confirmed.",
+          "Yes, where another suitable date and time is available.\n\nRescheduling at least 24 hours before the start time is free. The earlier you make the change, the easier it is to find another slot and update the professional's schedule.\n\nWithin 24 hours of the start time, a booking cannot be moved as a free reschedule. You would need to cancel under the cancellation rule and book again.",
       },
       {
         question: "How much notice do I need to cancel?",
         answer:
-          "You can cancel through the Mundoria booking process before the clean starts.\n\nTo cancel without a fee, cancel at least 24 hours before the scheduled start time.\n\nCancellations less than 24 hours before the start time incur the full booking amount.",
+          "To cancel without charge, cancel at least 24 hours before the scheduled start time.\n\nCancellations less than 24 hours before the start time are charged the full booking price.\n\nIf a booking is cancelled because the pre-clean payment hold could not be placed, no cancellation fee applies. Your statutory consumer rights are not affected.",
       },
       {
         question: "Is there a cancellation fee?",
         answer:
-          "Yes, for late cancellations.\n\n• 24 hours or more before the start time: no fee\n• Less than 24 hours before the start time: 100% of the booking total\n\nThose windows are applied when you cancel through Mundoria and are shown as part of the cancellation process.",
+          "Only for late cancellations.\n\n• 24 hours or more before the start time: no fee\n• Less than 24 hours before the start time: the full booking price\n\nBy that point a professional has usually set the time aside and turned down other work. The rule is shown before you book and when you cancel. Your statutory consumer rights are not affected.",
       },
       {
         question: "Is there a rescheduling fee?",
@@ -2017,7 +2017,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I cancel a recurring clean?",
         answer:
-          "Yes.\n\nRecurring cleaning does not lock you in forever. You can cancel future visits through Mundoria.\n\nEach upcoming visit follows the same cancellation notice windows as a one-off booking: free at 24 hours or more before the start time, and 100% within 24 hours.",
+          "Yes. Recurring cleaning is not a membership and there is no minimum term. You can stop future visits through Mundoria.\n\nEach upcoming visit follows the same rule as a one-off booking: free if cancelled 24 hours or more before the start time, and the full price for that visit within 24 hours.",
       },
       {
         question: "Can I pause a recurring clean?",
@@ -2069,7 +2069,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What happens if something is accidentally damaged?",
         answer:
-          "Report it to Mundoria as soon as possible.\n\nProvide details of what was damaged, what happened if known and photographs where useful. Mundoria will review the booking with the cleaning professional and handle the issue through the platform's dispute and insurance process.\n\nCompensation is not automatic. The outcome depends on what happened, the evidence available and the professional's insurance cover.",
+          "Report it to Mundoria as soon as possible, with your booking reference, what was affected and photographs where useful. Where it is safe to, leave the damaged item as it is until it has been reviewed.\n\nMundoria reviews the booking with the cleaning professional and handles the issue through the dispute and insurance process.\n\nCompensation is not automatic. Professionals must hold at least £1 million of Public Liability insurance, but the outcome depends on what happened, the evidence and the policy terms.",
       },
       {
         question: "What happens if something goes missing?",
@@ -2089,12 +2089,12 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Will Mundoria pay for damage?",
         answer:
-          "Not automatically.\n\nWhether compensation applies depends on what happened, the evidence available, the cleaning professional's insurance and Mundoria's review of the booking.\n\nReport damage through Mundoria as soon as possible so the case can be assessed properly. We do not promise that every reported item will be paid for regardless of the circumstances.",
+          "Not automatically.\n\nMundoria requires professionals to hold at least £1 million of Public Liability insurance, but each report is reviewed on its facts: what happened, the evidence, the professional's account and the policy terms.\n\nReport damage through Mundoria as soon as possible so the case can be assessed properly. We do not promise that every reported item will be paid for regardless of the circumstances, and your statutory consumer rights are not affected.",
       },
       {
         question: "Are cleaners insured for accidental damage?",
         answer:
-          "Yes.\n\nCleaning professionals are required to have appropriate insurance before taking relevant bookings through Mundoria.\n\nIf accidental damage occurs, the insurance and claims process may apply depending on the circumstances. Contact Mundoria so the booking can be reviewed and the next steps explained.",
+          "Every professional approved for bookings must hold at least £1 million of Public Liability insurance suitable for the service booked.\n\nWhether damage to a particular item is covered depends on the policy's terms, its exclusions and what happened. Public Liability does not automatically cover every item, damage caused by a treatment you asked for, lost keys or work you are unhappy with.\n\nReport damage to Mundoria promptly so the booking can be reviewed and the next steps explained.",
       },
       {
         question: "Can Mundoria guarantee every stain will be removed?",
@@ -2228,7 +2228,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I cancel recurring cleaning?",
         answer:
-          "Yes.\n\nRecurring cleaning does not lock you in forever. You can cancel future visits through Mundoria.\n\nEach upcoming visit follows the same cancellation notice windows as a one-off booking: free at 24 hours or more before the start time, and 100% within 24 hours.",
+          "Yes. Recurring cleaning is not a membership and there is no minimum term. You can stop future visits through Mundoria.\n\nEach upcoming visit follows the same rule as a one-off booking: free if cancelled 24 hours or more before the start time, and the full price for that visit within 24 hours.",
       },
       {
         question: "Can I change the number of hours on future bookings?",

@@ -1,141 +1,52 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { MarketingFaqColumnsSection } from "@/components/marketing/marketing-faq-columns-section";
-import {
-  PlaceServiceExplainerIntro,
-  PlaceServiceExplainerList,
-} from "@/components/marketing/place-service-explainer-list";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
-import {
-  BIRMINGHAM_SERVICE_FAQ_LINKS,
-  birminghamPlaceFaqEntries,
-  bookCleanerSteps,
-  houseCleanCoveredPoints,
-  whyChooseMundoriaPoints,
-} from "@/lib/seo/birmingham-place-faqs";
-import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import { cleanerPlacePath } from "@/lib/seo/canonical";
+import { locationFaqContext, locationFaqs } from "@/lib/seo/location-faqs";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
 
 const linkClass =
   "font-semibold text-[#6a45b8] underline-offset-2 hover:underline";
 
+/** Location FAQ block: six core answers plus the page's local questions. */
 export async function BirminghamPlaceFaqList({
-  bookingHref,
   place = "Birmingham",
   placePath,
   title,
 }: {
-  bookingHref: string;
+  bookingHref?: string;
   place?: string;
-  /** Canonical place URL for “See cleaners in {place}” (no query). */
+  /** Canonical place URL (no query); identifies the hub, area or town. */
   placePath?: string;
   title?: string;
 }) {
-  const { deep } = BIRMINGHAM_SERVICE_FAQ_LINKS;
-  const entries = birminghamPlaceFaqEntries(place, await loadServicePricing());
+  const path = placePath ?? cleanerPlacePath(LAUNCH_CITY.slug);
+  const faqs = locationFaqs(
+    locationFaqContext(place, path),
+    await loadServicePricing(),
+  );
 
-  const richAnswers: Record<string, ReactNode> = {
-    [entries[0]!.question]: (
+  const items = faqs.map((faq) => ({
+    question: faq.question,
+    answer: (
       <>
-        <PlaceServiceExplainerIntro place={place} />
-        <PlaceServiceExplainerList place={place} />
-      </>
-    ),
-    [entries[1]!.question]: (
-      <>
-        <p>
-          Exact scope depends on the service you choose. Typical
-          house cleaning visits include:
-        </p>
-        <ul className="mt-2.5 list-disc space-y-1.5 pl-5">
-          {houseCleanCoveredPoints().map((point) => (
-            <li key={point}>{point}</li>
-          ))}
-        </ul>
-      </>
-    ),
-    [entries[2]!.question]: (
-      <ol className="list-decimal space-y-1.5 pl-5">
-        {bookCleanerSteps(place).map((step, index) => (
-          <li key={step}>
-            {index === 0 ? (
-              <>
-                Open{" "}
-                <Link className={linkClass} href={bookingHref}>
-                  Mundoria booking
-                </Link>{" "}
-                and enter your postcode in {place}
-              </>
-            ) : (
-              step
-            )}
-          </li>
+        {faq.answer.split("\n\n").map((paragraph, index) => (
+          <p className={index ? "mt-2.5" : undefined} key={index}>
+            {paragraph}
+          </p>
         ))}
-      </ol>
-    ),
-    [entries[3]!.question]: (
-      <>
-        <ol className="list-decimal space-y-1.5 pl-5">
-          {whyChooseMundoriaPoints().map((point) => (
-            <li key={point}>{point}</li>
-          ))}
-        </ol>
-        <p className="mt-3">
-          Ready to try Mundoria?{" "}
-          <Link
-            className={linkClass}
-            href={placePath ?? cleanerPlacePath(LAUNCH_CITY.slug)}
-          >
-            See cleaners in {place}
-          </Link>
-          .
-        </p>
+        {faq.links?.length ? (
+          <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+            {faq.links.map((link) => (
+              <Link className={linkClass} href={link.href} key={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </p>
+        ) : null}
       </>
     ),
-    [entries[8]!.question]: (
-      <>
-        Yes. Choose deep cleaning when you{" "}
-        <Link className={linkClass} href={bookingHref}>
-          book online
-        </Link>{" "}
-        or read more about{" "}
-        <Link className={linkClass} href={deep}>
-          deep cleaning in {place}
-        </Link>
-        . Add oven, fridge or interior windows if you want a heavier reset.
-      </>
-    ),
-    [entries[9]!.question]: (
-      <>
-        Use your own products and equipment, or add{" "}
-        <Link className={linkClass} href={`${bookingHref}?step=addons`}>
-          cleaning products
-        </Link>{" "}
-        and cleaning equipment in booking. Share fragrance-free or allergy notes
-        in the booking instructions.
-      </>
-    ),
-    [entries[10]!.question]: (
-      <>
-        Cancel or reschedule free of charge more than 24 hours before the visit.
-        Within 24 hours, the full booking amount is retained. See{" "}
-        <Link className={linkClass} href={FAQ_LINKS.cancellationFee}>
-          cancellation fees
-        </Link>
-        , the{" "}
-        <Link className={linkClass} href="/help">
-          Help Centre
-        </Link>
-        , and your booking confirmation for the exact windows.
-      </>
-    ),
-  };
-
-  const items = entries.map((item) => ({
-    answer: richAnswers[item.question] ?? item.schemaAnswer,
-    question: item.question,
   }));
 
   return (
@@ -158,7 +69,7 @@ export async function BirminghamPlaceFaqList({
         </>
       }
       items={items}
-      title={title ?? "Mundoria FAQ"}
+      title={title ?? `Cleaning in ${place}: your questions`}
     />
   );
 }
