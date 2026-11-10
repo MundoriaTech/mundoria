@@ -436,7 +436,7 @@ export function DiaryBoard() {
       {panel === "away" ? (
         <form className="grid gap-3 rounded-3xl border border-[#e6e0f2] bg-[#fff8f4] p-4 sm:grid-cols-2" onSubmit={(event) => void addAbsence(event)}>
           <p className="text-sm leading-6 text-[#5c5670] sm:col-span-2">
-            New visits will skip these days. You can also hand back visits already booked, so another pro can take them.
+            New visits will skip these days. You can also hand back visits already booked, so another cleaner can take them.
           </p>
           <label className="space-y-1 text-sm font-medium text-[#1c133b]">
             First day
