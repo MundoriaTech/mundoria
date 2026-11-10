@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { absenceError, diaryPlanError } from "@/lib/cleaner/diary-dates";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
 import type { ServiceType } from "@/types/customer";
@@ -222,10 +223,22 @@ export function DiaryBoard() {
   async function addEvent(event: React.FormEvent) {
     event.preventDefault();
     setMessage(null);
+    if (!title.trim()) {
+      setMessage("Give the plan a name.");
+      return;
+    }
+    // datetime-local values are device-local; new Date() reads them as local time.
+    const startIso = startsAt ? new Date(startsAt).toISOString() : "";
+    const endIso = endsAt ? new Date(endsAt).toISOString() : "";
+    const dateError = diaryPlanError(startIso, endIso);
+    if (dateError) {
+      setMessage(dateError);
+      return;
+    }
     const response = await fetch("/api/cleaner/diary", {
       body: JSON.stringify({
-        endsAt: new Date(endsAt).toISOString(),
-        startsAt: new Date(startsAt).toISOString(),
+        endsAt: endIso,
+        startsAt: startIso,
         title,
       }),
       headers: { "Content-Type": "application/json" },
@@ -246,6 +259,11 @@ export function DiaryBoard() {
   async function addAbsence(event: React.FormEvent) {
     event.preventDefault();
     setMessage(null);
+    const dateError = absenceError(awayStart, awayEnd, localIso(new Date()));
+    if (dateError) {
+      setMessage(dateError);
+      return;
+    }
     const response = await fetch("/api/cleaner/absence", {
       body: JSON.stringify({
         cancelExisting,
@@ -405,11 +423,11 @@ export function DiaryBoard() {
           </label>
           <label className="space-y-1 text-sm font-medium text-[#1c133b]">
             Starts
-            <Input onChange={(event) => setStartsAt(event.target.value)} type="datetime-local" value={startsAt} />
+            <Input min={nowStamp} onChange={(event) => setStartsAt(event.target.value)} type="datetime-local" value={startsAt} />
           </label>
           <label className="space-y-1 text-sm font-medium text-[#1c133b]">
             Ends
-            <Input onChange={(event) => setEndsAt(event.target.value)} type="datetime-local" value={endsAt} />
+            <Input min={startsAt || nowStamp} onChange={(event) => setEndsAt(event.target.value)} type="datetime-local" value={endsAt} />
           </label>
           <Button className="sm:col-span-2" type="submit">Save plan</Button>
         </form>
@@ -422,11 +440,11 @@ export function DiaryBoard() {
           </p>
           <label className="space-y-1 text-sm font-medium text-[#1c133b]">
             First day
-            <Input onChange={(event) => setAwayStart(event.target.value)} type="date" value={awayStart} />
+            <Input min={today} onChange={(event) => setAwayStart(event.target.value)} type="date" value={awayStart} />
           </label>
           <label className="space-y-1 text-sm font-medium text-[#1c133b]">
             Last day
-            <Input onChange={(event) => setAwayEnd(event.target.value)} type="date" value={awayEnd} />
+            <Input min={awayStart || today} onChange={(event) => setAwayEnd(event.target.value)} type="date" value={awayEnd} />
           </label>
           <label className="space-y-1 text-sm font-medium text-[#1c133b] sm:col-span-2">
             Note, if you want one
