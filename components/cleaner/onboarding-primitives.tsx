@@ -130,7 +130,7 @@ export function OnboardingSelect({
                     ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-brand-subtle"
                     : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-brand-muted",
                   open && "text-brand-ink",
-                  error && "text-brand-terracotta",
+                  error && "text-brand-terracotta-deep",
                 )}
               >
                 {label}
@@ -361,7 +361,7 @@ export function OnboardingDateField({
                 ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-brand-subtle"
                 : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-brand-muted",
               open && "text-brand-ink",
-              error && "text-brand-terracotta",
+              error && "text-brand-terracotta-deep",
             )}
           >
             {label}

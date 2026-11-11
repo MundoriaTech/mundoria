@@ -340,7 +340,7 @@ export function BookingDetail({
     <div className="min-w-0 space-y-6 sm:space-y-8">
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
             Booking
           </p>
           {!waitingForCleaner && booking.status !== "cancelled" ? (
@@ -948,7 +948,7 @@ function LookingForCleanerCard({
     <section className="overflow-hidden rounded-2xl border border-[#e6e8ee] bg-white">
       <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 text-sm font-semibold text-brand-terracotta">
+          <p className="flex items-center gap-2 text-sm font-semibold text-brand-terracotta-deep">
             <span className="h-2 w-2 rounded-full bg-brand-terracotta" />
             Finding your cleaner
           </p>
@@ -977,7 +977,7 @@ function LookingForCleanerCard({
                 "mx-auto flex h-6 w-6 items-center justify-center rounded-full",
                 step.state === "done" && "bg-brand-indigo text-white",
                 step.state === "current" &&
-                  "bg-[#fff1ea] text-brand-terracotta ring-2 ring-brand-terracotta",
+                  "bg-[#fff1ea] text-brand-terracotta-deep ring-2 ring-brand-terracotta",
                 step.state === "next" && "bg-[#f3f4f6] text-[#9aa1ab]",
               )}
             >

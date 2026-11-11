@@ -193,7 +193,7 @@ export function UtrComplianceStep({
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            <p className="mt-2 text-xs leading-5 text-[#8a8498]">
+            <p className="mt-2 text-xs leading-5 text-brand-subtle">
               PDF, JPG, JPEG or PNG · max 10 MB. The document must show your
               name and UTR clearly.
             </p>
@@ -677,7 +677,7 @@ export function InsuranceComplianceStep({
                   <input
                     aria-label="Other cover amount"
                     autoFocus
-                    className="h-full w-full min-w-0 bg-transparent text-[15px] font-medium text-brand-ink outline-none placeholder:text-[#8a8498]"
+                    className="h-full w-full min-w-0 bg-transparent text-[15px] font-medium text-brand-ink outline-none placeholder:text-brand-subtle"
                     id="onboarding-insurance-cover-other"
                     inputMode="decimal"
                     onChange={(event) => {
@@ -690,7 +690,7 @@ export function InsuranceComplianceStep({
                 </div>
               ) : null}
             </div>
-            <p className="text-xs leading-5 text-[#8a8498]">
+            <p className="text-xs leading-5 text-brand-subtle">
               Mundoria’s minimum is £1 million for standard domestic cleaning.
             </p>
             {error && insuranceCoverBand(coverAmount) === "other" ? (
@@ -745,7 +745,7 @@ export function InsuranceComplianceStep({
               </li>
             ))}
           </ol>
-          <p className="text-xs leading-5 text-[#8a8498]">
+          <p className="text-xs leading-5 text-brand-subtle">
             Starting points (not endorsements): Simply Business, PolicyBee,
             Hiscox. Always check eligibility and exclusions.
           </p>

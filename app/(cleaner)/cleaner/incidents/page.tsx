@@ -96,7 +96,7 @@ export default async function CleanerIncidentsPage() {
                   key={incident.id}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-brand-gold">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-brand-gold-deep">
                       {INCIDENT_CATEGORIES.find(
                         (item) => item.value === incident.category,
                       )?.label ?? incident.category}

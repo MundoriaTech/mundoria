@@ -127,7 +127,7 @@ export default async function CustomerDashboardPage() {
             {later.length ? (
               <div>
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
                     Also scheduled
                   </p>
                   {laterOverflow > 0 ? (
@@ -163,7 +163,7 @@ export default async function CustomerDashboardPage() {
                           href={`/booking/${booking.id}`}
                         >
                           <div className="flex w-12 shrink-0 flex-col items-center leading-none">
-                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-brand-gold">
+                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-brand-gold-deep">
                               {month}
                             </span>
                             <span className="mt-0.5 text-lg font-semibold tracking-tight text-brand-ink">
@@ -204,7 +204,7 @@ export default async function CustomerDashboardPage() {
       </DashboardSection>
 
       <section>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
           For you
         </p>
         <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-brand-ink">
@@ -271,7 +271,7 @@ export default async function CustomerDashboardPage() {
 
       {customer.referral_code ? (
         <section className="rounded-[1.75rem] bg-brand-cream-deep p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
             Share Mundoria
           </p>
           <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
@@ -312,7 +312,7 @@ function NextCleanCard({ booking }: { booking: Booking }) {
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-brand-line bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
       <div className="px-5 pt-5 sm:px-6">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
           {waiting ? customerWaitingLabel(booking.status) : "Confirmed"}
         </p>
         <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">

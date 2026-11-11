@@ -3768,7 +3768,7 @@ function CheckoutStep({
             value={draft.specialInstructions}
           />
         </FormField>
-        <p className="mt-1.5 px-0.5 text-xs leading-5 text-[#8a8498]">
+        <p className="mt-1.5 px-0.5 text-xs leading-5 text-brand-subtle">
           e.g. female pro preferred, key notes, fragrance-free products
         </p>
       </div>
@@ -3808,7 +3808,7 @@ function CheckoutStep({
                         color: "#1c133b",
                         fontFamily: "system-ui, sans-serif",
                         fontSize: "16px",
-                        "::placeholder": { color: "#8a8498" },
+                        "::placeholder": { color: "#6f6a82" },
                       },
                     },
                   }}

@@ -75,7 +75,7 @@ export function CleanerMedallionPanel({
           </p>
         </div>
         <Link
-          className="shrink-0 text-xs font-bold text-brand-terracotta"
+          className="shrink-0 text-xs font-bold text-brand-terracotta-deep"
           href="/cleaner/performance"
         >
           View
