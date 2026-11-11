@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import {
   analyticsConfigured,
   applyDefaultConsent,
   loadAnalyticsTags,
+  trackMetaPageView,
   updateConsentMode,
 } from "@/lib/analytics/gtm";
 
@@ -25,11 +27,13 @@ import {
  * Re-open via footer “Manage cookies” (no floating widget).
  */
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [ready, setReady] = useState(false);
   const [bannerOpen, setBannerOpen] = useState(false);
   const [preferences, setPreferences] = useState<ConsentPreferences | null>(
     null,
   );
+  const lastMetaPath = useRef<string | null>(null);
 
   useEffect(() => {
     applyDefaultConsent();
@@ -68,6 +72,18 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       );
     };
   }, []);
+
+  useEffect(() => {
+    if (!preferences?.marketing || !pathname) return;
+    if (lastMetaPath.current === null) {
+      // Initial PageView is fired inside loadMetaPixel().
+      lastMetaPath.current = pathname;
+      return;
+    }
+    if (lastMetaPath.current === pathname) return;
+    lastMetaPath.current = pathname;
+    trackMetaPageView();
+  }, [pathname, preferences?.marketing]);
 
   const save = useCallback((next: ConsentPreferences) => {
     writeConsent(next);
@@ -259,7 +275,8 @@ function CookieConsentBanner({
                   <span>
                     <span className="font-bold text-foreground">Statistics</span>
                     <span className="mt-1 block text-muted-foreground">
-                      Help us understand how visitors use the site (analytics).
+                      Help us understand how visitors use the site (analytics
+                      and session recordings).
                     </span>
                   </span>
                 </label>
@@ -273,7 +290,7 @@ function CookieConsentBanner({
                   <span>
                     <span className="font-bold text-foreground">Marketing</span>
                     <span className="mt-1 block text-muted-foreground">
-                      Used to show more relevant ads and measure campaigns.
+                      Used for Meta ads measurement and more relevant campaigns.
                     </span>
                   </span>
                 </label>

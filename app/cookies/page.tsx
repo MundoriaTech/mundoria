@@ -43,7 +43,7 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Statistic cookies help website owners to understand how visitors interact with websites by collecting and reporting information anonymously.",
-      "On Mundoria: Google Tag Manager / Google Analytics 4.",
+      "On Mundoria: Google Tag Manager / Google Analytics 4 and Microsoft Clarity (session recordings and heatmaps).",
       "Typical duration: up to 2 years for analytics identifiers (provider-controlled).",
       "Consent Mode keeps analytics storage denied until you opt in.",
     ],
@@ -52,8 +52,8 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Marketing cookies are used to track visitors across websites. The intention is to display ads that are relevant and engaging for the individual user and thereby more valuable for publishers and third party advertisers.",
-      "Reserved for future advertising pixels (for example Meta or Microsoft Advertising).",
-      "Off until you allow Marketing (or Allow all).",
+      "On Mundoria: Meta Pixel for campaign measurement and ad personalisation.",
+      "Off until you allow Marketing (or Accept all).",
     ],
     title: "Marketing",
   },

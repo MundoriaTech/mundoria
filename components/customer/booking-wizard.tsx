@@ -74,6 +74,11 @@ import {
   slotsFinishingByWindowEnd,
 } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
+import {
+  trackMetaAddPaymentInfo,
+  trackMetaInitiateCheckout,
+  trackMetaPurchase,
+} from "@/lib/analytics/gtm";
 import { trackClientActivity } from "@/lib/analytics/track-client";
 import { createBrowserClient } from "@/lib/supabase/client";
 import {
@@ -430,6 +435,8 @@ export function BookingWizard({
   const dismissedFarPostcodeRef = useRef<string | null>(null);
   const applyingPopStateRef = useRef(false);
   const historyReadyRef = useRef(false);
+  const metaCheckoutStartedRef = useRef(false);
+  const metaPaymentInfoRef = useRef(false);
   const lastSyncedStepIdRef = useRef<BookingFlowStepId | null>(null);
   /** Index of the current step within this session's history stack (0 = funnel entry). */
   const funnelDepthRef = useRef(0);
@@ -1692,6 +1699,28 @@ export function BookingWizard({
       : pricedServiceType
         ? indicativeHourlyRatePence(pricedServiceType, pricing)
         : null);
+
+  useEffect(() => {
+    if (!hydrated || metaCheckoutStartedRef.current) return;
+    metaCheckoutStartedRef.current = true;
+    trackMetaInitiateCheckout({
+      content_category: draft.serviceCategory,
+      content_name: draft.serviceType,
+      value: displayAmount > 0 ? Math.round(displayAmount) / 100 : undefined,
+    });
+    // Fire once when the funnel is ready; ignore later draft/price changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || stepId !== "checkout" || metaPaymentInfoRef.current) {
+      return;
+    }
+    metaPaymentInfoRef.current = true;
+    trackMetaAddPaymentInfo({
+      value: displayAmount > 0 ? Math.round(displayAmount) / 100 : undefined,
+    });
+  }, [displayAmount, hydrated, stepId]);
   const priceLabel =
     displayHourlyRatePence != null
       ? formatHourlyRate(displayHourlyRatePence)
@@ -4341,6 +4370,11 @@ function CheckoutStep({
     if (!bookingResponse.ok || !booking.bookingId) {
       throw new Error(booking.error ?? "Unable to create booking.");
     }
+
+    trackMetaPurchase({
+      bookingId: booking.bookingId,
+      valuePence: amountPence,
+    });
 
     if (draftResumeToken) {
       void fetch(`/api/booking-drafts/${draftResumeToken}/complete`, {
