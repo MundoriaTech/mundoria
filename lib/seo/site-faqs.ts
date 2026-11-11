@@ -4,6 +4,11 @@ import {
 } from "@/lib/customer/pricing-config";
 import { applyPricingFaqOverrides } from "@/lib/customer/published-pricing";
 import {
+  faqItemAnchor,
+  faqItemPath,
+  faqSectionPath,
+} from "@/lib/seo/faq-paths";
+import {
   FAQ_NAV_GROUPS,
   SITE_FAQ_CATALOGUE,
 } from "@/lib/seo/site-faq-catalogue";
@@ -70,14 +75,35 @@ export async function getAllSiteFaqs() {
   return allSiteFaqs(await getSiteFaqSections());
 }
 
-/** Stable in-page anchor for a FAQ question. */
-export function faqItemAnchor(sectionId: string, question: string) {
-  const slug = question
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 64);
-  return `${sectionId}-${slug || "q"}`;
+export { faqItemAnchor };
+
+export async function getSiteFaqSection(id: string) {
+  const sections = await getSiteFaqSections();
+  return sections.find((section) => section.id === id) ?? null;
+}
+
+export const SITE_FAQ_SECTION_IDS = SITE_FAQ_SECTIONS.map((section) => section.id);
+
+/** Most-asked questions shown (and marked up) on the FAQ hub. */
+export const FAQ_TOP_QUESTIONS: ReadonlyArray<[sectionId: string, question: string]> = [
+  ["pricing", "How much does Mundoria cost?"],
+  ["payments", "When will I be charged?"],
+  ["cancellations", "Is there a cancellation fee?"],
+  ["safety", "What checks does Mundoria carry out on cleaners?"],
+  ["safety", "Are cleaners insured?"],
+  ["booking", "Do I need to be at home during the clean?"],
+  ["products", "Do I need to provide cleaning products?"],
+  ["matching", "Can I choose my cleaner?"],
+  ["coverage", "Which areas does Mundoria cover?"],
+  ["about-mundoria", "Is Mundoria a cleaning company?"],
+];
+
+export function topSiteFaqs(sections: SiteFaqSection[]) {
+  const byId = new Map(sections.map((section) => [section.id, section]));
+  return FAQ_TOP_QUESTIONS.flatMap(([sectionId, question]) => {
+    const item = byId.get(sectionId)?.items.find((entry) => entry.question === question);
+    return item ? [{ ...item, sectionId }] : [];
+  });
 }
 
 export type FaqNavMenuItem = {
@@ -112,14 +138,14 @@ export function faqNavMenus(): FaqNavMenu[] {
       .filter((section): section is SiteFaqSection => Boolean(section));
 
     const sectionLinks: FaqNavMenuItem[] = sections.map((section) => ({
-      href: `/faq#${section.id}`,
+      href: faqSectionPath(section.id),
       kind: "section",
       label: section.title,
     }));
 
     const allQuestions = sections.flatMap((section) =>
       section.items.map((item) => ({
-        href: `/faq#${faqItemAnchor(section.id, item.question)}`,
+        href: faqItemPath(section.id, item.question),
         kind: "question" as const,
         label: item.question,
       })),

@@ -18,7 +18,9 @@ import {
   MARKETING_CATEGORY_PATHS,
   indexableMarketingServices,
 } from "@/lib/seo/marketing";
+import { faqSectionPath } from "@/lib/seo/faq-paths";
 import { SERVICE_GUIDE_TOPICS, serviceGuidePath } from "@/lib/seo/service-guides";
+import { SITE_FAQ_SECTIONS } from "@/lib/seo/site-faqs";
 import { MARKETING_CONTENT_UPDATED_AT, absoluteUrl } from "@/lib/seo/site";
 
 /**
@@ -51,6 +53,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     priority: path === "" ? 1 : 0.8,
     url: absoluteUrl(path || "/"),
+  }));
+
+  const faqRoutes = SITE_FAQ_SECTIONS.map((section) => ({
+    changeFrequency: "monthly" as const,
+    lastModified: now,
+    priority: 0.6,
+    url: absoluteUrl(faqSectionPath(section.id)),
   }));
 
   const categoryRoutes = MARKETING_CATEGORY_PATHS.map((path) => ({
@@ -136,6 +145,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...faqRoutes,
     ...categoryRoutes,
     ...serviceRoutes,
     ...guideRoutes,

@@ -17,7 +17,9 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 - Never add placeholder, curated or "example" testimonials, ratings or cleaners. Faking reviews or presenting them misleadingly breaks the DMCC Act 2024 and Google's policies.
 - The only star rating on the site is the live Google rating (`GoogleReviewsButton`).
   - It only accepts a Google listing whose name contains "Mundoria".
-  - Set `GOOGLE_PLACE_ID` to the verified listing.
+  - Set `GOOGLE_PLACES_API_KEY` (Places API (New) enabled) and `GOOGLE_PLACE_ID` to the verified listing, then redeploy.
+  - Until there are reviews from completed bookings, `ReviewsSection` shows the listing's own Google reviews (up to 5, from the Places API), each credited "Google review" with the reviewer's name. Google reviews are never put in our structured data.
+  - Without the key, the badge becomes a "Read our reviews on Google" link to the listing.
 - Seed and demo accounts (`*@seed.mundoria.local`) are excluded from the public views by migration `20261109120000_hide_seed_accounts_from_marketing.sql`.
 
 ## Company details
@@ -41,7 +43,8 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 ## Titles, descriptions and dates
 
 - Titles: about 60 characters at most. `brandedTitle` drops the "| Mundoria" suffix when it would overflow.
-- Descriptions: about 110 to 160 characters. Use `fullDescription()` to pad short ones.
+- Descriptions: about 110 to 160 characters. Use `fullDescription()` to pad short ones. `buildPageMetadata` clamps anything longer to 160 at a word boundary (Mag excerpts come from the database), but write hand-made descriptions to fit.
+- Visible link text must say where it goes. When a design needs a short "Read more", add the target in an `sr-only` span (`Read more <span className="sr-only">about {label}</span>`); `aria-label` alone does not satisfy the Lighthouse link-text check.
 - Do not use "Best", "top-rated" or other superlatives until verified reviews support them.
 - Sitemap `lastmod`:
   - Marketing pages use `MARKETING_CONTENT_UPDATED_AT` (`lib/seo/site.ts`). Bump it when their templates or copy change.
@@ -76,10 +79,10 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 - `robots.ts` allows the main AI crawlers on public pages only.
 - Keep answers direct: a question heading, then a one-paragraph answer that holds up when quoted on its own.
 
-## Help Centre
+## FAQ, location answers and How it works
 
-- Articles live in `scripts/help-content.mjs` and are published with `npm run seed:help`. That command only touches the Help tables. `npm run seed:content` also deletes and re-inserts every Mag post, so never use it to publish Help changes.
-- Each article opens with a one-paragraph answer that stands on its own, then question headings. Aim for 300 to 500 words.
-- One line per paragraph: the renderer (`renderEditorialBlocks`) treats every line as a block.
-- Link two to four related articles (`/help/article/<slug>`) and the matching FAQ topic (`/faq/<section id>`). Every article should have at least two links from other articles.
-- Describe what the product does today, checked in code. When a feature does not exist (no self-service account deletion, no favourite cleaners), say so and give the real route, usually the support chat on `/contact`.
+- The FAQ catalogue is `lib/seo/site-faq-catalogue.ts`. `/faq` is a hub (search, topic cards, ten most-asked answers); each section has its own page at `/faq/<section id>` with its own FAQPage markup. Build links with `lib/seo/faq-paths.ts` or `FAQ_LINKS`, never hand-written hashes. Old `/faq#…` links are forwarded to the right topic page in the browser.
+- Any FAQ answer with a £ amount must be listed in `buildPricingFaqAnswerOverrides` (`lib/customer/published-pricing.ts`) so it follows the admin rate card.
+- Area, town and hub pages show `lib/seo/location-faqs.ts`: six core answers on every page (postcode, services, price, booking and confirmation, cleaner checks, cancellation) plus two local questions per neighbourhood hub, priority area or nearby town. Add local questions there; do not copy the core answers into new pages.
+- `/how-it-works` reads `lib/seo/how-it-works.ts`.
+- Live rules every answer must match: card saved at booking with no charge; a hold from 48 hours before once a cleaner is assigned (up to five attempts, cancelled free if not authorised by 24 hours before); payment taken the day after the clean; free cancellation 24 hours or more ahead, full price within 24 hours; at least £1 million Public Liability, Basic DBS, identity and right to work, and an interview before approval. Never describe a cleaner as trained, certified or referenced beyond what onboarding records.

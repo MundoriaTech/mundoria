@@ -25,7 +25,12 @@ import {
   slicePage,
   totalPages,
 } from "@/lib/pagination";
-import { buildPageMetadata, fullDescription } from "@/lib/seo/site";
+import { JsonLd } from "@/components/marketing/json-ld";
+import {
+  absoluteUrl,
+  buildPageMetadata,
+  fullDescription,
+} from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 
 type PageProps = {
@@ -46,7 +51,7 @@ export async function generateMetadata({
       "Step-by-step answers from the Mundoria Help Centre.",
     ),
     path: `/help/${collection.slug}`,
-    title: `${collection.title} | Mundoria Help`,
+    title: `${collection.title} | Mundoria Help Centre`,
   });
 }
 
@@ -103,8 +108,39 @@ export default async function HelpCollectionPage({
         ? "Everyone"
         : "For customers";
 
+  const url = absoluteUrl(`/help/${collection.slug}`);
+
   return (
     <BrandedPageWash>
+        <JsonLd
+          data={[
+            {
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              description: collection.description,
+              mainEntity: {
+                "@type": "ItemList",
+                itemListElement: articles.map((article, index) => ({
+                  "@type": "ListItem",
+                  name: article.title,
+                  position: index + 1,
+                  url: absoluteUrl(`/help/article/${article.slug}`),
+                })),
+              },
+              name: `${collection.title}: Mundoria Help Centre`,
+              url,
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", item: absoluteUrl("/"), name: "Home", position: 1 },
+                { "@type": "ListItem", item: absoluteUrl("/help"), name: "Help Centre", position: 2 },
+                { "@type": "ListItem", item: url, name: collection.title, position: 3 },
+              ],
+            },
+          ]}
+        />
         <section
           className={cn(
             "relative px-4 pb-10 pt-10 sm:px-8 sm:pt-12 lg:px-12",

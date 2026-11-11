@@ -253,6 +253,7 @@ export function ServiceCategoriesSection({
                           href={item.href}
                         >
                           Read more
+                          <span className="sr-only"> about {item.label}</span>
                         </Link>
                         <Link
                           className="inline-flex h-11 items-center justify-center rounded-full bg-[#2a2158] px-5 text-sm font-semibold text-white transition hover:bg-[#3d3470] touch-manipulation sm:h-9 sm:px-4 sm:text-[13px]"

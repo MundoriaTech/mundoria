@@ -14,7 +14,8 @@ import {
   listHelpArticlesForCollection,
   listHelpCollections,
 } from "@/lib/content/editorial";
-import { buildPageMetadata } from "@/lib/seo/site";
+import { JsonLd } from "@/components/marketing/json-ld";
+import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 const HELP_HERO_IMAGE = "/images/mag/welcome-mag.jpg";
@@ -23,7 +24,7 @@ export const metadata: Metadata = buildPageMetadata({
   description:
     "Mundoria Help Centre: advice for customers and cleaners on booking, payments, Recovery, and becoming a partner.",
   path: "/help",
-  title: "Help Centre | Mundoria",
+  title: "Help Centre: Booking, Payments and Cleaners | Mundoria",
 });
 
 export const revalidate = 60;
@@ -42,6 +43,35 @@ export default async function HelpCentrePage() {
 
   return (
     <>
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            description:
+              "Advice for Mundoria customers and cleaners on booking, payments, Recovery cleaning and becoming a partner.",
+            mainEntity: {
+              "@type": "ItemList",
+              itemListElement: withArticles.map((collection, index) => ({
+                "@type": "ListItem",
+                name: collection.title,
+                position: index + 1,
+                url: absoluteUrl(`/help/${collection.slug}`),
+              })),
+            },
+            name: "Mundoria Help Centre",
+            url: absoluteUrl("/help"),
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", item: absoluteUrl("/"), name: "Home", position: 1 },
+              { "@type": "ListItem", item: absoluteUrl("/help"), name: "Help Centre", position: 2 },
+            ],
+          },
+        ]}
+      />
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0">
           <Image

@@ -4,7 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Star, X } from "lucide-react";
 
-import type { GooglePlaceReviews } from "@/lib/google/place-reviews";
+import {
+  GOOGLE_REVIEWS_LISTING_URL,
+  type GooglePlaceReviews,
+} from "@/lib/google/place-reviews";
 import { cn } from "@/lib/utils";
 
 function GoogleMark({ className }: { className?: string }) {
@@ -83,7 +86,8 @@ function loadGoogleReviews() {
   return reviewsRequest;
 }
 
-function useGoogleReviews() {
+/** Live Google listing (one shared request per page load). */
+export function useGoogleReviews() {
   const [data, setData] = useState<GooglePlaceReviews | null>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -246,6 +250,25 @@ export function GoogleReviewsButton({ className }: { className?: string }) {
   const { data, loaded } = useGoogleReviews();
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
+
+  // Listing unavailable (no API key, or Google returned nothing): link to the
+  // listing itself rather than opening an empty "Google reviews" drawer.
+  if (loaded && !data) {
+    return (
+      <a
+        className={cn(
+          "inline-flex items-center gap-3 rounded-full border border-[#e8eaed] bg-white px-3.5 py-2 text-sm font-medium text-[#3c4043] shadow-[0_1px_2px_rgba(60,64,67,0.08),0_8px_24px_rgba(60,64,67,0.08)] transition hover:bg-[#f8f9fa]",
+          className,
+        )}
+        href={GOOGLE_REVIEWS_LISTING_URL}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <GoogleMark className="h-6 w-6 shrink-0" />
+        Read our reviews on Google
+      </a>
+    );
+  }
 
   return (
     <>
