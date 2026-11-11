@@ -1,7 +1,6 @@
 "use client";
 
-import type { EmojiClickData } from "emoji-picker-react";
-import { Theme } from "emoji-picker-react";
+import type { EmojiClickData, Theme } from "emoji-picker-react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, type CSSProperties } from "react";
 
@@ -67,7 +66,9 @@ export function ChatEmojiPicker({
         previewConfig={{ showPreview: false }}
         searchPlaceHolder="Search emoji"
         skinTonesDisabled
-        theme={Theme.LIGHT}
+        // A value import of Theme would pull the whole emoji library (~310 KB)
+        // into every page that renders a chat, defeating the dynamic import.
+        theme={"light" as Theme}
         width="100%"
       />
     </div>

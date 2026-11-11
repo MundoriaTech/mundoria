@@ -27,6 +27,10 @@ import {
   parseGifMessage,
 } from "@/components/shared/chat-gif-picker";
 import {
+  SUPPORT_MESSENGER_EVENT,
+  type SupportMessengerTab,
+} from "@/components/support/support-messenger-events";
+import {
   getOrCreateGuestToken,
   SUPPORT_GUEST_HEADER,
 } from "@/lib/support/guest-token";
@@ -58,9 +62,12 @@ function SupportMessageBody({
   );
 }
 
-export const SUPPORT_MESSENGER_EVENT = "mundoria:open-support-messenger";
+export {
+  openSupportMessenger,
+  SUPPORT_MESSENGER_EVENT,
+} from "@/components/support/support-messenger-events";
 
-type Tab = "home" | "messages" | "help";
+type Tab = SupportMessengerTab;
 
 type HelpArticle = {
   collectionSlug: string;
@@ -159,17 +166,17 @@ function formatRelative(value: string) {
   );
 }
 
-export function openSupportMessenger(tab: Tab = "home") {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(
-    new CustomEvent(SUPPORT_MESSENGER_EVENT, { detail: { tab } }),
-  );
-}
-
-export function SupportMessengerWidget() {
-  const [open, setOpen] = useState(false);
+export function SupportMessengerWidget({
+  initialOpen = false,
+  initialTab = "home",
+}: {
+  /** Set by SupportMessengerLauncher when the widget loads because of a click. */
+  initialOpen?: boolean;
+  initialTab?: Tab;
+} = {}) {
+  const [open, setOpen] = useState(initialOpen);
   const [expanded, setExpanded] = useState(false);
-  const [tab, setTab] = useState<Tab>("home");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [guestToken, setGuestToken] = useState("");
   const [conversations, setConversations] = useState<SupportConversation[]>(
     [],

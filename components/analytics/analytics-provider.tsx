@@ -146,7 +146,7 @@ function CookieConsentBanner({
       aria-describedby="mundoria-cookie-copy"
       aria-labelledby="mundoria-cookie-title"
       aria-modal="true"
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-[2px] sm:items-end sm:p-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))] md:items-center"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/45 p-0 sm:backdrop-blur-[2px] sm:items-end sm:p-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))] md:items-center"
       role="dialog"
     >
       <div className="flex max-h-[min(92dvh,40rem)] w-full max-w-3xl flex-col overflow-hidden rounded-t-[1.25rem] border border-border bg-card shadow-2xl shadow-foreground/10 sm:rounded-[1.25rem]">
