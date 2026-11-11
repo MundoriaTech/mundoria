@@ -2,6 +2,7 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { diaryPlanError } from "@/lib/cleaner/diary-dates";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const eventSchema = z.object({
@@ -96,6 +97,10 @@ export async function POST(request: Request) {
       { error: "Give the plan a name, and when it starts and ends." },
       { status: 400 },
     );
+  }
+  const dateError = diaryPlanError(parsed.data.startsAt, parsed.data.endsAt);
+  if (dateError) {
+    return NextResponse.json({ error: dateError }, { status: 400 });
   }
   const { user } = await getRequestUser(request);
   if (!user) {

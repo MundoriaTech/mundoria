@@ -2,6 +2,7 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { absenceError, ukTodayIso } from "@/lib/cleaner/diary-dates";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -20,11 +21,9 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (parsed.data.endsOn < parsed.data.startsOn) {
-    return NextResponse.json(
-      { error: "The end date has to be on or after the start date." },
-      { status: 400 },
-    );
+  const dateError = absenceError(parsed.data.startsOn, parsed.data.endsOn, ukTodayIso());
+  if (dateError) {
+    return NextResponse.json({ error: dateError }, { status: 400 });
   }
   const { user } = await getRequestUser(request);
   if (!user) {
