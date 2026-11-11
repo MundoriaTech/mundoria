@@ -99,9 +99,20 @@ export function fullDescription(primary: string, ...extras: string[]) {
   return text;
 }
 
+/** Meta descriptions longer than this are cut off in Google results. */
+export const MAX_DESCRIPTION_LENGTH = 160;
+
+/** Keep a meta description within the limit, cut at a word boundary. */
+export function clampDescription(text: string, max = MAX_DESCRIPTION_LENGTH) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,.;:\s]+$/, "")}…`;
+}
+
 export function buildPageMetadata({
   title,
-  description,
+  description: rawDescription,
   path = "/",
   noIndex = false,
   image = DEFAULT_OG_IMAGE,
@@ -112,6 +123,8 @@ export function buildPageMetadata({
   path?: string;
   title: string;
 }): Metadata {
+  // Blog excerpts and generated place copy can run long; clamp them all here.
+  const description = clampDescription(rawDescription);
   const url = absoluteUrl(path);
   const ogImage = absoluteUrl(image);
   const resolvedTitle = brandedTitle(title);

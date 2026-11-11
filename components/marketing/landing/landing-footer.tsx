@@ -96,9 +96,9 @@ export function LandingFooter({
 
           {footerSections.map((section) => (
             <div className="min-w-0" key={section.title}>
-              <h3 className="text-[15px] font-bold uppercase tracking-[0.16em] text-[#414141]">
+              <h2 className="text-[15px] font-bold uppercase tracking-[0.16em] text-[#414141]">
                 {section.title}
-              </h3>
+              </h2>
               <ul className="mt-4 space-y-3 sm:mt-5">
                 {section.links.map((item) => (
                   <li key={`${section.title}-${item.label}`}>

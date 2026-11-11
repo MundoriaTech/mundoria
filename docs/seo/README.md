@@ -17,7 +17,9 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 - Never add placeholder, curated or "example" testimonials, ratings or cleaners. Faking reviews or presenting them misleadingly breaks the DMCC Act 2024 and Google's policies.
 - The only star rating on the site is the live Google rating (`GoogleReviewsButton`).
   - It only accepts a Google listing whose name contains "Mundoria".
-  - Set `GOOGLE_PLACE_ID` to the verified listing.
+  - Set `GOOGLE_PLACES_API_KEY` (Places API (New) enabled) and `GOOGLE_PLACE_ID` to the verified listing, then redeploy.
+  - Until there are reviews from completed bookings, `ReviewsSection` shows the listing's own Google reviews (up to 5, from the Places API), each credited "Google review" with the reviewer's name. Google reviews are never put in our structured data.
+  - Without the key, the badge becomes a "Read our reviews on Google" link to the listing.
 - Seed and demo accounts (`*@seed.mundoria.local`) are excluded from the public views by migration `20261109120000_hide_seed_accounts_from_marketing.sql`.
 
 ## Company details
@@ -41,7 +43,8 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 ## Titles, descriptions and dates
 
 - Titles: about 60 characters at most. `brandedTitle` drops the "| Mundoria" suffix when it would overflow.
-- Descriptions: about 110 to 160 characters. Use `fullDescription()` to pad short ones.
+- Descriptions: about 110 to 160 characters. Use `fullDescription()` to pad short ones. `buildPageMetadata` clamps anything longer to 160 at a word boundary (Mag excerpts come from the database), but write hand-made descriptions to fit.
+- Visible link text must say where it goes. When a design needs a short "Read more", add the target in an `sr-only` span (`Read more <span className="sr-only">about {label}</span>`); `aria-label` alone does not satisfy the Lighthouse link-text check.
 - Do not use "Best", "top-rated" or other superlatives until verified reviews support them.
 - Sitemap `lastmod`:
   - Marketing pages use `MARKETING_CONTENT_UPDATED_AT` (`lib/seo/site.ts`). Bump it when their templates or copy change.

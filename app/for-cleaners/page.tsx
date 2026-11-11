@@ -18,7 +18,7 @@ export const metadata: Metadata = buildPageMetadata({
   description:
     "Become a Mundoria cleaner in Birmingham. Flexible jobs, clear checklists, in-app messaging and Stripe Connect payouts after onboarding and vetting.",
   path: "/for-cleaners",
-  title: "Become a Cleaner | Mundoria",
+  title: "Cleaning Jobs in Birmingham: Become a Cleaner | Mundoria",
 });
 
 const benefits = [

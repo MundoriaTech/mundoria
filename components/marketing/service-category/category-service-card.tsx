@@ -92,7 +92,6 @@ export function CategoryServiceCard({
           )}
         >
           <Link
-            aria-label={`Read more about ${label}`}
             className={cn(
               overlayLinkClass,
               "border border-white text-white hover:bg-white hover:text-[#1c133b]",
@@ -100,6 +99,7 @@ export function CategoryServiceCard({
             href={href}
           >
             Read more
+            <span className="sr-only"> about {label}</span>
           </Link>
           <Link
             aria-label={`Book ${label}`}

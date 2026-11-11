@@ -11,7 +11,10 @@ import {
 } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { GoogleReviewsButton } from "@/components/marketing/google-reviews-drawer";
+import {
+  GoogleReviewsButton,
+  useGoogleReviews,
+} from "@/components/marketing/google-reviews-drawer";
 import { LazyImage } from "@/components/shared/lazy-image";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import type { LandingReview } from "@/lib/marketing/landing-reviews";
@@ -324,11 +327,27 @@ const DesktopReviewCarousel = forwardRef<
 
 export function ReviewsSection({
   heading = "What our customers say",
-  reviews = [],
+  reviews: ownReviews = [],
 }: {
   heading?: string;
   reviews?: LandingReview[];
 }) {
+  // Reviews from completed bookings come first. Until there are some, show
+  // the real reviews from the Mundoria Google listing, credited to Google.
+  const { data: google } = useGoogleReviews();
+  const reviews = ownReviews.length
+    ? ownReviews
+    : (google?.reviews ?? [])
+        .filter((review) => review.text)
+        .map((review) => ({
+          detail: review.relativeTime
+            ? `Google review · ${review.relativeTime}`
+            : "Google review",
+          id: review.id,
+          name: review.author,
+          quote: review.text,
+          rating: review.rating,
+        }));
   const scrollerRef = useRef<HTMLDivElement>(null);
   const desktopCarouselRef = useRef<DesktopReviewCarouselHandle>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -403,7 +422,7 @@ export function ReviewsSection({
           {reviews.length ? null : (
             <p className="mt-4 max-w-md text-pretty text-sm leading-6 text-[#5a5470]">
               We only publish reviews written by customers after a completed
-              booking. Tap the Google badge to read what customers say there.
+              booking, or reviews left on our Google listing.
             </p>
           )}
         </ScrollReveal>

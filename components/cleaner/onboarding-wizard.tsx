@@ -46,6 +46,7 @@ import {
 } from "@/lib/cleaner/document-urls";
 import {
   INTERVIEW_DURATION_MINUTES,
+  isBookableInterviewSlot,
   upcomingInterviewDays,
 } from "@/lib/cleaner/interview-slots";
 import {
@@ -665,12 +666,18 @@ export function OnboardingWizard({
     const saved = window.localStorage.getItem(draftKey);
     if (saved) {
       try {
-        setData((current) =>
-          sanitizeOnboardingData({
+        setData((current) => {
+          const restored = sanitizeOnboardingData({
             ...current,
             ...(JSON.parse(saved) as Partial<OnboardingData>),
-          }),
-        );
+          });
+          // A slot saved in an earlier visit may have passed since: drop it so
+          // the wizard never shows a past interview as booked.
+          return restored.interview_scheduled_at &&
+            !isBookableInterviewSlot(restored.interview_scheduled_at)
+            ? { ...restored, interview_scheduled_at: null }
+            : restored;
+        });
       } catch {
         window.localStorage.removeItem(draftKey);
       }
@@ -2268,7 +2275,13 @@ function AppointmentPicker({
   selected: string | null;
   takenSlots: string[];
 }) {
-  const days = upcomingInterviewDays(new Date(), takenSlots);
+  // Re-render every minute so slots that pass while the page is open drop out.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const days = upcomingInterviewDays(now, takenSlots);
   const selectedDay =
     days.find((day) =>
       day.slots.some((slot) => sameMinute(slot.startsAt, selected)),
@@ -2276,7 +2289,14 @@ function AppointmentPicker({
   const [dayDate, setDayDate] = useState(selectedDay?.date ?? "");
   const day = days.find((item) => item.date === dayDate) ?? selectedDay;
   const [choice, setChoice] = useState<string | null>(selected);
-  const booked = choice ?? selected;
+  const picked = choice ?? selected;
+  // Only confirm a slot that is still on offer; one that has passed (or been
+  // taken) is left to the step validation, which asks for a new time.
+  const booked = days.some((item) =>
+    item.slots.some((slot) => sameMinute(slot.startsAt, picked)),
+  )
+    ? picked
+    : null;
 
   const morning = (day?.slots ?? []).filter(
     (slot) => Number(slot.label.slice(0, 2)) < 12,
@@ -3844,8 +3864,18 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     message,
   });
 
-  if (stepId === "appointment" && !data.interview_scheduled_at) {
-    return issue("slot", "Choose a time for your appointment.");
+  if (stepId === "appointment") {
+    if (!data.interview_scheduled_at) {
+      return issue("slot", "Choose a time for your appointment.");
+    }
+    // Taken slots are re-checked by the server; here we only reject times
+    // that have passed or are not on the interview schedule.
+    if (!isBookableInterviewSlot(data.interview_scheduled_at)) {
+      return issue(
+        "slot",
+        "That interview time has passed. Choose a new time.",
+      );
+    }
   }
 
   if (stepId === "services" && data.services.length === 0) {
