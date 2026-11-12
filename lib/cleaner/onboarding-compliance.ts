@@ -545,6 +545,7 @@ export function applicationLifecycleLabel(cleaner: {
   dbs_document_status?: string | null;
   insurance_status?: string | null;
   id_document_status?: string | null;
+  headshot_status?: string | null;
 }) {
   if (!cleaner.onboarding_complete) return "Draft";
   if (cleaner.status === "suspended") return "Suspended";
@@ -557,6 +558,7 @@ export function applicationLifecycleLabel(cleaner: {
     cleaner.dbs_document_status,
     cleaner.insurance_status,
     cleaner.id_document_status,
+    cleaner.headshot_status,
   ].some((status) => status === "rejected" || status === "expired");
 
   if (

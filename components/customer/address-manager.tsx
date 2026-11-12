@@ -654,6 +654,7 @@ function AddressAutocompleteInput({
   const [mounted, setMounted] = useState(false);
   const [menuBox, setMenuBox] = useState<{
     left: number;
+    maxHeight: number;
     top: number;
     width: number;
   } | null>(null);
@@ -718,9 +719,23 @@ function AddressAutocompleteInput({
     const node = rootRef.current;
     if (!node) return;
     const rect = node.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const viewportHeight = viewport?.height ?? window.innerHeight;
+    const viewportTop = viewport?.offsetTop ?? 0;
+    const viewportBottom = viewportTop + viewportHeight;
+    const gap = 6;
+    const spaceBelow = viewportBottom - rect.bottom - gap;
+    const spaceAbove = rect.top - viewportTop - gap;
+    const openUpward = spaceBelow < 160 && spaceAbove > spaceBelow;
+    const available = Math.max(96, openUpward ? spaceAbove : spaceBelow);
+    const maxHeight = Math.min(288, available);
+    const top = openUpward
+      ? Math.max(viewportTop + 8, rect.top - gap - maxHeight)
+      : rect.bottom + gap;
     setMenuBox({
       left: rect.left,
-      top: rect.bottom + 6,
+      maxHeight,
+      top,
       width: rect.width,
     });
   };
@@ -731,11 +746,16 @@ function AddressAutocompleteInput({
       return;
     }
     syncMenuBox();
+    const viewport = window.visualViewport;
     window.addEventListener("resize", syncMenuBox);
     window.addEventListener("scroll", syncMenuBox, true);
+    viewport?.addEventListener("resize", syncMenuBox);
+    viewport?.addEventListener("scroll", syncMenuBox);
     return () => {
       window.removeEventListener("resize", syncMenuBox);
       window.removeEventListener("scroll", syncMenuBox, true);
+      viewport?.removeEventListener("resize", syncMenuBox);
+      viewport?.removeEventListener("scroll", syncMenuBox);
     };
   }, [open, suggestions.length, loading]);
 
@@ -780,11 +800,12 @@ function AddressAutocompleteInput({
       {showMenu
         ? createPortal(
             <ul
-              className="fixed z-[120] max-h-72 overflow-auto rounded-xl border border-[#d9ccef] bg-white p-1 shadow-[0_16px_40px_rgba(28,19,59,0.18)]"
+              className="fixed z-[120] overflow-auto overscroll-contain rounded-xl border border-[#d9ccef] bg-white p-1 shadow-[0_16px_40px_rgba(28,19,59,0.18)]"
               ref={menuRef}
               role="listbox"
               style={{
                 left: menuBox.left,
+                maxHeight: menuBox.maxHeight,
                 top: menuBox.top,
                 width: menuBox.width,
               }}

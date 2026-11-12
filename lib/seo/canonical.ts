@@ -9,9 +9,10 @@ export const SEO_SERVICE_REDIRECTS: Record<string, string> = {
   "move-out-cleaning": "move-in-move-out-cleaning",
   // Short-let cluster → one guest-turnover page (+ serviced stays separate)
   "holiday-let-cleaning": "airbnb-shortlet-cleaning",
-  // Recovery twins
+  // Recovery twins / retired recovery services → category hub
   "postpartum-cleaning": "pregnancy-and-postpartum-cleaning",
-  "injury-recovery-cleaning": "illness-and-injury-recovery",
+  "illness-and-injury-recovery": "/cleaning/recovery",
+  "injury-recovery-cleaning": "/cleaning/recovery",
   // Legacy / hidden residential
   "same-day-cleaning": "one-off-cleaning",
 };

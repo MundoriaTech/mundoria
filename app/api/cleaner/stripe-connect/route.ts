@@ -2,6 +2,11 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
+import {
+  buildCleanerExpressAccountCreateParams,
+  isBankFocusedConnectAccount,
+  syncCleanerConnectAccount,
+} from "@/lib/stripe/cleaner-connect";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 
@@ -12,7 +17,7 @@ export async function POST(request: Request) {
   const [{ data: profile }, { data: cleaner }] = await Promise.all([
     admin
       .from("profiles")
-      .select("email, stripe_account_id")
+      .select("email, full_name, phone, stripe_account_id")
       .eq("id", user.id)
       .single(),
     admin
@@ -51,37 +56,50 @@ export async function POST(request: Request) {
   }
 
   let accountId = profile?.stripe_account_id as string | null;
+  const identity = {
+    email: profile?.email,
+    fullName: profile?.full_name,
+    phone: profile?.phone,
+  };
 
   try {
+    let account;
     if (!accountId) {
-      const account = await stripe.accounts.create({
-        business_type: "individual",
-        capabilities: {
-          card_payments: { requested: true },
-          transfers: { requested: true },
-        },
-        country: "GB",
-        email: profile?.email,
-        metadata: { supabase_user_id: user.id },
-        type: "express",
-      });
+      account = await stripe.accounts.create(
+        buildCleanerExpressAccountCreateParams({
+          ...identity,
+          userId: user.id,
+        }),
+      );
       accountId = account.id;
       await admin
         .from("profiles")
         .update({ stripe_account_id: accountId })
         .eq("id", user.id);
+    } else {
+      account = await syncCleanerConnectAccount(stripe, accountId, identity);
     }
 
     const session = await stripe.accountSessions.create({
       account: accountId,
       components: {
-        account_management: { enabled: true },
-        account_onboarding: { enabled: true },
-        notification_banner: { enabled: true },
+        account_management: {
+          enabled: true,
+          features: { external_account_collection: true },
+        },
+        account_onboarding: {
+          enabled: true,
+          features: { external_account_collection: true },
+        },
+        notification_banner: {
+          enabled: true,
+          features: { external_account_collection: true },
+        },
       },
     });
 
     return NextResponse.json({
+      bankFocused: isBankFocusedConnectAccount(account),
       clientSecret: session.client_secret,
       stripeComplete: Boolean(cleaner.stripe_onboarding_complete),
     });

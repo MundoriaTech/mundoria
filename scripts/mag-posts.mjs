@@ -749,7 +749,7 @@ Enter your postcode, choose regular cleaning, and pick a Saturday window that fi
   {
     author_name: "Mundoria Team",
     category: "Home Care",
-    content: `There are seasons when keeping a home tidy simply costs more energy than you have — pregnancy, postpartum, illness, injury or bereavement. Mundoria Recovery is built for those moments.
+    content: `There are seasons when keeping a home tidy simply costs more energy than you have — pregnancy, postpartum, hospital return or bereavement. Mundoria Recovery is built for those moments.
 
 We’re clear about one thing up front: **Recovery is cleaning with care, not healthcare.**
 
@@ -771,7 +771,7 @@ Anything clinical stays with your care team. Share only what helps the visit run
 | Recovery focus | Example note |
 | --- | --- |
 | Postpartum | “Kitchen + bathroom priority; please keep fragrance-free.” |
-| Illness | “Quiet knock; leave shoes at door.” |
+| Hospital discharge | “Quiet knock; leave shoes at door.” |
 | Bereavement | “Living room and kitchen only today.” |
 
 > **Pro Tip:** You don’t need a long explanation. Short, practical notes are enough.
@@ -779,7 +779,7 @@ Anything clinical stays with your care team. Share only what helps the visit run
 Choose Recovery when you book, add notes without pressure, and we’ll match with the care those visits need.`,
     cover_url: IMG.recovery,
     excerpt:
-      "Supportive cleans for pregnancy, postpartum, illness and bereavement — cleaning with care, not healthcare.",
+      "Supportive cleans for pregnancy, postpartum, hospital discharge and bereavement — cleaning with care, not healthcare.",
     published: true,
     published_at: daysAgo(10),
     slug: "what-recovery-cleaning-means",
@@ -1252,7 +1252,7 @@ export const MAG_RELATED_SERVICES_BY_SLUG = {
   ],
   "fragrance-free-cleaning-sensitive-homes": [
     "pregnancy-and-postpartum-cleaning",
-    "illness-and-injury-recovery",
+    "hospital-discharge-home-cleaning",
     "regular-cleaning",
   ],
   "hosts-keep-five-star-reviews": [
@@ -1304,7 +1304,6 @@ export const MAG_RELATED_SERVICES_BY_SLUG = {
   ],
   "what-recovery-cleaning-means": [
     "pregnancy-and-postpartum-cleaning",
-    "illness-and-injury-recovery",
     "hospital-discharge-home-cleaning",
     "bereavement-support-cleaning",
   ],

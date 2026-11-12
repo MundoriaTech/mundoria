@@ -434,7 +434,7 @@ function resolveTemplate(
         buttonLabel: "View application status",
         cards: [
           { label: "Application reference", value: data.applicationReference },
-          { label: "Interview", value: data.interviewWhen },
+          { label: "Onboarding call", value: data.interviewWhen },
           { label: "Payout preference", value: data.payoutPreference },
           { label: "Working areas", value: data.workingAreas },
         ],
@@ -565,13 +565,13 @@ function resolveTemplate(
       };
     case "admin.cleaner_application_submitted":
       return {
-        body: `${string(data.cleanerName) || "A cleaner"} submitted an application and booked an interview. Review documents and readiness in admin before approving.`,
+        body: `${string(data.cleanerName) || "A cleaner"} submitted an application and booked an onboarding call. Review documents and readiness in admin before approving.`,
         buttonHref: string(data.cleanerUrl) || `${appUrl}/admin/cleaners`,
         buttonLabel: "Review application",
         cards: [
           { label: "Cleaner", value: data.cleanerName },
           { label: "Email", value: data.cleanerEmail },
-          { label: "Interview", value: data.interviewWhen },
+          { label: "Onboarding call", value: data.interviewWhen },
           { label: "Experience", value: data.yearsExperience },
           { label: "Reference", value: data.applicationReference },
         ],

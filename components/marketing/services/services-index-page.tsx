@@ -138,13 +138,6 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
             label: "Pregnancy and Postpartum Cleaning",
             seedService: "pregnancy_support",
           },
-          {
-            description:
-              "Extra-care cleaning while recovering from illness, injury or limited mobility.",
-            href: "/cleaning/illness-and-injury-recovery",
-            label: "Illness & injury recovery",
-            seedService: "illness_recovery",
-          },
         ]),
         bookable(
           "hospital_discharge",

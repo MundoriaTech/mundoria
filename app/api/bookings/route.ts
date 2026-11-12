@@ -12,7 +12,9 @@ import {
   addOnAmountPence,
   formatMoney,
   formatServiceName,
+  isOfferedService,
   SERVICE_ADD_ONS,
+  serviceDefinition,
 } from "@/lib/customer/services";
 import { createRecurringFollowOnBookings } from "@/lib/bookings/recurring";
 import { sendBrandedEmail } from "@/lib/email/send-email";
@@ -37,6 +39,20 @@ export async function POST(request: Request) {
   ) {
     return NextResponse.json(
       { error: "This service needs a repeat schedule." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    if (!isOfferedService(serviceDefinition(parsed.data.serviceType))) {
+      return NextResponse.json(
+        { error: "This service is no longer available to book." },
+        { status: 400 },
+      );
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "This service is no longer available to book." },
       { status: 400 },
     );
   }

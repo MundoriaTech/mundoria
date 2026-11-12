@@ -8,7 +8,11 @@ import {
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
-import { estimatePrice } from "@/lib/customer/services";
+import {
+  estimatePrice,
+  isOfferedService,
+  serviceDefinition,
+} from "@/lib/customer/services";
 import {
   confirmBookingSetupIntentWithSavedCard,
   createBookingSetupIntent,
@@ -33,6 +37,20 @@ export async function POST(request: Request) {
   ) {
     return NextResponse.json(
       { error: "Workspace cleaning needs a repeat schedule." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    if (!isOfferedService(serviceDefinition(parsed.data.serviceType))) {
+      return NextResponse.json(
+        { error: "This service is no longer available to book." },
+        { status: 400 },
+      );
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "This service is no longer available to book." },
       { status: 400 },
     );
   }

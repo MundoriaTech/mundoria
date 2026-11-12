@@ -2,6 +2,7 @@
 
 import {
   loadConnectAndInitialize,
+  type CollectionOptions,
   type StripeConnectInstance,
 } from "@stripe/connect-js";
 import {
@@ -21,14 +22,43 @@ type Mode = "onboarding" | "management";
 
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
 
-async function fetchAccountSessionClientSecret() {
+/** Hide Mundoria-owned / prefilled business fields; collect bank (and any remaining KYC). */
+const EXCLUDE_PLATFORM_FIELDS: CollectionOptions = {
+  fields: "currently_due",
+  futureRequirements: "omit",
+  requirements: {
+    exclude: [
+      "business_type",
+      "business_profile.mcc",
+      "business_profile.product_description",
+      "business_profile.url",
+      "business_profile.*",
+    ],
+  },
+};
+
+/** When identity is already satisfied, only bank / payout details. */
+const BANK_ONLY_FIELDS: CollectionOptions = {
+  fields: "currently_due",
+  futureRequirements: "omit",
+  requirements: {
+    only: ["external_account"],
+  },
+};
+
+async function fetchAccountSession() {
   const response = await fetch("/api/cleaner/stripe-connect", {
     headers: { "Content-Type": "application/json" },
     method: "POST",
   });
-  let result: { clientSecret?: string; error?: string } = {};
+  let result: {
+    bankFocused?: boolean;
+    clientSecret?: string;
+    error?: string;
+  } = {};
   try {
     result = (await response.json()) as {
+      bankFocused?: boolean;
       clientSecret?: string;
       error?: string;
     };
@@ -42,7 +72,15 @@ async function fetchAccountSessionClientSecret() {
   if (!response.ok || !result.clientSecret) {
     throw new Error(result.error ?? "Unable to start payout setup.");
   }
-  return result.clientSecret;
+  return {
+    bankFocused: Boolean(result.bankFocused),
+    clientSecret: result.clientSecret,
+  };
+}
+
+async function fetchAccountSessionClientSecret() {
+  const session = await fetchAccountSession();
+  return session.clientSecret;
 }
 
 function createConnectInstance() {
@@ -74,11 +112,13 @@ function createConnectInstance() {
 }
 
 export function StripeEmbeddedPayouts({
+  bankFocused,
   mode,
   onClose,
   open,
   title,
 }: {
+  bankFocused: boolean;
   mode: Mode;
   onClose: () => void;
   open: boolean;
@@ -87,6 +127,11 @@ export function StripeEmbeddedPayouts({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [instance, setInstance] = useState<StripeConnectInstance | null>(null);
+
+  const collectionOptions = useMemo(
+    () => (bankFocused || mode === "management" ? BANK_ONLY_FIELDS : EXCLUDE_PLATFORM_FIELDS),
+    [bankFocused, mode],
+  );
 
   useEffect(() => {
     if (!open) {
@@ -115,13 +160,12 @@ export function StripeEmbeddedPayouts({
     router.refresh();
   }, [onClose, router]);
 
-  const subtitle = useMemo(
-    () =>
-      mode === "onboarding"
-        ? "Complete the steps below without leaving Mundoria. Bank details go straight to Stripe."
-        : "Update your payout details here. Sensitive bank information stays with Stripe.",
-    [mode],
-  );
+  const subtitle = useMemo(() => {
+    if (mode === "management" || bankFocused) {
+      return "Add or update your bank account for payouts. Details go straight to Stripe.";
+    }
+    return "Confirm payout details without leaving Mundoria. Bank details go straight to Stripe.";
+  }, [bankFocused, mode]);
 
   if (!open) return null;
 
@@ -162,12 +206,15 @@ export function StripeEmbeddedPayouts({
           ) : instance ? (
             <ConnectComponentsProvider connectInstance={instance}>
               <div className="mb-4">
-                <ConnectNotificationBanner />
+                <ConnectNotificationBanner collectionOptions={collectionOptions} />
               </div>
               {mode === "onboarding" ? (
-                <ConnectAccountOnboarding onExit={handleExit} />
+                <ConnectAccountOnboarding
+                  collectionOptions={collectionOptions}
+                  onExit={handleExit}
+                />
               ) : (
-                <ConnectAccountManagement />
+                <ConnectAccountManagement collectionOptions={collectionOptions} />
               )}
             </ConnectComponentsProvider>
           ) : (
@@ -182,6 +229,7 @@ export function StripeEmbeddedPayouts({
 export function useStripeEmbeddedPayouts() {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("onboarding");
+  const [bankFocused, setBankFocused] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -191,7 +239,8 @@ export function useStripeEmbeddedPayouts() {
     try {
       // Warm the Account Session before mounting Connect.js so we surface
       // auth / approval errors before opening the overlay.
-      await fetchAccountSessionClientSecret();
+      const session = await fetchAccountSession();
+      setBankFocused(session.bankFocused);
       setMode(nextMode);
       setOpen(true);
     } catch (err) {
@@ -203,5 +252,5 @@ export function useStripeEmbeddedPayouts() {
 
   const close = useCallback(() => setOpen(false), []);
 
-  return { busy, close, error, mode, open, start };
+  return { bankFocused, busy, close, error, mode, open, start };
 }

@@ -1107,12 +1107,11 @@ More answers are in the [Recurring Bookings FAQ](/faq/recurring).`,
     topic: "Services & cleaners",
   },
   {
-    body: `Recovery cleaning is house cleaning arranged around a harder time, such as pregnancy, illness, injury, a hospital stay or a bereavement. It is still cleaning, and Mundoria does not provide medical, nursing or personal care.
+    body: `Recovery cleaning is house cleaning arranged around a harder time, such as pregnancy, a hospital stay or a bereavement. It is still cleaning, and Mundoria does not provide medical, nursing or personal care.
 
 ## Which services can I book?
 Choose **Recovery cleaning** when you start a booking, then pick the service that fits:
 - **Pregnancy & postpartum cleaning**, during pregnancy and in the weeks after birth.
-- **Illness & injury recovery**, while recovering from illness, injury or limited mobility.
 - **Hospital Discharge Home Cleaning**, a comprehensive clean before or after someone comes home from hospital.
 - **Bereavement Support Cleaning**, respectful, practical cleaning after a loss.
 
@@ -1137,7 +1136,7 @@ Use these notes to mention rest times, noise, a new baby or mobility equipment, 
 Yes. A partner, relative or friend can book on your behalf. They need accurate details about the property and access. Where appropriate, the person living there should know about the booking and be comfortable with it. A clean can also be arranged before someone comes home, if access can be arranged safely.
 
 ## Can it repeat?
-Pregnancy & postpartum, illness & injury and bereavement cleans can be one-off or repeat weekly, fortnightly or monthly. Hospital discharge cleans are booked as single visits. See [How do recurring cleans work?](/help/article/recurring-cleans). When life settles, you can move to a regular house clean.
+Pregnancy & postpartum and bereavement cleans can be one-off or repeat weekly, fortnightly or monthly. Hospital discharge cleans are booked as single visits. See [How do recurring cleans work?](/help/article/recurring-cleans). When life settles, you can move to a regular house clean.
 
 ## Who will clean?
 Your cleaner is an independent professional who has passed Mundoria's checks and interview. See [Who are Mundoria cleaners and how are they checked?](/help/article/who-are-mundoria-cleaners). For practical tips before the visit, see [How should I prepare for a cleaning visit?](/help/article/prepare-for-a-clean).
@@ -1148,7 +1147,7 @@ More answers are in the [Recovery Cleaning FAQ](/faq/recovery).`,
     collection_id: C[0].id,
     slug: "recovery-cleans",
     sort_order: 460,
-    summary: "Recovery cleaning is house cleaning arranged around pregnancy, illness, injury, hospital discharge or bereavement. It is cleaning, not care.",
+    summary: "Recovery cleaning is house cleaning arranged around pregnancy, hospital discharge or bereavement. It is cleaning, not care.",
     title: "What is recovery cleaning?",
     topic: "Services & cleaners",
   },
@@ -1756,7 +1755,7 @@ For each booking, Mundoria only considers cleaners who:
 | --- | --- |
 | Bronze | Regular and one-off house cleaning, office cleaning, retail and hospitality cleaning |
 | Silver | Deep cleaning, same-day cleaning, short-let, holiday let and serviced accommodation cleaning, educational facility and communal area cleaning, pregnancy support and bereavement support |
-| Gold | End of tenancy, move-in and move-out cleaning, post-construction cleaning, postpartum, illness and injury recovery and hospital discharge cleaning |
+| Gold | End of tenancy, move-in and move-out cleaning, post-construction cleaning, postpartum and hospital discharge cleaning |
 
 [How do ratings and medallions work?](/help/article/reviews-and-ratings) explains how you move up.
 

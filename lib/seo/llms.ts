@@ -51,7 +51,7 @@ function factsSection(services: MarketingService[]) {
 - Booking: choose a service, enter a postcode and property details, see the price, pick a date and time, then save a card to confirm.
 - Payment: nothing is charged when booking. From 48 hours before the visit, once a cleaner is assigned, a temporary hold is placed on the card; the payment is taken the day after the clean. If the hold cannot be placed by 24 hours before, the booking is cancelled free of charge. Payments run through Stripe and customers never pay the cleaner directly.
 - Cancellation: free 24 hours or more before the start time; the full booking price within 24 hours. Statutory consumer rights are unaffected.
-- Vetting: identity and right-to-work checks, a Basic DBS check, experience review, an interview with the Mundoria team, and at least £1 million Public Liability insurance (lapsed cover removes a cleaner from matching).
+- Vetting: identity and right-to-work checks, a Basic DBS check, experience review, an onboarding call with the Mundoria team, and at least £1 million Public Liability insurance (lapsed cover removes a cleaner from matching).
 - During the booking: live status (matched, on the way, in progress, done) and in-app messaging with the cleaner.
 - Reviews: Mundoria only publishes reviews written by customers after a completed booking.
 - Contact: ${office.supportEmail}, ${office.phone}, live chat on ${absoluteUrl("/contact")}.`;

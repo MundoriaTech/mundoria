@@ -189,8 +189,6 @@ const OPTIONAL_RECURRING: ServiceType[] = [
   "holiday_let",
   "serviced_accommodation",
   "pregnancy_support",
-  "illness_recovery",
-  "post_injury",
   "bereavement_support",
 ];
 
@@ -199,6 +197,45 @@ export function frequencyModeFor(serviceType: ServiceType | null): FrequencyMode
   if (REQUIRED_RECURRING.includes(serviceType)) return "required_recurring";
   if (OPTIONAL_RECURRING.includes(serviceType)) return "optional";
   return "none";
+}
+
+/**
+ * When a booking category collapses “service vs cadence” into frequency
+ * (House Cleaning), opening the category should land on this service.
+ */
+export function defaultServiceForCategory(
+  category: ServiceCategory | null | undefined,
+): ServiceType | null {
+  if (category === "residential") return "regular";
+  return null;
+}
+
+/** Compact labels for the booking service picker (full catalogue labels stay elsewhere). */
+export function shortServiceLabel(serviceType: ServiceType) {
+  switch (serviceType) {
+    case "regular":
+      return "House cleaning";
+    case "one_off":
+      return "One-off cleaning";
+    case "deep_clean":
+      return "Deep cleaning";
+    case "office":
+      return "Office";
+    case "retail_hospitality":
+      return "Retail & hospitality";
+    case "educational_facility":
+      return "Education";
+    case "communal_area":
+      return "Communal areas";
+    case "pregnancy_support":
+      return "Pregnancy & postpartum";
+    case "hospital_discharge":
+      return "Hospital discharge";
+    case "bereavement_support":
+      return "Bereavement support";
+    default:
+      return serviceDefinition(serviceType).label;
+  }
 }
 
 export function propertyQuestionModeFor(

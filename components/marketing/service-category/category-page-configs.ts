@@ -117,18 +117,13 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   faqs: [
     {
       answer:
-        "Recovery cleaning is for times when life changes, pregnancy, recovery, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
+        "Recovery cleaning is for times when life changes — pregnancy, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
       question: "What is recovery cleaning?",
       services: [
         {
           description:
             "Supportive home cleaning during pregnancy and after birth.",
           name: "Pregnancy and Postpartum Cleaning",
-        },
-        {
-          description:
-            "Extra-care cleaning while recovering from illness, injury or limited mobility.",
-          name: "Illness & injury recovery",
         },
         {
           description: "A comprehensive clean before or after hospital discharge.",
@@ -158,11 +153,6 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
       href: "/cleaning/pregnancy-and-postpartum-cleaning",
       image: "/images/marketing/landing/recovery-pregnancy.png",
       label: "Pregnancy and Postpartum Cleaning",
-    },
-    {
-      href: "/cleaning/illness-and-injury-recovery",
-      image: "/images/marketing/landing/recovery-illness.png",
-      label: "Illness & injury recovery",
     },
     {
       href: "/cleaning/hospital-discharge-home-cleaning",

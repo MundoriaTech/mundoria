@@ -52,7 +52,6 @@ const SERVICES_ALREADY_ON_PAGE = {
   ],
   recovery: [
     "pregnancy-and-postpartum-cleaning",
-    "illness-and-injury-recovery",
     "hospital-discharge-home-cleaning",
     "bereavement-support-cleaning",
   ],
@@ -87,7 +86,7 @@ const DIFFERENT_SERVICE_ORDER = [
   "serviced-accommodation-cleaning",
   "end-of-tenancy-cleaning",
   "move-in-move-out-cleaning",
-  "illness-and-injury-recovery",
+  "hospital-discharge-home-cleaning",
   "one-off-cleaning",
 ] as const;
 

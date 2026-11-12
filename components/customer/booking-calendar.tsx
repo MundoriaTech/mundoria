@@ -113,7 +113,7 @@ export function BookingCalendar({
         <button
           aria-label="Previous month"
           className={cn(
-            "inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation",
+            "inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation",
             !canGoPrev && "opacity-30",
           )}
           disabled={!canGoPrev}
@@ -125,7 +125,7 @@ export function BookingCalendar({
         <p className="font-semibold text-[#1c133b]">{monthLabel}</p>
         <button
           aria-label="Next month"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg text-[#1c133b] touch-manipulation"
           onClick={() => shiftMonth(1)}
           type="button"
         >
@@ -137,7 +137,7 @@ export function BookingCalendar({
           <span key={day}>{day}</span>
         ))}
       </div>
-      <div className="mt-2 grid grid-cols-7 gap-1 text-center text-sm">
+      <div className="mt-2 grid grid-cols-7 gap-0.5 text-center text-sm sm:gap-1">
         {cells.map((day, index) => {
           if (!day) return <span key={`e-${index}`} />;
           const iso = toIso(year, month, day);
@@ -146,7 +146,7 @@ export function BookingCalendar({
           return (
             <button
               className={cn(
-                "mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[#1c133b] touch-manipulation",
+                "mx-auto flex h-11 w-11 items-center justify-center rounded-full text-[#1c133b] touch-manipulation",
                 isSelected && "bg-[#6a45b8] font-bold text-white",
                 disabled && "opacity-30",
                 !isSelected && !disabled && "hover:bg-white",

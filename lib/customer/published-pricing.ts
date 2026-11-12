@@ -171,7 +171,7 @@ export function buildPricingFaqAnswerOverrides(
 
     "How much is Recovery Cleaning?":
       `Recovery Cleaning currently starts from ${recovery}.\n\n` +
-      `That applies across Mundoria Recovery services such as Pregnancy & Postpartum Home Cleaning, Illness & Injury Recovery Home Cleaning, Hospital Discharge Home Cleaning and Bereavement Home Cleaning.\n\n` +
+      `That applies across Mundoria Recovery services such as Pregnancy & Postpartum Home Cleaning, Hospital Discharge Home Cleaning and Bereavement Home Cleaning.\n\n` +
       `The slightly different rate reflects the way these bookings are handled around individual circumstances and preferences.\n\n` +
       `The service remains cleaning only. There are no medical, nursing or personal-care services included in the price.`,
 

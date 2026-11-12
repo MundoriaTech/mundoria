@@ -335,7 +335,7 @@ const GROUPS: { ids: StepId[]; title: string; blurb: string }[] = [
   {
     ids: ["consent", "appointment", "emergency", "agreements"],
     title: "Finish",
-    blurb: "Consent, interview, safety and agreements",
+    blurb: "Consent, appointment, safety and agreements",
   },
 ];
 
@@ -1281,7 +1281,7 @@ export function OnboardingWizard({
 
           {data.interview_scheduled_at ? (
             <p className="mt-4 rounded-xl bg-[#f3eee4] px-4 py-3 text-center text-sm font-medium text-[#1c133b]">
-              Interview booked:{" "}
+              Appointment booked:{" "}
               {formatAppointmentSummary(data.interview_scheduled_at)}
             </p>
           ) : null}
@@ -1305,7 +1305,7 @@ export function OnboardingWizard({
               We confirm your identity, required checks and eligibility for
               your selected cleaning services
               {data.interview_scheduled_at
-                ? ", including your booked online interview"
+                ? ", including your booked onboarding call"
                 : ""}
               .
               {outstanding.length > 0
@@ -2325,7 +2325,7 @@ function AppointmentPicker({
         <div className="space-y-8 p-5 sm:p-7">
           {days.length === 0 ? (
             <p className="text-sm text-[#8b8798]">
-              No interview times are open right now. Check back shortly.
+              No appointment times are open right now. Check back shortly.
             </p>
           ) : (
             <>
@@ -3873,7 +3873,7 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
     if (!isBookableInterviewSlot(data.interview_scheduled_at)) {
       return issue(
         "slot",
-        "That interview time has passed. Choose a new time.",
+        "That appointment time has passed. Choose a new time.",
       );
     }
   }

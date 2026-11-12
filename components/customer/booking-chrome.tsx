@@ -42,12 +42,12 @@ export function BookingChrome({
 
   return (
     <div
-      className={cn("flex min-h-screen flex-col bg-[#f9f6ef]", className)}
+      className={cn("flex min-h-dvh flex-col bg-[#f9f6ef]", className)}
     >
-      <header className="sticky top-0 z-50 border-b border-[#e8e0d0]/80 bg-[#f9f6ef]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-[#e8e0d0]/80 bg-[#f9f6ef]/95 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
         <div className="relative mx-auto grid h-14 w-full max-w-[1140px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:h-16 md:px-5">
           <button
-            className="inline-flex items-center justify-self-start gap-0.5 text-sm font-medium text-[#1c133b] transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40 touch-manipulation"
+            className="inline-flex min-h-11 items-center justify-self-start gap-0.5 py-2 text-sm font-medium text-[#1c133b] transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40 touch-manipulation"
             disabled={backDisabled}
             onClick={onBack}
             type="button"
@@ -58,7 +58,7 @@ export function BookingChrome({
           {onHome ? (
             <button
               aria-label="Mundoria home"
-              className="inline-flex shrink-0 items-center justify-self-center touch-manipulation"
+              className="inline-flex min-h-11 shrink-0 items-center justify-self-center touch-manipulation"
               onClick={onHome}
               type="button"
             >
@@ -74,7 +74,7 @@ export function BookingChrome({
             <span />
           ) : (
             <Link
-              className="inline-flex h-9 items-center justify-center justify-self-end rounded-full border border-[#1c133b] px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-white/70 touch-manipulation"
+              className="inline-flex h-11 items-center justify-center justify-self-end rounded-full border border-[#1c133b] px-4 text-sm font-semibold text-[#1c133b] transition hover:bg-white/70 touch-manipulation"
               href={authHref}
             >
               Sign in

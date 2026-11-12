@@ -370,7 +370,7 @@ cross join lateral (
   select
     (array[
       'regular','one_off','deep_clean','same_day','end_of_tenancy',
-      'airbnb_turnover','office','move_in','illness_recovery'
+      'airbnb_turnover','office','move_in','hospital_discharge'
     ])[1 + (i % 9)]::public.service_type as service_type,
     (current_date + ((i % 60) - 20))::date as scheduled_date,
     (array['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'])[

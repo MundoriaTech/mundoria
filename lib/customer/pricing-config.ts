@@ -333,8 +333,6 @@ export const ADMIN_PRICING_SERVICES: Array<{
   { label: "Communal area", value: "communal_area" },
   { label: "Pregnancy support", value: "pregnancy_support" },
   { label: "Postpartum", value: "postpartum" },
-  { label: "Illness recovery", value: "illness_recovery" },
-  { label: "Post-injury", value: "post_injury" },
   { label: "Hospital discharge", value: "hospital_discharge" },
   { label: "Bereavement support", value: "bereavement_support" },
 ];

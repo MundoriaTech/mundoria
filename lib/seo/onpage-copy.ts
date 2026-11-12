@@ -92,10 +92,6 @@ export const ONPAGE_SERVICE_COPY: Record<string, OnpageCopy> = {
     description: `Gentle home cleaning in Birmingham from {from} during pregnancy and after a birth, so you can rest. Book online or call ${SUPPORT_PHONE} to talk it through.`,
     title: "Pregnancy & Postpartum Cleaning Birmingham | Mundoria",
   },
-  "illness-and-injury-recovery": {
-    description: `Home cleaning in Birmingham from {from} while you recover from illness or injury, with a careful, quiet visit. Call ${SUPPORT_PHONE} to talk it through.`,
-    title: "Illness & Injury Recovery Cleaning | Mundoria",
-  },
   "hospital-discharge-home-cleaning": {
     description: `Have your Birmingham home cleaned and ready before discharge day, from {from}. Book online or call ${SUPPORT_PHONE} and we will help plan the visit.`,
     title: "Hospital Discharge Home Cleaning | Mundoria",

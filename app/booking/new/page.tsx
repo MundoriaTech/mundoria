@@ -34,8 +34,9 @@ const serviceTypeSet = new Set(SERVICES.map((service) => service.value));
 function canonicalService(value?: string) {
   if (value === "move_out") return "move_in";
   if (value === "postpartum") return "pregnancy_support";
-  if (value === "post_injury") return "illness_recovery";
   if (value === "same_day") return "one_off";
+  // Retired: illness & injury recovery is no longer offered.
+  if (value === "post_injury" || value === "illness_recovery") return undefined;
   return value;
 }
 
@@ -46,6 +47,8 @@ function draftFromSearchParams(searchParams: {
 }) {
   const rawService =
     searchParams.focus === "move" ? "move_in" : searchParams.service;
+  const retiredToRecovery =
+    rawService === "illness_recovery" || rawService === "post_injury";
   const requested = canonicalService(rawService);
   const category = serviceCategorySet.has(searchParams.category as ServiceCategory)
     ? (searchParams.category as ServiceCategory)
@@ -54,10 +57,12 @@ function draftFromSearchParams(searchParams: {
     ? (requested as ServiceType)
     : null;
   const service = serviceType
-    ? SERVICES.find((item) => item.value === serviceType)
+    ? SERVICES.find(
+        (item) => item.value === serviceType && item.hidden !== true,
+      )
     : null;
 
-  if (!category && !service) return undefined;
+  if (!category && !service && !retiredToRecovery) return undefined;
 
   const serviceTypeValue = service?.value ?? null;
 
@@ -75,7 +80,8 @@ function draftFromSearchParams(searchParams: {
       rawService === "same_day"
         ? new Date().toISOString().slice(0, 10)
         : undefined,
-    serviceCategory: service?.category ?? category,
+    serviceCategory:
+      service?.category ?? category ?? (retiredToRecovery ? "recovery" : null),
     serviceType: serviceTypeValue,
   } satisfies Partial<BookingDraft>;
 }

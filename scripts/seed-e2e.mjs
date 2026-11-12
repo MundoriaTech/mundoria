@@ -60,8 +60,6 @@ const SERVICES = [
   "communal_area",
   "pregnancy_support",
   "postpartum",
-  "illness_recovery",
-  "post_injury",
   "hospital_discharge",
   "bereavement_support",
 ];

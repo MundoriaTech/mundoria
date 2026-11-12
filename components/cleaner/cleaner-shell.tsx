@@ -72,20 +72,20 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
     const interviewFailed = cleaner.interview_status === "failed";
     const lifecycle = applicationLifecycleLabel(cleaner);
     const title = interviewFailed
-      ? "Interview needs a follow-up"
+      ? "Onboarding call needs a follow-up"
       : awaitingInterview
-        ? "Online interview coming up"
+        ? "Onboarding call coming up"
         : cleaner.status === "in_training"
           ? "Action required"
           : lifecycle === "Action Required"
             ? "Action required"
             : "Application under review";
     const body = interviewFailed
-      ? "Your online interview didn’t pass this time. Mundoria will follow up with next steps. You can still update your profile."
+      ? "Your onboarding call didn’t lead to approval this time. Mundoria will follow up with next steps. You can still update your profile."
       : awaitingInterview
         ? cleaner.interview_scheduled_at
-          ? `Your 30-minute online interview is booked for ${formatInterviewSlot(cleaner.interview_scheduled_at)}. We’ll use the phone number on your profile.`
-          : "Thanks for submitting. Keep your interview time free, we’ll use the phone number on your profile."
+          ? `Your 30-minute onboarding call is booked for ${formatInterviewSlot(cleaner.interview_scheduled_at)}. We’ll use the phone number on your profile.`
+          : "Thanks for submitting. Keep your appointment free — we’ll use the phone number on your profile."
         : cleaner.status === "in_training"
           ? "Mundoria has put your application on hold. You can still update your profile. Job offers appear after you’re approved."
           : "You can explore your dashboard and update your profile. New job offers will appear after Mundoria approves your application. Payout setup opens on your dashboard once you’re approved.";

@@ -118,7 +118,7 @@ export function coreLocationFaqs(
     {
       question: "How does Mundoria check the cleaner who visits?",
       answer: P(
-        "Before anyone can take bookings, Mundoria checks their identity and right to work, reviews a Basic DBS certificate, looks at their cleaning experience and holds an interview with them.",
+        "Before anyone can take bookings, Mundoria checks their identity and right to work, reviews a Basic DBS certificate, looks at their cleaning experience and holds an onboarding call with them.",
         "Every cleaner must have at least £1 million of Public Liability insurance, and anyone whose cover expires is taken out of matching until it is renewed. Insurance has limits and does not cover every loss, so if something goes wrong, report it through Mundoria and it is reviewed on its facts.",
       ),
       links: [{ href: faqSectionHref("safety"), label: "Safety and vetting" }],

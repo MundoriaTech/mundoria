@@ -368,7 +368,6 @@ const _services = [
   _ServiceChoice('educational_facility', 'Educational facility', 'commercial', 4, 'required'),
   _ServiceChoice('communal_area', 'Communal areas', 'commercial', 3, 'required'),
   _ServiceChoice('pregnancy_support', 'Pregnancy and postpartum', 'recovery', 3, 'repeat'),
-  _ServiceChoice('illness_recovery', 'Illness and injury recovery', 'recovery', 4.5, 'repeat'),
   _ServiceChoice('hospital_discharge', 'Hospital discharge', 'recovery', 5, 'once'),
   _ServiceChoice('bereavement_support', 'Bereavement support', 'recovery', 4, 'repeat'),
 ];

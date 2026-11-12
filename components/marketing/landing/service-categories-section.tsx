@@ -98,11 +98,6 @@ const GROUPS = [
         label: "Pregnancy and postpartum",
       },
       {
-        description: "Support while you recover.",
-        href: "/cleaning/illness-and-injury-recovery",
-        label: "Illness and injury",
-      },
-      {
         description: "A home ready for coming back.",
         href: "/cleaning/hospital-discharge-home-cleaning",
         label: "Hospital discharge",
@@ -123,11 +118,8 @@ const GROUPS = [
 
 export function ServiceCategoriesSection({
   bookingHref,
-  fromPriceBySlug,
 }: {
   bookingHref: string;
-  /** Live admin from-prices keyed by marketing slug. */
-  fromPriceBySlug?: Record<string, string>;
 }) {
   const [activeId, setActiveId] = useState<(typeof GROUPS)[number]["id"]>("home");
   const [openLabel, setOpenLabel] = useState<string | null>(null);
@@ -204,8 +196,6 @@ export function ServiceCategoriesSection({
                 const open = openLabel === item.label;
                 const slug = item.href.replace(/^\/cleaning\//, "").split("/")[0] ?? "";
                 const service = marketingServiceBySlug(slug);
-                const fromPrice =
-                  fromPriceBySlug?.[slug] ?? service?.fromPrice ?? null;
                 const bookHref =
                   setupOnly || !service ? bookingHref : service.bookingHref;
                 const panelId = `category-actions-${slug}`;
@@ -223,15 +213,8 @@ export function ServiceCategoriesSection({
                       type="button"
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="flex items-start justify-between gap-3">
-                          <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#2a2158] sm:text-[17px]">
-                            {item.label}
-                          </span>
-                          {fromPrice ? (
-                            <span className="shrink-0 pt-0.5 text-sm font-semibold tabular-nums text-[#2a2158] sm:text-[15px]">
-                              From {fromPrice}
-                            </span>
-                          ) : null}
+                        <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#2a2158] sm:text-[17px]">
+                          {item.label}
                         </span>
                         <span className="mt-1 block max-w-sm text-sm leading-5 text-[#5c5670]">
                           {item.description}

@@ -5,9 +5,17 @@ import { z } from "zod";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 import {
+  CLEANER_DOCUMENT_LABELS,
+  documentStatusColumn,
+  documentVerifiedColumn,
+  isCleanerDocumentKind,
+  writeDocumentReview,
+} from "@/lib/cleaner/document-reviews";
+import {
   mergeVerificationFlags,
   reasonSuggestsUnreadableDoc,
 } from "@/lib/cleaner/onboarding-compliance";
+import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import {
   createInAppNotification,
@@ -25,11 +33,32 @@ const schema = z.object({
     "fail_interview",
     "approve_skills",
     "request_info",
+    "review_document",
   ]),
+  document_kind: z
+    .enum(["dbs", "id", "utr", "insurance", "headshot"])
+    .optional(),
+  document_decision: z.enum(["verified", "rejected"]).optional(),
   flag_unreadable_doc: z.boolean().optional().default(false),
-  reason: z.string().trim().min(3),
+  reason: z.string().trim().optional().default(""),
   tier: z.enum(["bronze", "silver", "gold", "rose_gold", "elite"]).optional(),
 });
+
+const NOTE_REQUIRED_ACTIONS = new Set([
+  "reject",
+  "request_info",
+  "fail_interview",
+  "suspend",
+  "remove",
+  "review_document",
+]);
+
+const DEFAULT_ACTION_NOTES: Record<string, string> = {
+  approve: "Approved for live jobs after onboarding call and document checks.",
+  approve_skills: "Specialist skills approved.",
+  complete_interview: "Onboarding call marked complete.",
+  set_tier: "Tier updated by admin.",
+};
 
 export async function POST(
   request: Request,
@@ -42,28 +71,61 @@ export async function POST(
     return NextResponse.json(
       {
         error:
-          parsed.error.issues[0]?.message ??
-          "A reason of at least 3 characters is required.",
+          parsed.error.issues[0]?.message ?? "Invalid cleaner action request.",
       },
       { status: 400 },
     );
   }
-  const { action, flag_unreadable_doc, reason, tier } = parsed.data;
+  const {
+    action,
+    document_decision,
+    document_kind,
+    flag_unreadable_doc,
+    tier,
+  } = parsed.data;
+  let reason = parsed.data.reason.trim();
+  if (NOTE_REQUIRED_ACTIONS.has(action) && reason.length < 3) {
+    return NextResponse.json(
+      {
+        error:
+          "Add a short note (at least 3 characters) explaining this decision.",
+      },
+      { status: 400 },
+    );
+  }
+  if (!reason) {
+    reason = DEFAULT_ACTION_NOTES[action] ?? `Admin action: ${action}`;
+  }
 
   const { data: current } = await auth.admin
     .from("cleaner_profiles")
     .select(
-      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,utr_number,dbs_document_url,id_document_url,verification_flags",
+      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,verification_flags",
     )
     .eq("id", params.id)
     .single();
+
+  if (action === "review_document") {
+    if (!document_kind || !isCleanerDocumentKind(document_kind)) {
+      return NextResponse.json(
+        { error: "Choose which document you are reviewing." },
+        { status: 400 },
+      );
+    }
+    if (!document_decision) {
+      return NextResponse.json(
+        { error: "Choose approve or reject for this document." },
+        { status: 400 },
+      );
+    }
+  }
 
   if (action === "approve") {
     if (current?.interview_status !== "completed") {
       return NextResponse.json(
         {
           error:
-            "Mark the phone interview as completed before approving for live jobs.",
+            "Mark the onboarding call as completed before approving for live jobs.",
         },
         { status: 400 },
       );
@@ -83,6 +145,49 @@ export async function POST(
     if (!current?.utr_number) {
       return NextResponse.json(
         { error: "Cleaner has not provided a UTR number." },
+        { status: 400 },
+      );
+    }
+
+    const pendingDocs: string[] = [];
+    const requireVerified = (
+      label: string,
+      status: string | null | undefined,
+      hasFile: boolean,
+    ) => {
+      if (!hasFile) return;
+      if (status !== "verified") pendingDocs.push(label);
+    };
+    requireVerified(
+      "Headshot",
+      current?.headshot_status,
+      Boolean(current?.headshot_url),
+    );
+    requireVerified(
+      "Government ID",
+      current?.id_document_status,
+      parseDocumentUrls(current?.id_document_url).some(Boolean),
+    );
+    requireVerified(
+      "DBS",
+      current?.dbs_document_status,
+      parseDocumentUrls(current?.dbs_document_url).some(Boolean),
+    );
+    requireVerified(
+      "UTR proof",
+      current?.utr_document_status,
+      Boolean(current?.utr_document_url),
+    );
+    requireVerified(
+      "Insurance",
+      current?.insurance_status,
+      Boolean(current?.insurance_certificate_url),
+    );
+    if (pendingDocs.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Approve or reject each uploaded document first: ${pendingDocs.join(", ")}.`,
+        },
         { status: 400 },
       );
     }
@@ -119,15 +224,30 @@ export async function POST(
     updates.certification_assessed_at = new Date().toISOString();
   }
 
+  if (action === "review_document" && document_kind && document_decision) {
+    const statusColumn = documentStatusColumn(document_kind);
+    const verifiedColumn = documentVerifiedColumn(document_kind);
+    updates[statusColumn] = document_decision;
+    if (verifiedColumn) {
+      updates[verifiedColumn] = document_decision === "verified";
+    }
+    updates.verification_flags = writeDocumentReview(
+      (current?.verification_flags as Record<string, unknown> | null) ?? {},
+      document_kind,
+      {
+        decision: document_decision,
+        note: reason,
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: auth.user.id,
+      },
+    );
+    if (document_decision === "rejected") {
+      updates.status = "in_training";
+    }
+  }
+
   if (action === "approve") {
-    updates.dbs_verified = true;
-    updates.id_verified = true;
-    updates.utr_verified = true;
-    updates.dbs_document_status = "verified";
-    updates.id_document_status = "verified";
-    updates.headshot_status = "verified";
-    updates.utr_document_status = "verified";
-    updates.insurance_status = "verified";
+    // Documents must already be individually verified above.
     updates.certification_passed = true;
     updates.certification_notes = reason;
     updates.certification_assessed_by = auth.user.id;
@@ -201,9 +321,18 @@ export async function POST(
     adminId: auth.user.id,
     entityId: params.id,
     entityType: "cleaner",
-    metadata: tier ? { tier } : {},
+    metadata: {
+      ...(tier ? { tier } : {}),
+      ...(document_kind ? { document_kind } : {}),
+      ...(document_decision ? { document_decision } : {}),
+    },
     reason,
   });
+
+  const documentLabel =
+    document_kind && isCleanerDocumentKind(document_kind)
+      ? CLEANER_DOCUMENT_LABELS[document_kind]
+      : "Document";
 
   const notificationBody =
     action === "approve"
@@ -212,12 +341,16 @@ export async function POST(
         ? "Your application is on hold. Mundoria will follow up if more is needed."
         : action === "request_info"
           ? "We need a little more information to finish reviewing your application. Check your email for details."
+          : action === "review_document" && document_decision === "verified"
+            ? `Your ${documentLabel} document was accepted.`
+            : action === "review_document" && document_decision === "rejected"
+              ? `Your ${documentLabel} document needs another look. ${reason}`
           : action === "approve_skills"
             ? "Your specialist skills have been reviewed and approved."
         : action === "complete_interview"
-          ? "Your phone interview is complete. Mundoria will finish document review shortly."
+          ? "Your onboarding call is complete. Mundoria will finish document review shortly."
           : action === "fail_interview"
-            ? "Your phone interview did not pass. Mundoria will follow up with next steps."
+            ? "Your onboarding call didn’t lead to approval this time. Mundoria will follow up with next steps."
             : action === "suspend"
               ? "Your cleaner account has been temporarily suspended."
               : action === "remove"
@@ -231,12 +364,16 @@ export async function POST(
         ? "Application on hold"
         : action === "request_info"
           ? "More information needed"
+          : action === "review_document" && document_decision === "verified"
+            ? `${documentLabel} accepted`
+            : action === "review_document" && document_decision === "rejected"
+              ? `${documentLabel} needs another look`
           : action === "approve_skills"
             ? "Specialist skills approved"
         : action === "complete_interview"
-          ? "Interview complete"
+          ? "Onboarding call complete"
           : action === "fail_interview"
-            ? "Interview update"
+            ? "Onboarding call update"
             : "Account update";
 
   await createInAppNotification(
@@ -268,7 +405,8 @@ export async function POST(
     if (
       (action === "approve" ||
         action === "reject" ||
-        action === "request_info") &&
+        action === "request_info" ||
+        (action === "review_document" && document_decision === "rejected")) &&
       recipient?.email
     ) {
       const fullName = (recipient.full_name as string | null) ?? "";
@@ -278,7 +416,10 @@ export async function POST(
             process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin,
           firstName: fullName.split(" ")[0] || undefined,
           fullName: fullName || undefined,
-          reason,
+          reason:
+            action === "review_document"
+              ? `${documentLabel}: ${reason}`
+              : reason,
           tier: action === "approve" ? "Silver" : undefined,
         },
         template:
@@ -298,6 +439,8 @@ export async function POST(
   revalidatePath(`/admin/cleaner/${params.id}`);
   revalidatePath("/admin/cleaners");
   revalidatePath("/admin/dashboard");
+  revalidatePath("/cleaner/profile");
+  revalidatePath("/cleaner/dashboard");
 
   return NextResponse.json({ success: true });
 }

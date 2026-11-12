@@ -84,7 +84,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import {
   composeBookingNotes,
   bookingCategoryImages,
-  bookingServiceImages,
+  defaultServiceForCategory,
   durationSummary,
   formatBookingDate,
   frequencyAllowsOneOff,
@@ -96,6 +96,7 @@ import {
   getFlowSteps,
   guestAddressComplete,
   pricingServiceTypeFor,
+  shortServiceLabel,
   type BookingEntryLock,
   isBookingFlowStepId,
   resolveFlowStepIndex,
@@ -1408,6 +1409,7 @@ export function BookingWizard({
   }, [addressPostcode, tooFarOpen]);
 
   function goNext() {
+    setBasketOpen(false);
     if (
       addressTooFar &&
       dismissedFarPostcodeRef.current !== addressPostcode
@@ -2144,7 +2146,7 @@ export function BookingWizard({
             <button
               aria-expanded={basketOpen}
               aria-label={basketOpen ? "Close basket" : "Open basket"}
-              className="absolute left-1/2 top-1/2 inline-flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[#1c133b] touch-manipulation"
+              className="absolute left-1/2 top-1/2 inline-flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[#1c133b] touch-manipulation"
               onClick={() => setBasketOpen((open) => !open)}
               type="button"
             >
@@ -2377,14 +2379,6 @@ function KnownCleanersStep({
   );
 }
 
-const PRIMARY_RESIDENTIAL_SERVICES = new Set<ServiceType>([
-  "regular",
-  "move_in",
-  "one_off",
-  "end_of_tenancy",
-  "airbnb_turnover",
-]);
-
 function servicesForPicker(
   category: ServiceCategory,
   selected: ServiceType | null,
@@ -2393,15 +2387,12 @@ function servicesForPicker(
   let services = servicesForCategory(category).filter((item) => !item.hidden);
   if (focusServices?.length) {
     services = services.filter((item) => focusServices.includes(item.value));
-  } else if (category === "residential") {
-    services = services.filter(
-      (item) =>
-        (PRIMARY_RESIDENTIAL_SERVICES.has(item.value) ||
-          item.value === selected) &&
-        (item.value !== "holiday_let" || item.value === selected),
-    );
   }
   return services;
+}
+
+function categoryNeedsSubtype(category: ServiceCategory) {
+  return defaultServiceForCategory(category) == null;
 }
 
 function ServicePickerStep({
@@ -2425,24 +2416,46 @@ function ServicePickerStep({
       )
     : MAIN_BOOKING_CATEGORIES;
 
-  const initialOpen =
-    lockedCategory ??
-    selectedCategory ??
-    (selectedService
+  const selectedCat =
+    selectedService != null
       ? serviceDefinition(selectedService).category
-      : null);
+      : selectedCategory;
 
   const [openCategory, setOpenCategory] = useState<ServiceCategory | null>(
-    initialOpen,
+    () => {
+      if (lockedCategory && categoryNeedsSubtype(lockedCategory)) {
+        return lockedCategory;
+      }
+      if (selectedCat && categoryNeedsSubtype(selectedCat)) return selectedCat;
+      return null;
+    },
   );
 
   useEffect(() => {
-    if (lockedCategory) {
+    if (lockedCategory && categoryNeedsSubtype(lockedCategory)) {
       setOpenCategory(lockedCategory);
+    }
+  }, [lockedCategory]);
+
+  // House Cleaning is one click — select Regular, no nested panel.
+  useEffect(() => {
+    if (lockedCategory !== "residential") return;
+    if (selectedService && serviceDefinition(selectedService).category === "residential") {
       return;
     }
-    if (selectedCategory) setOpenCategory(selectedCategory);
-  }, [lockedCategory, selectedCategory]);
+    onSelectService("regular");
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on residential lock
+  }, [lockedCategory]);
+
+  function chooseCategory(category: ServiceCategory) {
+    const fallback = defaultServiceForCategory(category);
+    if (fallback) {
+      onSelectService(fallback);
+      setOpenCategory(null);
+      return;
+    }
+    setOpenCategory((current) => (current === category ? null : category));
+  }
 
   return (
     <div>
@@ -2450,115 +2463,160 @@ function ServicePickerStep({
         What do you need?
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        Open a category, then pick the cleaning that fits.
+        Pick a category. How often comes later.
       </p>
-      <div className="mt-8 grid gap-3">
+      <div className="mt-8 grid gap-2.5">
         {categories.map((category) => {
-          const open = openCategory === category.value;
           const image = bookingCategoryImages[category.value];
+          const needsSubtype =
+            categoryNeedsSubtype(category.value) || Boolean(focusServices?.length);
+          const open = openCategory === category.value && needsSubtype;
+          const selectedInCategory = selectedCat === category.value;
           const services = servicesForPicker(
             category.value,
             selectedService,
             focusServices,
           );
-          const selectedInCategory =
-            selectedService != null &&
-            serviceDefinition(selectedService).category === category.value;
+          const rateService =
+            selectedInCategory && selectedService
+              ? selectedService
+              : defaultServiceForCategory(category.value);
+          const isDeepHome =
+            category.value === "residential" && selectedService === "deep_clean";
 
           return (
             <div
               className={cn(
-                "overflow-hidden rounded-2xl border-2 border-transparent bg-white transition",
-                (open || selectedInCategory) && "border-[#6a45b8]",
+                "overflow-hidden rounded-2xl border bg-white transition",
+                selectedInCategory
+                  ? "border-[#6a45b8] border-2"
+                  : "border-[#ebe4da]",
               )}
               key={category.value}
             >
               <button
-                aria-expanded={open}
-                className="flex w-full items-center gap-3 p-3 text-left touch-manipulation hover:bg-[#f8f5ff] sm:gap-4 sm:p-4"
-                onClick={() =>
-                  setOpenCategory((current) =>
-                    current === category.value ? null : category.value,
-                  )
-                }
+                aria-expanded={needsSubtype ? open : undefined}
+                className="flex w-full items-center gap-3 px-3.5 py-3.5 text-left touch-manipulation hover:bg-[#faf8f5] sm:gap-3.5 sm:px-4"
+                onClick={() => chooseCategory(category.value)}
                 type="button"
               >
-                <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white sm:h-[4.5rem] sm:w-[4.5rem]">
+                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f3eef9] sm:h-14 sm:w-14">
                   <LazyImage
                     alt=""
                     className="object-cover object-center"
                     fill
-                    sizes="72px"
+                    sizes="56px"
                     src={image}
                   />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-[#1c133b]">
-                    {category.label}
-                  </p>
-                  <p className="mt-1 text-sm leading-5 text-[#5a5470]">
-                    {category.description}
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="font-semibold text-[#1c133b]">
+                      {category.label}
+                    </p>
+                    {rateService ? (
+                      <p className="shrink-0 text-sm font-bold tabular-nums text-[#1c133b]">
+                        {formatHourlyRate(
+                          indicativeHourlyRatePence(rateService, pricing),
+                        )}
+                      </p>
+                    ) : null}
+                  </div>
+                  <p className="mt-0.5 text-sm leading-5 text-[#5a5470]">
+                    {isDeepHome
+                      ? "Deep clean selected"
+                      : selectedInCategory &&
+                          selectedService &&
+                          needsSubtype
+                        ? shortServiceLabel(selectedService)
+                        : category.description}
                   </p>
                 </div>
-                <ChevronDown
-                  aria-hidden
-                  className={cn(
-                    "h-5 w-5 shrink-0 text-[#6a45b8] transition",
-                    open && "rotate-180",
-                  )}
-                />
+                {needsSubtype ? (
+                  <ChevronDown
+                    aria-hidden
+                    className={cn(
+                      "h-5 w-5 shrink-0 text-[#8a849c] transition",
+                      open && "rotate-180",
+                      selectedInCategory && "text-[#6a45b8]",
+                    )}
+                  />
+                ) : selectedInCategory ? (
+                  <span
+                    aria-hidden
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[10px] font-bold text-white"
+                  >
+                    ✓
+                  </span>
+                ) : null}
               </button>
 
+              {category.value === "residential" &&
+              selectedInCategory &&
+              !focusServices?.length ? (
+                <div className="border-t border-[#f0ebe3] px-3.5 py-2.5 sm:px-4">
+                  {selectedService === "deep_clean" ? (
+                    <button
+                      className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
+                      onClick={() => onSelectService("regular")}
+                      type="button"
+                    >
+                      Switch to standard house cleaning
+                    </button>
+                  ) : (
+                    <button
+                      className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
+                      onClick={() => onSelectService("deep_clean")}
+                      type="button"
+                    >
+                      Need a deep clean instead?
+                    </button>
+                  )}
+                </div>
+              ) : null}
+
               {open ? (
-                <div className="space-y-2 border-t border-[#eeeef1] px-3 pb-3 pt-2 sm:px-4 sm:pb-4">
-                  {services.map((item) => {
-                    const active = selectedService === item.value;
-                    const popular = item.value === "regular";
-                    const serviceImage = bookingServiceImages[item.value];
-                    return (
-                      <button
-                        className={cn(
-                          "relative flex w-full items-center gap-3 rounded-xl border-2 border-transparent bg-[#faf8ff] p-3 text-left transition hover:bg-[#f3effc] touch-manipulation sm:gap-4 sm:p-3.5",
-                          active && "border-[#6a45b8] bg-white",
-                        )}
-                        key={item.value}
-                        onClick={() => onSelectService(item.value)}
-                        type="button"
-                      >
-                        {popular ? (
-                          <span className="absolute right-2.5 top-2.5 z-10 rounded bg-[#c79c66] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c133b]">
-                            Popular
-                          </span>
-                        ) : null}
-                        <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white sm:h-16 sm:w-16">
-                          <LazyImage
-                            alt=""
-                            className="object-cover object-center"
-                            fill
-                            sizes="64px"
-                            src={serviceImage}
-                          />
-                        </span>
-                        <div
-                          className={cn("min-w-0 flex-1", popular && "pr-14")}
+                <div className="border-t border-[#f0ebe3] px-2 py-2 sm:px-3 sm:py-2.5">
+                  <div className="flex flex-col">
+                    {services.map((item) => {
+                      const active = selectedService === item.value;
+                      return (
+                        <button
+                          className={cn(
+                            "flex items-center justify-between gap-3 rounded-xl px-2.5 py-2.5 text-left transition touch-manipulation sm:px-3",
+                            active
+                              ? "bg-[#f3eef9]"
+                              : "hover:bg-[#faf8f5]",
+                          )}
+                          key={item.value}
+                          onClick={() => onSelectService(item.value)}
+                          type="button"
                         >
-                          <div className="flex items-start justify-between gap-3">
-                            <p className="font-semibold text-[#1c133b]">
-                              {item.label}
-                            </p>
-                            <p className="shrink-0 text-sm font-bold tabular-nums text-[#1c133b]">
-                              {formatHourlyRate(
-                                indicativeHourlyRatePence(item.value, pricing),
+                          <span className="flex min-w-0 items-center gap-2.5">
+                            <span
+                              aria-hidden
+                              className={cn(
+                                "h-3.5 w-3.5 shrink-0 rounded-full border-2",
+                                active
+                                  ? "border-[#6a45b8] bg-[#6a45b8] shadow-[inset_0_0_0_2px_#fff]"
+                                  : "border-[#cfc8de] bg-white",
                               )}
-                            </p>
-                          </div>
-                          <p className="mt-1 text-sm leading-5 text-[#5a5470] line-clamp-2">
-                            {item.description}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                            />
+                            <span className="min-w-0">
+                              <span className="block font-medium text-[#1c133b]">
+                                {shortServiceLabel(item.value)}
+                              </span>
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-sm font-semibold tabular-nums text-[#1c133b]">
+                            {formatHourlyRate(
+                              indicativeHourlyRatePence(item.value, pricing),
+                            )}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -2754,7 +2812,11 @@ function AddressStep({
 }) {
   const signedIn = Boolean(userId) && !localOnly;
   const collapsibleSaved = signedIn && addresses.length > 1;
-  const [savedOpen, setSavedOpen] = useState(() => addresses.length <= 2);
+  const [savedOpen, setSavedOpen] = useState(() => addresses.length <= 1);
+  const [isNarrow, setIsNarrow] = useState(true);
+  const serviceSectionRef = useRef<HTMLDivElement>(null);
+  const roomsSectionRef = useRef<HTMLDivElement>(null);
+  const extrasSectionRef = useRef<HTMLDivElement>(null);
   const categoryForRooms =
     selectedService != null
       ? serviceDefinition(selectedService).category
@@ -2764,23 +2826,66 @@ function AddressStep({
     selectedId != null
       ? (addresses.find((item) => item.id === selectedId) ?? null)
       : null;
+  const addressReady =
+    selectedId != null || guestAddressComplete(draft.guestAddress);
+  const serviceReady = selectedService != null;
+  const roomsReady =
+    !showHomeRooms || (bedrooms != null && bathrooms != null);
+  // Mobile: reveal sections as prior ones are complete. Desktop: keep the full form.
+  const revealService =
+    !isNarrow ||
+    addressReady ||
+    serviceReady ||
+    Boolean(lockedCategory) ||
+    Boolean(focusServices?.length);
+  const revealRooms = !isNarrow || serviceReady;
+  const revealExtras = !isNarrow || (serviceReady && roomsReady);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setIsNarrow(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  const prevAddressReady = useRef(addressReady);
+  const prevServiceReady = useRef(serviceReady);
+  const prevRoomsReady = useRef(roomsReady);
+
+  useEffect(() => {
+    const becameReady = addressReady && !prevAddressReady.current;
+    prevAddressReady.current = addressReady;
+    if (!isNarrow || !becameReady || !revealService) return;
+    serviceSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [addressReady, isNarrow, revealService]);
+
+  useEffect(() => {
+    const becameReady = serviceReady && !prevServiceReady.current;
+    prevServiceReady.current = serviceReady;
+    if (!isNarrow || !becameReady || !revealRooms) return;
+    roomsSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [isNarrow, revealRooms, serviceReady]);
+
+  useEffect(() => {
+    const becameReady = roomsReady && !prevRoomsReady.current;
+    prevRoomsReady.current = roomsReady;
+    if (!isNarrow || !becameReady || !revealExtras) return;
+    extrasSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [isNarrow, revealExtras, roomsReady]);
 
   return (
     <div>
-      {onSelectService ? (
-        <ServicePickerStep
-          focusServices={focusServices}
-          lockedCategory={lockedCategory}
-          onSelectService={onSelectService}
-          pricing={pricing}
-          selectedCategory={selectedCategory}
-          selectedService={selectedService}
-        />
-      ) : null}
-
-      <div
-        className={cn(onSelectService && "mt-10 border-t border-[#eeeef1] pt-8")}
-      >
+      <div>
         <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
           {proName
             ? `Where should ${proName} clean?`
@@ -2886,15 +2991,34 @@ function AddressStep({
         ) : null}
       </div>
 
-      {showHomeRooms ? (
-        <div className="mt-10 border-t border-[#eeeef1] pt-8">
+      {onSelectService && revealService ? (
+        <div
+          className="mt-10 scroll-mt-28 border-t border-[#eeeef1] pt-8"
+          ref={serviceSectionRef}
+        >
+          <ServicePickerStep
+            focusServices={focusServices}
+            lockedCategory={lockedCategory}
+            onSelectService={onSelectService}
+            pricing={pricing}
+            selectedCategory={selectedCategory}
+            selectedService={selectedService}
+          />
+        </div>
+      ) : null}
+
+      {showHomeRooms && revealRooms ? (
+        <div
+          className="mt-10 scroll-mt-28 border-t border-[#eeeef1] pt-8"
+          ref={roomsSectionRef}
+        >
           <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
             Tell us about the rooms
           </h2>
           <p className="mt-3 text-sm leading-6 text-[#5a5470]">
             This helps size duration and price for the clean.
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6">
             <RoomCountStepper
               label="Bedrooms"
               onChange={onBedrooms}
@@ -2913,13 +3037,16 @@ function AddressStep({
         </div>
       ) : null}
 
-      {selectedService ? (
-        <div className="mt-10 border-t border-[#eeeef1] pt-8">
+      {selectedService && revealExtras ? (
+        <div
+          className="mt-10 scroll-mt-28 border-t border-[#eeeef1] pt-8"
+          ref={extrasSectionRef}
+        >
           <AddOnsStep draft={draft} pricing={pricing} update={update} />
         </div>
       ) : null}
 
-      {duration && onDurationChange ? (
+      {duration && onDurationChange && revealExtras ? (
         <div className="mt-10 border-t border-[#eeeef1] pt-8">
           <DurationStep
             duration={duration}
@@ -3157,10 +3284,10 @@ function RoomCountStepper({
   return (
     <div className="grid min-w-0 grid-rows-[auto_auto] gap-2">
       <p className="text-sm font-medium text-[#291845]">{label}</p>
-      <div className="flex h-11 items-center justify-between gap-2 sm:justify-start sm:gap-3">
+      <div className="flex h-11 min-w-0 items-center justify-between gap-1.5 sm:gap-3">
         <button
           aria-label={`Decrease ${label.toLowerCase()}`}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition touch-manipulation hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-11 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition touch-manipulation hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-11"
           disabled={set && value <= min}
           onClick={() => {
             if (!set) onChange(min);
@@ -3170,17 +3297,17 @@ function RoomCountStepper({
         >
           <Minus className="h-4 w-4" strokeWidth={2.5} />
         </button>
-        <div className="min-w-0 flex-1 text-center sm:min-w-[5.5rem] sm:flex-none">
-          <p className="text-lg font-semibold leading-none tabular-nums text-[#291845]">
+        <div className="min-w-0 flex-1 px-0.5 text-center">
+          <p className="text-base font-semibold leading-none tabular-nums text-[#291845] sm:text-lg">
             {!set ? "-" : value === 6 ? "6+" : value}
           </p>
-          <p className="mt-0.5 text-xs font-medium text-[#8b8798]">
+          <p className="mt-0.5 truncate text-[11px] font-medium text-[#8b8798] sm:text-xs">
             {!set ? unitPlural : value === 1 ? unitSingular : unitPlural}
           </p>
         </div>
         <button
           aria-label={`Increase ${label.toLowerCase()}`}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition touch-manipulation hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-11 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] text-[#1c133b] transition touch-manipulation hover:bg-[#1c133b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-11"
           disabled={set && value >= max}
           onClick={() => {
             if (!set) onChange(Math.min(max, 1));
@@ -3382,7 +3509,7 @@ function AddOnsStep({
         </button>
         <button
           aria-label={`About ${addOn.label}`}
-          className="absolute right-0.5 top-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#6a45b8] shadow-sm touch-manipulation hover:bg-[#f8f5ff]"
+          className="absolute right-0 top-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#6a45b8] shadow-sm touch-manipulation hover:bg-[#f8f5ff]"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -4046,7 +4173,7 @@ function TimeSection({
       ) : null}
 
       {showFlexPrompt ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 sm:items-center sm:p-4">
           <div
             aria-labelledby="flex-prompt-title"
             aria-modal="true"

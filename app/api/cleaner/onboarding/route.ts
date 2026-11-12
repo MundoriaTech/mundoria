@@ -135,7 +135,7 @@ const schema = z
       .string()
       .refine(
         (value) => !Number.isNaN(Date.parse(value)),
-        "Choose a valid interview time.",
+        "Choose a valid appointment time.",
       ),
     location_tracking_consent_accepted: z.literal(true, {
       errorMap: () => ({ message: "Location consent is required" }),
@@ -459,14 +459,14 @@ export async function POST(request: Request) {
 
   if (Date.parse(parsed.data.interview_scheduled_at) <= Date.now()) {
     return NextResponse.json(
-      { error: "That interview time has passed. Choose a new time." },
+      { error: "That appointment time has passed. Choose a new time." },
       { status: 400 },
     );
   }
   const taken = await listTakenInterviewSlots(user.id);
   if (!isBookableInterviewSlot(parsed.data.interview_scheduled_at, taken)) {
     return NextResponse.json(
-      { error: "That interview time is no longer available. Choose another." },
+      { error: "That appointment time is no longer available. Choose another." },
       { status: 409 },
     );
   }
@@ -766,16 +766,16 @@ export async function POST(request: Request) {
     .eq("role", "admin");
   await admin.from("notifications").insert([
     ...(admins ?? []).map((recipient) => ({
-      body: `${value.full_name} booked a 30-minute online interview for ${interviewWhen}.`,
+      body: `${value.full_name} booked a 30-minute onboarding call for ${interviewWhen}.`,
       data: { cleaner_id: user.id },
       title: "New cleaner application",
       type: "cleaner_application",
       user_id: recipient.id,
     })),
     {
-      body: `Your 30-minute online interview is booked for ${interviewWhen}.`,
+      body: `Your 30-minute onboarding call is booked for ${interviewWhen}.`,
       data: { interview_scheduled_at: value.interview_scheduled_at },
-      title: "Interview booked",
+      title: "Appointment booked",
       type: "interview_booked",
       user_id: user.id,
     },
@@ -808,7 +808,7 @@ export async function POST(request: Request) {
     Sentry.captureException(pushError);
   }
   await admin.from("admin_alert_queue").insert({
-    body: `${value.full_name} booked a 30-minute online interview for ${interviewWhen}.`,
+    body: `${value.full_name} booked a 30-minute onboarding call for ${interviewWhen}.`,
     data: { cleaner_id: user.id },
     title: "New cleaner application",
     type: "cleaner_application",

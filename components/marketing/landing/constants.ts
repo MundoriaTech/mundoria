@@ -106,11 +106,6 @@ export const landingCategoryNav = [
         label: "Pregnancy & postpartum",
       },
       {
-        description: "Support while you recover",
-        href: "/cleaning/illness-and-injury-recovery",
-        label: "Illness & injury",
-      },
-      {
         description: "A home ready for coming back",
         href: "/cleaning/hospital-discharge-home-cleaning",
         label: "Hospital discharge",

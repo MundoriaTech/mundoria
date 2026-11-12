@@ -17,6 +17,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { normalizePhone } from "@/lib/auth/phone-verify";
+import {
+  CLEANER_DOCUMENT_KINDS,
+  CLEANER_DOCUMENT_LABELS,
+  cleanerFacingDocStatus,
+  documentReviewNoteFor,
+  documentStatusColumn,
+} from "@/lib/cleaner/document-reviews";
 import { SERVICES } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -26,6 +33,7 @@ import type {
   CleanerAvailability,
   CleanerProfile,
   CleanerService,
+  DocumentReviewStatus,
 } from "@/types/cleaner";
 
 export function CleanerProfileForm({
@@ -419,8 +427,51 @@ export function CleanerProfileForm({
         </Panel>
 
         <Panel eyebrow="Checks" title="Documents">
-          <StatusRow label="DBS" value={labelStatus(cleaner.dbs_document_status)} />
-          <StatusRow label="Photo ID" value={labelStatus(cleaner.id_document_status)} />
+          <p className="text-sm leading-6 text-[#5c5670]">
+            Mundoria reviews each upload separately. Rejected documents include
+            a note explaining what to fix.
+          </p>
+          <div className="mt-3 space-y-3">
+            {CLEANER_DOCUMENT_KINDS.map((kind) => {
+              const status = cleaner[
+                documentStatusColumn(kind)
+              ] as DocumentReviewStatus;
+              const review = documentReviewNoteFor(
+                cleaner.verification_flags,
+                kind,
+              );
+              return (
+                <div
+                  className="rounded-2xl border border-[#ebe4da] bg-[#faf8f5] px-3.5 py-3"
+                  key={kind}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-medium text-[#1c133b]">
+                      {CLEANER_DOCUMENT_LABELS[kind]}
+                    </p>
+                    <p
+                      className={cn(
+                        "shrink-0 text-sm font-semibold",
+                        status === "verified"
+                          ? "text-emerald-800"
+                          : status === "rejected" || status === "expired"
+                            ? "text-amber-900"
+                            : "text-[#5c5670]",
+                      )}
+                    >
+                      {cleanerFacingDocStatus(status)}
+                    </p>
+                  </div>
+                  {review?.note &&
+                  (status === "rejected" || review.decision === "rejected") ? (
+                    <p className="mt-2 text-sm leading-5 text-[#5c5670]">
+                      {review.note}
+                    </p>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
         </Panel>
 
         <Panel eyebrow="Money" title="Payouts">
@@ -474,6 +525,7 @@ export function CleanerProfileForm({
       </div>
 
       <StripeEmbeddedPayouts
+        bankFocused={payouts.bankFocused}
         mode={payouts.mode}
         onClose={payouts.close}
         open={payouts.open}
@@ -499,14 +551,6 @@ const DAY_NAMES = [
   "Friday",
   "Saturday",
 ];
-
-function labelStatus(value: string) {
-  if (value === "verified") return "Approved";
-  if (value === "pending") return "Being checked";
-  if (value === "rejected") return "Needs another look";
-  if (value === "missing") return "Not uploaded";
-  return value.replaceAll("_", " ");
-}
 
 function AboutYou({
   name,

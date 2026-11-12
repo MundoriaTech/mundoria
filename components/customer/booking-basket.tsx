@@ -132,7 +132,7 @@ function BasketSection({
       </span>
       <span
         className={cn(
-          "min-w-0 flex-1 text-sm",
+          "min-w-0 flex-1 text-sm line-clamp-2",
           filled ? "font-bold text-[#1c133b]" : "font-semibold text-[#8a8498]",
         )}
       >
@@ -598,7 +598,7 @@ export function BookingBasketSheet({
     <div
       aria-labelledby={titleId}
       aria-modal="true"
-      className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] top-0 z-[60] flex items-end justify-center bg-black/40 lg:hidden"
+      className="fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] top-0 z-[60] flex items-end justify-center bg-black/40 lg:hidden"
       role="dialog"
     >
       <button

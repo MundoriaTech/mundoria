@@ -65,19 +65,13 @@ export default async function HomePage() {
   const customerHref = bookingHref;
   const cleanerHref = configured ? "/signup/cleaner" : "/setup";
   const pricedServices = await getPublicMarketingServices();
-  const fromPriceBySlug = Object.fromEntries(
-    pricedServices.map((service) => [service.slug, service.fromPrice]),
-  );
 
   return (
     <MarketingShell>
       <JsonLd data={homePageStructuredData(pricedServices)} />
       <LandingPurpleField>
         <HeroSection bookingHref={bookingHref} />
-        <ServiceCategoriesSection
-          bookingHref={bookingHref}
-          fromPriceBySlug={fromPriceBySlug}
-        />
+        <ServiceCategoriesSection bookingHref={bookingHref} />
         <PopularServicesSection bookingBaseHref={bookingHref} />
       </LandingPurpleField>
       <HowMundoriaWorksSection />

@@ -8,7 +8,8 @@ const RETIRED_SERVICE_SLUGS = {
   "move-out-cleaning": "move-in-move-out-cleaning",
   "holiday-let-cleaning": "airbnb-shortlet-cleaning",
   "postpartum-cleaning": "pregnancy-and-postpartum-cleaning",
-  "injury-recovery-cleaning": "illness-and-injury-recovery",
+  "illness-and-injury-recovery": "/cleaning/recovery",
+  "injury-recovery-cleaning": "/cleaning/recovery",
   "same-day-cleaning": "one-off-cleaning",
 };
 
@@ -18,20 +19,30 @@ const nextConfig = {
   async redirects() {
     // Every retired URL resolves to its live page in ONE hop (audit, Nov 2026).
     const retiredServiceVariants = Object.entries(RETIRED_SERVICE_SLUGS).flatMap(
-      ([from, to]) => [
-        { source: `/cleaning/${from}`, destination: `/cleaning/${to}`, permanent: true },
-        { source: `/cleaning/${from}/birmingham`, destination: `/cleaning/${to}`, permanent: true },
-        {
-          source: `/cleaning/${from}/birmingham/wider/:zone`,
-          destination: `/cleaning/${to}`,
-          permanent: true,
-        },
-        {
-          source: `/cleaning/${from}/guides/:topic(price|included|booking)`,
-          destination: `/cleaning/${to}/guides/:topic`,
-          permanent: true,
-        },
-      ],
+      ([from, to]) => {
+        const destination = to.startsWith("/") ? to : `/cleaning/${to}`;
+        const guideDestination = to.startsWith("/")
+          ? to
+          : `/cleaning/${to}/guides/:topic`;
+        return [
+          { source: `/cleaning/${from}`, destination, permanent: true },
+          {
+            source: `/cleaning/${from}/birmingham`,
+            destination,
+            permanent: true,
+          },
+          {
+            source: `/cleaning/${from}/birmingham/wider/:zone`,
+            destination,
+            permanent: true,
+          },
+          {
+            source: `/cleaning/${from}/guides/:topic(price|included|booking)`,
+            destination: guideDestination,
+            permanent: true,
+          },
+        ];
+      },
     );
     return [
       // Duplicate service intents → one strong page each (incl. their old sub-URLs)

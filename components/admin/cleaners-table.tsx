@@ -11,17 +11,9 @@ import {
 } from "@/components/shared/pagination-controls";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Input } from "@/components/ui/input";
+import { adminCleanerStatusLabel } from "@/lib/admin/cleaner-status";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminCleaner } from "@/types/admin";
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Needs review",
-  in_training: "On hold",
-  certified: "Approved",
-  active: "Approved",
-  suspended: "Suspended",
-  removed: "Banned",
-};
 
 const TABS = [
   { value: "all", label: "All" },
@@ -189,9 +181,7 @@ export function CleanersTable({
                   ) : null}
                   <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span>
-                      {STATUS_LABEL[status ?? ""] ??
-                        status?.replaceAll("_", " ") ??
-                        "—"}
+                      {status ? adminCleanerStatusLabel(status) : "—"}
                     </span>
                     <span>
                       Score {cleaner.cleaner_profiles?.medallion_score ?? 0}
@@ -274,9 +264,11 @@ export function CleanersTable({
                   <td>{cleaner.cleaner_profiles?.medallion_score ?? 0}</td>
                   <td>{cleaner.cleaner_profiles?.total_jobs ?? 0}</td>
                   <td>
-                    {STATUS_LABEL[cleaner.cleaner_profiles?.status ?? ""] ??
-                      cleaner.cleaner_profiles?.status?.replaceAll("_", " ") ??
-                      "—"}
+                    {cleaner.cleaner_profiles?.status
+                      ? adminCleanerStatusLabel(
+                          cleaner.cleaner_profiles.status,
+                        )
+                      : "—"}
                     {cleaner.cleaner_profiles?.onboarding_complete === false ? (
                       <span className="mt-1 block text-xs text-muted-foreground">
                         Onboarding incomplete

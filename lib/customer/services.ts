@@ -116,7 +116,7 @@ export const CLEANING_STANDARDS: Array<{
 
 export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
   {
-    description: "Regular, one-off and deep cleans for the home.",
+    description: "For your home, one-off or on a schedule.",
     icon: Home,
     label: "House Cleaning",
     value: "residential",
@@ -134,14 +134,14 @@ export const SERVICE_CATEGORIES: ServiceCategoryDefinition[] = [
     value: "short_term_rental",
   },
   {
-    description: "Workplaces, retail, hospitality, education and shared areas.",
+    description: "Offices, retail, hospitality, education and shared areas.",
     icon: BriefcaseBusiness,
     label: "Workspace Cleaning",
     value: "commercial",
   },
   {
     description:
-      "Pregnancy and postpartum, illness, injury, hospital discharge and bereavement support cleans.",
+      "Pregnancy & postpartum, hospital discharge, or bereavement support.",
     icon: HeartHandshake,
     label: "Recovery cleaning",
     value: "recovery",
@@ -325,6 +325,7 @@ export const SERVICES: ServiceDefinition[] = [
     description:
       "Extra-care cleaning while recovering from illness, injury, or limited mobility.",
     duration: 4.5,
+    hidden: true,
     icon: HeartHandshake,
     label: "Illness & injury recovery",
     recommendedStandard: "comprehensive",

@@ -57,6 +57,7 @@ export function ConnectPayoutCard({
       </section>
 
       <StripeEmbeddedPayouts
+        bankFocused={payouts.bankFocused}
         mode={payouts.mode}
         onClose={payouts.close}
         open={payouts.open}
