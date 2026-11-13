@@ -8,6 +8,7 @@ import {
 import { BrandedPageWash } from "@/components/marketing/branded-page-sections";
 import { RecoveryCleaningPage } from "@/components/marketing/recovery/recovery-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { loadPageDirectoryContent } from "@/lib/marketing/page-directory";
 import { onpageCopyForPath } from "@/lib/seo/onpage-copy";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
@@ -29,6 +30,9 @@ export default async function RecoveryCleaningRoute() {
   const bookingHref = configured
     ? "/booking/new?category=recovery&returnTo=/cleaning/recovery"
     : "/setup";
+  const { cleaners, reviews } = await loadPageDirectoryContent({
+    category: "recovery",
+  });
 
   return (
     <MarketingShell>
@@ -47,12 +51,18 @@ export default async function RecoveryCleaningRoute() {
           await launchCityFaqJsonLd(),
         ]}
       />
-      <RecoveryCleaningPage bookingHref={bookingHref} />
+      <RecoveryCleaningPage
+        bookingHref={bookingHref}
+        cleaners={cleaners}
+        reviews={reviews}
+      />
       <BrandedPageWash>
         <LaunchCityHubSections
           bookingHref={bookingHref}
           categoryFocus="recovery"
           showAreaCards={false}
+          showFeatured={false}
+          showReviews={false}
         />
       </BrandedPageWash>
     </MarketingShell>

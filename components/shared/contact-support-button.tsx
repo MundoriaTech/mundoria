@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { openSupportMessenger } from "@/components/support/support-messenger-events";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ export function ContactSupportButton({
   tab = "messages",
 }: {
   className?: string;
-  label?: string;
+  label?: ReactNode;
   style?: CSSProperties;
   tab?: SupportTab;
 }) {

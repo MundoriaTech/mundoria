@@ -9,6 +9,7 @@ import { FeaturedCleanerCards } from "@/components/marketing/featured-cleaner-ca
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { PaginationLinks } from "@/components/shared/pagination-controls";
 import {
   bookingHrefWithDirectoryCleaner,
   loadDirectoryCleaner,
@@ -19,7 +20,15 @@ import {
 import { LAUNCH_CITY, birminghamAreaBySlug } from "@/lib/seo/marketing";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
+import {
+  clampPage,
+  parsePage,
+  slicePage,
+  totalPages,
+} from "@/lib/pagination";
 import { cn } from "@/lib/utils";
+
+const PROFILE_REVIEWS_PAGE_SIZE = 6;
 
 function RatingStars({ score }: { score: number | null }) {
   const value = score ?? 0;
@@ -28,17 +37,26 @@ function RatingStars({ score }: { score: number | null }) {
       aria-label={score == null ? "No rating" : `${score.toFixed(1)} out of 5`}
       className="inline-flex gap-0.5 text-[#c79c66]"
     >
-      {Array.from({ length: 5 }, (_, index) => (
-        <Star
-          aria-hidden
-          className={cn(
-            "size-3.5",
-            index < Math.round(value) ? "fill-current" : "fill-none",
-          )}
-          key={index}
-          strokeWidth={1.75}
-        />
-      ))}
+      {Array.from({ length: 5 }, (_, index) => {
+        const fill = Math.max(0, Math.min(1, value - index));
+        return (
+          <span className="relative size-3.5" key={index}>
+            <Star
+              aria-hidden
+              className="absolute inset-0 size-3.5 text-[#e8e0d4]"
+              fill="currentColor"
+              strokeWidth={0}
+            />
+            <span
+              aria-hidden
+              className="absolute inset-y-0 left-0 overflow-hidden text-[#c79c66]"
+              style={{ width: `${fill * 100}%` }}
+            >
+              <Star className="size-3.5" fill="currentColor" strokeWidth={0} />
+            </span>
+          </span>
+        );
+      })}
     </span>
   );
 }
@@ -60,6 +78,7 @@ async function otherPros(cleaner: DirectoryCleaner, areaSlug: string) {
 
 type PageProps = {
   params: { area: string; cleaner: string };
+  searchParams?: { page?: string | string[] };
 };
 
 export const dynamicParams = true;
@@ -76,23 +95,39 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
-export default async function BirminghamCleanerPage({ params }: PageProps) {
+export default async function BirminghamCleanerPage({
+  params,
+  searchParams,
+}: PageProps) {
   const area = birminghamAreaBySlug(params.area);
   if (!area) notFound();
 
   const cleaner = await loadDirectoryCleaner(params.cleaner, area.slug);
   if (!cleaner) notFound();
+  // Only redirect when the id-stable slug differs (legacy name-only URLs).
   const canonicalSlug = cleaner.href.split("/").at(-1);
-  if (canonicalSlug && canonicalSlug !== params.cleaner) {
+  const paramId = params.cleaner.match(/-([a-f0-9]{8})$/i)?.[1]?.toLowerCase();
+  const canonicalId = canonicalSlug?.match(/-([a-f0-9]{8})$/i)?.[1]?.toLowerCase();
+  if (
+    canonicalSlug &&
+    canonicalSlug !== params.cleaner &&
+    (!paramId || !canonicalId || paramId === canonicalId)
+  ) {
     permanentRedirect(cleaner.href);
   }
-  const [reviews, pros] = await Promise.all([
+  const [allReviews, pros] = await Promise.all([
     loadDirectoryReviews({
       cleanerId: cleaner.id,
-      limit: 6,
+      limit: Math.max(cleaner.reviewCount || 0, 12),
     }),
     otherPros(cleaner, area.slug),
   ]);
+  const reviewTotal = allReviews?.length ?? 0;
+  const reviewPages = totalPages(reviewTotal, PROFILE_REVIEWS_PAGE_SIZE);
+  const reviewPage = clampPage(parsePage(searchParams?.page), reviewPages);
+  const reviews = allReviews
+    ? slicePage(allReviews, reviewPage, PROFILE_REVIEWS_PAGE_SIZE)
+    : [];
 
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
@@ -103,7 +138,9 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
     .map((part) => part[0])
     .join("")
     .slice(0, 2);
-  const ratingLabel = cleaner.rating > 0 ? cleaner.rating.toFixed(1) : "New";
+  // Stars only when there is at least one publishable review (same rule as cards).
+  const hasPublishedReviews = (cleaner.reviewCount ?? 0) > 0 && cleaner.rating > 0;
+  const ratingLabel = hasPublishedReviews ? cleaner.rating.toFixed(1) : "New";
   const reviewLabel = `${cleaner.reviewCount} review${cleaner.reviewCount === 1 ? "" : "s"}`;
 
   return (
@@ -194,7 +231,10 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                     <span className="inline-flex items-center gap-1 font-semibold text-[#1c133b]">
                       <Star
                         aria-hidden
-                        className="size-4 fill-[#c79c66] text-[#c79c66]"
+                        className={cn(
+                          "size-4 text-[#c79c66]",
+                          hasPublishedReviews ? "fill-[#c79c66]" : "fill-none",
+                        )}
                       />
                       {ratingLabel}
                     </span>
@@ -236,8 +276,8 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
               ) : null}
             </article>
 
-            {reviews?.length ? (
-              <section className="mt-14">
+            {reviewTotal ? (
+              <section className="mt-14" id="reviews">
                 <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-2xl">
                   Reviews for {cleaner.name}
                 </h2>
@@ -263,6 +303,15 @@ export default async function BirminghamCleanerPage({ params }: PageProps) {
                     </li>
                   ))}
                 </ul>
+                {reviewPages > 1 ? (
+                  <PaginationLinks
+                    className="mt-8"
+                    page={reviewPage}
+                    pageSize={PROFILE_REVIEWS_PAGE_SIZE}
+                    pathname={cleaner.href}
+                    totalItems={reviewTotal}
+                  />
+                ) : null}
               </section>
             ) : null}
 

@@ -200,6 +200,7 @@ function BasketPanel({
   customDates = [],
   durationHint = null,
   durationHours,
+  footer = null,
   frequencyLabel,
   hasPets = null,
   headerTitle = "My basket",
@@ -212,7 +213,11 @@ function BasketPanel({
   serviceLabel,
   standardLabel,
   showHeader = true,
-}: BasketProps & { headerTitle?: string; showHeader?: boolean }) {
+}: BasketProps & {
+  footer?: ReactNode;
+  headerTitle?: string;
+  showHeader?: boolean;
+}) {
   const [open, setOpen] = useState({
     schedule: false,
     /** Open when a category is already chosen so the £/h rate is visible. */
@@ -273,6 +278,11 @@ function BasketPanel({
             We can&apos;t wait to take care of your home.
           </p>
         </div>
+        {footer ? (
+          <div className="border-t border-[#e4daf5] px-5 py-4 text-center">
+            {footer}
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -538,15 +548,23 @@ function BasketPanel({
           )
         ) : null}
       </BasketSection>
+      {footer ? (
+        <div className="border-t border-[#e4daf5] px-5 py-4 text-center">
+          {footer}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 /** Desktop sticky sidebar basket (hidden below lg). */
-export function BookingBasket(props: BasketProps) {
+export function BookingBasket({
+  footer = null,
+  ...props
+}: BasketProps & { footer?: ReactNode }) {
   return (
     <aside className="hidden w-full lg:sticky lg:top-20 lg:block">
-      <BasketPanel {...props} />
+      <BasketPanel {...props} footer={footer} />
     </aside>
   );
 }
@@ -561,10 +579,15 @@ export function BookingSummaryCard({
 
 /** Mobile bottom sheet. WeCasa-style “My basket”. Closed via bar chevron. */
 export function BookingBasketSheet({
+  footer = null,
   onClose,
   open,
   ...props
-}: BasketProps & { onClose: () => void; open: boolean }) {
+}: BasketProps & {
+  footer?: ReactNode;
+  onClose: () => void;
+  open: boolean;
+}) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -629,7 +652,7 @@ export function BookingBasketSheet({
           </h2>
         </div>
         <div className="overflow-y-auto overscroll-contain border-t border-[#e8e8eb] px-3 pb-3 pt-3">
-          <BasketPanel {...props} showHeader={false} />
+          <BasketPanel {...props} footer={footer} showHeader={false} />
         </div>
       </div>
     </div>

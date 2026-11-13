@@ -5,43 +5,33 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 
 import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
+import {
+  FeaturedCleanerCards,
+  type FeaturedCleanerCardData,
+} from "@/components/marketing/featured-cleaner-cards";
+import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
+import { BrandedSection } from "@/components/marketing/branded-page-sections";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
-import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
-import { CategoryServicesCarousel } from "@/components/marketing/service-category/category-services-carousel";
 import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
+import type { LandingReview } from "@/lib/marketing/landing-reviews";
 
 const HERO_IMAGE = "/images/marketing/landing/residential-hero.jpg";
 
-const SERVICE_CARDS = [
-  {
-    href: "/cleaning/regular-cleaning",
-    image: "/images/marketing/landing/residential-regular.png",
-    label: "Regular Cleaning",
-    objectPosition: "object-center",
-  },
-  {
-    href: "/cleaning/one-off-cleaning",
-    image: "/images/marketing/landing/residential-one-off.png",
-    label: "One-Off Cleaning",
-    objectPosition: "object-center",
-  },
-  {
-    href: "/cleaning/deep-cleaning",
-    image: "/images/marketing/landing/residential-deep.jpg",
-    label: "Deep Cleaning",
-    objectPosition: "object-center",
-  },
-] as const;
-
 export function ResidentialCleaningPage({
   bookingHref,
+  cleaners = [],
   fromRateLabel = "£22.00/h",
+  place = "Birmingham",
+  reviews = [],
 }: {
   bookingHref: string;
+  cleaners?: FeaturedCleanerCardData[];
   /** Live admin rate-card label, e.g. "£22.00/h". */
   fromRateLabel?: string;
+  place?: string;
+  reviews?: LandingReview[];
 }) {
   return (
     <>
@@ -103,30 +93,23 @@ export function ResidentialCleaningPage({
 
       <PhotoFeatureBand />
 
-      <section className="px-4 py-10 sm:px-8 sm:py-14">
-        <div className="mx-auto max-w-6xl">
-          <CategoryServicesCarousel
-            label="services"
-            title={
-              <h2 className="max-w-md text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-                Choose your house cleaning service
-              </h2>
-            }
-          >
-            {SERVICE_CARDS.map((service) => (
-              <CategoryServiceCard
-                bookingHref={bookingHref}
-                href={service.href}
-                image={service.image}
-                key={service.label}
-                label={service.label}
-                objectPosition={service.objectPosition}
-                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
-              />
-            ))}
-          </CategoryServicesCarousel>
-        </div>
-      </section>
+      <ReviewsSection
+        heading={`Cleaning reviews in ${place}`}
+        reviews={reviews}
+      />
+
+      {cleaners.length ? (
+        <BrandedSection tone="cream">
+          <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            Your next cleaner could be right here.
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+            Find a vetted cleaner in Birmingham, with ratings from completed
+            visits.
+          </p>
+          <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
+        </BrandedSection>
+      ) : null}
 
       <LocationStickyBookBar bookingHref={bookingHref} />
     </>

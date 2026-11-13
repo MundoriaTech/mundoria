@@ -203,10 +203,6 @@ export function LocationReviews({
 }) {
   // Keep the #reviews anchor (hero "Read reviews" link) even before there
   // are local reviews: the section then points to the Google listing only.
-  if (!reviews.length) {
-    return <ReviewsSection heading={heading ?? "Mundoria customer reviews"} />;
-  }
-
   return (
     <ReviewsSection
       heading={heading ?? `Cleaning reviews in ${place}`}

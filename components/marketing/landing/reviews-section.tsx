@@ -1,332 +1,218 @@
 "use client";
 
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-  type AnimationEvent,
-} from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Star } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   GoogleReviewsButton,
   useGoogleReviews,
 } from "@/components/marketing/google-reviews-drawer";
-import { LazyImage } from "@/components/shared/lazy-image";
-import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import type { LandingReview } from "@/lib/marketing/landing-reviews";
+import { cn } from "@/lib/utils";
 
-const REVIEW_SMILEYS = {
-  decorLeft: "/images/marketing/landing/happy_10760935 1.png",
-  decorRightSmall: "/images/marketing/landing/smile_15604428 1.png",
-  decorTopRight: "/images/marketing/landing/smiley_16301313 1.png",
-  card: "/images/marketing/landing/smiley_16301313 1.png",
-} as const;
+const ROTATE_MS = 4000;
+const VISIBLE_STACK = 3;
 
-const REVIEWS_SECTION_BG = "#F3F2FA";
-const REVIEW_CARD_BG = "#ece3f9";
+/** Opacity only — no movement, so reading stays easy. */
+const REVIEW_MOTION = "dissolve" as ReviewMotion;
 
-const CARD_SLOT_STYLES = [
-  {
-    accent: "#c79c66",
-    accentHeight: 11,
-    offsetClass: "md:translate-y-0",
+type ReviewMotion = "crossfade" | "dissolve" | "rise" | "slide" | "stagger";
+
+const MOTION_CLASS: Record<
+  ReviewMotion,
+  { in: string; out: string; stagger?: boolean }
+> = {
+  crossfade: {
+    in: "reviews-motion-crossfade-in",
+    out: "reviews-motion-crossfade-out",
   },
-  {
-    accent: "#733fb2",
-    accentHeight: 14,
-    offsetClass: "md:-translate-y-10",
+  dissolve: {
+    in: "reviews-motion-dissolve-in",
+    out: "reviews-motion-dissolve-out",
   },
-  {
-    accent: "#e67248",
-    accentHeight: 11,
-    offsetClass: "md:translate-y-5",
+  rise: {
+    in: "reviews-motion-rise-in",
+    out: "reviews-motion-rise-out",
   },
-] as const;
+  slide: {
+    in: "reviews-motion-slide-in",
+    out: "reviews-motion-slide-out",
+  },
+  stagger: {
+    in: "reviews-motion-stagger-in",
+    out: "reviews-motion-stagger-out",
+    stagger: true,
+  },
+};
 
-const CARD_GAP = 20;
-const DESKTOP_SET_SIZE = 3;
-const AUTO_ADVANCE_HOLD_MS = 6500;
-const DESKTOP_STAGE_MIN_HEIGHT = 360;
-
-function ReviewCardAccent({
-  color,
-  height,
-}: {
-  color: string;
-  height: number;
-}) {
-  const viewHeight = 12;
-
+function QuoteMark({ className }: { className?: string }) {
   return (
     <svg
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 bottom-0 block w-full"
-      height={height}
-      preserveAspectRatio="none"
-      viewBox={`0 0 248 ${viewHeight}`}
+      className={cn("text-[#6a45b8]", className)}
+      fill="currentColor"
+      height="48"
+      viewBox="0 0 64 48"
+      width="64"
     >
-      <path d="M0 12V9.5Q124 2.5 248 9.5V12H0Z" fill={color} />
+      <path d="M12.8 48C7.2 48 2.8 43.4 2.8 37.4 2.8 24.6 11.6 12.8 26 4.8L30.4 11.2C20.8 17.2 15.6 24.2 15.6 31.4c0 2.2.6 4 1.8 5.4 1.4-1 3.2-1.6 5.2-1.6 5 0 8.8 3.6 8.8 8.6S27.6 48 22.6 48h-9.8zm30.4 0c-5.6 0-10-4.6-10-10.6 0-12.8 8.8-24.6 23.2-32.6L61 11.2C51.4 17.2 46.2 24.2 46.2 31.4c0 2.2.6 4 1.8 5.4 1.4-1 3.2-1.6 5.2-1.6 5 0 8.8 3.6 8.8 8.6S63.6 48 58.6 48H43.2z" />
     </svg>
   );
 }
 
-export type DesktopReviewCarouselHandle = {
-  advance: () => void;
-  isAnimating: () => boolean;
-  retreat: () => void;
-};
+function ReviewStars({ score }: { score: number | null | undefined }) {
+  if (score == null || score <= 0) return null;
+  return (
+    <span
+      aria-label={`${score.toFixed(1)} out of 5`}
+      className="inline-flex gap-0.5 text-[#c79c66]"
+    >
+      {Array.from({ length: 5 }, (_, index) => {
+        const fill = Math.max(0, Math.min(1, score - index));
+        return (
+          <span className="relative size-3.5" key={index}>
+            <Star
+              aria-hidden
+              className="absolute inset-0 size-3.5 text-[#e8e0d4]"
+              fill="currentColor"
+              strokeWidth={0}
+            />
+            <span
+              aria-hidden
+              className="absolute inset-y-0 left-0 overflow-hidden text-[#c79c66]"
+              style={{ width: `${fill * 100}%` }}
+            >
+              <Star className="size-3.5" fill="currentColor" strokeWidth={0} />
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
-function ReviewCard({
+function FeaturedReview({ review }: { review: LandingReview }) {
+  return (
+    <div className="max-w-xl">
+      <QuoteMark className="h-10 w-14 sm:h-12 sm:w-[4.25rem]" />
+      <div className="mt-5">
+        <ReviewStars score={review.rating} />
+      </div>
+      <p className="mt-3 text-[1.15rem] font-medium leading-[1.45] tracking-[-0.015em] text-[#1c133b] sm:text-[1.35rem] sm:leading-[1.4]">
+        “{review.quote}”
+      </p>
+      <p className="mt-8 text-base font-semibold text-[#1c133b]">{review.name}</p>
+      {review.detail ? (
+        <p className="mt-1 text-sm text-[#6b6578]">{review.detail}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function StackedReview({
   review,
-  slotIndex,
+  showRule,
 }: {
   review: LandingReview;
-  slotIndex: number;
+  showRule: boolean;
 }) {
-  const slot = CARD_SLOT_STYLES[slotIndex % CARD_SLOT_STYLES.length];
-
   return (
-    <article
-      className={`relative flex min-h-[280px] w-full flex-col overflow-hidden rounded-[8px] shadow-[0_12px_32px_rgba(28,19,59,0.12)] md:min-h-[300px] md:shadow-[0_14px_36px_rgba(28,19,59,0.14)] ${slot.offsetClass}`}
-      style={{ backgroundColor: REVIEW_CARD_BG }}
-    >
-      <div className="flex flex-1 flex-col px-6 pb-6 pt-7 sm:px-7">
-        <div className="flex items-start justify-between gap-3">
-          {review.rating ? (
-            <p
-              aria-label={`Rated ${Math.round(review.rating)} out of 5`}
-              className="text-sm tracking-[0.12em] text-[#c79c66]"
-            >
-              {"★".repeat(Math.max(1, Math.min(5, Math.round(review.rating))))}
-            </p>
-          ) : (
-            <span />
-          )}
-          <LazyImage
-            alt=""
-            className="shrink-0"
-            height={36}
-            src={REVIEW_SMILEYS.card}
-            width={36}
-          />
-        </div>
-        <p className="mt-4 flex-1 text-[15px] font-normal leading-[1.55] text-[#1c133b] sm:text-base sm:leading-relaxed">
-          “{review.quote}”
-        </p>
-        <div className="mt-6 pb-1">
-          <p className="text-sm font-semibold leading-snug text-[#1c133b] sm:text-[15px]">
-            {review.name}
-          </p>
-          <p className="mt-1 text-xs font-normal leading-snug text-[#5a5470] sm:text-sm">
-            {review.detail}
-          </p>
-        </div>
-      </div>
-      <ReviewCardAccent color={slot.accent} height={slot.accentHeight} />
+    <article className={cn(showRule && "border-t border-[#e6e1ee] pt-6")}>
+      <ReviewStars score={review.rating} />
+      <p className="mt-2 text-[0.98rem] leading-7 text-[#1c133b] sm:text-[1.05rem] sm:leading-7">
+        “{review.quote}”
+      </p>
+      <p className="mt-4 text-sm font-semibold text-[#1c133b]">{review.name}</p>
+      {review.detail ? (
+        <p className="mt-0.5 text-sm text-[#6b6578]">{review.detail}</p>
+      ) : null}
     </article>
   );
 }
 
-function getVisibleReviews(reviews: LandingReview[], startIndex: number) {
-  if (reviews.length === 0) return [];
-
-  return Array.from({ length: Math.min(3, reviews.length) }, (_, slot) => {
-    return reviews[(startIndex + slot) % reviews.length];
-  });
+function uniqueReviews(reviews: LandingReview[]) {
+  const unique: LandingReview[] = [];
+  const seen = new Set<string>();
+  for (const review of reviews) {
+    const key = review.quote.trim().toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(review);
+  }
+  return unique;
 }
 
-function ReviewSetGrid({
-  reviews,
-  startIndex,
+function windowAt(reviews: LandingReview[], offset: number) {
+  const count = reviews.length;
+  if (!count) {
+    return { featured: null as LandingReview | null, stacked: [] as LandingReview[] };
+  }
+  const featured = reviews[offset % count]!;
+  const stacked: LandingReview[] = [];
+  for (let i = 1; i <= Math.min(VISIBLE_STACK, count - 1); i += 1) {
+    stacked.push(reviews[(offset + i) % count]!);
+  }
+  return { featured, stacked };
+}
+
+function ReviewWindow({
+  enter,
+  featured,
+  motion,
+  stacked,
 }: {
-  reviews: LandingReview[];
-  startIndex: number;
+  enter: boolean;
+  featured: LandingReview;
+  motion: ReviewMotion;
+  stacked: LandingReview[];
 }) {
-  const visibleReviews = getVisibleReviews(reviews, startIndex);
+  const classes = MOTION_CLASS[motion];
+  const phase = enter ? classes.in : classes.out;
+
+  if (classes.stagger) {
+    return (
+      <div className="grid gap-12 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:items-start md:gap-14 lg:gap-20">
+        <div
+          className={phase}
+          style={enter ? { animationDelay: "0ms" } : undefined}
+        >
+          <FeaturedReview review={featured} />
+        </div>
+        <div className="flex flex-col gap-6">
+          {stacked.map((review, index) => (
+            <div
+              className={phase}
+              key={review.id}
+              style={
+                enter ? { animationDelay: `${120 + index * 90}ms` } : undefined
+              }
+            >
+              <StackedReview review={review} showRule={index > 0} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-3 items-start gap-6">
-      {visibleReviews.map((review, slotIndex) => (
-        <ReviewCard
-          key={`${review.id}-${slotIndex}`}
-          review={review}
-          slotIndex={slotIndex}
-        />
-      ))}
+    <div className={cn("grid gap-12 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:items-start md:gap-14 lg:gap-20", phase)}>
+      <FeaturedReview review={featured} />
+      <div className="flex flex-col gap-6">
+        {stacked.map((review, index) => (
+          <StackedReview
+            key={review.id}
+            review={review}
+            showRule={index > 0}
+          />
+        ))}
+      </div>
     </div>
   );
 }
-
-function ReviewCarouselStage({
-  animateClassName,
-  "aria-hidden": ariaHidden,
-  className,
-  onAnimationEnd,
-  reviews,
-  startIndex,
-}: {
-  animateClassName?: string;
-  "aria-hidden"?: boolean;
-  className?: string;
-  onAnimationEnd?: (event: AnimationEvent<HTMLDivElement>) => void;
-  reviews: LandingReview[];
-  startIndex: number;
-}) {
-  return (
-    <div
-      aria-hidden={ariaHidden}
-      className={`absolute inset-x-0 top-0 pt-10 ${animateClassName ?? ""} ${className ?? ""}`}
-      style={{ backgroundColor: REVIEWS_SECTION_BG }}
-      onAnimationEnd={onAnimationEnd}
-    >
-      <ReviewSetGrid reviews={reviews} startIndex={startIndex} />
-    </div>
-  );
-}
-
-const DesktopReviewCarousel = forwardRef<
-  DesktopReviewCarouselHandle,
-  {
-    onAnimatingChange?: (isAnimating: boolean) => void;
-    reviews: LandingReview[];
-  }
->(function DesktopReviewCarousel({ onAnimatingChange, reviews }, ref) {
-  const displayIndexRef = useRef(0);
-  const incomingIndexRef = useRef<number | null>(null);
-  const isAnimatingRef = useRef(false);
-  const advanceRef = useRef<() => void>(() => {});
-  const autoAdvanceTimeoutRef = useRef<number | null>(null);
-
-  const [displayIndex, setDisplayIndex] = useState(0);
-  const [incomingIndex, setIncomingIndex] = useState<number | null>(null);
-
-  const canAdvance = reviews.length > DESKTOP_SET_SIZE;
-
-  useEffect(() => {
-    displayIndexRef.current = displayIndex;
-  }, [displayIndex]);
-
-  useEffect(() => {
-    incomingIndexRef.current = incomingIndex;
-  }, [incomingIndex]);
-
-  function clearAutoAdvance() {
-    if (autoAdvanceTimeoutRef.current !== null) {
-      window.clearTimeout(autoAdvanceTimeoutRef.current);
-      autoAdvanceTimeoutRef.current = null;
-    }
-  }
-
-  const scheduleAutoAdvance = useCallback(() => {
-    clearAutoAdvance();
-
-    if (!canAdvance) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.matchMedia("(max-width: 767px)").matches) return;
-
-    autoAdvanceTimeoutRef.current = window.setTimeout(() => {
-      advanceRef.current();
-    }, AUTO_ADVANCE_HOLD_MS);
-  }, [canAdvance]);
-
-  const navigateTo = useCallback(
-    (targetIndex: number) => {
-      if (!canAdvance || isAnimatingRef.current) return;
-      if (targetIndex === displayIndexRef.current) return;
-
-      clearAutoAdvance();
-
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        setDisplayIndex(targetIndex);
-        scheduleAutoAdvance();
-        return;
-      }
-
-      isAnimatingRef.current = true;
-      onAnimatingChange?.(true);
-      setIncomingIndex(targetIndex);
-    },
-    [canAdvance, onAnimatingChange, scheduleAutoAdvance],
-  );
-
-  const advance = useCallback(() => {
-    const nextIndex =
-      (displayIndexRef.current + DESKTOP_SET_SIZE) % reviews.length;
-    navigateTo(nextIndex);
-  }, [navigateTo, reviews.length]);
-
-  const retreat = useCallback(() => {
-    const previousIndex =
-      (displayIndexRef.current - DESKTOP_SET_SIZE + reviews.length) %
-      reviews.length;
-    navigateTo(previousIndex);
-  }, [navigateTo, reviews.length]);
-
-  useEffect(() => {
-    advanceRef.current = advance;
-  }, [advance]);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      advance,
-      isAnimating: () => isAnimatingRef.current,
-      retreat,
-    }),
-    [advance, retreat],
-  );
-
-  useEffect(() => {
-    if (incomingIndex !== null) return;
-
-    scheduleAutoAdvance();
-    return clearAutoAdvance;
-  }, [displayIndex, incomingIndex, scheduleAutoAdvance]);
-
-  function finishTransition(event: AnimationEvent<HTMLDivElement>) {
-    if (event.animationName !== "reviews-carousel-enter") return;
-    if (incomingIndexRef.current === null) return;
-
-    setDisplayIndex(incomingIndexRef.current);
-    setIncomingIndex(null);
-    isAnimatingRef.current = false;
-    onAnimatingChange?.(false);
-  }
-
-  return (
-    <div
-      className="relative hidden pb-2 md:block"
-      style={{ minHeight: DESKTOP_STAGE_MIN_HEIGHT }}
-    >
-      {incomingIndex === null ? (
-        <ReviewCarouselStage reviews={reviews} startIndex={displayIndex} />
-      ) : (
-        <>
-          <ReviewCarouselStage
-            animateClassName="reviews-carousel-exit motion-reduce:animate-none motion-reduce:opacity-0"
-            aria-hidden
-            reviews={reviews}
-            startIndex={displayIndex}
-          />
-          <ReviewCarouselStage
-            animateClassName="reviews-carousel-enter motion-reduce:animate-none motion-reduce:opacity-100"
-            className="z-10"
-            onAnimationEnd={finishTransition}
-            reviews={reviews}
-            startIndex={incomingIndex}
-          />
-        </>
-      )}
-    </div>
-  );
-});
 
 export function ReviewsSection({
-  heading = "What our customers say",
+  heading = "Cleaning reviews in Birmingham",
   reviews: ownReviews = [],
 }: {
   heading?: string;
@@ -348,161 +234,94 @@ export function ReviewsSection({
           quote: review.text,
           rating: review.rating,
         }));
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const desktopCarouselRef = useRef<DesktopReviewCarouselHandle>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
 
-  function scrollMobile(direction: "left" | "right") {
-    const node = scrollerRef.current;
-    if (!node) return;
+  const unique = uniqueReviews(reviews);
+  const canRotate = unique.length > 1;
 
-    const cardWidth = node.querySelector("article")?.clientWidth ?? 300;
-    node.scrollBy({
-      behavior: "smooth",
-      left: direction === "right" ? cardWidth + CARD_GAP : -(cardWidth + CARD_GAP),
-    });
-  }
+  const [offset, setOffset] = useState(0);
+  const [paused, setPaused] = useState(false);
+  // Keep the outgoing set briefly so enter/exit can overlap (true crossfade).
+  const [outgoing, setOutgoing] = useState<number | null>(null);
+  const offsetRef = useRef(offset);
+  offsetRef.current = offset;
 
-  function goToNext() {
-    if (window.matchMedia("(max-width: 767px)").matches) {
-      scrollMobile("right");
+  useEffect(() => {
+    if (!canRotate || paused) return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
       return;
     }
 
-    if (desktopCarouselRef.current?.isAnimating()) return;
+    const timer = window.setInterval(() => {
+      const current = offsetRef.current;
+      setOutgoing(current);
+      setOffset((current + 1) % unique.length);
+    }, ROTATE_MS);
 
-    desktopCarouselRef.current?.advance();
-  }
+    return () => window.clearInterval(timer);
+  }, [canRotate, paused, unique.length]);
 
-  function goToPrevious() {
-    if (window.matchMedia("(max-width: 767px)").matches) {
-      scrollMobile("left");
-      return;
-    }
+  useEffect(() => {
+    if (outgoing == null) return;
+    const clear = window.setTimeout(() => setOutgoing(null), 520);
+    return () => window.clearTimeout(clear);
+  }, [outgoing]);
 
-    if (desktopCarouselRef.current?.isAnimating()) return;
-
-    desktopCarouselRef.current?.retreat();
-  }
+  const incoming = windowAt(unique, offset);
+  const leaving =
+    outgoing == null ? null : windowAt(unique, outgoing);
 
   return (
-    <section
-      className="overflow-x-clip px-4 py-14 sm:px-8 sm:py-20"
-      id="reviews"
-      style={{ backgroundColor: REVIEWS_SECTION_BG }}
-    >
+    <section className="bg-white px-4 py-14 sm:px-8 sm:py-20" id="reviews">
       <div className="mx-auto max-w-6xl">
-        <ScrollReveal className="relative mx-auto flex min-h-[72px] max-w-[720px] flex-col items-center justify-center px-2 text-center sm:min-h-[96px] sm:px-16">
-          <LazyImage
-            alt=""
-            className="absolute right-0 top-0 hidden sm:block"
-            height={47}
-            src={REVIEW_SMILEYS.decorTopRight}
-            width={47}
-          />
-          <LazyImage
-            alt=""
-            className="absolute left-0 top-[38%] hidden sm:block"
-            height={44}
-            src={REVIEW_SMILEYS.decorLeft}
-            width={44}
-          />
-          <LazyImage
-            alt=""
-            className="absolute bottom-2 right-[22%] hidden sm:block"
-            height={30}
-            src={REVIEW_SMILEYS.decorRightSmall}
-            width={30}
-          />
-
-          <h2 className="max-w-[20rem] text-balance text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:max-w-none sm:text-2xl lg:text-[1.75rem]">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-balance text-[1.65rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[1.9rem] lg:text-[2.1rem]">
             {heading}
           </h2>
-          <GoogleReviewsButton className="mt-4" />
-          {reviews.length ? null : (
-            <p className="mt-4 max-w-md text-pretty text-sm leading-6 text-[#5a5470]">
-              We only publish reviews written by customers after a completed
-              booking, or reviews left on our Google listing.
-            </p>
-          )}
-        </ScrollReveal>
-
-        {reviews.length ? (
-        <div className="mt-8 md:mt-14">
-          <div className="hidden md:flex md:items-center md:gap-3 lg:gap-4">
-            {reviews.length > DESKTOP_SET_SIZE ? (
-              <button
-                aria-label="Previous reviews"
-                className="flex size-[31px] shrink-0 items-center justify-center rounded-full bg-[#d9d9d9] text-[#414141] transition hover:bg-[#cfcfcf] disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isAnimating}
-                onClick={goToPrevious}
-                type="button"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-            ) : null}
-
-            <div className="min-w-0 flex-1">
-              <DesktopReviewCarousel
-                onAnimatingChange={setIsAnimating}
-                ref={desktopCarouselRef}
-                reviews={reviews}
-              />
-            </div>
-
-            {reviews.length > DESKTOP_SET_SIZE ? (
-              <button
-                aria-label="Next reviews"
-                className="flex size-[31px] shrink-0 items-center justify-center rounded-full bg-[#d9d9d9] text-[#414141] transition hover:bg-[#cfcfcf] disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isAnimating}
-                onClick={goToNext}
-                type="button"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            ) : null}
-          </div>
-
-          <div className="md:hidden">
-            <div
-              className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              ref={scrollerRef}
-            >
-              {reviews.map((review, index) => (
-                <div
-                  className="w-[min(78vw,280px)] shrink-0 snap-start"
-                  key={review.id}
-                >
-                  <ReviewCard review={review} slotIndex={index % 3} />
-                </div>
-              ))}
-            </div>
-
-            {reviews.length > DESKTOP_SET_SIZE ? (
-              <div className="mt-5 flex justify-end gap-2">
-                <button
-                  aria-label="Previous reviews"
-                  className="flex size-11 items-center justify-center rounded-full bg-[#d9d9d9] text-[#414141] transition hover:bg-[#cfcfcf] disabled:cursor-not-allowed disabled:opacity-50 sm:size-[31px]"
-                  disabled={isAnimating}
-                  onClick={goToPrevious}
-                  type="button"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                <button
-                  aria-label="Next reviews"
-                  className="flex size-11 items-center justify-center rounded-full bg-[#d9d9d9] text-[#414141] transition hover:bg-[#cfcfcf] disabled:cursor-not-allowed disabled:opacity-50 sm:size-[31px]"
-                  disabled={isAnimating}
-                  onClick={goToNext}
-                  type="button"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
-            ) : null}
+          <div className="mt-5 flex justify-center">
+            <GoogleReviewsButton />
           </div>
         </div>
-        ) : null}
+
+        {incoming.featured ? (
+          <div
+            className="relative mt-10 md:mt-12"
+            onBlurCapture={() => setPaused(false)}
+            onFocusCapture={() => setPaused(true)}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
+            {leaving?.featured ? (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0"
+                key={`out-${outgoing}`}
+              >
+                <ReviewWindow
+                  enter={false}
+                  featured={leaving.featured}
+                  motion={REVIEW_MOTION}
+                  stacked={leaving.stacked}
+                />
+              </div>
+            ) : null}
+            <div key={`in-${offset}`}>
+              <ReviewWindow
+                enter
+                featured={incoming.featured}
+                motion={REVIEW_MOTION}
+                stacked={incoming.stacked}
+              />
+            </div>
+          </div>
+        ) : (
+          <p className="mt-6 max-w-xl text-sm leading-6 text-[#5a5470]">
+            We only publish reviews written by customers after a completed
+            booking, or reviews left on our Google listing.
+          </p>
+        )}
       </div>
     </section>
   );

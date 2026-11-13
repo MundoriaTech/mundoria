@@ -181,8 +181,24 @@ set
   id_verified = true,
   rating = 4.9,
   performance_score = 96,
-  total_jobs = 240
+  total_jobs = 240,
+  show_on_directory = true
 where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3';
+
+-- Shortlist up to 24 seed cleaners for public marketing directory cards.
+with ranked as (
+  select
+    cp.id,
+    row_number() over (order by cp.rating desc nulls last, cp.total_jobs desc, cp.id) as rn
+  from public.cleaner_profiles cp
+  join public.profiles p on p.id = cp.id
+  where p.email like '%@seed.mundoria.local'
+    and cp.status = 'active'
+)
+update public.cleaner_profiles cp
+set show_on_directory = ranked.rn <= 24
+from ranked
+where cp.id = ranked.id;
 
 -- Cleaner services (common catalogue)
 insert into public.cleaner_services (cleaner_id, service_type, is_active)

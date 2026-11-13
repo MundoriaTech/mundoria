@@ -57,13 +57,23 @@ function FeaturedCleanerCard({
   onToggle: () => void;
   open: boolean;
 }) {
-  const area = cleaner.areas.split("·")[0]?.trim() || cleaner.areas;
-  const ratingLabel =
-    cleaner.rating > 0 ? `${cleaner.rating.toFixed(1)} / 5` : "New";
+  const areaList = cleaner.areas
+    .split("·")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const areaSummary =
+    areaList.length > 0 ? areaList.join(" · ") : cleaner.areas;
+  const hasPublishedReviews =
+    (cleaner.reviewCount ?? 0) > 0 && cleaner.rating > 0;
+  const ratingLabel = hasPublishedReviews
+    ? `${cleaner.rating.toFixed(1)} / 5`
+    : "New";
   const detail = [
-    cleaner.reviewCount
+    hasPublishedReviews
       ? `${cleaner.reviewCount} review${cleaner.reviewCount === 1 ? "" : "s"}`
-      : null,
+      : cleaner.reviewCount === 0
+        ? "0 reviews"
+        : null,
     cleaner.jobs ? `${cleaner.jobs} jobs` : null,
   ]
     .filter(Boolean)
@@ -102,23 +112,21 @@ function FeaturedCleanerCard({
               )}
             />
           </div>
-          <p className="mt-0.5 flex items-center gap-1 text-[12px] text-[#6b6578]">
+          <p className="mt-0.5 flex items-start gap-1 text-[12px] leading-4 text-[#6b6578]">
             <MapPin
               aria-hidden
-              className="size-3 shrink-0 text-[#c79c66]"
+              className="mt-0.5 size-3 shrink-0 text-[#c79c66]"
               strokeWidth={2.25}
             />
-            <span className="truncate">{area}</span>
+            <span className="line-clamp-2">{areaSummary}</span>
           </p>
           <p className="mt-1 flex flex-wrap items-center gap-x-1 text-[11px] font-medium text-[#1c133b] sm:text-[12px]">
             <span className="inline-flex items-center gap-0.5">
               <Star
                 aria-hidden
                 className={cn(
-                  "size-3",
-                  cleaner.rating > 0
-                    ? "fill-[#c79c66] text-[#c79c66]"
-                    : "text-[#c79c66]",
+                  "size-3 text-[#c79c66]",
+                  hasPublishedReviews ? "fill-[#c79c66]" : "fill-none",
                 )}
               />
               {ratingLabel}
@@ -135,28 +143,35 @@ function FeaturedCleanerCard({
         )}
       >
         <div className="overflow-hidden">
-          <div
-            className={cn(
-              "border-t border-[#ece7f5] px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4",
-              cleaner.href ? "grid grid-cols-2 gap-2" : "flex",
-            )}
-          >
-            {cleaner.href ? (
+          <div className="border-t border-[#ece7f5] px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4">
+            {areaList.length > 1 ? (
+              <p className="mb-3 text-[12px] leading-5 text-[#6b6578]">
+                <span className="font-semibold text-[#1c133b]">Serves: </span>
+                {areaSummary}
+              </p>
+            ) : null}
+            <div
+              className={cn(
+                cleaner.href ? "grid grid-cols-2 gap-2" : "flex",
+              )}
+            >
+              {cleaner.href ? (
+                <Link
+                  className="inline-flex h-9 items-center justify-center rounded-full border border-[#1c133b]/20 bg-white px-3 text-[12px] font-semibold text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f7f2fc]"
+                  href={cleaner.href}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  View profile
+                </Link>
+              ) : null}
               <Link
-                className="inline-flex h-9 items-center justify-center rounded-full border border-[#1c133b]/20 bg-white px-3 text-[12px] font-semibold text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f7f2fc]"
-                href={cleaner.href}
+                className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-[#1c133b] px-3 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
+                href={bookHref}
                 onClick={(event) => event.stopPropagation()}
               >
-                View profile
+                Book
               </Link>
-            ) : null}
-            <Link
-              className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-[#1c133b] px-3 text-[12px] font-semibold text-white transition hover:bg-[#1c133b]/90"
-              href={bookHref}
-              onClick={(event) => event.stopPropagation()}
-            >
-              Book
-            </Link>
+            </div>
           </div>
         </div>
       </div>

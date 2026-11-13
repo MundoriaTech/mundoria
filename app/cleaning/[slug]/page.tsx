@@ -10,6 +10,7 @@ import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ServiceCityCoverage } from "@/components/marketing/service-city-coverage";
 import { ServiceGuideLinks } from "@/components/marketing/service-guide-links";
 import { ServiceCategoryMarketingPage } from "@/components/marketing/service-category/service-category-marketing-page";
+import { loadPageDirectoryContent } from "@/lib/marketing/page-directory";
 import {
   canonicalCleaningPath,
   isIndexableServiceSlug,
@@ -61,6 +62,9 @@ export default async function CleaningServicePage({ params }: PageProps) {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? service.bookingHref : "/setup";
   const magCategory = magCategoryFor(service.category);
+  const { cleaners, reviews } = await loadPageDirectoryContent({
+    serviceType: service.value,
+  });
 
   return (
     <MarketingShell>
@@ -69,7 +73,9 @@ export default async function CleaningServicePage({ params }: PageProps) {
       />
       <ServiceCategoryMarketingPage
         bookingHref={bookingHref}
+        cleaners={cleaners}
         config={serviceDetailConfig(service, priced)}
+        reviews={reviews}
       />
       <ServiceGuideLinks service={service} />
       <ServiceCityCoverage service={service} />

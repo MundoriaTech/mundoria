@@ -177,6 +177,7 @@ export async function CityLocationPage({
       <PlaceFeatureBand />
       <BrandedPageWash>
         <LaunchCityHubSections
+          areaSlug={priorityArea?.slug}
           bookingHref={bookingHref}
           categoryFocus={
             categoryFocus === "commercial" ||
@@ -187,7 +188,7 @@ export async function CityLocationPage({
               ? categoryFocus
               : undefined
           }
-          cleanerLimit={18}
+          cleanerLimit={24}
           place={name}
           placeLinks={placeLinks}
           allAreasCovered={allAreasCovered}

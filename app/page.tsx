@@ -8,6 +8,7 @@ import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { houseCleaningFromLabel } from "@/lib/customer/published-pricing";
+import { loadPageDirectoryContent } from "@/lib/marketing/page-directory";
 import { getPublicMarketingServices } from "@/lib/seo/marketing";
 import { buildPageMetadata } from "@/lib/seo/site";
 import { homePageStructuredData } from "@/lib/seo/structured-data";
@@ -65,6 +66,7 @@ export default async function HomePage() {
   const customerHref = bookingHref;
   const cleanerHref = configured ? "/signup/cleaner" : "/setup";
   const pricedServices = await getPublicMarketingServices();
+  const { reviews } = await loadPageDirectoryContent({ reviewLimit: 40 });
 
   return (
     <MarketingShell>
@@ -75,7 +77,10 @@ export default async function HomePage() {
         <PopularServicesSection bookingBaseHref={bookingHref} />
       </LandingPurpleField>
       <HowMundoriaWorksSection />
-      <ReviewsSection />
+      <ReviewsSection
+        heading="Cleaning reviews in Birmingham"
+        reviews={reviews}
+      />
       <AboutSection cleanerHref={cleanerHref} customerHref={customerHref} />
       <CoverageSection />
     </MarketingShell>

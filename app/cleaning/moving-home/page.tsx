@@ -4,6 +4,7 @@ import { CategoryMagLinks } from "@/components/marketing/category-mag-links";
 import { MovingHomeCleaningPage } from "@/components/marketing/moving-home/moving-home-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
+import { loadPageDirectoryContent } from "@/lib/marketing/page-directory";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { organizationRef } from "@/lib/seo/structured-data";
@@ -18,11 +19,14 @@ export const metadata: Metadata = buildPageMetadata({
   title: "Moving Home Cleaning | Mundoria",
 });
 
-export default function MovingHomeCleaningRoute() {
+export default async function MovingHomeCleaningRoute() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured
     ? "/booking/new?category=moving_home&returnTo=/cleaning/moving-home"
     : "/setup";
+  const { cleaners, reviews } = await loadPageDirectoryContent({
+    category: "moving_home",
+  });
 
   return (
     <MarketingShell>
@@ -38,7 +42,11 @@ export default function MovingHomeCleaningRoute() {
           url: absoluteUrl("/cleaning/moving-home"),
         }}
       />
-      <MovingHomeCleaningPage bookingHref={bookingHref} />
+      <MovingHomeCleaningPage
+        bookingHref={bookingHref}
+        cleaners={cleaners}
+        reviews={reviews}
+      />
       <CategoryMagLinks category="moving_home" />
     </MarketingShell>
   );

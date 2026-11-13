@@ -5,6 +5,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 
+import { BrandedSection } from "@/components/marketing/branded-page-sections";
+import {
+  FeaturedCleanerCards,
+  type FeaturedCleanerCardData,
+} from "@/components/marketing/featured-cleaner-cards";
 import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
@@ -14,6 +19,7 @@ import { CategoryHeroOverlay } from "@/components/marketing/service-category/cat
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
 import { CategoryServicesCarousel } from "@/components/marketing/service-category/category-services-carousel";
 import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
+import type { LandingReview } from "@/lib/marketing/landing-reviews";
 
 export type CategoryServiceCard = {
   href: string;
@@ -46,12 +52,22 @@ export type ServiceCategoryMarketingConfig = {
 
 export function ServiceCategoryMarketingPage({
   bookingHref,
+  cleaners = [],
   config,
+  place = "Birmingham",
+  reviews = [],
+  reviewsHeading,
+  showCleaners = true,
   showFaqs = true,
   showReviews = true,
 }: {
   bookingHref: string;
+  cleaners?: FeaturedCleanerCardData[];
   config: ServiceCategoryMarketingConfig;
+  place?: string;
+  reviews?: LandingReview[];
+  reviewsHeading?: string;
+  showCleaners?: boolean;
   /** Set false when a parent route adds Birmingham hub FAQs. */
   showFaqs?: boolean;
   /** Set false when a parent route adds location reviews (e.g. Birmingham hub). */
@@ -68,6 +84,8 @@ export function ServiceCategoryMarketingPage({
     subtitle,
     title,
   } = config;
+  const resolvedReviewsHeading =
+    reviewsHeading ?? `Cleaning reviews in ${place}`;
 
   return (
     <>
@@ -149,7 +167,22 @@ export function ServiceCategoryMarketingPage({
         </div>
       </section>
 
-      {showReviews ? <ReviewsSection /> : null}
+      {showReviews ? (
+        <ReviewsSection heading={resolvedReviewsHeading} reviews={reviews} />
+      ) : null}
+
+      {showCleaners && cleaners.length ? (
+        <BrandedSection tone="cream">
+          <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            Your next cleaner could be right here.
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+            Find a vetted cleaner in {place}, with ratings from completed
+            visits.
+          </p>
+          <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
+        </BrandedSection>
+      ) : null}
 
       {showFaqs ? (
         <MarketingFaqColumnsSection

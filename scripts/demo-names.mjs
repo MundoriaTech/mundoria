@@ -105,8 +105,9 @@ export const BIRMINGHAM_DISTRICTS = [
 export function demoPerson(n) {
   const index = Math.max(1, Number(n)) - 1;
   const firstIndex = index % DEMO_FIRST_NAMES.length;
-  const lastIndex =
-    Math.floor(index / DEMO_FIRST_NAMES.length) % DEMO_LAST_NAMES.length;
+  // Prime step so consecutive people do not share a surname (avoids
+  // cleaner batches all landing on "Farooq" after CLEANER_NAME_OFFSET).
+  const lastIndex = (index * 11 + 3) % DEMO_LAST_NAMES.length;
   return {
     fullName: `${DEMO_FIRST_NAMES[firstIndex]} ${DEMO_LAST_NAMES[lastIndex]}`,
     gender: firstIndex % 2 === 0 ? "woman" : "man",

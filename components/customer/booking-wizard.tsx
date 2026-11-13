@@ -48,8 +48,10 @@ import {
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
+import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { Input } from "@/components/ui/input";
 import { AppModal } from "@/components/shared/app-modal";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 import {
   nationalFromPhone,
   storedPhone,
@@ -61,6 +63,7 @@ import {
   BookingSummaryCard,
 } from "@/components/customer/booking-basket";
 import { BookingCalendar } from "@/components/customer/booking-calendar";
+import { BookingCategoryMenu } from "@/components/customer/booking-category-menu";
 import { BookingChrome } from "@/components/customer/booking-chrome";
 import {
   BookingLoadingOverlay,
@@ -83,7 +86,6 @@ import { trackClientActivity } from "@/lib/analytics/track-client";
 import { createBrowserClient } from "@/lib/supabase/client";
 import {
   composeBookingNotes,
-  bookingCategoryImages,
   defaultServiceForCategory,
   durationSummary,
   formatBookingDate,
@@ -113,7 +115,6 @@ import {
   type HistoryRecommendation,
   type HistoryVisit,
 } from "@/lib/customer/history-recommendation";
-import { LazyImage } from "@/components/shared/lazy-image";
 import {
   addOnAmountPence,
   availableAddOns,
@@ -130,7 +131,6 @@ import {
   selectedAddOnTotal,
   serviceDefinition,
   SERVICES,
-  SERVICE_CATEGORIES,
   servicesForCategory,
 } from "@/lib/customer/services";
 import {
@@ -318,14 +318,16 @@ let bookingHistoryBootstrap: {
   stepId: string;
 } | null = null;
 
+// Cache-bust after stripping white fills so browsers/Next don't keep opaque PNGs.
+const ADD_ON_ICON_VERSION = "8";
 const ADD_ON_IMAGES: Record<string, string> = {
-  cleaning_products: "/images/marketing/icons/plain/cleaning-products.png",
-  cleaning_equipment: "/images/marketing/icons/plain/cleaning-equipment.png",
-  interior_windows: "/images/marketing/icons/plain/interior-windows.png",
-  ironing: "/images/marketing/icons/plain/ironing.png",
-  laundry: "/images/marketing/icons/plain/laundry.png",
-  inside_fridge: "/images/marketing/icons/plain/inside-fridge.png",
-  inside_oven: "/images/marketing/icons/plain/inside-oven.png",
+  cleaning_products: `/images/marketing/icons/plain/cleaning-products.png?v=${ADD_ON_ICON_VERSION}`,
+  cleaning_equipment: `/images/marketing/icons/plain/cleaning-equipment.png?v=${ADD_ON_ICON_VERSION}`,
+  interior_windows: `/images/marketing/icons/plain/interior-windows.png?v=${ADD_ON_ICON_VERSION}`,
+  ironing: `/images/marketing/icons/plain/ironing.png?v=${ADD_ON_ICON_VERSION}`,
+  laundry: `/images/marketing/icons/plain/laundry.png?v=${ADD_ON_ICON_VERSION}`,
+  inside_fridge: `/images/marketing/icons/plain/inside-fridge.png?v=${ADD_ON_ICON_VERSION}`,
+  inside_oven: `/images/marketing/icons/plain/inside-oven.png?v=${ADD_ON_ICON_VERSION}`,
 };
 
 const ADD_ON_ICON_TINT =
@@ -411,14 +413,22 @@ export function BookingWizard({
   const router = useRouter();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [basketOpen, setBasketOpen] = useState(false);
-  const [draft, setDraft] = useState<BookingDraft>({
-    ...blankDraft,
-    ...initialDraft,
-    alternateTimes: initialDraft?.alternateTimes ?? [],
-    contactEmail:
-      initialDraft?.contactEmail?.trim() ||
-      customerEmail?.trim() ||
-      "",
+  const [draft, setDraft] = useState<BookingDraft>(() => {
+    const seededCategory = initialDraft?.serviceCategory ?? "residential";
+    const seededService =
+      initialDraft?.serviceType ??
+      defaultServiceForCategory(seededCategory);
+    return {
+      ...blankDraft,
+      ...initialDraft,
+      alternateTimes: initialDraft?.alternateTimes ?? [],
+      contactEmail:
+        initialDraft?.contactEmail?.trim() ||
+        customerEmail?.trim() ||
+        "",
+      serviceCategory: seededCategory,
+      serviceType: seededService,
+    };
   });
   const [stepIndex, setStepIndex] = useState(0);
   const [hydrated, setHydrated] = useState(false);
@@ -432,6 +442,7 @@ export function BookingWizard({
     DEFAULT_SERVICE_PRICING,
   );
   const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [subtypePickerOpen, setSubtypePickerOpen] = useState(false);
   const [tooFarOpen, setTooFarOpen] = useState(false);
   const dismissedFarPostcodeRef = useRef<string | null>(null);
   const applyingPopStateRef = useRef(false);
@@ -529,6 +540,27 @@ export function BookingWizard({
         : current,
     );
   }, [addresses, draft.addressId, draft.guestAddress]);
+
+  // Header category defaults to Home Cleaning when nothing is chosen yet.
+  useEffect(() => {
+    if (entryLock === "service") return;
+    if (draft.serviceType) return;
+    const category = draft.serviceCategory ?? "residential";
+    if (categoryNeedsSubtype(category)) {
+      if (!draft.serviceCategory) {
+        setDraft((current) =>
+          current.serviceCategory
+            ? current
+            : { ...current, serviceCategory: category },
+        );
+      }
+      setSubtypePickerOpen(true);
+      return;
+    }
+    const fallback = defaultServiceForCategory(category);
+    if (fallback) selectService(fallback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed once when empty
+  }, [draft.serviceType, draft.serviceCategory, entryLock]);
   const selectedStandard = draft.serviceType
     ? normalizeStandard(draft.serviceType, draft.cleaningStandard)
     : null;
@@ -836,6 +868,12 @@ export function BookingWizard({
         });
       } else {
         // No draft blob, still restore address from dedicated storage.
+        // Generic Book now defaults to Home Cleaning in the header menu.
+        const seededCategory =
+          initialDraft?.serviceCategory ?? "residential";
+        const seededService =
+          initialDraft?.serviceType ??
+          defaultServiceForCategory(seededCategory);
         setDraft({
           ...blankDraft,
           ...initialDraft,
@@ -844,6 +882,8 @@ export function BookingWizard({
             initialDraft?.addressId ?? keptAddress.addressId ?? null,
           guestAddress:
             initialDraft?.guestAddress ?? keptAddress.guestAddress ?? null,
+          serviceCategory: seededCategory,
+          serviceType: seededService,
         });
       }
 
@@ -1113,6 +1153,12 @@ export function BookingWizard({
       path: "/booking/new",
     });
   }, [hydrated, stepId, userId]);
+
+  // New funnel steps should open at the top (desktop + mobile).
+  useEffect(() => {
+    if (!hydrated) return;
+    window.scrollTo({ left: 0, top: 0, behavior: "auto" });
+  }, [hydrated, stepId]);
 
   // Leaving the booking flow (browser back, logo, other nav) clears the basket,
   // except auth round-trips that return to /booking/new. Address is always kept.
@@ -1528,6 +1574,33 @@ export function BookingWizard({
     if (options?.advance) goNext();
   }
 
+  function selectCategory(category: ServiceCategory) {
+    const fallback = defaultServiceForCategory(category);
+    if (fallback) {
+      selectService(fallback);
+      setSubtypePickerOpen(false);
+      return;
+    }
+    setDraft((current) => ({
+      ...current,
+      cleaningStandard: null,
+      frequencyChosen: false,
+      isRecurring: false,
+      recommendedCleaningStandard: null,
+      recommendedServiceType: null,
+      recurrencePattern: null,
+      customRecurrenceDates: [],
+      selectedAddOns: [],
+      serviceCategory: category,
+      serviceType: null,
+      estimatedDurationHours: null,
+      hasPets: null,
+      petTypes: [],
+      officeSpaces: [],
+    }));
+    setSubtypePickerOpen(true);
+  }
+
   function draftFromHistory(suggestion: HistoryRecommendation): BookingDraft {
     const category = serviceDefinition(suggestion.serviceType).category;
     const duration =
@@ -1838,7 +1911,13 @@ export function BookingWizard({
     standardLabel: null,
   };
 
-  const basket = <BookingBasket {...basketProps} />;
+  const showBookingHelp = stepId !== "checkout" && stepId !== "auth";
+  const basket = (
+    <BookingBasket
+      {...basketProps}
+      footer={showBookingHelp ? <BookingHelpContact /> : null}
+    />
+  );
 
   const stepBody = (
     <>
@@ -2087,6 +2166,20 @@ export function BookingWizard({
   return (
     <BookingChrome
       backDisabled={checkoutBusy}
+      categoryControl={
+        entryLock === "service"
+          ? null
+          : () => (
+              <BookingCategoryMenu
+                onSelect={selectCategory}
+                selected={
+                  draft.serviceType
+                    ? serviceDefinition(draft.serviceType).category
+                    : (draft.serviceCategory ?? "residential")
+                }
+              />
+            )
+      }
       onBack={goBack}
       onHome={() => {
         abandonBookingStorage();
@@ -2104,15 +2197,18 @@ export function BookingWizard({
     >
       <div
         className={cn(
-          // WeCasa funnel: 1140px shell. Bottom pad on mobile for the fixed Next / Book bar.
-          "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pt-8 md:px-5 md:pt-6 lg:pb-10 xl:px-0",
+          // WeCasa funnel: 1140px shell. Extra mobile pad clears sticky Next bar + help line.
+          "mx-auto box-border w-full max-w-[1140px] flex-1 px-5 pt-6 pb-[calc(7.5rem+env(safe-area-inset-bottom))] sm:pt-8 md:px-5 md:pt-6 lg:pb-10 xl:px-0",
         )}
       >
         <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-start lg:gap-0">
           <div className="flex min-w-0 w-full flex-col lg:min-h-[calc(100vh-9.5rem)] lg:w-[56%]">
             <div className="min-w-0">{stepBody}</div>
+            {showBookingHelp ? (
+              <BookingHelpContact className="mt-10 border-t border-[#e8e0d0]/90 pt-6 lg:hidden" />
+            ) : null}
             {/* Desktop: Next pinned to the bottom of the content column. */}
-            {stepId !== "checkout" && stepId !== "auth" ? (
+            {showBookingHelp ? (
               <div className="mt-10 hidden lg:mt-auto lg:block lg:pt-10 lg:pb-2">
                 <button
                   className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
@@ -2125,7 +2221,7 @@ export function BookingWizard({
               </div>
             ) : null}
           </div>
-          <div className="hidden lg:ml-[6%] lg:flex lg:w-[38%] lg:shrink-0">
+          <div className="hidden lg:ml-[6%] lg:block lg:w-[38%] lg:shrink-0">
             {basket}
           </div>
         </div>
@@ -2216,8 +2312,63 @@ export function BookingWizard({
         </div>
       ) : null}
 
+      {subtypePickerOpen &&
+      draft.serviceCategory &&
+      categoryNeedsSubtype(draft.serviceCategory) ? (
+        <AppModal
+          backdrop="blur"
+          onClose={() => {
+            setSubtypePickerOpen(false);
+            // Cancel with no subtype chosen — fall back to house cleaning.
+            if (!draft.serviceType) {
+              selectService("regular");
+            }
+          }}
+          title="What type of clean?"
+        >
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            How often comes later.
+          </p>
+          <div className="mt-5 grid gap-2">
+            {servicesForPicker(
+              draft.serviceCategory,
+              draft.serviceType,
+              focusServices,
+            ).map((item) => {
+              const active = draft.serviceType === item.value;
+              return (
+                <button
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3.5 text-left transition touch-manipulation",
+                    active
+                      ? "border-[#6a45b8] bg-[#f8f5ff]"
+                      : "border-[#ebe4da] bg-white hover:bg-[#faf8f5]",
+                  )}
+                  key={item.value}
+                  onClick={() => {
+                    selectService(item.value);
+                    setSubtypePickerOpen(false);
+                  }}
+                  type="button"
+                >
+                  <span className="font-semibold text-[#1c133b]">
+                    {shortServiceLabel(item.value)}
+                  </span>
+                  <span className="shrink-0 text-sm font-semibold tabular-nums text-[#1c133b]">
+                    {formatHourlyRate(
+                      indicativeHourlyRatePence(item.value, pricing),
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </AppModal>
+      ) : null}
+
       <BookingBasketSheet
         {...basketProps}
+        footer={showBookingHelp ? <BookingHelpContact /> : null}
         onClose={() => setBasketOpen(false)}
         open={basketOpen}
       />
@@ -2277,9 +2428,6 @@ function CheckoutAuthGate({
   );
 }
 
-const MAIN_BOOKING_CATEGORIES = SERVICE_CATEGORIES.filter((category) =>
-  ["residential", "commercial", "recovery"].includes(category.value),
-);
 
 function KnownCleanersStep({
   addressId,
@@ -2395,11 +2543,14 @@ function categoryNeedsSubtype(category: ServiceCategory) {
   return defaultServiceForCategory(category) == null;
 }
 
+/**
+ * Category lives in the header dropdown. Subtypes open in a blurred modal.
+ * This step only offers residential / moving secondary options on the page.
+ */
 function ServicePickerStep({
   focusServices,
   lockedCategory,
   onSelectService,
-  pricing = DEFAULT_SERVICE_PRICING,
   selectedCategory,
   selectedService,
 }: {
@@ -2410,221 +2561,79 @@ function ServicePickerStep({
   selectedCategory: ServiceCategory | null;
   selectedService: ServiceType | null;
 }) {
-  const categories = lockedCategory
-    ? MAIN_BOOKING_CATEGORIES.filter(
-        (category) => category.value === lockedCategory,
-      )
-    : MAIN_BOOKING_CATEGORIES;
-
-  const selectedCat =
+  const category =
     selectedService != null
       ? serviceDefinition(selectedService).category
-      : selectedCategory;
-
-  const [openCategory, setOpenCategory] = useState<ServiceCategory | null>(
-    () => {
-      if (lockedCategory && categoryNeedsSubtype(lockedCategory)) {
-        return lockedCategory;
-      }
-      if (selectedCat && categoryNeedsSubtype(selectedCat)) return selectedCat;
-      return null;
-    },
-  );
+      : (selectedCategory ?? lockedCategory);
 
   useEffect(() => {
-    if (lockedCategory && categoryNeedsSubtype(lockedCategory)) {
-      setOpenCategory(lockedCategory);
-    }
-  }, [lockedCategory]);
-
-  // House Cleaning is one click — select Regular, no nested panel.
-  useEffect(() => {
-    if (lockedCategory !== "residential") return;
-    if (selectedService && serviceDefinition(selectedService).category === "residential") {
+    if (!category) return;
+    if (selectedService && serviceDefinition(selectedService).category === category) {
       return;
     }
-    onSelectService("regular");
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on residential lock
-  }, [lockedCategory]);
-
-  function chooseCategory(category: ServiceCategory) {
     const fallback = defaultServiceForCategory(category);
-    if (fallback) {
-      onSelectService(fallback);
-      setOpenCategory(null);
-      return;
-    }
-    setOpenCategory((current) => (current === category ? null : category));
+    if (fallback) onSelectService(fallback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed default when category changes
+  }, [category]);
+
+  if (!category) return null;
+  if (categoryNeedsSubtype(category) || focusServices?.length) return null;
+
+  const services = servicesForPicker(category, selectedService, focusServices);
+
+  if (category === "residential" && !focusServices?.length) {
+    return (
+      <div className="mt-6">
+        {selectedService === "deep_clean" ? (
+          <button
+            className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
+            onClick={() => onSelectService("regular")}
+            type="button"
+          >
+            Switch to standard home cleaning
+          </button>
+        ) : (
+          <button
+            className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
+            onClick={() => onSelectService("deep_clean")}
+            type="button"
+          >
+            Need a deep clean instead?
+          </button>
+        )}
+      </div>
+    );
   }
 
-  return (
-    <div>
-      <h2 className="text-[1.75rem] font-bold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-        What do you need?
-      </h2>
-      <p className="mt-3 text-sm leading-6 text-[#5a5470]">
-        Pick a category. How often comes later.
-      </p>
-      <div className="mt-8 grid gap-2.5">
-        {categories.map((category) => {
-          const image = bookingCategoryImages[category.value];
-          const needsSubtype =
-            categoryNeedsSubtype(category.value) || Boolean(focusServices?.length);
-          const open = openCategory === category.value && needsSubtype;
-          const selectedInCategory = selectedCat === category.value;
-          const services = servicesForPicker(
-            category.value,
-            selectedService,
-            focusServices,
-          );
-          const rateService =
-            selectedInCategory && selectedService
-              ? selectedService
-              : defaultServiceForCategory(category.value);
-          const isDeepHome =
-            category.value === "residential" && selectedService === "deep_clean";
-
-          return (
-            <div
-              className={cn(
-                "overflow-hidden rounded-2xl border bg-white transition",
-                selectedInCategory
-                  ? "border-[#6a45b8] border-2"
-                  : "border-[#ebe4da]",
-              )}
-              key={category.value}
-            >
-              <button
-                aria-expanded={needsSubtype ? open : undefined}
-                className="flex w-full items-center gap-3 px-3.5 py-3.5 text-left touch-manipulation hover:bg-[#faf8f5] sm:gap-3.5 sm:px-4"
-                onClick={() => chooseCategory(category.value)}
-                type="button"
-              >
-                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f3eef9] sm:h-14 sm:w-14">
-                  <LazyImage
-                    alt=""
-                    className="object-cover object-center"
-                    fill
-                    sizes="56px"
-                    src={image}
-                  />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <p className="font-semibold text-[#1c133b]">
-                      {category.label}
-                    </p>
-                    {rateService ? (
-                      <p className="shrink-0 text-sm font-bold tabular-nums text-[#1c133b]">
-                        {formatHourlyRate(
-                          indicativeHourlyRatePence(rateService, pricing),
-                        )}
-                      </p>
-                    ) : null}
-                  </div>
-                  <p className="mt-0.5 text-sm leading-5 text-[#5a5470]">
-                    {isDeepHome
-                      ? "Deep clean selected"
-                      : selectedInCategory &&
-                          selectedService &&
-                          needsSubtype
-                        ? shortServiceLabel(selectedService)
-                        : category.description}
-                  </p>
-                </div>
-                {needsSubtype ? (
-                  <ChevronDown
-                    aria-hidden
-                    className={cn(
-                      "h-5 w-5 shrink-0 text-[#8a849c] transition",
-                      open && "rotate-180",
-                      selectedInCategory && "text-[#6a45b8]",
-                    )}
-                  />
-                ) : selectedInCategory ? (
-                  <span
-                    aria-hidden
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6a45b8] text-[10px] font-bold text-white"
-                  >
-                    ✓
-                  </span>
-                ) : null}
-              </button>
-
-              {category.value === "residential" &&
-              selectedInCategory &&
-              !focusServices?.length ? (
-                <div className="border-t border-[#f0ebe3] px-3.5 py-2.5 sm:px-4">
-                  {selectedService === "deep_clean" ? (
-                    <button
-                      className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
-                      onClick={() => onSelectService("regular")}
-                      type="button"
-                    >
-                      Switch to standard house cleaning
-                    </button>
-                  ) : (
-                    <button
-                      className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
-                      onClick={() => onSelectService("deep_clean")}
-                      type="button"
-                    >
-                      Need a deep clean instead?
-                    </button>
-                  )}
-                </div>
-              ) : null}
-
-              {open ? (
-                <div className="border-t border-[#f0ebe3] px-2 py-2 sm:px-3 sm:py-2.5">
-                  <div className="flex flex-col">
-                    {services.map((item) => {
-                      const active = selectedService === item.value;
-                      return (
-                        <button
-                          className={cn(
-                            "flex items-center justify-between gap-3 rounded-xl px-2.5 py-2.5 text-left transition touch-manipulation sm:px-3",
-                            active
-                              ? "bg-[#f3eef9]"
-                              : "hover:bg-[#faf8f5]",
-                          )}
-                          key={item.value}
-                          onClick={() => onSelectService(item.value)}
-                          type="button"
-                        >
-                          <span className="flex min-w-0 items-center gap-2.5">
-                            <span
-                              aria-hidden
-                              className={cn(
-                                "h-3.5 w-3.5 shrink-0 rounded-full border-2",
-                                active
-                                  ? "border-[#6a45b8] bg-[#6a45b8] shadow-[inset_0_0_0_2px_#fff]"
-                                  : "border-[#cfc8de] bg-white",
-                              )}
-                            />
-                            <span className="min-w-0">
-                              <span className="block font-medium text-[#1c133b]">
-                                {shortServiceLabel(item.value)}
-                              </span>
-                            </span>
-                          </span>
-                          <span className="shrink-0 text-sm font-semibold tabular-nums text-[#1c133b]">
-                            {formatHourlyRate(
-                              indicativeHourlyRatePence(item.value, pricing),
-                            )}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
+  if (category === "moving_home" && !focusServices?.length) {
+    const hasEndOfTenancy = services.some(
+      (item) => item.value === "end_of_tenancy",
+    );
+    if (!hasEndOfTenancy) return null;
+    return (
+      <div className="mt-6">
+        {selectedService === "end_of_tenancy" ? (
+          <button
+            className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
+            onClick={() => onSelectService("move_in")}
+            type="button"
+          >
+            Switch to move-in / move-out cleaning
+          </button>
+        ) : (
+          <button
+            className="text-sm font-medium text-[#6a45b8] underline-offset-2 hover:underline touch-manipulation"
+            onClick={() => onSelectService("end_of_tenancy")}
+            type="button"
+          >
+            Need end of tenancy cleaning instead?
+          </button>
+        )}
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }
 
 function withHistoryStep(steps: BookingFlowStepId[], include: boolean) {
@@ -2831,15 +2840,23 @@ function AddressStep({
   const serviceReady = selectedService != null;
   const roomsReady =
     !showHomeRooms || (bedrooms != null && bathrooms != null);
+  // House cleaning is the default — treat it as already chosen so rooms /
+  // extras do not wait on a navbar click.
+  const houseDefaultReady =
+    serviceReady ||
+    selectedCategory === "residential" ||
+    lockedCategory === "residential" ||
+    (selectedCategory == null && lockedCategory == null && !focusServices?.length);
   // Mobile: reveal sections as prior ones are complete. Desktop: keep the full form.
   const revealService =
     !isNarrow ||
     addressReady ||
-    serviceReady ||
+    houseDefaultReady ||
     Boolean(lockedCategory) ||
     Boolean(focusServices?.length);
-  const revealRooms = !isNarrow || serviceReady;
-  const revealExtras = !isNarrow || (serviceReady && roomsReady);
+  const revealRooms = !isNarrow || houseDefaultReady || addressReady;
+  const revealExtras =
+    !isNarrow || ((houseDefaultReady || serviceReady) && roomsReady);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1023px)");
@@ -2992,10 +3009,7 @@ function AddressStep({
       </div>
 
       {onSelectService && revealService ? (
-        <div
-          className="mt-10 scroll-mt-28 border-t border-[#eeeef1] pt-8"
-          ref={serviceSectionRef}
-        >
+        <div className="scroll-mt-28" ref={serviceSectionRef}>
           <ServicePickerStep
             focusServices={focusServices}
             lockedCategory={lockedCategory}
@@ -3351,8 +3365,16 @@ function PetsSection({
       <div className="mt-8 grid max-w-md grid-cols-2 gap-3">
         {(
           [
-            ["Yes, pets", true, "/images/marketing/icons/plain/pets.png"],
-            ["No, none", false, "/images/marketing/icons/plain/no-pets.png"],
+            [
+              "Yes, pets",
+              true,
+              `/images/marketing/icons/plain/pets.png?v=${ADD_ON_ICON_VERSION}`,
+            ],
+            [
+              "No, none",
+              false,
+              `/images/marketing/icons/plain/no-pets.png?v=${ADD_ON_ICON_VERSION}`,
+            ],
           ] as const
         ).map(([label, value, imageSrc]) => {
           const active = draft.hasPets === value;
@@ -3361,7 +3383,7 @@ function PetsSection({
               aria-pressed={active}
               className={cn(
                 "flex flex-col items-center rounded-2xl border-2 border-transparent bg-white px-3 pb-3 pt-4 text-center transition hover:bg-[#f8f5ff] touch-manipulation",
-                active && "border-[#6a45b8] bg-white",
+                active && "border-[#6a45b8] bg-[#f8f5ff]",
               )}
               key={label}
               onClick={() => {
@@ -3370,9 +3392,10 @@ function PetsSection({
               }}
               type="button"
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element -- plain PNG with alpha */}
+              <img
                 alt=""
-                className="h-14 w-14 object-contain sm:h-16 sm:w-16"
+                className="h-14 w-14 bg-transparent object-contain sm:h-16 sm:w-16"
                 height={512}
                 src={imageSrc}
                 width={512}
@@ -3472,31 +3495,28 @@ function AddOnsStep({
           aria-pressed={selected}
           className={cn(
             "flex w-full flex-col items-center rounded-2xl border-2 border-transparent bg-white px-2 pb-2.5 pt-3 text-center transition touch-manipulation hover:bg-[#f8f5ff]",
-            selected && "border-[#6a45b8] bg-white",
+            selected && "border-[#6a45b8] bg-[#f8f5ff]",
           )}
           onClick={() => toggleAddOn(addOn.id)}
           type="button"
         >
-          <span className="relative flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
+          <span className="relative flex h-16 w-16 items-center justify-center bg-transparent sm:h-20 sm:w-20">
             {imageSrc ? (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element -- plain PNG with alpha; avoid optimizer cache keeping opaque fills
+              <img
                 alt=""
-                className="h-full w-full scale-110 object-contain"
+                className="h-full w-full scale-110 bg-transparent object-contain"
                 height={160}
                 src={imageSrc}
                 width={160}
               />
             ) : AddOnIcon ? (
-              <span className="inline-flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-[#1c133b] bg-[#efe6ff] sm:h-20 sm:w-20">
-                <AddOnIcon
-                  aria-hidden
-                  className={cn("h-8 w-8 sm:h-10 sm:w-10", icon?.className)}
-                  weight="duotone"
-                />
-              </span>
-            ) : (
-              <span className="h-16 w-16 rounded-full border-[3px] border-[#1c133b] bg-[#efe6ff] sm:h-20 sm:w-20" />
-            )}
+              <AddOnIcon
+                aria-hidden
+                className={cn("h-10 w-10 sm:h-12 sm:w-12", icon?.className)}
+                weight="duotone"
+              />
+            ) : null}
           </span>
           <span className="mt-2 line-clamp-2 min-h-[2.5rem] text-xs font-semibold leading-tight text-[#1c133b]">
             {addOn.label}
@@ -3509,7 +3529,7 @@ function AddOnsStep({
         </button>
         <button
           aria-label={`About ${addOn.label}`}
-          className="absolute right-0 top-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#6a45b8] shadow-sm touch-manipulation hover:bg-[#f8f5ff]"
+          className="absolute right-0 top-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-transparent text-[#6a45b8] touch-manipulation hover:bg-transparent"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -3517,7 +3537,7 @@ function AddOnsStep({
           }}
           type="button"
         >
-          <Info className="h-4 w-4" strokeWidth={2.25} />
+          <Info className="h-4 w-4 fill-none" strokeWidth={2.25} />
         </button>
       </div>
     );
@@ -3536,32 +3556,28 @@ function AddOnsStep({
         Tap extras you want. Details are behind the info icon.
       </p>
 
-      {supplyAddOns.length ? (
-        <div className="mt-6">
-          <h3 className="text-sm font-semibold text-[#1c133b]">
-            Cleaning products &amp; equipment
-          </h3>
-          {/* <p className="mt-1 text-sm leading-5 text-[#5a5470]">
-            Optional Mundoria kits, charged by the hour while the cleaner is on
-            site.
-          </p> */}
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:max-w-md sm:gap-3">
-            {supplyAddOns.map((addOn) =>
-              renderAddOnCard(addOn, { showPrice: true }),
-            )}
-          </div>
-        </div>
-      ) : null}
-
       {extraAddOns.length ? (
-        <div className={cn(supplyAddOns.length ? "mt-8" : "mt-6")}>
+        <div className="mt-6">
           {supplyAddOns.length ? (
             <h3 className="mb-3 text-sm font-semibold text-[#1c133b]">
-              Other extras
+              Extras
             </h3>
           ) : null}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-3">
             {extraAddOns.map((addOn) => renderAddOnCard(addOn))}
+          </div>
+        </div>
+      ) : null}
+
+      {supplyAddOns.length ? (
+        <div className={cn(extraAddOns.length ? "mt-8" : "mt-6")}>
+          <h3 className="text-sm font-semibold text-[#1c133b]">
+            Cleaning products &amp; equipment
+          </h3>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:max-w-md sm:gap-3">
+            {supplyAddOns.map((addOn) =>
+              renderAddOnCard(addOn, { showPrice: true }),
+            )}
           </div>
         </div>
       ) : null}
@@ -4173,23 +4189,29 @@ function TimeSection({
       ) : null}
 
       {showFlexPrompt ? (
-        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 px-0 pb-[calc(5.75rem+env(safe-area-inset-bottom))] sm:items-center sm:p-4 sm:pb-4">
+          <button
+            aria-label="Close"
+            className="absolute inset-0 cursor-default"
+            onClick={dismissFlexPrompt}
+            type="button"
+          />
           <div
             aria-labelledby="flex-prompt-title"
             aria-modal="true"
-            className="relative w-full max-w-md rounded-t-[1.75rem] bg-white px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-8 shadow-[0_24px_60px_rgba(28,19,59,0.28)] sm:rounded-[1.75rem] sm:pb-6"
+            className="relative z-10 w-full max-w-md rounded-t-[1.75rem] bg-white px-5 pb-6 pt-8 shadow-[0_24px_60px_rgba(28,19,59,0.28)] sm:rounded-[1.75rem] sm:px-6"
             role="dialog"
           >
             <button
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1c133b] touch-manipulation"
+              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-[#1c133b] touch-manipulation hover:bg-[#f3f3f5]"
               onClick={dismissFlexPrompt}
               type="button"
             >
-              ×
+              <X className="h-5 w-5" strokeWidth={2.5} />
             </button>
             <h3
-              className="pr-8 text-xl font-bold tracking-[-0.02em] text-[#1c133b]"
+              className="pr-10 text-xl font-bold tracking-[-0.02em] text-[#1c133b]"
               id="flex-prompt-title"
             >
               Available at other times on the same day?
@@ -4198,7 +4220,7 @@ function TimeSection({
               The more slots you add, the easier it will be for us to find the
               ideal pro for you.
             </p>
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-6 grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
               <button
                 className="min-h-12 rounded-full border border-[#1c133b] bg-white px-4 py-3 text-sm font-semibold text-[#1c133b] touch-manipulation"
                 onClick={dismissFlexPrompt}
@@ -4868,22 +4890,52 @@ function CheckoutStep({
         )}
       </div>
 
-      <div className="mt-6 divide-y divide-[#e4daf5] border-y border-[#e4daf5]">
-        <TrustRow
-          iconSrc="/images/marketing/icons/plain/free-cancellation.svg"
-          subtitle="Free up to 24 hours before each session."
-          title="Free cancellation"
-        />
-        <TrustRow
-          iconSrc="/images/marketing/icons/plain/cleaning-experts.svg"
-          subtitle="Only home cleaning professionals."
-          title="Cleaning experts"
-        />
-        <TrustRow
-          iconSrc="/images/marketing/icons/plain/verified-reviews.svg"
-          subtitle="Verified reviews collected after launch."
-          title="Trust-first booking"
-        />
+      <div className="mt-6 px-1 py-2 sm:px-0">
+        <h3 className="text-lg font-semibold tracking-[-0.02em] text-[#1c133b]">
+          Your booking, with peace of mind
+        </h3>
+        <ul className="mt-5 space-y-4">
+          {[
+            {
+              title: "Pay after your clean",
+              body: "We check your card now, but you’re only charged after the session is completed.",
+              icon: "/images/marketing/icons/pay-after-clean.svg",
+            },
+            {
+              title: "Flexible cancellation",
+              body: "Cancel free up to 24 hours before your appointment.",
+              icon: "/images/marketing/icons/flexible-cancellation.svg",
+            },
+            {
+              title: "Cleaners you can feel confident about",
+              body: "Identity, DBS and insurance checks before anyone takes bookings.",
+              icon: "/images/marketing/icons/cleaners-confident.svg",
+            },
+            {
+              title: "Support when you need it",
+              body: "Mundoria is here if something doesn’t go as planned.",
+              icon: "/images/marketing/icons/support-when-needed.svg",
+            },
+          ].map((item) => (
+            <li className="flex gap-3" key={item.title}>
+              <Image
+                alt=""
+                className="mt-0.5 size-10 shrink-0 sm:size-11"
+                height={44}
+                src={item.icon}
+                width={44}
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#1c133b]">
+                  {item.title}
+                </p>
+                <p className="mt-0.5 text-sm leading-5 text-[#5b5478]">
+                  {item.body}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <p className="mt-5 text-sm leading-6 text-[#5b5478]">
@@ -4893,22 +4945,6 @@ function CheckoutStep({
         </CheckoutOutboundLink>
         .
       </p>
-
-      <div className="mt-4 flex items-start gap-2.5 px-0.5">
-        <Info
-          aria-hidden
-          className="mt-0.5 h-4 w-4 shrink-0 text-[#6a45b8]"
-          strokeWidth={2}
-        />
-        <div>
-          <p className="text-sm font-semibold text-[#1c133b]">
-            Pay after the clean
-          </p>
-          <p className="mt-0.5 text-sm leading-5 text-[#5b5478]">
-            Mundoria doesn’t take payment until your cleaning is completed.
-          </p>
-        </div>
-      </div>
 
       {processing ? (
         <BookingLoadingOverlay
@@ -5171,28 +5207,23 @@ function CheckoutOutboundLink({
   );
 }
 
-function TrustRow({
-  iconSrc,
-  subtitle,
-  title,
-}: {
-  iconSrc: string;
-  subtitle: ReactNode;
-  title: string;
-}) {
+function BookingHelpContact({ className }: { className?: string }) {
+  const phone = MUNDORIA_IDENTITY.phone;
+  const telHref = `tel:+${phone.replace(/\D/g, "").replace(/^0/, "44")}`;
+  const linkClass =
+    "font-semibold text-[#6a45b8] underline underline-offset-2 decoration-[#6a45b8]/45 transition hover:text-[#5a38a3] hover:decoration-[#5a38a3] touch-manipulation";
+
   return (
-    <div className="flex items-start gap-3 py-3">
-      <Image
-        alt=""
-        className="mt-0.5 h-11 w-11 shrink-0 object-contain"
-        height={88}
-        src={iconSrc}
-        width={88}
-      />
-      <div>
-        <p className="font-semibold text-[#1c133b]">{title}</p>
-        <p className="text-sm text-[#5b5478]">{subtitle}</p>
-      </div>
-    </div>
+    <p className={cn("text-sm leading-6 text-[#5a5470]", className)}>
+      Need help?{" "}
+      <ContactSupportButton className={linkClass} label="Contact us" tab="home" />
+      <span aria-hidden className="text-[#c4bfd0]">
+        {" "}
+        ·{" "}
+      </span>
+      <a className={linkClass} href={telHref}>
+        {phone}
+      </a>
+    </p>
   );
 }

@@ -101,12 +101,24 @@ function injectScript(src: string, id: string) {
   document.head.appendChild(script);
 }
 
+/**
+ * GTM is installed in `app/layout.tsx` (head + noscript). This remains as a
+ * safe no-op / fallback if the layout snippet is missing in a test shell.
+ */
 export function loadGoogleTagManager() {
   const gtmId = getGtmId();
   if (!gtmId || typeof window === "undefined") return false;
+  ensureDataLayer();
+  // Layout already injected googletagmanager.com/gtm.js?id=…
+  if (
+    document.querySelector(
+      `script[src*="googletagmanager.com/gtm.js?id=${gtmId}"]`,
+    )
+  ) {
+    return true;
+  }
   if (document.getElementById("mundoria-gtm")) return true;
 
-  ensureDataLayer();
   window.dataLayer?.push({
     "gtm.start": new Date().getTime(),
     event: "gtm.js",
@@ -261,21 +273,17 @@ export function trackMetaPurchase(params: {
 }
 
 /**
- * Load the tag container only after an optional-cookie choice.
- * GTM is no longer bootstrapped in the document head: a container tag that
- * ignores Consent Mode (for example an ads pixel) could otherwise fire before
- * the visitor answers the banner, which UK PECR does not allow. Deferring the
- * container also takes it off the critical path for first page load.
- *
- * Clarity waits for Statistics consent; Meta Pixel waits for Marketing consent.
+ * GTM loads from the root layout on every page (Consent Mode defaults deny
+ * storage until the banner updates). Optional first-party loaders below still
+ * wait for consent: Clarity (Statistics), Meta Pixel (Marketing).
  */
 export function loadAnalyticsTags(preferences: ConsentPreferences) {
-  if (!allowsOptionalTags(preferences)) return;
   if (getGtmId()) {
     loadGoogleTagManager();
   } else if (preferences.analytics) {
     loadGa4Direct();
   }
+  if (!allowsOptionalTags(preferences)) return;
   if (preferences.analytics) loadMicrosoftClarity();
   if (preferences.marketing) loadMetaPixel();
 }

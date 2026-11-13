@@ -207,6 +207,7 @@ export function defaultServiceForCategory(
   category: ServiceCategory | null | undefined,
 ): ServiceType | null {
   if (category === "residential") return "regular";
+  if (category === "moving_home") return "move_in";
   return null;
 }
 

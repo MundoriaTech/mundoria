@@ -52,6 +52,7 @@ type ReviewRow = {
   cleaner_id?: string | null;
   comment: string | null;
   created_at?: string | null;
+  id?: string | null;
   overall_score?: number | null;
   postcode_prefix: string | null;
   service_type: string | null;
@@ -92,6 +93,12 @@ function directoryClient() {
   if (!url || !key) return null;
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
+    // Next.js caches `fetch` by default; stale marketing rows caused profile
+    // 404s after seed renames (cards refreshed, profile routes did not).
+    global: {
+      fetch: (input, init) =>
+        fetch(input, { ...init, cache: "no-store" }),
+    },
   });
 }
 
@@ -117,13 +124,21 @@ function areaSlugForPrefixes(prefixes: string[]) {
   return BIRMINGHAM_AREAS[0]?.slug ?? "birmingham";
 }
 
-export function cleanerPublicPath(name: string, areaSlug: string) {
+export function cleanerPublicPath(
+  name: string,
+  areaSlug: string,
+  id?: string,
+) {
   const base =
     name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "cleaner";
-  return `/cleaners/${LAUNCH_CITY.slug}/${areaSlug}/profile/${base}`;
+  // Stable unique suffix so profiles resolve even when names collide.
+  const suffix = id
+    ? `-${id.replace(/-/g, "").slice(0, 8).toLowerCase()}`
+    : "";
+  return `/cleaners/${LAUNCH_CITY.slug}/${areaSlug}/profile/${base}${suffix}`;
 }
 
 function serviceLabel(value: string) {
@@ -150,7 +165,7 @@ function toCleaner(row: CleanerRow): DirectoryCleaner {
     avatarUrl: row.avatar_url,
     bio:
       radiusMiles == null ? bio : bioWithCoverage(bio, radiusMiles, homeArea),
-    href: cleanerPublicPath(row.full_name, areaSlug),
+    href: cleanerPublicPath(row.full_name, areaSlug, row.id),
     id: row.id,
     jobs: row.total_jobs ?? 0,
     name: publicCleanerName(row.full_name),
@@ -163,6 +178,15 @@ function toCleaner(row: CleanerRow): DirectoryCleaner {
   };
 }
 
+/** Drop em/en dashes from publishable review copy (seed + live). */
+function sanitizeReviewBody(comment: string) {
+  return comment
+    .replace(/\s*[\u2014\u2013]\s*/g, ". ")
+    .replace(/\.\s+\./g, ".")
+    .replace(/([.!?])\s+([a-z])/g, (_, end: string, letter: string) => `${end} ${letter.toUpperCase()}`)
+    .trim();
+}
+
 function toReview(row: ReviewRow): DirectoryReview | null {
   if (!row.comment) return null;
   const area = row.postcode_prefix ? areaNameForPrefix(row.postcode_prefix) : null;
@@ -171,7 +195,7 @@ function toReview(row: ReviewRow): DirectoryReview | null {
   const created = row.created_at ? new Date(row.created_at) : null;
   return {
     author: `${first} (${place})`,
-    body: row.comment,
+    body: sanitizeReviewBody(row.comment),
     score: row.overall_score == null ? null : Number(row.overall_score),
     service: row.service_type ? serviceLabel(row.service_type) : "Cleaning",
     when:
@@ -186,6 +210,7 @@ export async function loadDirectoryCleaners(options?: {
   limit?: number;
   prefix?: string;
   serviceType?: string;
+  serviceTypes?: string[];
 }) {
   const client = directoryClient();
   if (!client) return null;
@@ -196,6 +221,9 @@ export async function loadDirectoryCleaners(options?: {
     : options?.areaSlug
       ? prefixesForArea(options.areaSlug)
       : BIRMINGHAM_POSTCODES.map((item) => item.prefix);
+  const serviceTypes = options?.serviceType
+    ? [options.serviceType]
+    : options?.serviceTypes?.filter(Boolean);
 
   const columns =
     "id, full_name, avatar_url, bio, rating, total_jobs, years_experience, working_radius_km, postcode_prefixes, service_types";
@@ -209,8 +237,10 @@ export async function loadDirectoryCleaners(options?: {
     .order("rating", { ascending: false })
     .limit(Math.max(limit, 12));
 
-  if (options?.serviceType) {
-    query = query.contains("service_types", [options.serviceType]);
+  if (serviceTypes?.length === 1) {
+    query = query.contains("service_types", [serviceTypes[0]]);
+  } else if (serviceTypes && serviceTypes.length > 1) {
+    query = query.overlaps("service_types", serviceTypes);
   }
 
   let { data, error } = await query;
@@ -221,8 +251,10 @@ export async function loadDirectoryCleaners(options?: {
       .overlaps("postcode_prefixes", prefixes)
       .order("rating", { ascending: false })
       .limit(Math.max(limit, 12));
-    if (options?.serviceType) {
-      fallback = fallback.contains("service_types", [options.serviceType]);
+    if (serviceTypes?.length === 1) {
+      fallback = fallback.contains("service_types", [serviceTypes[0]]);
+    } else if (serviceTypes && serviceTypes.length > 1) {
+      fallback = fallback.overlaps("service_types", serviceTypes);
     }
     const retry = await fallback;
     data = (retry.data ?? null) as typeof data;
@@ -233,10 +265,65 @@ export async function loadDirectoryCleaners(options?: {
   const cleaners = (data as CleanerRow[]).map(toCleaner);
   const unique = new Map<string, DirectoryCleaner>();
   for (const cleaner of cleaners) unique.set(cleaner.id, cleaner);
-  return attachReviewCounts(
-    withUniqueProfileHrefs(Array.from(unique.values())).slice(0, limit),
+  const withReviews = await attachReviewCounts(
+    withUniqueProfileHrefs(Array.from(unique.values())),
   );
+  return interleaveByGender(withReviews).slice(0, limit);
 }
+
+/** Alternate woman / man so rating sort alone does not stack women first. */
+function interleaveByGender(cleaners: DirectoryCleaner[]) {
+  const women: DirectoryCleaner[] = [];
+  const men: DirectoryCleaner[] = [];
+  for (const cleaner of cleaners) {
+    if (guessWoman(cleaner)) women.push(cleaner);
+    else men.push(cleaner);
+  }
+  const out: DirectoryCleaner[] = [];
+  const n = Math.max(women.length, men.length);
+  for (let i = 0; i < n; i += 1) {
+    if (women[i]) out.push(women[i]);
+    if (men[i]) out.push(men[i]);
+  }
+  return out;
+}
+
+function guessWoman(cleaner: DirectoryCleaner) {
+  const avatar = cleaner.avatarUrl?.toLowerCase() ?? "";
+  if (avatar.includes("woman")) return true;
+  if (avatar.includes("man") && !avatar.includes("woman")) return false;
+  const first = (cleaner.name.split(/\s+/)[0] ?? "").toLowerCase();
+  return WOMAN_FIRST_NAMES.has(first);
+}
+
+const WOMAN_FIRST_NAMES = new Set(
+  [
+    "amara",
+    "priya",
+    "olivia",
+    "fatima",
+    "elena",
+    "hannah",
+    "sophie",
+    "aisha",
+    "grace",
+    "mei",
+    "nia",
+    "chloe",
+    "freya",
+    "yasmin",
+    "lucy",
+    "hana",
+    "ruth",
+    "zara",
+    "imogen",
+    "leila",
+    "maya",
+    "nora",
+    "isla",
+    "keisha",
+  ].map((name) => name.toLowerCase()),
+);
 
 function withUniqueProfileHrefs(cleaners: DirectoryCleaner[]) {
   const used = new Map<string, number>();
@@ -253,38 +340,70 @@ async function attachReviewCounts(cleaners: DirectoryCleaner[]) {
   if (!client || !cleaners.length) return cleaners;
   const { data } = await client
     .from("marketing_reviews")
-    .select("cleaner_id")
+    .select("id, cleaner_id")
     .in(
       "cleaner_id",
       cleaners.map((cleaner) => cleaner.id),
     )
     .limit(2000);
   const counts = new Map<string, number>();
+  const seenRatings = new Set<string>();
   for (const row of data ?? []) {
-    const id = (row as { cleaner_id?: string }).cleaner_id;
+    const typed = row as { cleaner_id?: string; id?: string };
+    const id = typed.cleaner_id;
     if (!id) continue;
+    const ratingKey = typed.id ?? `${id}:${seenRatings.size}`;
+    if (seenRatings.has(ratingKey)) continue;
+    seenRatings.add(ratingKey);
     counts.set(id, (counts.get(id) ?? 0) + 1);
   }
-  return cleaners.map((cleaner) => ({
-    ...cleaner,
-    reviewCount: counts.get(cleaner.id) ?? 0,
-  }));
+  return cleaners.map((cleaner) => {
+    const reviewCount = counts.get(cleaner.id) ?? 0;
+    return {
+      ...cleaner,
+      // Keep jobs/rating honest with publishable reviews.
+      jobs: reviewCount > 0 ? cleaner.jobs : Math.min(cleaner.jobs, 3),
+      rating: reviewCount > 0 ? cleaner.rating : 0,
+      reviewCount,
+    };
+  });
+}
+
+function cleanerSlugId(slug: string) {
+  const match = slug.match(/-([a-f0-9]{8})$/i);
+  return match?.[1]?.toLowerCase() ?? null;
 }
 
 export async function loadDirectoryCleaner(slug: string, areaSlug: string) {
-  const cleaners = await loadDirectoryCleaners({ areaSlug, limit: 80 });
-  if (!cleaners) return null;
-  const exact = cleaners.find((cleaner) => cleaner.href.endsWith(`/profile/${slug}`));
-  if (exact) return exact;
+  const needle = cleanerSlugId(slug);
 
-  const legacy = slug.match(/^(.*)-([a-f0-9]{8})$/i);
-  if (!legacy) return null;
-  const needle = legacy[2].toLowerCase();
-  return (
-    cleaners.find((cleaner) =>
-      cleaner.id.replace(/-/g, "").toLowerCase().startsWith(needle),
-    ) ?? null
-  );
+  // Prefer id suffix (stable), then area list, then city-wide — avoids 404s when
+  // area-filtered queries miss a cleaner that the card linked to.
+  const pools = [
+    await loadDirectoryCleaners({ areaSlug, limit: 80 }),
+    await loadDirectoryCleaners({ limit: 80 }),
+  ];
+
+  for (const cleaners of pools) {
+    if (!cleaners?.length) continue;
+    if (needle) {
+      const byId = cleaners.find((cleaner) =>
+        cleaner.id.replace(/-/g, "").toLowerCase().startsWith(needle),
+      );
+      if (byId) return byId;
+    }
+    const exact = cleaners.find((cleaner) =>
+      cleaner.href.endsWith(`/profile/${slug}`),
+    );
+    if (exact) return exact;
+    const byTail = cleaners.find((cleaner) => {
+      const pathSlug = cleaner.href.split("/").pop() ?? "";
+      return pathSlug === slug || pathSlug.startsWith(`${slug}-`);
+    });
+    if (byTail) return byTail;
+  }
+
+  return null;
 }
 
 export async function loadDirectoryReviews(options?: {
@@ -292,6 +411,10 @@ export async function loadDirectoryReviews(options?: {
   cleanerId?: string;
   limit?: number;
   prefix?: string;
+  /** Single booking service_type, e.g. "regular". */
+  serviceType?: string;
+  /** Several service types (category pages). */
+  serviceTypes?: string[];
 }) {
   const client = directoryClient();
   if (!client) return null;
@@ -304,13 +427,23 @@ export async function loadDirectoryReviews(options?: {
         ? null
         : BIRMINGHAM_POSTCODES.map((item) => item.prefix);
 
+  const serviceTypes = options.serviceType
+    ? [options.serviceType]
+    : options.serviceTypes?.filter(Boolean);
+
+  // Over-fetch when filtering by service so a sparse category still fills the layout.
+  const fetchLimit =
+    serviceTypes?.length && !options?.cleanerId
+      ? Math.max((options?.limit ?? 6) * 4, 24)
+      : (options?.limit ?? 6);
+
   let query = client
     .from("marketing_reviews")
     .select(
-      "author_first_name, cleaner_id, comment, created_at, overall_score, postcode_prefix, service_type",
+      "id, author_first_name, cleaner_id, comment, created_at, overall_score, postcode_prefix, service_type",
     )
     .order("created_at", { ascending: false })
-    .limit(options?.limit ?? 6);
+    .limit(fetchLimit);
 
   if (options?.cleanerId) {
     query = query.eq("cleaner_id", options.cleanerId);
@@ -318,12 +451,27 @@ export async function loadDirectoryReviews(options?: {
     query = query.in("postcode_prefix", prefixes);
   }
 
+  if (serviceTypes?.length === 1) {
+    query = query.eq("service_type", serviceTypes[0]);
+  } else if (serviceTypes && serviceTypes.length > 1) {
+    query = query.in("service_type", serviceTypes);
+  }
+
   const { data, error } = await query;
 
   if (error || !data) return null;
-  return (data as ReviewRow[])
+  // Guard against legacy view joins that multiplied one rating per working area.
+  const seen = new Set<string>();
+  const unique = (data as ReviewRow[]).filter((row) => {
+    const key = row.id ?? `${row.comment}|${row.created_at}|${row.author_first_name}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return unique
     .map(toReview)
-    .filter((review): review is DirectoryReview => Boolean(review));
+    .filter((review): review is DirectoryReview => Boolean(review))
+    .slice(0, options?.limit ?? 6);
 }
 
 /**

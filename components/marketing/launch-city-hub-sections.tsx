@@ -14,6 +14,7 @@ import {
   LocationNearPlacePills,
   LocationReviews,
 } from "@/components/marketing/location-seo-sections";
+import { serviceTypesForCategory } from "@/lib/marketing/page-directory";
 import {
   loadDirectoryCleaners,
   loadDirectoryReviews,
@@ -30,11 +31,11 @@ import {
   BIRMINGHAM_AREAS,
   LAUNCH_CITY,
   publicMarketingServices,
-  serviceCardHref,
   type MarketingArea,
   type MarketingService,
 } from "@/lib/seo/marketing";
 import { coverageFocusSearch } from "@/lib/seo/birmingham-coverage";
+import type { ServiceCategory } from "@/types/customer";
 
 const PLACE = LAUNCH_CITY.name;
 
@@ -66,14 +67,6 @@ const SERVICES_ALREADY_ON_PAGE = {
   ],
 } as const;
 
-const CATEGORY_SERVICE_TITLE = {
-  commercial: "Choose your workspace cleaning service",
-  moving_home: "Choose your moving home cleaning service",
-  recovery: "Choose your recovery cleaning service",
-  residential: "Choose your house cleaning service",
-  short_term_rental: "Choose your short-let cleaning service",
-} as const;
-
 type HubCategory = keyof typeof SERVICES_ALREADY_ON_PAGE;
 
 /** Indexable canonical slugs only — never redirected twins. */
@@ -89,16 +82,6 @@ const DIFFERENT_SERVICE_ORDER = [
   "hospital-discharge-home-cleaning",
   "one-off-cleaning",
 ] as const;
-
-function categoryCleaningServices(categoryFocus: HubCategory) {
-  const bySlug = new Map(
-    publicMarketingServices().map((service) => [service.slug, service]),
-  );
-  return SERVICES_ALREADY_ON_PAGE[categoryFocus].flatMap((slug) => {
-    const service = bySlug.get(slug);
-    return service ? [service] : [];
-  });
-}
 
 function differentCleaningServices(
   categoryFocus?: HubCategory,
@@ -121,9 +104,10 @@ function differentCleaningServices(
 }
 
 export async function LaunchCityHubSections({
+  areaSlug,
   bookingHref,
   categoryFocus,
-  cleanerLimit = 12,
+  cleanerLimit = 24,
   serviceFocus,
   showAreaCards = true,
   showCategoryServices = false,
@@ -140,6 +124,7 @@ export async function LaunchCityHubSections({
   showNearbyTowns = false,
   surroundingLinks,
 }: {
+  areaSlug?: string;
   bookingHref: string;
   categoryFocus?: HubCategory;
   cleanerLimit?: number;
@@ -161,25 +146,39 @@ export async function LaunchCityHubSections({
   showNearbyTowns?: boolean;
   surroundingLinks?: Array<{ href: string; label: string }>;
 }) {
-  const liveCleaners = await loadDirectoryCleaners({
-    areaSlug: undefined,
+  const resolvedAreaSlug = areaSlug ?? priorityArea?.slug;
+  const categoryServiceTypes =
+    !serviceFocus && categoryFocus
+      ? serviceTypesForCategory(categoryFocus as ServiceCategory).map(String)
+      : undefined;
+
+  let liveCleaners = await loadDirectoryCleaners({
+    areaSlug: resolvedAreaSlug,
     limit: cleanerLimit,
     serviceType: serviceFocus?.value,
+    serviceTypes: categoryServiceTypes,
   });
+  let liveReviews = await loadDirectoryReviews({
+    areaSlug: resolvedAreaSlug,
+    limit: 40,
+    serviceType: serviceFocus?.value,
+    serviceTypes: categoryServiceTypes,
+  });
+  // Prefer scoped cleaners; fall back to place-wide cleaners only.
+  // Reviews stay scoped — House pages must not show Workspace/office quotes.
+  if (!(liveCleaners?.length) && (serviceFocus || categoryServiceTypes)) {
+    liveCleaners = await loadDirectoryCleaners({
+      areaSlug: resolvedAreaSlug,
+      limit: cleanerLimit,
+    });
+  }
   // Real, active cleaner profiles only. No invented fallback cleaners.
   const featured = liveCleaners ?? [];
-  const reviews = publishedReviews(await loadDirectoryReviews({ limit: 9 }), 9);
+  const reviews = publishedReviews(liveReviews, 40);
   const lookingFor = differentCleaningServices(
     categoryFocus,
     serviceFocus?.slug,
   );
-  const categoryServices =
-    showCategoryServices && categoryFocus
-      ? categoryCleaningServices(categoryFocus)
-      : [];
-  const categoryServiceTitle = categoryFocus
-    ? CATEGORY_SERVICE_TITLE[categoryFocus]
-    : null;
   const listNearbyTowns = showNearbyTowns || !placeLinks;
 
   const areasCoveredText = allAreasCovered?.length
@@ -188,32 +187,8 @@ export async function LaunchCityHubSections({
 
   return (
     <>
-      {categoryServiceTitle && categoryServices.length ? (
-        <BrandedSection>
-          <CategoryServicesCarousel
-            label="services"
-            title={
-              <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-                {categoryServiceTitle}
-              </h2>
-            }
-          >
-            {categoryServices.map((service) => (
-              <CategoryServiceCard
-                bookingHref={bookingHref}
-                href={
-                  placePath
-                    ? `${placePath}?service=${encodeURIComponent(service.slug)}`
-                    : serviceCardHref(service.slug)
-                }
-                image={marketingServiceCardImage(service)}
-                key={service.slug}
-                label={`${service.label} in ${place}`}
-                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
-              />
-            ))}
-          </CategoryServicesCarousel>
-        </BrandedSection>
+      {showCategoryServices ? (
+        <LocationReviews place={place} reviews={reviews} />
       ) : null}
 
       {showFeatured && featured.length ? (
@@ -249,7 +224,9 @@ export async function LaunchCityHubSections({
         </BrandedSection>
       ) : null}
 
-      {showReviews ? <LocationReviews place={place} reviews={reviews} /> : null}
+      {showReviews && !showCategoryServices ? (
+        <LocationReviews place={place} reviews={reviews} />
+      ) : null}
 
       {areasCoveredText ? (
         <BrandedSection tone="cream">

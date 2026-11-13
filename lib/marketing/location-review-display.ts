@@ -9,13 +9,17 @@ function parseLocationReviewAuthor(author: string) {
   return { area: null as string | null, name: author.trim() };
 }
 
-/** Maps directory / location SEO reviews into the landing carousel card shape. */
+/** Maps directory reviews into landing cards: stars, quote, name, service · place. */
 export function directoryReviewsToLandingReviews(
   reviews: DirectoryReview[],
 ): LandingReview[] {
   return reviews.map((review, index) => {
     const { area, name } = parseLocationReviewAuthor(review.author);
-    const detail = area ? `${review.service} · ${area}` : review.service;
+    const service = review.service?.trim() || null;
+    const detail =
+      service && area
+        ? `${service} · ${area}`
+        : service || area || "Mundoria customer";
 
     return {
       detail,

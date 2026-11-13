@@ -4,13 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
+import { BrandedSection } from "@/components/marketing/branded-page-sections";
+import {
+  FeaturedCleanerCards,
+  type FeaturedCleanerCardData,
+} from "@/components/marketing/featured-cleaner-cards";
 import { HeroReviewsLink } from "@/components/marketing/hero-reviews-link";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
+import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
 import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
 import { CategoryServicesCarousel } from "@/components/marketing/service-category/category-services-carousel";
 import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
+import type { LandingReview } from "@/lib/marketing/landing-reviews";
 
 const HERO_IMAGE = "/images/marketing/landing/commercial-hero.jpg";
 
@@ -43,8 +50,14 @@ const SERVICE_CARDS = [
 
 export function CommercialCleaningPage({
   bookingHref,
+  cleaners = [],
+  place = "Birmingham",
+  reviews = [],
 }: {
   bookingHref: string;
+  cleaners?: FeaturedCleanerCardData[];
+  place?: string;
+  reviews?: LandingReview[];
 }) {
   return (
     <>
@@ -131,6 +144,24 @@ export function CommercialCleaningPage({
           </CategoryServicesCarousel>
         </div>
       </section>
+
+      <ReviewsSection
+        heading={`Cleaning reviews in ${place}`}
+        reviews={reviews}
+      />
+
+      {cleaners.length ? (
+        <BrandedSection tone="cream">
+          <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+            Your next cleaner could be right here.
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
+            Find a vetted cleaner in Birmingham, with ratings from completed
+            visits.
+          </p>
+          <FeaturedCleanerCards bookingHref={bookingHref} cleaners={cleaners} />
+        </BrandedSection>
+      ) : null}
 
       <LocationStickyBookBar bookingHref={bookingHref} />
     </>

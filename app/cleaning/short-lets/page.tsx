@@ -4,6 +4,7 @@ import { CategoryMagLinks } from "@/components/marketing/category-mag-links";
 import { ShortLetsCleaningPage } from "@/components/marketing/short-lets/short-lets-cleaning-page";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { JsonLd } from "@/components/marketing/json-ld";
+import { loadPageDirectoryContent } from "@/lib/marketing/page-directory";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { organizationRef } from "@/lib/seo/structured-data";
@@ -18,11 +19,14 @@ export const metadata: Metadata = buildPageMetadata({
   title: "Airbnb & Short Lets Cleaning | Mundoria",
 });
 
-export default function ShortLetsCleaningRoute() {
+export default async function ShortLetsCleaningRoute() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured
     ? "/booking/new?category=short_term_rental&returnTo=/cleaning/short-lets"
     : "/setup";
+  const { cleaners, reviews } = await loadPageDirectoryContent({
+    category: "short_term_rental",
+  });
 
   return (
     <MarketingShell>
@@ -38,7 +42,11 @@ export default function ShortLetsCleaningRoute() {
           url: absoluteUrl("/cleaning/short-lets"),
         }}
       />
-      <ShortLetsCleaningPage bookingHref={bookingHref} />
+      <ShortLetsCleaningPage
+        bookingHref={bookingHref}
+        cleaners={cleaners}
+        reviews={reviews}
+      />
       <CategoryMagLinks category="short_term_rental" />
     </MarketingShell>
   );
