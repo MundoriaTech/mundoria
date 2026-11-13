@@ -158,7 +158,7 @@ export async function LaunchCityHubSections({
     serviceType: serviceFocus?.value,
     serviceTypes: categoryServiceTypes,
   });
-  let liveReviews = await loadDirectoryReviews({
+  const liveReviews = await loadDirectoryReviews({
     areaSlug: resolvedAreaSlug,
     limit: 40,
     serviceType: serviceFocus?.value,
