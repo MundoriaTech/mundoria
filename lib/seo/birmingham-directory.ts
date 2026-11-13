@@ -427,9 +427,9 @@ export async function loadDirectoryReviews(options?: {
         ? null
         : BIRMINGHAM_POSTCODES.map((item) => item.prefix);
 
-  const serviceTypes = options.serviceType
+  const serviceTypes = options?.serviceType
     ? [options.serviceType]
-    : options.serviceTypes?.filter(Boolean);
+    : options?.serviceTypes?.filter(Boolean);
 
   // Over-fetch when filtering by service so a sparse category still fills the layout.
   const fetchLimit =
