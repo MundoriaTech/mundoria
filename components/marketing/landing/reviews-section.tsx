@@ -212,9 +212,11 @@ function ReviewWindow({
 }
 
 export function ReviewsSection({
+  description,
   heading = "Cleaning reviews in Birmingham",
   reviews: ownReviews = [],
 }: {
+  description?: string;
   heading?: string;
   reviews?: LandingReview[];
 }) {
@@ -280,7 +282,12 @@ export function ReviewsSection({
           <h2 className="text-balance text-[1.65rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[1.9rem] lg:text-[2.1rem]">
             {heading}
           </h2>
-          <div className="mt-5 flex justify-center">
+          {description ? (
+            <p className="mt-3 text-base leading-7 text-[#5a5470]">
+              {description}
+            </p>
+          ) : null}
+          <div className={cn("flex justify-center", description ? "mt-6" : "mt-5")}>
             <GoogleReviewsButton />
           </div>
         </div>

@@ -6,17 +6,22 @@ import { BrandedCtaBand } from "@/components/marketing/branded-page-sections";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { LANDING_PURPLE } from "@/components/marketing/landing/landing-purple-field";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
+import { ReviewsSection } from "@/components/marketing/landing/reviews-section";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { houseCleaningFromLabel } from "@/lib/customer/published-pricing";
-import { GOOGLE_REVIEWS_LISTING_URL } from "@/lib/google/place-reviews";
+import { directoryReviewsToLandingReviews } from "@/lib/marketing/location-review-display";
 import {
   MUNDORIA_IDENTITY,
   companyRegistrationSentence,
 } from "@/lib/seo/identity";
 import { LAUNCH_CITY } from "@/lib/seo/marketing";
+import {
+  loadDirectoryReviews,
+  publishedReviews,
+} from "@/lib/seo/birmingham-directory";
 import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
 import { organizationRef, organizationSchema } from "@/lib/seo/structured-data";
 import { hasSupabasePublicConfig } from "@/lib/supabase/config";
@@ -61,7 +66,13 @@ const linkClass =
 export default async function AboutPage() {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
-  const from = houseCleaningFromLabel(await loadServicePricing());
+  const [from, liveReviews] = await Promise.all([
+    loadServicePricing().then(houseCleaningFromLabel),
+    loadDirectoryReviews({ limit: 40 }),
+  ]);
+  const reviews = directoryReviewsToLandingReviews(
+    publishedReviews(liveReviews, 40),
+  );
 
   return (
     <MarketingShell>
@@ -201,47 +212,11 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section
-        aria-labelledby="about-trust-heading"
-        className="relative overflow-hidden bg-[#1c133b] px-4 py-16 sm:px-8 sm:py-20"
-      >
-        <Image
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-35 mix-blend-soft-light"
-          fill
-          sizes="100vw"
-          src="/images/marketing/landing/hero-purple-texture.png"
-        />
-        <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center">
-          <Image
-            alt=""
-            className="h-20 w-20 rounded-full object-cover sm:h-24 sm:w-24"
-            height={512}
-            src="/images/marketing/icons/reliable.png"
-            width={512}
-          />
-          <h2
-            className="mt-6 text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-white sm:text-[2.15rem]"
-            id="about-trust-heading"
-          >
-            Reviews you can trust
-          </h2>
-          <p className="mt-4 max-w-xl text-base leading-7 text-white/80">
-            We only publish reviews written by customers after a completed
-            booking, and we never filter out critical ones. You can also read
-            what people say about Mundoria on Google.
-          </p>
-          <Link
-            className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-7 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f3eef8]"
-            href={GOOGLE_REVIEWS_LISTING_URL}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Read Google reviews
-          </Link>
-        </div>
-      </section>
+      <ReviewsSection
+        description="We only publish reviews written by customers after a completed booking, and we never filter out critical ones."
+        heading="Reviews you can trust"
+        reviews={reviews}
+      />
 
       <section
         aria-labelledby="about-contact-heading"
