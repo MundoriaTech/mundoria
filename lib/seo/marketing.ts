@@ -407,11 +407,11 @@ const BIRMINGHAM_POSTCODE_ZONE_ORDER: BirminghamPostcodeDistrict["zoneId"][] = [
 
 /** Districts cleaners can choose and customers can be matched into. */
 export const BIRMINGHAM_POSTCODES: readonly BirminghamPostcodeDistrict[] = [
-  // Birmingham City Centre
+  // Central Birmingham (no separate City Centre place page)
   { areaSlug: "jewellery-quarter", name: "Jewellery Quarter", prefix: "B1", zoneId: "central" },
-  { areaSlug: "birmingham-city-centre", name: "City Centre", prefix: "B2", zoneId: "central" },
+  { areaSlug: "birmingham", name: "City Centre", prefix: "B2", zoneId: "central" },
   { areaSlug: "jewellery-quarter", name: "Jewellery Quarter", prefix: "B3", zoneId: "central" },
-  { areaSlug: "birmingham-city-centre", name: "City Centre", prefix: "B4", zoneId: "central" },
+  { areaSlug: "birmingham", name: "City Centre", prefix: "B4", zoneId: "central" },
   { areaSlug: "digbeth", name: "Digbeth & Highgate", prefix: "B5", zoneId: "central" },
   // Edgbaston & Harborne
   { areaSlug: "edgbaston", name: "Edgbaston", prefix: "B15", zoneId: "west" },
@@ -540,10 +540,10 @@ export function districtFromAreaParam(param: string) {
   if (district.areaSlug === slug) {
     return { district, legacy: false as const };
   }
-  // Pre-rename City Centre district URLs used areaSlug `city-centre`.
+  // Legacy City Centre district URLs used `city-centre` / `birmingham-city-centre`.
   if (
-    slug === "city-centre" &&
-    district.areaSlug === "birmingham-city-centre"
+    (slug === "city-centre" || slug === "birmingham-city-centre") &&
+    district.areaSlug === "birmingham"
   ) {
     return { district, legacy: true as const };
   }

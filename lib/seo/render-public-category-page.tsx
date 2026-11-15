@@ -73,9 +73,6 @@ import type { ServiceCategory, ServiceType } from "@/types/customer";
 
 type Cat = Exclude<ServiceCategory, "exterior">;
 
-const LEGACY_CITY_CENTRE_SLUG = "city-centre";
-const CITY_CENTRE_PLACE_SLUG = "birmingham-city-centre";
-
 const ONPAGE_PATH: Record<Cat, string> = {
   residential: "/house-cleaning",
   commercial: "/workspace-cleaning",
@@ -84,16 +81,45 @@ const ONPAGE_PATH: Record<Cat, string> = {
   recovery: "/recovery-cleaning",
 };
 
+function categoryHubPath(category: Cat): string {
+  return category === "residential"
+    ? categoryRootPath("residential")
+    : categoryCityPath(category);
+}
+
+/** Redirect a place slug (after SEO fold) to the live public path. */
+function redirectCanonicalPlace(
+  category: Cat,
+  placeSlug: string,
+  serviceType?: ServiceType,
+): never {
+  const target = SEO_AREA_REDIRECTS[placeSlug] ?? placeSlug;
+  if (target === LAUNCH_CITY.slug) {
+    permanentRedirect(
+      serviceType
+        ? serviceCityPath(category, serviceType)
+        : categoryHubPath(category),
+    );
+  }
+  permanentRedirect(
+    serviceType
+      ? servicePlacePath(category, serviceType, target)
+      : categoryPlacePath(category, target),
+  );
+}
+
 function redirectPostcodeDistrict(areaSlug: string, category: Cat): never {
-  const resolved =
-    areaSlug === LEGACY_CITY_CENTRE_SLUG ? CITY_CENTRE_PLACE_SLUG : areaSlug;
+  const resolved = SEO_AREA_REDIRECTS[areaSlug] ?? areaSlug;
+  if (resolved === LAUNCH_CITY.slug) {
+    permanentRedirect(categoryHubPath(category));
+  }
   if (
     birminghamAreaBySlug(resolved) ||
     birminghamCoveragePlaceBySlug(resolved)
   ) {
     permanentRedirect(categoryPlacePath(category, resolved));
   }
-  permanentRedirect(categoryCityPath(category));
+  permanentRedirect(categoryHubPath(category));
 }
 
 export async function publicCategoryMetadata(
@@ -171,13 +197,8 @@ export async function publicCategoryMetadata(
   if (district) {
     redirectPostcodeDistrict(district.district.areaSlug, category);
   }
-  if (placeSlug === LEGACY_CITY_CENTRE_SLUG) {
-    permanentRedirect(categoryPlacePath(category, CITY_CENTRE_PLACE_SLUG));
-  }
   if (placeSlug in SEO_AREA_REDIRECTS) {
-    permanentRedirect(
-      categoryPlacePath(category, SEO_AREA_REDIRECTS[placeSlug]!),
-    );
+    redirectCanonicalPlace(category, placeSlug);
   }
 
   const area = birminghamAreaBySlug(placeSlug);
@@ -259,20 +280,8 @@ export async function renderPublicCategoryPage(
   if (district) {
     redirectPostcodeDistrict(district.district.areaSlug, category);
   }
-  if (placeSlug === LEGACY_CITY_CENTRE_SLUG) {
-    permanentRedirect(
-      parsed.serviceType
-        ? servicePlacePath(category, parsed.serviceType, CITY_CENTRE_PLACE_SLUG)
-        : categoryPlacePath(category, CITY_CENTRE_PLACE_SLUG),
-    );
-  }
   if (placeSlug in SEO_AREA_REDIRECTS) {
-    const target = SEO_AREA_REDIRECTS[placeSlug]!;
-    permanentRedirect(
-      parsed.serviceType
-        ? servicePlacePath(category, parsed.serviceType, target)
-        : categoryPlacePath(category, target),
-    );
+    redirectCanonicalPlace(category, placeSlug, parsed.serviceType);
   }
 
   return renderPlacePage(category, parsed, configured);

@@ -56,8 +56,8 @@ export function locationFaqContext(place: string, path: string): LocationFaqCont
   const area = birminghamAreaBySlug(slug);
   if (area?.faqs.length) return { kind: "area", place, local: area.faqs };
 
-  // City Centre, Erdington and Sutton Coldfield are place pages that are
-  // also the hub for their zone.
+  // Erdington and Sutton Coldfield are place pages that are also the hub
+  // for their zone. Central Birmingham folds into the city hub.
   const namedZone = BIRMINGHAM_COVERAGE_ZONES.find(
     (zone) =>
       zone.id !== BIRMINGHAM_NEARBY_ZONE_ID &&
@@ -304,7 +304,7 @@ const CITY_FAQS: LocationFaq[] = [
   {
     question: "Which parts of Birmingham do you cover?",
     answer: P(
-      "Mundoria takes bookings across Birmingham, grouped into nine areas: City Centre, Edgbaston & Harborne, Selly Oak & Bournville, Moseley & Kings Heath, Aston & Handsworth, Erdington, Alum Rock & Hodge Hill, Yardley & Sheldon, and Sutton Coldfield.",
+      "Mundoria takes bookings across Birmingham, grouped into nine areas: Central Birmingham, Edgbaston & Harborne, Selly Oak & Bournville, Moseley & Kings Heath, Aston & Handsworth, Erdington, Alum Rock & Hodge Hill, Yardley & Sheldon, and Sutton Coldfield.",
       "Each area page lists the neighbourhoods inside it. Matching works from your full postcode, so enter your address when you book.",
     ),
   },

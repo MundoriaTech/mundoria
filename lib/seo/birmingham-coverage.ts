@@ -29,10 +29,9 @@ function places(...labels: string[]): CoverageArea[] {
 export const BIRMINGHAM_COVERAGE_ZONES: readonly BirminghamCoverageZone[] = [
   {
     id: "central",
-    label: "Birmingham City Centre",
-    title: "Birmingham City Centre & Central Birmingham",
+    label: "Central Birmingham",
+    title: "Central Birmingham",
     areas: places(
-      "Birmingham City Centre",
       "Jewellery Quarter",
       "Digbeth",
       "Eastside",
@@ -409,7 +408,11 @@ export function coverageZoneHubSlug(zone: BirminghamCoverageZone) {
 
 /** Town zones with compound labels that need their own hub page. */
 export function birminghamCompoundZones() {
-  return birminghamTownZones().filter((zone) => !zoneMatchesExistingPlace(zone));
+  return birminghamTownZones().filter(
+    (zone) =>
+      // Central folds into the Birmingham city hub — not its own place page.
+      zone.id !== "central" && !zoneMatchesExistingPlace(zone),
+  );
 }
 
 export function birminghamCompoundZoneIds() {
@@ -430,7 +433,11 @@ export function birminghamCoverageZoneByHubSlug(slug: string) {
  */
 export function coverageZonePath(zoneId: string): string {
   const zone = birminghamCoverageZoneById(zoneId);
-  if (!zone || zone.id === BIRMINGHAM_NEARBY_ZONE_ID) {
+  if (
+    !zone ||
+    zone.id === BIRMINGHAM_NEARBY_ZONE_ID ||
+    zone.id === "central"
+  ) {
     return cleanerPlacePath(LAUNCH_CITY.slug);
   }
   const matchingPlace = birminghamCoveragePlaces().find(

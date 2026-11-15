@@ -188,6 +188,9 @@ export function servicePlacePath(
   placeSlug: string,
   citySlug = LAUNCH_CITY_SLUG,
 ): string {
+  if (placeSlug === citySlug) {
+    return serviceCityPath(category, serviceType, citySlug);
+  }
   if (STANDALONE_TOWN_SLUGS.has(placeSlug)) {
     return `${servicePublicPath(category, serviceType)}/${placeSlug}`;
   }

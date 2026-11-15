@@ -32,25 +32,28 @@ export const SEO_SERVICE_REDIRECTS: Record<string, string> = {
  * Thin / duplicate area pages redirect to these high-authority hubs.
  */
 export const SEO_AREA_REDIRECTS: Record<string, string> = {
-  // Central Hub
-  digbeth: "birmingham-city-centre",
-  eastside: "birmingham-city-centre",
-  southside: "birmingham-city-centre",
-  "chinese-quarter": "birmingham-city-centre",
-  "gay-village": "birmingham-city-centre",
-  "colmore-business-district": "birmingham-city-centre",
-  brindleyplace: "birmingham-city-centre",
-  "broad-street": "birmingham-city-centre",
-  westside: "birmingham-city-centre",
-  ladywood: "birmingham-city-centre",
-  "lee-bank": "birmingham-city-centre",
-  "park-central": "birmingham-city-centre",
-  "attwood-green": "birmingham-city-centre",
-  highgate: "birmingham-city-centre",
-  bordesley: "birmingham-city-centre",
-  "five-ways": "birmingham-city-centre",
-  "gun-quarter": "birmingham-city-centre",
-  newtown: "birmingham-city-centre",
+  // Central Hub — no separate City Centre page; fold into Birmingham hub
+  "birmingham-city-centre": "birmingham",
+  "city-centre": "birmingham",
+  "central-birmingham": "birmingham",
+  digbeth: "birmingham",
+  eastside: "birmingham",
+  southside: "birmingham",
+  "chinese-quarter": "birmingham",
+  "gay-village": "birmingham",
+  "colmore-business-district": "birmingham",
+  brindleyplace: "birmingham",
+  "broad-street": "birmingham",
+  westside: "birmingham",
+  ladywood: "birmingham",
+  "lee-bank": "birmingham",
+  "park-central": "birmingham",
+  "attwood-green": "birmingham",
+  highgate: "birmingham",
+  bordesley: "birmingham",
+  "five-ways": "birmingham",
+  "gun-quarter": "birmingham",
+  newtown: "birmingham",
 
   // West Hub (Edgbaston / Harborne)
   "north-edgbaston": "edgbaston-and-harborne",
@@ -225,7 +228,7 @@ export function isIndexableAreaSlug(slug: string): boolean {
 
 /** Path for a marketing area slug after canonicalisation. */
 export function canonicalAreaPath(slug: string): string {
-  return cleanerPlacePath(SEO_AREA_REDIRECTS[slug] ?? slug);
+  return cleanerPlacePath(slug);
 }
 
 /**
@@ -233,7 +236,7 @@ export function canonicalAreaPath(slug: string): string {
  * Cleaner *profiles* stay under `/cleaners/birmingham/[area]/profile/[cleaner]`.
  */
 export function cleanerPlacePath(areaSlug: string): string {
-  return houseCleaningPlacePath(areaSlug);
+  return houseCleaningPlacePath(SEO_AREA_REDIRECTS[areaSlug] ?? areaSlug);
 }
 
 export function isStandaloneTownSlug(slug: string): boolean {

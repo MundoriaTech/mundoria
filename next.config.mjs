@@ -86,6 +86,37 @@ const nextConfig = {
         destination: "/house-cleaning",
         permanent: true,
       },
+      // City Centre is not a separate location — fold into Birmingham hub
+      {
+        source: "/house-cleaning/birmingham/birmingham-city-centre",
+        destination: "/house-cleaning",
+        permanent: true,
+      },
+      {
+        source: "/house-cleaning/birmingham/city-centre",
+        destination: "/house-cleaning",
+        permanent: true,
+      },
+      {
+        source: "/:category(workspace-cleaning|moving-cleaning|airbnb-cleaning|recovery-cleaning)/birmingham/birmingham-city-centre",
+        destination: "/:category/birmingham",
+        permanent: true,
+      },
+      {
+        source: "/:category(workspace-cleaning|moving-cleaning|airbnb-cleaning|recovery-cleaning)/birmingham/city-centre",
+        destination: "/:category/birmingham",
+        permanent: true,
+      },
+      {
+        source: "/cleaners/birmingham/birmingham-city-centre",
+        destination: "/house-cleaning",
+        permanent: true,
+      },
+      {
+        source: "/cleaners/birmingham/city-centre",
+        destination: "/house-cleaning",
+        permanent: true,
+      },
       // House cleaners Birmingham hub → house cleaning
       {
         source: "/cleaners/birmingham",

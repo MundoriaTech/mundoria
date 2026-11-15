@@ -9,20 +9,16 @@ function parseLocationReviewAuthor(author: string) {
   return { area: null as string | null, name: author.trim() };
 }
 
-/** Maps directory reviews into landing cards: stars, quote, name, service · place. */
+/** Maps directory reviews into landing cards: stars, quote, name, service. */
 export function directoryReviewsToLandingReviews(
   reviews: DirectoryReview[],
 ): LandingReview[] {
   return reviews.map((review, index) => {
-    const { area, name } = parseLocationReviewAuthor(review.author);
+    const { name } = parseLocationReviewAuthor(review.author);
     const service = review.service?.trim() || null;
-    const detail =
-      service && area
-        ? `${service} · ${area}`
-        : service || area || "Mundoria customer";
 
     return {
-      detail,
+      detail: service || "Mundoria customer",
       id: `location-review-${index}-${review.body.slice(0, 16).replace(/\s+/g, "-")}`,
       name,
       quote: review.body,
