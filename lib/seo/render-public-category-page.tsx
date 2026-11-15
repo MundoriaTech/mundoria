@@ -130,16 +130,18 @@ export async function publicCategoryMetadata(
     (!parsed.placeSlug || parsed.placeSlug === LAUNCH_CITY.slug) &&
     !parsed.serviceType
   ) {
+    // House cleaning city hub is the category root.
+    if (category === "residential") {
+      permanentRedirect(categoryRootPath("residential"));
+    }
     const title =
-      category === "residential"
-        ? "House cleaning in Birmingham"
-        : category === "commercial"
-          ? "Workspace cleaning in Birmingham"
-          : category === "moving_home"
-            ? "Moving home cleaning in Birmingham"
-            : category === "short_term_rental"
-              ? "Airbnb cleaning in Birmingham"
-              : "Recovery cleaning in Birmingham";
+      category === "commercial"
+        ? "Workspace cleaning in Birmingham"
+        : category === "moving_home"
+          ? "Moving home cleaning in Birmingham"
+          : category === "short_term_rental"
+            ? "Airbnb cleaning in Birmingham"
+            : "Recovery cleaning in Birmingham";
     return buildPageMetadata({
       description: `${title}. Vetted independent cleaners, house cleaning from ${from}. See the price before you book.`,
       path: categoryCityPath(category),
@@ -236,6 +238,9 @@ export async function renderPublicCategoryPage(
     (!parsed.placeSlug || parsed.placeSlug === LAUNCH_CITY.slug) &&
     !parsed.serviceType
   ) {
+    if (category === "residential") {
+      permanentRedirect(categoryRootPath("residential"));
+    }
     return renderCityHub(category, configured);
   }
 
@@ -309,9 +314,15 @@ async function renderCategoryHub(category: Cat, configured: boolean) {
           <LaunchCityHubSections
             bookingHref={bookingHref}
             categoryFocus="residential"
-            showAreaCards={false}
-            showFeatured={false}
-            showReviews={false}
+            cleanerLimit={18}
+            placePath={path}
+            showAreaCards
+          />
+          <BrandedCtaBand
+            body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."
+            href={bookingHref}
+            label="Book house cleaning"
+            title="Ready to book in Birmingham?"
           />
         </BrandedPageWash>
       </MarketingShell>

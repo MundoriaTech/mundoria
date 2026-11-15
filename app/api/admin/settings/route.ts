@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       "/recovery-cleaning",
       "/moving-cleaning",
       "/airbnb-cleaning",
-      "/house-cleaning/birmingham",
+      "/house-cleaning",
       "/faq",
       "/llms.txt",
     ]) {

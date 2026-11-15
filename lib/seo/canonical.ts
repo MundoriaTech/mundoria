@@ -261,7 +261,12 @@ export function canonicalInternalHref(href: string): string {
     return `${canonicalCleaningPath(service[1]!)}${suffix}`;
   }
 
-  if (path === "/house-cleaning/birmingham" || path === "/house-cleaning/birmingham/") {
+  if (
+    path === "/house-cleaning/birmingham" ||
+    path === "/house-cleaning/birmingham/" ||
+    path === "/cleaners/birmingham" ||
+    path === "/cleaners/birmingham/"
+  ) {
     return `${houseCleaningCityPath()}${suffix}`;
   }
 

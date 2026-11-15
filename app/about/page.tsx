@@ -200,7 +200,7 @@ export default async function AboutPage() {
 
           <p className="mt-12 text-center text-sm leading-6 text-[#5a5470]">
             Browse{" "}
-            <Link className={linkClass} href="/house-cleaning/birmingham">
+            <Link className={linkClass} href="/house-cleaning">
               areas we cover
             </Link>{" "}
             and{" "}

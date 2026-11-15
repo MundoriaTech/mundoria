@@ -80,20 +80,26 @@ const nextConfig = {
         destination: "/cleaning/:slug",
         permanent: true,
       },
-      // House cleaners Birmingham hub → house cleaning Birmingham
+      // City hub is the category root — no /house-cleaning/birmingham twin
+      {
+        source: "/house-cleaning/birmingham",
+        destination: "/house-cleaning",
+        permanent: true,
+      },
+      // House cleaners Birmingham hub → house cleaning
       {
         source: "/cleaners/birmingham",
-        destination: "/house-cleaning/birmingham",
+        destination: "/house-cleaning",
         permanent: true,
       },
       {
         source: "/cleaners/birmingham/wider/:zone",
-        destination: "/house-cleaning/birmingham",
+        destination: "/house-cleaning",
         permanent: true,
       },
       {
         source: "/cleaners/birmingham/birmingham",
-        destination: "/house-cleaning/birmingham",
+        destination: "/house-cleaning",
         permanent: true,
       },
       {

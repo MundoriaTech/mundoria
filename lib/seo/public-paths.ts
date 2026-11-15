@@ -164,6 +164,10 @@ export function categoryPlacePath(
   placeSlug: string,
   citySlug = LAUNCH_CITY_SLUG,
 ): string {
+  // House cleaning city hub lives at the category root (no /birmingham twin).
+  if (category === "residential" && placeSlug === citySlug) {
+    return categoryRootPath(category);
+  }
   if (STANDALONE_TOWN_SLUGS.has(placeSlug) || placeSlug === citySlug) {
     return `${categoryRootPath(category)}/${placeSlug}`;
   }
@@ -190,9 +194,12 @@ export function servicePlacePath(
   return `${servicePublicPath(category, serviceType)}/${citySlug}/${placeSlug}`;
 }
 
-/** House-cleaning Birmingham hub (merged former `/cleaners/birmingham`). */
-export function houseCleaningCityPath(citySlug = LAUNCH_CITY_SLUG): string {
-  return categoryCityPath("residential", citySlug);
+/**
+ * House-cleaning city hub — same as the category root.
+ * `/house-cleaning/birmingham` redirects here; areas stay under `/house-cleaning/birmingham/{area}`.
+ */
+export function houseCleaningCityPath(_citySlug = LAUNCH_CITY_SLUG): string {
+  return categoryRootPath("residential");
 }
 
 export function houseCleaningPlacePath(placeSlug: string): string {
