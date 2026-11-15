@@ -201,7 +201,7 @@ export function servicePlacePath(
  * House-cleaning city hub — same as the category root.
  * `/house-cleaning/birmingham` redirects here; areas stay under `/house-cleaning/birmingham/{area}`.
  */
-export function houseCleaningCityPath(_citySlug = LAUNCH_CITY_SLUG): string {
+export function houseCleaningCityPath(): string {
   return categoryRootPath("residential");
 }
 
