@@ -143,7 +143,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "Yes. Choose the service, select a flat as the property type and give the number of bedrooms and bathrooms so the time estimate fits the space.",
         "Apartment cleaning covers the same rooms as a house clean. If the flat is a short-let between guests, book short-let cleaning instead so the turnaround is planned around check-out and check-in.",
       ),
-      links: [{ href: "/cleaning/residential", label: "House and flat cleaning" }],
+      links: [{ href: "/house-cleaning", label: "House and flat cleaning" }],
     },
     {
       question: "How does the cleaner get into a building with a concierge or intercom?",
@@ -161,7 +161,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "Yes. Choose regular cleaning weekly or fortnightly, and you can ask for the same cleaner on later visits.",
         "Mundoria tries to keep the same person where possible, but it cannot be guaranteed. When your usual cleaner is away, a suitable replacement is looked for, and you can stop future visits at any time without a minimum term.",
       ),
-      links: [{ href: "/cleaning/regular-cleaning", label: "Regular cleaning" }],
+      links: [{ href: "/house-cleaning/regular", label: "Regular cleaning" }],
     },
     {
       question: "Can an agent hand over keys for an end-of-tenancy clean in Harborne?",
@@ -169,7 +169,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "Yes. Book end of tenancy cleaning and put the agent's details in the access instructions, including where keys are collected and returned.",
         "Make sure the agent knows the date and has agreed to release the keys to the cleaner. Mundoria does not hold customer keys itself.",
       ),
-      links: [{ href: "/cleaning/end-of-tenancy-cleaning", label: "End of tenancy cleaning" }],
+      links: [{ href: "/moving-cleaning/end-of-tenancy", label: "End of tenancy cleaning" }],
     },
   ],
   "south-west": [
@@ -179,7 +179,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "Yes. Book end of tenancy cleaning for the whole property and give the number of bedrooms, bathrooms and shared rooms so the time estimate fits.",
         "Whoever books needs authority to arrange the clean, such as the landlord, the letting agent or the tenants leaving together. Agree the date with everyone moving out so rooms are empty when the cleaner arrives.",
       ),
-      links: [{ href: "/cleaning/end-of-tenancy-cleaning", label: "End of tenancy cleaning" }],
+      links: [{ href: "/moving-cleaning/end-of-tenancy", label: "End of tenancy cleaning" }],
     },
     {
       question: "In a shared house, which rooms will the cleaner go into?",
@@ -197,8 +197,8 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "If the home has not been cleaned properly for a while, start with a deep clean, then move to regular visits to keep it there.",
       ),
       links: [
-        { href: "/cleaning/regular-cleaning", label: "Regular cleaning" },
-        { href: "/cleaning/deep-cleaning", label: "Deep cleaning" },
+        { href: "/house-cleaning/regular", label: "Regular cleaning" },
+        { href: "/house-cleaning/deep", label: "Deep cleaning" },
       ],
     },
     {
@@ -216,7 +216,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "Yes. Book the clean for the shared areas, such as the kitchen, bathrooms, hallways and stairs, and list the private rooms the cleaner must not enter.",
         "The person booking needs authority over those shared areas, and the people living there should know when the clean is happening.",
       ),
-      links: [{ href: "/cleaning/communal-area-cleaning", label: "Communal area cleaning" }],
+      links: [{ href: "/workspace-cleaning/communal-areas", label: "Communal area cleaning" }],
     },
     {
       question: "How should I arrange access when several people live at the property?",
@@ -268,7 +268,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "They can be on the same day or different days, depending on when you have the keys for each property.",
       ),
       links: [
-        { href: "/cleaning/move-in-move-out-cleaning", label: "Move-in and move-out cleaning" },
+        { href: "/moving-cleaning/move-in-move-out", label: "Move-in and move-out cleaning" },
       ],
     },
     {
@@ -286,7 +286,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "Yes. The booking estimates the hours from the bedrooms, bathrooms and condition you enter, and the price you see reflects those hours.",
         "For a larger home that has not had a thorough clean for a while, a deep clean is the better starting point before regular visits.",
       ),
-      links: [{ href: "/cleaning/deep-cleaning", label: "Deep cleaning" }],
+      links: [{ href: "/house-cleaning/deep", label: "Deep cleaning" }],
     },
     {
       question: "Can I have the same cleaner for recurring visits in Sutton Coldfield?",
@@ -294,7 +294,7 @@ const ZONE_FAQS: Record<string, LocationFaq[]> = {
         "You can ask for the same cleaner on regular weekly or fortnightly visits, and Mundoria tries to keep that continuity.",
         "It cannot be guaranteed every time. When your usual cleaner is away, a suitable replacement is looked for.",
       ),
-      links: [{ href: "/cleaning/regular-cleaning", label: "Regular cleaning" }],
+      links: [{ href: "/house-cleaning/regular", label: "Regular cleaning" }],
     },
   ],
 };

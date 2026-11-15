@@ -70,15 +70,18 @@ export async function POST(request: Request) {
     for (const path of [
       "/",
       "/cleaning",
-      "/cleaning/residential",
-      "/cleaning/commercial",
-      "/cleaning/recovery",
+      "/house-cleaning",
+      "/workspace-cleaning",
+      "/recovery-cleaning",
+      "/moving-cleaning",
+      "/airbnb-cleaning",
+      "/house-cleaning/birmingham",
       "/faq",
       "/llms.txt",
-      "/cleaners/birmingham",
     ]) {
       revalidatePath(path);
     }
+    revalidatePath("/house-cleaning", "layout");
     revalidatePath("/cleaning", "layout");
   }
 

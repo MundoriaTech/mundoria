@@ -60,10 +60,13 @@ function bookingHeaderCategoryShortLabel(category: ServiceCategory | null) {
 
 export function BookingCategoryMenu({
   disabled = false,
+  /** When true, show the current category as a label only (no switcher). */
+  locked = false,
   onSelect,
   selected,
 }: {
   disabled?: boolean;
+  locked?: boolean;
   onSelect: (category: ServiceCategory) => void;
   selected: ServiceCategory | null;
 }) {
@@ -76,7 +79,11 @@ export function BookingCategoryMenu({
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (locked) setOpen(false);
+  }, [locked]);
+
+  useEffect(() => {
+    if (!open || locked) return;
     function onPointerDown(event: MouseEvent | TouchEvent) {
       const target = event.target as Node | null;
       if (target && rootRef.current?.contains(target)) return;
@@ -93,7 +100,21 @@ export function BookingCategoryMenu({
       document.removeEventListener("touchstart", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, locked]);
+
+  if (locked) {
+    return (
+      <p
+        aria-label={`Cleaning type: ${triggerLabel}`}
+        className="inline-flex h-9 items-center px-2 text-sm font-semibold text-[#1c133b] sm:h-10 sm:px-2.5"
+      >
+        <span className="sm:hidden">
+          {bookingHeaderCategoryShortLabel(selected)}
+        </span>
+        <span className="hidden sm:inline">{triggerLabel}</span>
+      </p>
+    );
+  }
 
   return (
     <div className="relative" ref={rootRef}>

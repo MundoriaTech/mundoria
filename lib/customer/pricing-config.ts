@@ -338,9 +338,9 @@ export const ADMIN_PRICING_SERVICES: Array<{
 ];
 
 export const ADMIN_FLAT_ADD_ONS: Array<{ id: string; label: string }> = [
-  { id: "inside_cabinets", label: "Inside cabinets" },
-  { id: "balcony_patio", label: "Balcony or patio" },
-  { id: "extra_bathroom_detail", label: "Extra bathroom detail" },
+  { id: "inside_cabinets", label: "Cabinet cleaning" },
+  { id: "balcony_patio", label: "Patio cleaning" },
+  { id: "extra_bathroom_detail", label: "Bathroom cleaning" },
   { id: "linen_change", label: "Linen change" },
   { id: "recovery_priority", label: "Recovery priority care" },
 ];

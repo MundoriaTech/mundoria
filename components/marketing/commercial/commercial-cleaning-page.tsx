@@ -23,25 +23,25 @@ const HERO_IMAGE = "/images/marketing/landing/commercial-hero.jpg";
 
 const SERVICE_CARDS = [
   {
-    href: "/cleaning/office-cleaning",
+    href: "/workspace-cleaning/office",
     image: "/images/marketing/landing/commercial-office.png",
     label: "Office Cleaning",
     objectPosition: "object-center",
   },
   {
-    href: "/cleaning/retail-and-hospitality-cleaning",
+    href: "/workspace-cleaning/retail-and-hospitality",
     image: "/images/marketing/landing/commercial-retail.png",
     label: "Retail & Hospitality Cleaning",
     objectPosition: "object-center",
   },
   {
-    href: "/cleaning/educational-facility-cleaning",
+    href: "/workspace-cleaning/education",
     image: "/images/marketing/landing/commercial-education.png",
     label: "Educational Facility Cleaning",
     objectPosition: "object-center",
   },
   {
-    href: "/cleaning/communal-area-cleaning",
+    href: "/workspace-cleaning/communal-areas",
     image: "/images/marketing/landing/commercial-communal.png",
     label: "Communal Area Cleaning",
     objectPosition: "object-center",

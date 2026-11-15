@@ -1,58 +1,75 @@
 import { withSentryConfig } from "@sentry/nextjs";
 
 /**
- * Retired service slugs → their canonical page.
- * Keep in sync with SEO_SERVICE_REDIRECTS in lib/seo/canonical.ts.
+ * Legacy `/cleaning/{slug}` → new public path (no `/cleaning` prefix).
+ * Keep in sync with LEGACY_CLEANING_PATHS in lib/seo/public-paths.ts.
  */
-const RETIRED_SERVICE_SLUGS = {
-  "move-out-cleaning": "move-in-move-out-cleaning",
-  "holiday-let-cleaning": "airbnb-shortlet-cleaning",
-  "postpartum-cleaning": "pregnancy-and-postpartum-cleaning",
-  "illness-and-injury-recovery": "/cleaning/recovery",
-  "injury-recovery-cleaning": "/cleaning/recovery",
-  "same-day-cleaning": "one-off-cleaning",
+const LEGACY_CLEANING_PATHS = {
+  residential: "/house-cleaning",
+  commercial: "/workspace-cleaning",
+  "short-lets": "/airbnb-cleaning",
+  "moving-home": "/moving-cleaning",
+  recovery: "/recovery-cleaning",
+  "regular-cleaning": "/house-cleaning/regular",
+  "one-off-cleaning": "/house-cleaning/one-off",
+  "deep-cleaning": "/house-cleaning/deep",
+  "same-day-cleaning": "/house-cleaning/one-off",
+  "move-in-move-out-cleaning": "/moving-cleaning/move-in-move-out",
+  "move-out-cleaning": "/moving-cleaning/move-in-move-out",
+  "end-of-tenancy-cleaning": "/moving-cleaning/end-of-tenancy",
+  "airbnb-shortlet-cleaning": "/airbnb-cleaning/shortlet",
+  "holiday-let-cleaning": "/airbnb-cleaning/shortlet",
+  "serviced-accommodation-cleaning": "/airbnb-cleaning/serviced",
+  "office-cleaning": "/workspace-cleaning/office",
+  "retail-and-hospitality-cleaning":
+    "/workspace-cleaning/retail-and-hospitality",
+  "educational-facility-cleaning": "/workspace-cleaning/education",
+  "communal-area-cleaning": "/workspace-cleaning/communal-areas",
+  "pregnancy-and-postpartum-cleaning":
+    "/recovery-cleaning/pregnancy-and-postpartum",
+  "postpartum-cleaning": "/recovery-cleaning/pregnancy-and-postpartum",
+  "hospital-discharge-home-cleaning": "/recovery-cleaning/hospital-discharge",
+  "bereavement-support-cleaning": "/recovery-cleaning/bereavement-support",
+  "illness-and-injury-recovery": "/recovery-cleaning",
+  "injury-recovery-cleaning": "/recovery-cleaning",
 };
+
+const STANDALONE_TOWNS =
+  "solihull|shirley|olton|walsall|west-bromwich|halesowen|cradley-heath|coleshill|water-orton|bromsgrove|smethwick|oldbury|rowley-regis|aldridge|knowle|dorridge|wythall|worcester|alvechurch|barnt-green|marston-green|chelmsley-wood|castle-bromwich|bearwood";
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   async redirects() {
-    // Every retired URL resolves to its live page in ONE hop (audit, Nov 2026).
-    const retiredServiceVariants = Object.entries(RETIRED_SERVICE_SLUGS).flatMap(
-      ([from, to]) => {
-        const destination = to.startsWith("/") ? to : `/cleaning/${to}`;
-        const guideDestination = to.startsWith("/")
-          ? to
-          : `/cleaning/${to}/guides/:topic`;
-        return [
-          { source: `/cleaning/${from}`, destination, permanent: true },
-          {
-            source: `/cleaning/${from}/birmingham`,
-            destination,
-            permanent: true,
-          },
-          {
-            source: `/cleaning/${from}/birmingham/wider/:zone`,
-            destination,
-            permanent: true,
-          },
-          {
-            source: `/cleaning/${from}/guides/:topic(price|included|booking)`,
-            destination: guideDestination,
-            permanent: true,
-          },
-        ];
-      },
+    const legacyCleaningVariants = Object.entries(LEGACY_CLEANING_PATHS).flatMap(
+      ([from, to]) => [
+        { source: `/cleaning/${from}`, destination: to, permanent: true },
+        {
+          source: `/cleaning/${from}/birmingham`,
+          destination: `${to}/birmingham`,
+          permanent: true,
+        },
+        {
+          source: `/cleaning/${from}/birmingham/:area`,
+          destination: `${to}/birmingham/:area`,
+          permanent: true,
+        },
+        {
+          source: `/cleaning/${from}/birmingham/wider/:zone`,
+          destination: `${to}/birmingham`,
+          permanent: true,
+        },
+        {
+          source: `/cleaning/${from}/guides/:topic(price|included|booking)`,
+          destination: to,
+          permanent: true,
+        },
+      ],
     );
+
     return [
-      // Duplicate service intents → one strong page each (incl. their old sub-URLs)
-      ...retiredServiceVariants,
-      // Wider-area hubs overlapped local place pages
-      {
-        source: "/cleaners/birmingham/wider/:zone",
-        destination: "/cleaners/birmingham",
-        permanent: true,
-      },
+      ...legacyCleaningVariants,
+      // Catch-all for any remaining /cleaning/{slug}/… not listed above
       {
         source: "/cleaning/:slug/birmingham/wider/:zone",
         destination: "/cleaning/:slug",
@@ -63,22 +80,42 @@ const nextConfig = {
         destination: "/cleaning/:slug",
         permanent: true,
       },
-      // Old Erdington hub slug (was a redirect target that 404ed)
+      // House cleaners Birmingham hub → house cleaning Birmingham
       {
-        source: "/cleaners/birmingham/erdington-and-north-east-birmingham",
-        destination: "/cleaners/birmingham/erdington",
+        source: "/cleaners/birmingham",
+        destination: "/house-cleaning/birmingham",
         permanent: true,
       },
-      // The city hub is /cleaners/birmingham, never a "birmingham" place under it
+      {
+        source: "/cleaners/birmingham/wider/:zone",
+        destination: "/house-cleaning/birmingham",
+        permanent: true,
+      },
       {
         source: "/cleaners/birmingham/birmingham",
-        destination: "/cleaners/birmingham",
+        destination: "/house-cleaning/birmingham",
         permanent: true,
       },
-      // Standalone towns previously nested under /birmingham/
       {
-        source: "/cleaners/birmingham/:town(solihull|shirley|olton|walsall|west-bromwich|halesowen|cradley-heath|coleshill|water-orton|bromsgrove|smethwick|oldbury|rowley-regis|aldridge|knowle|dorridge|wythall|hollywood|alvechurch|barnt-green|marston-green|chelmsley-wood|castle-bromwich|bearwood)",
-        destination: "/cleaners/:town",
+        source: "/cleaners/birmingham/erdington-and-north-east-birmingham",
+        destination: "/house-cleaning/birmingham/erdington",
+        permanent: true,
+      },
+      // Standalone towns previously under /cleaners/birmingham/ or /cleaners/
+      {
+        source: `/cleaners/birmingham/:town(${STANDALONE_TOWNS})`,
+        destination: "/house-cleaning/:town",
+        permanent: true,
+      },
+      {
+        source: `/cleaners/:town(${STANDALONE_TOWNS})`,
+        destination: "/house-cleaning/:town",
+        permanent: true,
+      },
+      // Birmingham neighbourhood hubs (not profiles — :area is one segment)
+      {
+        source: "/cleaners/birmingham/:area",
+        destination: "/house-cleaning/birmingham/:area",
         permanent: true,
       },
       // Obvious URLs people and AI agents try

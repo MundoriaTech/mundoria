@@ -431,7 +431,7 @@ export function birminghamCoverageZoneByHubSlug(slug: string) {
 export function coverageZonePath(zoneId: string): string {
   const zone = birminghamCoverageZoneById(zoneId);
   if (!zone || zone.id === BIRMINGHAM_NEARBY_ZONE_ID) {
-    return `/cleaners/${LAUNCH_CITY.slug}`;
+    return cleanerPlacePath(LAUNCH_CITY.slug);
   }
   const matchingPlace = birminghamCoveragePlaces().find(
     (place) => place.label.toLowerCase() === zone.label.toLowerCase(),

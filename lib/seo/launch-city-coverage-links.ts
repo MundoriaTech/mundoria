@@ -7,7 +7,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "House cleaning",
     links: [
       {
-        href: "/cleaning/residential",
+        href: "/house-cleaning",
         label: `House cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -17,7 +17,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Workspace cleaning",
     links: [
       {
-        href: "/cleaning/commercial",
+        href: "/workspace-cleaning",
         label: `Workspace cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -27,7 +27,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Recovery cleaning",
     links: [
       {
-        href: "/cleaning/recovery",
+        href: "/recovery-cleaning",
         label: `Recovery cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -37,7 +37,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Regular cleaning",
     links: [
       {
-        href: "/cleaning/regular-cleaning",
+        href: "/house-cleaning/regular",
         label: `Regular Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -47,7 +47,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Deep cleaning",
     links: [
       {
-        href: "/cleaning/deep-cleaning",
+        href: "/house-cleaning/deep",
         label: `Deep Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -57,7 +57,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "End of tenancy cleaning",
     links: [
       {
-        href: "/cleaning/end-of-tenancy-cleaning",
+        href: "/moving-cleaning/end-of-tenancy",
         label: `End of Tenancy Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],
@@ -67,7 +67,7 @@ export const LAUNCH_CITY_COVERAGE_GROUPS = [
     heading: "Airbnb/Shortlet cleaning",
     links: [
       {
-        href: "/cleaning/airbnb-shortlet-cleaning",
+        href: "/airbnb-cleaning/shortlet",
         label: `Airbnb/Shortlet Cleaning in ${LAUNCH_CITY.name}`,
       },
     ],

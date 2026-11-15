@@ -1393,11 +1393,11 @@ export function BookingWizard({
       return;
     }
     const categoryExit: Partial<Record<string, string>> = {
-      residential: "/cleaning/residential",
-      moving_home: "/cleaning/moving-home",
-      short_term_rental: "/cleaning/short-lets",
-      commercial: "/cleaning/commercial",
-      recovery: "/cleaning/recovery",
+      residential: "/house-cleaning",
+      moving_home: "/moving-cleaning",
+      short_term_rental: "/airbnb-cleaning",
+      commercial: "/workspace-cleaning",
+      recovery: "/recovery-cleaning",
     };
     const exitHref =
       (draft.serviceCategory && categoryExit[draft.serviceCategory]) ||
@@ -2171,6 +2171,9 @@ export function BookingWizard({
           ? null
           : () => (
               <BookingCategoryMenu
+                // After step 1, lock the pillar so mid-flow switches cannot
+                // desync basket pricing / rooms / extras. Go back to step 1 to change.
+                locked={stepIndex > 0}
                 onSelect={selectCategory}
                 selected={
                   draft.serviceType

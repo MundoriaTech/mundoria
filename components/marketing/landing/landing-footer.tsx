@@ -9,7 +9,7 @@ import {
 import { CookieSettingsLink } from "@/components/analytics/cookie-settings-button";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
-import { canonicalCleaningPath } from "@/lib/seo/canonical";
+import { canonicalCleaningPath, cleanerPlacePath } from "@/lib/seo/canonical";
 import {
   LAUNCH_CITY,
   popularMarketingServices,
@@ -42,11 +42,14 @@ export function LandingFooter({
     {
       links: [
         { href: "/cleaning", label: "All services" },
+        { href: "/domestic-cleaning", label: "Domestic cleaning" },
         ...popularSeoServices.map((service) => ({
           href: canonicalCleaningPath(service.slug),
           label: service.label,
         })),
-        { href: "/cleaning/moving-home", label: "Moving home cleaning" },
+        { href: "/moving-cleaning", label: "Moving home cleaning" },
+        { href: "/ironing", label: "Ironing" },
+        { href: "/oven-cleaning", label: "Oven cleaning" },
       ],
       title: "Services",
     },
@@ -56,7 +59,7 @@ export function LandingFooter({
         { href: cleanerHref, label: "Become a cleaner" },
         { href: cleanerLoginHref, label: "Cleaner login" },
         {
-          href: `/cleaners/${LAUNCH_CITY.slug}`,
+          href: cleanerPlacePath(LAUNCH_CITY.slug),
           label: `Cleaners in ${LAUNCH_CITY.name}`,
         },
       ],
@@ -130,10 +133,6 @@ export function LandingFooter({
             <p>© 2026 {MUNDORIA_IDENTITY.legalName}. All rights reserved.</p>
             <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
               {companyRegistrationSentence()} Tel: {MUNDORIA_IDENTITY.phone}
-            </p>
-            <p className="mt-2 max-w-2xl text-pretty text-sm leading-6">
-              Cleaners on Mundoria are independent contractors. Availability,
-              pricing and coverage may vary by location and service type.
             </p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-3">

@@ -19,27 +19,27 @@ const GROUPS = [
     items: [
       {
         description: "Everyday upkeep, on a schedule that works for you.",
-        href: "/cleaning/regular-cleaning",
+        href: "/house-cleaning/regular",
         label: "Regular cleaning",
       },
       {
         description: "A helping hand when your home needs a reset.",
-        href: "/cleaning/one-off-cleaning",
+        href: "/house-cleaning/one-off",
         label: "One-off cleaning",
       },
       {
         description: "Ready to leave, or ready to arrive.",
-        href: "/cleaning/move-in-move-out-cleaning",
+        href: "/moving-cleaning/move-in-move-out",
         label: "Move-in / move-out",
       },
       {
         description: "A checkout clean for landlord and agent standards.",
-        href: "/cleaning/end-of-tenancy-cleaning",
+        href: "/moving-cleaning/end-of-tenancy",
         label: "End of tenancy",
       },
       {
         description: "A turnover so the place is guest-ready.",
-        href: "/cleaning/airbnb-shortlet-cleaning",
+        href: "/airbnb-cleaning/shortlet",
         label: "Airbnb/Shortlet",
       },
     ],
@@ -59,22 +59,22 @@ const GROUPS = [
     items: [
       {
         description: "Desks, bathrooms and shared rooms.",
-        href: "/cleaning/office-cleaning",
+        href: "/workspace-cleaning/office",
         label: "Office cleaning",
       },
       {
         description: "Shops, cafés and guest areas.",
-        href: "/cleaning/retail-and-hospitality-cleaning",
+        href: "/workspace-cleaning/retail-and-hospitality",
         label: "Retail and hospitality",
       },
       {
         description: "Schools and learning spaces.",
-        href: "/cleaning/educational-facility-cleaning",
+        href: "/workspace-cleaning/education",
         label: "Education",
       },
       {
         description: "Halls, stairs and shared blocks.",
-        href: "/cleaning/communal-area-cleaning",
+        href: "/workspace-cleaning/communal-areas",
         label: "Communal areas",
       },
     ],
@@ -94,17 +94,17 @@ const GROUPS = [
     items: [
       {
         description: "Extra help around the house.",
-        href: "/cleaning/pregnancy-and-postpartum-cleaning",
+        href: "/recovery-cleaning/pregnancy-and-postpartum",
         label: "Pregnancy and postpartum",
       },
       {
         description: "A home ready for coming back.",
-        href: "/cleaning/hospital-discharge-home-cleaning",
+        href: "/recovery-cleaning/hospital-discharge",
         label: "Hospital discharge",
       },
       {
         description: "Practical help at a hard time.",
-        href: "/cleaning/bereavement-support-cleaning",
+        href: "/recovery-cleaning/bereavement-support",
         label: "Bereavement support",
       },
     ],

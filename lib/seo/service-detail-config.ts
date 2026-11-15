@@ -6,6 +6,7 @@ import {
   serviceFaqsTitle,
 } from "@/lib/seo/service-detail-faqs";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
+import { canonicalCleaningPath } from "@/lib/seo/canonical";
 
 const CATEGORY_HERO: Record<ServiceCategory, string> = {
   commercial: "/images/marketing/landing/commercial-hero.jpg",
@@ -39,11 +40,11 @@ const SERVICE_IMAGE: Partial<Record<ServiceType, string>> = {
 };
 
 const CATEGORY_PAGE: Partial<Record<ServiceCategory, string>> = {
-  commercial: "/cleaning/commercial",
-  moving_home: "/cleaning/moving-home",
-  recovery: "/cleaning/recovery",
-  residential: "/cleaning/residential",
-  short_term_rental: "/cleaning/short-lets",
+  commercial: "/workspace-cleaning",
+  moving_home: "/moving-cleaning",
+  recovery: "/recovery-cleaning",
+  residential: "/house-cleaning",
+  short_term_rental: "/airbnb-cleaning",
 };
 
 function imageFor(service: MarketingService) {
@@ -64,7 +65,7 @@ export function serviceDetailConfig(
   const cards =
     siblings.length > 0
       ? siblings.map((item) => ({
-          href: `/cleaning/${item.slug}`,
+          href: canonicalCleaningPath(item.slug),
           image: imageFor(item),
           label: item.label,
         }))

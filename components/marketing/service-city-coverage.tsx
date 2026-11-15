@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BrandedSection } from "@/components/marketing/branded-page-sections";
 import type { MarketingService } from "@/lib/seo/marketing";
 import { BIRMINGHAM_AREAS, LAUNCH_CITY } from "@/lib/seo/marketing";
+import { cleanerPlacePath } from "@/lib/seo/canonical";
 
 /** Links the main service page to strong area hubs, not service×area copies. */
 export function ServiceCityCoverage({ service }: { service: MarketingService }) {
@@ -22,7 +23,7 @@ export function ServiceCityCoverage({ service }: { service: MarketingService }) 
         <li>
           <Link
             className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
-            href={`/cleaners/${LAUNCH_CITY.slug}`}
+            href={cleanerPlacePath(LAUNCH_CITY.slug)}
           >
             Cleaners in {LAUNCH_CITY.name}
           </Link>
@@ -31,7 +32,7 @@ export function ServiceCityCoverage({ service }: { service: MarketingService }) 
           <li key={area.slug}>
             <Link
               className="inline-flex rounded-full border border-[#e4daf5] bg-white px-4 py-2 text-sm font-semibold text-[#1c133b] transition hover:text-[#6a45b8]"
-              href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`}
+              href={cleanerPlacePath(area.slug)}
             >
               {area.name}
             </Link>

@@ -1,53 +1,5 @@
-import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 
-import { CategoryMagLinks } from "@/components/marketing/category-mag-links";
-import { MovingHomeCleaningPage } from "@/components/marketing/moving-home/moving-home-cleaning-page";
-import { MarketingShell } from "@/components/marketing/marketing-shell";
-import { JsonLd } from "@/components/marketing/json-ld";
-import { loadPageDirectoryContent } from "@/lib/marketing/page-directory";
-import { absoluteUrl, buildPageMetadata } from "@/lib/seo/site";
-import { hasSupabasePublicConfig } from "@/lib/supabase/config";
-import { organizationRef } from "@/lib/seo/structured-data";
-
-/** Marketing page: cached and refreshed every 5 minutes (rate-card changes included). */
-export const revalidate = 300;
-
-export const metadata: Metadata = buildPageMetadata({
-  description:
-    "Moving home cleaning with Mundoria: end of tenancy, move-in and move-out cleans with clear pricing and vetted cleaners in Birmingham.",
-  path: "/cleaning/moving-home",
-  title: "Moving Home Cleaning | Mundoria",
-});
-
-export default async function MovingHomeCleaningRoute() {
-  const configured = hasSupabasePublicConfig();
-  const bookingHref = configured
-    ? "/booking/new?category=moving_home&returnTo=/cleaning/moving-home"
-    : "/setup";
-  const { cleaners, reviews } = await loadPageDirectoryContent({
-    category: "moving_home",
-  });
-
-  return (
-    <MarketingShell>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Service",
-          areaServed: { "@type": "City", name: "Birmingham" },
-          description:
-            "End of tenancy, move-in and move-out cleaning for handovers.",
-          name: "Moving Home Cleaning",
-          provider: organizationRef(),
-          url: absoluteUrl("/cleaning/moving-home"),
-        }}
-      />
-      <MovingHomeCleaningPage
-        bookingHref={bookingHref}
-        cleaners={cleaners}
-        reviews={reviews}
-      />
-      <CategoryMagLinks category="moving_home" />
-    </MarketingShell>
-  );
+export default function MovingHomeCleaningLegacyRedirect() {
+  permanentRedirect("/moving-cleaning");
 }

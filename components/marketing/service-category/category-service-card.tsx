@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { LazyImage } from "@/components/shared/lazy-image";
-import { marketingServiceBySlug } from "@/lib/seo/marketing";
+import { canonicalCleaningPath } from "@/lib/seo/canonical";
+import {
+  MARKETING_SERVICES,
+  marketingServiceBySlug,
+} from "@/lib/seo/marketing";
+import { standalonePageByPath } from "@/lib/seo/standalone-pages";
 import { cn } from "@/lib/utils";
 
 const overlayLinkClass =
@@ -15,10 +20,17 @@ function serviceSlugFromCardHref(href: string) {
     const url = new URL(href, "https://www.mundoria.co.uk");
     const fromQuery = url.searchParams.get("service");
     if (fromQuery) return fromQuery;
+    const bare = url.pathname.replace(/\/$/, "");
+    if (bare.startsWith("/cleaning/")) {
+      return bare.replace(/^\/cleaning\//, "").split("/")[0] ?? "";
+    }
+    const match = MARKETING_SERVICES.find(
+      (service) => canonicalCleaningPath(service.slug) === bare,
+    );
+    return match?.slug ?? "";
   } catch {
-    // Fall through to path parsing for relative /cleaning/{slug} hrefs.
+    return "";
   }
-  return href.replace(/^\/cleaning\//, "").split(/[/?#]/)[0] ?? "";
 }
 
 export function CategoryServiceCard({
@@ -40,8 +52,17 @@ export function CategoryServiceCard({
 }) {
   const slug = serviceSlugFromCardHref(href);
   const service = marketingServiceBySlug(slug);
+  const standalone = standalonePageByPath(href.split("?")[0] || href);
   const bookHref =
-    bookingHref === "/setup" || !service ? bookingHref : service.bookingHref;
+    bookingHref === "/setup"
+      ? bookingHref
+      : service
+        ? service.bookingHref
+        : standalone
+          ? standalone.kind === "domestic"
+            ? "/booking/new?category=residential"
+            : bookingHref
+          : bookingHref;
   const [open, setOpen] = useState(false);
 
   return (

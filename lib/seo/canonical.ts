@@ -3,6 +3,16 @@
  * Duplicate / thin URLs permanent-redirect here so Google stops splitting trust.
  */
 
+import {
+  houseCleaningCityPath,
+  houseCleaningPlacePath,
+  LEGACY_CLEANING_PATHS,
+  legacyCleaningPathToPublic,
+  STANDALONE_TOWN_SLUGS,
+} from "@/lib/seo/public-paths";
+
+export { STANDALONE_TOWN_SLUGS };
+
 /** Marketing URL slug → canonical public slug (or category hub). */
 export const SEO_SERVICE_REDIRECTS: Record<string, string> = {
   // Move-out twin → one Move-in / move-out page (end of tenancy stays separate)
@@ -11,8 +21,8 @@ export const SEO_SERVICE_REDIRECTS: Record<string, string> = {
   "holiday-let-cleaning": "airbnb-shortlet-cleaning",
   // Recovery twins / retired recovery services → category hub
   "postpartum-cleaning": "pregnancy-and-postpartum-cleaning",
-  "illness-and-injury-recovery": "/cleaning/recovery",
-  "injury-recovery-cleaning": "/cleaning/recovery",
+  "illness-and-injury-recovery": "/recovery-cleaning",
+  "injury-recovery-cleaning": "/recovery-cleaning",
   // Legacy / hidden residential
   "same-day-cleaning": "one-off-cleaning",
 };
@@ -194,8 +204,13 @@ export const SEO_AREA_REDIRECTS: Record<string, string> = {
 /** Path for a marketing service slug after canonicalisation. */
 export function canonicalCleaningPath(slug: string): string {
   const target = SEO_SERVICE_REDIRECTS[slug] ?? slug;
-  if (target.startsWith("/")) return target;
-  return `/cleaning/${target}`;
+  if (target.startsWith("/")) {
+    if (target.startsWith("/cleaning/")) {
+      return legacyCleaningPathToPublic(target) ?? target;
+    }
+    return target;
+  }
+  return LEGACY_CLEANING_PATHS[target] ?? `/cleaning/${target}`;
 }
 
 /** Whether this marketing slug should appear in the sitemap as its own page. */
@@ -214,43 +229,11 @@ export function canonicalAreaPath(slug: string): string {
 }
 
 /**
- * Standalone town pages (not under /birmingham/).
- * These places are outside Birmingham city but were previously nested there.
+ * Place / town / city hub path for house cleaning (merged former `/cleaners/…` hubs).
+ * Cleaner *profiles* stay under `/cleaners/birmingham/[area]/profile/[cleaner]`.
  */
-export const STANDALONE_TOWN_SLUGS = new Set([
-  "solihull",
-  "shirley",
-  "olton",
-  "walsall",
-  "west-bromwich",
-  "halesowen",
-  "cradley-heath",
-  "coleshill",
-  "water-orton",
-  "bromsgrove",
-  "smethwick",
-  "oldbury",
-  "rowley-regis",
-  "aldridge",
-  "knowle",
-  "dorridge",
-  "wythall",
-  "hollywood",
-  "alvechurch",
-  "barnt-green",
-  "marston-green",
-  "chelmsley-wood",
-  "castle-bromwich",
-  "bearwood",
-]);
-
 export function cleanerPlacePath(areaSlug: string): string {
-  // The city itself is the hub, not a place under it (/cleaners/birmingham/birmingham 404s).
-  if (areaSlug === "birmingham") return "/cleaners/birmingham";
-  if (STANDALONE_TOWN_SLUGS.has(areaSlug)) {
-    return `/cleaners/${areaSlug}`;
-  }
-  return `/cleaners/birmingham/${areaSlug}`;
+  return houseCleaningPlacePath(areaSlug);
 }
 
 export function isStandaloneTownSlug(slug: string): boolean {
@@ -268,13 +251,29 @@ export function canonicalInternalHref(href: string): string {
   const [path, query = ""] = pathAndQuery.split("?");
   const suffix = `${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
 
+  const fromCleaning = legacyCleaningPathToPublic(path);
+  if (fromCleaning && fromCleaning !== path) {
+    return `${fromCleaning}${suffix}`;
+  }
+
   const service = path.match(/^\/cleaning\/([^/]+)\/?$/);
-  if (service && service[1] in SEO_SERVICE_REDIRECTS) {
-    return `${canonicalCleaningPath(service[1])}${suffix}`;
+  if (service) {
+    return `${canonicalCleaningPath(service[1]!)}${suffix}`;
   }
+
+  if (path === "/house-cleaning/birmingham" || path === "/house-cleaning/birmingham/") {
+    return `${houseCleaningCityPath()}${suffix}`;
+  }
+
   const area = path.match(/^\/cleaners\/birmingham\/([^/]+)\/?$/);
-  if (area && (area[1] in SEO_AREA_REDIRECTS || STANDALONE_TOWN_SLUGS.has(area[1]))) {
-    return `${canonicalAreaPath(area[1])}${suffix}`;
+  if (area) {
+    return `${canonicalAreaPath(area[1]!)}${suffix}`;
   }
+
+  const town = path.match(/^\/cleaners\/([^/]+)\/?$/);
+  if (town && STANDALONE_TOWN_SLUGS.has(town[1]!)) {
+    return `${houseCleaningPlacePath(town[1]!)}${suffix}`;
+  }
+
   return href;
 }

@@ -28,17 +28,29 @@ export const ONPAGE_PATH_COPY: Record<string, OnpageCopy> = {
     description: `Compare house, deep, end of tenancy, Airbnb, workspace and recovery cleaning in Birmingham. See the price before you book, or call ${SUPPORT_PHONE}.`,
     title: "Cleaning Services in Birmingham | Mundoria",
   },
-  "/cleaning/residential": {
+  "/house-cleaning": {
     description: `House cleaning in Birmingham: regular, deep and one-off cleans by vetted independent cleaners, with the price shown before you book. Call ${SUPPORT_PHONE}.`,
     title: "House Cleaning Services in Birmingham | Mundoria",
   },
-  "/cleaning/commercial": {
+  "/workspace-cleaning": {
     description: `Office, retail, school and communal area cleaning in Birmingham by vetted independent cleaners. Clear pricing per cleaner-hour. Call ${SUPPORT_PHONE}.`,
     title: "Workspace & Office Cleaning Birmingham | Mundoria",
   },
-  "/cleaning/recovery": {
+  "/recovery-cleaning": {
     description: `Considerate home cleaning in Birmingham during pregnancy, after a birth, illness, injury, a hospital stay or a bereavement. Call ${SUPPORT_PHONE} to talk.`,
     title: "Recovery Cleaning Services in Birmingham | Mundoria",
+  },
+  "/moving-cleaning": {
+    description: `Move-in, move-out and end of tenancy cleaning in Birmingham by vetted independent cleaners, with the price shown before you book. Call ${SUPPORT_PHONE}.`,
+    title: "Moving Home Cleaning in Birmingham | Mundoria",
+  },
+  "/airbnb-cleaning": {
+    description: `Airbnb, short-let and serviced accommodation cleaning in Birmingham, with guest-ready checklists and clear pricing. Call ${SUPPORT_PHONE}.`,
+    title: "Airbnb & Short-Let Cleaning Birmingham | Mundoria",
+  },
+  "/domestic-cleaning": {
+    description: `Domestic cleaning in Birmingham for everyday homes, with vetted independent cleaners and the price shown before you book. Call ${SUPPORT_PHONE}.`,
+    title: "Domestic Cleaning in Birmingham | Mundoria",
   },
 };
 

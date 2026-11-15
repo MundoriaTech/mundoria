@@ -1,31 +1,13 @@
 import { permanentRedirect } from "next/navigation";
 
-import { birminghamCoveragePlaceBySlug } from "@/lib/seo/birmingham-coverage";
-import { canonicalAreaPath, canonicalCleaningPath } from "@/lib/seo/canonical";
-import {
-  birminghamAreaBySlug,
-  marketingServiceBySlug,
-} from "@/lib/seo/marketing";
+import { canonicalCleaningPath } from "@/lib/seo/canonical";
 
 type PageProps = {
   params: { area: string; slug: string };
 };
 
-/**
- * Former service×area thin pages.
- * Local intent → the area's final hub in one hop (consolidated areas go
- * straight to their hub, not via the retired area URL). Unknown area → the
- * canonical service page.
- */
-export default function ServiceBirminghamAreaRedirect({ params }: PageProps) {
-  const known =
-    birminghamAreaBySlug(params.area) ??
-    birminghamCoveragePlaceBySlug(params.area);
-  if (known) {
-    permanentRedirect(canonicalAreaPath(params.area));
-  }
-  const service = marketingServiceBySlug(params.slug);
+export default function CleaningServiceAreaLegacyRedirect({ params }: PageProps) {
   permanentRedirect(
-    service ? canonicalCleaningPath(service.slug) : "/cleaning",
+    `${canonicalCleaningPath(params.slug)}/birmingham/${params.area}`,
   );
 }

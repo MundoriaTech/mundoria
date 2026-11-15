@@ -39,7 +39,7 @@ export const MAG_POSTS = [
   {
     author_name: "Mundoria Team",
     category: "Cleaning Tips",
-    content: `A full-home deep clean feels huge until you break it into rooms. Working room-by-room keeps standards consistent, stops you redistributing dirt, and makes it obvious when to DIY versus [book a deep clean](/cleaning/deep-cleaning).
+    content: `A full-home deep clean feels huge until you break it into rooms. Working room-by-room keeps standards consistent, stops you redistributing dirt, and makes it obvious when to DIY versus [book a deep clean](/house-cleaning/deep).
 
 This guide gives you the sequence, a room checklist, and a clear handoff to Mundoria when you’d rather not spend the weekend on skirting boards.
 
@@ -95,7 +95,7 @@ Set a timer per room, finish the checklist for that room, then move on. Don’t 
 
 ## When Should You Hand It Over?
 
-If grease has built up for months, you’re preparing for guests, or you need inventory-ready finishes, book [deep cleaning](/cleaning/deep-cleaning) or [regular cleaning](/cleaning/regular-cleaning) for the upkeep afterwards. See your estimate before you pay — then keep this checklist for the light top-ups between visits.`,
+If grease has built up for months, you’re preparing for guests, or you need inventory-ready finishes, book [deep cleaning](/house-cleaning/deep) or [regular cleaning](/house-cleaning/regular) for the upkeep afterwards. See your estimate before you pay — then keep this checklist for the light top-ups between visits.`,
     cover_url: IMG.roomDeep,
     excerpt:
       "A practical room-by-room deep cleaning guide — sequence, checklists, and when to book a Mundoria deep clean.",
@@ -161,7 +161,7 @@ Birmingham’s hard water means taps and screens need a descaler more often than
 
 ## When Should You Book a Pro?
 
-Before guests, after a neglected rental, or when limescale has hardened for months. Add bathroom priority notes on a [deep clean](/cleaning/deep-cleaning) or [one-off clean](/cleaning/one-off-cleaning), or keep bathrooms sharp with [regular cleaning](/cleaning/regular-cleaning). Mundoria shows a clear estimate before you confirm.`,
+Before guests, after a neglected rental, or when limescale has hardened for months. Add bathroom priority notes on a [deep clean](/house-cleaning/deep) or [one-off clean](/house-cleaning/one-off), or keep bathrooms sharp with [regular cleaning](/house-cleaning/regular). Mundoria shows a clear estimate before you confirm.`,
     cover_url: IMG.bathroom,
     excerpt:
       "How to deep clean a bathroom from top to bottom — monthly checklist, hard-water tips, and when to book Mundoria.",
@@ -270,7 +270,7 @@ This guide covers everyday UK laundry care, a stain-response order that actually
 
 ## How Do You Disinfect Laundry When Needed?
 
-For gym kit, illness recovery, or cloths used in bathrooms, a hotter cycle (where the label allows) or a laundry disinfectant can help. Sensitive households should prefer fragrance-free options and note that in [Recovery](/cleaning/recovery) or residential booking preferences.
+For gym kit, illness recovery, or cloths used in bathrooms, a hotter cycle (where the label allows) or a laundry disinfectant can help. Sensitive households should prefer fragrance-free options and note that in [Recovery](/recovery-cleaning) or residential booking preferences.
 
 ## Silk, Suede and Delicates
 
@@ -1112,7 +1112,7 @@ Set recurring cleaning, keep the notes honest, and let the scrambles become rare
     category: "Local Life",
     content: `It’s another weekend afternoon, the sun is out, and you’re on your knees scrubbing the bath. Again.
 
-If you’re searching for [regular cleaning in Birmingham](/cleaning/regular-cleaning), you probably already know the feeling. Nobody looks back on their life wishing they’d spent more Saturdays mopping, yet most of us keep doing it, because a dirty home feels worse.
+If you’re searching for [regular cleaning in Birmingham](/house-cleaning/regular), you probably already know the feeling. Nobody looks back on their life wishing they’d spent more Saturdays mopping, yet most of us keep doing it, because a dirty home feels worse.
 
 There’s a better option: a regular house cleaner who keeps your home fresh while you get your time back. This guide covers how regular cleaning works, how often you actually need it, and what to check before a stranger walks through your front door.
 
@@ -1144,7 +1144,7 @@ A one-off clean fixes a bad week. Regular cleaning stops the bad week happening.
 
 When grime is wiped away every seven or fourteen days, it never gets the chance to bake on. Limescale doesn’t build up around taps, the shower doesn’t get that grey film, and the floors never reach the point where you apologise to guests. Each visit also stays quicker and lighter, because your cleaner is maintaining a clean home, not rescuing a neglected one.
 
-If your home needs a proper reset first, start with a [deep clean](/cleaning/deep-cleaning) and then move to regular upkeep. If you only need a helping hand once, our [one-off cleaning](/cleaning/one-off-cleaning) is made for that.
+If your home needs a proper reset first, start with a [deep clean](/house-cleaning/deep) and then move to regular upkeep. If you only need a helping hand once, our [one-off cleaning](/house-cleaning/one-off) is made for that.
 
 ## The Real Worry: Letting a Stranger Into Your Home
 
@@ -1179,12 +1179,12 @@ We’re serving Birmingham neighbourhood by neighbourhood, with regular house cl
 
 Some homes need a different kind of clean, so Mundoria covers the full range:
 
-- [Deep cleaning](/cleaning/deep-cleaning) for built-up dirt and overlooked areas, ideal before you start a regular schedule
-- [End of tenancy cleaning](/cleaning/end-of-tenancy-cleaning) to landlord and agent standards, so you get your deposit back
-- [Airbnb cleaning](/cleaning/airbnb-shortlet-cleaning) for fast, guest-ready turnovers, plus [holiday let cleaning](/cleaning/holiday-let-cleaning)
-- [Move-in / move-out cleaning](/cleaning/move-in-move-out-cleaning) so you’re ready to leave or ready to arrive
-- [One-off cleaning](/cleaning/one-off-cleaning) when your home needs a reset
-- [Office cleaning](/cleaning/office-cleaning) for workplaces and studios across Birmingham
+- [Deep cleaning](/house-cleaning/deep) for built-up dirt and overlooked areas, ideal before you start a regular schedule
+- [End of tenancy cleaning](/moving-cleaning/end-of-tenancy) to landlord and agent standards, so you get your deposit back
+- [Airbnb cleaning](/airbnb-cleaning/shortlet) for fast, guest-ready turnovers, plus [holiday let cleaning](/cleaning/holiday-let-cleaning)
+- [Move-in / move-out cleaning](/moving-cleaning/move-in-move-out) so you’re ready to leave or ready to arrive
+- [One-off cleaning](/house-cleaning/one-off) when your home needs a reset
+- [Office cleaning](/workspace-cleaning/office) for workplaces and studios across Birmingham
 
 Ready to go? You can [book regular cleaning](/booking/new?service=regular), a [deep clean](/booking/new?service=deep_clean), an [end of tenancy clean](/booking/new?service=end_of_tenancy) or a [one-off clean](/booking/new?service=one_off) directly.
 
@@ -1208,7 +1208,7 @@ A quick clear of surfaces and floors lets your cleaner spend the time cleaning i
 
 ### What if I want something more thorough first?
 
-Book a [deep clean](/cleaning/deep-cleaning) to reset the home, then move to regular upkeep.
+Book a [deep clean](/house-cleaning/deep) to reset the home, then move to regular upkeep.
 
 ### Can I try it once before committing?
 

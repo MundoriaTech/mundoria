@@ -7,6 +7,11 @@ import { LazyImage } from "@/components/shared/lazy-image";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { bookingServiceImages } from "@/lib/customer/booking-flow";
 import { MARKETING_SERVICES } from "@/lib/seo/marketing";
+import { canonicalCleaningPath } from "@/lib/seo/canonical";
+import {
+  standaloneDomesticPage,
+  standaloneExtraPages,
+} from "@/lib/seo/standalone-pages";
 import { cn } from "@/lib/utils";
 import type { ServiceType } from "@/types/customer";
 
@@ -41,7 +46,7 @@ function bookable(
   const service = marketingByValue(value);
   return {
     description: service.description,
-    href: pageHref(`/cleaning/${service.slug}`, bookingHref),
+    href: pageHref(canonicalCleaningPath(service.slug), bookingHref),
     image: bookingServiceImages[value],
     label: labelOverride ?? service.label,
   };
@@ -71,31 +76,30 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
     {
       description:
         "Homes, flats and guest turns, everyday upkeep through to deeper resets.",
-      href: "/cleaning/residential",
+      href: "/house-cleaning",
       label: "House Cleaning",
       soft: "#efe6ff",
       services: [
         bookable("regular", bookingHref),
         bookable("deep_clean", bookingHref),
         bookable("one_off", bookingHref),
+        {
+          description: standaloneDomesticPage().subtitle,
+          href: pageHref(standaloneDomesticPage().path, bookingHref),
+          image: standaloneDomesticPage().cardImage,
+          label: standaloneDomesticPage().title,
+        },
         ...pageOnly(bookingHref, [
           {
             description:
-              "Routine house cleaning for kitchens, living areas and bathrooms.",
-            href: "/cleaning/regular-cleaning",
-            label: "House Cleaning",
-            seedService: "regular",
-          },
-          {
-            description:
               "Ongoing housekeeping support to keep your home consistently tidy.",
-            href: "/cleaning/regular-cleaning",
+            href: "/house-cleaning/regular",
             label: "Housekeeping",
             seedService: "regular",
           },
           {
             description: "A thorough seasonal refresh for the whole home.",
-            href: "/cleaning/deep-cleaning",
+            href: "/house-cleaning/deep",
             label: "Spring Cleaning",
             seedService: "deep_clean",
           },
@@ -112,7 +116,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
     {
       description:
         "Offices, retail and shared spaces with clearer scope before you book.",
-      href: "/cleaning/commercial",
+      href: "/workspace-cleaning",
       label: "Workspace Cleaning",
       soft: "#f8e4d4",
       services: [
@@ -126,7 +130,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
     {
       description:
         "Cleaning that adapts when life does, with more personal consideration.",
-      href: "/cleaning/recovery",
+      href: "/recovery-cleaning",
       label: "Recovery cleaning",
       soft: "#f0e4f8",
       services: [
@@ -134,7 +138,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
           {
             description:
               "Supportive home cleaning during pregnancy and after birth.",
-            href: "/cleaning/pregnancy-and-postpartum-cleaning",
+            href: "/recovery-cleaning/pregnancy-and-postpartum",
             label: "Pregnancy and Postpartum Cleaning",
             seedService: "pregnancy_support",
           },
@@ -150,6 +154,19 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
           "Bereavement Support Cleaning",
         ),
       ],
+    },
+    {
+      description:
+        "Optional extras you can add when you book — ironing, laundry, ovens and more.",
+      href: "/domestic-cleaning",
+      label: "Extras & add-ons",
+      soft: "#e8f0e9",
+      services: standaloneExtraPages().map((page) => ({
+        description: page.subtitle,
+        href: pageHref(page.path, bookingHref),
+        image: page.cardImage,
+        label: page.title,
+      })),
     },
   ];
 }
@@ -178,7 +195,7 @@ export function ServicesIndexPage({ bookingHref }: { bookingHref: string }) {
     const service = marketingByValue(value);
     return {
       description: service.description,
-      href: pageHref(`/cleaning/${service.slug}`, bookingHref),
+      href: pageHref(canonicalCleaningPath(service.slug), bookingHref),
       image: bookingServiceImages[value],
       label: service.label,
       tint: POPULAR_TINTS[index % POPULAR_TINTS.length],

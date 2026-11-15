@@ -964,7 +964,7 @@ Yes. When you book while signed in, a step called **Request a cleaner you alread
 Your choice is tried first, but it is not guaranteed. If they are busy or cannot take that time, Mundoria matches someone else who is suitable.
 
 ## Can I browse cleaners before booking?
-You can view public cleaner profiles in the [Birmingham cleaner directory](/cleaners/birmingham). For a new booking, Mundoria still matches the cleaner, so viewing a profile does not reserve that person. Requesting a named cleaner works for cleaners who have already cleaned for you.
+You can view public cleaner profiles in the [Birmingham cleaner directory](/house-cleaning/birmingham). For a new booking, Mundoria still matches the cleaner, so viewing a profile does not reserve that person. Requesting a named cleaner works for cleaners who have already cleaned for you.
 
 ## Can I ask for a different cleaner?
 Yes. On an upcoming visit with a cleaner assigned, the **Manage** panel can show an option to change your cleaner. Mundoria then starts a new search and leaves your previous cleaner out of it. On a regular clean, this option is available from the second visit. See [Can I change the date, time or details of a booking?](/help/article/modify-booking).
@@ -1115,7 +1115,7 @@ Choose **Recovery cleaning** when you start a booking, then pick the service tha
 - **Hospital Discharge Home Cleaning**, a comprehensive clean before or after someone comes home from hospital.
 - **Bereavement Support Cleaning**, respectful, practical cleaning after a loss.
 
-You can read about each one on the [recovery cleaning page](/cleaning/recovery).
+You can read about each one on the [recovery cleaning page](/recovery-cleaning).
 
 ## What is different about the booking?
 Recovery bookings include a **Recovery preferences** step. You can:

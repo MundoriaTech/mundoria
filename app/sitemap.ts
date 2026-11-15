@@ -11,17 +11,16 @@ import {
   coveragePlaceHref,
   coverageZonePath,
 } from "@/lib/seo/birmingham-coverage";
-import { isStandaloneTownSlug, isIndexableAreaSlug } from "@/lib/seo/canonical";
+import { canonicalCleaningPath, cleanerPlacePath, isIndexableAreaSlug, isStandaloneTownSlug } from "@/lib/seo/canonical";
 import {
   BIRMINGHAM_AREAS,
-  LAUNCH_CITY,
   MARKETING_CATEGORY_PATHS,
   indexableMarketingServices,
 } from "@/lib/seo/marketing";
 import { faqSectionPath } from "@/lib/seo/faq-paths";
-import { SERVICE_GUIDE_TOPICS, serviceGuidePath } from "@/lib/seo/service-guides";
 import { SITE_FAQ_SECTIONS } from "@/lib/seo/site-faqs";
 import { MARKETING_CONTENT_UPDATED_AT, absoluteUrl } from "@/lib/seo/site";
+import { STANDALONE_PAGES } from "@/lib/seo/standalone-pages";
 
 /**
  * Lean sitemap: one page per service intent + one page per area.
@@ -37,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     "",
     "/cleaning",
-    "/cleaners/birmingham",
+    "/house-cleaning/birmingham",
     "/help",
     "/faq",
     "/blog",
@@ -69,21 +68,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: absoluteUrl(path),
   }));
 
+  const standaloneRoutes = STANDALONE_PAGES.map((page) => ({
+    changeFrequency: "weekly" as const,
+    lastModified: now,
+    priority: page.kind === "domestic" ? 0.85 : 0.7,
+    url: absoluteUrl(page.path),
+  }));
+
   const serviceRoutes = indexableServices.map((service) => ({
     changeFrequency: "weekly" as const,
     lastModified: now,
     priority: 0.75,
-    url: absoluteUrl(`/cleaning/${service.slug}`),
+    url: absoluteUrl(canonicalCleaningPath(service.slug)),
   }));
-
-  const guideRoutes = indexableServices.flatMap((service) =>
-    SERVICE_GUIDE_TOPICS.map((topic) => ({
-      changeFrequency: "monthly" as const,
-      lastModified: now,
-      priority: 0.5,
-      url: absoluteUrl(serviceGuidePath(service.slug, topic)),
-    })),
-  );
 
   const knownAreaSlugs = new Set(BIRMINGHAM_AREAS.map((area) => area.slug));
   const areaRoutes = [
@@ -92,7 +89,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly" as const,
         lastModified: now,
         priority: 0.7,
-        url: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}/${area.slug}`),
+        url: absoluteUrl(cleanerPlacePath(area.slug)),
       }),
     ),
     ...birminghamCoveragePlaces()
@@ -147,8 +144,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...faqRoutes,
     ...categoryRoutes,
+    ...standaloneRoutes,
     ...serviceRoutes,
-    ...guideRoutes,
     ...areaRoutes,
     ...blogRoutes,
     ...helpCollectionRoutes,

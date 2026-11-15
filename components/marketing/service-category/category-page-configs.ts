@@ -39,12 +39,12 @@ export const MOVING_HOME_PAGE: ServiceCategoryMarketingConfig = {
   heroImage: "/images/marketing/landing/category-moving-home.jpg",
   serviceCards: [
     {
-      href: "/cleaning/end-of-tenancy-cleaning",
+      href: "/moving-cleaning/end-of-tenancy",
       image: "/images/marketing/landing/moving-end-of-tenancy.png",
       label: "End of Tenancy Cleaning",
     },
     {
-      href: "/cleaning/move-in-move-out-cleaning",
+      href: "/moving-cleaning/move-in-move-out",
       image: "/images/marketing/landing/moving-move-in.png",
       label: "Move-in / move-out cleaning",
     },
@@ -92,12 +92,12 @@ export const SHORT_LETS_PAGE: ServiceCategoryMarketingConfig = {
   heroImage: "/images/marketing/landing/category-str.jpg",
   serviceCards: [
     {
-      href: "/cleaning/airbnb-shortlet-cleaning",
+      href: "/airbnb-cleaning/shortlet",
       image: "/images/marketing/landing/str-airbnb.png",
       label: "Airbnb/Shortlet Cleaning",
     },
     {
-      href: "/cleaning/serviced-accommodation-cleaning",
+      href: "/airbnb-cleaning/serviced",
       image: "/images/marketing/landing/str-serviced.png",
       label: "Serviced Accommodation Cleaning",
     },
@@ -150,17 +150,17 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   heroImage: "/images/marketing/landing/recovery-hero.jpg",
   serviceCards: [
     {
-      href: "/cleaning/pregnancy-and-postpartum-cleaning",
+      href: "/recovery-cleaning/pregnancy-and-postpartum",
       image: "/images/marketing/landing/recovery-pregnancy.png",
       label: "Pregnancy and Postpartum Cleaning",
     },
     {
-      href: "/cleaning/hospital-discharge-home-cleaning",
+      href: "/recovery-cleaning/hospital-discharge",
       image: "/images/marketing/landing/recovery-hospital.png",
       label: "Hospital Discharge Home Cleaning",
     },
     {
-      href: "/cleaning/bereavement-support-cleaning",
+      href: "/recovery-cleaning/bereavement-support",
       image: "/images/marketing/landing/recovery-bereavement.png",
       label: "Bereavement Support Cleaning",
     },

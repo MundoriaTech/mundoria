@@ -1,4 +1,4 @@
-import { canonicalCleaningPath } from "@/lib/seo/canonical";
+import { canonicalCleaningPath, cleanerPlacePath } from "@/lib/seo/canonical";
 import {
   LAUNCH_CITY,
   publicMarketingServices,
@@ -33,7 +33,7 @@ export function serviceMoneyPath(serviceSlug: string) {
 /** Insertable closing CTA for Mag drafts: service page + city cleaners hub + booking. */
 export function magMoneyPageCtaMarkdown(serviceSlug: string, label: string) {
   const servicePath = serviceMoneyPath(serviceSlug);
-  const cityPath = `/cleaners/${LAUNCH_CITY.slug}`;
+  const cityPath = cleanerPlacePath(LAUNCH_CITY.slug);
   return [
     "",
     `Ready to book? See [${label}](${servicePath}), browse [cleaners in ${LAUNCH_CITY.name}](${cityPath}), or [start a booking](/booking/new).`,

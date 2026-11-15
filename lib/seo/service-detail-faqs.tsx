@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { CategoryFaq } from "@/components/marketing/service-category/service-category-marketing-page";
+import { canonicalCleaningPath, cleanerPlacePath } from "@/lib/seo/canonical";
 import { FAQ_LINKS } from "@/lib/seo/faq-links";
 import {
   LAUNCH_CITY,
@@ -60,7 +61,7 @@ function servicePhrase(service: MarketingService) {
 }
 
 function serviceHref(slug: string) {
-  return `/cleaning/${slug}`;
+  return canonicalCleaningPath(slug);
 }
 
 function relatedServiceLink(slug: string, label: string) {
@@ -226,7 +227,7 @@ const INCLUDED: Partial<
       <>
         Airbnb and short-let cleaning is built for guest-ready turnovers. Browse
         more host options on{" "}
-        <FaqLink href="/cleaning/short-lets">short-let cleaning</FaqLink>. A
+        <FaqLink href="/airbnb-cleaning">short-let cleaning</FaqLink>. A
         typical visit can include:
       </>
     ),
@@ -254,7 +255,7 @@ const INCLUDED: Partial<
       <>
         Office cleaning keeps workplaces presentable between busier deep cleans.
         See all{" "}
-        <FaqLink href="/cleaning/commercial">workspace cleaning</FaqLink>{" "}
+        <FaqLink href="/workspace-cleaning">workspace cleaning</FaqLink>{" "}
         options. A typical visit can include:
       </>
     ),
@@ -414,7 +415,7 @@ function frequencyFaq(service: MarketingService): CategoryFaq | null {
        , start from{" "}
         <FaqLink href={service.bookingHref}>short-let booking</FaqLink> or
         browse{" "}
-        <FaqLink href="/cleaning/short-lets">short-let services</FaqLink>.
+        <FaqLink href="/airbnb-cleaning">short-let services</FaqLink>.
       </p>,
     );
   }
@@ -426,7 +427,7 @@ function frequencyFaq(service: MarketingService): CategoryFaq | null {
         presentation. Others book a deeper clean less often. Pick a one-off
         visit or a repeating schedule when you{" "}
         <FaqLink href={service.bookingHref}>book</FaqLink>, or explore{" "}
-        <FaqLink href="/cleaning/commercial">workspace cleaning</FaqLink>.
+        <FaqLink href="/workspace-cleaning">workspace cleaning</FaqLink>.
       </p>,
     );
   }
@@ -468,7 +469,7 @@ function bookingFaq(service: MarketingService): CategoryFaq {
       Ready to book? Open{" "}
       <FaqLink href={service.bookingHref}>Mundoria booking</FaqLink> for{" "}
       {service.label.toLowerCase()}, or browse{" "}
-      <FaqLink href={`/cleaners/${LAUNCH_CITY.slug}`}>
+      <FaqLink href={cleanerPlacePath(LAUNCH_CITY.slug)}>
         cleaners in {LAUNCH_CITY.name}
       </FaqLink>{" "}
       first. It’s simple:
@@ -559,7 +560,7 @@ function whyFaq(service: MarketingService): CategoryFaq {
         Book {service.label.toLowerCase()}
       </FaqLink>
       , meet{" "}
-      <FaqLink href={`/cleaners/${LAUNCH_CITY.slug}`}>
+      <FaqLink href={cleanerPlacePath(LAUNCH_CITY.slug)}>
         vetted cleaners in {LAUNCH_CITY.name}
       </FaqLink>
       , or read more in the <FaqLink href="/faq">FAQ</FaqLink> and{" "}

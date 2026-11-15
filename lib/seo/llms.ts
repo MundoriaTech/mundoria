@@ -10,7 +10,7 @@ import {
   coveragePlaceHref,
   coverageZonePath,
 } from "@/lib/seo/birmingham-coverage";
-import { isIndexableAreaSlug } from "@/lib/seo/canonical";
+import { canonicalCleaningPath, cleanerPlacePath, isIndexableAreaSlug } from "@/lib/seo/canonical";
 import { faqSectionPath } from "@/lib/seo/faq-paths";
 import {
   MUNDORIA_IDENTITY,
@@ -58,7 +58,7 @@ function factsSection(services: MarketingService[]) {
 }
 
 function serviceLine(service: MarketingService) {
-  return `- ${service.label}: ${absoluteUrl(`/cleaning/${service.slug}`)}, from ${service.fromPrice}. ${service.description}`;
+  return `- ${service.label}: ${absoluteUrl(canonicalCleaningPath(service.slug))}, from ${service.fromPrice}. ${service.description}`;
 }
 
 function areaHubLines() {
@@ -97,7 +97,7 @@ ${factsSection(services)}
 - Home: ${absoluteUrl("/")}
 - Book a clean: ${absoluteUrl("/booking/new")}
 - All services and prices: ${absoluteUrl("/cleaning")}
-- Cleaners in Birmingham: ${absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`)}
+- Cleaners in Birmingham: ${absoluteUrl(cleanerPlacePath(LAUNCH_CITY.slug))}
 - How it works: ${absoluteUrl("/how-it-works")}
 - About Mundoria: ${absoluteUrl("/about")}
 - FAQ: ${absoluteUrl("/faq")}
@@ -146,7 +146,7 @@ export async function buildLlmsFullTxt() {
         return `  - ${guide.title} ${absoluteUrl(serviceGuidePath(service.slug, topic))}\n    ${guide.description}`;
       }).join("\n");
       return `### ${service.label}
-- Page: ${absoluteUrl(`/cleaning/${service.slug}`)}
+- Page: ${absoluteUrl(canonicalCleaningPath(service.slug))}
 - From: ${service.fromPrice}
 - About: ${service.description}
 - Guides:

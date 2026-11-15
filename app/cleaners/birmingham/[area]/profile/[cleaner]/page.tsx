@@ -27,6 +27,7 @@ import {
   totalPages,
 } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
+import { cleanerPlacePath } from "@/lib/seo/canonical";
 
 const PROFILE_REVIEWS_PAGE_SIZE = 6;
 
@@ -132,7 +133,7 @@ export default async function BirminghamCleanerPage({
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
   const bookWithHref = bookingHrefWithDirectoryCleaner(bookingHref, cleaner);
-  const areaHref = `/cleaners/${LAUNCH_CITY.slug}/${area.slug}`;
+  const areaHref = cleanerPlacePath(area.slug);
   const initials = cleaner.name
     .split(" ")
     .map((part) => part[0])
@@ -153,7 +154,7 @@ export default async function BirminghamCleanerPage({
             { "@type": "ListItem", item: absoluteUrl("/"), name: "Home", position: 1 },
             {
               "@type": "ListItem",
-              item: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
+              item: absoluteUrl(cleanerPlacePath(LAUNCH_CITY.slug)),
               name: "Birmingham",
               position: 2,
             },
@@ -189,7 +190,7 @@ export default async function BirminghamCleanerPage({
                 <li>
                   <Link
                     className="hover:text-[#1c133b]"
-                    href={`/cleaners/${LAUNCH_CITY.slug}`}
+                    href={cleanerPlacePath(LAUNCH_CITY.slug)}
                   >
                     Birmingham
                   </Link>

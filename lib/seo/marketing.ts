@@ -11,9 +11,10 @@ import {
   servicesForCategory,
 } from "@/lib/customer/services";
 import {
-  canonicalCleaningPath,
-  isIndexableServiceSlug,
   SEO_SERVICE_REDIRECTS,
+  canonicalCleaningPath,
+  cleanerPlacePath,
+  isIndexableServiceSlug,
 } from "@/lib/seo/canonical";
 import { onpageCopyForServiceSlug } from "@/lib/seo/onpage-copy";
 import type { ServiceCategory, ServiceType } from "@/types/customer";
@@ -153,7 +154,7 @@ export async function getIndexableMarketingServices() {
  * New internal links should use `/cleaning/{slug}` + `/cleaners/...` hubs.
  */
 export function servicePlacePath(serviceSlug: string, areaSlug?: string) {
-  const city = `/cleaning/${serviceSlug}/${LAUNCH_CITY.slug}`;
+  const city = `${canonicalCleaningPath(serviceSlug)}/${LAUNCH_CITY.slug}`;
   return areaSlug ? `${city}/${areaSlug}` : city;
 }
 
@@ -502,13 +503,13 @@ export function birminghamPostcodesForPicker() {
   });
 }
 
-/** `/cleaners/birmingham/harborne-b17`, place name in the path, postcode at the end. */
+/** `/house-cleaning/birmingham/harborne-b17`, place name in the path, postcode at the end. */
 export function postcodePath(prefix: string) {
   const district = birminghamPostcode(prefix);
   const slug = district
     ? `${district.areaSlug}-${district.prefix.toLowerCase()}`
     : prefix.toLowerCase();
-  return `/cleaners/${LAUNCH_CITY.slug}/${slug}`;
+  return cleanerPlacePath(slug);
 }
 
 /**
@@ -562,11 +563,11 @@ export function prefixesForArea(areaSlug: string) {
 }
 
 export const MARKETING_CATEGORY_PATHS = [
-  "/cleaning/residential",
-  "/cleaning/moving-home",
-  "/cleaning/short-lets",
-  "/cleaning/commercial",
-  "/cleaning/recovery",
+  "/house-cleaning",
+  "/moving-cleaning",
+  "/airbnb-cleaning",
+  "/workspace-cleaning",
+  "/recovery-cleaning",
 ] as const;
 
 export const FOR_CLEANERS_FAQS: Array<{ answer: string; question: string }> = [
@@ -681,7 +682,7 @@ export function categoryMarketingLinks() {
     services: servicesForCategory(category.value).map((service) => {
       const marketing = MARKETING_SERVICES.find((item) => item.value === service.value)!;
       return {
-        href: `/cleaning/${marketing.slug}`,
+        href: canonicalCleaningPath(marketing.slug),
         label: marketing.label,
       };
     }),

@@ -22,6 +22,7 @@ import {
 } from "@/lib/seo/place-page-focus";
 import { absoluteUrl } from "@/lib/seo/site";
 import { organizationRef } from "@/lib/seo/structured-data";
+import { cleanerPlacePath } from "@/lib/seo/canonical";
 
 const HERO_DESCRIPTION =
   "One-off or regular house cleaning with tried & vetted cleaners in your area, clear estimates from booking to checklist.";
@@ -105,7 +106,7 @@ export async function CityLocationPage({
         name: "Cleaners",
       }
     : {
-        item: absoluteUrl(`/cleaners/${LAUNCH_CITY.slug}`),
+        item: absoluteUrl(cleanerPlacePath(LAUNCH_CITY.slug)),
         name: "Cleaners in Birmingham",
       };
 

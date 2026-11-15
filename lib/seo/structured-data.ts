@@ -1,3 +1,4 @@
+import { canonicalCleaningPath } from "@/lib/seo/canonical";
 import {
   BIRMINGHAM_AREAS,
   MARKETING_SERVICES,
@@ -109,7 +110,7 @@ export function hourlyOfferSchema(service: Pick<MarketingService, "fromPricePenc
       unitCode: "HUR",
       unitText: "hour",
     },
-    url: absoluteUrl(`/cleaning/${service.slug}`),
+    url: absoluteUrl(canonicalCleaningPath(service.slug)),
   };
 }
 
@@ -131,7 +132,7 @@ export function serviceSchema(
     ...(offer ? { offers: offer } : {}),
     provider: organizationRef(),
     serviceType: service.label,
-    url: options?.url ?? absoluteUrl(`/cleaning/${service.slug}`),
+    url: options?.url ?? absoluteUrl(canonicalCleaningPath(service.slug)),
   };
 }
 

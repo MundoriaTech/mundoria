@@ -96,9 +96,8 @@ function differentCleaningServices(
   );
 
   return DIFFERENT_SERVICE_ORDER.flatMap((slug) => {
-    const canonical = canonicalCleaningPath(slug).replace("/cleaning/", "");
-    if (excluded.has(slug) || excluded.has(canonical)) return [];
-    const service = bySlug.get(canonical) ?? bySlug.get(slug);
+    if (excluded.has(slug)) return [];
+    const service = bySlug.get(slug);
     return service ? [service] : [];
   }).slice(0, 4);
 }
@@ -213,7 +212,7 @@ export async function LaunchCityHubSections({
             {lookingFor.map((service) => (
               <CategoryServiceCard
                 bookingHref={bookingHref}
-                href={`/cleaning/${service.slug}`}
+                href={canonicalCleaningPath(service.slug)}
                 image={marketingServiceCardImage(service)}
                 key={service.slug}
                 label={service.label}
@@ -262,7 +261,7 @@ export async function LaunchCityHubSections({
             {BIRMINGHAM_AREAS.map((area) => (
               <BrandedCardLink
                 description={area.description}
-                href={`/cleaners/${LAUNCH_CITY.slug}/${area.slug}${coverageFocusSearch({
+                href={`${cleanerPlacePath(area.slug)}${coverageFocusSearch({
                   category: categoryFocus,
                   serviceSlug: serviceFocus?.slug,
                 })}`}
