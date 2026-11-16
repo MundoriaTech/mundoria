@@ -46,6 +46,16 @@ export const landingCategoryNav = [
         label: "Deep cleaning",
       },
       {
+        description: "Ongoing home cleaning on a schedule",
+        href: "/housekeeping",
+        label: "Housekeeping",
+      },
+      {
+        description: "A seasonal refresh for the whole home",
+        href: "/spring-cleaning",
+        label: "Spring cleaning",
+      },
+      {
         description: "Ready to leave, or ready to arrive",
         href: "/moving-cleaning/move-in-move-out",
         label: "Move-in / move-out",

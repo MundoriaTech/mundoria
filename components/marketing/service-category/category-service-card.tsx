@@ -9,7 +9,10 @@ import {
   MARKETING_SERVICES,
   marketingServiceBySlug,
 } from "@/lib/seo/marketing";
-import { standalonePageByPath } from "@/lib/seo/standalone-pages";
+import {
+  standaloneBookingHref,
+  standalonePageByPath,
+} from "@/lib/seo/standalone-pages";
 import { cn } from "@/lib/utils";
 
 const overlayLinkClass =
@@ -59,9 +62,7 @@ export function CategoryServiceCard({
       : service
         ? service.bookingHref
         : standalone
-          ? standalone.kind === "domestic"
-            ? "/booking/new?category=residential"
-            : bookingHref
+          ? standaloneBookingHref(standalone, true)
           : bookingHref;
   const [open, setOpen] = useState(false);
 

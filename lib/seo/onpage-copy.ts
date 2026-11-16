@@ -52,6 +52,14 @@ export const ONPAGE_PATH_COPY: Record<string, OnpageCopy> = {
     description: `Domestic cleaning in Birmingham for everyday homes, with vetted independent cleaners and the price shown before you book. Call ${SUPPORT_PHONE}.`,
     title: "Domestic Cleaning in Birmingham | Mundoria",
   },
+  "/housekeeping": {
+    description: `Housekeeping in Birmingham for ongoing home cleaning, with vetted independent cleaners and the price shown before you book. Call ${SUPPORT_PHONE}.`,
+    title: "Housekeeping in Birmingham | Mundoria",
+  },
+  "/spring-cleaning": {
+    description: `Spring cleaning in Birmingham for a thorough seasonal refresh, with vetted independent cleaners and the price shown before you book. Call ${SUPPORT_PHONE}.`,
+    title: "Spring Cleaning in Birmingham | Mundoria",
+  },
 };
 
 /** Indexable service pages keyed by marketing slug. */

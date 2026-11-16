@@ -28,6 +28,8 @@ const PUBLIC_MARKETING_PREFIXES = [
   "/moving-cleaning",
   "/recovery-cleaning",
   "/domestic-cleaning",
+  "/housekeeping",
+  "/spring-cleaning",
   "/ironing",
   "/laundry-cleaning",
   "/fridge-cleaning",

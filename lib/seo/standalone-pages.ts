@@ -11,6 +11,8 @@ export type StandalonePageDef = {
   /** Booking add-on id when this page maps to a selectable extra. */
   addOnId?: string;
   bookCta: string;
+  /** Optional bookable service deep-link for domestic SEO pages. */
+  bookService?: "deep_clean" | "one_off" | "regular";
   bullets: [string, string, string];
   /** Image used on /cleaning cards and related carousels. */
   cardImage: string;
@@ -30,6 +32,7 @@ export type StandalonePageDef = {
 const RESIDENTIAL_HERO = "/images/marketing/landing/residential-hero.jpg";
 const RESIDENTIAL_REGULAR =
   "/images/marketing/landing/residential-regular.png";
+const RESIDENTIAL_DEEP = "/images/marketing/landing/residential-deep.jpg";
 
 const ICON = {
   fridge: "/images/marketing/icons/plain/inside-fridge.png",
@@ -79,6 +82,73 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
     subtitle:
       "Reliable home cleaning for flats and houses, with a clear estimate before you confirm.",
     title: "Domestic Cleaning",
+  },
+  {
+    bookCta: "Book housekeeping",
+    bookService: "regular",
+    bullets: [
+      "Regular visits that keep the home consistently tidy",
+      "Clear estimates before you book",
+      "Reliable, vetted cleaners you can trust",
+    ],
+    cardImage: RESIDENTIAL_REGULAR,
+    description:
+      "Housekeeping in Birmingham — ongoing home cleaning so kitchens, bathrooms and living spaces stay tidy between visits, with vetted cleaners and the price shown before you book.",
+    faqs: [
+      faq(
+        "What is housekeeping?",
+        "Housekeeping is regular home cleaning: kitchens, bathrooms, bedrooms and living areas kept up between visits. On Mundoria you book it as recurring house cleaning on a schedule that suits you.",
+      ),
+      faq(
+        "How is housekeeping different from a one-off clean?",
+        "Housekeeping is ongoing — the same type of clean on a weekly, fortnightly or monthly rhythm. A one-off clean is a single visit when you need a reset without a repeating schedule.",
+      ),
+      faq(
+        "Can I add extras like ironing?",
+        "Yes. When you book you can add extras such as ironing, laundry, oven cleaning and inside windows. Time is added where needed so the visit stays realistic.",
+      ),
+    ],
+    heroImage: RESIDENTIAL_HERO,
+    kind: "domestic",
+    metaTitle: "Housekeeping in Birmingham | Mundoria",
+    path: "/housekeeping",
+    slug: "housekeeping",
+    subtitle:
+      "Ongoing housekeeping support to keep your home consistently tidy.",
+    title: "Housekeeping",
+  },
+  {
+    bookCta: "Book spring cleaning",
+    bookService: "deep_clean",
+    bullets: [
+      "A thorough seasonal refresh for the whole home",
+      "Clear estimates before you book",
+      "Reliable, vetted cleaners you can trust",
+    ],
+    cardImage: RESIDENTIAL_DEEP,
+    description:
+      "Spring cleaning in Birmingham — a deeper seasonal clean for kitchens, bathrooms and the places regular visits miss, with vetted cleaners and the price shown before you book.",
+    faqs: [
+      faq(
+        "What is spring cleaning?",
+        "Spring cleaning is a thorough seasonal refresh: more time on kitchens, bathrooms, skirting, doors and areas weekly cleans usually skip. On Mundoria you book it as a deep clean.",
+      ),
+      faq(
+        "How is spring cleaning different from regular housekeeping?",
+        "Regular housekeeping keeps the home tidy week to week. Spring cleaning goes deeper on build-up and neglected areas — useful once or twice a year, or after a busy season.",
+      ),
+      faq(
+        "Can I combine spring cleaning with extras?",
+        "Yes. You can add oven cleaning, fridge cleaning, interior windows and similar extras when you book so everything is covered in one visit.",
+      ),
+    ],
+    heroImage: RESIDENTIAL_HERO,
+    kind: "domestic",
+    metaTitle: "Spring Cleaning in Birmingham | Mundoria",
+    path: "/spring-cleaning",
+    slug: "spring-cleaning",
+    subtitle: "A thorough seasonal refresh for the whole home.",
+    title: "Spring Cleaning",
   },
   {
     addOnId: "ironing",
@@ -362,7 +432,11 @@ export function standaloneExtraPages() {
 }
 
 export function standaloneDomesticPage() {
-  return STANDALONE_PAGES.find((page) => page.kind === "domestic")!;
+  return standalonePageBySlug("domestic-cleaning")!;
+}
+
+export function standaloneDomesticPages() {
+  return STANDALONE_PAGES.filter((page) => page.kind === "domestic");
 }
 
 /** Booking deep-link for a standalone page. */
@@ -373,6 +447,9 @@ export function standaloneBookingHref(
   if (!configured) return "/setup";
   const returnTo = encodeURIComponent(page.path);
   if (page.kind === "domestic") {
+    if (page.bookService) {
+      return `/booking/new?service=${page.bookService}&returnTo=${returnTo}`;
+    }
     return `/booking/new?category=residential&returnTo=${returnTo}`;
   }
   // Extras attach to a residential (or short-let) flow; start on house cleaning.

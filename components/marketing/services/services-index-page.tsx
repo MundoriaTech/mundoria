@@ -11,6 +11,7 @@ import { canonicalCleaningPath } from "@/lib/seo/canonical";
 import {
   standaloneDomesticPage,
   standaloneExtraPages,
+  standalonePageBySlug,
 } from "@/lib/seo/standalone-pages";
 import { cn } from "@/lib/utils";
 import type { ServiceType } from "@/types/customer";
@@ -72,105 +73,72 @@ function pageOnly(
 }
 
 function buildGroups(bookingHref: string): ServiceGroup[] {
+  const domestic = standaloneDomesticPage();
+  const housekeeping = standalonePageBySlug("housekeeping")!;
+  const springCleaning = standalonePageBySlug("spring-cleaning")!;
+
   return [
     {
-      description:
-        "Homes and flats — everyday upkeep through to deeper resets.",
+      description: "Homes, flats and family spaces",
       href: "/house-cleaning",
-      label: "House Cleaning",
+      label: "House",
       soft: "#efe6ff",
       services: [
-        bookable("regular", bookingHref),
-        bookable("deep_clean", bookingHref),
-        bookable("one_off", bookingHref),
         {
-          description: standaloneDomesticPage().subtitle,
-          href: pageHref(standaloneDomesticPage().path, bookingHref),
-          image: standaloneDomesticPage().cardImage,
-          label: standaloneDomesticPage().title,
+          description: domestic.subtitle,
+          href: pageHref(domestic.path, bookingHref),
+          image: domestic.cardImage,
+          label: domestic.title,
         },
-        ...pageOnly(bookingHref, [
-          {
-            description:
-              "Ongoing housekeeping support to keep your home consistently tidy.",
-            href: "/house-cleaning/regular",
-            label: "Housekeeping",
-            seedService: "regular",
-          },
-          {
-            description: "A thorough seasonal refresh for the whole home.",
-            href: "/house-cleaning/deep",
-            label: "Spring Cleaning",
-            seedService: "deep_clean",
-          },
-        ]),
+        bookable("regular", bookingHref, "Regular cleaning"),
+        bookable("one_off", bookingHref, "One-off cleaning"),
+        bookable("deep_clean", bookingHref, "Deep cleaning"),
+        {
+          description: housekeeping.subtitle,
+          href: pageHref(housekeeping.path, bookingHref),
+          image: housekeeping.cardImage,
+          label: housekeeping.title,
+        },
+        {
+          description: springCleaning.subtitle,
+          href: pageHref(springCleaning.path, bookingHref),
+          image: springCleaning.cardImage,
+          label: springCleaning.title,
+        },
+        bookable("move_in", bookingHref, "Move-in / move-out"),
+        bookable("end_of_tenancy", bookingHref, "End of tenancy"),
+        bookable("airbnb_turnover", bookingHref, "Airbnb / short let"),
       ],
     },
     {
-      description:
-        "End of tenancy, move-in and move-out when you’re changing homes.",
-      href: "/moving-cleaning",
-      label: "Moving Home",
-      soft: "#f7f0d8",
-      services: [
-        bookable("move_in", bookingHref),
-        bookable("end_of_tenancy", bookingHref),
-      ],
-    },
-    {
-      description:
-        "Guest-ready turnovers for Airbnb, shortlets and serviced stays.",
-      href: "/airbnb-cleaning",
-      label: "Airbnb & Short Lets",
-      soft: "#f0e4f8",
-      services: [
-        bookable(
-          "airbnb_turnover",
-          bookingHref,
-          "Airbnb/Shortlet Cleaning",
-        ),
-        bookable("serviced_accommodation", bookingHref),
-      ],
-    },
-    {
-      description:
-        "Offices, retail and shared spaces with clearer scope before you book.",
+      description: "Offices, shops and shared workplaces",
       href: "/workspace-cleaning",
-      label: "Workspace Cleaning",
+      label: "Workspace",
       soft: "#f8e4d4",
       services: [
-        bookable("office", bookingHref),
-        bookable("retail_hospitality", bookingHref),
-        bookable("educational_facility", bookingHref),
-        bookable("communal_area", bookingHref),
+        bookable("office", bookingHref, "Office cleaning"),
+        bookable("retail_hospitality", bookingHref, "Retail & hospitality"),
+        bookable("educational_facility", bookingHref, "Education"),
+        bookable("communal_area", bookingHref, "Communal areas"),
       ],
     },
     {
-      description:
-        "Cleaning that adapts when life does, with more personal consideration.",
+      description: "Cleaning support when life changes",
       href: "/recovery-cleaning",
-      label: "Recovery cleaning",
-      soft: "#efe6ff",
+      label: "Recovery",
+      soft: "#f0e4f8",
       services: [
         ...pageOnly(bookingHref, [
           {
             description:
               "Supportive home cleaning during pregnancy and after birth.",
             href: "/recovery-cleaning/pregnancy-and-postpartum",
-            label: "Pregnancy and Postpartum Cleaning",
+            label: "Pregnancy & postpartum",
             seedService: "pregnancy_support",
           },
         ]),
-        bookable(
-          "hospital_discharge",
-          bookingHref,
-          "Hospital Discharge Home Cleaning",
-        ),
-        bookable(
-          "bereavement_support",
-          bookingHref,
-          "Bereavement Support Cleaning",
-        ),
+        bookable("hospital_discharge", bookingHref, "Hospital discharge"),
+        bookable("bereavement_support", bookingHref, "Bereavement support"),
       ],
     },
     {
