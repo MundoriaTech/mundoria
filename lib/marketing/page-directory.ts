@@ -65,7 +65,7 @@ export async function loadPageDirectoryContent(options?: {
     }),
   ]);
 
-  // Keep category/service scope — never fall back to unscoped reviews or a
+  // Keep category/service scope - never fall back to unscoped reviews or a
   // House page can show Workspace/office copy (and vice versa).
   const liveReviews = scopedReviews;
 

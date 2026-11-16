@@ -143,7 +143,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
     },
     {
       description:
-        "Optional extras you can add when you book — ironing, laundry, ovens and more.",
+        "Optional extras you can add when you book - ironing, laundry, ovens and more.",
       href: "/ironing",
       label: "Extras & add-ons",
       soft: "#e8f0e9",

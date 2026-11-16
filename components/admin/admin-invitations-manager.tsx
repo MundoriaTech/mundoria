@@ -199,7 +199,7 @@ export function AdminInvitationsManager({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate font-semibold">
-                  {invitation.full_name ?? "—"}
+                  {invitation.full_name ?? "-"}
                 </p>
                 <p className="mt-0.5 truncate text-sm text-muted-foreground">
                   {invitation.email}
@@ -249,13 +249,13 @@ export function AdminInvitationsManager({
             {sortedInvitations.map((invitation) => (
               <tr className="border-t" key={invitation.id}>
                 <td className="p-3">
-                  <b>{invitation.full_name ?? "—"}</b>
+                  <b>{invitation.full_name ?? "-"}</b>
                   <small className="block text-muted-foreground">
                     {invitation.email}
                   </small>
                 </td>
                 <td className="capitalize">{invitation.status}</td>
-                <td>{invitation.invited_by_profile?.full_name ?? "—"}</td>
+                <td>{invitation.invited_by_profile?.full_name ?? "-"}</td>
                 <td>
                   {new Date(invitation.expires_at).toLocaleDateString("en-GB")}
                 </td>

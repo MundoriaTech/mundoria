@@ -37,7 +37,7 @@ export function RatingDisputeList({ ratings }: { ratings: HeldRating[] }) {
                 Deadline:{" "}
                 {rating.dispute_deadline
                   ? new Date(rating.dispute_deadline).toLocaleString("en-GB")
-                  : "—"}
+                  : "-"}
               </small>
             </span>
             <Button onClick={() => setSelected(rating)} size="sm" variant="outline">

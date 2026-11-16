@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 
-/** Cleaning / janitorial services MCC — independent domestic cleaners. */
+/** Cleaning / janitorial services MCC - independent domestic cleaners. */
 const CLEANER_MCC = "7349";
 
 const PRODUCT_DESCRIPTION =
@@ -82,7 +82,7 @@ export function buildCleanerExpressAccountCreateParams(input: {
     business_profile: cleanerBusinessProfile(),
     business_type: "individual",
     capabilities: {
-      // Marketplace pays cleaners via Transfers — do not request card_payments
+      // Marketplace pays cleaners via Transfers - do not request card_payments
       // (that pulls in merchant KYC / business website requirements).
       transfers: { requested: true },
     },

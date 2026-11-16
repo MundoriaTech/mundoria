@@ -32,7 +32,7 @@ export const SEO_SERVICE_REDIRECTS: Record<string, string> = {
  * Thin / duplicate area pages redirect to these high-authority hubs.
  */
 export const SEO_AREA_REDIRECTS: Record<string, string> = {
-  // Central Hub — no separate City Centre page; fold into Birmingham hub
+  // Central Hub - no separate City Centre page; fold into Birmingham hub
   "birmingham-city-centre": "birmingham",
   "city-centre": "birmingham",
   "central-birmingham": "birmingham",

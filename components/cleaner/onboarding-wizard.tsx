@@ -2160,7 +2160,7 @@ function StepBody({
               ONBOARDING_FIELD_CLASS,
             )}
           >
-            {data.full_name || "—"}
+            {data.full_name || "-"}
           </p>
           {issueFor("full_name") ? (
             <FieldError message={issueFor("full_name")!} />
@@ -2199,7 +2199,7 @@ function StepBody({
                   )}
                 >
                   <UkFlag className="h-4 w-6 shrink-0 overflow-hidden rounded-[2px]" />
-                  <span>{data.phone || "—"}</span>
+                  <span>{data.phone || "-"}</span>
                 </p>
               </div>
             )}
@@ -3214,7 +3214,7 @@ const HOURS_DAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const; // Mon → Sun
 const HOURS_DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const HOURS_WEEKDAYS = new Set([1, 2, 3, 4, 5]);
 const HOURS_WEEKENDS = new Set([0, 6]);
-/** Match customer bookable window (07:00–23:00). */
+/** Match customer bookable window (07:00-23:00). */
 const WORKING_HOURS_MIN = formatWindowMinutes(DAY_WINDOW_START_MINUTES);
 const WORKING_HOURS_MAX = formatWindowMinutes(DAY_WINDOW_END_MINUTES);
 const DEFAULT_START = WORKING_HOURS_MIN;

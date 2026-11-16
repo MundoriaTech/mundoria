@@ -61,7 +61,7 @@ export function IncidentsTable({ rows }: { rows: IncidentRow[] }) {
                   })}
                 </Link>
               </td>
-              <td className="px-4 py-3">{cleaner?.full_name ?? "—"}</td>
+              <td className="px-4 py-3">{cleaner?.full_name ?? "-"}</td>
               <td className="px-4 py-3">
                 <p className="font-medium">{row.title}</p>
                 <p className="text-xs text-muted-foreground">
@@ -90,7 +90,7 @@ export function IncidentsTable({ rows }: { rows: IncidentRow[] }) {
                     Flagged
                   </span>
                 ) : (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground"> - </span>
                 )}
               </td>
             </tr>

@@ -152,7 +152,7 @@ export function allowsOptionalTags(preferences: ConsentPreferences) {
   return preferences.analytics || preferences.marketing;
 }
 
-/** Microsoft Clarity — session recordings. Statistics consent only. */
+/** Microsoft Clarity - session recordings. Statistics consent only. */
 export function loadMicrosoftClarity() {
   const clarityId = getClarityId();
   if (!clarityId || typeof window === "undefined") return false;

@@ -419,7 +419,7 @@ export function CleanerProfileForm({
                   {DAY_NAMES[day.day_of_week]}
                 </span>
                 <span className="tabular-nums">
-                  {day.start_time.slice(0, 5)}–{day.end_time.slice(0, 5)}
+                  {day.start_time.slice(0, 5)}-{day.end_time.slice(0, 5)}
                 </span>
               </label>
             ))}

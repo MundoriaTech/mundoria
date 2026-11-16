@@ -64,7 +64,7 @@ const SERVICES_ALREADY_ON_PAGE = {
 
 type HubCategory = keyof typeof SERVICES_ALREADY_ON_PAGE;
 
-/** Indexable canonical slugs only — never redirected twins. */
+/** Indexable canonical slugs only - never redirected twins. */
 const DIFFERENT_SERVICE_ORDER = [
   "deep-cleaning",
   "office-cleaning",
@@ -157,7 +157,7 @@ export async function LaunchCityHubSections({
     serviceTypes: categoryServiceTypes,
   });
   // Prefer scoped cleaners; fall back to place-wide cleaners only.
-  // Reviews stay scoped — House pages must not show Workspace/office quotes.
+  // Reviews stay scoped - House pages must not show Workspace/office quotes.
   if (!(liveCleaners?.length) && (serviceFocus || categoryServiceTypes)) {
     liveCleaners = await loadDirectoryCleaners({
       areaSlug: resolvedAreaSlug,

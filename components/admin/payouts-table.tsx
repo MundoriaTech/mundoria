@@ -92,7 +92,7 @@ export function PayoutsTable({ payouts }: { payouts: AdminPayoutRow[] }) {
             <td className="font-semibold">{formatMoney(item.net_amount)}</td>
             <td className="capitalize">{item.status}</td>
             <td className="font-mono text-xs">
-              {item.stripe_transfer_id ?? "—"}
+              {item.stripe_transfer_id ?? "-"}
             </td>
           </tr>
         )}

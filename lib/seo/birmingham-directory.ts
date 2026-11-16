@@ -377,7 +377,7 @@ function cleanerSlugId(slug: string) {
 export async function loadDirectoryCleaner(slug: string, areaSlug: string) {
   const needle = cleanerSlugId(slug);
 
-  // Prefer id suffix (stable), then area list, then city-wide — avoids 404s when
+  // Prefer id suffix (stable), then area list, then city-wide - avoids 404s when
   // area-filtered queries miss a cleaner that the card linked to.
   const pools = [
     await loadDirectoryCleaners({ areaSlug, limit: 80 }),

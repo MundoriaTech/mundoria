@@ -183,13 +183,13 @@ export default async function CleanerDashboardPage() {
               },
               {
                 label: "Area",
-                value: nextJob.address?.city ?? "—",
+                value: nextJob.address?.city ?? "-",
               },
               {
                 label: "Earn",
                 value: nextJob.amount_cleaner
                   ? formatMoney(nextJob.amount_cleaner)
-                  : "—",
+                  : "-",
               },
             ]}
             personLine={
@@ -286,13 +286,13 @@ export default async function CleanerDashboardPage() {
           emptyBody="Completed sessions will show here with earnings."
           emptyTitle="No completed jobs yet"
           rows={recent.map((job) => ({
-            amount: job.amount_cleaner ? formatMoney(job.amount_cleaner) : "—",
+            amount: job.amount_cleaner ? formatMoney(job.amount_cleaner) : "-",
             date: new Date(`${job.scheduled_date}T12:00:00`).toLocaleDateString(
               "en-GB",
               { day: "numeric", month: "short", year: "numeric" },
             ),
             href: `/cleaner/job/${job.id}`,
-            person: job.address?.city ?? "—",
+            person: job.address?.city ?? "-",
             service: formatServiceName(job.service_type),
             status: "Completed",
           }))}

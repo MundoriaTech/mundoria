@@ -31,7 +31,7 @@ export function ConnectPayoutCard({
         </h2>
         <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c5670]">
           Set up payouts here in Mundoria. Your UK bank details go straight to
-          Stripe — we never store your sort code or account number.
+          Stripe - we never store your sort code or account number.
         </p>
         <Button
           className="mt-5 h-11 rounded-full bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]"

@@ -227,7 +227,7 @@ export function DashboardHistoryList({
                 </p>
                 <p className="mt-1 text-sm font-light text-[#5a5470] dark:text-muted-foreground">
                   {row.date}
-                  {row.person !== "—" ? ` · ${row.person}` : ""}
+                  {row.person !== "-" ? ` · ${row.person}` : ""}
                 </p>
               </div>
               <div className="flex items-center justify-between gap-4 sm:justify-end">

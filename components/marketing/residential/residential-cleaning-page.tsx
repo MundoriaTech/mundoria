@@ -23,14 +23,14 @@ const HERO_IMAGE = "/images/marketing/landing/residential-hero.jpg";
 
 const SERVICE_CARDS = [
   {
+    href: "/domestic-cleaning",
+    image: "/images/marketing/domestic/domestic-cleaning.jpg",
+    label: "Domestic Cleaning",
+  },
+  {
     href: "/house-cleaning/regular",
     image: "/images/marketing/landing/residential-regular.png",
     label: "Regular Cleaning",
-  },
-  {
-    href: "/house-cleaning/deep",
-    image: "/images/marketing/landing/residential-deep.jpg",
-    label: "Deep Cleaning",
   },
   {
     href: "/house-cleaning/one-off",
@@ -38,9 +38,64 @@ const SERVICE_CARDS = [
     label: "One-Off Cleaning",
   },
   {
-    href: "/domestic-cleaning",
+    href: "/house-cleaning/deep",
+    image: "/images/marketing/landing/residential-deep.jpg",
+    label: "Deep Cleaning",
+  },
+  {
+    href: "/housekeeping",
     image: "/images/marketing/landing/residential-regular.png",
-    label: "Domestic Cleaning",
+    label: "Housekeeping",
+  },
+  {
+    href: "/spring-cleaning",
+    image: "/images/marketing/domestic/spring-cleaning.jpg",
+    label: "Spring Cleaning",
+  },
+  {
+    href: "/ironing",
+    image: "/images/marketing/extras/ironing.jpg",
+    label: "Ironing",
+  },
+  {
+    href: "/laundry-cleaning",
+    image: "/images/marketing/extras/laundry.jpg",
+    label: "Laundry",
+  },
+  {
+    href: "/oven-cleaning",
+    image: "/images/marketing/extras/oven.jpg",
+    label: "Oven Cleaning",
+  },
+  {
+    href: "/fridge-cleaning",
+    image: "/images/marketing/extras/fridge.jpg",
+    label: "Fridge Cleaning",
+  },
+  {
+    href: "/window-cleaning",
+    image: "/images/marketing/extras/windows.jpg",
+    label: "Window Cleaning",
+  },
+  {
+    href: "/bathroom-cleaning",
+    image: "/images/marketing/extras/bathroom.jpg",
+    label: "Bathroom Cleaning",
+  },
+  {
+    href: "/cabinet-cleaning",
+    image: "/images/marketing/extras/cabinets.jpg",
+    label: "Cabinet Cleaning",
+  },
+  {
+    href: "/patio-cleaning",
+    image: "/images/marketing/extras/patio.jpg",
+    label: "Patio Cleaning",
+  },
+  {
+    href: "/linen-change",
+    image: "/images/marketing/extras/linen.jpg",
+    label: "Linen Change",
   },
 ] as const;
 

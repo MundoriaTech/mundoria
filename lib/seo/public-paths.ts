@@ -15,7 +15,7 @@
 
 import type { ServiceCategory, ServiceType } from "@/types/customer";
 
-/** Launch city slug — keep local to avoid import cycles with marketing.ts. */
+/** Launch city slug - keep local to avoid import cycles with marketing.ts. */
 const LAUNCH_CITY_SLUG = "birmingham";
 
 /**
@@ -198,7 +198,7 @@ export function servicePlacePath(
 }
 
 /**
- * House-cleaning city hub — same as the category root.
+ * House-cleaning city hub - same as the category root.
  * `/house-cleaning/birmingham` redirects here; areas stay under `/house-cleaning/birmingham/{area}`.
  */
 export function houseCleaningCityPath(): string {

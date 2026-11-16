@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const ROTATE_MS = 4000;
 const VISIBLE_STACK = 3;
 
-/** Opacity only — no movement, so reading stays easy. */
+/** Opacity only - no movement, so reading stays easy. */
 const REVIEW_MOTION = "dissolve" as ReviewMotion;
 
 type ReviewMotion = "crossfade" | "dissolve" | "rise" | "slide" | "stagger";

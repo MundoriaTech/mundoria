@@ -221,7 +221,7 @@ where cp.status = 'active'
   )
 on conflict (cleaner_id, service_type) do nothing;
 
--- Availability Mon–Sat mornings/afternoons
+-- Availability Mon-Sat mornings/afternoons
 insert into public.cleaner_availability (
   cleaner_id, day_of_week, start_time, end_time, is_available
 )
@@ -432,7 +432,7 @@ select
   round((3.5 + (abs(hashtext(b.id::text)) % 15) / 10.0)::numeric, 2),
   '{"kitchen":5,"bathroom":4}'::jsonb,
   (array[
-    'Kitchen and bathrooms looked genuinely finished — not a rushed wipe.',
+    'Kitchen and bathrooms looked genuinely finished - not a rushed wipe.',
     'Clear updates throughout and the checklist matched what we asked for.',
     'Punctual, careful and professional. Would book again.',
     'End-of-tenancy photos made the agent handover much easier.',
@@ -457,7 +457,7 @@ select
   b.id,
   b.customer_id,
   b.cleaner_id,
-  'Hi — seeded message so messaging UI has volume to test.',
+  'Hi - seeded message so messaging UI has volume to test.',
   (abs(hashtext(b.id::text)) % 2 = 0)
 from public.bookings b
 join public.profiles p on p.id = b.customer_id

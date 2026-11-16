@@ -81,7 +81,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <p><b>Customer:</b> {booking.customer?.full_name}</p>
             <p><b>Cleaner:</b> {booking.cleaner?.full_name ?? "Unassigned"}</p>
-            <p><b>Category:</b> {booking.service_category?.replaceAll("_", " ") ?? "—"}</p>
+            <p><b>Category:</b> {booking.service_category?.replaceAll("_", " ") ?? "-"}</p>
             <p><b>Standard:</b> {standardLabel(booking.cleaning_standard ?? "enhanced")}</p>
             <p><b>Schedule:</b> {booking.scheduled_date} {booking.scheduled_start_time}</p>
             <p><b>Status:</b> {booking.status}</p>
@@ -89,9 +89,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             <p><b>Amount:</b> {formatMoney(booking.amount_total)}</p>
             <p><b>Payment:</b> {booking.payment_status}</p>
             <p><b>Allocated cleaners:</b> {booking.allocated_cleaners ?? 1}</p>
-            <p><b>Cleaner hours:</b> {booking.cleaner_hours ?? "—"}</p>
-            <p><b>Property condition:</b> {booking.property_condition?.replaceAll("_", " ") ?? "—"}</p>
-            <p><b>Recently moved:</b> {booking.recently_moved == null ? "—" : booking.recently_moved ? "Yes" : "No"}</p>
+            <p><b>Cleaner hours:</b> {booking.cleaner_hours ?? "-"}</p>
+            <p><b>Property condition:</b> {booking.property_condition?.replaceAll("_", " ") ?? "-"}</p>
+            <p><b>Recently moved:</b> {booking.recently_moved == null ? "-" : booking.recently_moved ? "Yes" : "No"}</p>
             <p className="sm:col-span-2"><b>Special attention:</b> {(booking.special_attention_areas ?? []).join(", ") || "None"}</p>
             <p className="sm:col-span-2"><b>Add-ons:</b> {(addOns ?? []).map((addOn) => addOn.label).join(", ") || "None"}</p>
             <p className="sm:col-span-2"><b>Recommendation:</b> {booking.recommendation_outcome?.replaceAll("_", " ") ?? "not shown"}{booking.recommended_service_type ? ` → ${formatServiceName(booking.recommended_service_type)}` : ""}</p>
@@ -142,7 +142,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         offerOpen={Boolean(openOffer)}
         status={booking.status}
       />
-      <SimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "—"])} />
+      <SimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "-"])} />
       <SimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [item.created_at, item.sender?.full_name ?? "Unknown", item.content])} />
     </div>
   );

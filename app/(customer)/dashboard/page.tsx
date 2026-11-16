@@ -311,7 +311,7 @@ function NextCleanCard({ booking }: { booking: Booking }) {
     { label: "Where", value: area },
     {
       label: "Total",
-      value: booking.amount_total ? formatMoney(booking.amount_total) : "—",
+      value: booking.amount_total ? formatMoney(booking.amount_total) : "-",
     },
   ];
 

@@ -105,10 +105,10 @@ export default async function AdminCustomerPage({
             {new Date(profile.created_at).toLocaleString("en-GB")}
           </p>
           <p>
-            <b>Referral code:</b> {profile.referral_code || "—"}
+            <b>Referral code:</b> {profile.referral_code || "-"}
           </p>
           <p className="break-all sm:col-span-2">
-            <b>Stripe customer:</b> {profile.stripe_customer_id || "—"}
+            <b>Stripe customer:</b> {profile.stripe_customer_id || "-"}
           </p>
         </div>
       </section>

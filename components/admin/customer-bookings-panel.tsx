@@ -80,7 +80,7 @@ export function CustomerBookingsPanel({
               {booking.status.replaceAll("_", " ")}
             </td>
             <td className="capitalize">{booking.payment_status}</td>
-            <td>{booking.cleaner_profile?.full_name ?? "—"}</td>
+            <td>{booking.cleaner_profile?.full_name ?? "-"}</td>
             <td>{formatMoney(booking.amount_total)}</td>
             <td>
               <Link

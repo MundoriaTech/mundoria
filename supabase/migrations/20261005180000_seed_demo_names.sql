@@ -217,7 +217,7 @@ where p.id = cp.id
 update public.ratings
 set comment = (
   array[
-    'Kitchen and bathrooms looked genuinely finished — not a rushed wipe.',
+    'Kitchen and bathrooms looked genuinely finished - not a rushed wipe.',
     'Clear updates throughout and the checklist matched what we asked for.',
     'Punctual, careful and professional. Would book again.',
     'End-of-tenancy photos made the agent handover much easier.',
@@ -247,7 +247,7 @@ select
   '{"kitchen":5,"bathroom":5}'::jsonb,
   (
     array[
-      'Kitchen and bathrooms looked genuinely finished — not a rushed wipe.',
+      'Kitchen and bathrooms looked genuinely finished - not a rushed wipe.',
       'Clear updates throughout and the checklist matched what we asked for.',
       'Punctual, careful and professional. Would book again.',
       'End-of-tenancy photos made the agent handover much easier.',

@@ -1,7 +1,7 @@
 /**
  * Seed thousands of users into a hosted or local Supabase project via the
  * service-role API. Prefer `supabase db reset` (uses supabase/seed.sql) for
- * local — this script is for remote projects where SQL seed isn't applied.
+ * local - this script is for remote projects where SQL seed isn't applied.
  *
  * Usage:
  *   NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run seed
@@ -246,7 +246,7 @@ async function listDirectoryCleaners(cleanerIds) {
       error.message,
     );
     console.warn(
-      `Continuing without the column — ${listed.length} seed cleaners stay visible via the current marketing view.`,
+      `Continuing without the column - ${listed.length} seed cleaners stay visible via the current marketing view.`,
     );
     return;
   }
@@ -274,7 +274,7 @@ async function makeCleanersMatchReady(cleanerIds) {
   const BIO_TAILS = [
     "Regular and deep cleans with a clear checklist in the app.",
     "Happy with pets, and careful around busy family homes.",
-    "Strong on kitchens and bathrooms — detail-led finishes.",
+    "Strong on kitchens and bathrooms - detail-led finishes.",
     "Short-let turnovers and guest-ready resets between stays.",
     "Move-out and end-of-tenancy cleans for agent handovers.",
     "Quiet, punctual visits that fit around your working day.",
@@ -283,7 +283,7 @@ async function makeCleanersMatchReady(cleanerIds) {
     cleanerIds.map((cleaner_id, index) => {
       const district = districtForId(cleaner_id);
       const miles = 6 + (index % 10);
-      // Modest baseline — seedRatings() raises jobs only when reviews exist.
+      // Modest baseline - seedRatings() raises jobs only when reviews exist.
       const jobs = 1 + (index % 3);
       const years = 1 + (index % 9);
       return admin
@@ -461,7 +461,7 @@ async function seedBookings(customerIds, cleanerIds) {
   console.log("service types:", SERVICES.join(", "));
   const addresses = await loadSeedAddresses(customerIds);
   if (!addresses?.length) {
-    console.warn("No addresses found — skip bookings");
+    console.warn("No addresses found - skip bookings");
     return;
   }
   console.log(`Using ${addresses.length} addresses for bookings`);
@@ -525,7 +525,7 @@ async function seedBookings(customerIds, cleanerIds) {
   process.stdout.write("\n");
 }
 
-/** Service-aware review copy — large pools so the same cleaner never repeats lines. */
+/** Service-aware review copy - large pools so the same cleaner never repeats lines. */
 const RATING_COMMENTS_BY_SERVICE = {
   regular: [
     "Quiet fortnightly visit while I worked from home. Checklist followed exactly.",
@@ -656,7 +656,7 @@ const RATING_COMMENTS_FALLBACK = [
 /**
  * Per-cleaner whole-star pools so a 4.5 card is a mix of 4★ and 5★ reviews
  * (not every row showing five filled stars). Averages roughly 4.1 → 4.9.
- * Keep room_ratings empty — the ratings trigger overwrites overall_score from
+ * Keep room_ratings empty - the ratings trigger overwrites overall_score from
  * room averages, which previously forced every review to 4.5.
  */
 const RATING_SCORE_BANDS = [
@@ -697,14 +697,14 @@ function serviceSetForCleaner(index) {
   return Array.from(new Set([...core, ...focus]));
 }
 
-/** Varied publishable review targets — not every cleaner stuck on 2. */
+/** Varied publishable review targets - not every cleaner stuck on 2. */
 function reviewTargetForCleaner(index) {
   const band = index % 10;
   if (band === 0) return 0; // New
-  if (band === 1) return 1 + (index % 2); // 1–2
-  if (band === 2 || band === 3) return 4 + (index % 4); // 4–7
-  if (band === 4 || band === 5 || band === 6) return 9 + (index % 8); // 9–16
-  return 18 + (index % 15); // 18–32 established
+  if (band === 1) return 1 + (index % 2); // 1-2
+  if (band === 2 || band === 3) return 4 + (index % 4); // 4-7
+  if (band === 4 || band === 5 || band === 6) return 9 + (index % 8); // 9-16
+  return 18 + (index % 15); // 18-32 established
 }
 
 async function diversifyDirectoryServices(cleanerIds) {
@@ -750,7 +750,7 @@ function uniqueCommentFor(serviceType, ordinal, used) {
       return comment;
     }
   }
-  // Exhausted service pool — fall back to any unused global line.
+  // Exhausted service pool - fall back to any unused global line.
   for (const comment of RATING_COMMENTS_FALLBACK) {
     if (!used.has(comment)) {
       used.add(comment);
@@ -807,7 +807,7 @@ async function ensureCompletedBookingsForDirectory(cleanerIds) {
   if (!cleanerIds.length) return;
   const customerIds = await loadSeedProfileIds("customer");
   if (!customerIds.length) {
-    console.warn("No seed customers — cannot backfill directory reviews");
+    console.warn("No seed customers - cannot backfill directory reviews");
     return;
   }
 
@@ -980,7 +980,7 @@ async function seedRatings() {
     return;
   }
   if (!bookings?.length) {
-    console.log("No completed bookings — skip ratings");
+    console.log("No completed bookings - skip ratings");
     return;
   }
 
@@ -1055,7 +1055,7 @@ async function seedRatings() {
     const row = rows[i];
     const booking = bookingById.get(row.booking_id);
     if (!booking?.scheduled_date) continue;
-    // Postgres time may be "09:00:00" — only use HH:MM for the ISO stamp.
+    // Postgres time may be "09:00:00" - only use HH:MM for the ISO stamp.
     const time = String(booking.scheduled_start_time || "14:00").slice(0, 5);
     const created = new Date(`${booking.scheduled_date}T${time}:00.000Z`);
     created.setUTCHours(created.getUTCHours() + 3 + (i % 5));

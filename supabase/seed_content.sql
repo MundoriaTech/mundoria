@@ -25,7 +25,7 @@ insert into public.help_articles (collection_id, title, slug, summary, body, sor
   'How does payment and cancellation work?',
   'payment-and-cancellation',
   'We hold payment at booking and capture after the clean.',
-  E'## Payment hold\nMundoria authorises (holds) your card when you book. Funds are captured after the job is completed — not days early.\n\n## Cancellation fees\n- More than 48 hours before: usually free full release.\n- Within 48 hours: a partial fee may apply.\n- Within 24 hours: the full amount may be retained.\n\nExact timing is based on your scheduled start.',
+  E'## Payment hold\nMundoria authorises (holds) your card when you book. Funds are captured after the job is completed - not days early.\n\n## Cancellation fees\n- More than 48 hours before: usually free full release.\n- Within 48 hours: a partial fee may apply.\n- Within 24 hours: the full amount may be retained.\n\nExact timing is based on your scheduled start.',
   20
 ),
 (
@@ -33,7 +33,7 @@ insert into public.help_articles (collection_id, title, slug, summary, body, sor
   'How do I message my cleaner?',
   'how-do-i-message-my-cleaner',
   'In-app messaging after a cleaner is matched.',
-  E'## When messaging unlocks\nYou can message once a cleaner is assigned to your booking.\n\n## Where to find chat\nOpen the booking in your account and use Messages. Keep all communication on Mundoria — do not share personal phone numbers for off-platform payments.',
+  E'## When messaging unlocks\nYou can message once a cleaner is assigned to your booking.\n\n## Where to find chat\nOpen the booking in your account and use Messages. Keep all communication on Mundoria - do not share personal phone numbers for off-platform payments.',
   30
 ),
 (
@@ -57,7 +57,7 @@ insert into public.help_articles (collection_id, title, slug, summary, body, sor
   'How do job offers and checklists work?',
   'job-offers-and-checklists',
   'Respond promptly, follow the checklist, check in and out on site.',
-  E'## Job offers\nEligible jobs appear in your feed. Respond quickly — slow replies mean the customer may be matched elsewhere.\n\n## On the day\n- Travel to the address and check in within the geofence.\n- Complete the service checklist and upload photos if required.\n- Check out when finished so payment can be captured.',
+  E'## Job offers\nEligible jobs appear in your feed. Respond quickly - slow replies mean the customer may be matched elsewhere.\n\n## On the day\n- Travel to the address and check in within the geofence.\n- Complete the service checklist and upload photos if required.\n- Check out when finished so payment can be captured.',
   10
 );
 

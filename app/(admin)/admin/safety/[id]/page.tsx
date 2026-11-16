@@ -68,13 +68,13 @@ export default async function AdminSafetyDetailPage({
             <div>
               <dt className="text-muted-foreground">Raised by</dt>
               <dd className="font-medium">
-                {raiser?.full_name ?? "—"} ({alert.raised_by_role})
+                {raiser?.full_name ?? "-"} ({alert.raised_by_role})
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Contact</dt>
               <dd className="font-medium">
-                {raiser?.phone ?? "—"}
+                {raiser?.phone ?? "-"}
                 <br />
                 <span className="text-muted-foreground">{raiser?.email}</span>
               </dd>
@@ -87,7 +87,7 @@ export default async function AdminSafetyDetailPage({
             </div>
             <div className="sm:col-span-2">
               <dt className="text-muted-foreground">Address snapshot</dt>
-              <dd className="font-medium">{alert.address_line ?? "—"}</dd>
+              <dd className="font-medium">{alert.address_line ?? "-"}</dd>
             </div>
             {alert.outcome_notes ? (
               <div className="sm:col-span-2">
@@ -123,11 +123,11 @@ export default async function AdminSafetyDetailPage({
                   {String(booking.scheduled_start_time).slice(0, 5)}
                 </p>
                 <p>
-                  Customer: {booking.customer?.full_name ?? "—"} ·{" "}
+                  Customer: {booking.customer?.full_name ?? "-"} ·{" "}
                   {booking.customer?.phone ?? booking.customer?.email}
                 </p>
                 <p>
-                  Cleaner: {booking.cleaner?.full_name ?? "—"} ·{" "}
+                  Cleaner: {booking.cleaner?.full_name ?? "-"} ·{" "}
                   {booking.cleaner?.phone ?? booking.cleaner?.email}
                 </p>
               </div>

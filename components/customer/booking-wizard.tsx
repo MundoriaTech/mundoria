@@ -2322,7 +2322,7 @@ export function BookingWizard({
           backdrop="blur"
           onClose={() => {
             setSubtypePickerOpen(false);
-            // Cancel with no subtype chosen — fall back to house cleaning.
+            // Cancel with no subtype chosen - fall back to house cleaning.
             if (!draft.serviceType) {
               selectService("regular");
             }
@@ -2843,7 +2843,7 @@ function AddressStep({
   const serviceReady = selectedService != null;
   const roomsReady =
     !showHomeRooms || (bedrooms != null && bathrooms != null);
-  // House cleaning is the default — treat it as already chosen so rooms /
+  // House cleaning is the default - treat it as already chosen so rooms /
   // extras do not wait on a navbar click.
   const houseDefaultReady =
     serviceReady ||

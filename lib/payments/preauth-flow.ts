@@ -131,7 +131,7 @@ function londonHour(date: Date) {
   return hour;
 }
 
-/** True during UK quiet hours (22:00–08:00) for customer notifications. */
+/** True during UK quiet hours (22:00-08:00) for customer notifications. */
 export function isQuietHoursUk(date = new Date()) {
   const hour = londonHour(date);
   return hour >= QUIET_START_HOUR_UK || hour < QUIET_END_HOUR_UK;

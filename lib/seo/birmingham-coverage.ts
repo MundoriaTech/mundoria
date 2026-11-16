@@ -410,7 +410,7 @@ export function coverageZoneHubSlug(zone: BirminghamCoverageZone) {
 export function birminghamCompoundZones() {
   return birminghamTownZones().filter(
     (zone) =>
-      // Central folds into the Birmingham city hub — not its own place page.
+      // Central folds into the Birmingham city hub - not its own place page.
       zone.id !== "central" && !zoneMatchesExistingPlace(zone),
   );
 }
@@ -451,7 +451,7 @@ export function coverageZoneHref(zoneId: string, focus?: CoverageLinkFocus) {
   return `${coverageZonePath(zoneId)}${coverageFocusSearch(focus)}`;
 }
 
-/** Legacy `/wider/{zoneId}` path — keep only for permanent redirects. */
+/** Legacy `/wider/{zoneId}` path - keep only for permanent redirects. */
 export function coverageZoneLegacyWiderPath(zoneId: string): string {
   return `/cleaners/${LAUNCH_CITY.slug}/wider/${zoneId}`;
 }

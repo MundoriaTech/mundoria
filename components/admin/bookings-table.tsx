@@ -178,7 +178,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
                     {booking.id.slice(0, 8)}
                   </Link>
                 </td>
-                <td>{booking.customer?.full_name ?? "—"}</td>
+                <td>{booking.customer?.full_name ?? "-"}</td>
                 <td>{booking.cleaner_profile?.full_name ?? "Unassigned"}</td>
                 <td>{formatServiceName(booking.service_type)}</td>
                 <td>{booking.scheduled_date}</td>

@@ -74,7 +74,7 @@ export function locationFaqContext(place: string, path: string): LocationFaqCont
   return { kind: "place", place };
 }
 
-/** L01–L05 and L08 from the location FAQ standard. */
+/** L01-L05 and L08 from the location FAQ standard. */
 export function coreLocationFaqs(
   place: string,
   pricing: ServicePricingConfig = DEFAULT_SERVICE_PRICING,
@@ -134,7 +134,7 @@ export function coreLocationFaqs(
   ];
 }
 
-/** Two local questions per neighbourhood hub (pages 247–249 of the brief). */
+/** Two local questions per neighbourhood hub (pages 247-249 of the brief). */
 const ZONE_FAQS: Record<string, LocationFaq[]> = {
   central: [
     {

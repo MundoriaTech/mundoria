@@ -12,7 +12,7 @@ export type BookingCategoryOption = {
   value: ServiceCategory;
 };
 
-/** Main booking categories — not every catalogue niche. */
+/** Main booking categories - not every catalogue niche. */
 export const BOOKING_HEADER_CATEGORIES: BookingCategoryOption[] = [
   {
     description: "For your home, one-off or on a schedule.",

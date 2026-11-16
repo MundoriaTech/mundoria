@@ -60,7 +60,7 @@ type MarketingViewer = Pick<
 /**
  * Measured from Frame 105 (1024×92 export):
  * bar ~75px tall, corner radius ~18px (gently curved sides, not stadium),
- * lavender #e8e0f9, CTA pills ~26–36px with clear inset from the bar edges.
+ * lavender #e8e0f9, CTA pills ~26-36px with clear inset from the bar edges.
  * Mobile uses a shorter pill via --landing-nav-pill-h.
  */
 

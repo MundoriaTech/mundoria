@@ -80,13 +80,13 @@ const nextConfig = {
         destination: "/cleaning/:slug",
         permanent: true,
       },
-      // City hub is the category root — no /house-cleaning/birmingham twin
+      // City hub is the category root - no /house-cleaning/birmingham twin
       {
         source: "/house-cleaning/birmingham",
         destination: "/house-cleaning",
         permanent: true,
       },
-      // City Centre is not a separate location — fold into Birmingham hub
+      // City Centre is not a separate location - fold into Birmingham hub
       {
         source: "/house-cleaning/birmingham/birmingham-city-centre",
         destination: "/house-cleaning",
@@ -149,7 +149,7 @@ const nextConfig = {
         destination: "/house-cleaning/:town",
         permanent: true,
       },
-      // Birmingham neighbourhood hubs (not profiles — :area is one segment)
+      // Birmingham neighbourhood hubs (not profiles - :area is one segment)
       {
         source: "/cleaners/birmingham/:area",
         destination: "/house-cleaning/birmingham/:area",

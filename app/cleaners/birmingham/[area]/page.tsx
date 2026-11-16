@@ -6,7 +6,7 @@ type PageProps = {
   params: { area: string };
 };
 
-/** Former cleaners area hubs — merged into house-cleaning place pages. */
+/** Former cleaners area hubs - merged into house-cleaning place pages. */
 export default function BirminghamAreaCleanersRedirect({ params }: PageProps) {
   permanentRedirect(houseCleaningPlacePath(params.area));
 }

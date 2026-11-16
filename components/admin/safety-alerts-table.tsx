@@ -67,7 +67,7 @@ export function SafetyAlertsTable({ rows }: { rows: SafetyAlertRow[] }) {
                 ] ?? row.reason}
               </td>
               <td className="px-4 py-3">
-                {raiser?.full_name ?? "—"}{" "}
+                {raiser?.full_name ?? "-"}{" "}
                 <span className="text-xs text-muted-foreground">
                   ({row.raised_by_role})
                 </span>
@@ -81,7 +81,7 @@ export function SafetyAlertsTable({ rows }: { rows: SafetyAlertRow[] }) {
                 </Link>
               </td>
               <td className="max-w-[14rem] truncate px-4 py-3 text-muted-foreground">
-                {row.address_line ?? "—"}
+                {row.address_line ?? "-"}
               </td>
             </tr>
           );

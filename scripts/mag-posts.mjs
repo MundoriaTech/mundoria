@@ -1,5 +1,5 @@
 /**
- * Mundoria Mag seed posts — WeCasa-style guides + Unsplash stock covers.
+ * Mundoria Mag seed posts - WeCasa-style guides + Unsplash stock covers.
  * Imported by scripts/seed-content.mjs
  */
 
@@ -45,12 +45,12 @@ This guide gives you the sequence, a room checklist, and a clear handoff to Mund
 
 ## Should You Clean Room-by-Room or All at Once?
 
-**Room-by-room wins** for most Birmingham homes. Finish one space to a high standard before you move on — especially if you only have a few hours. “All at once” only works when you have a full team (or a pro booking) and can keep wet and dry zones separate.
+**Room-by-room wins** for most Birmingham homes. Finish one space to a high standard before you move on - especially if you only have a few hours. “All at once” only works when you have a full team (or a pro booking) and can keep wet and dry zones separate.
 
 ## What’s the Best Order for a Whole-Home Deep Clean?
 
 1. Declutter walkways and clear surfaces in every room you’ll clean
-2. Dust high areas — tops of frames, light fittings you can safely reach
+2. Dust high areas - tops of frames, light fittings you can safely reach
 3. Kitchen (grease first, floor last)
 4. Bathrooms (limescale and sanitise)
 5. Bedrooms and living rooms
@@ -84,21 +84,21 @@ This guide gives you the sequence, a room checklist, and a clear handoff to Mund
 | Home size | Typical DIY time | Mundoria tip |
 | --- | --- | --- |
 | 1-bed flat | Half a day | Often fits a focused deep-clean booking |
-| 2–3 bed terrace | Full day | Split kitchen/bath priority if time is short |
+| 2-3 bed terrace | Full day | Split kitchen/bath priority if time is short |
 | Larger family home | Weekend | Book longer or a multi-visit plan |
 
 ## How Do You Avoid Getting Overwhelmed?
 
-Set a timer per room, finish the checklist for that room, then move on. Don’t start the oven if the bathroom still isn’t done — incomplete rooms are what make deep cleans feel endless.
+Set a timer per room, finish the checklist for that room, then move on. Don’t start the oven if the bathroom still isn’t done - incomplete rooms are what make deep cleans feel endless.
 
 > **Pro Tip:** Note your top three priorities in a [Mundoria booking](/booking/new?service=deep_clean). Pros follow a checklist so time goes into cleaning, not guessing.
 
 ## When Should You Hand It Over?
 
-If grease has built up for months, you’re preparing for guests, or you need inventory-ready finishes, book [deep cleaning](/house-cleaning/deep) or [regular cleaning](/house-cleaning/regular) for the upkeep afterwards. See your estimate before you pay — then keep this checklist for the light top-ups between visits.`,
+If grease has built up for months, you’re preparing for guests, or you need inventory-ready finishes, book [deep cleaning](/house-cleaning/deep) or [regular cleaning](/house-cleaning/regular) for the upkeep afterwards. See your estimate before you pay - then keep this checklist for the light top-ups between visits.`,
     cover_url: IMG.roomDeep,
     excerpt:
-      "A practical room-by-room deep cleaning guide — sequence, checklists, and when to book a Mundoria deep clean.",
+      "A practical room-by-room deep cleaning guide - sequence, checklists, and when to book a Mundoria deep clean.",
     published: true,
     published_at: daysAgo(0),
     slug: "room-by-room-deep-cleaning-guide",
@@ -107,7 +107,7 @@ If grease has built up for months, you’re preparing for guests, or you need in
   {
     author_name: "Jess M.",
     category: "Cleaning Tips",
-    content: `Bathrooms look fine until limescale, soap scum and grout catch the light. A proper bathroom deep clean doesn’t need to take all day — but it does need the right order, a short dwell time for products, and a plan for what you wipe last.
+    content: `Bathrooms look fine until limescale, soap scum and grout catch the light. A proper bathroom deep clean doesn’t need to take all day - but it does need the right order, a short dwell time for products, and a plan for what you wipe last.
 
 Here’s a UK-friendly top-to-bottom method, a checklist you can reuse monthly, and when to put it on a Mundoria visit instead.
 
@@ -121,13 +121,13 @@ Work **top to bottom**, dry to wet:
 
 1. Clear products from the basin and bath edge
 2. Dust high areas and the extractor cover
-3. Spray and leave cleaner to dwell 10–15 minutes
+3. Spray and leave cleaner to dwell 10-15 minutes
 4. Scrub tiles, grout and screen
 5. Clean basin, taps and mirrors
 6. Toilet last
 7. Floor mop to finish
 
-![Leave bathroom cleaner to dwell before scrubbing — limescale and soap scum loosen faster.](/images/mag/bathroom.jpg "Top to bottom keeps dirty water off surfaces you’ve already finished.")
+![Leave bathroom cleaner to dwell before scrubbing - limescale and soap scum loosen faster.](/images/mag/bathroom.jpg "Top to bottom keeps dirty water off surfaces you’ve already finished.")
 
 ## Bathroom Deep Clean Checklist
 
@@ -142,12 +142,12 @@ Work **top to bottom**, dry to wet:
 
 ## What Products Help Most in Hard-Water Areas?
 
-Birmingham’s hard water means taps and screens need a descaler more often than soft-water cities. White vinegar solutions can help on glass and chrome — never mix vinegar with bleach. For fragrance-sensitive homes, note preferences when you [book](/booking/new).
+Birmingham’s hard water means taps and screens need a descaler more often than soft-water cities. White vinegar solutions can help on glass and chrome - never mix vinegar with bleach. For fragrance-sensitive homes, note preferences when you [book](/booking/new).
 
 | Task | DIY tip |
 | --- | --- |
 | Shower screen | Descale, then squeegee after each use |
-| Grout | Soft brush — avoid harsh scourers on cheap sealant |
+| Grout | Soft brush - avoid harsh scourers on cheap sealant |
 | Toilet | Bowl first, then seat and exterior |
 
 ## Common Mistakes
@@ -164,7 +164,7 @@ Birmingham’s hard water means taps and screens need a descaler more often than
 Before guests, after a neglected rental, or when limescale has hardened for months. Add bathroom priority notes on a [deep clean](/house-cleaning/deep) or [one-off clean](/house-cleaning/one-off), or keep bathrooms sharp with [regular cleaning](/house-cleaning/regular). Mundoria shows a clear estimate before you confirm.`,
     cover_url: IMG.bathroom,
     excerpt:
-      "How to deep clean a bathroom from top to bottom — monthly checklist, hard-water tips, and when to book Mundoria.",
+      "How to deep clean a bathroom from top to bottom - monthly checklist, hard-water tips, and when to book Mundoria.",
     published: true,
     published_at: daysAgo(0.5),
     slug: "how-to-deep-clean-bathroom",
@@ -173,7 +173,7 @@ Before guests, after a neglected rental, or when limescale has hardened for mont
   {
     author_name: "Priya S.",
     category: "Cleaning Tips",
-    content: `Homemade cleaning sprays are popular for a reason: fewer mystery fragrances, less plastic, and recipes that actually work when you match the ingredient to the job. They are not magic — and some mixes are unsafe — but a small set of DIY formulas covers most UK kitchens and bathrooms.
+    content: `Homemade cleaning sprays are popular for a reason: fewer mystery fragrances, less plastic, and recipes that actually work when you match the ingredient to the job. They are not magic - and some mixes are unsafe - but a small set of DIY formulas covers most UK kitchens and bathrooms.
 
 Below are practical recipes, where they shine, and what to avoid.
 
@@ -181,7 +181,7 @@ Below are practical recipes, where they shine, and what to avoid.
 
 Start with three: a **multi-surface spray**, a **bathroom descaler**, and a **kitchen degreaser**. That covers worktops, taps, splashbacks and most weekly messes.
 
-![A simple spray bottle and pantry staples cover most everyday cleaning jobs.](/images/mag/diy-spray.jpg "Label every bottle — vinegar and bleach should never meet.")
+![A simple spray bottle and pantry staples cover most everyday cleaning jobs.](/images/mag/diy-spray.jpg "Label every bottle - vinegar and bleach should never meet.")
 
 ## Homemade Multi-Surface Spray
 
@@ -196,7 +196,7 @@ Wipe with a microfibre cloth and dry shiny surfaces to avoid streaks.
 
 1. Equal parts white vinegar and water in a spray bottle
 2. Spray taps, screens and tile splash zones
-3. Leave 10–15 minutes
+3. Leave 10-15 minutes
 4. Agitate with a soft cloth or non-scratch pad
 5. Rinse and dry
 
@@ -208,7 +208,7 @@ Wipe with a microfibre cloth and dry shiny surfaces to avoid streaks.
 2. For stubborn hob grease, add a bicarbonate of soda paste, leave briefly, then wipe
 3. Rinse food-contact surfaces afterwards
 
-Baking soda and vinegar foam looks dramatic but is a weak cleaner once they neutralise each other — use them for agitation and rinse, not as a “super formula” left in a closed bottle.
+Baking soda and vinegar foam looks dramatic but is a weak cleaner once they neutralise each other - use them for agitation and rinse, not as a “super formula” left in a closed bottle.
 
 ## What Should You Avoid?
 
@@ -221,7 +221,7 @@ Baking soda and vinegar foam looks dramatic but is a weak cleaner once they neut
 | --- | --- |
 | Worktops (sealed) | Mild soapy water |
 | Glass / chrome | Diluted vinegar, then dry |
-| Wood furniture | Barely damp cloth — see our [wood guide](/blog/how-to-clean-wooden-furniture) |
+| Wood furniture | Barely damp cloth - see our [wood guide](/blog/how-to-clean-wooden-furniture) |
 | Stone (marble/limestone) | Avoid vinegar; use pH-neutral soap |
 
 ## When Are Shop Products Still Better?
@@ -231,7 +231,7 @@ Disinfecting after illness, oven interiors, and mould treatment often need purpo
 DIY sprays keep the weekly reset cheap and controlled. For the heavy resets, [book a Mundoria clean](/booking/new) and keep your homemade kit for the top-ups in between.`,
     cover_url: IMG.diySpray,
     excerpt:
-      "Practical DIY cleaning spray recipes for UK homes — multi-surface, descaler, degreaser, and the mixes to avoid.",
+      "Practical DIY cleaning spray recipes for UK homes - multi-surface, descaler, degreaser, and the mixes to avoid.",
     published: true,
     published_at: daysAgo(1),
     slug: "diy-cleaning-sprays-uk-guide",
@@ -246,17 +246,17 @@ This guide covers everyday UK laundry care, a stain-response order that actually
 
 ## What’s the Golden Rule for Stains?
 
-**Blot, don’t rub — and treat before you tumble-dry.** Heat sets many stains permanently. Check the care label, test treatments on a hidden seam, and wash on the coolest effective cycle for the fabric.
+**Blot, don’t rub - and treat before you tumble-dry.** Heat sets many stains permanently. Check the care label, test treatments on a hidden seam, and wash on the coolest effective cycle for the fabric.
 
-![Treat stains before heat — tumble-drying can set marks that were still removable.](/images/mag/laundry.jpg "Keep a small stain kit: mild detergent, bicarbonate and a soft cloth.")
+![Treat stains before heat - tumble-drying can set marks that were still removable.](/images/mag/laundry.jpg "Keep a small stain kit: mild detergent, bicarbonate and a soft cloth.")
 
 ## Everyday Laundry Habits That Prevent Remakes
 
-- Don’t overload the machine — clothes need water movement
+- Don’t overload the machine - clothes need water movement
 - Separate whites on first washes of new bedding
 - Empty pockets (pens destroy whole loads)
 - Shake out towels to reduce musty folds
-- Dry fully before cupboarding — damp storage causes smells
+- Dry fully before cupboarding - damp storage causes smells
 
 ## Quick Stain Response Guide
 
@@ -274,18 +274,18 @@ For gym kit, illness recovery, or cloths used in bathrooms, a hotter cycle (wher
 
 ## Silk, Suede and Delicates
 
-Delicate fibres need gentler rules — cool water, mild detergent, and often hand wash or a delicates bag. When in doubt, specialist cleaners beat a ruined blouse. For everyday cottons and polycottons, the blot-and-pretreat method above is enough.
+Delicate fibres need gentler rules - cool water, mild detergent, and often hand wash or a delicates bag. When in doubt, specialist cleaners beat a ruined blouse. For everyday cottons and polycottons, the blot-and-pretreat method above is enough.
 
 ## How This Links to Cleaner Visits
 
-Mundoria cleaners don’t replace your washing machine — but linen-ready homes finish faster. If you want beds remade, leave clean sets ready (hosts: keep two sets per bed — see [washing new bedding](/blog/should-you-wash-new-bedding)). Note laundry locations in the booking so time isn’t spent hunting cupboards.
+Mundoria cleaners don’t replace your washing machine - but linen-ready homes finish faster. If you want beds remade, leave clean sets ready (hosts: keep two sets per bed - see [washing new bedding](/blog/should-you-wash-new-bedding)). Note laundry locations in the booking so time isn’t spent hunting cupboards.
 
 > **Pro Tip:** Pre-treat stains the night before a turnover or guest arrival. Fresh bedding looks better in photos and reviews alike.
 
 Keep a small stain kit under the sink, wash smarter, and [book a clean](/booking/new) when you’d rather the surfaces and floors matched the fresh laundry pile.`,
     cover_url: IMG.laundry,
     excerpt:
-      "A practical UK laundry and stain guide — what to blot first, what heat ruins, and how linen prep helps Mundoria visits.",
+      "A practical UK laundry and stain guide - what to blot first, what heat ruins, and how linen prep helps Mundoria visits.",
     published: true,
     published_at: daysAgo(1.5),
     slug: "laundry-and-stain-removal-guide",
@@ -294,18 +294,18 @@ Keep a small stain kit under the sink, wash smarter, and [book a clean](/booking
   {
     author_name: "Aisha O.",
     category: "Cleaning Tips",
-    content: `Is your flat starting to look tired, but you only have a short window before guests arrive? You’re not alone. A focused two-hour clean can transform a home — as long as you know what realistically fits, and what doesn’t.
+    content: `Is your flat starting to look tired, but you only have a short window before guests arrive? You’re not alone. A focused two-hour clean can transform a home - as long as you know what realistically fits, and what doesn’t.
 
 Below, you’ll find a practical guide to what a Mundoria cleaner can usually complete in 120 minutes, how to brief the visit, and when you should book longer.
 
 ## What Usually Fits in Two Hours?
 
-Most Birmingham flats and smaller terraces respond brilliantly to a tight two-hour visit. The goal isn’t to deep-clean every cupboard — it’s to make the home feel reset where it matters most.
+Most Birmingham flats and smaller terraces respond brilliantly to a tight two-hour visit. The goal isn’t to deep-clean every cupboard - it’s to make the home feel reset where it matters most.
 
 Here’s what typically fits:
 
 1. Kitchen surfaces, hob, sink and a quick appliance wipe
-2. One bathroom — basin, toilet, shower or bath surround, and the floor
+2. One bathroom - basin, toilet, shower or bath surround, and the floor
 3. Living-room floors plus high-touch surfaces
 4. A tidy vacuum or mop pass through corridors
 
@@ -317,8 +317,8 @@ Moving heavy furniture, oven interiors, inside every cupboard, loft spaces, or a
 | --- | --- |
 | Flat tidy + kitchen + one bathroom | Yes |
 | Family home with pets | Often needs 3+ hours |
-| Oven interior + fridge interior | No — book a deep clean |
-| End of tenancy / inventory ready | No — book end-of-tenancy |
+| Oven interior + fridge interior | No - book a deep clean |
+| End of tenancy / inventory ready | No - book end-of-tenancy |
 
 ## In What Order Should the Cleaner Work?
 
@@ -340,10 +340,10 @@ Use the booking notes to name your **top three priorities**. Mundoria checklists
 
 Family homes with pets, post-party kitchens, or Recovery visits with mobility notes often need three hours or more. If you’re unsure, start with the estimate Mundoria shows and add time before you confirm.
 
-If you’d rather not race the clock yourself, [book a cleaner](/booking/new) and we’ll match someone who can fulfil in your area — with a clear estimate before you pay.`,
+If you’d rather not race the clock yourself, [book a cleaner](/booking/new) and we’ll match someone who can fulfil in your area - with a clear estimate before you pay.`,
     cover_url: IMG.hours,
     excerpt:
-      "Your home, sorted in no time — what realistically fits in a focused two-hour Mundoria visit (and what doesn’t).",
+      "Your home, sorted in no time - what realistically fits in a focused two-hour Mundoria visit (and what doesn’t).",
     published: true,
     published_at: daysAgo(1),
     slug: "what-can-a-cleaner-do-in-2-hours",
@@ -354,18 +354,18 @@ If you’d rather not race the clock yourself, [book a cleaner](/booking/new) an
     category: "Home Care",
     content: `Is your bedroom starting to feel more chaotic than calming? You’re not alone. Between busy schedules and everyday life, bedrooms collect clutter, dust and laundry faster than almost any other room.
 
-The good news: with a solid bedroom cleaning checklist, keeping your space fresh becomes second nature — no marathon sessions required. Below you’ll find a daily routine, a weekly clean, and a monthly deep-clean plan.
+The good news: with a solid bedroom cleaning checklist, keeping your space fresh becomes second nature - no marathon sessions required. Below you’ll find a daily routine, a weekly clean, and a monthly deep-clean plan.
 
 ## In What Order Should You Clean Your Bedroom?
 
 Work from **top to bottom** so dust that falls gets picked up when you do the floor.
 
-1. Declutter — rubbish, stray items and dirty clothes
-2. Strip the bed — sheets and pillowcases
-3. Dust surfaces — from light fixtures down to nightstands
-4. Wipe and sanitise — mirrors, switches, door handles
-5. Vacuum or mop — including under the bed
-6. Make the bed — with fresh bedding
+1. Declutter - rubbish, stray items and dirty clothes
+2. Strip the bed - sheets and pillowcases
+3. Dust surfaces - from light fixtures down to nightstands
+4. Wipe and sanitise - mirrors, switches, door handles
+5. Vacuum or mop - including under the bed
+6. Make the bed - with fresh bedding
 
 ![A freshly made bed is the fastest way to make a bedroom feel finished.](/images/mag/bedroom-made.jpg "A made bed resets the whole room in under two minutes.")
 
@@ -403,7 +403,7 @@ Once a week, set aside around 30 minutes for a proper reset.
 
 ## Monthly Deep Cleaning Bedroom Tasks
 
-Block out 60–90 minutes once a month for the jobs a weekly tidy can’t reach.
+Block out 60-90 minutes once a month for the jobs a weekly tidy can’t reach.
 
 - Vacuum and rotate the mattress
 - Wash pillows and mattress protectors (check care labels)
@@ -415,18 +415,18 @@ Block out 60–90 minutes once a month for the jobs a weekly tidy can’t reach.
 
 ## What Are the Rules of Smart Bedroom Cleaning?
 
-1. Clean from top to bottom — dust falls downward
+1. Clean from top to bottom - dust falls downward
 2. Let products sit briefly before scrubbing
 3. Tackle spills straight away
 4. Ventilate when using sprays
-5. Stay consistent — a little daily effort beats a huge monthly panic
+5. Stay consistent - a little daily effort beats a huge monthly panic
 
 > **Pro Tip:** Always start with the corner that feels most overwhelming. Momentum does half the work.
 
 If you’d rather keep the deep cleans off your weekend, [book a Mundoria cleaner](/booking/new) and keep the daily habits for yourself.`,
     cover_url: IMG.bedroom,
     excerpt:
-      "A complete daily, weekly and monthly bedroom cleaning checklist — so your sleep space stays calm without marathon sessions.",
+      "A complete daily, weekly and monthly bedroom cleaning checklist - so your sleep space stays calm without marathon sessions.",
     published: true,
     published_at: daysAgo(2),
     slug: "bedroom-cleaning-checklist",
@@ -435,17 +435,17 @@ If you’d rather keep the deep cleans off your weekend, [book a Mundoria cleane
   {
     author_name: "Jess M.",
     category: "Home Care",
-    content: `Wooden furniture brings warmth into a home — and UK central heating loves drying it out. Harsh sprays leave haze; too much water raises the grain. The good news is that everyday care is simple once you know the rules.
+    content: `Wooden furniture brings warmth into a home - and UK central heating loves drying it out. Harsh sprays leave haze; too much water raises the grain. The good news is that everyday care is simple once you know the rules.
 
 This complete UK-friendly guide covers weekly dusting, deeper refreshes, natural recipes, and what to avoid.
 
 ## What’s the Best Everyday Cleaner for Wood?
 
-For most **finished** wood, warm water with a few drops of mild washing-up liquid is all you need. Dip a soft cloth, wring it until it’s damp — not wet — and wipe gently along the grain. Dry immediately with a clean cloth.
+For most **finished** wood, warm water with a few drops of mild washing-up liquid is all you need. Dip a soft cloth, wring it until it’s damp - not wet - and wipe gently along the grain. Dry immediately with a clean cloth.
 
 Never soak the surface. Moisture left sitting on wood is what causes rings, swelling and dull patches.
 
-![Wipe wooden furniture along the grain with a barely damp cloth, then dry straight away.](/images/mag/wood-wipe.jpg "Damp — not wet — and always dry immediately.")
+![Wipe wooden furniture along the grain with a barely damp cloth, then dry straight away.](/images/mag/wood-wipe.jpg "Damp - not wet - and always dry immediately.")
 
 ## How Often Should You Dust Wooden Furniture?
 
@@ -453,7 +453,7 @@ Aim to dust at least once a week with a soft, lint-free microfibre cloth. Regula
 
 ## Can You Use Vinegar on Wooden Furniture?
 
-White vinegar can work as a natural cleaner, but it must be diluted. Never apply undiluted vinegar — the acidity can damage certain finishes over time.
+White vinegar can work as a natural cleaner, but it must be diluted. Never apply undiluted vinegar - the acidity can damage certain finishes over time.
 
 ### Natural polish recipe
 
@@ -462,11 +462,11 @@ White vinegar can work as a natural cleaner, but it must be diluted. Never apply
 3. Wipe along the wood grain
 4. Buff with a clean, dry cloth
 
-> **Important:** Always test any solution on a hidden spot first — especially on antique, shellac or French-polish finishes.
+> **Important:** Always test any solution on a hidden spot first - especially on antique, shellac or French-polish finishes.
 
 ## How Do You Remove Sticky Residue?
 
-Sticky patches are often old polish buildup or spills. Dab a little olive oil on the area, leave for a few minutes, then wipe with a dry cloth. For tougher residue, a damp cloth with a drop of washing-up liquid usually helps — then dry straight away.
+Sticky patches are often old polish buildup or spills. Dab a little olive oil on the area, leave for a few minutes, then wipe with a dry cloth. For tougher residue, a damp cloth with a drop of washing-up liquid usually helps - then dry straight away.
 
 ## What Should You Avoid?
 
@@ -478,9 +478,9 @@ Sticky patches are often old polish buildup or spills. Dab a little olive oil on
 
 ## Pine and Painted Wood
 
-Pine marks easily — spot-test cleaners underneath a shelf. Painted pieces usually prefer mild soap and water; never soak.
+Pine marks easily - spot-test cleaners underneath a shelf. Painted pieces usually prefer mild soap and water; never soak.
 
-If you’d rather leave the careful work to someone else, Mundoria cleaners can dust and safely wipe finished furniture as part of a booking checklist — restoration and antique conservation stay with specialists.`,
+If you’d rather leave the careful work to someone else, Mundoria cleaners can dust and safely wipe finished furniture as part of a booking checklist - restoration and antique conservation stay with specialists.`,
     cover_url: IMG.wood,
     excerpt:
       "The complete UK-friendly guide to cleaning wooden furniture without raising the grain or dulling the finish.",
@@ -492,7 +492,7 @@ If you’d rather leave the careful work to someone else, Mundoria cleaners can 
   {
     author_name: "Mundoria Team",
     category: "Cleaning Tips",
-    content: `A greasy hob and sticky splashback can make the whole home feel unsettled — even when the rest of the house is fine. A kitchen deep clean doesn’t have to be overwhelming if you follow a clear sequence.
+    content: `A greasy hob and sticky splashback can make the whole home feel unsettled - even when the rest of the house is fine. A kitchen deep clean doesn’t have to be overwhelming if you follow a clear sequence.
 
 Here’s how to tackle it top to bottom, what usually fits in a Mundoria visit, and when to book extra time.
 
@@ -507,7 +507,7 @@ Work **top to bottom**, and leave the floor until last so you’re not walking d
 5. Empty crumbs from toaster trays if accessible
 6. Vacuum edges, then mop the floor
 
-![A kitchen deep clean works best top to bottom — floors last so you are not walking dirt back in.](/images/mag/kitchen-sink.jpg "Clear the sink first so splashback and hob work stay efficient.")
+![A kitchen deep clean works best top to bottom - floors last so you are not walking dirt back in.](/images/mag/kitchen-sink.jpg "Clear the sink first so splashback and hob work stay efficient.")
 
 ## How Long Does a Kitchen Deep Clean Take?
 
@@ -533,7 +533,7 @@ A compact kitchen often fits into a two-hour visit alongside one bathroom. Large
 After festive cooking, before guests, or when grease has quietly built up for months. [Book a Mundoria clean](/booking/new), note “kitchen priority”, and we’ll show a clear estimate before you confirm.`,
     cover_url: IMG.kitchen,
     excerpt:
-      "A practical kitchen deep-clean sequence — timing, prep tips, and when to book extra hours on Mundoria.",
+      "A practical kitchen deep-clean sequence - timing, prep tips, and when to book extra hours on Mundoria.",
     published: true,
     published_at: daysAgo(4),
     slug: "kitchen-deep-clean-without-the-stress",
@@ -542,7 +542,7 @@ After festive cooking, before guests, or when grease has quietly built up for mo
   {
     author_name: "Priya S.",
     category: "Host Tips",
-    content: `Should you wash new bedding before the first night? In most cases, **yes**. New sheets can carry finishing chemicals, dust and dye residues. A first wash makes them softer — and kinder to sensitive skin, especially for guest stays.
+    content: `Should you wash new bedding before the first night? In most cases, **yes**. New sheets can carry finishing chemicals, dust and dye residues. A first wash makes them softer - and kinder to sensitive skin, especially for guest stays.
 
 ## Why Wash New Bedding First?
 
@@ -552,10 +552,10 @@ Manufacturers often treat fabrics so they look crisp on the shelf. Those finishe
 
 1. Check the care label for temperature
 2. Wash whites separately the first time
-3. Use a mild detergent — skip heavy fragrance if guests have allergies
+3. Use a mild detergent - skip heavy fragrance if guests have allergies
 4. Dry fully before the first night
 
-![Fresh bedding looks and feels better after a first wash — especially for guest stays.](/images/mag/linen-stack.jpg "Keep two full linen sets per bed for stress-free turnovers.")
+![Fresh bedding looks and feels better after a first wash - especially for guest stays.](/images/mag/linen-stack.jpg "Keep two full linen sets per bed for stress-free turnovers.")
 
 ## What About Airbnb and Short-Lets?
 
@@ -567,10 +567,10 @@ Keep at least **two full linen sets per bed** so one can wash while the other is
 
 Ask guests (politely in the house manual) to use coasters and report spills early. Keep a spare duvet cover for emergencies.
 
-If linen change is part of your Mundoria short-let booking, leave sets ready — we’ll follow the checklist so the next guest walks into a review-ready bed.`,
+If linen change is part of your Mundoria short-let booking, leave sets ready - we’ll follow the checklist so the next guest walks into a review-ready bed.`,
     cover_url: IMG.bedding,
     excerpt:
-      "Should you wash new bedding before use? Here’s what hosts and households should know — plus short-let linen tips.",
+      "Should you wash new bedding before use? Here’s what hosts and households should know - plus short-let linen tips.",
     published: true,
     published_at: daysAgo(5),
     slug: "should-you-wash-new-bedding",
@@ -581,7 +581,7 @@ If linen change is part of your Mundoria short-let booking, leave sets ready —
     category: "Cleaning Tips",
     content: `End-of-tenancy cleaning isn’t a slightly harder weekly tidy. Landlords and agents look for **inventory-ready** finishes: skirting, inside cupboards, appliance interiors and windowsills that a regular clean might skip.
 
-Use this checklist to brief your Mundoria booking — or to DIY with a clear plan.
+Use this checklist to brief your Mundoria booking - or to DIY with a clear plan.
 
 ## What’s on an End-of-Tenancy Checklist?
 
@@ -612,7 +612,7 @@ Mundoria checklists often include photo confirmation so you can show the agent w
 | --- | --- |
 | Keys-back date known | Book as soon as you can |
 | Same week | Slots go quickly in student corridors |
-| Property still full | Empty first — cleans finish sharper |
+| Property still full | Empty first - cleans finish sharper |
 
 > **Pro Tip:** Share condition photos in the booking notes. Cleaners can’t fix damaged carpets or broken appliances, but they can prioritise what still matters.
 
@@ -628,13 +628,13 @@ Mundoria checklists often include photo confirmation so you can show the agent w
   {
     author_name: "Daniel K.",
     category: "Home Care",
-    content: `Piles of paper and tangled cables on a home desk don’t just look messy — they raise cognitive load. Hybrid workers feel it most: the same corner has to be office and living room.
+    content: `Piles of paper and tangled cables on a home desk don’t just look messy - they raise cognitive load. Hybrid workers feel it most: the same corner has to be office and living room.
 
 A short weekly reset can make work-from-home feel calmer without a renovation.
 
 ## Why Does Clutter Affect Wellbeing?
 
-Visual noise competes for attention. Clearing one surface completely gives your eye a resting place — and makes it easier to start focused work.
+Visual noise competes for attention. Clearing one surface completely gives your eye a resting place - and makes it easier to start focused work.
 
 ## A 20-Minute Desk Reset
 
@@ -661,7 +661,7 @@ Vacuum under the desk and along cable runs. Crumbs and dust collect faster in wo
 If admin piles have spread into living rooms, a Mundoria one-off clean with “office corner priority” in the notes can reset the space while you tackle filing separately.`,
     cover_url: IMG.office,
     excerpt:
-      "How home-office clutter affects wellbeing — and a 20-minute reset that actually sticks.",
+      "How home-office clutter affects wellbeing - and a 20-minute reset that actually sticks.",
     published: true,
     published_at: daysAgo(7),
     slug: "office-clutter-and-wellbeing",
@@ -672,7 +672,7 @@ If admin piles have spread into living rooms, a Mundoria one-off clean with “o
     category: "Host Tips",
     content: `Guest turnovers around Birmingham’s Jewellery Quarter are time-boxed between late checkouts and early arrivals. Consistency beats heroic last-minute scrubs every time.
 
-Here’s how hosts keep a review-ready rhythm — and how Mundoria short-let cleans fit in.
+Here’s how hosts keep a review-ready rhythm - and how Mundoria short-let cleans fit in.
 
 ## Why Do Short-Lets Need a Different Rhythm?
 
@@ -685,7 +685,7 @@ Hotels have housekeeping teams on a fixed loop. Short-lets need the same reliabi
 - Linen change when sets are left ready
 - Photo confirmation for ops teams
 
-![A review-ready short-let reset is bathroom, kitchen, floors and linen — in that kind of rhythm.](/images/mag/linen-stack.jpg "Leave clean sets labelled so turnovers move faster.")
+![A review-ready short-let reset is bathroom, kitchen, floors and linen - in that kind of rhythm.](/images/mag/linen-stack.jpg "Leave clean sets labelled so turnovers move faster.")
 
 ## How Much Buffer Should You Leave?
 
@@ -693,8 +693,8 @@ Leave enough time between checkout and the next arrival for travel **plus** a fu
 
 | Buffer | Typical use |
 | --- | --- |
-| Under 2 hours | High risk — only for tiny studios with linen ready |
-| 3–4 hours | Comfortable for most city flats |
+| Under 2 hours | High risk - only for tiny studios with linen ready |
+| 3-4 hours | Comfortable for most city flats |
 | Same-day late checkout + early arrival | Book early and keep notes precise |
 
 ## House Manual Tips That Help Cleaners
@@ -703,10 +703,10 @@ Clear bin instructions, Wi-Fi notes and a short “how to leave the flat” list
 
 > **Pro Tip:** Keep a labelled linen cupboard. Mundoria turnovers move faster when clean sets are obvious.
 
-[Book an Airbnb & Shortlet clean](/booking/new) with lockbox details in the booking — not in a side chat.`,
+[Book an Airbnb & Shortlet clean](/booking/new) with lockbox details in the booking - not in a side chat.`,
     cover_url: IMG.shortlet,
     excerpt:
-      "Checklist-led guest resets for Birmingham short-lets — linen, bathrooms and a review-ready finish.",
+      "Checklist-led guest resets for Birmingham short-lets - linen, bathrooms and a review-ready finish.",
     published: true,
     published_at: daysAgo(8),
     slug: "airbnb-turnovers-jewellery-quarter",
@@ -719,7 +719,7 @@ Clear bin instructions, Wi-Fi notes and a short “how to leave the flat” list
 
 ## What’s the Harborne Pattern?
 
-A fortnightly rhythm — kitchen, bathrooms and floors — keeps family homes manageable between school runs and weekend plans.
+A fortnightly rhythm - kitchen, bathrooms and floors - keeps family homes manageable between school runs and weekend plans.
 
 ## Why Prefer the Same Cleaner?
 
@@ -727,7 +727,7 @@ Once you’re matched on Mundoria, you can ask to keep the same cleaner for recu
 
 ## How Do You Secure Weekend Slots?
 
-Weekend slots go quickly around family neighbourhoods. Set your recurring series early and update notes when priorities change — pets, school holidays, guests.
+Weekend slots go quickly around family neighbourhoods. Set your recurring series early and update notes when priorities change - pets, school holidays, guests.
 
 | Cadence | Best for |
 | --- | --- |
@@ -749,13 +749,13 @@ Enter your postcode, choose regular cleaning, and pick a Saturday window that fi
   {
     author_name: "Mundoria Team",
     category: "Home Care",
-    content: `There are seasons when keeping a home tidy simply costs more energy than you have — pregnancy, postpartum, hospital return or bereavement. Mundoria Recovery is built for those moments.
+    content: `There are seasons when keeping a home tidy simply costs more energy than you have - pregnancy, postpartum, hospital return or bereavement. Mundoria Recovery is built for those moments.
 
 We’re clear about one thing up front: **Recovery is cleaning with care, not healthcare.**
 
 ## What Is Recovery Cleaning?
 
-Practical upkeep — kitchens, bathrooms, floors and surfaces — following your notes and platform checklists, with extra attention to preferences that make the visit kinder.
+Practical upkeep - kitchens, bathrooms, floors and surfaces - following your notes and platform checklists, with extra attention to preferences that make the visit kinder.
 
 ## What Should You Share in Preferences?
 
@@ -779,7 +779,7 @@ Anything clinical stays with your care team. Share only what helps the visit run
 Choose Recovery when you book, add notes without pressure, and we’ll match with the care those visits need.`,
     cover_url: IMG.recovery,
     excerpt:
-      "Supportive cleans for pregnancy, postpartum, hospital discharge and bereavement — cleaning with care, not healthcare.",
+      "Supportive cleans for pregnancy, postpartum, hospital discharge and bereavement - cleaning with care, not healthcare.",
     published: true,
     published_at: daysAgo(10),
     slug: "what-recovery-cleaning-means",
@@ -788,7 +788,7 @@ Choose Recovery when you book, add notes without pressure, and we’ll match wit
   {
     author_name: "Lina T.",
     category: "Cleaner Stories",
-    content: `People ask what a day on Mundoria actually looks like. Here’s an honest walk-through — from the morning offer feed to checkout and payouts.
+    content: `People ask what a day on Mundoria actually looks like. Here’s an honest walk-through - from the morning offer feed to checkout and payouts.
 
 ## Morning: Choosing the Right Jobs
 
@@ -818,7 +818,7 @@ Completed jobs feed my Stripe Express payouts on the schedule I chose. No chasin
 Thinking of joining? Apply as a cleaner, complete onboarding and documents, then wait for approval. The Help Centre has the full partner guide.`,
     cover_url: IMG.cleaner,
     excerpt:
-      "From job offer to checklist checkout — how partners actually work a day on Mundoria.",
+      "From job offer to checklist checkout - how partners actually work a day on Mundoria.",
     published: true,
     published_at: daysAgo(11),
     slug: "day-in-the-life-mundoria-cleaner",
@@ -827,7 +827,7 @@ Thinking of joining? Apply as a cleaner, complete onboarding and documents, then
   {
     author_name: "Mundoria Team",
     category: "Cleaning Tips",
-    content: `The difference between a good clean and a great one often isn’t the cleaner — it’s the five minutes of prep before they arrive. A little decluttering means more time spent cleaning, not relocating laundry piles.
+    content: `The difference between a good clean and a great one often isn’t the cleaner - it’s the five minutes of prep before they arrive. A little decluttering means more time spent cleaning, not relocating laundry piles.
 
 ## What Should You Do Before the Cleaner Arrives?
 
@@ -839,7 +839,7 @@ Thinking of joining? Apply as a cleaner, complete onboarding and documents, then
 
 ## Why Does a Priority List Matter?
 
-If time is tight, cleaners need to know what matters most. Bathrooms and kitchen usually top the list — but Recovery preferences or guest bedrooms might come first for you.
+If time is tight, cleaners need to know what matters most. Bathrooms and kitchen usually top the list - but Recovery preferences or guest bedrooms might come first for you.
 
 | Prep step | Why it helps |
 | --- | --- |
@@ -862,11 +862,11 @@ After the clean, check live status, review photos if included, and keep the same
   {
     author_name: "Sofia N.",
     category: "Home Care",
-    content: `Strong cleaners can linger in flats with poor ventilation — and they’re tough on pregnancy, asthma and migraine-prone households. Fragrance-free cleaning isn’t a trend; it’s a practical kindness.
+    content: `Strong cleaners can linger in flats with poor ventilation - and they’re tough on pregnancy, asthma and migraine-prone households. Fragrance-free cleaning isn’t a trend; it’s a practical kindness.
 
 ## Why Does Fragrance-Free Matter?
 
-Scented products stack. Aerosol fresheners on top of scented sprays don’t remove the source of smells — they add more chemicals to the air.
+Scented products stack. Aerosol fresheners on top of scented sprays don’t remove the source of smells - they add more chemicals to the air.
 
 ## What Should You Request on Mundoria?
 
@@ -886,10 +886,10 @@ Add **fragrance-free** in preferences or special instructions. Recovery bookings
 
 > **Pro Tip:** For hosts, listing fragrance-free cleaning in your guest manual is a quiet five-star detail.
 
-Keep homes fresh without heavy scent — especially when someone in the household needs calmer air.`,
+Keep homes fresh without heavy scent - especially when someone in the household needs calmer air.`,
     cover_url: IMG.fragrance,
     excerpt:
-      "How to keep homes fresh without heavy scent — especially for sensitive households.",
+      "How to keep homes fresh without heavy scent - especially for sensitive households.",
     published: true,
     published_at: daysAgo(13),
     slug: "fragrance-free-cleaning-sensitive-homes",
@@ -898,7 +898,7 @@ Keep homes fresh without heavy scent — especially when someone in the househol
   {
     author_name: "Mundoria Team",
     category: "Local Life",
-    content: `Spilled cooking oil, last-minute guests, a chaotic week — Birmingham same-day cleans are for urgent resets, not your weekly rhythm.
+    content: `Spilled cooking oil, last-minute guests, a chaotic week - Birmingham same-day cleans are for urgent resets, not your weekly rhythm.
 
 ## When Does Same-Day Make Sense?
 
@@ -923,7 +923,7 @@ A focused visit with clear priorities. Deep oven cleans or full end-of-tenancy s
 If you need frequent urgent cleans, a fortnightly series usually costs less stress than repeated same-day bookings.`,
     cover_url: IMG.sameDay,
     excerpt:
-      "When a Birmingham same-day clean is worth it — and how to brief it well.",
+      "When a Birmingham same-day clean is worth it - and how to brief it well.",
     published: true,
     published_at: daysAgo(14),
     slug: "same-day-cleans-in-birmingham",
@@ -959,10 +959,10 @@ Book the clean for the gap between previous tenants leaving and your van arrivin
 
 > **Pro Tip:** Choose Mundoria moving-home services and add photos of oven or bathroom issues in the booking notes.
 
-Start the tenancy feeling settled — not scrubbing at midnight with a toothbrush.`,
+Start the tenancy feeling settled - not scrubbing at midnight with a toothbrush.`,
     cover_url: IMG.moveIn,
     excerpt:
-      "A renter’s move-in cleaning checklist — before the boxes hit the floor.",
+      "A renter’s move-in cleaning checklist - before the boxes hit the floor.",
     published: true,
     published_at: daysAgo(15),
     slug: "move-in-cleaning-checklist-for-renters",
@@ -971,7 +971,7 @@ Start the tenancy feeling settled — not scrubbing at midnight with a toothbrus
   {
     author_name: "Elena V.",
     category: "Host Tips",
-    content: `Reviews are won between stays. Guests notice bathrooms, bedding smell and whether the kitchen feels truly reset — not your clever welcome letter alone.
+    content: `Reviews are won between stays. Guests notice bathrooms, bedding smell and whether the kitchen feels truly reset - not your clever welcome letter alone.
 
 ## What Are the Non-Negotiables?
 
@@ -996,7 +996,7 @@ Spare toiletries, one spare duvet set, and dishwasher tablets prevent frantic sh
 
 > **Pro Tip:** Read review keywords monthly. If the same word appears twice, put it at the top of the next booking notes.
 
-Close the loop, keep the checklist boringly consistent, and five-star stays become the default — not a surprise.`,
+Close the loop, keep the checklist boringly consistent, and five-star stays become the default - not a surprise.`,
     cover_url: IMG.fiveStar,
     excerpt:
       "How short-let hosts keep five-star standards between guest stays.",
@@ -1008,7 +1008,7 @@ Close the loop, keep the checklist boringly consistent, and five-star stays beco
   {
     author_name: "Mundoria Team",
     category: "Company News",
-    content: `Welcome to Mundoria Mag — our home for practical cleaning guides, host tips, Birmingham neighbourhood notes and stories from cleaners on the platform.
+    content: `Welcome to Mundoria Mag - our home for practical cleaning guides, host tips, Birmingham neighbourhood notes and stories from cleaners on the platform.
 
 ## Why Did We Start a Magazine?
 
@@ -1024,14 +1024,14 @@ Booking a cleaner shouldn’t feel like filling in an insurance form, and cleane
 
 ## Where Are We Launching?
 
-We launch where we can fulfil reliably — central and south-west Birmingham first — then grow outward with the same standard.
+We launch where we can fulfil reliably - central and south-west Birmingham first - then grow outward with the same standard.
 
 > **Pro Tip:** Browse by category above, save the guides you need before a booking, and tell us what to write next via Contact us.
 
-Ready when you are — [book a clean](/booking/new) with a clear estimate before you confirm.`,
+Ready when you are - [book a clean](/booking/new) with a clear estimate before you confirm.`,
     cover_url: IMG.welcome,
     excerpt:
-      "Why we built Mundoria Mag — clearer booking, fairer cleaner tools, and cleaning guides that fit real life.",
+      "Why we built Mundoria Mag - clearer booking, fairer cleaner tools, and cleaning guides that fit real life.",
     published: true,
     published_at: daysAgo(18),
     slug: "welcome-to-mundoria-mag",
@@ -1044,7 +1044,7 @@ Ready when you are — [book a clean](/booking/new) with a clear estimate before
 
 ## Why Switch to Mundoria?
 
-Mundoria shows the job scope before I accept. I can see the checklist, the area and the timing — then say yes only when it fits.
+Mundoria shows the job scope before I accept. I can see the checklist, the area and the timing - then say yes only when it fits.
 
 ## What Do I Look for in an Offer?
 
@@ -1078,7 +1078,7 @@ If you’re considering the switch, the Help Centre’s “Become a Mundoria cle
 
 ## Why Does Recurring Beat Last-Minute Scrambles?
 
-Heroic weekend blitzes feel productive — until you’re exhausted and still hunting for the vacuum. A steady series keeps grease, dust and laundry piles from becoming a crisis.
+Heroic weekend blitzes feel productive - until you’re exhausted and still hunting for the vacuum. A steady series keeps grease, dust and laundry piles from becoming a crisis.
 
 ## How Do You Choose a Cadence?
 
@@ -1148,7 +1148,7 @@ If your home needs a proper reset first, start with a [deep clean](/house-cleani
 
 ## The Real Worry: Letting a Stranger Into Your Home
 
-![A Mundoria cleaner on the way — you should know who’s coming before they arrive.](/images/mag/regular-birmingham-vetted.jpg "Vetted cleaners and live booking status take the guesswork out of who is coming.")
+![A Mundoria cleaner on the way - you should know who’s coming before they arrive.](/images/mag/regular-birmingham-vetted.jpg "Vetted cleaners and live booking status take the guesswork out of who is coming.")
 
 This is what most people don’t say out loud. You’re not only wondering whether the oven gets cleaned. You’re wondering who is coming into your home.
 
@@ -1216,7 +1216,7 @@ Yes. You can book a single visit and decide afterwards whether a schedule suits 
 
 ## Get Your Weekends Back
 
-![A calm, tidy home — the point of regular cleaning is getting your Saturdays back.](/images/mag/regular-birmingham-home.jpg "A clean home shouldn’t cost you your Saturdays.")
+![A calm, tidy home - the point of regular cleaning is getting your Saturdays back.](/images/mag/regular-birmingham-home.jpg "A clean home shouldn’t cost you your Saturdays.")
 
 A clean home shouldn’t cost you your Saturdays.
 

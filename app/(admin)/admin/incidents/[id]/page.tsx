@@ -33,7 +33,7 @@ export default async function AdminIncidentDetailPage({
           dateStyle: "medium",
           timeStyle: "short",
         })
-      : "—";
+      : "-";
 
   return (
     <div className="space-y-6">
@@ -65,7 +65,7 @@ export default async function AdminIncidentDetailPage({
                       {cleaner.full_name ?? "Cleaner"}
                     </Link>
                   ) : (
-                    "—"
+                    "-"
                   )}
                   <br />
                   <span className="font-normal text-muted-foreground">
@@ -86,7 +86,7 @@ export default async function AdminIncidentDetailPage({
               </div>
               <div>
                 <dt className="text-muted-foreground">Location</dt>
-                <dd className="font-medium">{incident.location_note ?? "—"}</dd>
+                <dd className="font-medium">{incident.location_note ?? "-"}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Emergency services</dt>

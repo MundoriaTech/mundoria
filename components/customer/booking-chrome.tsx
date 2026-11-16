@@ -36,7 +36,7 @@ export function BookingChrome({
   onBack: () => void;
   /** When set, logo abandons the booking flow instead of a plain home link. */
   onHome?: () => void;
-  /** 0–1 progress through the booking funnel; omit to hide the bar. */
+  /** 0-1 progress through the booking funnel; omit to hide the bar. */
   progress?: number | null;
   /** e.g. "Step 2 of 8" shown above the bar. */
   progressLabel?: string | null;

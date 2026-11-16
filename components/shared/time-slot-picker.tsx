@@ -7,7 +7,7 @@ export type TimeSlotAvailability =
   | Record<string, string[]>
   | ((date: string) => string[]);
 
-/** Daytime bookable window: 07:00–23:00 (16 hours). */
+/** Daytime bookable window: 07:00-23:00 (16 hours). */
 export const DAY_WINDOW_START_MINUTES = 7 * 60;
 export const DAY_WINDOW_END_MINUTES = 23 * 60;
 

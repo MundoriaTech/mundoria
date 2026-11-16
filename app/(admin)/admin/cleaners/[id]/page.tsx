@@ -290,7 +290,7 @@ export default async function AdminCleanerPage({
         meta={[
           {
             label: "Application reference",
-            value: cleaner.application_reference ?? "—",
+            value: cleaner.application_reference ?? "-",
           },
           {
             label: "Verification flags",
@@ -361,9 +361,9 @@ export default async function AdminCleanerPage({
         rows={(medallionEvents ?? []).map((item) => [
           new Date(item.created_at).toLocaleDateString("en-GB"),
           item.event_type.replaceAll("_", " "),
-          `${item.score_before ?? "—"} → ${item.score_after ?? "—"}`,
-          `${item.tier_before ?? "—"} → ${item.tier_after ?? "—"}`,
-          item.notes ?? "—",
+          `${item.score_before ?? "-"} → ${item.score_after ?? "-"}`,
+          `${item.tier_before ?? "-"} → ${item.tier_after ?? "-"}`,
+          item.notes ?? "-",
         ])}
         title="Account history"
       />
@@ -392,9 +392,9 @@ export default async function AdminCleanerPage({
         rows={(ratings ?? []).map((item) => [
           new Date(item.created_at).toLocaleDateString("en-GB"),
           item.mood ?? item.overall_score,
-          item.internal_score ?? "—",
+          item.internal_score ?? "-",
           item.application_status ?? "applied",
-          item.comment ?? "—",
+          item.comment ?? "-",
         ])}
         title="Mood ratings"
       />

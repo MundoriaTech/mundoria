@@ -79,7 +79,7 @@ export function ReceiptsList({ receipts }: { receipts: ReceiptBooking[] }) {
             <td>
               {booking.address
                 ? `${booking.address.city}, ${booking.address.postcode}`
-                : "—"}
+                : "-"}
             </td>
             <td>
               <PriceDisplay amount={booking.amount_total} />

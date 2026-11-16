@@ -67,7 +67,7 @@ export async function POST(request: Request) {
   if (created?.user) {
     userId = created.user.id;
   } else if (createError?.message.toLowerCase().includes("already")) {
-    // Invite was sent to an existing customer/cleaner — promote that account.
+    // Invite was sent to an existing customer/cleaner - promote that account.
     const { data: existingProfile } = await admin
       .from("profiles")
       .select("id, role")

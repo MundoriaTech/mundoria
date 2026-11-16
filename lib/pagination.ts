@@ -89,5 +89,5 @@ export function rangeLabel(
   const safe = clampPage(page, pages);
   const start = (safe - 1) * pageSize + 1;
   const end = Math.min(safe * pageSize, totalItems);
-  return `${start}–${end} of ${totalItems}`;
+  return `${start}-${end} of ${totalItems}`;
 }

@@ -155,7 +155,7 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
               · {promo.uses_count}/{promo.max_uses ?? "∞"} uses
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {promo.valid_from?.slice(0, 10) ?? "Now"} –{" "}
+              {promo.valid_from?.slice(0, 10) ?? "Now"} -{" "}
               {promo.valid_until?.slice(0, 10) ?? "No expiry"}
             </p>
           </div>
@@ -187,7 +187,7 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
                   {promo.uses_count}/{promo.max_uses ?? "∞"}
                 </td>
                 <td>
-                  {promo.valid_from?.slice(0, 10) ?? "Now"} –{" "}
+                  {promo.valid_from?.slice(0, 10) ?? "Now"} -{" "}
                   {promo.valid_until?.slice(0, 10) ?? "No expiry"}
                 </td>
                 <td>

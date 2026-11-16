@@ -77,7 +77,7 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
         <Fact label="Area" value={area} />
         <Fact
           label="Your pay"
-          value={job.amount_cleaner ? formatMoney(job.amount_cleaner) : "—"}
+          value={job.amount_cleaner ? formatMoney(job.amount_cleaner) : "-"}
         />
       </dl>
 

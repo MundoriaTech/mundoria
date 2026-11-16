@@ -326,7 +326,7 @@ class _DiaryBoardState extends State<DiaryBoard> {
             for (final event in events)
               _line(
                 '${(event as Map)['title']}',
-                '${event['starts_at']} – ${event['ends_at']}',
+                '${event['starts_at']} - ${event['ends_at']}',
                 onDelete: () => _run(
                   () => MundoriaApi(widget.session).delete(
                     '/api/cleaner/diary?id=${event['id']}',
@@ -336,7 +336,7 @@ class _DiaryBoardState extends State<DiaryBoard> {
             for (final absence in absences)
               _line(
                 'Time off',
-                '${(absence as Map)['starts_on']} – ${absence['ends_on']}',
+                '${(absence as Map)['starts_on']} - ${absence['ends_on']}',
                 onDelete: () => _run(
                   () => MundoriaApi(widget.session).delete(
                     '/api/cleaner/absence?id=${absence['id']}',
@@ -446,7 +446,7 @@ const _exam = [
     'Neighbours may lend supplies',
   ]),
   _ExamQuestion('accept', 'When you receive a job offer, you should:', [
-    'Ignore it — Mundoria will auto-assign',
+    'Ignore it - Mundoria will auto-assign',
     'Accept or decline within the respond-by window',
     'Message the customer off-platform first',
     'Show up without confirming',

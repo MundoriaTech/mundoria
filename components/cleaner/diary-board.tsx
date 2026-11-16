@@ -113,7 +113,7 @@ function heading(view: View, from: string, to: string) {
   }
   const startMonth = start.toLocaleDateString("en-GB", { month: "long" });
   const endMonth = end.toLocaleDateString("en-GB", { month: "long" });
-  if (startMonth === endMonth) return `${start.getDate()}–${end.getDate()} ${startMonth}`;
+  if (startMonth === endMonth) return `${start.getDate()}-${end.getDate()} ${startMonth}`;
   return `${start.getDate()} ${startMonth}, ${end.getDate()} ${endMonth}`;
 }
 
@@ -738,7 +738,7 @@ function DayAgenda({
               <div>
                 <p className="text-sm font-semibold text-[#7a3b28]">{event.title}</p>
                 <p className="text-sm text-[#7a3b28]/80">
-                  {clockFromDate(event.starts_at)}–{clockFromDate(event.ends_at)} · your plan
+                  {clockFromDate(event.starts_at)}-{clockFromDate(event.ends_at)} · your plan
                   {overlapsJob(event, jobs) ? " · overlaps a visit" : ""}
                 </p>
               </div>

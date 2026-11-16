@@ -143,6 +143,66 @@ export const landingCategoryNav = [
       "The cleaner arrives already briefed",
     ],
   },
+  {
+    bookCategory: "residential",
+    bookLabel: "Book a clean with extras",
+    description: "Add-ons you can include when you book",
+    href: "/cleaning#extras-add-ons",
+    pageLabel: "See all extras",
+    items: [
+      {
+        description: "Pressing and folding during the visit",
+        href: "/ironing",
+        label: "Ironing",
+      },
+      {
+        description: "Wash, dry and fold as part of the clean",
+        href: "/laundry-cleaning",
+        label: "Laundry",
+      },
+      {
+        description: "Interior oven clean added to your booking",
+        href: "/oven-cleaning",
+        label: "Oven cleaning",
+      },
+      {
+        description: "Interior fridge clean as an add-on",
+        href: "/fridge-cleaning",
+        label: "Fridge cleaning",
+      },
+      {
+        description: "Interior glass and sill cleaning",
+        href: "/window-cleaning",
+        label: "Window cleaning",
+      },
+      {
+        description: "Extra bathroom detail and limescale care",
+        href: "/bathroom-cleaning",
+        label: "Bathroom cleaning",
+      },
+      {
+        description: "Inside cupboards and cabinets",
+        href: "/cabinet-cleaning",
+        label: "Cabinet cleaning",
+      },
+      {
+        description: "Light balcony or patio tidy",
+        href: "/patio-cleaning",
+        label: "Patio cleaning",
+      },
+      {
+        description: "Bed linen change for short-let turnovers",
+        href: "/linen-change",
+        label: "Linen change",
+      },
+    ],
+    label: "Extras",
+    notes: [
+      "Add extras when you book a home clean",
+      "Time is added so the visit stays realistic",
+      "Clear estimate before you confirm",
+    ],
+  },
 ] as const;
 
 /** Hover mega-panel items for Services (WeCasa-style). */

@@ -1,4 +1,4 @@
-/** Upload a file to Supabase Storage with XHR progress (0–100). */
+/** Upload a file to Supabase Storage with XHR progress (0-100). */
 export function uploadWithProgress({
   accessToken,
   anonKey,

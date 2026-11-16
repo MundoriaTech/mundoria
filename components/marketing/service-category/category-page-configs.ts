@@ -117,7 +117,7 @@ export const RECOVERY_PAGE: ServiceCategoryMarketingConfig = {
   faqs: [
     {
       answer:
-        "Recovery cleaning is for times when life changes — pregnancy, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
+        "Recovery cleaning is for times when life changes - pregnancy, hospital discharge, bereavement and more. It is not healthcare, nursing or personal care.",
       question: "What is recovery cleaning?",
       services: [
         {

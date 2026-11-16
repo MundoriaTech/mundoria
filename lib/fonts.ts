@@ -2,7 +2,7 @@ import localFont from "next/font/local";
 
 /**
  * Site typography (Sora). Self-hosted so `next build` does not depend on
- * Google Fonts — Google sometimes returns extensionless kit URLs that crash
+ * Google Fonts - Google sometimes returns extensionless kit URLs that crash
  * next/font/google on Next 14 (TypeError … reading '1').
  */
 export const sora = localFont({

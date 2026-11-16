@@ -20,7 +20,7 @@ export type AbandonedBookingLeadRow = {
 };
 
 function formatWhen(iso: string | null) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleString("en-GB", {
     day: "numeric",
     hour: "2-digit",
@@ -31,7 +31,7 @@ function formatWhen(iso: string | null) {
 }
 
 function stepLabel(step: string | null) {
-  if (!step) return "—";
+  if (!step) return "-";
   return step.replaceAll("_", " ");
 }
 
@@ -75,7 +75,7 @@ export function AbandonedBookingLeadsTable({
               <td className="px-4 py-3 capitalize">
                 {stepLabel(row.current_step)}
               </td>
-              <td className="px-4 py-3">{row.service_label ?? "—"}</td>
+              <td className="px-4 py-3">{row.service_label ?? "-"}</td>
               <td className="px-4 py-3">
                 {row.user_id ? (
                   <Link

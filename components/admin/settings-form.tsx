@@ -387,7 +387,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               value={settings.payment_preauth_hours_before}
             />
           </Field>
-          <Field label="Capture hour (UK, 0–23)">
+          <Field label="Capture hour (UK, 0-23)">
             <Input
               max={23}
               min={0}
@@ -401,7 +401,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               value={settings.payment_capture_hour_uk}
             />
           </Field>
-          <Field label="Capture minute (UK, 0–59)">
+          <Field label="Capture minute (UK, 0-59)">
             <Input
               max={59}
               min={0}

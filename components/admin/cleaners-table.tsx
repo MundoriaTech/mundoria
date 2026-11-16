@@ -181,7 +181,7 @@ export function CleanersTable({
                   ) : null}
                   <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span>
-                      {status ? adminCleanerStatusLabel(status) : "—"}
+                      {status ? adminCleanerStatusLabel(status) : "-"}
                     </span>
                     <span>
                       Score {cleaner.cleaner_profiles?.medallion_score ?? 0}
@@ -243,12 +243,12 @@ export function CleanersTable({
                       </span>
                     </div>
                   </td>
-                  <td>{cleaner.phone || "—"}</td>
+                  <td>{cleaner.phone || "-"}</td>
                   <td className="max-w-[12rem]">
                     {areas ? (
                       <span className="line-clamp-2">{areas}</span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground"> - </span>
                     )}
                   </td>
                   <td>
@@ -258,7 +258,7 @@ export function CleanersTable({
                         tier={cleaner.cleaner_profiles.tier}
                       />
                     ) : (
-                      "—"
+                      "-"
                     )}
                   </td>
                   <td>{cleaner.cleaner_profiles?.medallion_score ?? 0}</td>
@@ -268,7 +268,7 @@ export function CleanersTable({
                       ? adminCleanerStatusLabel(
                           cleaner.cleaner_profiles.status,
                         )
-                      : "—"}
+                      : "-"}
                     {cleaner.cleaner_profiles?.onboarding_complete === false ? (
                       <span className="mt-1 block text-xs text-muted-foreground">
                         Onboarding incomplete

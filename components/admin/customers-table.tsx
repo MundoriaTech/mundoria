@@ -64,7 +64,7 @@ function AddressCell({
   extraCount: number;
   label: string | null;
 }) {
-  if (!label) return <span className="text-muted-foreground">—</span>;
+  if (!label) return <span className="text-muted-foreground"> - </span>;
   return (
     <span>
       <span className="line-clamp-2">{label}</span>
@@ -170,7 +170,7 @@ export function CustomersTable({
                     {customer.email}
                   </small>
                 </td>
-                <td>{customer.phone || "—"}</td>
+                <td>{customer.phone || "-"}</td>
                 <td className="max-w-[14rem] py-3 pr-3">
                   <AddressCell
                     extraCount={customer.extraAddressCount}

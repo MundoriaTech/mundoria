@@ -294,8 +294,8 @@ export const EMERGENCY_FAQS = [
 /** Preferred weekly volume (guides matching, not a hard cap). */
 export const PREFERRED_HOURS_BANDS = [
   { label: "Up to 10 hours", value: "up_to_10" },
-  { label: "10–20 hours", value: "10_20" },
-  { label: "20–30 hours", value: "20_30" },
+  { label: "10-20 hours", value: "10_20" },
+  { label: "20-30 hours", value: "20_30" },
   { label: "30+ hours", value: "30_plus" },
   { label: "Flexible", value: "flexible" },
 ] as const;

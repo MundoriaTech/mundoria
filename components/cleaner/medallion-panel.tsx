@@ -92,18 +92,18 @@ export function CleanerMedallionPanel({
       <div className="mt-4 grid grid-cols-3 gap-2 border-t border-[#f0edf5] pt-3.5 text-center">
         <Metric
           label="Rating"
-          value={hasCompletedJobs ? `${rating}/5` : "—"}
+          value={hasCompletedJobs ? `${rating}/5` : "-"}
         />
         <Metric
           label="On time"
-          value={hasCompletedJobs ? `${onTimeRate}%` : "—"}
+          value={hasCompletedJobs ? `${onTimeRate}%` : "-"}
         />
         <Metric
           label="Accept"
           value={
             hasCompletedJobs || Number(acceptanceRate) !== 100
               ? `${acceptanceRate}%`
-              : "—"
+              : "-"
           }
         />
       </div>
