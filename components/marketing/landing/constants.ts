@@ -36,14 +36,19 @@ export const landingCategoryNav = [
         label: "Regular cleaning",
       },
       {
-        description: "Ready to leave, or ready to arrive",
-        href: "/moving-cleaning/move-in-move-out",
-        label: "Move-in / move-out",
-      },
-      {
         description: "A single visit when you need it",
         href: "/house-cleaning/one-off",
         label: "One-off cleaning",
+      },
+      {
+        description: "A thorough reset for neglected areas",
+        href: "/house-cleaning/deep",
+        label: "Deep cleaning",
+      },
+      {
+        description: "Ready to leave, or ready to arrive",
+        href: "/moving-cleaning/move-in-move-out",
+        label: "Move-in / move-out",
       },
       {
         description: "For the checkout inspection",

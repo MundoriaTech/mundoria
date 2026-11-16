@@ -75,7 +75,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
   return [
     {
       description:
-        "Homes, flats and guest turns, everyday upkeep through to deeper resets.",
+        "Homes and flats — everyday upkeep through to deeper resets.",
       href: "/house-cleaning",
       label: "House Cleaning",
       soft: "#efe6ff",
@@ -104,13 +104,32 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
             seedService: "deep_clean",
           },
         ]),
+      ],
+    },
+    {
+      description:
+        "End of tenancy, move-in and move-out when you’re changing homes.",
+      href: "/moving-cleaning",
+      label: "Moving Home",
+      soft: "#f7f0d8",
+      services: [
         bookable("move_in", bookingHref),
         bookable("end_of_tenancy", bookingHref),
+      ],
+    },
+    {
+      description:
+        "Guest-ready turnovers for Airbnb, shortlets and serviced stays.",
+      href: "/airbnb-cleaning",
+      label: "Airbnb & Short Lets",
+      soft: "#f0e4f8",
+      services: [
         bookable(
           "airbnb_turnover",
           bookingHref,
           "Airbnb/Shortlet Cleaning",
         ),
+        bookable("serviced_accommodation", bookingHref),
       ],
     },
     {
@@ -124,7 +143,6 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
         bookable("retail_hospitality", bookingHref),
         bookable("educational_facility", bookingHref),
         bookable("communal_area", bookingHref),
-        bookable("serviced_accommodation", bookingHref),
       ],
     },
     {
@@ -132,7 +150,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
         "Cleaning that adapts when life does, with more personal consideration.",
       href: "/recovery-cleaning",
       label: "Recovery cleaning",
-      soft: "#f0e4f8",
+      soft: "#efe6ff",
       services: [
         ...pageOnly(bookingHref, [
           {
@@ -158,7 +176,7 @@ function buildGroups(bookingHref: string): ServiceGroup[] {
     {
       description:
         "Optional extras you can add when you book — ironing, laundry, ovens and more.",
-      href: "/domestic-cleaning",
+      href: "/ironing",
       label: "Extras & add-ons",
       soft: "#e8f0e9",
       services: standaloneExtraPages().map((page) => ({

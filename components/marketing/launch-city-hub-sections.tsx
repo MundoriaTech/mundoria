@@ -3,10 +3,7 @@ import {
   CategoryMagLinks,
   magCategoryFor,
 } from "@/components/marketing/category-mag-links";
-import {
-  BrandedCardLink,
-  BrandedSection,
-} from "@/components/marketing/branded-page-sections";
+import { BrandedSection } from "@/components/marketing/branded-page-sections";
 import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
 import { CategoryServicesCarousel } from "@/components/marketing/service-category/category-services-carousel";
 import {
@@ -28,13 +25,11 @@ import {
   locationFaqs,
 } from "@/lib/seo/location-faqs";
 import {
-  BIRMINGHAM_AREAS,
   LAUNCH_CITY,
   publicMarketingServices,
   type MarketingArea,
   type MarketingService,
 } from "@/lib/seo/marketing";
-import { coverageFocusSearch } from "@/lib/seo/birmingham-coverage";
 import type { ServiceCategory } from "@/types/customer";
 
 const PLACE = LAUNCH_CITY.name;
@@ -108,7 +103,6 @@ export async function LaunchCityHubSections({
   categoryFocus,
   cleanerLimit = 24,
   serviceFocus,
-  showAreaCards = true,
   showCategoryServices = false,
   showFaqs = true,
   showFeatured = true,
@@ -128,7 +122,6 @@ export async function LaunchCityHubSections({
   categoryFocus?: HubCategory;
   cleanerLimit?: number;
   serviceFocus?: MarketingService;
-  showAreaCards?: boolean;
   showCategoryServices?: boolean;
   showFaqs?: boolean;
   showFeatured?: boolean;
@@ -246,33 +239,6 @@ export async function LaunchCityHubSections({
         showNearbyTowns={listNearbyTowns}
         surroundingLinks={surroundingLinks}
       />
-
-      {showAreaCards ? (
-        <BrandedSection>
-          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
-            Neighbourhoods we prioritise
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5a5470]">
-            {place === PLACE
-              ? "Mundoria cleaners are available in these Birmingham areas and their surroundings:"
-              : `Priority neighbourhoods near ${place} and across Birmingham:`}
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {BIRMINGHAM_AREAS.map((area) => (
-              <BrandedCardLink
-                description={area.description}
-                href={`${cleanerPlacePath(area.slug)}${coverageFocusSearch({
-                  category: categoryFocus,
-                  serviceSlug: serviceFocus?.slug,
-                })}`}
-                key={area.slug}
-                label={area.name}
-                meta={place}
-              />
-            ))}
-          </div>
-        </BrandedSection>
-      ) : null}
 
       {priorityArea && !serviceFocus ? (
         <BrandedSection tone="cream">

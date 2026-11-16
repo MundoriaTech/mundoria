@@ -9,10 +9,12 @@ export function MovingHomeCleaningPage({
   bookingHref,
   cleaners = [],
   reviews = [],
+  showFaqs = true,
 }: {
   bookingHref: string;
   cleaners?: FeaturedCleanerCardData[];
   reviews?: LandingReview[];
+  showFaqs?: boolean;
 }) {
   return (
     <ServiceCategoryMarketingPage
@@ -20,6 +22,7 @@ export function MovingHomeCleaningPage({
       cleaners={cleaners}
       config={MOVING_HOME_PAGE}
       reviews={reviews}
+      showFaqs={showFaqs}
     />
   );
 }

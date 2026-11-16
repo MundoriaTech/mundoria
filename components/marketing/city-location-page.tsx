@@ -197,7 +197,6 @@ export async function CityLocationPage({
           placesNote={placesNote}
           priorityArea={priorityArea ?? undefined}
           serviceFocus={service ?? undefined}
-          showAreaCards={false}
           showCategoryServices={Boolean(focus?.category)}
           showFaqs={!focus?.serviceSlug}
           showNearbyTowns={showNearbyTowns}

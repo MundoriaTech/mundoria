@@ -674,17 +674,29 @@ export function popularMarketingServices(
     .slice(0, limit);
 }
 
+const CATEGORY_HUB_PATH: Partial<Record<ServiceCategory, string>> = {
+  commercial: "/workspace-cleaning",
+  moving_home: "/moving-cleaning",
+  recovery: "/recovery-cleaning",
+  residential: "/house-cleaning",
+  short_term_rental: "/airbnb-cleaning",
+};
+
 export function categoryMarketingLinks() {
   return SERVICE_CATEGORIES.map((category) => ({
     description: category.description,
-    href: `/cleaning?category=${category.value}`,
+    href: CATEGORY_HUB_PATH[category.value] ?? "/cleaning",
     label: category.label,
-    services: servicesForCategory(category.value).map((service) => {
-      const marketing = MARKETING_SERVICES.find((item) => item.value === service.value)!;
-      return {
-        href: canonicalCleaningPath(marketing.slug),
-        label: marketing.label,
-      };
-    }),
+    services: servicesForCategory(category.value)
+      .filter((service) => !service.hidden)
+      .map((service) => {
+        const marketing = MARKETING_SERVICES.find(
+          (item) => item.value === service.value,
+        )!;
+        return {
+          href: canonicalCleaningPath(marketing.slug),
+          label: marketing.label,
+        };
+      }),
   }));
 }

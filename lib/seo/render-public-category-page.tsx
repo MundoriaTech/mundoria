@@ -323,9 +323,9 @@ async function renderCategoryHub(category: Cat, configured: boolean) {
           <LaunchCityHubSections
             bookingHref={bookingHref}
             categoryFocus="residential"
-            cleanerLimit={18}
             placePath={path}
-            showAreaCards
+            showFeatured={false}
+            showReviews={false}
           />
           <BrandedCtaBand
             body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."
@@ -341,11 +341,27 @@ async function renderCategoryHub(category: Cat, configured: boolean) {
   if (category === "commercial") {
     return (
       <MarketingShell>
+        <JsonLd data={[await launchCityFaqJsonLd(undefined, path)]} />
         <CommercialCleaningPage
           bookingHref={bookingHref}
           cleaners={cleaners}
           reviews={reviews}
         />
+        <BrandedPageWash>
+          <LaunchCityHubSections
+            bookingHref={bookingHref}
+            categoryFocus="commercial"
+            placePath={path}
+            showFeatured={false}
+            showReviews={false}
+          />
+          <BrandedCtaBand
+            body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."
+            href={bookingHref}
+            label="Book workspace cleaning"
+            title="Ready to book in Birmingham?"
+          />
+        </BrandedPageWash>
       </MarketingShell>
     );
   }
@@ -353,11 +369,28 @@ async function renderCategoryHub(category: Cat, configured: boolean) {
   if (category === "moving_home") {
     return (
       <MarketingShell>
+        <JsonLd data={[await launchCityFaqJsonLd(undefined, path)]} />
         <MovingHomeCleaningPage
           bookingHref={bookingHref}
           cleaners={cleaners}
           reviews={reviews}
+          showFaqs={false}
         />
+        <BrandedPageWash>
+          <LaunchCityHubSections
+            bookingHref={bookingHref}
+            categoryFocus="moving_home"
+            placePath={path}
+            showFeatured={false}
+            showReviews={false}
+          />
+          <BrandedCtaBand
+            body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."
+            href={bookingHref}
+            label="Book moving home cleaning"
+            title="Ready to book in Birmingham?"
+          />
+        </BrandedPageWash>
       </MarketingShell>
     );
   }
@@ -365,22 +398,55 @@ async function renderCategoryHub(category: Cat, configured: boolean) {
   if (category === "short_term_rental") {
     return (
       <MarketingShell>
+        <JsonLd data={[await launchCityFaqJsonLd(undefined, path)]} />
         <ShortLetsCleaningPage
           bookingHref={bookingHref}
           cleaners={cleaners}
           reviews={reviews}
+          showFaqs={false}
         />
+        <BrandedPageWash>
+          <LaunchCityHubSections
+            bookingHref={bookingHref}
+            categoryFocus="short_term_rental"
+            placePath={path}
+            showFeatured={false}
+            showReviews={false}
+          />
+          <BrandedCtaBand
+            body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."
+            href={bookingHref}
+            label="Book short-let cleaning"
+            title="Ready to book in Birmingham?"
+          />
+        </BrandedPageWash>
       </MarketingShell>
     );
   }
 
   return (
     <MarketingShell>
+      <JsonLd data={[await launchCityFaqJsonLd(undefined, path)]} />
       <RecoveryCleaningPage
         bookingHref={bookingHref}
         cleaners={cleaners}
         reviews={reviews}
       />
+      <BrandedPageWash>
+        <LaunchCityHubSections
+          bookingHref={bookingHref}
+          categoryFocus="recovery"
+          placePath={path}
+          showFeatured={false}
+          showReviews={false}
+        />
+        <BrandedCtaBand
+          body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."
+          href={bookingHref}
+          label="Book recovery cleaning"
+          title="Ready to book in Birmingham?"
+        />
+      </BrandedPageWash>
     </MarketingShell>
   );
 }
@@ -491,7 +557,6 @@ async function renderCityHub(
           cleanerLimit={18}
           placePath={path}
           serviceFocus={service ?? undefined}
-          showAreaCards={category === "residential" && !service}
         />
         <BrandedCtaBand
           body="Enter your Birmingham postcode and service, we’ll show a clear estimate before you book."

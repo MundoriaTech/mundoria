@@ -14,10 +14,35 @@ import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { LocationStickyBookBar } from "@/components/marketing/location-sticky-book-bar";
 import { BrandedSection } from "@/components/marketing/branded-page-sections";
 import { CategoryHeroOverlay } from "@/components/marketing/service-category/category-hero-overlay";
+import { CategoryServiceCard } from "@/components/marketing/service-category/category-service-card";
+import { CategoryServicesCarousel } from "@/components/marketing/service-category/category-services-carousel";
 import { PhotoFeatureBand } from "@/components/marketing/service-category/photo-feature-band";
 import type { LandingReview } from "@/lib/marketing/landing-reviews";
 
 const HERO_IMAGE = "/images/marketing/landing/residential-hero.jpg";
+
+const SERVICE_CARDS = [
+  {
+    href: "/house-cleaning/regular",
+    image: "/images/marketing/landing/residential-regular.png",
+    label: "Regular Cleaning",
+  },
+  {
+    href: "/house-cleaning/deep",
+    image: "/images/marketing/landing/residential-deep.jpg",
+    label: "Deep Cleaning",
+  },
+  {
+    href: "/house-cleaning/one-off",
+    image: "/images/marketing/landing/residential-one-off.png",
+    label: "One-Off Cleaning",
+  },
+  {
+    href: "/domestic-cleaning",
+    image: "/images/marketing/landing/residential-regular.png",
+    label: "Domestic Cleaning",
+  },
+] as const;
 
 export function ResidentialCleaningPage({
   bookingHref,
@@ -92,6 +117,30 @@ export function ResidentialCleaningPage({
       </section>
 
       <PhotoFeatureBand />
+
+      <section className="px-4 py-10 sm:px-8 sm:py-14">
+        <div className="mx-auto max-w-6xl">
+          <CategoryServicesCarousel
+            label="services"
+            title={
+              <h2 className="max-w-lg text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c133b] sm:text-2xl lg:text-[1.75rem]">
+                Choose your house cleaning service
+              </h2>
+            }
+          >
+            {SERVICE_CARDS.map((service) => (
+              <CategoryServiceCard
+                bookingHref={bookingHref}
+                href={service.href}
+                image={service.image}
+                key={service.label}
+                label={service.label}
+                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 260px, 240px"
+              />
+            ))}
+          </CategoryServicesCarousel>
+        </div>
+      </section>
 
       <ReviewsSection
         heading={`Cleaning reviews in ${place}`}

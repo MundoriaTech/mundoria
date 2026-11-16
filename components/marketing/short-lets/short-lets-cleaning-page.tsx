@@ -9,10 +9,12 @@ export function ShortLetsCleaningPage({
   bookingHref,
   cleaners = [],
   reviews = [],
+  showFaqs = true,
 }: {
   bookingHref: string;
   cleaners?: FeaturedCleanerCardData[];
   reviews?: LandingReview[];
+  showFaqs?: boolean;
 }) {
   return (
     <ServiceCategoryMarketingPage
@@ -20,6 +22,7 @@ export function ShortLetsCleaningPage({
       cleaners={cleaners}
       config={SHORT_LETS_PAGE}
       reviews={reviews}
+      showFaqs={showFaqs}
     />
   );
 }
