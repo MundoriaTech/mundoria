@@ -34,12 +34,17 @@ const RESIDENTIAL_REGULAR =
   "/images/marketing/landing/residential-regular.png";
 const RESIDENTIAL_DEEP = "/images/marketing/landing/residential-deep.jpg";
 
-const ICON = {
-  fridge: "/images/marketing/icons/plain/inside-fridge.png",
-  ironing: "/images/marketing/icons/plain/ironing.png",
-  laundry: "/images/marketing/icons/plain/laundry.png",
-  oven: "/images/marketing/icons/plain/inside-oven.png",
-  windows: "/images/marketing/icons/plain/interior-windows.png",
+/** Real stock photos for extras marketing pages (not booking-flow icons). */
+const EXTRA_PHOTO = {
+  bathroom: "/images/marketing/extras/bathroom.jpg",
+  cabinets: "/images/marketing/extras/cabinets.jpg",
+  fridge: "/images/marketing/extras/fridge.jpg",
+  ironing: "/images/marketing/extras/ironing.jpg",
+  laundry: "/images/marketing/extras/laundry.jpg",
+  linen: "/images/marketing/extras/linen.jpg",
+  oven: "/images/marketing/extras/oven.jpg",
+  patio: "/images/marketing/extras/patio.jpg",
+  windows: "/images/marketing/extras/windows.jpg",
 } as const;
 
 function faq(
@@ -158,7 +163,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "No separate ironing charge — you pay for the visit time",
       "Add it when you book a home clean",
     ],
-    cardImage: ICON.ironing,
+    cardImage: EXTRA_PHOTO.ironing,
     description:
       "Ironing as an add-on to your Mundoria home clean in Birmingham. We add time for pressing and folding so it fits the visit, with a clear estimate before you book.",
     faqs: [
@@ -175,7 +180,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "Ironing itself is not charged as a separate line. We add about 30 minutes to the booking (you can adjust) and you pay for that cleaning time at your service rate.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.ironing,
     kind: "extra",
     metaTitle: "Ironing with Your Clean | Mundoria Birmingham",
     path: "/ironing",
@@ -192,7 +197,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "About 30 minutes added at no separate laundry fee",
       "Machine and detergent need to be available",
     ],
-    cardImage: ICON.laundry,
+    cardImage: EXTRA_PHOTO.laundry,
     description:
       "Laundry cleaning as a Mundoria booking extra in Birmingham: wash, dry and fold during your home clean, with time added so the visit stays on track.",
     faqs: [
@@ -205,7 +210,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "We start with about 30 minutes and you can adjust depending on how much laundry you have.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.laundry,
     kind: "extra",
     metaTitle: "Laundry Cleaning Add-On | Mundoria Birmingham",
     path: "/laundry-cleaning",
@@ -221,7 +226,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "About 30 minutes added to the visit",
       "Empty perishables you do not want moved",
     ],
-    cardImage: ICON.fridge,
+    cardImage: EXTRA_PHOTO.fridge,
     description:
       "Fridge cleaning in Birmingham as a Mundoria add-on: interior wipe-down of shelves, drawers and seals during your home clean.",
     faqs: [
@@ -234,7 +239,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "No separate fridge fee — we add about 30 minutes and you pay for that time at your service rate.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.fridge,
     kind: "extra",
     metaTitle: "Fridge Cleaning in Birmingham | Mundoria",
     path: "/fridge-cleaning",
@@ -250,7 +255,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "About 30 minutes added to the visit",
       "Finish any self-cleaning cycle before we arrive",
     ],
-    cardImage: ICON.oven,
+    cardImage: EXTRA_PHOTO.oven,
     description:
       "Oven cleaning in Birmingham as a Mundoria booking extra: grease and residue cleaned from the oven interior during your visit.",
     faqs: [
@@ -263,7 +268,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "Oven cleaning is not charged as its own line. We add about 30 minutes and you pay for the visit time.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.oven,
     kind: "extra",
     metaTitle: "Oven Cleaning in Birmingham | Mundoria",
     path: "/oven-cleaning",
@@ -279,7 +284,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "About 30 minutes added to the visit",
       "Interior only — not exterior or high atrium glass",
     ],
-    cardImage: ICON.windows,
+    cardImage: EXTRA_PHOTO.windows,
     description:
       "Window cleaning (interior) in Birmingham with Mundoria: inside glass and sills as an add-on to your home or commercial clean.",
     faqs: [
@@ -292,7 +297,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "There is no separate window fee — we add about 30 minutes and you pay for that cleaning time.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.windows,
     kind: "extra",
     metaTitle: "Window Cleaning (Interior) Birmingham | Mundoria",
     path: "/window-cleaning",
@@ -308,7 +313,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "Popular for short-let turnovers",
       "Priced clearly in your estimate",
     ],
-    cardImage: RESIDENTIAL_REGULAR,
+    cardImage: EXTRA_PHOTO.cabinets,
     description:
       "Cabinet cleaning in Birmingham: interior cupboard and cabinet wipe-down as a Mundoria booking extra, often chosen for guest turnovers.",
     faqs: [
@@ -321,7 +326,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "It appears as a priced extra in the booking estimate so you see the total before you confirm.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.cabinets,
     kind: "extra",
     metaTitle: "Cabinet Cleaning in Birmingham | Mundoria",
     path: "/cabinet-cleaning",
@@ -337,7 +342,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "Available on short-let style bookings",
       "Shown clearly in your estimate",
     ],
-    cardImage: RESIDENTIAL_REGULAR,
+    cardImage: EXTRA_PHOTO.patio,
     description:
       "Patio cleaning in Birmingham as a Mundoria add-on: a light clean of balcony or patio areas when you book an eligible service.",
     faqs: [
@@ -350,7 +355,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "The same extra covers a light clean of either a balcony or patio, depending on the property.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.patio,
     kind: "extra",
     metaTitle: "Patio Cleaning Add-On | Mundoria Birmingham",
     path: "/patio-cleaning",
@@ -366,7 +371,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "Ideal when bathrooms need more than a standard pass",
       "Priced in your estimate before you book",
     ],
-    cardImage: RESIDENTIAL_REGULAR,
+    cardImage: EXTRA_PHOTO.bathroom,
     description:
       "Bathroom cleaning detail in Birmingham: extra time for limescale and bathroom surfaces as a Mundoria booking extra.",
     faqs: [
@@ -379,7 +384,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "It is available on short-let and recovery bookings where bathroom detail is commonly needed.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.bathroom,
     kind: "extra",
     metaTitle: "Bathroom Cleaning in Birmingham | Mundoria",
     path: "/bathroom-cleaning",
@@ -395,7 +400,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
       "Built for Airbnb and short-let turnovers",
       "Clear price in the booking estimate",
     ],
-    cardImage: RESIDENTIAL_REGULAR,
+    cardImage: EXTRA_PHOTO.linen,
     description:
       "Linen change in Birmingham for guest turnovers: bed linen supplied by you or the host, changed as a Mundoria booking extra.",
     faqs: [
@@ -408,7 +413,7 @@ export const STANDALONE_PAGES: StandalonePageDef[] = [
         "It is available on Airbnb / short-let and related guest-turnover bookings.",
       ),
     ],
-    heroImage: RESIDENTIAL_HERO,
+    heroImage: EXTRA_PHOTO.linen,
     kind: "extra",
     metaTitle: "Linen Change for Short Lets | Mundoria Birmingham",
     path: "/linen-change",
