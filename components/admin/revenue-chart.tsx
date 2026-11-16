@@ -56,12 +56,12 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
                 <XAxis
                   axisLine={false}
                   dataKey="label"
-                  tick={{ fill: "#8b8798", fontSize: 11 }}
+                  tick={{ fill: "#6f6a82", fontSize: 11 }}
                   tickLine={false}
                 />
                 <YAxis
                   axisLine={false}
-                  tick={{ fill: "#8b8798", fontSize: 11 }}
+                  tick={{ fill: "#6f6a82", fontSize: 11 }}
                   tickFormatter={(value) => formatMoney(Number(value))}
                   tickLine={false}
                   width={72}
@@ -88,12 +88,12 @@ export function RevenueChart({ points }: { points: RevenuePoint[] }) {
                 <XAxis
                   axisLine={false}
                   dataKey="label"
-                  tick={{ fill: "#8b8798", fontSize: 11 }}
+                  tick={{ fill: "#6f6a82", fontSize: 11 }}
                   tickLine={false}
                 />
                 <YAxis
                   axisLine={false}
-                  tick={{ fill: "#8b8798", fontSize: 11 }}
+                  tick={{ fill: "#6f6a82", fontSize: 11 }}
                   tickFormatter={(value) => formatMoney(Number(value))}
                   tickLine={false}
                   width={72}

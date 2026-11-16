@@ -17,6 +17,7 @@ import {
   nationalFromPhone,
   storedPhone,
 } from "@/lib/auth/uk-phone";
+import { toast } from "@/lib/feedback/toast";
 
 export function CompleteProfileForm({
   defaultFullName,
@@ -68,6 +69,7 @@ export function CompleteProfileForm({
       return;
     }
 
+    toast.success("Profile completed", { description: "You are all set." });
     router.replace(safeRedirectPath(next, "/dashboard"));
     router.refresh();
   });

@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
+import { toast } from "@/lib/feedback/toast";
 import type { CleanerJob } from "@/types/cleaner";
 
 export function JobFeed({
@@ -63,20 +64,32 @@ export function JobFeed({
       body: JSON.stringify({ response }),
     });
     if (res.ok) {
-      if (response === "accepted") router.push(`/cleaner/job/${id}`);
-      else {
+      if (response === "accepted") {
+        toast.success("Job accepted", { description: "It is in your schedule now." });
+        router.push(`/cleaner/job/${id}`);
+      } else {
+        toast.info("Offer declined");
         setWarning(true);
         router.refresh();
       }
+      return;
     }
+    const result = (await res.json().catch(() => ({}))) as { error?: string };
+    toast.error(result.error ?? "Could not answer that offer", { action: { label: "Retry", onClick: () => void respond(id, response) } });
   }
 
   async function claimTeam(id: string) {
     const res = await fetch(`/api/cleaner/jobs/${id}/claim-team`, {
       method: "POST",
     });
-    if (res.ok) router.push(`/cleaner/job/${id}`);
-    else router.refresh();
+    if (res.ok) {
+      toast.success("Team slot claimed");
+      router.push(`/cleaner/job/${id}`);
+      return;
+    }
+    const result = (await res.json().catch(() => ({}))) as { error?: string };
+    toast.error(result.error ?? "Could not claim that slot", { action: { label: "Retry", onClick: () => void claimTeam(id) } });
+    router.refresh();
   }
 
   function isTeamSlot(job: CleanerJob) {

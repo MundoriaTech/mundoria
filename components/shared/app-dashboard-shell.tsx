@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
+import { useFeedback } from "@/components/shared/feedback-provider";
 import {
   AccountMenu,
   type AccountMenuItem,
@@ -102,6 +103,7 @@ export function AppDashboardShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { confirm } = useFeedback();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -130,6 +132,13 @@ export function AppDashboardShell({
   }, [drawerOpen]);
 
   async function logout() {
+    const confirmed = await confirm({
+      action: "Log out",
+      description: "You will need to sign in again to see your account.",
+      title: "Log out of Mundoria?",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     setSigningOut(true);
     await createBrowserClient().auth.signOut();
     router.replace(loginPathFor(pathname));
@@ -150,7 +159,7 @@ export function AppDashboardShell({
       <header className="sticky top-0 z-40 border-b border-brand-line/80 bg-white/85 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div
           className={cn(
-            "mx-auto flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8",
+            "mx-auto flex h-[4.25rem] items-center gap-3 px-5 sm:px-6 md:h-16 lg:px-8",
             widthClass,
           )}
         >
@@ -203,7 +212,7 @@ export function AppDashboardShell({
             "min-w-0 flex-1",
             fullBleed
               ? "py-0"
-              : "py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:py-8 md:pb-12",
+              : "py-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:py-8 md:pb-12",
           )}
         >
           {backLink && !fullBleed ? (
@@ -224,7 +233,7 @@ export function AppDashboardShell({
         className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
       >
         <div
-          className="mx-auto grid h-16 max-w-lg"
+          className="mx-auto grid h-20 max-w-lg px-2 pt-1 pb-2.5"
           style={{
             gridTemplateColumns: `repeat(${tabItems.length + 1}, minmax(0, 1fr))`,
           }}
@@ -236,7 +245,7 @@ export function AppDashboardShell({
               <Link
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+                  "relative flex flex-col items-center justify-center gap-1.5 rounded-xl text-[11px] font-medium transition-colors",
                   active ? "text-brand-ink" : "text-brand-subtle",
                 )}
                 href={item.href}

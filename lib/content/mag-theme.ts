@@ -14,7 +14,7 @@ export const MAG_CATEGORY_THEME: Record<
     accent: "#d4694a",
     chip: "border-brand-peach/70 bg-[#fff4ee] text-[#8a3d28]",
     chipActive: "border-transparent bg-brand-terracotta text-white shadow-[0_6px_16px_rgba(212,105,74,0.35)]",
-    label: "text-brand-terracotta",
+    label: "text-brand-terracotta-deep",
     soft: "bg-gradient-to-br from-[#fff4ee] via-brand-haze to-brand-lavender-light",
   },
   "Home Care": {
@@ -22,7 +22,7 @@ export const MAG_CATEGORY_THEME: Record<
     // Was #f5eaf1 — too close to the Mag page wash, so the pill looked colourless
     chip: "border-[#f5b8cb] bg-[#ffe8f0] text-[#c2186a]",
     chipActive: "border-transparent bg-[#b85a8a] text-white shadow-[0_6px_16px_rgba(184,90,138,0.35)]",
-    label: "text-[#b85a8a]",
+    label: "text-[#9c4a76]",
     soft: "bg-gradient-to-br from-[#f0e4ec] via-brand-haze to-brand-lavender-light",
   },
   "Host Tips": {
@@ -36,7 +36,7 @@ export const MAG_CATEGORY_THEME: Record<
     accent: "#4a7ab5",
     chip: "border-[#b7d0ea] bg-[#e8f2ff] text-[#2f557f]",
     chipActive: "border-transparent bg-[#4a7ab5] text-white shadow-[0_6px_16px_rgba(74,122,181,0.35)]",
-    label: "text-[#4a7ab5]",
+    label: "text-[#3f6aa3]",
     soft: "bg-gradient-to-br from-[#e8f2ff] via-brand-haze to-brand-lavender-light",
   },
   "Cleaner Stories": {

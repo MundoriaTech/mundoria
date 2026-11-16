@@ -97,7 +97,7 @@ function FeaturedCleanerCard({
             <ChevronDown
               aria-hidden
               className={cn(
-                "mt-0.5 size-4 shrink-0 text-[#8a8498] transition-transform duration-300",
+                "mt-0.5 size-4 shrink-0 text-brand-subtle transition-transform duration-300",
                 open && "rotate-180 text-brand-ink",
               )}
             />
@@ -123,7 +123,7 @@ function FeaturedCleanerCard({
               />
               {ratingLabel}
             </span>
-            {detail ? <span className="text-[#8a8498]">· {detail}</span> : null}
+            {detail ? <span className="text-brand-subtle">· {detail}</span> : null}
           </p>
         </div>
       </button>

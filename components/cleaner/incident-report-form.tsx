@@ -6,8 +6,10 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SimpleSelect } from "@/components/ui/select";
 import { INCIDENT_CATEGORIES } from "@/lib/cleaner/onboarding-compliance";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/feedback/toast";
 
 const FIELD_CLASS =
   "border-2 border-brand-ink bg-brand-cream focus-visible:ring-brand-ink";
@@ -84,6 +86,7 @@ export function IncidentReportForm({
         return;
       }
       setSubmitted(true);
+      toast.success("Report sent", { description: "The Mundoria team has been notified." });
       router.refresh();
     } catch {
       setError("Could not send your report. Check your connection and try again.");
@@ -132,21 +135,12 @@ export function IncidentReportForm({
       </div>
 
       <Field label="What type of incident?" htmlFor="incident-category">
-        <select
-          className={cn(
-            "h-11 w-full rounded-md px-3 text-sm text-brand-ink outline-none focus-visible:ring-2 [color-scheme:light]",
-            FIELD_CLASS,
-          )}
+        <SimpleSelect
           id="incident-category"
-          onChange={(event) => setCategory(event.target.value)}
+          onChange={setCategory}
+          options={INCIDENT_CATEGORIES.map((item) => ({ label: item.label, value: item.value }))}
           value={category}
-        >
-          {INCIDENT_CATEGORIES.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+        />
       </Field>
 
       <fieldset>
@@ -256,22 +250,13 @@ export function IncidentReportForm({
 
       {bookings.length ? (
         <Field label="Related booking (optional)" htmlFor="incident-booking">
-          <select
-            className={cn(
-              "h-11 w-full rounded-md px-3 text-sm text-brand-ink outline-none focus-visible:ring-2 [color-scheme:light]",
-              FIELD_CLASS,
-            )}
+          <SimpleSelect
+            emptyLabel="Not linked to a booking"
             id="incident-booking"
-            onChange={(event) => setBookingId(event.target.value)}
+            onChange={setBookingId}
+            options={bookings.map((booking) => ({ label: booking.label, value: booking.id }))}
             value={bookingId}
-          >
-            <option value="">Not linked to a booking</option>
-            {bookings.map((booking) => (
-              <option key={booking.id} value={booking.id}>
-                {booking.label}
-              </option>
-            ))}
-          </select>
+          />
         </Field>
       ) : null}
 

@@ -92,7 +92,7 @@ export function FormField({
             dense ? "top-1.5" : "top-2.5",
             "origin-left text-[11px] font-semibold leading-none text-brand-muted",
             "transition-all duration-150",
-            error && "text-brand-terracotta",
+            error && "text-brand-terracotta-deep",
             plain
               ? "group-focus-within/field:text-brand-ink"
               : "group-focus-within/field:text-brand-purple",

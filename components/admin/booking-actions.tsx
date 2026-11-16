@@ -7,6 +7,7 @@ import { useFeedback } from "@/components/shared/feedback-provider";
 import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SimpleSelect } from "@/components/ui/select";
 
 export function BookingActions({
   allocatedCleaners = 1,
@@ -95,17 +96,14 @@ export function BookingActions({
         placeholder="Required audit note"
       />
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <select
-          className="h-11 min-w-0 w-full flex-1 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
-          onChange={(event) => setCleanerId(event.target.value)}
-        >
-          <option value="">Select cleaner</option>
-          {cleaners.map((cleaner) => (
-            <option key={cleaner.id} value={cleaner.id}>
-              {cleaner.full_name}
-            </option>
-          ))}
-        </select>
+        <SimpleSelect
+          aria-label="Cleaner"
+          className="min-w-0 flex-1"
+          onChange={setCleanerId}
+          options={cleaners.map((cleaner) => ({ label: cleaner.full_name, value: cleaner.id }))}
+          placeholder="Select cleaner"
+          value={cleanerId}
+        />
         <Button
           className="min-h-11 w-full sm:w-auto"
           disabled={!cleanerId || note.length < 3}
@@ -158,12 +156,11 @@ export function BookingActions({
       ) : null}
 
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <select
-          className="h-11 min-w-0 w-full flex-1 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
-          onChange={(event) => setStatus(event.target.value)}
-          value={status}
-        >
-          {[
+        <SimpleSelect
+          aria-label="Booking status"
+          className="min-w-0 flex-1"
+          onChange={setStatus}
+          options={[
             ["pending_match", "Pending match"],
             ["matched", "Matched"],
             ["confirmed", "Confirmed"],
@@ -173,12 +170,9 @@ export function BookingActions({
             ["completed", "Completed"],
             ["cancelled", "Cancelled"],
             ["disputed", "Disputed"],
-          ].map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          ].map(([value, label]) => ({ label, value }))}
+          value={status}
+        />
         <Button
           className="min-h-11 w-full sm:w-auto"
           disabled={note.length < 3}

@@ -276,7 +276,7 @@ export default async function BlogIndexPage({
           style={{ paddingTop: `calc(${LANDING_NAV_BLOCK} + 2.75rem)` }}
         >
           <div className="mx-auto max-w-6xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-terracotta">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-terracotta-deep">
               The magazine
             </p>
             <h1 className="mt-4 max-w-3xl text-[3rem] font-black leading-[0.95] tracking-[-0.05em] text-brand-ink sm:text-[4.75rem]">

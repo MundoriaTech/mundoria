@@ -80,7 +80,7 @@ export function EmptyState({
         />
       </motion.span>
       {eyebrow ? (
-        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-gold">
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-gold-deep">
           {eyebrow}
         </p>
       ) : null}

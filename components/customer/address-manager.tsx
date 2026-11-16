@@ -154,7 +154,7 @@ export function AddressManager({
         <div className="rounded-[1.75rem] border border-brand-line bg-white p-5 shadow-[0_16px_40px_rgba(28,19,59,0.06)] sm:p-6">
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
                 {editing ? "Edit" : "New"}
               </p>
               <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
@@ -190,7 +190,7 @@ export function AddressManager({
             >
               <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
                     {address.is_default ? "Default" : "Saved place"}
                   </p>
                   <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
@@ -245,7 +245,7 @@ export function AddressManager({
         </div>
       ) : (
         <div className="rounded-[1.75rem] bg-brand-cream-deep px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
             Places
           </p>
           <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-brand-ink">

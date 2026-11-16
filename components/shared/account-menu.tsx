@@ -15,6 +15,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { popIn } from "@/lib/motion";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -39,6 +40,7 @@ export function AccountMenu({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { confirm } = useFeedback();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [canHover, setCanHover] = useState(false);
@@ -97,6 +99,14 @@ export function AccountMenu({
   }, [open]);
 
   async function logout() {
+    setOpen(false);
+    const confirmed = await confirm({
+      action: "Log out",
+      description: "You will need to sign in again to see your account.",
+      title: "Log out of Mundoria?",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     setSigningOut(true);
     await createBrowserClient().auth.signOut();
     const loginPath = pathname.startsWith("/cleaner")

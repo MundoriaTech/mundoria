@@ -8,6 +8,7 @@ import {
   usePagedItems,
 } from "@/components/shared/pagination-controls";
 import { Input } from "@/components/ui/input";
+import { SimpleSelect } from "@/components/ui/select";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminDispute } from "@/types/admin";
 
@@ -35,30 +36,20 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
   return (
     <div className="min-w-0">
       <div className="grid gap-3 sm:grid-cols-3">
-        <select
-          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-brand-ink"
-          onChange={(event) => setType(event.target.value)}
+        <SimpleSelect
+          aria-label="Type"
+          emptyLabel="All types"
+          onChange={setType}
+          options={["damage", "no_show", "quality", "payment", "other"].map((value) => ({ label: value.replaceAll("_", " "), value }))}
           value={type}
-        >
-          <option value="">All types</option>
-          {["damage", "no_show", "quality", "payment", "other"].map((value) => (
-            <option key={value} value={value}>
-              {value.replaceAll("_", " ")}
-            </option>
-          ))}
-        </select>
-        <select
-          className="h-11 rounded-md border border-[#e8e8eb] bg-white px-3 text-brand-ink"
-          onChange={(event) => setStatus(event.target.value)}
+        />
+        <SimpleSelect
+          aria-label="Status"
+          emptyLabel="All statuses"
+          onChange={setStatus}
+          options={["open", "under_review", "resolved", "closed"].map((value) => ({ label: value.replaceAll("_", " "), value }))}
           value={status}
-        >
-          <option value="">All statuses</option>
-          {["open", "under_review", "resolved", "closed"].map((value) => (
-            <option key={value} value={value}>
-              {value.replaceAll("_", " ")}
-            </option>
-          ))}
-        </select>
+        />
         <Input
           onChange={(event) => setDate(event.target.value)}
           type="date"

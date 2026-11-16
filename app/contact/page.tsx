@@ -21,7 +21,7 @@ export default function ContactPage() {
     <MarketingShell>
       <section className="bg-white px-4 pb-16 pt-10 sm:px-8 sm:pb-20 sm:pt-14">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-[2.75rem] font-semibold leading-none tracking-[-0.04em] text-brand-gold sm:text-[3.5rem]">
+          <h1 className="text-[2.75rem] font-semibold leading-none tracking-[-0.04em] text-brand-gold-deep sm:text-[3.5rem]">
             Contact us
           </h1>
 

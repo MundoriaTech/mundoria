@@ -12,6 +12,7 @@ import {
 import { Stagger, StaggerItem } from "@/components/shared/motion-primitives";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Input } from "@/components/ui/input";
+import { SimpleSelect } from "@/components/ui/select";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminCleaner } from "@/types/admin";
 
@@ -134,18 +135,14 @@ export function CleanersTable({
             value={search}
           />
         </label>
-        <select
-          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
-          onChange={(event) => setTier(event.target.value)}
+        <SimpleSelect
+          aria-label="Tier"
+          emptyLabel="All tiers"
+          onChange={setTier}
+          options={["bronze", "silver", "gold", "rose_gold"].map((value) => ({ label: value.replace("_", " "), value }))}
+          size="sm"
           value={tier}
-        >
-          <option value="">All tiers</option>
-          {["bronze", "silver", "gold", "rose_gold"].map((value) => (
-            <option key={value} value={value}>
-              {value.replace("_", " ")}
-            </option>
-          ))}
-        </select>
+        />
         <Input
           onChange={(event) => setArea(event.target.value)}
           placeholder="Working area"

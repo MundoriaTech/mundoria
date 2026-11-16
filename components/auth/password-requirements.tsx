@@ -13,10 +13,8 @@ import { cn } from "@/lib/utils";
 export function PasswordRequirementsList({ password }: { password: string }) {
   const rules = passwordRequirements(password);
   const started = password.length > 0;
-  const metCount = rules.filter((rule) => rule.met).length;
   const unmet = rules.filter((rule) => !rule.met);
   const allMet = started && unmet.length === 0;
-  const statusKey = allMet ? "ok" : started ? `progress-${metCount}` : "idle";
 
   return (
     <div aria-live="polite" className="space-y-1.5 px-0.5">
@@ -25,51 +23,57 @@ export function PasswordRequirementsList({ password }: { password: string }) {
           <Segment key={rule.id} rule={rule} />
         ))}
       </ul>
-      <div className="relative min-h-4 overflow-hidden text-[11px] leading-4 text-brand-subtle">
-        <AnimatePresence initial={false} mode="popLayout">
+      <ul className="grid grid-cols-1 gap-x-4 gap-y-1 text-[12px] leading-5 sm:grid-cols-2" role="list">
+        {rules.map((rule) => (
+          <li
+            className={cn(
+              "flex items-center gap-2 transition-colors",
+              rule.met ? "text-brand-plum" : "text-brand-subtle",
+            )}
+            key={rule.id}
+          >
+            <motion.span
+              animate={{
+                backgroundColor: rule.met ? "#6a45b8" : "#ffffff",
+                borderColor: rule.met ? "#6a45b8" : "#cfc8dd",
+                scale: rule.met ? 1 : 0.9,
+              }}
+              className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-white"
+              initial={false}
+              transition={rule.met ? SPRING.lively : { duration: DURATION.fast, ease: EASE.out }}
+            >
+              <AnimatePresence initial={false}>
+                {rule.met ? (
+                  <motion.span
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="inline-flex"
+                    exit={{ opacity: 0, scale: 0.4 }}
+                    initial={{ opacity: 0, scale: 0.4 }}
+                    key="check"
+                    transition={{ duration: DURATION.fast }}
+                  >
+                    <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                  </motion.span>
+                ) : null}
+              </AnimatePresence>
+            </motion.span>
+            <span className={cn(rule.met && "line-through decoration-brand-purple/50")}>{rule.example}</span>
+          </li>
+        ))}
+      </ul>
+      <AnimatePresence initial={false}>
+        {allMet ? (
           <motion.p
             animate={{ opacity: 1, y: 0 }}
-            exit={{
-              opacity: 0,
-              transition: { duration: DURATION.fast, ease: EASE.in },
-              y: -6,
-            }}
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-brand-plum"
+            exit={{ opacity: 0, y: -4 }}
             initial={{ opacity: 0, y: 6 }}
-            key={statusKey}
             transition={{ duration: DURATION.fast, ease: EASE.out }}
           >
-            {allMet ? (
-              <span className="inline-flex items-center gap-1 font-medium text-brand-plum">
-                <motion.span
-                  animate={{ rotate: 0, scale: 1 }}
-                  className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand-purple text-white"
-                  initial={{ rotate: -45, scale: 0 }}
-                  transition={SPRING.lively}
-                >
-                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
-                </motion.span>
-                Password looks good
-              </span>
-            ) : started ? (
-              <>
-                <span className="font-medium text-brand-purple">
-                  {metCount} of {rules.length}
-                </span>
-                <span className="text-[#9a93ad]">
-                  {" · need "}
-                  {unmet
-                    .slice(0, 2)
-                    .map((rule) => rule.example)
-                    .join(", ")}
-                  {unmet.length > 2 ? "…" : ""}
-                </span>
-              </>
-            ) : (
-              "Must include an uppercase letter, a lowercase letter, a number, a symbol, and 8+ characters"
-            )}
+            Password looks good
           </motion.p>
-        </AnimatePresence>
-      </div>
+        ) : null}
+      </AnimatePresence>
       <span className="sr-only">
         {rules
           .map((rule) => `${rule.example}: ${rule.met ? "met" : "not met"}`)

@@ -9,6 +9,7 @@ import { toast } from "@/lib/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { SimpleSelect } from "@/components/ui/select";
 import { formatInterviewSlot } from "@/lib/cleaner/interview-slots";
 import { cleanerTierLabel } from "@/lib/cleaner/tier";
 import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
@@ -359,19 +360,15 @@ export function CleanerReviewPanel({
             New approvals start on silver automatically.
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <select
-              className="h-11 w-full flex-1 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
-              onChange={(event) => setTier(event.target.value as CleanerTier)}
-              value={tier}
-            >
-              {(["bronze", "silver", "gold", "rose_gold", "elite"] as const).map(
-                (value) => (
-                  <option key={value} value={value}>
-                    {cleanerTierLabel(value)}
-                  </option>
-                ),
+            <SimpleSelect
+              aria-label="Tier"
+              className="flex-1"
+              onChange={(value) => setTier(value as CleanerTier)}
+              options={(["bronze", "silver", "gold", "rose_gold", "elite"] as const).map(
+                (value) => ({ label: cleanerTierLabel(value), value }),
               )}
-            </select>
+              value={tier}
+            />
             <Button
               className="min-h-11 w-full sm:w-auto"
               disabled={!reasonIsValid || busy}

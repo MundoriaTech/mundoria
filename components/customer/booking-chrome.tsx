@@ -86,7 +86,7 @@ export function BookingChrome({
         {progressPct != null ? (
           <div>
             {progressLabel ? (
-              <p className="mx-auto w-full max-w-[1140px] overflow-hidden px-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8a8498] md:px-5">
+              <p className="mx-auto w-full max-w-[1140px] overflow-hidden px-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-brand-subtle md:px-5">
                 <AnimatePresence initial={false} mode="popLayout">
                   <motion.span
                     animate={{ opacity: 1, y: 0 }}

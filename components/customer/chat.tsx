@@ -325,7 +325,7 @@ export function Chat({
           })
         ) : (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-brand-gold">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-brand-gold-deep">
               Messages
             </p>
             <p className="mt-2 text-sm font-light text-brand-muted">

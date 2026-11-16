@@ -120,7 +120,7 @@ function BasketSection({
       <span
         className={cn(
           "min-w-0 flex-1 text-sm",
-          filled ? "font-bold text-brand-ink" : "font-semibold text-[#8a8498]",
+          filled ? "font-bold text-brand-ink" : "font-semibold text-brand-subtle",
         )}
       >
         {title}
@@ -129,7 +129,7 @@ function BasketSection({
         <span
           className={cn(
             "shrink-0 text-[11px] font-normal tabular-nums",
-            filled ? "text-brand-muted" : "text-[#8a8498]",
+            filled ? "text-brand-muted" : "text-brand-subtle",
           )}
         >
           {right}
@@ -384,7 +384,7 @@ function BasketPanel({
             ))}
           </ul>
         ) : (
-          <p className="font-semibold text-[#8a8498]">
+          <p className="font-semibold text-brand-subtle">
             Choose your cleaning session.
           </p>
         )}
@@ -437,7 +437,7 @@ function BasketPanel({
                 </p>
               ) : null}
               {!promo.addressReady ? (
-                <p className="mt-2 text-center text-xs leading-5 text-[#8a8498]">
+                <p className="mt-2 text-center text-xs leading-5 text-brand-subtle">
                   Promo codes apply once your address is saved at payment.
                 </p>
               ) : null}

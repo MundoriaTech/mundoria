@@ -13,6 +13,7 @@ import {
 } from "@/components/shared/pagination-controls";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { Input } from "@/components/ui/input";
+import { SimpleSelect } from "@/components/ui/select";
 import { formatServiceName, SERVICES } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminBooking } from "@/types/admin";
@@ -62,13 +63,11 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
             placeholder="Customer or booking ID"
           />
         </label>
-        <select
-          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
-          onChange={(event) => setStatus(event.target.value)}
-          value={status}
-        >
-          <option value="">All statuses</option>
-          {[
+        <SimpleSelect
+          aria-label="Status"
+          emptyLabel="All statuses"
+          onChange={setStatus}
+          options={[
             "pending_match",
             "matched",
             "confirmed",
@@ -79,24 +78,18 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
             "cancelled",
             "no_show",
             "disputed",
-          ].map((value) => (
-            <option key={value} value={value}>
-              {value.replaceAll("_", " ")}
-            </option>
-          ))}
-        </select>
-        <select
-          className="h-10 rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-brand-ink"
-          onChange={(event) => setService(event.target.value)}
+          ].map((value) => ({ label: value.replaceAll("_", " "), value }))}
+          size="sm"
+          value={status}
+        />
+        <SimpleSelect
+          aria-label="Service"
+          emptyLabel="All services"
+          onChange={setService}
+          options={SERVICES.map((item) => ({ label: item.label, value: item.value }))}
+          size="sm"
           value={service}
-        >
-          <option value="">All services</option>
-          {SERVICES.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+        />
         <Input
           onChange={(event) => setFrom(event.target.value)}
           type="date"

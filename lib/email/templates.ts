@@ -653,7 +653,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
     ? `<p class="email-intro" style="margin:0 0 16px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">${escapeHtml(context.intro!)}</p>`
     : `<h1 class="email-title" style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;font-weight:500;letter-spacing:-0.02em;color:#1c133b;">${escapeHtml(context.title)}</h1>`;
   const signoff = isAdmin
-    ? `<p class="email-signoff" style="margin:28px 0 0;font-size:14px;line-height:1.6;color:#8a8498;">Mundoria ops alert · internal use only</p>`
+    ? `<p class="email-signoff" style="margin:28px 0 0;font-size:14px;line-height:1.6;color:#6f6a82;">Mundoria ops alert · internal use only</p>`
     : `<p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">See you soon — the Mundoria team</p>`;
   const footerPrimary = isAdmin
     ? `<p style="margin:0 0 14px;">Review this in the <a href="${escapeAttribute(appUrl)}/admin/dashboard" style="color:#b8894e;font-weight:600;text-decoration:underline;">admin panel</a>. Do not forward to customers.</p>`
@@ -721,7 +721,7 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
               </td>
             </tr>
             <tr>
-              <td class="email-footer" align="center" style="padding:36px 28px 40px;color:#8a8498;font-size:12px;line-height:1.7;text-align:center;">
+              <td class="email-footer" align="center" style="padding:36px 28px 40px;color:#6f6a82;font-size:12px;line-height:1.7;text-align:center;">
                 ${footerPrimary}
                 ${footerSocial}
                 ${footerLegal}
@@ -749,7 +749,7 @@ function renderCards(cards: Array<{ label: string; value?: unknown }>) {
       .map(
         (card) => `<tr>
           <td class="email-detail-line" style="padding:0 0 10px;font-size:15px;line-height:1.5;color:#4a4460;">
-            <span class="email-row-label" style="color:#8a8498;">${escapeHtml(card.label)}:</span>
+            <span class="email-row-label" style="color:#6f6a82;">${escapeHtml(card.label)}:</span>
             <span class="email-row-value" style="color:#1c133b;font-weight:600;"> ${escapeHtml(formatValue(card.value))}</span>
           </td>
         </tr>`,
@@ -823,7 +823,7 @@ function renderButton(href: string, label: string, showExpiry = false) {
     <a class="email-cta" href="${escapeAttribute(href)}" style="color:#b8894e;font-weight:700;text-decoration:underline;">${escapeHtml(label)}</a>
   </p>${
     showExpiry
-      ? `<p class="email-meta" style="margin:10px 0 0;font-size:13px;line-height:1.5;color:#8a8498;">This link stays active for 2 days.</p>`
+      ? `<p class="email-meta" style="margin:10px 0 0;font-size:13px;line-height:1.5;color:#6f6a82;">This link stays active for 2 days.</p>`
       : ""
   }`;
 }

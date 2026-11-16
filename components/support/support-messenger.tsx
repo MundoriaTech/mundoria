@@ -31,6 +31,7 @@ import {
   SUPPORT_GUEST_HEADER,
 } from "@/lib/support/guest-token";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/feedback/toast";
 import type { SupportConversation, SupportMessage } from "@/types/support";
 
 function SupportMessageBody({
@@ -452,6 +453,7 @@ export function SupportMessengerWidget() {
       };
       if (!res.ok) {
         setError(data.error ?? "Could not send message.");
+        toast.error(data.error ?? "Could not send message");
         return;
       }
       setDraft("");

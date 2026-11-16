@@ -55,7 +55,7 @@ export function ConnectPayoutCard({
 
   return (
     <section className="rounded-[1.75rem] border border-[#e8e0d6]/80 bg-white p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold">
+      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-brand-gold-deep">
         Payouts
       </p>
       <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-brand-ink">
