@@ -11,42 +11,55 @@ import type { Booking } from "@/types/customer";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
+function HomeIcon() {
+  return (
+    <svg fill="none" height={40} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={40}>
+      <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" />
+      <path d="M9 21V12h6v9" />
+    </svg>
+  );
+}
+function OfficeIcon() {
+  return (
+    <svg fill="none" height={40} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={40}>
+      <rect height="20" rx="2" width="16" x="4" y="2" />
+      <path d="M9 22V12h6v10" />
+      <path d="M8 7h.01M12 7h.01M16 7h.01M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01" strokeWidth={2.5} />
+    </svg>
+  );
+}
+function EventIcon() {
+  return (
+    <svg fill="none" height={40} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={40}>
+      <path d="M5.8 11.3 2 22l10.4-3.8M2 22l6.4-6.4" />
+      <path d="M15.4 15 11 10.6l8.3-8.3a2.1 2.1 0 1 1 3 3L15.4 15Z" />
+      <path d="M2 11.5a10 10 0 0 1 10-10" />
+      <path d="M12.5 22a10 10 0 0 0 10-10" />
+    </svg>
+  );
+}
+
 const SERVICES = [
   {
+    Icon: HomeIcon,
     flip: false,
     href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
-    icon: "/images/dashboard/icon-service-home.png",
-    iconH: 41,
-    iconW: 62,
-    iconX: "73px",
     img: "/images/dashboard/service-home.png",
     label: "Home",
-    tabW: "137px",
-    width: "360px",
   },
   {
+    Icon: OfficeIcon,
     flip: true,
     href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
-    icon: "/images/dashboard/icon-service-office.png",
-    iconH: 38,
-    iconW: 58,
-    iconX: "70px",
     img: "/images/dashboard/service-office.png",
     label: "Office",
-    tabW: "135px",
-    width: "357px",
   },
   {
+    Icon: EventIcon,
     flip: false,
     href: "/booking/new?fresh=1&service=one_off&returnTo=/dashboard",
-    icon: "/images/dashboard/icon-service-event.png",
-    iconH: 43,
-    iconW: 65,
-    iconX: "74px",
     img: "/images/dashboard/service-event.png",
     label: "Event",
-    tabW: "139px",
-    width: "360px",
   },
 ] as const;
 
@@ -106,115 +119,125 @@ function TimeTile({ booking }: { booking: Booking | null }) {
 }
 
 function LocationTile({ booking }: { booking: Booking | null }) {
-  const city = booking?.address?.city ?? "Birmingham, UK";
+  const city = booking?.address?.city ?? null;
   const line1 = booking?.address?.address_line_1 ?? null;
   const postcode = booking?.address?.postcode ?? null;
+  const hasAddress = !!(line1 || city);
 
   return (
     <div
       className="relative h-[238px] overflow-hidden rounded-[18px]"
-      style={{ minWidth: "240px", flex: "1 1 240px", background: "#EDEAF5" }}
+      style={{ minWidth: "240px", flex: "1 1 240px", background: "#1E1848" }}
     >
-      <Image alt="" className="object-cover" fill sizes="300px" src="/images/dashboard/map.png" />
-      <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(180deg,rgba(198,191,220,0.78) 0%,rgba(225,220,238,0.55) 55%,rgba(255,255,255,0.35) 100%)" }}
-      />
-      <svg
-        className="absolute"
-        height={64}
-        style={{ left: "58px", top: "124px", filter: "drop-shadow(0 4px 6px rgba(0,0,0,.18))" }}
-        viewBox="0 0 54 64"
-        width={54}
-      >
-        <ellipse cx="27" cy="58" fill="none" rx="20" ry="5" stroke="#FFFFFF" strokeWidth="3" />
-        <path d="M27 2C14.3 2 4 12 4 24.4 4 39 27 58 27 58S50 39 50 24.4C50 12 39.7 2 27 2z" fill="#E5262B" />
-        <circle cx="27" cy="24" fill="#FFFFFF" r="8.5" />
+      {/* dot-grid background */}
+      <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern id="dot-grid" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(255,255,255,0.07)" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#dot-grid)" />
       </svg>
+
+      {/* glow */}
       <div
-        className="absolute flex flex-col bg-white"
-        style={{
-          left: "50%",
-          top: "79px",
-          width: "151px",
-          border: "1.5px solid #D6BF9A",
-          borderRadius: "8px",
-          padding: "12px 11px",
-          boxShadow: "0 4px 12px -6px rgba(31,24,62,.25)",
-          boxSizing: "border-box",
-        }}
+        className="pointer-events-none absolute rounded-full"
+        style={{ width: "200px", height: "200px", left: "-40px", top: "-60px", background: "radial-gradient(circle,rgba(130,113,177,0.35) 0%,transparent 70%)" }}
+      />
+
+      {/* decorative location pin */}
+      <svg
+        className="absolute opacity-10"
+        fill="none"
+        height={120}
+        style={{ right: "-18px", bottom: "-18px" }}
+        viewBox="0 0 100 120"
+        width={100}
       >
-        <div className="flex items-center gap-[7px]">
+        <path d="M50 10C31.2 10 16 25.2 16 44c0 24 34 66 34 66s34-42 34-66c0-18.8-15.2-34-34-34z" fill="#ffffff" />
+        <circle cx="50" cy="44" fill="#1E1848" r="13" />
+      </svg>
+
+      {/* content */}
+      <div className="absolute left-5 right-5" style={{ top: "32px" }}>
+        <div className="mb-3 flex items-center gap-2">
           <span
-            className="flex items-center justify-center rounded-[4px]"
-            style={{ width: "17px", height: "17px", background: "#E7E5F0" }}
+            className="flex items-center justify-center rounded-[6px]"
+            style={{ width: "24px", height: "24px", background: "rgba(255,255,255,0.12)" }}
           >
-            <svg fill="none" height={11} stroke="#524096" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} viewBox="0 0 24 24" width={11}>
-              <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-              <path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <svg fill="none" height={14} stroke="#C69C66" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}>
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
             </svg>
           </span>
-          <span style={{ fontSize: "12.3px", color: "#55555C" }}>Home address</span>
+          <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C69C66" }}>Service location</span>
         </div>
-        {(line1 || postcode) ? (
-          <div
-            className="mt-3 font-medium text-[#524096]"
-            style={{ fontSize: "12.3px", lineHeight: "14px", letterSpacing: "-0.01em" }}
-          >
-            {line1}
-            {postcode ? <>, <span className="font-semibold">{postcode}</span></> : null}
+
+        {hasAddress ? (
+          <div>
+            {line1 && (
+              <p style={{ fontSize: "17.4px", fontWeight: 700, color: "#FFFFFF", lineHeight: "20px", letterSpacing: "-0.01em", margin: 0 }}>{line1}</p>
+            )}
+            {postcode && (
+              <p style={{ fontSize: "17.4px", fontWeight: 400, color: "rgba(255,255,255,0.7)", lineHeight: "22px", margin: 0 }}>{postcode}</p>
+            )}
+            {city && (
+              <div
+                className="mt-3 inline-flex items-center gap-2 rounded-full"
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", padding: "5px 12px 5px 8px" }}
+              >
+                <span className="rounded-full bg-[#524096]" style={{ width: "6px", height: "6px", flexShrink: 0 }} />
+                <span style={{ fontSize: "13.5px", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{city}</span>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="mt-3 text-[#5F5F66]" style={{ fontSize: "12.3px" }}>No address</div>
+          <div>
+            <p style={{ fontSize: "17.4px", fontWeight: 700, color: "rgba(255,255,255,0.4)", lineHeight: "22px", margin: 0 }}>No address set</p>
+            <a
+              href="/addresses"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "12px", fontSize: "13.5px", fontWeight: 600, color: "#C69C66", textDecoration: "none" }}
+            >
+              Add a location
+              <svg fill="none" height={14} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </a>
+          </div>
         )}
-        <div
-          className="mt-[15px] flex items-center gap-[7px] font-semibold text-[#3D335F]"
-          style={{ fontSize: "12.3px" }}
-        >
-          <span className="rounded-full bg-[#524096]" style={{ width: "5px", height: "5px", flexShrink: 0 }} />
-          {city}
-        </div>
       </div>
     </div>
   );
 }
 
 function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
+  const Icon = service.Icon;
   return (
     <Link
       className="group relative block shrink-0 overflow-hidden rounded-[14px] transition"
       href={service.href}
-      style={{ width: service.width, height: "255px", border: "2px solid #7262A9", boxSizing: "border-box" }}
+      style={{ width: "340px", height: "255px", border: "2px solid #7262A9", boxSizing: "border-box" }}
     >
       <Image
         alt={service.label}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         fill
         sizes="400px"
         src={service.img}
         style={{ transform: service.flip ? "scaleX(-1)" : undefined }}
       />
       <div
-        className="absolute left-0 top-0 flex items-center bg-[#7F71B1]"
-        style={{ height: "42px", width: service.tabW, borderRadius: "0 0 14px 0", paddingLeft: "24px", boxSizing: "border-box" }}
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(180deg, transparent 50%, rgba(28,20,56,0.75) 100%)" }}
+      />
+      <div
+        className="absolute left-0 top-0 flex items-center gap-3"
+        style={{ height: "52px", paddingLeft: "18px", paddingRight: "24px", background: "rgba(82,64,150,0.92)", backdropFilter: "blur(4px)", borderRadius: "0 0 14px 0", boxSizing: "border-box" }}
       >
-        <span style={{ fontSize: "16px", fontWeight: 600, color: "#FFFFFF" }}>{service.label}</span>
+        <Icon />
+        <span style={{ fontSize: "17.4px", fontWeight: 700, color: "#FFFFFF" }}>{service.label}</span>
       </div>
       <div
-        className="absolute top-0"
-        style={{ left: service.tabW, width: "14px", height: "14px", background: "radial-gradient(circle at 100% 100%, transparent 13.5px, #7F71B1 14px)" }}
-      />
-      <div
-        className="absolute left-0"
-        style={{ top: "42px", width: "14px", height: "14px", background: "radial-gradient(circle at 100% 100%, transparent 13.5px, #7F71B1 14px)" }}
-      />
-      <Image
-        alt=""
-        className="absolute"
-        height={service.iconH}
-        src={service.icon}
-        style={{ left: service.iconX, top: "0", width: `${service.iconW}px`, height: `${service.iconH}px` }}
-        width={service.iconW}
+        className="absolute left-0 top-[52px]"
+        style={{ width: "14px", height: "14px", background: "radial-gradient(circle at 100% 100%, transparent 13.5px, rgba(82,64,150,0.92) 14px)" }}
       />
     </Link>
   );
@@ -262,13 +285,6 @@ export default async function CustomerDashboardPage() {
             >
               Upcoming Cleaning
             </h2>
-            <Image
-              alt=""
-              className="absolute right-4 -top-1"
-              height={83}
-              src="/images/dashboard/illus-calendar-broom.png"
-              width={124}
-            />
           </div>
           <div className="flex flex-wrap gap-4">
             <Link
@@ -324,13 +340,6 @@ export default async function CustomerDashboardPage() {
           >
             Popular Services
           </h2>
-          <Image
-            alt=""
-            className="absolute right-4 -top-1"
-            height={79}
-            src="/images/dashboard/illus-clipboard-crown.png"
-            width={119}
-          />
         </div>
         <div
           className="flex gap-5"

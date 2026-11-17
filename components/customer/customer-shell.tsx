@@ -355,13 +355,7 @@ export function CustomerShell({
                       <h1 className="m-0 text-[34.7px] font-semibold leading-[40px] tracking-[-0.02em] text-[#000]">
                         Welcome back {firstName}
                       </h1>
-                      <Image
-                        alt=""
-                        height={34}
-                        src="/images/dashboard/wave-hand.png"
-                        style={{ width: "32px", height: "34px" }}
-                        width={32}
-                      />
+                      <span aria-label="wave" role="img" style={{ fontSize: "30px", lineHeight: 1 }}>👋</span>
                     </div>
                   )}
                   <p className="m-0 max-w-xl text-[18px] leading-[21px] text-[#5F5F66]">

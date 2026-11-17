@@ -16,14 +16,8 @@ export default async function CustomerProfilePage() {
     .single();
 
   return (
-    <div>
-      <h1 className="text-3xl font-semibold tracking-tight">Your profile</h1>
-      <p className="mt-2 text-muted-foreground">
-        Keep your details, preferences, and payment methods up to date.
-      </p>
-      <div className="mt-8">
-        <ProfileForm initialProfile={data as Profile} />
-      </div>
+    <div className="min-w-0">
+      <ProfileForm initialProfile={data as Profile} />
     </div>
   );
 }

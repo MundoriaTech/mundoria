@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { cn } from "@/lib/utils";
 
 export type ConversationListItem = {
   bookingId: string;
@@ -25,68 +24,78 @@ export function ConversationList({
 }) {
   if (!items.length) {
     return (
-      <div className="mt-10 px-2 py-12 text-center">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-          Inbox
-        </p>
-        <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground">
-          {emptyTitle}
-        </h3>
-        <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-6 text-[#5a5470] dark:text-muted-foreground">
-          {emptyBody}
-        </p>
+      <div className="rounded-[14px] bg-[#F3F4F6] px-5 py-14 text-center">
+        <div
+          className="mx-auto mb-4 flex items-center justify-center rounded-full bg-[#EAE7F5]"
+          style={{ width: "56px", height: "56px" }}
+        >
+          <svg fill="none" height={26} stroke="#524096" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={26}>
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </div>
+        <p style={{ fontSize: "17.4px", fontWeight: 700, color: "#1E1848", margin: 0 }}>{emptyTitle}</p>
+        <p style={{ fontSize: "14.5px", color: "#6B6B70", maxWidth: "320px", margin: "6px auto 0" }}>{emptyBody}</p>
       </div>
     );
   }
 
   return (
-    <ul className="mt-2">
+    <div className="flex flex-col gap-[6px]">
       {items.map((item) => (
-        <li key={item.bookingId}>
-          <Link
-            className="group flex items-center gap-3 border-b border-[#ece8f3] py-3.5 transition hover:bg-[#f7f4fc]/70 dark:border-border dark:hover:bg-muted/30 sm:gap-4 sm:py-4"
-            href={item.href}
-          >
+        <Link
+          className="flex items-center gap-4 rounded-[14px] bg-[#F3F4F6] p-4 transition-colors hover:bg-white hover:shadow-sm"
+          href={item.href}
+          key={item.bookingId}
+          style={{ textDecoration: "none" }}
+        >
+          <div className="relative shrink-0">
             <UserAvatar
-              className="h-11 w-11 shrink-0 border border-[#e8def8]"
+              className="h-12 w-12"
               name={item.title}
               url={item.avatarUrl}
             />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between gap-3">
-                <p
-                  className={cn(
-                    "truncate text-sm font-semibold text-[#1c133b] dark:text-foreground",
-                    item.unread && "font-bold",
-                  )}
-                >
-                  {item.title}
-                </p>
-                {item.timeLabel ? (
-                  <span className="shrink-0 text-[11px] text-[#8b8798]">
-                    {item.timeLabel}
-                  </span>
-                ) : null}
-              </div>
-              <p className="mt-0.5 truncate text-xs text-[#8b8798]">
-                {item.subtitle}
-              </p>
-              <p
-                className={cn(
-                  "mt-1 truncate text-sm text-[#5a5470] dark:text-muted-foreground",
-                  item.unread && "font-medium text-[#1c133b] dark:text-foreground",
-                )}
-              >
-                {item.preview}
-              </p>
-            </div>
             {item.unread ? (
-              <span className="h-2 w-2 shrink-0 rounded-full bg-[#d4694a]" />
+              <span
+                className="absolute -right-0.5 -top-0.5 rounded-full bg-[#D4694A]"
+                style={{ width: "10px", height: "10px", border: "2px solid #F3F4F6" }}
+              />
             ) : null}
-          </Link>
-        </li>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline justify-between gap-3">
+              <span
+                className="truncate"
+                style={{ fontSize: "15px", fontWeight: item.unread ? 700 : 600, color: "#1E1848" }}
+              >
+                {item.title}
+              </span>
+              {item.timeLabel ? (
+                <span style={{ fontSize: "12px", color: "#8B8798", flexShrink: 0 }}>{item.timeLabel}</span>
+              ) : null}
+            </div>
+            <p className="truncate" style={{ fontSize: "12.5px", color: "#8B8798", margin: "1px 0 0" }}>
+              {item.subtitle}
+            </p>
+            <p
+              className="truncate"
+              style={{
+                fontSize: "13.5px",
+                color: item.unread ? "#1E1848" : "#5F5F66",
+                fontWeight: item.unread ? 600 : 400,
+                margin: "3px 0 0",
+              }}
+            >
+              {item.preview}
+            </p>
+          </div>
+
+          <svg fill="none" height={18} stroke="#C4BFD4" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={18}>
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
       ))}
-    </ul>
+    </div>
   );
 }
 
