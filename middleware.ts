@@ -54,6 +54,7 @@ const PUBLIC_MARKETING_PREFIXES = [
 const PUBLIC_EXACT_PATHS = new Set([
   "/",
   "/setup",
+  "/book-2-get-1-free",
   "/robots.txt",
   "/sitemap.xml",
   "/llms.txt",

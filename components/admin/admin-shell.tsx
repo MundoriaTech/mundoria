@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Newspaper,
   Percent,
+  PhoneCall,
   Settings,
   ShieldAlert,
   Users,
@@ -57,6 +58,13 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
         icon: MailWarning,
         label: "Abandoned bookings",
         match: (p) => p === "/admin/abandoned-bookings" || p.startsWith("/admin/abandoned-bookings/"),
+      },
+      {
+        href: "/admin/callback-leads",
+        icon: PhoneCall,
+        label: "Callback leads",
+        match: (p) =>
+          p === "/admin/callback-leads" || p.startsWith("/admin/callback-leads/"),
       },
       {
         href: "/admin/inbox",
@@ -131,6 +139,7 @@ const PAGE_SUBTITLES: Record<string, string> = {
   "/admin/dashboard": "Jobs running today, cleaners waiting for review, and money coming in.",
   "/admin/bookings": "Search, inspect, and resolve booking edge cases.",
   "/admin/abandoned-bookings": "Leads who started the booking flow but didn't complete it.",
+  "/admin/callback-leads": "Ads and promo callback requests waiting for a call.",
   "/admin/inbox": "Support conversations with customers and cleaners.",
   "/admin/disputes": "Manage and resolve booking disputes.",
   "/admin/safety": "Track and resolve safety incidents and SOS alerts.",
