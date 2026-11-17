@@ -9,7 +9,6 @@ import {
   Menu,
   LogOut,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -96,14 +95,12 @@ function CustomerSidebarFull({
   return (
     <div className="relative h-full overflow-hidden rounded-[22px] bg-[#F3F4F6]">
       {/* Logo */}
-      <Image
-        alt="Mundoria"
-        className="absolute"
-        height={32}
-        src="/images/dashboard/mundoria-lockup-horizontal.png"
-        style={{ left: "30px", top: "35px", height: "32px", width: "auto" }}
-        width={128}
-      />
+      <span
+        className="absolute select-none"
+        style={{ left: "30px", top: "38px", fontSize: "21px", fontWeight: 700, letterSpacing: "-0.025em", color: "#1E1848" }}
+      >
+        Mundoria
+      </span>
 
       {/* Active indicator bar */}
       {NAV_ITEMS.some((item) => isActive(pathname, item)) && (
@@ -133,30 +130,32 @@ function CustomerSidebarFull({
       {/* Promo card */}
       <div
         className="absolute overflow-hidden rounded-[14px]"
-        style={{ left: "20px", top: "744px", width: "240px", height: "178px" }}
+        style={{ left: "20px", top: "730px", width: "240px", height: "178px", background: "linear-gradient(145deg,#524096 0%,#7262A9 100%)" }}
       >
-        <Image
-          alt=""
-          className="h-full w-full object-cover"
-          fill
-          src="/images/dashboard/sidebar-promo.png"
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 80% 10%,rgba(255,255,255,0.14) 0%,transparent 60%)" }}
         />
-      </div>
-      {/* Notched promo arrow */}
-      <div
-        className="absolute rounded-full bg-[#F3F4F6]"
-        style={{ left: "113px", top: "717px", width: "54px", height: "54px" }}
-      />
-      <Link
-        className="absolute flex items-center justify-center rounded-full bg-[#7F71B1] transition hover:bg-[#524096]"
-        href="/booking/new"
-        onClick={onNavigate}
-        style={{ left: "123px", top: "727px", width: "34px", height: "34px" }}
-      >
-        <svg fill="none" height={16} stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} viewBox="0 0 24 24" width={16}>
-          <path d="M7 17 17 7M7 7h10v10" />
+        <svg className="absolute opacity-[0.09]" fill="none" height={130} style={{ right: "-14px", bottom: "-14px" }} viewBox="0 0 24 24" width={130}>
+          <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} />
+          <path d="M9 21V12h6v9" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} />
         </svg>
-      </Link>
+        <div className="absolute left-5 top-5 right-5">
+          <p style={{ fontSize: "10.5px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", margin: 0 }}>Quick book</p>
+          <p style={{ fontSize: "15px", fontWeight: 700, color: "#fff", lineHeight: "20px", marginTop: "5px" }}>Book your next clean</p>
+        </div>
+        <Link
+          className="absolute flex items-center gap-2 rounded-full bg-white font-semibold transition hover:bg-[#ECE8F6]"
+          href="/booking/new"
+          onClick={onNavigate}
+          style={{ left: "20px", bottom: "18px", height: "34px", padding: "0 14px", fontSize: "13px", color: "#524096" }}
+        >
+          Book now
+          <svg fill="none" height={12} stroke="#524096" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} viewBox="0 0 24 24" width={12}>
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -232,13 +231,7 @@ export function CustomerShell({
               )}
             >
               <div className="flex items-center justify-between p-5">
-                <Image
-                  alt="Mundoria"
-                  height={28}
-                  src="/images/dashboard/mundoria-lockup-horizontal.png"
-                  style={{ height: "28px", width: "auto" }}
-                  width={112}
-                />
+                <span style={{ fontSize: "19px", fontWeight: 700, letterSpacing: "-0.025em", color: "#1E1848" }}>Mundoria</span>
                 <button
                   aria-label="Close menu"
                   className="rounded-full p-2 text-[#6B6B70] hover:bg-black/5"
@@ -297,13 +290,7 @@ export function CustomerShell({
                   <Menu className="h-5 w-5" />
                 </button>
                 <div className="min-w-0 flex-1">
-                  <Image
-                    alt="Mundoria"
-                    height={22}
-                    src="/images/dashboard/mundoria-lockup-horizontal.png"
-                    style={{ height: "22px", width: "auto" }}
-                    width={88}
-                  />
+                  <span style={{ fontSize: "17px", fontWeight: 700, letterSpacing: "-0.025em", color: "#1E1848" }}>Mundoria</span>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <NotificationBell userId={profile.id} />

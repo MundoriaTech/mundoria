@@ -1,4 +1,3 @@
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import {
   FeedbackList,
   type GuestFeedbackRow,
@@ -17,10 +16,6 @@ export default async function AdminFeedbackPage() {
 
   return (
     <div className="min-w-0">
-      <AdminPageIntro>
-        Written reviews from the public page. These do not appear on the
-        website and do not change a cleaner’s score.
-      </AdminPageIntro>
       {error ? (
         <p className="text-sm text-[#9a3412]">
           Feedback could not be loaded yet. Apply the latest database migration

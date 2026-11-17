@@ -1,5 +1,4 @@
 import { DisputesTable } from "@/components/admin/disputes-table";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminDispute } from "@/types/admin";
 
@@ -13,9 +12,6 @@ export default async function AdminDisputesPage() {
 
   return (
     <div className="min-w-0">
-      <AdminPageIntro>
-        Investigate evidence and resolve customer issues.
-      </AdminPageIntro>
       <DisputesTable disputes={(data ?? []) as AdminDispute[]} />
     </div>
   );

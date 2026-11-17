@@ -1,5 +1,4 @@
 import { ZonesManager } from "@/components/admin/zones-manager";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminZonesPage() {
@@ -10,9 +9,6 @@ export default async function AdminZonesPage() {
 
   return (
     <div className="min-w-0">
-      <AdminPageIntro>
-        Control postcode coverage and launches.
-      </AdminPageIntro>
       <ZonesManager zones={data ?? []} />
     </div>
   );

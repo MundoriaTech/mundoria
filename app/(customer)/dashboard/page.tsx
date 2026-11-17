@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
@@ -42,23 +41,20 @@ function EventIcon() {
 const SERVICES = [
   {
     Icon: HomeIcon,
-    flip: false,
+    bg: "linear-gradient(145deg,#524096 0%,#7262A9 100%)",
     href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
-    img: "/images/dashboard/service-home.png",
     label: "Home",
   },
   {
     Icon: OfficeIcon,
-    flip: true,
+    bg: "linear-gradient(145deg,#1E1848 0%,#3B3480 100%)",
     href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
-    img: "/images/dashboard/service-office.png",
     label: "Office",
   },
   {
     Icon: EventIcon,
-    flip: false,
+    bg: "linear-gradient(145deg,#B85C38 0%,#D47848 100%)",
     href: "/booking/new?fresh=1&service=one_off&returnTo=/dashboard",
-    img: "/images/dashboard/service-event.png",
     label: "Event",
   },
 ] as const;
@@ -212,33 +208,46 @@ function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
   const Icon = service.Icon;
   return (
     <Link
-      className="group relative block shrink-0 overflow-hidden rounded-[14px] transition"
+      className="group relative block shrink-0 overflow-hidden rounded-[14px] transition hover:brightness-110"
       href={service.href}
-      style={{ width: "340px", height: "255px", border: "2px solid #7262A9", boxSizing: "border-box" }}
+      style={{ width: "340px", height: "255px", background: service.bg, boxSizing: "border-box" }}
     >
-      <Image
-        alt={service.label}
-        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        fill
-        sizes="400px"
-        src={service.img}
-        style={{ transform: service.flip ? "scaleX(-1)" : undefined }}
-      />
+      {/* Subtle radial highlight */}
       <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(180deg, transparent 50%, rgba(28,20,56,0.75) 100%)" }}
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(ellipse at 15% 15%,rgba(255,255,255,0.14) 0%,transparent 55%)" }}
       />
+      {/* Dot-grid texture */}
+      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern height="22" id={`dot-${service.label}`} patternUnits="userSpaceOnUse" width="22">
+            <circle cx="2" cy="2" fill="white" r="1.5" />
+          </pattern>
+        </defs>
+        <rect fill={`url(#dot-${service.label})`} height="100%" width="100%" />
+      </svg>
+      {/* Large decorative icon */}
+      <div
+        className="pointer-events-none absolute opacity-[0.13]"
+        style={{ right: "-20px", bottom: "-20px", transform: "scale(3.6)", transformOrigin: "right bottom" }}
+      >
+        <Icon />
+      </div>
+      {/* Top badge */}
       <div
         className="absolute left-0 top-0 flex items-center gap-3"
-        style={{ height: "52px", paddingLeft: "18px", paddingRight: "24px", background: "rgba(82,64,150,0.92)", backdropFilter: "blur(4px)", borderRadius: "0 0 14px 0", boxSizing: "border-box" }}
+        style={{ height: "52px", paddingLeft: "18px", paddingRight: "24px", background: "rgba(0,0,0,0.22)", backdropFilter: "blur(6px)", borderRadius: "0 0 14px 0", boxSizing: "border-box" }}
       >
         <Icon />
         <span style={{ fontSize: "17.4px", fontWeight: 700, color: "#FFFFFF" }}>{service.label}</span>
       </div>
+      {/* Bottom CTA strip */}
       <div
-        className="absolute left-0 top-[52px]"
-        style={{ width: "14px", height: "14px", background: "radial-gradient(circle at 100% 100%, transparent 13.5px, rgba(82,64,150,0.92) 14px)" }}
-      />
+        className="absolute bottom-0 left-0 right-0 px-5 pb-4 pt-10"
+        style={{ background: "linear-gradient(0deg,rgba(0,0,0,0.38) 0%,transparent 100%)" }}
+      >
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>Book now →</span>
+      </div>
     </Link>
   );
 }

@@ -1,4 +1,3 @@
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import {
   SafetyAlertsTable,
   type SafetyAlertRow,
@@ -17,10 +16,7 @@ export default async function AdminSafetyPage() {
   const rows = (data ?? []) as SafetyAlertRow[];
 
   return (
-    <div className="min-w-0 space-y-6">
-      <AdminPageIntro>
-        Urgent in-session Safety alerts. Acknowledge open cases quickly.
-      </AdminPageIntro>
+    <div className="min-w-0">
       <SafetyAlertsTable rows={rows} />
     </div>
   );

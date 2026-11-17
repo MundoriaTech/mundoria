@@ -1,4 +1,3 @@
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { SupportInboxList } from "@/components/admin/support-inbox";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SupportConversationWithUser } from "@/types/support";
@@ -26,10 +25,6 @@ export default async function AdminInboxPage() {
 
   return (
     <div className="min-w-0">
-      <AdminPageIntro>
-        Replies from the site messenger land here. Home, Messages and Help tabs
-        on the widget feed this inbox.
-      </AdminPageIntro>
       {error ? (
         <p className="text-sm text-[#9a3412]">
           Inbox could not be loaded yet. Apply the latest database migration

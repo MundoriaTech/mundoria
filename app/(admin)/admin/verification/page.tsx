@@ -1,4 +1,3 @@
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import {
   VerificationQueueTable,
   type VerificationQueueRow,
@@ -22,11 +21,7 @@ export default async function AdminVerificationQueuePage() {
   const rows = (data ?? []) as VerificationQueueRow[];
 
   return (
-    <div className="min-w-0 space-y-6">
-      <AdminPageIntro>
-        Cleaners with a UTR, DBS or insurance document waiting for review.
-        Oldest updates first. {rows.length} in the queue.
-      </AdminPageIntro>
+    <div className="min-w-0">
       <VerificationQueueTable rows={rows} />
     </div>
   );

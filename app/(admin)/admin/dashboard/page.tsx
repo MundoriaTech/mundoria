@@ -1,14 +1,17 @@
 import {
   AlertTriangle,
+  CalendarCheck,
+  CircleDollarSign,
   Star,
+  UserCheck,
   UsersRound,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 
 import { OperationsMap } from "@/components/admin/operations-map";
 import { RematchButton } from "@/components/admin/rematch-button";
 import { RevenueChart } from "@/components/admin/revenue-chart";
-import { DashboardStatTiles } from "@/components/shared/dashboard-stat-tiles";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { loadAdminUserCounts } from "@/lib/admin/user-counts";
 import { OPS_REFRESH_MS } from "@/lib/dashboard/live-refresh";
@@ -174,34 +177,27 @@ export default async function AdminDashboardPage() {
         )}
       </div>
 
-      <DashboardStatTiles
-        items={[
-          {
-            icon: "calendarCheck",
-            label: "Bookings today",
-            tone: "peachPurple",
-            value: String(todayBookings.length),
-          },
-          {
-            icon: "pulse",
-            label: "Jobs in progress",
-            tone: "lavenderOrange",
-            value: String(activeCount ?? 0),
-          },
-          {
-            icon: "currencyGbp",
-            label: "Revenue today",
-            tone: "lineOnly",
-            value: formatMoney(revenueToday),
-          },
-          {
-            icon: "usersThree",
-            label: "Cleaners to review",
-            tone: "peachPurple",
-            value: String(pending),
-          },
-        ]}
-      />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { Icon: CalendarCheck, label: "Bookings today", value: String(todayBookings.length) },
+          { Icon: Zap, label: "Jobs in progress", value: String(activeCount ?? 0) },
+          { Icon: CircleDollarSign, label: "Revenue today", value: formatMoney(revenueToday) },
+          { Icon: UserCheck, label: "Cleaners to review", value: String(pending) },
+        ].map(({ Icon, label, value }) => (
+          <div
+            className="flex items-start gap-4 rounded-[1.25rem] border border-[#EDEAF5] bg-white p-5 shadow-[0_4px_12px_rgba(82,64,150,0.05)]"
+            key={label}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EAE7F5]">
+              <Icon className="h-5 w-5 text-[#524096]" strokeWidth={1.8} />
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b8798]">{label}</p>
+              <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1E1848]">{value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <section className="rounded-[1.5rem] border border-[#e8e0f4] bg-white p-5 shadow-[0_12px_28px_rgba(49,44,121,0.04)]">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">

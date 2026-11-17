@@ -1,5 +1,4 @@
 import { AbandonedBookingLeadsTable } from "@/components/admin/abandoned-booking-leads-table";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ServiceType } from "@/types/customer";
@@ -39,19 +38,8 @@ export default async function AdminAbandonedBookingsPage() {
     user_id: row.user_id as string | null,
   }));
 
-  const stillOpen = rows.filter((row) => !row.completed_at).length;
-
   return (
     <div className="min-w-0">
-      <AdminPageIntro>
-        People who were sent the “Finish your Mundoria booking” email after
-        leaving a booking mid-flow. {rows.length ? (
-          <>
-            {rows.length} emailed
-            {stillOpen ? ` · ${stillOpen} still open` : null}.
-          </>
-        ) : null}
-      </AdminPageIntro>
       {error ? (
         <p className="text-sm text-[#9a3412]">
           Abandoned booking leads could not be loaded. Apply the latest database

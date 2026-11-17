@@ -1,4 +1,3 @@
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import {
   IncidentsTable,
   type IncidentRow,
@@ -17,16 +16,9 @@ export default async function AdminIncidentsPage() {
     .limit(200);
 
   const rows = (data ?? []) as IncidentRow[];
-  const open = rows.filter(
-    (row) => row.status !== "resolved" && row.status !== "closed",
-  ).length;
 
   return (
-    <div className="min-w-0 space-y-6">
-      <AdminPageIntro>
-        Incidents reported by cleaners. {open} open. Flag anything that may need
-        RIDDOR reporting.
-      </AdminPageIntro>
+    <div className="min-w-0">
       <IncidentsTable rows={rows} />
     </div>
   );

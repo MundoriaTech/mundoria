@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
 import { SupportInboxThread } from "@/components/admin/support-inbox";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
@@ -45,9 +44,6 @@ export default async function AdminInboxThreadPage({
 
   return (
     <div className="min-w-0">
-      <AdminPageIntro>
-        Reply as Mundoria. Visitors see your message in the site messenger.
-      </AdminPageIntro>
       <SupportInboxThread
         conversationId={params.id}
         initialConversation={{
