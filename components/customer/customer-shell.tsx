@@ -68,7 +68,7 @@ function useIsDesktop() {
 }
 
 function isActive(pathname: string, item: (typeof NAV_ITEMS)[number]) {
-  if (item.exact) return pathname === item.href;
+  if ("exact" in item && item.exact) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
