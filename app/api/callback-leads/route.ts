@@ -5,18 +5,20 @@ import { storedPhone } from "@/lib/auth/uk-phone";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
-  availableIn10Min: z.boolean(),
+  availableIn10Min: z.boolean().optional(),
   email: z.string().trim().email("Enter a valid email address").max(254),
   firstName: z
     .string()
     .trim()
-    .min(1, "Enter your first name")
-    .max(80, "First name is too long"),
+    .max(80, "First name is too long")
+    .optional()
+    .default(""),
   lastName: z
     .string()
     .trim()
-    .min(1, "Enter your last name")
-    .max(80, "Last name is too long"),
+    .max(80, "Last name is too long")
+    .optional()
+    .default(""),
   phone: z
     .string()
     .trim()
@@ -50,12 +52,15 @@ export async function POST(request: Request) {
     );
   }
 
+  const firstName = parsed.data.firstName.trim() || "Guest";
+  const lastName = parsed.data.lastName.trim() || "Lead";
+
   const admin = createAdminClient();
   const { error } = await admin.from("callback_leads").insert({
-    available_in_10_min: parsed.data.availableIn10Min,
+    available_in_10_min: parsed.data.availableIn10Min ?? false,
     email: parsed.data.email.toLowerCase(),
-    first_name: parsed.data.firstName,
-    last_name: parsed.data.lastName,
+    first_name: firstName,
+    last_name: lastName,
     phone,
     source: parsed.data.source?.trim() || "book-2-get-1-free",
     user_agent: request.headers.get("user-agent")?.slice(0, 500) ?? null,

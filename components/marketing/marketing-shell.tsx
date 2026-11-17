@@ -1,6 +1,7 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
+import { FreeHourOfferPopup } from "@/components/marketing/ads/free-hour-offer-popup";
 import { LandingFooter } from "@/components/marketing/landing/landing-footer";
 import { LandingNavbar } from "@/components/marketing/landing/landing-navbar";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
@@ -56,6 +57,9 @@ export async function MarketingShell({
 }) {
   const configured = hasSupabasePublicConfig();
   const bookingHref = configured ? "/booking/new" : "/setup";
+  const offerBookingHref = configured
+    ? "/booking/new?category=residential"
+    : "/setup";
   const cleanerHref = configured ? "/signup/cleaner" : "/setup";
 
   // Intentionally skip server auth here. Reading cookies() would force every
@@ -71,6 +75,9 @@ export async function MarketingShell({
       {children}
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
       <SupportMessengerLauncher />
+      <Suspense fallback={null}>
+        <FreeHourOfferPopup bookingHref={offerBookingHref} />
+      </Suspense>
     </main>
   );
 }
