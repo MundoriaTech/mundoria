@@ -105,16 +105,20 @@ export default async function CustomerConversationsPage() {
     );
 
   return (
-    <div className="pb-4">
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-        Inbox
-      </p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground sm:text-3xl">
-        Messages
-      </h1>
-      <p className="mt-2 max-w-xl text-sm font-light leading-6 text-[#5a5470] dark:text-muted-foreground">
-        Chat with your cleaner about access, timing, and session details.
-      </p>
+    <div className="flex flex-col gap-4 rounded-[18px] bg-white p-5">
+      {/* Banner */}
+      <div
+        className="relative flex h-[70px] items-center overflow-hidden rounded-[14px] px-6"
+        style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
+        />
+        <h2 className="relative m-0 font-semibold leading-none text-white" style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}>
+          Messages
+        </h2>
+      </div>
       <ConversationList
         emptyBody="Conversations appear here once a cleaner is matched to your booking."
         emptyTitle="No conversations yet"

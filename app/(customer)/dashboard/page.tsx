@@ -1,48 +1,258 @@
-import { CalendarCheck as CalendarCheckLucide, ChevronRight, Plus } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  DashboardEmptyCard,
-  DashboardSection,
-  DashboardWelcomeBanner,
-} from "@/components/shared/dashboard-panels";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
+import { CalendarTile } from "@/components/customer/dashboard/calendar-tile";
 import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
-import { Button } from "@/components/ui/button";
-import {
-  customerWaitingLabel,
-  isCleanerVisibleToCustomer,
-  isWaitingForCleanerAcceptance,
-} from "@/lib/customer/booking-visibility";
 import { getCustomerBookings } from "@/lib/customer/server";
-import { FEMALE_AVATAR_SRC } from "@/lib/avatars/default-pack";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Profile } from "@/types/auth";
 import type { Booking } from "@/types/customer";
 
-const DASHBOARD_BOOK_HREF = "/booking/new?fresh=1&returnTo=/dashboard";
-const MAX_ALSO_SCHEDULED = 5;
+export const metadata: Metadata = { title: "Dashboard" };
 
-export const metadata = { title: "Customer dashboard" };
+function HomeIcon() {
+  return (
+    <svg fill="none" height={40} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={40}>
+      <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" />
+      <path d="M9 21V12h6v9" />
+    </svg>
+  );
+}
+function OfficeIcon() {
+  return (
+    <svg fill="none" height={40} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={40}>
+      <rect height="20" rx="2" width="16" x="4" y="2" />
+      <path d="M9 22V12h6v10" />
+      <path d="M8 7h.01M12 7h.01M16 7h.01M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01" strokeWidth={2.5} />
+    </svg>
+  );
+}
+function EventIcon() {
+  return (
+    <svg fill="none" height={40} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={40}>
+      <path d="M5.8 11.3 2 22l10.4-3.8M2 22l6.4-6.4" />
+      <path d="M15.4 15 11 10.6l8.3-8.3a2.1 2.1 0 1 1 3 3L15.4 15Z" />
+      <path d="M2 11.5a10 10 0 0 1 10-10" />
+      <path d="M12.5 22a10 10 0 0 0 10-10" />
+    </svg>
+  );
+}
+
+const SERVICES = [
+  {
+    Icon: HomeIcon,
+    flip: false,
+    href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
+    img: "/images/dashboard/service-home.png",
+    label: "Home",
+  },
+  {
+    Icon: OfficeIcon,
+    flip: true,
+    href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
+    img: "/images/dashboard/service-office.png",
+    label: "Office",
+  },
+  {
+    Icon: EventIcon,
+    flip: false,
+    href: "/booking/new?fresh=1&service=one_off&returnTo=/dashboard",
+    img: "/images/dashboard/service-event.png",
+    label: "Event",
+  },
+] as const;
+
+function TimeTile({ booking }: { booking: Booking | null }) {
+  const time = booking?.scheduled_start_time?.slice(0, 5) ?? null;
+  const hours = time ? parseInt(time.split(":")[0]!) : null;
+  const minutes = time ? parseInt(time.split(":")[1]!) : null;
+  const totalMinutes = hours !== null && minutes !== null ? hours * 60 + minutes : null;
+  const progress = totalMinutes !== null ? totalMinutes / (24 * 60) : 0.41;
+
+  const C = 2 * Math.PI * 73;
+  const L = C * progress;
+
+  const h = hours !== null ? (hours % 12 || 12) : 2;
+  const m = minutes !== null ? String(minutes).padStart(2, "0") : "25";
+  const ampm = hours !== null ? (hours >= 12 ? "PM" : "AM") : "PM";
+
+  return (
+    <div
+      className="relative h-[238px] rounded-[18px] bg-[#F3F4F6]"
+      style={{ minWidth: "240px", flex: "1 1 240px" }}
+    >
+      <svg
+        className="absolute"
+        height={180}
+        style={{ left: "50%", top: "29px", transform: "translateX(-50%)" }}
+        viewBox="0 0 180 180"
+        width={180}
+      >
+        <circle
+          cx="90" cy="90" fill="none" r="73"
+          stroke="#2A2A2E" strokeDasharray="1.6 5.1" strokeWidth="9"
+          transform="rotate(-90 90 90)"
+        />
+        <circle
+          cx="90" cy="90" fill="none" r="73"
+          stroke="#F3F4F6" strokeDasharray={`${L + 6} ${C}`} strokeWidth="12"
+          transform="rotate(-90 90 90)"
+        />
+        <circle
+          cx="90" cy="90" fill="none" r="73"
+          stroke="#7262A9" strokeDasharray={`${L} ${C}`} strokeLinecap="round" strokeWidth="18"
+          transform="rotate(-90 90 90)"
+        />
+      </svg>
+      <div
+        className="absolute left-0 right-0 flex items-baseline justify-center gap-[2px]"
+        style={{ top: "105px" }}
+      >
+        <span style={{ fontSize: "28.8px", lineHeight: "30px", fontWeight: 600, letterSpacing: "-0.02em" }}>
+          {h}:{m}
+        </span>
+        <span style={{ fontSize: "13.5px", fontWeight: 600 }}>{ampm}</span>
+      </div>
+    </div>
+  );
+}
+
+function LocationTile({ booking }: { booking: Booking | null }) {
+  const city = booking?.address?.city ?? null;
+  const line1 = booking?.address?.address_line_1 ?? null;
+  const postcode = booking?.address?.postcode ?? null;
+  const hasAddress = !!(line1 || city);
+
+  return (
+    <div
+      className="relative h-[238px] overflow-hidden rounded-[18px]"
+      style={{ minWidth: "240px", flex: "1 1 240px", background: "#1E1848" }}
+    >
+      {/* dot-grid background */}
+      <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern id="dot-grid" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(255,255,255,0.07)" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#dot-grid)" />
+      </svg>
+
+      {/* glow */}
+      <div
+        className="pointer-events-none absolute rounded-full"
+        style={{ width: "200px", height: "200px", left: "-40px", top: "-60px", background: "radial-gradient(circle,rgba(130,113,177,0.35) 0%,transparent 70%)" }}
+      />
+
+      {/* decorative location pin */}
+      <svg
+        className="absolute opacity-10"
+        fill="none"
+        height={120}
+        style={{ right: "-18px", bottom: "-18px" }}
+        viewBox="0 0 100 120"
+        width={100}
+      >
+        <path d="M50 10C31.2 10 16 25.2 16 44c0 24 34 66 34 66s34-42 34-66c0-18.8-15.2-34-34-34z" fill="#ffffff" />
+        <circle cx="50" cy="44" fill="#1E1848" r="13" />
+      </svg>
+
+      {/* content */}
+      <div className="absolute left-5 right-5" style={{ top: "32px" }}>
+        <div className="mb-3 flex items-center gap-2">
+          <span
+            className="flex items-center justify-center rounded-[6px]"
+            style={{ width: "24px", height: "24px", background: "rgba(255,255,255,0.12)" }}
+          >
+            <svg fill="none" height={14} stroke="#C69C66" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}>
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </span>
+          <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C69C66" }}>Service location</span>
+        </div>
+
+        {hasAddress ? (
+          <div>
+            {line1 && (
+              <p style={{ fontSize: "17.4px", fontWeight: 700, color: "#FFFFFF", lineHeight: "20px", letterSpacing: "-0.01em", margin: 0 }}>{line1}</p>
+            )}
+            {postcode && (
+              <p style={{ fontSize: "17.4px", fontWeight: 400, color: "rgba(255,255,255,0.7)", lineHeight: "22px", margin: 0 }}>{postcode}</p>
+            )}
+            {city && (
+              <div
+                className="mt-3 inline-flex items-center gap-2 rounded-full"
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", padding: "5px 12px 5px 8px" }}
+              >
+                <span className="rounded-full bg-[#524096]" style={{ width: "6px", height: "6px", flexShrink: 0 }} />
+                <span style={{ fontSize: "13.5px", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{city}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <p style={{ fontSize: "17.4px", fontWeight: 700, color: "rgba(255,255,255,0.4)", lineHeight: "22px", margin: 0 }}>No address set</p>
+            <a
+              href="/addresses"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "12px", fontSize: "13.5px", fontWeight: 600, color: "#C69C66", textDecoration: "none" }}
+            >
+              Add a location
+              <svg fill="none" height={14} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
+  const Icon = service.Icon;
+  return (
+    <Link
+      className="group relative block shrink-0 overflow-hidden rounded-[14px] transition"
+      href={service.href}
+      style={{ width: "340px", height: "255px", border: "2px solid #7262A9", boxSizing: "border-box" }}
+    >
+      <Image
+        alt={service.label}
+        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        fill
+        sizes="400px"
+        src={service.img}
+        style={{ transform: service.flip ? "scaleX(-1)" : undefined }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(180deg, transparent 50%, rgba(28,20,56,0.75) 100%)" }}
+      />
+      <div
+        className="absolute left-0 top-0 flex items-center gap-3"
+        style={{ height: "52px", paddingLeft: "18px", paddingRight: "24px", background: "rgba(82,64,150,0.92)", backdropFilter: "blur(4px)", borderRadius: "0 0 14px 0", boxSizing: "border-box" }}
+      >
+        <Icon />
+        <span style={{ fontSize: "17.4px", fontWeight: 700, color: "#FFFFFF" }}>{service.label}</span>
+      </div>
+      <div
+        className="absolute left-0 top-[52px]"
+        style={{ width: "14px", height: "14px", background: "radial-gradient(circle at 100% 100%, transparent 13.5px, rgba(82,64,150,0.92) 14px)" }}
+      />
+    </Link>
+  );
+}
 
 export default async function CustomerDashboardPage() {
   const supabase = createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const [{ data: profile }, bookings] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user!.id).single(),
-    getCustomerBookings(supabase, user!.id),
-  ]);
+  const { data: { user } } = await supabase.auth.getUser();
+  const bookings = await getCustomerBookings(supabase, user!.id);
   const now = new Date();
   const upcoming = bookings
     .filter(
-      (booking) =>
-        !["completed", "cancelled"].includes(booking.status) &&
-        new Date(`${booking.scheduled_date}T${booking.scheduled_start_time}`) >=
-          now,
+      (b) =>
+        !["completed", "cancelled"].includes(b.status) &&
+        new Date(`${b.scheduled_date}T${b.scheduled_start_time}`) >= now,
     )
     .sort(
       (a, b) =>
@@ -50,309 +260,96 @@ export default async function CustomerDashboardPage() {
         new Date(`${b.scheduled_date}T${b.scheduled_start_time}`).getTime(),
     );
   const next = upcoming[0] ?? null;
-  const later = upcoming.slice(1, 1 + MAX_ALSO_SCHEDULED);
-  const laterOverflow = upcoming.length - 1 - later.length;
-  const customer = profile as Profile;
-  const firstName = customer.full_name.trim().split(/\s+/)[0] || "there";
-  const today = new Date().toISOString().slice(0, 10);
-  const todayCount = upcoming.filter((booking) => booking.scheduled_date === today).length;
-  const weekCount = upcoming.filter((booking) => {
-    const when = new Date(`${booking.scheduled_date}T12:00:00`).getTime();
-    return when >= new Date(`${today}T12:00:00`).getTime() && when < Date.now() + 7 * 864e5;
-  }).length;
-  const monthSpend = bookings
-    .filter(
-      (booking) =>
-        booking.status === "completed" && booking.scheduled_date.slice(0, 7) === today.slice(0, 7),
-    )
-    .reduce((sum, booking) => sum + (booking.amount_total ?? 0), 0);
-  const nextLabel = next
-    ? `${next.scheduled_start_time.slice(0, 5)} · ${next.address?.city ?? "Home"}`
-    : "None";
 
   return (
-    <div className="space-y-8 pb-4">
+    <div className="flex flex-col gap-5">
       <LiveDashboardRefresh
         scope={`customer-dashboard-${user!.id}`}
         watches={bookingWatchesFor("customer")}
       />
-      <DashboardWelcomeBanner
-        actions={
-          <>
-            <Link
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c133b] px-3.5 text-xs font-semibold text-white transition hover:bg-[#312c79] sm:h-12 sm:px-6 sm:text-sm"
-              href={DASHBOARD_BOOK_HREF}
-            >
-              <Plus className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
-              Book a session
-            </Link>
-            <Link
-              className="inline-flex h-9 items-center justify-center rounded-full border border-[#d8d4e0] bg-white px-3.5 text-xs font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea] sm:h-12 sm:px-6 sm:text-sm"
-              href="/bookings"
-            >
-              <CalendarCheckLucide className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
-              View sessions
-            </Link>
-          </>
-        }
-        figureSrc={
-          todayCount > 0
-            ? "/images/avatars/mundoria-woman-walk.png"
-            : upcoming.length
-              ? FEMALE_AVATAR_SRC
-              : "/images/avatars/mundoria-woman-wave.png"
-        }
-        firstName={firstName}
-        stats={[
-          { label: "Today", value: String(todayCount) },
-          { label: "This week", value: String(weekCount) },
-          { label: "This month", value: formatMoney(monthSpend) },
-          { label: "Next clean", value: nextLabel },
-        ]}
-        subtitle="Keep track of your cleaning services, upcoming bookings, and past appointments."
-      />
 
-      <DashboardSection
-        action={
-          upcoming.length > 1 ? (
-            <Link
-              className="text-sm font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-              href="/bookings"
+      {/* Upcoming Cleaning */}
+      <section className="flex flex-col gap-5 rounded-[22px] bg-white p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-5">
+          <div
+            className="relative flex h-[70px] flex-1 items-center overflow-hidden rounded-[14px] px-6"
+            style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
+          >
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
+            />
+            <h2
+              className="relative m-0 font-semibold leading-none text-white"
+              style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}
             >
-              View all
-            </Link>
-          ) : null
-        }
-        eyebrow="Coming up"
-        title="Next clean"
-      >
-        {next ? (
-          <div className="space-y-6">
-            <NextCleanCard booking={next} />
-
-            {later.length ? (
-              <div>
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-                    Also scheduled
-                  </p>
-                  {laterOverflow > 0 ? (
-                    <Link
-                      className="text-xs font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-                      href="/bookings"
-                    >
-                      +{laterOverflow} more
-                    </Link>
-                  ) : null}
-                </div>
-                <ul className="mt-3 grid gap-3">
-                  {later.map((booking) => {
-                    const when = new Date(`${booking.scheduled_date}T12:00:00`);
-                    const day = when.toLocaleDateString("en-GB", {
-                      day: "numeric",
-                    });
-                    const month = when.toLocaleDateString("en-GB", {
-                      month: "short",
-                    });
-                    const weekday = when.toLocaleDateString("en-GB", {
-                      weekday: "short",
-                    });
-                    const time = booking.scheduled_start_time.slice(0, 5);
-                    const waiting = isWaitingForCleanerAcceptance(
-                      booking.status,
-                    );
-
-                    return (
-                      <li key={booking.id}>
-                        <Link
-                          className="group flex items-center gap-3 rounded-[1.35rem] border border-[#e5e7eb] bg-white px-4 py-3 shadow-[0_10px_28px_rgba(28,19,59,0.05)] transition hover:bg-[#f3f4f6]"
-                          href={`/booking/${booking.id}`}
-                        >
-                          <div className="flex w-12 shrink-0 flex-col items-center leading-none">
-                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#c79c66]">
-                              {month}
-                            </span>
-                            <span className="mt-0.5 text-lg font-semibold tracking-tight text-[#1c133b]">
-                              {day}
-                            </span>
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-[#1c133b]">
-                              {formatServiceName(booking.service_type)}
-                            </p>
-                            <p className="mt-0.5 truncate text-xs text-[#5c5670]">
-                              {weekday} · {time}
-                              {waiting
-                                ? ` · ${(customerWaitingLabel(booking.status) ?? "Looking for a cleaner").toLowerCase()}`
-                                : ""}
-                            </p>
-                          </div>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-[#c4bfd4] transition group-hover:text-[#6a45b8]" />
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ) : null}
+              Upcoming Cleaning
+            </h2>
           </div>
-        ) : (
-          <DashboardEmptyCard
-            action={
-              <Button asChild className="rounded-full bg-[#1c133b] hover:bg-[#312c79]">
-                <Link href={DASHBOARD_BOOK_HREF}>Start a booking</Link>
-              </Button>
-            }
-            body="Book a session and your next clean will show up here with date, time and status."
-            title="Nothing scheduled yet"
-          />
-        )}
-      </DashboardSection>
-
-      <section>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-          For you
-        </p>
-        <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-          Halloween
-        </h2>
-        <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-2">
-          <Link
-            className="group relative isolate flex min-h-[18rem] flex-col overflow-hidden rounded-[1.75rem] shadow-[0_16px_40px_rgba(28,19,59,0.12)]"
-            href="/booking/new?fresh=1&service=one_off&returnTo=/dashboard"
-          >
-            <Image
-              alt=""
-              className="object-cover transition duration-500 group-hover:scale-[1.03]"
-              fill
-              sizes="(max-width: 1024px) 100vw, 720px"
-              src="/images/promos/halloween-after-party.jpg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1c133b]/88 via-[#1c133b]/25 to-[#1c133b]/10" />
-            <div className="relative mt-auto p-5 sm:p-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#ffc79f]">
-                Until 1 November
-              </p>
-              <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
-                After the party
-              </h3>
-              <p className="mt-2 max-w-sm text-sm font-light leading-6 text-white/85">
-                A one-off clean the morning after Halloween, so the house is yours again.
-              </p>
-              <span className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-[#1c133b] transition group-hover:bg-[#fff4ee]">
-                Book a one-off
-              </span>
-            </div>
-          </Link>
-
-          <Link
-            className="group relative isolate flex min-h-[18rem] flex-col overflow-hidden rounded-[1.75rem] shadow-[0_16px_40px_rgba(28,19,59,0.12)]"
-            href="/booking/new?fresh=1&service=deep_clean&returnTo=/dashboard"
-          >
-            <Image
-              alt=""
-              className="object-cover object-[70%_40%] transition duration-500 group-hover:scale-[1.03]"
-              fill
-              sizes="(max-width: 1024px) 100vw, 560px"
-              src="/images/promos/halloween-deep-clean.jpg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1c133b]/88 via-[#1c133b]/20 to-transparent" />
-            <div className="relative mt-auto p-5 sm:p-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#ffc79f]">
-                Before the 31st
-              </p>
-              <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
-                Deep clean
-              </h3>
-              <p className="mt-2 max-w-sm text-sm font-light leading-6 text-white/85">
-                A thorough clean before guests arrive.
-              </p>
-              <span className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-[#1c133b] transition group-hover:bg-[#fff4ee]">
-                Book a deep clean
-              </span>
-            </div>
-          </Link>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              className="flex items-center justify-center gap-3 rounded-full font-semibold text-white transition"
+              href="/booking/new?fresh=1&returnTo=/dashboard"
+              style={{
+                height: "57px",
+                padding: "0 24px",
+                fontSize: "17.4px",
+                background: "linear-gradient(90deg,#524096 0%,#8072B1 100%)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <svg fill="none" height={24} stroke="#fff" strokeLinecap="round" strokeWidth={1.8} viewBox="0 0 24 24" width={24}>
+                <path d="M5 12h14M12 5v14" />
+              </svg>
+              Book a Session
+            </Link>
+            <Link
+              className="flex items-center justify-center gap-3 rounded-full font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+              href="/bookings"
+              style={{ height: "57px", padding: "0 24px", fontSize: "17.4px", border: "2px solid #524096", whiteSpace: "nowrap" }}
+            >
+              <svg fill="none" height={26} stroke="#524096" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} viewBox="0 0 24 24" width={26}>
+                <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5M16 2v4M8 2v4M3 10h5" />
+                <circle cx="16" cy="16" r="6" />
+                <path d="M17.5 17.5 16 16.3V14" />
+              </svg>
+              View Sessions
+            </Link>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-5">
+          <CalendarTile booking={next} />
+          <TimeTile booking={next} />
+          <LocationTile booking={next} />
         </div>
       </section>
 
-      {customer.referral_code ? (
-        <section className="rounded-[1.75rem] bg-[#f3efe6] p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            Share Mundoria
-          </p>
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-            Give £10, get £10
-          </h2>
-          <p className="mt-2 max-w-xl text-sm font-light leading-6 text-[#3d3a48]">
-            Share code{" "}
-            <span className="font-semibold text-[#312c79]">
-              {customer.referral_code}
-            </span>
-            . Friends get £10 off their first clean; you get £10 after they
-            complete it.
-          </p>
-        </section>
-      ) : null}
-    </div>
-  );
-}
-
-function NextCleanCard({ booking }: { booking: Booking }) {
-  const waiting = isWaitingForCleanerAcceptance(booking.status);
-  const when = new Date(`${booking.scheduled_date}T12:00:00`).toLocaleDateString(
-    "en-GB",
-    { weekday: "short", day: "numeric", month: "short" },
-  );
-  const time = booking.scheduled_start_time.slice(0, 5);
-  const area = booking.address?.city ?? booking.address?.postcode ?? "Home";
-  const facts = [
-    { label: "Date", value: when },
-    { label: "Time", value: time },
-    { label: "Where", value: area },
-    {
-      label: "Total",
-      value: booking.amount_total ? formatMoney(booking.amount_total) : "-",
-    },
-  ];
-
-  return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-[#e6e0f2] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
-      <div className="px-5 pt-5 sm:px-6">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-          {waiting ? customerWaitingLabel(booking.status) : "Confirmed"}
-        </p>
-        <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-          {formatServiceName(booking.service_type)}
-        </h3>
-      </div>
-      <dl className="mt-5 grid grid-cols-2 gap-px border-y border-[#efe6ff] bg-[#efe6ff] sm:grid-cols-4">
-        {facts.map((fact) => (
-          <div className="bg-white px-5 py-3.5 sm:px-6" key={fact.label}>
-            <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
-              {fact.label}
-            </dt>
-            <dd className="mt-1 truncate text-sm font-semibold tracking-tight text-[#1c133b]">
-              {fact.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      <div className="flex flex-col gap-2 p-5 sm:flex-row sm:flex-wrap sm:items-center sm:px-6">
-        <Link
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
-          href={`/booking/${booking.id}`}
+      {/* Popular Services */}
+      <section className="flex flex-col gap-5 rounded-[22px] bg-white p-5">
+        <div
+          className="relative flex h-[70px] items-center overflow-hidden rounded-[14px] px-6"
+          style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
         >
-          {waiting ? "View request" : "Manage session"}
-        </Link>
-        {isCleanerVisibleToCustomer(booking.status) && booking.cleaner_id ? (
-          <Link
-            className="inline-flex h-11 items-center justify-center rounded-full border border-[#e6e0f2] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea]"
-            href={`/messages/${booking.id}`}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
+          />
+          <h2
+            className="relative m-0 font-semibold leading-none text-white"
+            style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}
           >
-            Message
-          </Link>
-        ) : null}
-      </div>
-    </article>
+            Popular Services
+          </h2>
+        </div>
+        <div
+          className="flex gap-5"
+          style={{ overflowX: "auto", overflowY: "hidden", scrollbarWidth: "none", paddingBottom: "4px" }}
+        >
+          {SERVICES.map((s) => (
+            <ServiceCard key={s.label} service={s} />
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }

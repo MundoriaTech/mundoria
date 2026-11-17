@@ -9,7 +9,6 @@ import {
   usePagedItems,
 } from "@/components/shared/pagination-controls";
 import { PAGE_SIZES } from "@/lib/pagination";
-import { cn } from "@/lib/utils";
 import type { Booking } from "@/types/customer";
 
 type BookingsTab = "upcoming" | "past" | "cancelled";
@@ -28,54 +27,86 @@ export function BookingsList({
   initialTab?: BookingsTab;
 }) {
   const [tab, setTab] = useState<BookingsTab>(initialTab);
-  const filtered = bookings.filter((booking) => {
-    if (tab === "cancelled") return booking.status === "cancelled";
-    if (tab === "past") return booking.status === "completed";
-    return !["completed", "cancelled"].includes(booking.status);
-  });
-  const { page, pageItems, setPage, totalItems } = usePagedItems(
-    filtered,
-    PAGE_SIZES.app,
-    tab,
-  );
 
-  const cancelledCount = bookings.filter(
-    (booking) => booking.status === "cancelled",
-  ).length;
+  const filtered = bookings.filter((b) => {
+    if (tab === "cancelled") return b.status === "cancelled";
+    if (tab === "past") return b.status === "completed";
+    return !["completed", "cancelled"].includes(b.status);
+  });
+
+  const { page, pageItems, setPage, totalItems } = usePagedItems(filtered, PAGE_SIZES.app, tab);
+
+  const upcomingCount = bookings.filter((b) => !["completed", "cancelled"].includes(b.status)).length;
+  const completedCount = bookings.filter((b) => b.status === "completed").length;
+  const cancelledCount = bookings.filter((b) => b.status === "cancelled").length;
+
+  const counts: Record<BookingsTab, number> = {
+    upcoming: upcomingCount,
+    past: completedCount,
+    cancelled: cancelledCount,
+  };
 
   return (
-    <div>
-      <div className="flex gap-1 border-b border-[#ece8f3] dark:border-border">
-        {TABS.map((item) => {
-          const label =
-            item.id === "cancelled" && cancelledCount > 0
-              ? `Cancelled (${cancelledCount})`
-              : item.label;
-          const active = tab === item.id;
+    <div className="flex flex-col gap-4 rounded-[18px] bg-white p-5">
+      {/* Banner */}
+      <div
+        className="relative flex h-[70px] items-center overflow-hidden rounded-[14px] px-6"
+        style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
+        />
+        <h2 className="relative m-0 font-semibold leading-none text-white" style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}>
+          Your sessions
+        </h2>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex h-[46px] items-center gap-1 rounded-full bg-[#E7E7EF] px-[5px]">
+        {TABS.map((t) => {
+          const count = counts[t.id];
+          const active = tab === t.id;
           return (
             <button
-              className={cn(
-                "relative px-3 pb-3 pt-1 text-sm font-semibold transition sm:px-4",
-                active
-                  ? "text-[#1c133b] dark:text-foreground"
-                  : "text-[#8b8798] hover:text-[#5a5470]",
-              )}
-              key={item.id}
-              onClick={() => setTab(item.id)}
+              className="flex items-center gap-1.5 whitespace-nowrap rounded-full text-[14.5px] font-semibold transition-colors"
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              style={{
+                height: "36px",
+                padding: "0 16px",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                background: active ? "#524096" : "transparent",
+                color: active ? "#FFFFFF" : "#524096",
+              }}
               type="button"
             >
-              {label}
-              {active ? (
-                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-[#d4694a] sm:inset-x-4" />
-              ) : null}
+              {t.label}
+              {count > 0 && (
+                <span
+                  className="rounded-full"
+                  style={{
+                    padding: "1px 6px",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    background: active ? "rgba(255,255,255,0.25)" : "rgba(82,64,150,0.15)",
+                    color: active ? "#FFFFFF" : "#524096",
+                  }}
+                >
+                  {count}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
 
-      {filtered.length ? (
+      {/* List */}
+      {pageItems.length > 0 ? (
         <>
-          <ul className="mt-1">
+          <ul className="m-0 list-none p-0">
             {pageItems.map((booking) => (
               <BookingCard
                 booking={booking}
@@ -85,7 +116,6 @@ export function BookingsList({
             ))}
           </ul>
           <ClientPagination
-            className="mt-6"
             onPageChange={setPage}
             page={page}
             pageSize={PAGE_SIZES.app}
@@ -93,32 +123,35 @@ export function BookingsList({
           />
         </>
       ) : (
-        <div className="mt-10 px-2 py-12 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            Sessions
+        <div className="rounded-[14px] bg-[#F3F4F6] px-5 py-14 text-center">
+          <div
+            className="mx-auto mb-4 flex items-center justify-center rounded-full bg-[#EAE7F5]"
+            style={{ width: "56px", height: "56px" }}
+          >
+            <svg fill="none" height={26} stroke="#524096" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24" width={26}>
+              <rect height="18" rx="2" width="18" x="3" y="4" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+          </div>
+          <p style={{ fontSize: "17.4px", fontWeight: 700, color: "#1E1848", margin: 0 }}>
+            {tab === "cancelled" ? "No cancelled sessions" : tab === "past" ? "No completed sessions" : "Nothing scheduled yet"}
           </p>
-          <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground">
+          <p style={{ fontSize: "14.5px", color: "#6B6B70", marginTop: "6px" }}>
             {tab === "cancelled"
-              ? "No cancelled sessions"
+              ? "Cancelled sessions will appear here."
               : tab === "past"
-                ? "No completed sessions"
-                : "Nothing scheduled"}
-          </h3>
-          <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-6 text-[#5a5470] dark:text-muted-foreground">
-            {tab === "cancelled"
-              ? "Cancelled sessions will show here."
-              : tab === "past"
-                ? "Completed cleans will show here."
-                : "Book a clean and your upcoming sessions will appear here."}
+                ? "Completed cleans will appear here."
+                : "Book your first clean and your sessions will appear here."}
           </p>
-          {tab === "upcoming" ? (
+          {tab === "upcoming" && (
             <Link
-              className="mt-5 inline-flex h-11 items-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+              className="mt-5 inline-flex items-center gap-2 rounded-full font-semibold text-white transition"
               href="/booking/new?fresh=1&returnTo=/bookings"
+              style={{ height: "48px", padding: "0 24px", fontSize: "15px", background: "linear-gradient(90deg,#524096 0%,#8072B1 100%)", textDecoration: "none" }}
             >
               Book a session
             </Link>
-          ) : null}
+          )}
         </div>
       )}
     </div>
