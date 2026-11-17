@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   Star,
+  UsersRound,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -138,41 +139,40 @@ export default async function AdminDashboardPage() {
   });
 
   return (
-    <div className="space-y-6 sm:space-y-7">
+    <div className="space-y-5">
       <LiveDashboardRefresh intervalMs={OPS_REFRESH_MS} scope="admin-dashboard" />
-      <section className="relative overflow-hidden rounded-[1.75rem] bg-[#1c133b] px-5 py-6 text-white shadow-[0_20px_48px_rgba(28,19,59,0.18)] sm:px-7 sm:py-8">
-        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#f0a888]/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 left-10 h-44 w-44 rounded-full bg-[#823fb2]/45 blur-3xl" />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f0a888]">
-              {weekday}
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
-              Operations desk
-            </h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-white/70">
-              Jobs running today, cleaners waiting for review, and money coming
-              in.
-            </p>
-          </div>
-          {pending > 0 ? (
-            <Link
-              className="inline-flex w-full items-center justify-center rounded-full bg-[#d4694a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c45a3c] sm:w-auto"
-              href="/admin/cleaners"
-            >
-              Review {pending} cleaner{pending === 1 ? "" : "s"}
-            </Link>
-          ) : (
-            <Link
-              className="inline-flex w-full items-center justify-center rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15 sm:w-auto"
-              href="/admin/bookings"
-            >
-              Open bookings
-            </Link>
-          )}
+
+      {/* Today banner + action */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          className="relative flex h-[70px] flex-1 items-center overflow-hidden rounded-[14px] px-6"
+          style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
+        >
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
+          />
+          <h2 className="relative text-[22.8px] font-semibold leading-none tracking-[-0.01em] text-white">
+            {weekday}
+          </h2>
         </div>
-      </section>
+        {pending > 0 ? (
+          <Link
+            className="inline-flex h-[57px] shrink-0 items-center justify-center gap-3 rounded-full bg-[#524096] px-6 text-[17.4px] font-semibold text-white transition hover:bg-[#45357F]"
+            href="/admin/cleaners"
+          >
+            <UsersRound className="h-[22px] w-[22px]" strokeWidth={1.8} />
+            Review {pending} cleaner{pending === 1 ? "" : "s"}
+          </Link>
+        ) : (
+          <Link
+            className="inline-flex h-[57px] shrink-0 items-center justify-center gap-3 rounded-full border-2 border-[#524096] px-6 text-[17.4px] font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+            href="/admin/bookings"
+          >
+            Open bookings
+          </Link>
+        )}
+      </div>
 
       <DashboardStatTiles
         items={[

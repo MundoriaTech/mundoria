@@ -46,8 +46,19 @@ export function AdminAlerts({
 
   useEffect(() => {
     const supabase = createBrowserClient();
+    const channelName = `admin-alerts-${userId}`;
+
+    for (const existing of supabase.getChannels()) {
+      if (
+        existing.topic === channelName ||
+        existing.topic === `realtime:${channelName}`
+      ) {
+        void supabase.removeChannel(existing);
+      }
+    }
+
     const channel = supabase
-      .channel(`admin-alerts-${userId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {

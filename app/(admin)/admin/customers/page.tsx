@@ -1,6 +1,4 @@
 import { CustomersTable } from "@/components/admin/customers-table";
-import { AdminPageIntro } from "@/components/admin/admin-page-intro";
-import { loadAdminUserCounts } from "@/lib/admin/user-counts";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = { title: "Customers" };
@@ -18,7 +16,7 @@ function formatAddressSummary(address: {
 
 export default async function AdminCustomersPage() {
   const admin = createAdminClient();
-  const [{ data: profiles }, { data: bookings }, { data: addresses }, people] =
+  const [{ data: profiles }, { data: bookings }, { data: addresses }] =
     await Promise.all([
       admin
         .from("profiles")
@@ -36,7 +34,6 @@ export default async function AdminCustomersPage() {
         .is("archived_at", null)
         .order("is_default", { ascending: false })
         .order("created_at", { ascending: true }),
-      loadAdminUserCounts(),
     ]);
 
   const stats = new Map<
@@ -97,11 +94,6 @@ export default async function AdminCustomersPage() {
 
   return (
     <div className="min-w-0">
-      <AdminPageIntro>
-        {people.customers.toLocaleString("en-GB")} customer
-        {people.customers === 1 ? "" : "s"} on Mundoria. Cleaners are managed
-        separately.
-      </AdminPageIntro>
       <CustomersTable customers={customers} />
     </div>
   );
