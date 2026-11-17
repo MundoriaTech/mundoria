@@ -99,7 +99,7 @@ export function FreeHourOfferPopup({ bookingHref }: { bookingHref: string }) {
       className="max-w-lg"
       description={
         submitted
-          ? "Your details are with us. Book now to lock in the offer."
+          ? "Book now to lock in the offer."
           : "Book 2 hours at £17.50/h and get 1 extra hour free. Leave your email and phone to claim it."
       }
       onClose={close}
@@ -110,7 +110,7 @@ export function FreeHourOfferPopup({ bookingHref }: { bookingHref: string }) {
       }
     >
       {submitted ? (
-        <div className="mt-6 space-y-4">
+        <div className="mt-6">
           <Link
             className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
             href={bookingHref}
@@ -118,9 +118,6 @@ export function FreeHourOfferPopup({ bookingHref }: { bookingHref: string }) {
           >
             Book now
           </Link>
-          <p className="text-center text-xs leading-5 text-muted-foreground">
-            Or we can call you to help arrange it.
-          </p>
         </div>
       ) : (
         <form className="mt-5 space-y-3" onSubmit={onSubmit}>
