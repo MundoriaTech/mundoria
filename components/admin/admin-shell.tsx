@@ -17,6 +17,7 @@ import {
   PhoneCall,
   Settings,
   ShieldAlert,
+  Target,
   Users,
   UserRound,
   UsersRound,
@@ -53,6 +54,12 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
     items: [
       { href: "/admin/dashboard", icon: Gauge, label: "Dashboard" },
       { href: "/admin/bookings", icon: BookOpenCheck, label: "Bookings" },
+      {
+        href: "/admin/leads",
+        icon: Target,
+        label: "Leads",
+        match: (p) => p === "/admin/leads" || p.startsWith("/admin/leads/"),
+      },
       {
         href: "/admin/abandoned-bookings",
         icon: MailWarning,
@@ -140,6 +147,8 @@ const PAGE_SUBTITLES: Record<string, string> = {
   "/admin/bookings": "Search, inspect, and resolve booking edge cases.",
   "/admin/abandoned-bookings": "Leads who started the booking flow but didn't complete it.",
   "/admin/callback-leads": "Ads and promo callback requests waiting for a call.",
+  "/admin/leads": "Every prospect, their follow-ups, AI replies and calls, and who needs a person.",
+  "/admin/leads/reports": "Weekly lead automation reports.",
   "/admin/inbox": "Support conversations with customers and cleaners.",
   "/admin/disputes": "Manage and resolve booking disputes.",
   "/admin/safety": "Track and resolve safety incidents and SOS alerts.",
@@ -175,6 +184,8 @@ function pageTitle(pathname: string) {
     if (match.href === "/admin/incidents" && pathname !== "/admin/incidents") return "Incident";
     if (match.href === "/admin/safety" && pathname !== "/admin/safety") return "Safety case";
     if (match.href === "/admin/inbox" && pathname !== "/admin/inbox") return "Conversation";
+    if (match.href === "/admin/leads" && pathname === "/admin/leads/reports") return "Lead reports";
+    if (match.href === "/admin/leads" && pathname !== "/admin/leads") return "Lead";
     return match.label;
   }
   if (pathname.startsWith("/admin/booking/")) return "Booking";

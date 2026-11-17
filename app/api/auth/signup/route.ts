@@ -11,6 +11,7 @@ import {
 import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
 import { applyReferralAtSignup } from "@/lib/customer/referrals";
+import { captureSignupLead } from "@/lib/outreach/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncSignupToZoho } from "@/lib/zoho/crm";
 
@@ -200,6 +201,22 @@ export async function POST(request: Request) {
     });
   } catch (zohoError) {
     Sentry.captureException(zohoError);
+  }
+
+  // Lead automation: a customer who signs up but doesn't book gets a short
+  // follow-up, only if they opted in to emails.
+  if (role === "customer") {
+    try {
+      await captureSignupLead({
+        email,
+        fullName: full_name,
+        marketingOptIn: Boolean(marketing_opt_in),
+        phone,
+        profileId: user.id,
+      });
+    } catch (leadError) {
+      Sentry.captureException(leadError);
+    }
   }
 
   return NextResponse.json({

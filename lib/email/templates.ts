@@ -51,6 +51,7 @@ export type EmailTemplateId =
   | "customer.rating_request"
   | "customer.refund_issued"
   | "customer.welcome"
+  | "outreach.message"
   | "system.generic";
 
 export interface RenderedEmail {
@@ -74,6 +75,8 @@ interface TemplateContext {
   subject: string;
   title: string;
   tone?: Tone;
+  /** Marketing/outreach mail only: one-click unsubscribe link in the footer. */
+  unsubscribeUrl?: string;
 }
 
 export function renderEmailTemplate(
@@ -618,6 +621,20 @@ function resolveTemplate(
         title: string(data.title) || "Admin alert",
         tone: "admin",
       };
+    case "outreach.message":
+      // Lead follow-ups (lib/outreach). Body may hold several paragraphs
+      // separated by blank lines; the footer carries the unsubscribe link.
+      return {
+        body: string(data.body),
+        buttonHref: string(data.actionUrl) || undefined,
+        buttonLabel: string(data.actionLabel) || "Book your clean",
+        intro: firstName ? `Hi ${firstName},` : "Hi there,",
+        preview: string(data.preview) || string(data.body).slice(0, 110),
+        subject: string(data.subject) || "A quick note from Mundoria",
+        title: string(data.subject) || "A quick note from Mundoria",
+        tone: "customer",
+        unsubscribeUrl: string(data.unsubscribeUrl) || undefined,
+      };
     case "system.generic":
     default:
       return {
@@ -690,7 +707,11 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const footerSocial = isAdmin ? "" : renderSocialLinks();
   const footerLegal = isAdmin
     ? `<p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · admin notification</p>`
-    : `<p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>`;
+    : `<p class="email-legal" style="margin:16px 0 0;color:#9a94a8;font-size:11px;">Mundoria · trusted cleaning, clearly managed</p>${
+        context.unsubscribeUrl
+          ? `<p class="email-legal" style="margin:8px 0 0;color:#9a94a8;font-size:11px;">Don’t want these emails? <a href="${escapeAttribute(context.unsubscribeUrl)}" style="color:#9a94a8;text-decoration:underline;">Unsubscribe</a>.</p>`
+          : ""
+      }`;
 
   const html = `<!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -733,7 +754,15 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
             <tr>
               <td style="padding:4px 28px 0;text-align:left;">
                 ${lead}
-                <p class="email-copy" style="margin:0;font-size:16px;line-height:1.7;color:#4a4460;">${escapeHtml(context.body)}</p>
+                ${context.body
+                  .split(/\n\s*\n/)
+                  .map((paragraph) => paragraph.trim())
+                  .filter(Boolean)
+                  .map(
+                    (paragraph, index) =>
+                      `<p class="email-copy" style="margin:${index ? "14px" : "0"} 0 0;font-size:16px;line-height:1.7;color:#4a4460;">${escapeHtml(paragraph)}</p>`,
+                  )
+                  .join("")}
                 ${cards.length ? renderCards(cards) : ""}
                 ${
                   context.buttonHref
@@ -899,6 +928,7 @@ function renderText(
     isAdmin
       ? "Mundoria ops alert · internal use only"
       : "See you soon, the Mundoria team",
+    context.unsubscribeUrl ? `Unsubscribe: ${context.unsubscribeUrl}` : "",
     isAdmin
       ? `Review in admin: ${appUrl}/admin/dashboard · Do not forward to customers.`
       : `Questions? ${supportEmail}`,

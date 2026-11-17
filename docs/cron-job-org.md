@@ -45,7 +45,9 @@ seconds.
 | Mundoria Recurring Payments | `https://www.mundoria.co.uk/api/cron/recurring-payments` | `0 9 * * *` | Rolls forward series visits and reminds customers who still need a saved card (T−7…T−2). |
 | Mundoria Pre-auth Payments | `https://www.mundoria.co.uk/api/cron/preauth-payments` | `*/15 * * * *` | Places card holds for confirmed bookings inside the pre-auth window (default T−24h). Also runs awaiting-payment auth retries and T−24 unpaid cancels. |
 | Mundoria Capture Payments | `https://www.mundoria.co.uk/api/cron/capture-payments` | `*/15 * * * *` | Captures held payments whose next-day UK capture time has arrived. |
-| Mundoria Abandoned Bookings | `https://www.mundoria.co.uk/api/cron/abandoned-booking-reminders` | `*/15 * * * *` | Emails guests who left an email on the date step but never finished booking (first nudge ~45m, second ~24h). |
+| Mundoria Abandoned Bookings | `https://www.mundoria.co.uk/api/cron/abandoned-booking-reminders` | `*/15 * * * *` | Emails guests who left an email on the date step but never finished booking (first nudge ~45m, second ~24h). Stops emailing once `OUTREACH_ENABLED=true`; the lead automation "Unfinished booking" journey takes over. |
+| Mundoria Run Outreach | `https://www.mundoria.co.uk/api/cron/run-outreach` | `*/5 * * * *` | Lead automation heartbeat: marks leads who booked, picks up unfinished booking drafts, runs due follow-up steps (emails, texts, AI calls, staff alerts). Sends nothing unless `OUTREACH_ENABLED=true`. See `docs/lead-automation-playbook.md`. |
+| Mundoria Weekly Lead Report | `https://www.mundoria.co.uk/api/cron/weekly-lead-report` | `0 9 * * 1` (Africa/Lagos; 08:00 UK in winter, 09:00 in summer) | Writes last week's lead report (AI summary plus numbers), stores it under Admin › Leads › Weekly reports and emails every admin. Safe to re-run: one report per week. |
 
 Use `Africa/Lagos` as the timezone for calendar-style schedules. For interval
 jobs such as every 5 or 15 minutes, either `Africa/Lagos` or `UTC` is fine.

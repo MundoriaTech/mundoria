@@ -244,3 +244,53 @@ export async function syncSignupToZoho(input: {
   }
   await upsertZohoContact(person);
 }
+
+const PROSPECT_STATUS: Record<string, string> = {
+  booked: "Pre-Qualified",
+  contacted: "Attempted to Contact",
+  engaged: "Contacted",
+  lost: "Lost Lead",
+  new: "Not Contacted",
+  unsubscribed: "Not Qualified",
+};
+
+/**
+ * Upsert a customer prospect from lead automation (lib/outreach) as a Zoho
+ * Lead, keyed by email. Status maps to Zoho's stock Lead_Status values only.
+ * Soft-fails when Zoho is unset or errors.
+ */
+export async function upsertZohoProspect(prospect: {
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  leadId: string;
+  phone?: string | null;
+  source: string;
+  status: string;
+  summary?: string | null;
+}) {
+  if (!isZohoCrmConfigured()) return;
+  const email = prospect.email.trim().toLowerCase();
+  if (!email) return;
+  const description = buildDescription([
+    `Mundoria lead id: ${prospect.leadId}`,
+    "Role: customer prospect",
+    `Source: ${prospect.source}`,
+    `Automation status: ${prospect.status}`,
+    prospect.summary ? `Latest: ${prospect.summary}` : null,
+  ]);
+  try {
+    await upsertRecord("Leads", {
+      Company: "Mundoria customer prospect",
+      Description: description,
+      Email: email,
+      First_Name: prospect.firstName?.trim() || undefined,
+      Last_Name: prospect.lastName?.trim() || prospect.firstName?.trim() || "Prospect",
+      Lead_Source: "Mundoria",
+      Lead_Status: PROSPECT_STATUS[prospect.status] ?? "Not Contacted",
+      Phone: prospect.phone?.trim() || undefined,
+    });
+  } catch (error) {
+    Sentry.captureException(error);
+  }
+}

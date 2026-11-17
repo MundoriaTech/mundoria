@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendBrandedEmail } from "@/lib/email/send-email";
+import { outreachEnabled } from "@/lib/outreach/config";
 import type { BookingDraft } from "@/types/customer";
 import { randomBytes } from "crypto";
 
@@ -182,6 +183,10 @@ export async function processAbandonedBookingReminders(limit = 40) {
     })
     .is("completed_at", null)
     .lt("updated_at", cutoff);
+
+  // With lead automation on, the "Unfinished booking" journey (lib/outreach)
+  // sends these follow-ups instead, so customers never get both.
+  if (outreachEnabled()) return { scanned: 0, sent: 0 };
 
   const { data: candidates } = await admin
     .from("booking_drafts")
