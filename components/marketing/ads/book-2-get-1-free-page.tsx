@@ -13,20 +13,14 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const HERO_IMAGE = "/images/marketing/landing/residential-hero.jpg";
-
-const OFFER_BULLETS = [
-  "Pay £35 for 2 hours.",
-  "Get 3 hours of cleaning.",
-  "That’s 1 extra hour FREE!",
-] as const;
+const BOOK_HREF = "/booking/new?category=residential";
 
 export function Book2Get1FreePage() {
   const searchParams = useSearchParams();
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [nationalNumber, setNationalNumber] = useState("");
   const [email, setEmail] = useState("");
   const [availableIn10Min, setAvailableIn10Min] = useState<boolean | null>(
@@ -50,8 +44,7 @@ export function Book2Get1FreePage() {
         body: JSON.stringify({
           availableIn10Min,
           email,
-          firstName,
-          lastName,
+          fullName,
           phone: nationalNumber,
           source: "book-2-get-1-free",
           utmCampaign: searchParams.get("utm_campaign"),
@@ -104,64 +97,77 @@ export function Book2Get1FreePage() {
             Limited offer
           </p>
           <h1 className="mt-3 max-w-2xl text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl">
-            Book 2 Hours of Cleaning. Get 1 Hour FREE!
+            Book 2 hours. Get 1 hour FREE.
           </h1>
           <p className="mt-4 max-w-xl text-pretty text-[15px] leading-6 text-white/90 sm:text-base sm:leading-7">
-            Enjoy more time for what matters while we help take care of your
-            home.
+            House cleaning from £17.50 an hour.
+          </p>
+          <p className="mt-3 max-w-xl text-pretty text-[15px] leading-6 text-white/85 sm:text-base sm:leading-7">
+            Book your first 2 hours and we&apos;ll give you 1 extra hour of
+            cleaning FREE.
           </p>
         </div>
       </section>
 
-      <section className="relative px-4 py-12 sm:px-8 sm:py-16 lg:px-12">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:items-start">
-          <div>
-            <p className="text-pretty text-[15px] leading-7 text-[#5a5470] sm:text-base">
-              Book 2 hours of cleaning at just{" "}
-              <span className="font-semibold text-[#1c133b]">£17.50</span> per
-              hour and get an additional hour FREE!
-            </p>
-
-            <div className="mt-8 rounded-[1.5rem] border border-[#e4daf5] bg-white p-6 sm:p-7">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#1c133b]">
-                Your Offer
-              </h2>
-              <ul className="mt-4 space-y-3">
-                {OFFER_BULLETS.map((item) => (
-                  <li
-                    className="flex items-start gap-3 text-[15px] leading-6 text-[#312c79]"
-                    key={item}
-                  >
-                    <span
-                      aria-hidden
-                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#c79c66]"
-                    />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+      <section className="relative px-4 py-12 sm:px-8 sm:py-14 lg:px-12">
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+          <div className="rounded-[1.5rem] border border-[#e4daf5] bg-white p-6 sm:p-7">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#1c133b]">
+              Your offer
+            </h2>
+            <div className="mt-5 space-y-3">
+              <div className="flex items-baseline justify-between gap-4 border-b border-[#eee8f7] pb-3">
+                <span className="text-[15px] text-[#312c79]">2 hours</span>
+                <span className="text-[15px] font-semibold text-[#1c133b]">
+                  £35
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-4 border-b border-[#eee8f7] pb-3">
+                <span className="text-[15px] text-[#312c79]">
+                  + 1 hour free
+                </span>
+                <span className="text-[15px] font-semibold text-[#6a45b8]">
+                  £0
+                </span>
+              </div>
             </div>
+            <p className="mt-5 text-[15px] leading-7 text-[#5a5470]">
+              That gives you{" "}
+              <span className="font-semibold text-[#1c133b]">
+                3 hours of cleaning for £35
+              </span>{" "}
+              when you use the full offer on the same booking.
+            </p>
+            <Link
+              className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3] sm:w-auto"
+              href={BOOK_HREF}
+            >
+              Book your clean
+            </Link>
           </div>
 
-          <div className="rounded-[1.75rem] border border-[#e4daf5] bg-white p-6 shadow-[0_16px_40px_rgba(49,44,121,0.08)] sm:p-8">
+          <div
+            className="rounded-[1.75rem] border border-[#e4daf5] bg-white p-6 shadow-[0_16px_40px_rgba(49,44,121,0.08)] sm:p-8"
+            id="callback"
+          >
             {submitted ? (
               <div className="space-y-6">
                 <h2 className="text-[1.65rem] font-semibold tracking-[-0.03em] text-[#1c133b]">
-                  Thank You For Your Interest!
+                  Thank you for your interest
                 </h2>
                 <p className="text-[15px] leading-7 text-[#5a5470]">
-                  We’ve received your details. A member of our team will be in
-                  touch shortly.
+                  We&apos;ve received your details. A member of our team will be
+                  in touch shortly.
                 </p>
                 <div className="rounded-2xl bg-[#f6f0ff] px-5 py-5">
                   <p className="text-sm font-semibold text-[#1c133b]">
-                    Want To Get Started Right Away?
+                    Want to get started right away?
                   </p>
                   <Link
                     className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3] sm:w-auto"
-                    href="/house-cleaning"
+                    href={BOOK_HREF}
                   >
-                    Continue booking a clean
+                    Book your clean
                   </Link>
                 </div>
               </div>
@@ -169,48 +175,35 @@ export function Book2Get1FreePage() {
               <form className="space-y-4" onSubmit={onSubmit}>
                 <div>
                   <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#1c133b]">
-                    Request a callback
+                    Not ready to book online?
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-[#5a5470]">
-                    Enter your details below, and our team will give you a call
-                    to help arrange your cleaning.
+                    Prefer to speak to someone first? Leave your number and the
+                    Mundoria team can help you arrange your clean.
                   </p>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <FormField htmlFor="callback-first-name" label="First Name">
-                    <Input
-                      autoComplete="given-name"
-                      id="callback-first-name"
-                      name="firstName"
-                      onChange={(event) => setFirstName(event.target.value)}
-                      placeholder=" "
-                      required
-                      value={firstName}
-                    />
-                  </FormField>
-                  <FormField htmlFor="callback-last-name" label="Last Name">
-                    <Input
-                      autoComplete="family-name"
-                      id="callback-last-name"
-                      name="lastName"
-                      onChange={(event) => setLastName(event.target.value)}
-                      placeholder=" "
-                      required
-                      value={lastName}
-                    />
-                  </FormField>
-                </div>
+                <FormField htmlFor="callback-full-name" label="Full name">
+                  <Input
+                    autoComplete="name"
+                    id="callback-full-name"
+                    name="fullName"
+                    onChange={(event) => setFullName(event.target.value)}
+                    placeholder=" "
+                    required
+                    value={fullName}
+                  />
+                </FormField>
 
                 <AuthPhoneField
                   htmlFor="callback-phone"
-                  label="Phone Number"
+                  label="Phone number"
                   nationalNumber={nationalNumber}
                   onNationalNumberChange={setNationalNumber}
                   required
                 />
 
-                <FormField htmlFor="callback-email" label="Email Address">
+                <FormField htmlFor="callback-email" label="Email address">
                   <Input
                     autoComplete="email"
                     id="callback-email"
@@ -225,7 +218,7 @@ export function Book2Get1FreePage() {
 
                 <fieldset className="space-y-3">
                   <legend className="text-sm font-medium text-[#1c133b]">
-                    Are You Available To Take A Call In The Next 10 Minutes?
+                    Can we call you in the next 10 minutes?
                   </legend>
                   <div className="grid grid-cols-2 gap-3">
                     {(
@@ -272,7 +265,7 @@ export function Book2Get1FreePage() {
                   disabled={submitting}
                   type="submit"
                 >
-                  {submitting ? "Sending…" : "Request a Callback"}
+                  {submitting ? "Sending..." : "Request a callback"}
                 </button>
               </form>
             )}

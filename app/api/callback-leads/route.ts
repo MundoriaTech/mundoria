@@ -13,6 +13,12 @@ const schema = z.object({
     .max(80, "First name is too long")
     .optional()
     .default(""),
+  fullName: z
+    .string()
+    .trim()
+    .max(120, "Name is too long")
+    .optional()
+    .default(""),
   lastName: z
     .string()
     .trim()
@@ -29,6 +35,16 @@ const schema = z.object({
   utmMedium: z.string().trim().max(120).optional().nullable(),
   utmSource: z.string().trim().max(120).optional().nullable(),
 });
+
+function splitFullName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "Guest", lastName: "Lead" };
+  if (parts.length === 1) return { firstName: parts[0]!, lastName: "Lead" };
+  return {
+    firstName: parts[0]!,
+    lastName: parts.slice(1).join(" "),
+  };
+}
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -52,8 +68,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const firstName = parsed.data.firstName.trim() || "Guest";
-  const lastName = parsed.data.lastName.trim() || "Lead";
+  const fromFull = splitFullName(parsed.data.fullName);
+  const firstName =
+    parsed.data.firstName.trim() || fromFull.firstName || "Guest";
+  const lastName = parsed.data.lastName.trim() || fromFull.lastName || "Lead";
 
   const admin = createAdminClient();
   const { error } = await admin.from("callback_leads").insert({

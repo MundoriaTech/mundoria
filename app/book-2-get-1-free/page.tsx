@@ -7,7 +7,7 @@ import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
-    "Book 2 hours of Mundoria house cleaning at £17.50 per hour and get 1 hour free. Leave your details for a callback, or continue booking online.",
+    "Book 2 hours of house cleaning from £17.50 an hour and get 1 hour free. Three hours for £35 on the same booking, or request a callback.",
   noIndex: true,
   path: "/book-2-get-1-free",
   title: "Book 2 Hours, Get 1 Free | Mundoria",

@@ -42,74 +42,114 @@ const SERVICES = [
   {
     Icon: HomeIcon,
     bg: "linear-gradient(145deg,#524096 0%,#7262A9 100%)",
-    href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
+    href: "/booking/new?fresh=1&service=regular&returnTo=/dashboard",
     label: "Home",
   },
   {
     Icon: OfficeIcon,
     bg: "linear-gradient(145deg,#1E1848 0%,#3B3480 100%)",
-    href: "/booking/new?fresh=1&service=regular_clean&returnTo=/dashboard",
+    href: "/booking/new?fresh=1&service=office&returnTo=/dashboard",
     label: "Office",
   },
   {
     Icon: EventIcon,
     bg: "linear-gradient(145deg,#B85C38 0%,#D47848 100%)",
     href: "/booking/new?fresh=1&service=one_off&returnTo=/dashboard",
-    label: "Event",
+    label: "One-off",
   },
 ] as const;
 
 function TimeTile({ booking }: { booking: Booking | null }) {
   const time = booking?.scheduled_start_time?.slice(0, 5) ?? null;
-  const hours = time ? parseInt(time.split(":")[0]!) : null;
-  const minutes = time ? parseInt(time.split(":")[1]!) : null;
-  const totalMinutes = hours !== null && minutes !== null ? hours * 60 + minutes : null;
-  const progress = totalMinutes !== null ? totalMinutes / (24 * 60) : 0.41;
+  const hours = time ? parseInt(time.split(":")[0]!, 10) : null;
+  const minutes = time ? parseInt(time.split(":")[1]!, 10) : null;
+  const hasTime = hours !== null && minutes !== null;
+  const totalMinutes = hasTime ? hours * 60 + minutes : null;
+  const progress = totalMinutes !== null ? totalMinutes / (24 * 60) : 0;
 
   const C = 2 * Math.PI * 73;
   const L = C * progress;
 
-  const h = hours !== null ? (hours % 12 || 12) : 2;
-  const m = minutes !== null ? String(minutes).padStart(2, "0") : "25";
-  const ampm = hours !== null ? (hours >= 12 ? "PM" : "AM") : "PM";
+  const h = hasTime ? hours % 12 || 12 : null;
+  const m = hasTime ? String(minutes).padStart(2, "0") : null;
+  const ampm = hasTime ? (hours >= 12 ? "PM" : "AM") : null;
 
   return (
     <div
       className="relative h-[238px] rounded-[18px] bg-[#F3F4F6]"
       style={{ minWidth: "240px", flex: "1 1 240px" }}
     >
-      <svg
-        className="absolute"
-        height={180}
-        style={{ left: "50%", top: "29px", transform: "translateX(-50%)" }}
-        viewBox="0 0 180 180"
-        width={180}
-      >
-        <circle
-          cx="90" cy="90" fill="none" r="73"
-          stroke="#2A2A2E" strokeDasharray="1.6 5.1" strokeWidth="9"
-          transform="rotate(-90 90 90)"
-        />
-        <circle
-          cx="90" cy="90" fill="none" r="73"
-          stroke="#F3F4F6" strokeDasharray={`${L + 6} ${C}`} strokeWidth="12"
-          transform="rotate(-90 90 90)"
-        />
-        <circle
-          cx="90" cy="90" fill="none" r="73"
-          stroke="#7262A9" strokeDasharray={`${L} ${C}`} strokeLinecap="round" strokeWidth="18"
-          transform="rotate(-90 90 90)"
-        />
-      </svg>
-      <div
-        className="absolute left-0 right-0 flex items-baseline justify-center gap-[2px]"
-        style={{ top: "105px" }}
-      >
-        <span style={{ fontSize: "28.8px", lineHeight: "30px", fontWeight: 600, letterSpacing: "-0.02em" }}>
-          {h}:{m}
-        </span>
-        <span style={{ fontSize: "13.5px", fontWeight: 600 }}>{ampm}</span>
-      </div>
+      <p className="absolute left-5 top-5 m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70">
+        Arrival time
+      </p>
+      {hasTime ? (
+        <>
+          <svg
+            className="absolute"
+            height={180}
+            style={{ left: "50%", top: "29px", transform: "translateX(-50%)" }}
+            viewBox="0 0 180 180"
+            width={180}
+          >
+            <circle
+              cx="90"
+              cy="90"
+              fill="none"
+              r="73"
+              stroke="#2A2A2E"
+              strokeDasharray="1.6 5.1"
+              strokeWidth="9"
+              transform="rotate(-90 90 90)"
+            />
+            <circle
+              cx="90"
+              cy="90"
+              fill="none"
+              r="73"
+              stroke="#F3F4F6"
+              strokeDasharray={`${L + 6} ${C}`}
+              strokeWidth="12"
+              transform="rotate(-90 90 90)"
+            />
+            <circle
+              cx="90"
+              cy="90"
+              fill="none"
+              r="73"
+              stroke="#7262A9"
+              strokeDasharray={`${L} ${C}`}
+              strokeLinecap="round"
+              strokeWidth="18"
+              transform="rotate(-90 90 90)"
+            />
+          </svg>
+          <div
+            className="absolute left-0 right-0 flex items-baseline justify-center gap-[2px]"
+            style={{ top: "105px" }}
+          >
+            <span
+              style={{
+                fontSize: "28.8px",
+                lineHeight: "30px",
+                fontWeight: 600,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {h}:{m}
+            </span>
+            <span style={{ fontSize: "13.5px", fontWeight: 600 }}>{ampm}</span>
+          </div>
+        </>
+      ) : (
+        <div className="absolute inset-x-5 top-[100px] text-center">
+          <p className="m-0 text-[17px] font-semibold text-[#5F5F66]">
+            No upcoming session
+          </p>
+          <p className="mt-2 m-0 text-[13px] text-[#8b8798]">
+            Book a clean to see your arrival time
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -208,9 +248,9 @@ function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
   const Icon = service.Icon;
   return (
     <Link
-      className="group relative block shrink-0 overflow-hidden rounded-[14px] transition hover:brightness-110"
+      className="group relative block min-w-[min(100%,280px)] shrink-0 overflow-hidden rounded-[14px] transition hover:brightness-110 sm:min-w-[300px]"
       href={service.href}
-      style={{ width: "340px", height: "255px", background: service.bg, boxSizing: "border-box" }}
+      style={{ height: "220px", flex: "1 1 280px", maxWidth: "360px", background: service.bg, boxSizing: "border-box" }}
     >
       {/* Subtle radial highlight */}
       <div
@@ -350,10 +390,7 @@ export default async function CustomerDashboardPage() {
             Popular Services
           </h2>
         </div>
-        <div
-          className="flex gap-5"
-          style={{ overflowX: "auto", overflowY: "hidden", scrollbarWidth: "none", paddingBottom: "4px" }}
-        >
+        <div className="flex flex-wrap gap-4">
           {SERVICES.map((s) => (
             <ServiceCard key={s.label} service={s} />
           ))}

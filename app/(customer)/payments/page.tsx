@@ -50,27 +50,26 @@ export default async function CustomerPaymentsPage() {
   );
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Payments & receipts
-        </h1>
-        <p className="mt-2 text-muted-foreground">
+    <div className="flex flex-col gap-5">
+      <div className="rounded-[18px] bg-white p-5">
+        <p className="m-0 text-[14px] leading-6 text-[#5F5F66]">
           Save a card for visits that still need one, then find receipts after
           payment is captured the day after a clean.{" "}
           <Link
-            className="font-medium text-primary underline-offset-2 hover:underline"
+            className="font-semibold text-[#524096] underline-offset-2 hover:underline"
             href="/help/article/why-pay-in-advance"
           >
-            how payment works
+            How payment works
           </Link>
           .
         </p>
       </div>
 
       {due.length ? (
-        <section>
-          <h2 className="font-semibold">Payment due</h2>
+        <section className="rounded-[18px] bg-white p-5">
+          <h2 className="m-0 text-[17px] font-semibold text-[#1E1848]">
+            Payment due
+          </h2>
           <div className="mt-4 space-y-3">
             {due.map((booking) => (
               <article
@@ -103,19 +102,21 @@ export default async function CustomerPaymentsPage() {
         </section>
       ) : null}
 
-      <section className="rounded-2xl border bg-card p-5 shadow-sm">
-        <h2 className="font-semibold">Your vouchers</h2>
+      <section className="rounded-[18px] bg-white p-5">
+        <h2 className="m-0 text-[17px] font-semibold text-[#1E1848]">
+          Your vouchers
+        </h2>
         {usableVouchers.length ? (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {usableVouchers.map((voucher) => (
               <div
-                className="rounded-xl border border-border bg-muted p-4"
+                className="rounded-xl border border-[#E7E7EF] bg-[#F3F4F6] p-4"
                 key={voucher.code}
               >
-                <p className="font-mono text-lg font-bold tracking-wider text-foreground">
+                <p className="font-mono text-lg font-bold tracking-wider text-[#1E1848]">
                   {voucher.code}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-sm text-[#5F5F66]">
                   £{(Number(voucher.discount_value) / 100).toFixed(2)} off ·{" "}
                   {voucher.kind === "referral_reward"
                     ? "Referral reward"
@@ -124,7 +125,7 @@ export default async function CustomerPaymentsPage() {
                       : "Promo"}
                 </p>
                 {voucher.valid_until ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
+                  <p className="mt-2 text-xs text-[#8b8798]">
                     Valid until{" "}
                     {new Date(voucher.valid_until).toLocaleDateString("en-GB")}
                   </p>
@@ -133,16 +134,20 @@ export default async function CustomerPaymentsPage() {
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-3 text-sm text-[#5F5F66]">
             No active vouchers yet. Share your referral code to earn £10 after a
-            friend’s first completed clean.
+            friend&apos;s first completed clean.
           </p>
         )}
       </section>
 
-      <section>
-        <h2 className="font-semibold">Past receipts</h2>
-        <ReceiptsList receipts={receipts} />
+      <section className="rounded-[18px] bg-white p-5">
+        <h2 className="m-0 text-[17px] font-semibold text-[#1E1848]">
+          Past receipts
+        </h2>
+        <div className="mt-4">
+          <ReceiptsList receipts={receipts} />
+        </div>
       </section>
     </div>
   );

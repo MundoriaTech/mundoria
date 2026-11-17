@@ -335,21 +335,18 @@ export function BookingDetail({
 
   return (
     <div className="min-w-0 space-y-6 sm:space-y-8">
-      <header className="space-y-4">
+      <header className="space-y-4 rounded-[18px] bg-white p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            Booking
-          </p>
           {!waitingForCleaner && booking.status !== "cancelled" ? (
             <BookingStatusBadge status={booking.status} />
           ) : null}
         </div>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <h1 className="break-words text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-3xl">
+            <h2 className="m-0 break-words text-xl font-semibold tracking-[-0.02em] text-[#1E1848] sm:text-2xl">
               {formatServiceName(booking.service_type)}
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-[#5a5470]">
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#5F5F66]">
               {[whenLabel, placeLabel, `#${booking.id.slice(0, 8)}`]
                 .filter(Boolean)
                 .join(" · ")}
@@ -358,7 +355,7 @@ export function BookingDetail({
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             {needsPayment ? (
               <Button
-                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                className="min-h-11 rounded-full bg-[#524096] hover:bg-[#43357f]"
                 onClick={() => setShowPay(true)}
               >
                 Authorise payment
@@ -366,7 +363,7 @@ export function BookingDetail({
             ) : null}
             {needsStartConfirm ? (
               <Button
-                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                className="min-h-11 rounded-full bg-[#524096] hover:bg-[#43357f]"
                 onClick={() => void confirmStart()}
               >
                 Start cleaning
@@ -375,7 +372,7 @@ export function BookingDetail({
             {canMessage ? (
               <Button
                 asChild
-                className="min-h-11 rounded-full bg-[#1c133b] hover:bg-[#312c79]"
+                className="min-h-11 rounded-full bg-[#524096] hover:bg-[#43357f]"
               >
                 <Link href={`/messages/${booking.id}`}>
                   <MessageCircle className="mr-2 h-4 w-4" />

@@ -128,21 +128,13 @@ export function AddressManager({
   }
 
   return (
-    <div className="space-y-8 pb-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
-            Places
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] sm:text-[2rem]">
-            Saved addresses
-          </h1>
-          <p className="mt-2 max-w-md text-sm font-light leading-6 text-[#5c5670]">
-            Keep a home, office, or family address ready for the next booking.
-          </p>
-        </div>
+    <div className="space-y-5 pb-4">
+      <div className="flex flex-col gap-4 rounded-[18px] bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="m-0 max-w-md text-sm leading-6 text-[#5F5F66]">
+          Keep a home, office or family address ready for the next booking.
+        </p>
         <button
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79]"
+          className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#524096] px-5 text-sm font-semibold text-white transition hover:bg-[#43357f]"
           onClick={() => {
             setEditing(null);
             setShowForm(true);

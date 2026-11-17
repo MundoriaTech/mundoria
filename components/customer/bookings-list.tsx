@@ -48,22 +48,8 @@ export function BookingsList({
 
   return (
     <div className="flex flex-col gap-4 rounded-[18px] bg-white p-5">
-      {/* Banner */}
-      <div
-        className="relative flex h-[70px] items-center overflow-hidden rounded-[14px] px-6"
-        style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
-      >
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
-        />
-        <h2 className="relative m-0 font-semibold leading-none text-white" style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}>
-          Your sessions
-        </h2>
-      </div>
-
       {/* Tabs */}
-      <div className="flex h-[46px] items-center gap-1 rounded-full bg-[#E7E7EF] px-[5px]">
+      <div className="flex h-[46px] items-center gap-1 overflow-x-auto rounded-full bg-[#E7E7EF] px-[5px]">
         {TABS.map((t) => {
           const count = counts[t.id];
           const active = tab === t.id;
