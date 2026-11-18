@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
@@ -14,6 +15,8 @@ import { cn } from "@/lib/utils";
 
 const HERO_IMAGE = "/images/marketing/landing/residential-hero.jpg";
 const BOOK_HREF = "/booking/new?category=residential";
+const FORM_ID = "callback-lead-form";
+const MOBILE_MAX = "(max-width: 767px)";
 
 export function Book2Get1FreePage() {
   const searchParams = useSearchParams();
@@ -26,6 +29,17 @@ export function Book2Get1FreePage() {
   const [availableIn10Min, setAvailableIn10Min] = useState<boolean | null>(
     null,
   );
+  const [mounted, setMounted] = useState(false);
+  const [mobile, setMobile] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia(MOBILE_MAX);
+    const sync = () => setMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,42 +124,7 @@ export function Book2Get1FreePage() {
       </section>
 
       <section className="relative px-4 py-12 sm:px-8 sm:py-14 lg:px-12">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
-          <div className="rounded-[1.5rem] border border-[#e4daf5] bg-white p-6 sm:p-7">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#1c133b]">
-              Your offer
-            </h2>
-            <div className="mt-5 space-y-3">
-              <div className="flex items-baseline justify-between gap-4 border-b border-[#eee8f7] pb-3">
-                <span className="text-[15px] text-[#312c79]">2 hours</span>
-                <span className="text-[15px] font-semibold text-[#1c133b]">
-                  £35
-                </span>
-              </div>
-              <div className="flex items-baseline justify-between gap-4 border-b border-[#eee8f7] pb-3">
-                <span className="text-[15px] text-[#312c79]">
-                  + 1 hour free
-                </span>
-                <span className="text-[15px] font-semibold text-[#6a45b8]">
-                  £0
-                </span>
-              </div>
-            </div>
-            <p className="mt-5 text-[15px] leading-7 text-[#5a5470]">
-              That gives you{" "}
-              <span className="font-semibold text-[#1c133b]">
-                3 hours of cleaning for £35
-              </span>{" "}
-              when you use the full offer on the same booking.
-            </p>
-            <Link
-              className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3] sm:w-auto"
-              href={BOOK_HREF}
-            >
-              Book your clean
-            </Link>
-          </div>
-
+        <div className="mx-auto w-full max-w-xl">
           <div
             className="rounded-[1.75rem] border border-[#e4daf5] bg-white p-6 shadow-[0_16px_40px_rgba(49,44,121,0.08)] sm:p-8"
             id="callback"
@@ -159,20 +138,18 @@ export function Book2Get1FreePage() {
                   We&apos;ve received your details. A member of our team will be
                   in touch shortly.
                 </p>
-                <div className="rounded-2xl bg-[#f6f0ff] px-5 py-5">
-                  <p className="text-sm font-semibold text-[#1c133b]">
-                    Want to get started right away?
-                  </p>
+                <p className="text-[15px] leading-7 text-[#5a5470]">
+                  Want to get started right away?{" "}
                   <Link
-                    className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3] sm:w-auto"
+                    className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
                     href={BOOK_HREF}
                   >
                     Book your clean
                   </Link>
-                </div>
+                </p>
               </div>
             ) : (
-              <form className="space-y-4" onSubmit={onSubmit}>
+              <form className="space-y-4" id={FORM_ID} onSubmit={onSubmit}>
                 <div>
                   <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#1c133b]">
                     Not ready to book online?
@@ -233,8 +210,8 @@ export function Book2Get1FreePage() {
                           className={cn(
                             "h-11 rounded-full border text-sm font-semibold transition",
                             selected
-                              ? "border-[#6a45b8] bg-[#6a45b8] text-white"
-                              : "border-[#e4daf5] bg-[#faf8ff] text-[#312c79] hover:border-[#6a45b8]/40",
+                              ? "border-[#1c133b] bg-[#1c133b] text-white"
+                              : "border-[#e4daf5] bg-[#faf8ff] text-[#312c79] hover:border-[#1c133b]/40",
                           )}
                           key={option.label}
                           onClick={() => setAvailableIn10Min(option.value)}
@@ -261,17 +238,50 @@ export function Book2Get1FreePage() {
                 {error ? <FieldError message={error} /> : null}
 
                 <button
-                  className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="hidden h-12 w-full items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90 disabled:cursor-not-allowed disabled:opacity-60 md:inline-flex"
                   disabled={submitting}
                   type="submit"
                 >
                   {submitting ? "Sending..." : "Request a callback"}
                 </button>
+
+                <p className="text-center text-sm leading-6 text-[#5a5470]">
+                  Ready to book?{" "}
+                  <Link
+                    className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                    href={BOOK_HREF}
+                  >
+                    Book your clean
+                  </Link>
+                </p>
               </form>
             )}
           </div>
         </div>
+        {!submitted ? (
+          <div aria-hidden className="h-[4.75rem] md:hidden" />
+        ) : null}
       </section>
+
+      {!submitted && mounted && mobile
+        ? createPortal(
+            <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 print:hidden">
+              <div className="pointer-events-auto rounded-t-[1.5rem] border border-b-0 border-[#e4daf5] bg-white px-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_32px_rgba(28,19,59,0.12)]">
+                <div className="mx-auto max-w-xl">
+                  <button
+                    className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white transition hover:bg-[#1c133b]/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={submitting}
+                    form={FORM_ID}
+                    type="submit"
+                  >
+                    {submitting ? "Sending..." : "Request a callback"}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
