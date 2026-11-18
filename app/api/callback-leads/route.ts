@@ -1,7 +1,9 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { storedPhone } from "@/lib/auth/uk-phone";
+import { captureCallbackLead } from "@/lib/outreach/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
@@ -92,6 +94,24 @@ export async function POST(request: Request) {
       { error: "We could not save that just now. Please try again." },
       { status: 500 },
     );
+  }
+
+  // Lead automation: alert the team, start the AI call / follow-ups.
+  // Never blocks or fails the form.
+  try {
+    await captureCallbackLead({
+      availableIn10Min: parsed.data.availableIn10Min ?? false,
+      email: parsed.data.email,
+      firstName,
+      lastName,
+      phone,
+      source: parsed.data.source?.trim() || "book-2-get-1-free",
+      utmCampaign: parsed.data.utmCampaign,
+      utmMedium: parsed.data.utmMedium,
+      utmSource: parsed.data.utmSource,
+    });
+  } catch (captureError) {
+    Sentry.captureException(captureError);
   }
 
   return NextResponse.json({ ok: true });
