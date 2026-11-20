@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
 import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
@@ -140,12 +141,17 @@ export function Book2Get1FreePage() {
                 </p>
                 <p className="text-[15px] leading-7 text-[#5a5470]">
                   Want to get started right away?{" "}
-                  <Link
+                  <CrmLink
                     className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                    crmEvent="booking_cta_click"
+                    crmPayload={{
+                      action: "Book your clean",
+                      item: "book-2-get-1-free",
+                    }}
                     href={BOOK_HREF}
                   >
                     Book your clean
-                  </Link>
+                  </CrmLink>
                 </p>
               </div>
             ) : (
@@ -247,12 +253,17 @@ export function Book2Get1FreePage() {
 
                 <p className="text-center text-sm leading-6 text-[#5a5470]">
                   Ready to book?{" "}
-                  <Link
+                  <CrmLink
                     className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
+                    crmEvent="booking_cta_click"
+                    crmPayload={{
+                      action: "Book your clean",
+                      item: "book-2-get-1-free",
+                    }}
                     href={BOOK_HREF}
                   >
                     Book your clean
-                  </Link>
+                  </CrmLink>
                 </p>
               </form>
             )}

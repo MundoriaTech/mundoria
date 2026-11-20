@@ -66,6 +66,17 @@ scopes, generate a refresh token, then deploy the secrets. When unset, CRM
 sync is a no-op. Bookings stay in Mundoria; Zoho is for people follow-up only.
 Full setup notes: [`docs/zoho-crm.md`](docs/zoho-crm.md).
 
+## Zoho Recruit (optional)
+
+Cleaner applicants also upsert as **Candidates** in Zoho Recruit EU. This is
+separate from CRM Leads and needs its own refresh token with Recruit scopes.
+
+- `ZOHO_RECRUIT_CLIENT_ID`, `ZOHO_RECRUIT_CLIENT_SECRET`, `ZOHO_RECRUIT_REFRESH_TOKEN`
+- `ZOHO_RECRUIT_ACCOUNTS_URL` (default `https://accounts.zoho.eu`)
+- `ZOHO_RECRUIT_API_DOMAIN` (default `https://recruit.zoho.eu`)
+
+When unset, Recruit sync is a no-op. Setup: [`docs/zoho-recruit.md`](docs/zoho-recruit.md).
+
 ## Sentry
 
 The Sentry SDK is configured for browser, server, and edge runtimes. Add

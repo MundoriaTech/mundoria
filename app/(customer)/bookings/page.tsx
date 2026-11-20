@@ -1,3 +1,4 @@
+import { CrmPageView } from "@/components/analytics/crm-page-view";
 import { BookingsList } from "@/components/customer/bookings-list";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
@@ -23,6 +24,7 @@ export default async function CustomerBookingsPage({
 
   return (
     <div>
+      <CrmPageView customerId={user!.id} event="view_sessions_click" />
       <LiveDashboardRefresh
         scope={`customer-bookings-${user!.id}`}
         watches={bookingWatchesFor("customer")}

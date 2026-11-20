@@ -1,3 +1,4 @@
+import { CrmPageView } from "@/components/analytics/crm-page-view";
 import { ProfileForm } from "@/components/customer/profile-form";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
@@ -17,6 +18,7 @@ export default async function CustomerProfilePage() {
 
   return (
     <div className="min-w-0">
+      <CrmPageView customerId={user!.id} event="account_view" />
       <ProfileForm initialProfile={data as Profile} />
     </div>
   );

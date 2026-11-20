@@ -95,6 +95,11 @@ export function AccountMenu({
 
   async function logout() {
     setSigningOut(true);
+    const { trackCrmEvent } = await import("@/lib/analytics/crm-events");
+    trackCrmEvent("logout", {
+      action: "sign_out",
+      customer_id: profile.id,
+    });
     // Loaded on demand so public pages that show this menu don't ship supabase-js up front.
     const { createBrowserClient } = await import("@/lib/supabase/client");
     await createBrowserClient().auth.signOut();

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import {
   LANDING_NAV_PILL_H,
@@ -521,14 +522,19 @@ function CategoryNavDropdown({
                 ))}
               </ul>
               <div className="mt-auto flex flex-col gap-2 border-t border-[#e4d8f5] pt-4">
-                <Link
+                <CrmLink
                   className="inline-flex h-10 items-center justify-center rounded-full bg-[#312c79] px-3 text-center text-[13px] font-semibold text-white transition hover:bg-[#241f5c]"
+                  crmEvent="booking_cta_click"
+                  crmPayload={{
+                    action: menu.bookLabel,
+                    service: menu.bookCategory,
+                  }}
                   href={categoryBookHref(customerHref, menu.bookCategory)}
                   onClick={() => setOpen(false)}
                   role="menuitem"
                 >
                   {menu.bookLabel}
-                </Link>
+                </CrmLink>
                 <Link
                   className="inline-flex h-10 items-center justify-center rounded-full bg-white px-3 text-center text-[13px] font-semibold text-[#312c79] transition hover:bg-[#f3efe6]"
                   href={menu.href}

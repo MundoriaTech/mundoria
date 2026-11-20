@@ -30,6 +30,7 @@ import {
   nationalFromPhone,
   storedPhone,
 } from "@/lib/auth/uk-phone";
+import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { isUserRole } from "@/types/auth";
@@ -271,6 +272,10 @@ export function BookingAuthPrompt({
         return;
       }
 
+      trackCrmEvent("login_success", {
+        action: "sign_in",
+        customer_id: data.user.id,
+      });
       markBookingAuthReturn();
       rememberBookingCheckoutStep();
       router.refresh();

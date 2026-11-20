@@ -1,6 +1,7 @@
 import { ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import type { Booking, BookingStatus } from "@/types/customer";
 
@@ -51,8 +52,22 @@ export function BookingCard({
         className="group flex items-stretch rounded-[14px] bg-[#F3F4F6] transition-colors hover:bg-white hover:shadow-sm"
         style={{ overflow: "hidden" }}
       >
-        <Link
+        <CrmLink
           className="flex min-w-0 flex-1 items-center gap-4 p-4"
+          crmEvent="booking_request_view"
+          crmPayload={{
+            action: "View request",
+            booking_amount:
+              typeof booking.amount_total === "number"
+                ? booking.amount_total / 100
+                : null,
+            booking_currency: "GBP",
+            booking_datetime: `${booking.scheduled_date}T${booking.scheduled_start_time}`,
+            booking_id: booking.id,
+            item: formatServiceName(booking.service_type),
+            service: booking.service_type,
+            service_location: place,
+          }}
           href={`/booking/${booking.id}`}
           style={{ textDecoration: "none" }}
         >
@@ -91,7 +106,7 @@ export function BookingCard({
           </div>
 
           <ChevronRight className="ml-2 shrink-0" style={{ width: "18px", height: "18px", color: "#C4BFD4" }} />
-        </Link>
+        </CrmLink>
 
         {showRebook ? (
           <div className="flex items-center pr-4">

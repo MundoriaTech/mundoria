@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { EditorialBody } from "@/components/marketing/editorial-body";
+import { FileUpload } from "@/components/shared/file-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { renderEditorialBlocks } from "@/lib/content/editorial";
@@ -46,8 +47,10 @@ const HINTS = [
     insert: "| Column | Column |\n| --- | --- |\n| Cell | Cell |\n",
     label: "Table",
   },
-  { insert: '![Caption](/images/mag/welcome-mag.jpg "Caption")\n', label: "Image" },
 ];
+
+const MAG_MEDIA_BUCKET = "mag-media";
+const MAG_IMAGE_ACCEPT = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 function blankForm(): MagForm {
   return {
@@ -306,6 +309,16 @@ export function MagPostEditor({
                       {hint.label}
                     </button>
                   ))}
+                  <FileUpload
+                    accept={MAG_IMAGE_ACCEPT}
+                    bucket={MAG_MEDIA_BUCKET}
+                    className="inline-flex"
+                    label="Image"
+                    maxSizeMb={8}
+                    onUpload={({ publicUrl }) =>
+                      insertHint(`![Caption](${publicUrl} "Caption")\n`)
+                    }
+                  />
                   <button
                     className="rounded-full border border-[#c79c66]/50 bg-[#fff8ef] px-2.5 py-1 text-[11px] font-semibold text-[#1c133b] hover:border-[#c79c66]"
                     onClick={insertMoneyCta}
@@ -437,11 +450,20 @@ export function MagPostEditor({
 
           <section className="rounded-[1.25rem] border border-[#e8e0f4] bg-white p-5 shadow-sm">
             <label className="text-sm font-semibold text-[#1c133b]">
-              Cover image URL
+              Cover image
             </label>
             <p className="mt-1 text-xs text-[#5a5470]">
-              Use a site path like `/images/mag/…` or a full URL.
+              Upload a photo, or paste a site path / URL.
             </p>
+            <div className="mt-3">
+              <FileUpload
+                accept={MAG_IMAGE_ACCEPT}
+                bucket={MAG_MEDIA_BUCKET}
+                label="Upload cover"
+                maxSizeMb={8}
+                onUpload={({ publicUrl }) => setField("cover_url", publicUrl)}
+              />
+            </div>
             <Input
               className="mt-2"
               onChange={(event) => setField("cover_url", event.target.value)}

@@ -38,6 +38,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import { upsertZohoLead } from "@/lib/zoho/crm";
+import { upsertZohoCandidate } from "@/lib/zoho/recruit";
 
 const requiredString = (label: string) =>
   z.string().trim().min(1, `${label} is required`);
@@ -862,19 +863,23 @@ export async function POST(request: Request) {
     userId: user.id,
   });
 
+  const zohoPerson = {
+    email: profile.email ?? "",
+    fullName: value.full_name,
+    phone: value.phone,
+    userId: user.id,
+  };
+  const zohoEnrichment = {
+    applicationReference,
+    applicationSubmitted: true,
+  };
   try {
-    await upsertZohoLead(
-      {
-        email: profile.email ?? "",
-        fullName: value.full_name,
-        phone: value.phone,
-        userId: user.id,
-      },
-      {
-        applicationReference,
-        applicationSubmitted: true,
-      },
-    );
+    await upsertZohoLead(zohoPerson, zohoEnrichment);
+  } catch (zohoError) {
+    Sentry.captureException(zohoError);
+  }
+  try {
+    await upsertZohoCandidate(zohoPerson, zohoEnrichment);
   } catch (zohoError) {
     Sentry.captureException(zohoError);
   }

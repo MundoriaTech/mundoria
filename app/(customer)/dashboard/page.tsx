@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { CrmLink } from "@/components/analytics/crm-link";
+import { CrmPageView } from "@/components/analytics/crm-page-view";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { CalendarTile } from "@/components/customer/dashboard/calendar-tile";
 import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
@@ -247,8 +249,14 @@ function LocationTile({ booking }: { booking: Booking | null }) {
 function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
   const Icon = service.Icon;
   return (
-    <Link
+    <CrmLink
       className="group relative block min-w-[min(100%,280px)] shrink-0 overflow-hidden rounded-[14px] transition hover:brightness-110 sm:min-w-[300px]"
+      crmEvent="recommendation_click"
+      crmPayload={{
+        action: "Book now",
+        item: service.label,
+        service: service.label,
+      }}
       href={service.href}
       style={{ height: "220px", flex: "1 1 280px", maxWidth: "360px", background: service.bg, boxSizing: "border-box" }}
     >
@@ -288,7 +296,7 @@ function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
       >
         <span style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>Book now →</span>
       </div>
-    </Link>
+    </CrmLink>
   );
 }
 
@@ -312,6 +320,7 @@ export default async function CustomerDashboardPage() {
 
   return (
     <div className="flex flex-col gap-5">
+      <CrmPageView customerId={user!.id} event="dashboard_view" />
       <LiveDashboardRefresh
         scope={`customer-dashboard-${user!.id}`}
         watches={bookingWatchesFor("customer")}
@@ -336,8 +345,10 @@ export default async function CustomerDashboardPage() {
             </h2>
           </div>
           <div className="flex flex-wrap gap-4">
-            <Link
+            <CrmLink
               className="flex items-center justify-center gap-3 rounded-full font-semibold text-white transition"
+              crmEvent="book_session_click"
+              crmPayload={{ action: "Book a Session", customer_id: user!.id }}
               href="/booking/new?fresh=1&returnTo=/dashboard"
               style={{
                 height: "57px",
@@ -351,9 +362,11 @@ export default async function CustomerDashboardPage() {
                 <path d="M5 12h14M12 5v14" />
               </svg>
               Book a Session
-            </Link>
-            <Link
+            </CrmLink>
+            <CrmLink
               className="flex items-center justify-center gap-3 rounded-full font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+              crmEvent="view_sessions_click"
+              crmPayload={{ action: "View Sessions", customer_id: user!.id }}
               href="/bookings"
               style={{ height: "57px", padding: "0 24px", fontSize: "17.4px", border: "2px solid #524096", whiteSpace: "nowrap" }}
             >
@@ -363,7 +376,37 @@ export default async function CustomerDashboardPage() {
                 <path d="M17.5 17.5 16 16.3V14" />
               </svg>
               View Sessions
-            </Link>
+            </CrmLink>
+            {next ? (
+              <CrmLink
+                className="flex items-center justify-center gap-3 rounded-full font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+                crmEvent="booking_request_view"
+                crmPayload={{
+                  action: "View request",
+                  booking_amount:
+                    typeof next.amount_total === "number"
+                      ? next.amount_total / 100
+                      : null,
+                  booking_currency: "GBP",
+                  booking_datetime: `${next.scheduled_date}T${next.scheduled_start_time}`,
+                  booking_id: next.id,
+                  customer_id: user!.id,
+                  service: next.service_type,
+                  service_location:
+                    [
+                      next.address?.address_line_1,
+                      next.address?.city,
+                      next.address?.postcode,
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || null,
+                }}
+                href={`/booking/${next.id}`}
+                style={{ height: "57px", padding: "0 24px", fontSize: "17.4px", border: "2px solid #524096", whiteSpace: "nowrap" }}
+              >
+                View request
+              </CrmLink>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-wrap gap-5">

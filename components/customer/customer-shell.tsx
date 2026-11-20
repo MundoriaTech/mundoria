@@ -13,6 +13,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
 import {
   DashboardBackLink,
@@ -21,6 +22,7 @@ import {
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
@@ -186,8 +188,10 @@ function CustomerSidebarFull({
         <p className="relative mt-1.5 m-0 text-[15px] font-bold leading-5 text-white">
           Book your next clean
         </p>
-        <Link
+        <CrmLink
           className="relative mt-4 inline-flex h-[34px] items-center gap-2 rounded-full bg-white px-3.5 text-[13px] font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+          crmEvent="book_session_click"
+          crmPayload={{ action: "Book now" }}
           href="/booking/new"
           onClick={onNavigate}
         >
@@ -204,7 +208,7 @@ function CustomerSidebarFull({
           >
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
-        </Link>
+        </CrmLink>
       </div>
     </div>
   );
@@ -229,6 +233,10 @@ export function CustomerShell({
 
   async function logout() {
     setSigningOut(true);
+    trackCrmEvent("logout", {
+      action: "sign_out",
+      customer_id: profile.id,
+    });
     await createBrowserClient().auth.signOut();
     router.replace("/login");
     router.refresh();

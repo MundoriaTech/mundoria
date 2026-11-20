@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { landingCategoryNav } from "@/components/marketing/landing/constants";
 import { LandingLogo } from "@/components/marketing/landing/landing-logo";
 import { magThemeFor } from "@/lib/content/mag-theme";
@@ -447,8 +448,13 @@ export function MarketingMobileMenuSheet({
                     <p className="mt-1 text-[13px] leading-5 text-[#1c133b]/55">
                       {activeCategory.description}
                     </p>
-                    <Link
+                    <CrmLink
                       className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#1c133b] px-3 text-sm font-semibold text-white touch-manipulation"
+                      crmEvent="booking_cta_click"
+                      crmPayload={{
+                        action: activeCategory.bookLabel,
+                        service: activeCategory.bookCategory,
+                      }}
                       href={categoryBookHref(
                         customerHref,
                         activeCategory.bookCategory,
@@ -456,7 +462,7 @@ export function MarketingMobileMenuSheet({
                       onClick={onClose}
                     >
                       {activeCategory.bookLabel}
-                    </Link>
+                    </CrmLink>
                   </div>
                   <ul className="flex-1 px-6">
                     {activeCategory.items.map((item) => (

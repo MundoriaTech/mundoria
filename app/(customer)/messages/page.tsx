@@ -1,3 +1,4 @@
+import { CrmPageView } from "@/components/analytics/crm-page-view";
 import {
   ConversationList,
   formatConversationTime,
@@ -106,6 +107,7 @@ export default async function CustomerConversationsPage() {
 
   return (
     <div className="flex flex-col gap-4 rounded-[18px] bg-white p-5">
+      <CrmPageView customerId={user!.id} event="messages_view" />
       <ConversationList
         emptyBody="Conversations appear here once a cleaner is matched to your booking."
         emptyTitle="No conversations yet"

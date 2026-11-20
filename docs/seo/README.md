@@ -55,6 +55,7 @@ These rules keep the fixes from the November 2026 audit in place. Read this befo
 - Google Tag Manager loads only after the visitor accepts analytics or marketing cookies (`components/analytics/analytics-provider.tsx`).
 - Do not put the GTM snippet back in the document head.
 - Check that every tag inside the container also respects Consent Mode.
+- CRM / booking funnel event names and real triggers (not `/booking/checkout` or `/booking/confirmation`) live in [`crm-event-mapping.md`](./crm-event-mapping.md).
 
 ## Naming (copy style)
 

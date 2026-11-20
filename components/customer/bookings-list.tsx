@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { BookingCard } from "@/components/customer/booking-card";
 import {
   ClientPagination,
@@ -130,13 +130,15 @@ export function BookingsList({
                 : "Book your first clean and your sessions will appear here."}
           </p>
           {tab === "upcoming" && (
-            <Link
+            <CrmLink
               className="mt-5 inline-flex items-center gap-2 rounded-full font-semibold text-white transition"
+              crmEvent="book_session_click"
+              crmPayload={{ action: "Book a session" }}
               href="/booking/new?fresh=1&returnTo=/bookings"
               style={{ height: "48px", padding: "0 24px", fontSize: "15px", background: "linear-gradient(90deg,#524096 0%,#8072B1 100%)", textDecoration: "none" }}
             >
               Book a session
-            </Link>
+            </CrmLink>
           )}
         </div>
       )}

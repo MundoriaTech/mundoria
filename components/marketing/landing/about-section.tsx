@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { LazyImage } from "@/components/shared/lazy-image";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,13 @@ export function AboutSection({
               asChild
               className="h-11 rounded-full bg-[#1c133b] px-5 text-[13px] font-semibold text-[#e6e5f3] hover:bg-[#1c133b]/90 sm:h-[33px] sm:text-[12px]"
             >
-              <Link href={customerHref}>Book a clean</Link>
+              <CrmLink
+                crmEvent="booking_cta_click"
+                crmPayload={{ action: "Book a clean" }}
+                href={customerHref}
+              >
+                Book a clean
+              </CrmLink>
             </Button>
             <Button
               asChild

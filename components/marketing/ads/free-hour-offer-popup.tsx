@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
 import { AppModal } from "@/components/shared/app-modal";
@@ -111,13 +112,15 @@ export function FreeHourOfferPopup({ bookingHref }: { bookingHref: string }) {
     >
       {submitted ? (
         <div className="mt-6">
-          <Link
+          <CrmLink
             className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#6a45b8] px-6 text-sm font-semibold text-white transition hover:bg-[#5a38a3]"
+            crmEvent="booking_cta_click"
+            crmPayload={{ action: "Book now", item: "free_hour_popup" }}
             href={bookingHref}
             onClick={close}
           >
             Book now
-          </Link>
+          </CrmLink>
         </div>
       ) : (
         <form className="mt-5 space-y-3" onSubmit={onSubmit}>

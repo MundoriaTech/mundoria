@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatEmojiPicker } from "@/components/customer/chat-emoji-picker";
 import { ActionError } from "@/components/shared/action-error";
 import { ChatMessage } from "@/components/shared/chat-message";
+import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { ownStoragePath } from "@/lib/storage/own-object";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -221,6 +222,12 @@ export function Chat({
       setError(result.error ?? "Unable to send message.");
       return;
     }
+
+    trackCrmEvent("message_sent", {
+      action: "send_message",
+      booking_id: bookingId,
+      customer_id: currentUserId,
+    });
 
     setMessages((current) =>
       current.some((message) => message.id === result.message!.id)

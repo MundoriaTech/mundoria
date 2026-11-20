@@ -1,5 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { upsertZohoCandidate } from "@/lib/zoho/recruit";
+
 type ZohoPerson = {
   email: string;
   fullName: string;
@@ -240,6 +242,7 @@ export async function syncSignupToZoho(input: {
   };
   if (input.role === "cleaner") {
     await upsertZohoLead(person);
+    await upsertZohoCandidate(person);
     return;
   }
   await upsertZohoContact(person);

@@ -18,6 +18,7 @@ import {
   Settings,
   ShieldAlert,
   Target,
+  UserSearch,
   Users,
   UserRound,
   UsersRound,
@@ -53,6 +54,12 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
     label: "Operations",
     items: [
       { href: "/admin/dashboard", icon: Gauge, label: "Dashboard" },
+      {
+        href: "/admin/matching",
+        icon: UserSearch,
+        label: "Matching",
+        match: (p) => p === "/admin/matching" || p.startsWith("/admin/matching/"),
+      },
       { href: "/admin/bookings", icon: BookOpenCheck, label: "Bookings" },
       {
         href: "/admin/leads",
@@ -144,6 +151,7 @@ const ALL_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
 
 const PAGE_SUBTITLES: Record<string, string> = {
   "/admin/dashboard": "Jobs running today, cleaners waiting for review, and money coming in.",
+  "/admin/matching": "Bookings that need a cleaner, a chase, or a human on the desk.",
   "/admin/bookings": "Search, inspect, and resolve booking edge cases.",
   "/admin/abandoned-bookings": "Leads who started the booking flow but didn't complete it.",
   "/admin/callback-leads": "Ads and promo callback requests waiting for a call.",

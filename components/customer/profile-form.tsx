@@ -8,6 +8,7 @@ import { useState } from "react";
 import { ChangeEmailForm } from "@/components/auth/change-email-form";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/auth";
 
@@ -135,6 +136,10 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
       .eq("id", profile.id);
     setSaving(false);
     if (error) { setStatus(error.message); return; }
+    trackCrmEvent("account_updated", {
+      action: "save_profile",
+      customer_id: profile.id,
+    });
     success({ kind: "saved", title: "Profile saved", note: "Your details are up to date." });
     router.refresh();
   }
@@ -158,6 +163,10 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
   }
 
   async function logout() {
+    trackCrmEvent("logout", {
+      action: "sign_out",
+      customer_id: profile.id,
+    });
     await createBrowserClient().auth.signOut();
     router.replace("/login");
     router.refresh();

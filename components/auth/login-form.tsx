@@ -13,6 +13,7 @@ import { PasswordRequirementsList } from "@/components/auth/password-requirement
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { dashboardForRole, redirectForRole } from "@/lib/auth/redirects";
 import { SIGNUP_EMAIL_SESSION_KEY } from "@/lib/auth/signup-email-pending";
 import { loginSchema, type LoginValues } from "@/lib/auth/schemas";
@@ -97,6 +98,11 @@ export function LoginForm({
       );
       return;
     }
+
+    trackCrmEvent("login_success", {
+      action: "sign_in",
+      customer_id: data.user.id,
+    });
 
     const dashboard = dashboardForRole(profile.role);
     router.replace(redirectForRole(profile.role, redirectTo ?? null, dashboard));

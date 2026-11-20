@@ -77,6 +77,7 @@ import {
   slotsFinishingByWindowEnd,
 } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
+import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import {
   trackMetaAddPaymentInfo,
   trackMetaInitiateCheckout,
@@ -1795,7 +1796,20 @@ export function BookingWizard({
     trackMetaAddPaymentInfo({
       value: displayAmount > 0 ? Math.round(displayAmount) / 100 : undefined,
     });
-  }, [displayAmount, hydrated, stepId]);
+    trackCrmEvent("checkout_view", {
+      action: "checkout",
+      booking_amount:
+        displayAmount > 0 ? Math.round(displayAmount) / 100 : null,
+      booking_currency: "GBP",
+      service: draft.serviceType ?? draft.serviceCategory ?? null,
+    });
+  }, [
+    displayAmount,
+    draft.serviceCategory,
+    draft.serviceType,
+    hydrated,
+    stepId,
+  ]);
   const priceLabel =
     displayHourlyRatePence != null
       ? formatHourlyRate(displayHourlyRatePence)
@@ -4526,6 +4540,24 @@ function CheckoutStep({
     trackMetaPurchase({
       bookingId: booking.bookingId,
       valuePence: amountPence,
+    });
+    const draftSnapshot = draftRef.current;
+    const locationParts = [
+      draftSnapshot.guestAddress?.address_line_1,
+      draftSnapshot.guestAddress?.city,
+      draftSnapshot.guestAddress?.postcode,
+    ].filter(Boolean);
+    trackCrmEvent("booking_completed", {
+      action: "booking_confirmed",
+      booking_amount: Math.max(0, amountPence) / 100,
+      booking_currency: "GBP",
+      booking_datetime:
+        draftSnapshot.scheduledDate && draftSnapshot.scheduledTime
+          ? `${draftSnapshot.scheduledDate}T${draftSnapshot.scheduledTime}`
+          : draftSnapshot.scheduledDate || null,
+      booking_id: booking.bookingId,
+      service: draftSnapshot.serviceType ?? draftSnapshot.serviceCategory ?? null,
+      service_location: locationParts.length ? locationParts.join(", ") : null,
     });
 
     if (draftResumeToken) {

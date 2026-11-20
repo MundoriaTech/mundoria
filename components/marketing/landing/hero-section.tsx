@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { CrmLink } from "@/components/analytics/crm-link";
 import {
   LANDING_NAV_PILL_H,
   LANDING_NAV_TOP,
@@ -113,12 +113,14 @@ export function HeroSection({ bookingHref }: { bookingHref: string }) {
             <br />
             You’ve got other things to do.
           </h1>
-          <Link
+          <CrmLink
             className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#c79c66] px-6 text-sm font-semibold text-[#1c133b] transition hover:brightness-95 touch-manipulation sm:mt-8 sm:h-12 sm:px-8 sm:text-[15px]"
+            crmEvent="booking_cta_click"
+            crmPayload={{ action: "Book my clean" }}
             href={bookingHref}
           >
             Book my clean
-          </Link>
+          </CrmLink>
         </div>
       </div>
     </section>
