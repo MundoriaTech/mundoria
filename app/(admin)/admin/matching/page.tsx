@@ -8,25 +8,39 @@ export const metadata = { title: "Matching" };
 
 export default async function AdminMatchingPage() {
   const today = new Date().toISOString().slice(0, 10);
-  const { data } = await createAdminClient()
-    .from("bookings")
-    .select(
-      "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name),cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)",
-    )
-    .in("status", [
-      "pending_match",
-      "matched",
-      "awaiting_payment",
-      "confirmed",
-      "cleaner_en_route",
-      "in_progress",
-      "awaiting_customer_confirmation",
-      "disputed",
-      "no_show",
-      "cancelled",
-    ])
-    .order("scheduled_date", { ascending: true })
-    .limit(800);
+  const admin = createAdminClient();
+  const [{ data }, { data: cleanerRows }] = await Promise.all([
+    admin
+      .from("bookings")
+      .select(
+        "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name),cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)",
+      )
+      .in("status", [
+        "pending_match",
+        "matched",
+        "awaiting_payment",
+        "confirmed",
+        "cleaner_en_route",
+        "in_progress",
+        "awaiting_customer_confirmation",
+        "disputed",
+        "no_show",
+        "cancelled",
+      ])
+      .order("scheduled_date", { ascending: true })
+      .limit(800),
+    admin
+      .from("profiles")
+      .select("id,full_name,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)")
+      .eq("role", "cleaner")
+      .in("cleaner_profiles.status", ["certified", "active"])
+      .order("full_name", { ascending: true }),
+  ]);
+
+  const cleaners = (cleanerRows ?? []).map((row) => ({
+    id: row.id as string,
+    full_name: (row.full_name as string) || "Cleaner",
+  }));
 
   const bookings = ((data ?? []) as AdminBooking[]).filter((booking) => {
     if (booking.status === "cancelled") {
@@ -46,7 +60,7 @@ export default async function AdminMatchingPage() {
   return (
     <div className="min-w-0">
       <LiveDashboardRefresh intervalMs={OPS_REFRESH_MS} scope="admin-matching" />
-      <MatchingQueue bookings={bookings} today={today} />
+      <MatchingQueue bookings={bookings} cleaners={cleaners} today={today} />
     </div>
   );
 }
