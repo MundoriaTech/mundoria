@@ -135,8 +135,7 @@ export function trackCrmEvent(
 
   const page_url =
     payload.page_url ??
-    `${window.location.pathname}${window.location.search}` ??
-    null;
+    `${window.location.pathname}${window.location.search}`;
   const enriched: CrmEventPayload = {
     ...readUtm(),
     ...payload,
