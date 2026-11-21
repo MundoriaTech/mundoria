@@ -21,6 +21,7 @@ import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
+import { sendZohoBookingEmailPreview, usesZohoBookingEmailPreview } from "@/lib/zoho/booking-email";
 import { upsertZohoContact } from "@/lib/zoho/crm";
 
 export async function POST(request: Request) {
@@ -338,7 +339,17 @@ export async function POST(request: Request) {
   };
 
   try {
-    if (preferences.email !== false && process.env.RESEND_API_KEY) {
+    if (preferences.email !== false && usesZohoBookingEmailPreview()) {
+      await sendZohoBookingEmailPreview({
+        event: "request_received",
+        bookingId: booking.id,
+        email: profile.email,
+        fullName: profile.full_name,
+        scheduledDate: parsed.data.scheduledDate,
+        scheduledTime: parsed.data.scheduledTime,
+        serviceName: formatServiceName(parsed.data.serviceType),
+      }).catch((error) => Sentry.captureException(error));
+    } else if (preferences.email !== false && process.env.RESEND_API_KEY) {
       await sendBrandedEmail({
         data: {
           address: `${address.address_line_1}, ${address.city}, ${address.postcode}`,

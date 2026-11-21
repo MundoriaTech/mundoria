@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { normalizeEmail, toE164 } from "@/lib/outreach/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { upsertZohoProspect } from "@/lib/zoho/crm";
+import { salesIntakeConfig } from "@/lib/zoho/sales-intake";
 
 export type LeadStatus = "new" | "contacted" | "engaged" | "booked" | "lost" | "unsubscribed";
 export type Channel = "email" | "sms" | "call";
@@ -268,7 +269,9 @@ export function leadName(lead: Pick<LeadRow, "first_name" | "last_name">) {
 }
 
 async function syncLeadToZoho(lead: LeadRow, summary?: string) {
-  if (!lead.email) return;
+  // When Sales owns the callback queue, the website must not overwrite its
+  // contact attempts or create a parallel prospect from an abandoned draft.
+  if (!lead.email || salesIntakeConfig()) return;
   await upsertZohoProspect({
     email: lead.email,
     firstName: lead.first_name,

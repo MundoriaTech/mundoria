@@ -76,7 +76,7 @@ export async function POST(request: Request) {
   const lastName = parsed.data.lastName.trim() || fromFull.lastName || "Lead";
 
   const admin = createAdminClient();
-  const { error } = await admin.from("callback_leads").insert({
+  const { data: callback, error } = await admin.from("callback_leads").insert({
     available_in_10_min: parsed.data.availableIn10Min ?? false,
     email: parsed.data.email.toLowerCase(),
     first_name: firstName,
@@ -87,9 +87,9 @@ export async function POST(request: Request) {
     utm_campaign: parsed.data.utmCampaign?.trim() || null,
     utm_medium: parsed.data.utmMedium?.trim() || null,
     utm_source: parsed.data.utmSource?.trim() || null,
-  });
+  }).select("id").single();
 
-  if (error) {
+  if (error || !callback) {
     return NextResponse.json(
       { error: "We could not save that just now. Please try again." },
       { status: 500 },
@@ -101,6 +101,7 @@ export async function POST(request: Request) {
   try {
     await captureCallbackLead({
       availableIn10Min: parsed.data.availableIn10Min ?? false,
+      callbackId: callback.id,
       email: parsed.data.email,
       firstName,
       lastName,

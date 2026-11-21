@@ -1,7 +1,7 @@
 # Zoho Recruit sync
 
-Mundoria upserts cleaner applicants into Zoho Recruit EU when OAuth env vars
-are set. Sync is fire-and-forget and never blocks signup or onboarding.
+Mundoria upserts cleaner applicants into Zoho Recruit when OAuth environment
+variables are set. A Zoho error does not fail signup or onboarding.
 
 CRM Leads for cleaners still run as documented in [`zoho-crm.md`](./zoho-crm.md).
 Recruit is the hiring record (Candidates). CRM is sales follow-up.
@@ -28,8 +28,8 @@ it already includes Recruit scopes (the CRM token today does not).
 ZOHO_RECRUIT_CLIENT_ID=
 ZOHO_RECRUIT_CLIENT_SECRET=
 ZOHO_RECRUIT_REFRESH_TOKEN=
-ZOHO_RECRUIT_ACCOUNTS_URL=https://accounts.zoho.eu
-ZOHO_RECRUIT_API_DOMAIN=https://recruit.zoho.eu
+ZOHO_RECRUIT_ACCOUNTS_URL=https://accounts.zoho.com
+ZOHO_RECRUIT_API_DOMAIN=https://recruit.zoho.com
 ```
 
 If any of the three credential vars is missing, Recruit sync is skipped.
@@ -39,14 +39,17 @@ generated with Recruit scopes.
 
 ## One-time Zoho setup
 
-1. Open the [Zoho API Console](https://api-console.zoho.eu/) for the **EU** DC.
+1. Open the [Zoho API Console](https://api-console.zoho.com/) for Mundoria's `.com` organisation.
 2. Use the existing Self Client, or create one.
 3. Generate a refresh token with scopes:
-   - `ZohoRecruit.modules.candidate.CREATE`
-   - `ZohoRecruit.modules.candidate.UPDATE`
+   - `ZohoRecruit.modules.candidates.CREATE`
+   - `ZohoRecruit.modules.candidates.UPDATE`
 4. Put client id, secret, and that refresh token in Vercel / `.env.local`.
 
 ## Code
 
 - Client: [`lib/zoho/recruit.ts`](../lib/zoho/recruit.ts)
 - Hooks: cleaner branch of `syncSignupToZoho`; cleaner onboarding submit
+- Verify a synthetic submission in Preview before production. Candidate upsert
+  saves the application reference. Opening assignment, assessments and status
+  transitions are separate Recruit operations.

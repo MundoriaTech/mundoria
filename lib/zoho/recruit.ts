@@ -1,5 +1,8 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { readZohoRecordResult, zohoErrorCode, zohoFetch, zohoOrigin } from "@/lib/zoho/http";
+import { maySyncZohoEmail } from "@/lib/zoho/preview";
+
 type ZohoCandidate = {
   email: string;
   fullName: string;
@@ -30,7 +33,7 @@ function accountsUrl() {
 function defaultApiDomain() {
   return (
     process.env.ZOHO_RECRUIT_API_DOMAIN?.trim().replace(/\/$/, "") ||
-    "https://recruit.zoho.eu"
+    zohoOrigin(accountsUrl(), "accounts").replace("accounts.", "recruit.")
   );
 }
 
@@ -94,32 +97,29 @@ async function getAccessToken(): Promise<CachedToken | null> {
     refresh_token: creds.refreshToken,
   });
 
-  const response = await fetch(`${accountsUrl()}/oauth/v2/token`, {
+  const response = await zohoFetch(`${zohoOrigin(accountsUrl(), "accounts")}/oauth/v2/token`, {
     body,
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     method: "POST",
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `Zoho Recruit token refresh failed (${response.status}): ${text.slice(0, 300)}`,
-    );
+    throw new Error(`Zoho Recruit token refresh failed (${response.status})`);
   }
 
-  const json = (await response.json()) as {
+  const json = (await response.json().catch(() => null)) as {
     access_token?: string;
-    api_domain?: string;
     expires_in?: number;
-  };
+  } | null;
 
-  if (!json.access_token) {
+  if (!json?.access_token) {
     throw new Error("Zoho Recruit token refresh returned no access_token");
   }
 
   cachedToken = {
     accessToken: json.access_token,
-    apiDomain: (json.api_domain || defaultApiDomain()).replace(/\/$/, ""),
+    // Recruit v2 uses the recruit service origin, even when OAuth returns zohoapis.
+    apiDomain: zohoOrigin(defaultApiDomain(), "recruit"),
     expiresAt: now + Math.max(60, Number(json.expires_in ?? 3600)) * 1000,
   };
   return cachedToken;
@@ -129,7 +129,7 @@ async function upsertCandidate(record: Record<string, unknown>) {
   const token = await getAccessToken();
   if (!token) return null;
 
-  const response = await fetch(
+  const response = await zohoFetch(
     `${token.apiDomain}/recruit/v2/Candidates/upsert`,
     {
       body: JSON.stringify({
@@ -144,14 +144,8 @@ async function upsertCandidate(record: Record<string, unknown>) {
     },
   );
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `Zoho Recruit Candidates upsert failed (${response.status}): ${text.slice(0, 400)}`,
-    );
-  }
-
-  return response.json();
+  if (response.status === 401) cachedToken = null;
+  return { response, result: await readZohoRecordResult(response) };
 }
 
 function identityRecord(person: ZohoCandidate) {
@@ -174,7 +168,7 @@ export async function upsertZohoCandidate(
 ) {
   if (!isZohoRecruitConfigured()) return;
   const email = person.email.trim().toLowerCase();
-  if (!email || email.endsWith("@pending.local")) return;
+  if (!maySyncZohoEmail(email)) return;
 
   const identity = identityRecord({ ...person, email });
   const withNotes = {
@@ -183,17 +177,17 @@ export async function upsertZohoCandidate(
   };
 
   try {
-    await upsertCandidate(withNotes);
+    let outcome = await upsertCandidate(withNotes);
+    if (
+      outcome?.result.status === "error" &&
+      outcome.result.details?.api_name === "Additional_Info"
+    ) {
+      outcome = await upsertCandidate(identity);
+    }
+    if (outcome && (!outcome.response.ok || outcome.result.status !== "success" || !outcome.result.details?.id)) {
+      throw new Error(`Zoho Recruit Candidates upsert failed (${outcome.response.status}, ${zohoErrorCode(outcome.result.code)})`);
+    }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-    if (!message.includes("(400)")) {
-      Sentry.captureException(error);
-      return;
-    }
-    try {
-      await upsertCandidate(identity);
-    } catch (retryError) {
-      Sentry.captureException(retryError);
-    }
+    Sentry.captureException(error);
   }
 }

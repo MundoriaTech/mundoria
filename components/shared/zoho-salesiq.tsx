@@ -1,65 +1,95 @@
 "use client";
 
-import Script from "next/script";
-import { useEffect } from "react";
+import { readConsent } from "@/lib/analytics/consent";
+
+type Visibility = { visible?: (state: "show" | "hide") => void };
 
 declare global {
   interface Window {
     $zoho?: {
       salesiq?: {
-        chat?: { start?: () => void };
-        floatwindow?: { visible?: (state: "show" | "hide") => void };
-        ready?: (callback: () => void) => void;
+        chatwindow?: Visibility;
+        floatbutton?: Visibility;
+        floatwindow?: Visibility;
+        ready?: () => void;
+        tracking?: { off?: () => void };
       };
     };
   }
 }
 
-const WIDGET_CODE = process.env.NEXT_PUBLIC_ZOHO_SALESIQ_WIDGET_CODE;
-const WIDGET_BASE =
-  process.env.NEXT_PUBLIC_ZOHO_SALESIQ_WIDGET_URL ??
-  "https://salesiq.zoho.eu/widget";
+const widgetSrc = process.env.NEXT_PUBLIC_ZOHO_SALESIQ_WIDGET_SRC;
+let loading: Promise<void> | undefined;
 
-/** Opens Zoho SalesIQ chat when configured; returns false if unavailable. */
-export function openZohoSupportChat(): boolean {
-  if (typeof window === "undefined" || !WIDGET_CODE) return false;
+function approvedScriptUrl() {
+  if (!widgetSrc) return null;
   try {
-    window.$zoho?.salesiq?.chat?.start?.();
-    window.$zoho?.salesiq?.floatwindow?.visible?.("show");
-    return Boolean(window.$zoho?.salesiq);
+    const url = new URL(widgetSrc);
+    if (
+      url.protocol === "https:" && !url.port && !url.username && !url.password &&
+      /^salesiq\.(?:zoho|zohopublic)\.(?:com|eu)$/.test(url.hostname) &&
+      url.pathname === "/widget" && url.searchParams.get("wc")
+    ) return url.href;
   } catch {
-    return false;
+    // The built-in messenger is still available if the install URL is invalid.
+  }
+  return null;
+}
+
+function loadWidget(src: string) {
+  if (loading) return loading;
+  if (document.getElementById("zsiqscript")) return Promise.resolve();
+
+  loading = new Promise<void>((resolve) => {
+    const script = document.createElement("script");
+    const timeout = window.setTimeout(resolve, 3_500);
+    window.$zoho ??= {};
+    window.$zoho.salesiq ??= {};
+    window.$zoho.salesiq.ready = () => {
+      window.clearTimeout(timeout);
+      closeZohoSupportChat();
+      resolve();
+    };
+    script.id = "zsiqscript";
+    script.src = src;
+    script.async = true;
+    script.onerror = () => {
+      window.clearTimeout(timeout);
+      script.remove();
+      loading = undefined;
+      resolve();
+    };
+    document.body.appendChild(script);
+  });
+  return loading;
+}
+
+export function closeZohoSupportChat() {
+  const widget = window.$zoho?.salesiq;
+  try {
+    widget?.tracking?.off?.();
+    widget?.floatbutton?.visible?.("hide");
+    (widget?.chatwindow ?? widget?.floatwindow)?.visible?.("hide");
+  } catch {
+    // The provider may still be loading, or already closed.
   }
 }
 
-/**
- * Loads Zoho SalesIQ (Zoho One chat) for public marketing pages.
- * No-ops until NEXT_PUBLIC_ZOHO_SALESIQ_WIDGET_CODE is set.
- */
-export function ZohoSalesIqWidget() {
-  useEffect(() => {
-    if (!WIDGET_CODE || typeof window === "undefined") return;
-    window.$zoho = window.$zoho || {};
-    window.$zoho.salesiq = window.$zoho.salesiq || {
-      ready: function ready() {
-        // Widget initialised by SalesIQ script.
-      },
-    };
-  }, []);
-
-  if (!WIDGET_CODE) return null;
-
-  return (
-    <>
-      <Script id="zoho-salesiq-bootstrap" strategy="afterInteractive">
-        {`window.$zoho=window.$zoho||{};window.$zoho.salesiq=window.$zoho.salesiq||{ready:function(){}};`}
-      </Script>
-      <Script
-        defer
-        id="zsiqscript"
-        src={`${WIDGET_BASE}?wc=${WIDGET_CODE}`}
-        strategy="afterInteractive"
-      />
-    </>
-  );
+/** Loads SalesIQ on a support click after consent, with the site chat as fallback. */
+export async function openZohoSupportChat() {
+  const src = approvedScriptUrl();
+  if (!src || !readConsent()?.analytics) return false;
+  try {
+    await loadWidget(src);
+    if (!readConsent()?.analytics) return false;
+    const widget = window.$zoho?.salesiq;
+    const chat = widget?.chatwindow ?? widget?.floatwindow;
+    if (!chat?.visible) return false;
+    widget?.tracking?.off?.();
+    widget?.floatbutton?.visible?.("hide");
+    chat.visible("show");
+    return true;
+  } catch {
+    return false;
+  }
 }

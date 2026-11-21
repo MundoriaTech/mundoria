@@ -49,7 +49,7 @@ export async function MagShell({
       <MagNavbar bookingHref={bookingHref} categories={categories} />
       <main className="flex-1">{children}</main>
       <MagFooter bookingHref={bookingHref} />
-      <SupportMessengerLauncher />
+      <SupportMessengerLauncher allowZoho />
     </div>
   );
 }

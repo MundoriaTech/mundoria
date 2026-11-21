@@ -1,12 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   SUPPORT_MESSENGER_EVENT,
   type SupportMessengerTab,
 } from "@/components/support/support-messenger-events";
+import { closeZohoSupportChat, openZohoSupportChat } from "@/components/shared/zoho-salesiq";
+import { readConsent } from "@/lib/analytics/consent";
 
 const loadWidget = () =>
   import("@/components/support/support-messenger").then((module) => ({
@@ -24,18 +26,48 @@ const SupportMessengerWidget = dynamic(loadWidget, {
  * and GIF pickers) when someone opens it, which keeps it off the mobile
  * critical path. Hovering or focusing the button preloads it.
  */
-export function SupportMessengerLauncher() {
+export function SupportMessengerLauncher({ allowZoho = false }: { allowZoho?: boolean }) {
   const [request, setRequest] = useState<{ tab: SupportMessengerTab } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const active = useRef(false);
+  const opening = useRef(false);
+
+  const launch = useCallback(async (tab: SupportMessengerTab) => {
+    if (opening.current) return;
+    opening.current = true;
+    setBusy(true);
+    const opened = allowZoho && tab !== "help" && await openZohoSupportChat();
+    opening.current = false;
+    if (!active.current) {
+      if (opened) closeZohoSupportChat();
+      return;
+    }
+    setBusy(false);
+    if (!opened) setRequest({ tab });
+  }, [allowZoho]);
+
+  useEffect(() => {
+    active.current = true;
+    function onConsentChange() {
+      if (allowZoho && !readConsent()?.analytics) closeZohoSupportChat();
+    }
+    window.addEventListener("mundoria:consent-updated", onConsentChange);
+    return () => {
+      active.current = false;
+      if (allowZoho) closeZohoSupportChat();
+      window.removeEventListener("mundoria:consent-updated", onConsentChange);
+    };
+  }, [allowZoho]);
 
   useEffect(() => {
     if (request) return;
     function onOpen(event: Event) {
       const detail = (event as CustomEvent<{ tab?: SupportMessengerTab }>).detail;
-      setRequest({ tab: detail?.tab ?? "home" });
+      void launch(detail?.tab ?? "home");
     }
     window.addEventListener(SUPPORT_MESSENGER_EVENT, onOpen);
     return () => window.removeEventListener(SUPPORT_MESSENGER_EVENT, onOpen);
-  }, [request]);
+  }, [launch, request]);
 
   if (request) {
     return <SupportMessengerWidget initialOpen initialTab={request.tab} />;
@@ -43,7 +75,8 @@ export function SupportMessengerLauncher() {
 
   return (
     <LauncherButton
-      onClick={() => setRequest({ tab: "home" })}
+      busy={busy}
+      onClick={() => void launch("home")}
       onPreload={() => void loadWidget()}
     />
   );

@@ -74,7 +74,7 @@ export async function MarketingShell({
       />
       {children}
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
-      <SupportMessengerLauncher />
+      <SupportMessengerLauncher allowZoho />
       <Suspense fallback={null}>
         <FreeHourOfferPopup bookingHref={offerBookingHref} />
       </Suspense>

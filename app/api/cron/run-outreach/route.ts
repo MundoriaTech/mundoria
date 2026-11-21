@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/auth";
 import { outreachEnabled } from "@/lib/outreach/config";
 import { markBookedLeads, runDueEnrollments, syncDraftLeads } from "@/lib/outreach/engine";
+import { syncZohoSalesEnquiries } from "@/lib/zoho/sales-intake";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -18,6 +19,7 @@ export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  await syncZohoSalesEnquiries().catch((error) => Sentry.captureException(error));
   try {
     const booked = await markBookedLeads();
     if (!outreachEnabled()) {

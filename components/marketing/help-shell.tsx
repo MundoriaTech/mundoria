@@ -74,7 +74,7 @@ export function HelpShell({
         </div>
       </footer>
 
-      <SupportMessengerLauncher />
+      <SupportMessengerLauncher allowZoho />
     </div>
   );
 }
