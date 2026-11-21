@@ -37,7 +37,7 @@ export function FaqShell({
       </main>
 
       <LandingFooter cleanerHref={cleanerHref} configured={configured} />
-      <SupportMessengerLauncher />
+      <SupportMessengerLauncher allowZoho />
     </div>
   );
 }

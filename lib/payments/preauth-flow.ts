@@ -1,3 +1,6 @@
+import * as Sentry from "@sentry/nextjs";
+
+import { formatServiceName } from "@/lib/customer/services";
 import { alertAdmins } from "@/lib/notifications/admin";
 import {
   createInAppNotification,
@@ -16,6 +19,7 @@ import {
   PAYMENT_TIME_ZONE,
 } from "@/lib/payments/uk-schedule";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendZohoBookingEmailPreview, usesZohoBookingEmailPreview } from "@/lib/zoho/booking-email";
 import { upsertZohoContact } from "@/lib/zoho/crm";
 import { getStripe } from "@/lib/stripe/server";
 
@@ -641,7 +645,17 @@ async function promoteToConfirmed(bookingId: string) {
       "Payment is secured and your cleaner is confirmed.",
       { booking_id: bookingId },
     );
-    if (customer?.email) {
+    if (customer?.email && usesZohoBookingEmailPreview()) {
+      await sendZohoBookingEmailPreview({
+        event: "cleaner_confirmed",
+        bookingId,
+        email: customer.email,
+        fullName: customer.full_name,
+        scheduledDate: booking.scheduled_date,
+        scheduledTime: String(booking.scheduled_start_time),
+        serviceName: formatServiceName(booking.service_type),
+      }).catch((error) => Sentry.captureException(error));
+    } else if (customer?.email) {
       await sendBrandedEmail({
         data: {
           appUrl: url,

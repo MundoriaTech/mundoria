@@ -26,6 +26,7 @@ import {
   type LeadRow,
 } from "@/lib/outreach/leads";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { queueZohoSalesEnquiry } from "@/lib/zoho/sales-intake";
 
 type EnrollmentRow = {
   context: JourneyContext;
@@ -245,6 +246,7 @@ export async function alertStaffAboutLead(lead: LeadRow, ctx: JourneyContext) {
 /** Called from POST /api/callback-leads right after the row is saved. */
 export async function captureCallbackLead(input: {
   availableIn10Min: boolean;
+  callbackId: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -275,6 +277,13 @@ export async function captureCallbackLead(input: {
     { callback_requested_at: new Date().toISOString() },
     { summary: `Asked for a callback${input.availableIn10Min ? " (free in the next 10 minutes)" : ""}`, type: "lead.callback_request" },
   );
+  if (!fresh.do_not_contact && fresh.status !== "unsubscribed") {
+    try {
+      await queueZohoSalesEnquiry(fresh.id, input.callbackId, input.email);
+    } catch (error) {
+      Sentry.captureException(error);
+    }
+  }
   // A new request replaces older, slower journeys.
   await stopEnrollments(fresh.id, "superseded_by_callback", "callback_request");
   const enrollment = await enrollLead(fresh, "callback_request", { availableNow: input.availableIn10Min, source: input.source });

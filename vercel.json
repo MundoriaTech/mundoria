@@ -1,1 +1,7 @@
-{}
+{
+  "git": {
+    "deploymentEnabled": {
+      "codex/zoho-website-integration": false
+    }
+  }
+}

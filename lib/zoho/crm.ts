@@ -1,5 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { readZohoRecordResult, zohoErrorCode, zohoFetch, zohoOrigin } from "@/lib/zoho/http";
+import { maySyncZohoEmail } from "@/lib/zoho/preview";
 import { upsertZohoCandidate } from "@/lib/zoho/recruit";
 
 type ZohoPerson = {
@@ -37,7 +39,7 @@ function accountsUrl() {
 function defaultApiDomain() {
   return (
     process.env.ZOHO_API_DOMAIN?.trim().replace(/\/$/, "") ||
-    "https://www.zohoapis.eu"
+    zohoOrigin(accountsUrl(), "accounts").replace(/^https:\/\/accounts\.(?:zoho|zohocloud)\./, "https://www.zohoapis.")
   );
 }
 
@@ -88,32 +90,33 @@ async function getAccessToken(): Promise<CachedToken | null> {
     refresh_token: creds.refreshToken,
   });
 
-  const response = await fetch(`${accountsUrl()}/oauth/v2/token`, {
+  const response = await zohoFetch(`${zohoOrigin(accountsUrl(), "accounts")}/oauth/v2/token`, {
     body,
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     method: "POST",
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `Zoho token refresh failed (${response.status}): ${text.slice(0, 300)}`,
-    );
+    throw new Error(`Zoho CRM token refresh failed (${response.status})`);
   }
 
-  const json = (await response.json()) as {
+  const json = (await response.json().catch(() => null)) as {
     access_token?: string;
     api_domain?: string;
     expires_in?: number;
-  };
+  } | null;
 
-  if (!json.access_token) {
+  if (!json?.access_token) {
     throw new Error("Zoho token refresh returned no access_token");
   }
 
+  const apiDomain = zohoOrigin(json.api_domain || defaultApiDomain(), "crm");
+  if (process.env.ZOHO_API_DOMAIN?.trim() && apiDomain !== zohoOrigin(defaultApiDomain(), "crm")) {
+    throw new Error("Zoho CRM token region does not match ZOHO_API_DOMAIN");
+  }
   cachedToken = {
     accessToken: json.access_token,
-    apiDomain: (json.api_domain || defaultApiDomain()).replace(/\/$/, ""),
+    apiDomain,
     expiresAt: now + Math.max(60, Number(json.expires_in ?? 3600)) * 1000,
   };
   return cachedToken;
@@ -126,7 +129,7 @@ async function upsertRecord(
   const token = await getAccessToken();
   if (!token) return null;
 
-  const response = await fetch(
+  const response = await zohoFetch(
     `${token.apiDomain}/crm/v8/${moduleName}/upsert`,
     {
       body: JSON.stringify({
@@ -141,14 +144,15 @@ async function upsertRecord(
     },
   );
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
+  const result = await readZohoRecordResult(response);
+  if (response.status === 401) cachedToken = null;
+  if (!response.ok || result.status !== "success" || !result.details?.id) {
     throw new Error(
-      `Zoho ${moduleName} upsert failed (${response.status}): ${text.slice(0, 400)}`,
+      `Zoho ${moduleName} upsert failed (${response.status}, ${zohoErrorCode(result.code)})`,
     );
   }
 
-  return response.json();
+  return result.details.id;
 }
 
 /** Upsert a customer Contact by Email. Soft-fails when Zoho is unset or errors. */
@@ -158,7 +162,7 @@ export async function upsertZohoContact(
 ) {
   if (!isZohoCrmConfigured()) return;
   const email = person.email.trim().toLowerCase();
-  if (!email || email.endsWith("@pending.local")) return;
+  if (!maySyncZohoEmail(email)) return;
 
   const { firstName, lastName } = splitName(person.fullName);
   const description = buildDescription([
@@ -192,7 +196,7 @@ export async function upsertZohoLead(
 ) {
   if (!isZohoCrmConfigured()) return;
   const email = person.email.trim().toLowerCase();
-  if (!email || email.endsWith("@pending.local")) return;
+  if (!maySyncZohoEmail(email)) return;
 
   const { firstName, lastName } = splitName(person.fullName);
   const description = buildDescription([
@@ -274,7 +278,7 @@ export async function upsertZohoProspect(prospect: {
 }) {
   if (!isZohoCrmConfigured()) return;
   const email = prospect.email.trim().toLowerCase();
-  if (!email) return;
+  if (!maySyncZohoEmail(email)) return;
   const description = buildDescription([
     `Mundoria lead id: ${prospect.leadId}`,
     "Role: customer prospect",
@@ -296,4 +300,37 @@ export async function upsertZohoProspect(prospect: {
   } catch (error) {
     Sentry.captureException(error);
   }
+}
+
+export async function createZohoSalesEnquiry(
+  record: Record<string, unknown>,
+  assignmentRuleId: string,
+  uniqueKeyField: string,
+) {
+  const token = await getAccessToken();
+  if (!token) throw new Error("Zoho CRM credentials are missing");
+
+  const response = await zohoFetch(`${token.apiDomain}/crm/v8/Leads`, {
+    method: "POST",
+    headers: {
+      Authorization: `Zoho-oauthtoken ${token.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      data: [record],
+      lar_id: assignmentRuleId,
+      trigger: [],
+      skip_feature_execution: [{ name: "cadences" }],
+    }),
+  });
+
+  const result = await readZohoRecordResult(response);
+  if (response.status === 401) cachedToken = null;
+  const details = result.details;
+  if (response.ok && result.status === "success" && details?.id) return details.id;
+  if (result.code === "DUPLICATE_DATA" && details?.api_name === uniqueKeyField) {
+    const id = details.id ?? details.module?.id;
+    if (id) return id;
+  }
+  throw new Error(`Zoho CRM lead intake failed (${response.status}, ${zohoErrorCode(result.code)})`);
 }
