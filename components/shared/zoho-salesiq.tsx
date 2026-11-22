@@ -26,14 +26,24 @@ function approvedScriptUrl() {
   try {
     const url = new URL(widgetSrc);
     if (
-      url.protocol === "https:" && !url.port && !url.username && !url.password &&
+      url.protocol === "https:" &&
+      !url.port &&
+      !url.username &&
+      !url.password &&
       /^salesiq\.(?:zoho|zohopublic)\.(?:com|eu)$/.test(url.hostname) &&
-      url.pathname === "/widget" && url.searchParams.get("wc")
-    ) return url.href;
+      url.pathname === "/widget" &&
+      url.searchParams.get("wc")
+    ) {
+      return url.href;
+    }
   } catch {
-    // The built-in messenger is still available if the install URL is invalid.
+    // Invalid install URL: public pages stay without a launcher.
   }
   return null;
+}
+
+export function zohoSalesIqConfigured() {
+  return Boolean(approvedScriptUrl());
 }
 
 function loadWidget(src: string) {
@@ -47,7 +57,12 @@ function loadWidget(src: string) {
     window.$zoho.salesiq ??= {};
     window.$zoho.salesiq.ready = () => {
       window.clearTimeout(timeout);
-      closeZohoSupportChat();
+      try {
+        window.$zoho?.salesiq?.tracking?.off?.();
+        window.$zoho?.salesiq?.floatbutton?.visible?.("show");
+      } catch {
+        // SalesIQ still owns the launcher once the script has loaded.
+      }
       resolve();
     };
     script.id = "zsiqscript";
@@ -75,18 +90,33 @@ export function closeZohoSupportChat() {
   }
 }
 
-/** Loads SalesIQ on a support click after consent, with the site chat as fallback. */
-export async function openZohoSupportChat() {
+/** Load SalesIQ after statistics consent and leave its own launcher visible. */
+export async function mountZohoSupportChat() {
   const src = approvedScriptUrl();
   if (!src || !readConsent()?.analytics) return false;
   try {
     await loadWidget(src);
-    if (!readConsent()?.analytics) return false;
+    if (!readConsent()?.analytics) {
+      closeZohoSupportChat();
+      return false;
+    }
+    const widget = window.$zoho?.salesiq;
+    widget?.tracking?.off?.();
+    widget?.floatbutton?.visible?.("show");
+    return Boolean(widget?.floatbutton?.visible || widget?.chatwindow?.visible);
+  } catch {
+    return false;
+  }
+}
+
+/** Open the SalesIQ window (footer “Start a chat”). */
+export async function openZohoSupportChat() {
+  const mounted = await mountZohoSupportChat();
+  if (!mounted) return false;
+  try {
     const widget = window.$zoho?.salesiq;
     const chat = widget?.chatwindow ?? widget?.floatwindow;
     if (!chat?.visible) return false;
-    widget?.tracking?.off?.();
-    widget?.floatbutton?.visible?.("hide");
     chat.visible("show");
     return true;
   } catch {

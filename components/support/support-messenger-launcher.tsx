@@ -7,7 +7,12 @@ import {
   SUPPORT_MESSENGER_EVENT,
   type SupportMessengerTab,
 } from "@/components/support/support-messenger-events";
-import { closeZohoSupportChat, openZohoSupportChat } from "@/components/shared/zoho-salesiq";
+import {
+  closeZohoSupportChat,
+  mountZohoSupportChat,
+  openZohoSupportChat,
+  zohoSalesIqConfigured,
+} from "@/components/shared/zoho-salesiq";
 import { readConsent } from "@/lib/analytics/consent";
 
 const loadWidget = () =>
@@ -21,12 +26,12 @@ const SupportMessengerWidget = dynamic(loadWidget, {
 });
 
 /**
- * Public pages render this instead of SupportMessengerWidget. It shows the same
- * round button but only downloads the messenger (about 1,500 lines plus emoji
- * and GIF pickers) when someone opens it, which keeps it off the mobile
- * critical path. Hovering or focusing the button preloads it.
+ * Marketing pages with SalesIQ configured use Zoho’s own launcher after
+ * statistics consent. Booking and other in-app pages keep the Mundoria
+ * messenger.
  */
 export function SupportMessengerLauncher({ allowZoho = false }: { allowZoho?: boolean }) {
+  const useZoho = allowZoho && zohoSalesIqConfigured();
   const [request, setRequest] = useState<{ tab: SupportMessengerTab } | null>(null);
   const [busy, setBusy] = useState(false);
   const active = useRef(false);
@@ -36,28 +41,31 @@ export function SupportMessengerLauncher({ allowZoho = false }: { allowZoho?: bo
     if (opening.current) return;
     opening.current = true;
     setBusy(true);
-    const opened = allowZoho && tab !== "help" && await openZohoSupportChat();
+    const opened = useZoho && await openZohoSupportChat();
     opening.current = false;
     if (!active.current) {
       if (opened) closeZohoSupportChat();
       return;
     }
     setBusy(false);
-    if (!opened) setRequest({ tab });
-  }, [allowZoho]);
+    if (!opened && !useZoho) setRequest({ tab });
+  }, [useZoho]);
 
   useEffect(() => {
     active.current = true;
+    if (useZoho) void mountZohoSupportChat();
     function onConsentChange() {
-      if (allowZoho && !readConsent()?.analytics) closeZohoSupportChat();
+      if (!useZoho) return;
+      if (readConsent()?.analytics) void mountZohoSupportChat();
+      else closeZohoSupportChat();
     }
     window.addEventListener("mundoria:consent-updated", onConsentChange);
     return () => {
       active.current = false;
-      if (allowZoho) closeZohoSupportChat();
+      if (useZoho) closeZohoSupportChat();
       window.removeEventListener("mundoria:consent-updated", onConsentChange);
     };
-  }, [allowZoho]);
+  }, [useZoho]);
 
   useEffect(() => {
     if (request) return;
@@ -68,6 +76,8 @@ export function SupportMessengerLauncher({ allowZoho = false }: { allowZoho?: bo
     window.addEventListener(SUPPORT_MESSENGER_EVENT, onOpen);
     return () => window.removeEventListener(SUPPORT_MESSENGER_EVENT, onOpen);
   }, [launch, request]);
+
+  if (useZoho) return null;
 
   if (request) {
     return <SupportMessengerWidget initialOpen initialTab={request.tab} />;
