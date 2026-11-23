@@ -40,6 +40,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import { upsertZohoLead } from "@/lib/zoho/crm";
 import { upsertZohoCandidate } from "@/lib/zoho/recruit";
+import { syncCleanerToRecruit } from "@/lib/zoho/recruit-sync";
 
 const requiredString = (label: string) =>
   z.string().trim().min(1, `${label} is required`);
@@ -889,7 +890,13 @@ export async function POST(request: Request) {
     Sentry.captureException(zohoError);
   }
   try {
-    await upsertZohoCandidate(zohoPerson, zohoEnrichment);
+    if (process.env.ZOHO_RECRUIT_PROFILE_SYNC_ENABLED === "true") {
+      const synced = await syncCleanerToRecruit(admin, user.id);
+      // Preserve the existing basic application handoff if richer field mapping fails.
+      if (synced.status === "failed") await upsertZohoCandidate(zohoPerson, zohoEnrichment);
+    } else {
+      await upsertZohoCandidate(zohoPerson, zohoEnrichment);
+    }
   } catch (zohoError) {
     Sentry.captureException(zohoError);
   }

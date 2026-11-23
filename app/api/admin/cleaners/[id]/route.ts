@@ -15,7 +15,8 @@ import {
   mergeVerificationFlags,
   reasonSuggestsUnreadableDoc,
 } from "@/lib/cleaner/onboarding-compliance";
-import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
+import { incompleteActivationRequirements } from "@/lib/zoho/recruit-mapping";
+import { syncCleanerToRecruit } from "@/lib/zoho/recruit-sync";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import {
   createInAppNotification,
@@ -100,7 +101,7 @@ export async function POST(
   const { data: current } = await auth.admin
     .from("cleaner_profiles")
     .select(
-      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,verification_flags",
+      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,insurance_expiry_date,skills_assessment_status,specialist_review_required,verification_flags",
     )
     .eq("id", params.id)
     .single();
@@ -121,73 +122,10 @@ export async function POST(
   }
 
   if (action === "approve") {
-    if (current?.interview_status !== "completed") {
+    const missing = incompleteActivationRequirements(current ?? {});
+    if (missing.length > 0) {
       return NextResponse.json(
-        {
-          error:
-            "Mark the onboarding call as completed before approving for live jobs.",
-        },
-        { status: 400 },
-      );
-    }
-    if (!current?.skills_exam_passed) {
-      return NextResponse.json(
-        { error: "Cleaner has not passed the skills exam." },
-        { status: 400 },
-      );
-    }
-    if (!current?.headshot_url) {
-      return NextResponse.json(
-        { error: "Cleaner has not uploaded a headshot." },
-        { status: 400 },
-      );
-    }
-    if (!current?.utr_number) {
-      return NextResponse.json(
-        { error: "Cleaner has not provided a UTR number." },
-        { status: 400 },
-      );
-    }
-
-    const pendingDocs: string[] = [];
-    const requireVerified = (
-      label: string,
-      status: string | null | undefined,
-      hasFile: boolean,
-    ) => {
-      if (!hasFile) return;
-      if (status !== "verified") pendingDocs.push(label);
-    };
-    requireVerified(
-      "Headshot",
-      current?.headshot_status,
-      Boolean(current?.headshot_url),
-    );
-    requireVerified(
-      "Government ID",
-      current?.id_document_status,
-      parseDocumentUrls(current?.id_document_url).some(Boolean),
-    );
-    requireVerified(
-      "DBS",
-      current?.dbs_document_status,
-      parseDocumentUrls(current?.dbs_document_url).some(Boolean),
-    );
-    requireVerified(
-      "UTR proof",
-      current?.utr_document_status,
-      Boolean(current?.utr_document_url),
-    );
-    requireVerified(
-      "Insurance",
-      current?.insurance_status,
-      Boolean(current?.insurance_certificate_url),
-    );
-    if (pendingDocs.length > 0) {
-      return NextResponse.json(
-        {
-          error: `Approve or reject each uploaded document first: ${pendingDocs.join(", ")}.`,
-        },
+        { error: `Complete these requirements before approving for live jobs: ${missing.join(", ")}.` },
         { status: 400 },
       );
     }
@@ -301,6 +239,7 @@ export async function POST(
       .update(updates)
       .eq("id", params.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    await syncCleanerToRecruit(auth.admin, params.id);
   }
 
   if (action === "approve" || action === "reject") {

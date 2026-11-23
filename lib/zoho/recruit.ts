@@ -125,7 +125,7 @@ async function getAccessToken(): Promise<CachedToken | null> {
   return cachedToken;
 }
 
-async function upsertCandidate(record: Record<string, unknown>) {
+async function upsertCandidate(record: Record<string, unknown>, extended = false) {
   const token = await getAccessToken();
   if (!token) return null;
 
@@ -134,7 +134,9 @@ async function upsertCandidate(record: Record<string, unknown>) {
     {
       body: JSON.stringify({
         data: [record],
-        duplicate_check_fields: ["Email"],
+        duplicate_check_fields: extended ? ["Mundoria_User_ID", "Email"] : ["Email"],
+        // Explicit opt-in after native workflows have been tested. Prevent duplicate applicant emails.
+        ...(extended ? { trigger: process.env.ZOHO_RECRUIT_TRIGGER_WORKFLOWS === "true" ? ["workflow"] : [] } : {}),
       }),
       headers: {
         Authorization: `Zoho-oauthtoken ${token.accessToken}`,
@@ -165,29 +167,34 @@ function identityRecord(person: ZohoCandidate) {
 export async function upsertZohoCandidate(
   person: ZohoCandidate,
   enrichment?: CandidateEnrichment,
+  fields?: Record<string, unknown>,
 ) {
-  if (!isZohoRecruitConfigured()) return;
+  if (!isZohoRecruitConfigured()) return { status: "skipped" as const };
   const email = person.email.trim().toLowerCase();
-  if (!maySyncZohoEmail(email)) return;
+  if (!maySyncZohoEmail(email)) return { status: "skipped" as const };
 
   const identity = identityRecord({ ...person, email });
   const withNotes = {
+    ...fields,
     ...identity,
     Additional_Info: additionalInfo({ ...person, email }, enrichment),
   };
 
   try {
-    let outcome = await upsertCandidate(withNotes);
+    let outcome = await upsertCandidate(withNotes, !!fields);
     if (
       outcome?.result.status === "error" &&
       outcome.result.details?.api_name === "Additional_Info"
     ) {
-      outcome = await upsertCandidate(identity);
+      outcome = await upsertCandidate({ ...fields, ...identity }, !!fields);
     }
     if (outcome && (!outcome.response.ok || outcome.result.status !== "success" || !outcome.result.details?.id)) {
       throw new Error(`Zoho Recruit Candidates upsert failed (${outcome.response.status}, ${zohoErrorCode(outcome.result.code)})`);
     }
+    if (!outcome) return { status: "skipped" as const };
+    return { status: "synced" as const, candidateId: outcome.result.details!.id! };
   } catch (error) {
     Sentry.captureException(error);
+    return { status: "failed" as const };
   }
 }
