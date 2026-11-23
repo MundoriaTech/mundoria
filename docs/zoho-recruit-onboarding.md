@@ -21,7 +21,7 @@ Native validation rules do not protect every API, import or workflow write. Do n
 
 1. Creating an email template displays “You have been temporarily restricted from Email Templates in Zoho Recruit” and requires one-time approval. No approval request or support email was sent.
 2. Workflow Rules remained an incomplete blank shell after one reload. No new workflow rule or scheduled reminder was enabled.
-3. The internal checklist read returned error 4834. Its generated `internal--zohorecruit` system connection was disconnected and requested `ZohoRecruit.modules.ALL`. This is broader than candidate read/update. Keep it disconnected unless the owner explicitly approves that scope, or use a separately approved least-privilege connection.
+3. The first internal checklist read returned error 4834 while its generated `internal--zohorecruit` system connection was disconnected. The owner subsequently explicitly approved the broader `ZohoRecruit.modules.ALL` scope. Native Zoho OAuth consent was completed and the connection was visibly Connected on 23 November. Post-connection runtime testing is still pending: candidate navigation timed out before a new internal no-email test record could be created, and the function was not executed after authorisation. Do not enable checklist workflows until the isolated tests below pass. No further approval is pending for this exact connection.
 
 No applicant messages should be enabled until these blockers and the staged tests below are resolved. The website's existing application acknowledgement, admin notification and document-rejection emails remain the current sender of those events.
 
@@ -68,7 +68,7 @@ Do not start reviewing the five website-owned document types solely in Recruit u
 - Ensure direct Supabase profile edits, document replacements and availability/service changes generate durable, deduplicated sync events. This PR handles the listed server routes only; it does not add database triggers, a queue consumer or automatic retries.
 - Implement version-aware Recruit → website review updates, retaining reviewer, decision time and document version, with idempotency and a manual activation action. Enforce all Recruit-only prerequisites server-side before website activation.
 - Backfill the four existing Recruit records only after manually matching their website IDs and application references. Do not guess identity or assign verified/active states from missing data.
-- Configure native checklist execution on relevant changes once the connection and Workflow Rules page work. Add expiry refresh without duplicate applicant emails.
+- Configure native checklist execution on relevant changes after the connected function passes its isolated tests and the Workflow Rules page works. Add expiry refresh without duplicate applicant emails.
 - Use one authoritative sender per event. Keep existing website notifications until their equivalent Recruit automation has passed the internal tests, then change ownership in one coordinated release.
 
 ## Vercel steps for the developer / owner
