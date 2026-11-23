@@ -19,7 +19,10 @@ declare global {
 }
 
 const widgetSrc = process.env.NEXT_PUBLIC_ZOHO_SALESIQ_WIDGET_SRC;
-let loading: Promise<void> | undefined;
+export const ZOHO_SALESIQ_READY_EVENT = "mundoria:salesiq-ready";
+let loading: Promise<boolean> | undefined;
+let ready = false;
+let wanted = false;
 
 function approvedScriptUrl() {
   if (!widgetSrc) return null;
@@ -37,7 +40,7 @@ function approvedScriptUrl() {
       return url.href;
     }
   } catch {
-    // Invalid install URL: public pages stay without a launcher.
+    // Invalid install URL: keep the original Mundoria messenger available.
   }
   return null;
 }
@@ -47,63 +50,80 @@ export function zohoSalesIqConfigured() {
 }
 
 function loadWidget(src: string) {
+  if (ready) return Promise.resolve(true);
   if (loading) return loading;
-  if (document.getElementById("zsiqscript")) return Promise.resolve();
 
-  loading = new Promise<void>((resolve) => {
-    const script = document.createElement("script");
-    const timeout = window.setTimeout(resolve, 3_500);
+  loading = new Promise<boolean>((resolve) => {
+    const existing = document.getElementById("zsiqscript") as HTMLScriptElement | null;
+    const script = existing ?? document.createElement("script");
     window.$zoho ??= {};
     window.$zoho.salesiq ??= {};
     window.$zoho.salesiq.ready = () => {
-      window.clearTimeout(timeout);
-      try {
-        window.$zoho?.salesiq?.tracking?.off?.();
-        window.$zoho?.salesiq?.floatbutton?.visible?.("show");
-      } catch {
-        // SalesIQ still owns the launcher once the script has loaded.
-      }
-      resolve();
+      ready = true;
+      syncVisibility();
+      resolve(true);
+      window.dispatchEvent(new Event(ZOHO_SALESIQ_READY_EVENT));
     };
     script.id = "zsiqscript";
     script.src = src;
     script.async = true;
     script.onerror = () => {
-      window.clearTimeout(timeout);
       script.remove();
       loading = undefined;
-      resolve();
+      resolve(false);
     };
-    document.body.appendChild(script);
+    if (!existing) document.body.appendChild(script);
   });
   return loading;
 }
 
-export function closeZohoSupportChat() {
+function syncVisibility() {
   const widget = window.$zoho?.salesiq;
   try {
     widget?.tracking?.off?.();
+    if (wanted && readConsent()?.analytics) {
+      widget?.floatbutton?.visible?.("show");
+      return Boolean(widget?.floatbutton?.visible);
+    }
     widget?.floatbutton?.visible?.("hide");
     (widget?.chatwindow ?? widget?.floatwindow)?.visible?.("hide");
   } catch {
     // The provider may still be loading, or already closed.
   }
+  return false;
+}
+
+export function closeZohoSupportChat() {
+  wanted = false;
+  syncVisibility();
+}
+
+/** A timeout leaves the single script loading; a late ready event restores the launcher. */
+function waitForWidget(pending: Promise<boolean>) {
+  return new Promise<boolean>((resolve) => {
+    const timeout = window.setTimeout(() => resolve(false), 8_000);
+    void pending.then((loaded) => {
+      window.clearTimeout(timeout);
+      resolve(loaded);
+    });
+  });
 }
 
 /** Load SalesIQ after statistics consent and leave its own launcher visible. */
 export async function mountZohoSupportChat() {
   const src = approvedScriptUrl();
-  if (!src || !readConsent()?.analytics) return false;
+  if (!src || !readConsent()?.analytics) {
+    closeZohoSupportChat();
+    return false;
+  }
+  wanted = true;
   try {
-    await loadWidget(src);
-    if (!readConsent()?.analytics) {
+    const loaded = await waitForWidget(loadWidget(src));
+    if (!wanted || !readConsent()?.analytics) {
       closeZohoSupportChat();
       return false;
     }
-    const widget = window.$zoho?.salesiq;
-    widget?.tracking?.off?.();
-    widget?.floatbutton?.visible?.("show");
-    return Boolean(widget?.floatbutton?.visible || widget?.chatwindow?.visible);
+    return loaded && syncVisibility();
   } catch {
     return false;
   }

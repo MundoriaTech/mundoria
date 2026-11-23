@@ -49,9 +49,11 @@ uses Vercel's `VERCEL_ENV=preview` system variable for the Preview checks.
 
 Enable only the rows for the features under test. Add the exact Preview URL
 to the Website channel's allowed URLs in SalesIQ. Turn off visitor tracking for
-the brand where supported. The launcher on public information pages loads
-SalesIQ after a click and statistics consent. The original Mundoria messenger
-serves checkout pages and acts as the fallback on public pages.
+the brand where supported. The shared launcher on existing marketing, Help,
+Mag, FAQ and booking pages loads SalesIQ after statistics consent and persists
+across navigation. Before consent, its button opens cookie preferences. The
+original Mundoria messenger is used only when SalesIQ is not configured. See
+[the widget rollout checks](./support-widget-rollout.md) for the navigation fix.
 
 Automatic deployments are disabled for this branch. In **Deployments**, open
 the three-dot menu next to the page heading, select **Create Deployment**, and
@@ -66,7 +68,7 @@ its Preview deployment. Share the Preview URL for verification.
 | Submit the callback form twice with one synthetic prospect | The website saves both requests. CRM has one lead with `New — Untouched`, one Sales task and the expected source. Change the status in CRM, then repeat the form. CRM keeps the salesperson's status. |
 | Create a customer account and submit a cleaner application using the test inbox | CRM receives the expected Contact or Lead and Recruit receives a Candidate with the application reference. Use separate test runs or reset only disposable test accounts as appropriate. Keep document uploads confined to the test database. |
 | Create a booking using Stripe test mode, then confirm a cleaner and secure the test payment | The two different CPaaS templates render the date in UK time. Check the Bookings agent log and the test inbox. From and Reply-To both show `bookings@notify.mundoria.co.uk`. |
-| Use public support chat on a fresh session with optional cookies declined, then allow statistics cookies and try again | The built-in messenger works with consent declined. After a fresh page load, the existing launcher opens the SalesIQ widget when consent and its URL are configured. Withdraw consent and check the widget closes. |
+| Use public support chat on a fresh session with optional cookies declined, then allow statistics cookies and try again | With consent declined, the support button opens cookie preferences without loading SalesIQ. Grant statistics consent and confirm the same native widget stays available across marketing, Help and booking pages without reloading. Withdraw consent and check the widget closes. |
 
 The callback is saved before CRM is contacted. The Preview form attempts eligible
 CRM sync immediately. In production the existing authenticated `run-outreach`

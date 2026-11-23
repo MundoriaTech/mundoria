@@ -9,6 +9,7 @@ import { FeedbackProvider } from "@/components/shared/feedback-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
 import { PageTransition } from "@/components/shared/page-transition";
+import { SupportMessengerProvider } from "@/components/support/support-messenger-launcher";
 import { ScrollToTopOnLoad } from "@/components/shared/scroll-to-top-on-load";
 import { sora } from "@/lib/fonts";
 import { getGtmId } from "@/lib/analytics/gtm";
@@ -93,7 +94,9 @@ export default function RootLayout({
             <AnalyticsProvider>
               <AuthHashHandler />
               <ScrollToTopOnLoad />
-              <PageTransition>{children}</PageTransition>
+              <SupportMessengerProvider>
+                <PageTransition>{children}</PageTransition>
+              </SupportMessengerProvider>
             </AnalyticsProvider>
           </FeedbackProvider>
         </ThemeProvider>

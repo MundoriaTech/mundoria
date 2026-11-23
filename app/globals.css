@@ -523,5 +523,15 @@
   html[data-sticky-book] .support-messenger-dock [role="dialog"] {
     max-height: calc(100dvh - 7.5rem - env(safe-area-inset-bottom, 0px));
   }
+
+  /* SalesIQ uses its own fixed elements outside the Mundoria messenger dock. */
+  html[data-sticky-book] #zsiq_float,
+  html[data-sticky-book] #zsiq_chat_wrap {
+    bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-sticky-book] #zsiq_chat_wrap {
+    max-height: calc(100dvh - 7.5rem - env(safe-area-inset-bottom, 0px));
+  }
 }
 
