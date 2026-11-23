@@ -889,7 +889,10 @@ export async function POST(request: Request) {
     Sentry.captureException(zohoError);
   }
   try {
-    await upsertZohoCandidate(zohoPerson, zohoEnrichment);
+    await upsertZohoCandidate(zohoPerson, {
+      ...zohoEnrichment,
+      interviewAt: value.interview_scheduled_at,
+    });
   } catch (zohoError) {
     Sentry.captureException(zohoError);
   }

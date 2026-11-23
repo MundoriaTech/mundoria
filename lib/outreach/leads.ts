@@ -2,8 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import { normalizeEmail, toE164 } from "@/lib/outreach/config";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { upsertZohoProspect } from "@/lib/zoho/crm";
-import { salesIntakeConfig } from "@/lib/zoho/sales-intake";
+import { markZohoEnquiryBooked, markZohoProspectOptOut } from "@/lib/zoho/sales-intake";
 
 export type LeadStatus = "new" | "contacted" | "engaged" | "booked" | "lost" | "unsubscribed";
 export type Channel = "email" | "sms" | "call";
@@ -123,7 +122,6 @@ export async function upsertLead(input: UpsertLeadInput): Promise<{ created: boo
     utm_campaign: input.utmCampaign,
     utm_source: input.utmSource,
   });
-  void syncLeadToZoho(lead);
   return { created: true, lead };
 }
 
@@ -176,7 +174,7 @@ export async function updateLead(
   if (event) {
     await logLeadEvent(lead.id, event.type, event.summary, event.payload ?? {}, event.actorId ?? null);
   }
-  if (patch.status && patch.status !== lead.status) void syncLeadToZoho(next, event?.summary);
+  if (patch.status === "booked" && lead.status !== "booked") await markZohoEnquiryBooked(lead.id);
   return next;
 }
 
@@ -254,6 +252,7 @@ export async function optOutLead(lead: LeadRow, channel: Channel | "all", reason
     allOut ? { do_not_contact: true, status: "unsubscribed" } : {},
     { summary: `Opted out (${channel}): ${reason}`, type: "lead.opt_out" },
   );
+  if (allOut || channel === "email") await markZohoProspectOptOut(lead.id, lead.email);
   if (allOut) {
     await createAdminClient()
       .from("outreach_enrollments")
@@ -266,20 +265,4 @@ export async function optOutLead(lead: LeadRow, channel: Channel | "all", reason
 
 export function leadName(lead: Pick<LeadRow, "first_name" | "last_name">) {
   return [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
-}
-
-async function syncLeadToZoho(lead: LeadRow, summary?: string) {
-  // When Sales owns the callback queue, the website must not overwrite its
-  // contact attempts or create a parallel prospect from an abandoned draft.
-  if (!lead.email || salesIntakeConfig()) return;
-  await upsertZohoProspect({
-    email: lead.email,
-    firstName: lead.first_name,
-    lastName: lead.last_name,
-    leadId: lead.id,
-    phone: lead.phone,
-    source: lead.source,
-    status: lead.status,
-    summary,
-  });
 }

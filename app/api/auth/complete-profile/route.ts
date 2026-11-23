@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { completeProfileSchema } from "@/lib/auth/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { syncProfileToZoho } from "@/lib/zoho/crm";
 
 export async function POST(request: Request) {
   const { user } = await getRequestUser(request);
@@ -33,6 +34,16 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  const { data: saved } = await admin
+    .from("profiles")
+    .select("email,role")
+    .eq("id", user.id)
+    .maybeSingle();
+  const email = saved?.email ?? user.email;
+  if (email && saved?.role) {
+    await syncProfileToZoho({ email, fullName: full_name, phone, role: saved.role, userId: user.id });
   }
 
   await trackUserActivity({

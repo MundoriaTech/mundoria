@@ -1,6 +1,12 @@
 import * as Sentry from "@sentry/nextjs";
 
 import { readZohoRecordResult, zohoErrorCode, zohoFetch, zohoOrigin } from "@/lib/zoho/http";
+import {
+  RECRUIT_LIFECYCLE,
+  RECRUIT_ORIGIN,
+  RECRUIT_SOURCE,
+  zohoDateTime,
+} from "@/lib/zoho/mapping";
 import { maySyncZohoEmail } from "@/lib/zoho/preview";
 
 type ZohoCandidate = {
@@ -11,8 +17,14 @@ type ZohoCandidate = {
 };
 
 type CandidateEnrichment = {
+  /** Cleaner account just created (sign-up or first OAuth sign-in). */
+  accountCreated?: boolean;
   applicationReference?: string;
   applicationSubmitted?: boolean;
+  /** Profile edit: send name/phone only, leave the hiring fields alone. */
+  identityOnly?: boolean;
+  /** Onboarding call booked in the application (ISO time). */
+  interviewAt?: string | null;
 };
 
 type CachedToken = {
@@ -155,8 +167,33 @@ function identityRecord(person: ZohoCandidate) {
     First_Name: firstName || undefined,
     Last_Name: lastName,
     Phone: person.phone?.trim() || undefined,
-    Source: "Mundoria",
   };
+}
+
+/**
+ * The org's own candidate fields (Mundoria_User_ID, lifecycle stage,
+ * application reference, onboarding call). Source and Origin are set only
+ * when the website is where the candidate came from.
+ */
+function hiringFields(person: ZohoCandidate, enrichment?: CandidateEnrichment) {
+  if (!enrichment || enrichment.identityOnly) return {};
+  const fields: Record<string, unknown> = {
+    Mundoria_User_ID: person.userId,
+    Origin: RECRUIT_ORIGIN,
+    Source: RECRUIT_SOURCE,
+  };
+  if (enrichment.applicationSubmitted) {
+    fields.Cleaner_Lifecycle_Stage = RECRUIT_LIFECYCLE.applicationSubmitted;
+    fields.Application_Submitted_At = zohoDateTime(Date.now());
+    if (enrichment.applicationReference) fields.Application_Reference = enrichment.applicationReference;
+    if (enrichment.interviewAt) {
+      fields.Onboarding_Call_At = zohoDateTime(enrichment.interviewAt);
+      fields.Onboarding_Call_Status = "Scheduled";
+    }
+  } else if (enrichment.accountCreated) {
+    fields.Cleaner_Lifecycle_Stage = RECRUIT_LIFECYCLE.accountCreated;
+  }
+  return fields;
 }
 
 /**
@@ -171,17 +208,21 @@ export async function upsertZohoCandidate(
   if (!maySyncZohoEmail(email)) return;
 
   const identity = identityRecord({ ...person, email });
-  const withNotes = {
-    ...identity,
-    Additional_Info: additionalInfo({ ...person, email }, enrichment),
-  };
+  const full = enrichment?.identityOnly
+    ? identity
+    : {
+        ...identity,
+        ...hiringFields({ ...person, email }, enrichment),
+        Additional_Info: additionalInfo({ ...person, email }, enrichment),
+      };
 
   try {
-    let outcome = await upsertCandidate(withNotes);
-    if (
-      outcome?.result.status === "error" &&
-      outcome.result.details?.api_name === "Additional_Info"
-    ) {
+    let outcome = await upsertCandidate(full);
+    // A field this org does not have (or a value it rejects) should not cost
+    // the candidate record: retry with the identity fields only.
+    const rejected = outcome?.result.details?.api_name;
+    if (outcome?.result.status === "error" && rejected && !(rejected in identity)) {
+      Sentry.captureMessage(`Zoho Recruit rejected candidate field ${rejected}`, "warning");
       outcome = await upsertCandidate(identity);
     }
     if (outcome && (!outcome.response.ok || outcome.result.status !== "success" || !outcome.result.details?.id)) {

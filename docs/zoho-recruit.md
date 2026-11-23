@@ -8,16 +8,16 @@ Recruit is the hiring record (Candidates). CRM is sales follow-up.
 
 ## Mapping
 
-| Mundoria | Zoho Recruit | Trigger |
+| Mundoria | Zoho Recruit Candidates | Values set |
 | --- | --- | --- |
-| Cleaner signup / OAuth | Candidates | Email/password signup; new OAuth profile |
-| Cleaner onboarding submit | Candidates (update) | Application submitted |
+| Cleaner sign-up / first OAuth sign-in | Upsert by Email | Source `CareerSite`, Origin `Applied`, `Mundoria_User_ID`, Cleaner Lifecycle Stage `Account Created` |
+| Application submitted | Same candidate | Lifecycle `Application Submitted`, `Application_Reference`, `Application_Submitted_At`, `Onboarding_Call_At` + Onboarding Call Status `Scheduled` |
+| Phone change (complete-profile, cleaner profile) | Same candidate | Name and phone only |
 
-Duplicate key: **Email** via Recruit Candidates upsert v2.
-
-Stock fields sent: Email, First_Name, Last_Name, Phone, Source (`Mundoria`).
-Mundoria user id and application reference go in `Additional_Info` when the
-org accepts that field; otherwise identity-only is retried.
+`Additional_Info` keeps the user id and reference as text. If the org rejects
+any of these fields, the upsert is retried with name, email and phone only
+and Sentry gets a warning naming the field. Document statuses, assessment and
+activation stay with the team in Recruit.
 
 ## Env vars (server-only)
 

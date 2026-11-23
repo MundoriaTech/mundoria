@@ -149,6 +149,8 @@ export function CleanerProfileForm({
 
     if (phoneChanged) {
       setProfile((current) => ({ ...current, phone_verified_at: null }));
+      // Keep the Zoho CRM lead and Recruit candidate phone in step.
+      void fetch("/api/profile/crm-sync", { method: "POST" }).catch(() => undefined);
     }
     setStatus(null);
     success({
