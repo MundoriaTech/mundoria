@@ -20,10 +20,24 @@ Native validation rules do not protect every API, import or workflow write. Do n
 ## Current Zoho blockers
 
 1. Creating an email template displays “You have been temporarily restricted from Email Templates in Zoho Recruit” and requires one-time approval. No approval request or support email was sent.
-2. Workflow Rules remained an incomplete blank shell after one reload. No new workflow rule or scheduled reminder was enabled.
-3. The first internal checklist read returned error 4834 while its generated `internal--zohorecruit` system connection was disconnected. The owner subsequently explicitly approved the broader `ZohoRecruit.modules.ALL` scope. Native Zoho OAuth consent was completed and the connection was visibly Connected on 23 November. Post-connection runtime testing is still pending: candidate navigation timed out before a new internal no-email test record could be created, and the function was not executed after authorisation. Do not enable checklist workflows until the isolated tests below pass. No further approval is pending for this exact connection.
+2. Workflow Rules now loads and lists the existing rules. Creating a new rule returns “You have been temporarily restricted from Workflow rules in Zoho Recruit” and requires a separate one-time approval. The attempted checklist rule was not created. No scheduled reminder or new alert was enabled.
+3. The earlier error 4834 is resolved: the owner approved `ZohoRecruit.modules.ALL`, the native system connection is Connected, and isolated checklist runtime tests passed on 23 November. No further access approval is pending for that connection. Permission to submit Zoho's built-in one-time requests for Email Templates and Workflow Rules is pending; neither request has been sent.
 
 No applicant messages should be enabled until these blockers and the staged tests below are resolved. The website's existing application acknowledgement, admin notification and document-rejection emails remain the current sender of those events.
+
+## Native checklist runtime verification
+
+The tested function body is preserved in [zoho-recruit-checklist.deluge](zoho-recruit-checklist.deluge). Paste it as the body of `mundoria_refresh_cleaner_checklist` with string argument `candidateId`; it is not a Vercel function or a scheduled task.
+
+- The first connected execution saved the right fields but its old success check misread Zoho's response shape. The function now verifies the three fields with a fresh read after an update, handles a blank expiry safely, and skips unchanged summaries.
+- An isolated no-email, Email Opt Out, Internal Test candidate was used. Uploaded ID plus DBS Under Review and rejected/missing remaining standard evidence produced **5 outstanding / 2 awaiting approval**, with the correct five-item list.
+- Seven standard approvals, yesterday's insurance expiry and required missing additional evidence produced **2 outstanding / 0 awaiting approval**: insurance and additional evidence.
+- With current insurance and every required item approved, the result was **0 outstanding / 0 awaiting approval**, and the prior list was cleared. These were dummy statuses, not approvals of actual evidence.
+- A repeated unchanged run returned “Checklist already current; no update needed.”
+- Turning off both automation flags made the function return “Checklist skipped: automation is not enabled for this record.”
+- The test candidate (`878039000000618277`) was moved to the Recycle Bin; the candidate view returned to the original four records. No applicant email, activation or real candidate change occurred.
+
+The function still has **no workflow or schedule association**. Date-only expiry refresh and end-to-end notification tests remain pending. These tests do not establish automated delivery or complete website synchronisation.
 
 ## Exact field contract
 
@@ -68,7 +82,7 @@ Do not start reviewing the five website-owned document types solely in Recruit u
 - Ensure direct Supabase profile edits, document replacements and availability/service changes generate durable, deduplicated sync events. This PR handles the listed server routes only; it does not add database triggers, a queue consumer or automatic retries.
 - Implement version-aware Recruit → website review updates, retaining reviewer, decision time and document version, with idempotency and a manual activation action. Enforce all Recruit-only prerequisites server-side before website activation.
 - Backfill the four existing Recruit records only after manually matching their website IDs and application references. Do not guess identity or assign verified/active states from missing data.
-- Configure native checklist execution on relevant changes after the connected function passes its isolated tests and the Workflow Rules page works. Add expiry refresh without duplicate applicant emails.
+- Configure native checklist execution on relevant changes after Zoho lifts its Workflow Rules creation restriction, then test the workflow trigger end to end. Add expiry refresh without duplicate applicant emails.
 - Use one authoritative sender per event. Keep existing website notifications until their equivalent Recruit automation has passed the internal tests, then change ownership in one coordinated release.
 
 ## Vercel steps for the developer / owner
