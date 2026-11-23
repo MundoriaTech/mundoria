@@ -101,6 +101,7 @@ export async function POST(request: Request) {
   if (!outreachEnabled()) {
     try {
       await notifyCallbackDeskChange({
+        isNew: true,
         lead: {
           email: parsed.data.email,
           first_name: firstName,
@@ -108,9 +109,9 @@ export async function POST(request: Request) {
           last_name: lastName,
           phone,
         },
-        summary: `New callback request${
-          parsed.data.availableIn10Min ? " (free in the next 10 minutes)" : ""
-        } from ${parsed.data.source?.trim() || "book-2-get-1-free"}`,
+        summary: parsed.data.availableIn10Min
+          ? "They said they can take a call in the next 10 minutes."
+          : "They asked us to call them back.",
       });
     } catch (notifyError) {
       Sentry.captureException(notifyError);

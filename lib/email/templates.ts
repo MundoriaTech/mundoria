@@ -568,39 +568,51 @@ function resolveTemplate(
       };
     case "admin.cleaner_application_submitted":
       return {
-        body: `${string(data.cleanerName) || "A cleaner"} submitted an application and booked an onboarding call. Review documents and readiness in admin before approving.`,
+        body: `${string(data.cleanerName) || "Someone"} has applied to clean with Mundoria and booked a 30-minute onboarding call. Please look at their documents before the call so you know if anything is missing (photo ID, DBS, insurance).`,
         buttonHref: string(data.cleanerUrl) || `${appUrl}/admin/cleaners`,
-        buttonLabel: "Review application",
+        buttonLabel: "Open their application",
         cards: [
-          { label: "Cleaner", value: data.cleanerName },
+          { label: "Name", value: data.cleanerName },
           { label: "Email", value: data.cleanerEmail },
           { label: "Onboarding call", value: data.interviewWhen },
-          { label: "Experience", value: data.yearsExperience },
-          { label: "Reference", value: data.applicationReference },
+          { label: "Years of experience", value: data.yearsExperience },
+          { label: "Application reference", value: data.applicationReference },
         ],
-        preview: "Cleaner application ready for admin review.",
-        subject: `Review cleaner application${data.cleanerName ? `: ${data.cleanerName}` : ""}`,
-        title: "Cleaner application to review",
+        intro: "Hi team,",
+        preview: "A cleaner has applied and booked an onboarding call.",
+        subject: `New cleaner application${data.cleanerName ? `: ${data.cleanerName}` : ""}`,
+        title: "A cleaner has applied",
         tone: "admin",
       };
     case "admin.user_signed_up": {
       const roleLabel =
-        string(data.role) === "cleaner" ? "Cleaner" : "Customer";
+        string(data.role) === "cleaner" ? "cleaner" : "customer";
       return {
         body:
-          roleLabel === "Cleaner"
-            ? `${string(data.userName) || "Someone"} created a cleaner account. Open the profile if you need to track onboarding progress.`
-            : `${string(data.userName) || "Someone"} created a customer account. Open the profile if you need account details or booking context.`,
+          roleLabel === "cleaner"
+            ? `${string(data.userName) || "Someone"} just created a cleaner account. They still need to finish onboarding (documents and an interview) before they can take jobs. Open their profile if you want to follow progress.`
+            : `${string(data.userName) || "Someone"} just created a customer account. No action is needed unless you want to say hello or they get in touch. Open their profile if you need their details.`,
         buttonHref: string(data.profileUrl) || `${appUrl}/admin/customers`,
-        buttonLabel: "Open in admin",
+        buttonLabel:
+          roleLabel === "cleaner" ? "Open their cleaner profile" : "Open their customer profile",
         cards: [
           { label: "Name", value: data.userName },
           { label: "Email", value: data.userEmail },
-          { label: "Role", value: roleLabel },
+          { label: "Account type", value: roleLabel === "cleaner" ? "Cleaner" : "Customer" },
         ],
-        preview: `New ${roleLabel.toLowerCase()} account created.`,
-        subject: `[Admin] New ${roleLabel.toLowerCase()}: ${string(data.userName) || string(data.userEmail) || "signup"}`,
-        title: `New ${roleLabel.toLowerCase()} account`,
+        intro: "Hi team,",
+        preview:
+          roleLabel === "cleaner"
+            ? "A new cleaner account was created."
+            : "A new customer account was created.",
+        subject:
+          roleLabel === "cleaner"
+            ? `New cleaner: ${string(data.userName) || string(data.userEmail) || "signup"}`
+            : `New customer: ${string(data.userName) || string(data.userEmail) || "signup"}`,
+        title:
+          roleLabel === "cleaner"
+            ? "A new cleaner signed up"
+            : "A new customer signed up",
         tone: "admin",
       };
     }
@@ -612,13 +624,16 @@ function resolveTemplate(
     case "admin.daily_summary":
     case "admin.alert":
       return {
-        body: string(data.body) || "An ops event needs attention in the Mundoria admin panel.",
+        body:
+          string(data.body) ||
+          "Something on Mundoria needs a look from the team. Open the link below for the full picture.",
         buttonHref: string(data.actionUrl) || `${appUrl}/admin/dashboard`,
-        buttonLabel: "Open admin panel",
+        buttonLabel: string(data.actionLabel) || "Open in Mundoria",
         cards: adminCards(data),
-        preview: string(data.preview) || "Mundoria admin alert.",
-        subject: string(data.subject) || `[Admin] ${string(data.title) || "Alert"}`,
-        title: string(data.title) || "Admin alert",
+        intro: string(data.intro) || "Hi team,",
+        preview: string(data.preview) || string(data.title) || "Mundoria team update",
+        subject: string(data.subject) || string(data.title) || "Mundoria team update",
+        title: string(data.title) || "Mundoria team update",
         tone: "admin",
       };
     case "outreach.message":
@@ -694,15 +709,21 @@ function renderBase(context: TemplateContext, data: Record<string, unknown>): Re
   const supportEmail = resolveSupportEmail();
   const isAdmin = context.tone === "admin";
   const hasIntro = Boolean(context.intro?.trim());
-  // Frameless letter: greeting leads; title only when there is no intro.
-  const lead = hasIntro
+  const titleBlock = `<h1 class="email-title" style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;font-weight:500;letter-spacing:-0.02em;color:#1c133b;">${escapeHtml(context.title)}</h1>`;
+  const introBlock = hasIntro
     ? `<p class="email-intro" style="margin:0 0 16px;font-size:18px;line-height:1.55;font-weight:600;color:#1c133b;">${escapeHtml(context.intro!)}</p>`
-    : `<h1 class="email-title" style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;font-weight:500;letter-spacing:-0.02em;color:#1c133b;">${escapeHtml(context.title)}</h1>`;
+    : "";
+  // Admin briefings keep a greeting and a clear heading. Customer mail uses one or the other.
+  const lead = isAdmin
+    ? `${introBlock}${titleBlock}`
+    : hasIntro
+      ? introBlock
+      : titleBlock;
   const signoff = isAdmin
-    ? `<p class="email-signoff" style="margin:28px 0 0;font-size:14px;line-height:1.6;color:#8a8498;">Mundoria ops alert · internal use only</p>`
+    ? `<p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">Thank you,<br>the Mundoria desk</p>`
     : `<p class="email-signoff" style="margin:28px 0 0;font-size:16px;line-height:1.6;color:#1c133b;">See you soon, the Mundoria team</p>`;
   const footerPrimary = isAdmin
-    ? `<p style="margin:0 0 14px;">Review this in the <a href="${escapeAttribute(appUrl)}/admin/dashboard" style="color:#b8894e;font-weight:600;text-decoration:underline;">admin panel</a>. Do not forward to customers.</p>`
+    ? `<p style="margin:0 0 14px;">This note is for the Mundoria team. Please don’t forward it to customers. You can also find it in the <a href="${escapeAttribute(appUrl)}/admin/dashboard" style="color:#b8894e;font-weight:600;text-decoration:underline;">admin home</a>.</p>`
     : `<p style="margin:0 0 14px;">Questions? Write to us at <a href="mailto:${escapeAttribute(supportEmail)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">${escapeHtml(supportEmail)}</a> or visit <a href="${escapeAttribute(appUrl)}" style="color:#b8894e;font-weight:600;text-decoration:underline;">mundoria.co.uk</a>.</p>`;
   const footerSocial = isAdmin ? "" : renderSocialLinks();
   const footerLegal = isAdmin
@@ -926,11 +947,11 @@ function renderText(
       (link) => `${link.label}: ${link.href}`,
     ),
     isAdmin
-      ? "Mundoria ops alert · internal use only"
+      ? "Thank you, the Mundoria desk"
       : "See you soon, the Mundoria team",
     context.unsubscribeUrl ? `Unsubscribe: ${context.unsubscribeUrl}` : "",
     isAdmin
-      ? `Review in admin: ${appUrl}/admin/dashboard · Do not forward to customers.`
+      ? `This note is for the Mundoria team. Please don’t forward it to customers. Admin home: ${appUrl}/admin/dashboard`
       : `Questions? ${supportEmail}`,
     isAdmin ? "" : "Follow us: Facebook, Instagram, TikTok, LinkedIn",
     isAdmin
@@ -965,13 +986,18 @@ function disputeCards(data: Record<string, unknown>) {
 }
 
 function adminCards(data: Record<string, unknown>) {
+  if (Array.isArray(data.cards)) {
+    return data.cards as Array<{ label: string; value?: unknown }>;
+  }
   return [
-    { label: "Type", value: data.type },
-    { label: "Booking ID", value: data.bookingId },
-    { label: "Cleaner", value: data.cleanerName },
+    { label: "Name", value: data.customerName ?? data.cleanerName ?? data.userName ?? data.name },
     { label: "Customer", value: data.customerName },
+    { label: "Cleaner", value: data.cleanerName },
+    { label: "Email", value: data.email ?? data.userEmail ?? data.cleanerEmail },
+    { label: "Phone", value: data.phone },
+    { label: "When", value: data.scheduledDate ?? data.when },
+    { label: "Time", value: data.scheduledTime ?? data.time },
     { label: "Amount", value: data.amount },
-    { label: "Created", value: data.createdAt },
   ];
 }
 

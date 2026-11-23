@@ -113,8 +113,8 @@ export async function POST(request: Request) {
           .eq("payment_status", "unpaid");
         await alertAdmins(
           "payment_failed",
-          "Customer payment failed",
-          `PaymentIntent ${intent.id} failed.`,
+          "A customer payment failed",
+          "The customer’s card was declined or could not be charged. Please open the booking and follow up with them.",
           {
             booking_id: booking?.id,
             payment_intent_id: intent.id,
@@ -134,8 +134,8 @@ export async function POST(request: Request) {
       }
       await alertAdmins(
         "payout_failed",
-        "Cleaner payout failed",
-        `Stripe payout ${payout.id} failed.`,
+        "A cleaner payout failed",
+        "Stripe could not send this cleaner their earnings. Please check payouts and the cleaner’s bank details.",
         { stripe_payout_id: payout.id },
       );
       break;

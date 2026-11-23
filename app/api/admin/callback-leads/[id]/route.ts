@@ -3,8 +3,11 @@ import { z } from "zod";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 import {
+  CALLBACK_AREA_LABELS,
   CALLBACK_AREAS,
+  CALLBACK_CALL_LABELS,
   CALLBACK_CALL_STATUSES,
+  CALLBACK_OUTCOME_LABELS,
   CALLBACK_OUTCOMES,
   parseArea,
   parseCallStatus,
@@ -155,12 +158,18 @@ export async function PATCH(
   if (important) {
     const bits = [
       callChanged
-        ? `Call: ${parseCallStatus(saved.call_status).replace(/_/g, " ")}`
+        ? `Call status is now “${CALLBACK_CALL_LABELS[parseCallStatus(saved.call_status)]}”`
         : null,
       outcomeChanged
-        ? `Outcome: ${parseOutcome(saved.outcome)?.replace(/_/g, " ") ?? "cleared"}`
+        ? `Outcome is now “${
+            parseOutcome(saved.outcome)
+              ? CALLBACK_OUTCOME_LABELS[parseOutcome(saved.outcome)!]
+              : "cleared"
+          }”`
         : null,
-      areaChanged ? `Area: ${parseArea(saved.area).replace(/_/g, " ")}` : null,
+      areaChanged
+        ? `Area is now “${CALLBACK_AREA_LABELS[parseArea(saved.area)]}”`
+        : null,
     ].filter(Boolean);
     void notifyCallbackDeskChange({
       actorEmail: auth.profile.email,

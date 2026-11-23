@@ -230,9 +230,15 @@ export async function alertStaffAboutLead(lead: LeadRow, ctx: JourneyContext) {
   const link = `${appUrl()}/admin/leads/${lead.id}`;
   await alertAdmins(
     "lead.callback_request",
-    `Callback request: ${name}`,
-    `${name} ${when}. Phone ${lead.phone ?? "not given"}, email ${lead.email ?? "not given"}. Source: ${lead.source}.`,
-    { leadId: lead.id, link },
+    `${name} wants a call`,
+    `${name} ${when}.`,
+    {
+      email: lead.email,
+      leadId: lead.id,
+      link,
+      name,
+      phone: lead.phone,
+    },
   );
   const onCall = onCallPhone();
   if (onCall) {
@@ -360,8 +366,8 @@ export async function syncDraftLeads(limit = 50) {
       enrolled += 1;
       await alertAdmins(
         "booking_draft.abandoned",
-        `Unfinished booking: ${email}`,
-        `${email} started a booking and has not finished. Follow-up is queued.`,
+        `${email} didn’t finish booking`,
+        `${email} started a booking and left before paying. We will send them a reminder.`,
         {
           actionUrl: `${appUrl()}/admin/abandoned-bookings`,
           email,

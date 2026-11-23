@@ -91,9 +91,9 @@ export async function generateWeeklyReport(now = new Date()) {
   const summary =
     (await writeWeeklySummary(metrics)) ??
     [
-      `${current.leads_new} new leads and ${current.bookings_won} bookings won (${current.conversion_rate_percent}% conversion). The week before: ${previous.leads_new} leads, ${previous.bookings_won} bookings.`,
-      `Messages sent: ${JSON.stringify(current.messages_sent_by_channel)}. AI calls: ${current.calls_placed} placed, ${current.calls_connected} connected. Replies: ${current.replies_received}.`,
-      `${current.leads_waiting_for_a_person_now} leads are waiting for a person in Admin › Leads.`,
+      `Last week we had ${current.leads_new} new people interested in Mundoria, and ${current.bookings_won} of them booked (${current.conversion_rate_percent}% of new leads). The week before that: ${previous.leads_new} new people and ${previous.bookings_won} bookings.`,
+      `We placed ${current.calls_placed} calls and spoke to someone on ${current.calls_connected} of them. ${current.replies_received} people replied to our messages.`,
+      `${current.leads_waiting_for_a_person_now} people are waiting for a member of the team. Please work through them in Leads.`,
     ].join("\n\n");
 
   const { data: row } = await admin
@@ -116,14 +116,18 @@ export async function generateWeeklyReport(now = new Date()) {
         actionLabel: "Open the full report",
         actionUrl: `${appUrl()}/admin/leads/reports`,
         body: summary,
-        "Bookings won": current.bookings_won,
-        "New leads": current.leads_new,
-        "Waiting for a person": current.leads_waiting_for_a_person_now,
-        title: `Lead report: ${range}`,
+        cards: [
+          { label: "New people interested", value: current.leads_new },
+          { label: "Bookings last week", value: current.bookings_won },
+          { label: "Waiting for a person", value: current.leads_waiting_for_a_person_now },
+        ],
+        intro: "Hi team,",
+        preview: `How last week went (${range})`,
+        title: `How last week went (${range})`,
         tone: "admin",
       },
-      subject: `Mundoria lead report: ${range}`,
-      template: "system.generic",
+      subject: `How last week went (${range})`,
+      template: "admin.alert",
       to: Array.from(new Set(recipients)),
     });
   }

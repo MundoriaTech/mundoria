@@ -137,14 +137,15 @@ export async function POST(request: Request) {
   // Notify admins; a failure here must not lose the saved report.
   try {
     const cleanerName = profile.full_name?.trim() || "A cleaner";
-    const severityLabel =
+    const title =
       input.severity === "emergency"
-        ? "Emergency"
+        ? "A cleaner reported an emergency"
         : input.severity === "urgent"
-          ? "Urgent"
-          : "New";
-    const title = `${severityLabel} cleaner incident`;
-    const body = `${cleanerName}: ${input.title}`.slice(0, 180);
+          ? "A cleaner reported something urgent"
+          : "A cleaner reported an incident";
+    const body =
+      `${cleanerName} reported: ${input.title}. Please read the report and follow up.`
+        .slice(0, 280);
     const data = {
       booking_id: incident.booking_id,
       category: incident.category,

@@ -103,9 +103,15 @@ export async function validateBookingGeofence({
       .eq("id", bookingId);
     await alertAdmins(
       "geofence_failed",
-      `${action === "checkin" ? "Check-in" : "Check-out"} needs review`,
-      `Cleaner was ${Math.round(distance)}m from the booking address.`,
-      { action, booking_id: bookingId, distance_metres: Math.round(distance) },
+      action === "checkin"
+        ? "A cleaner checked in away from the home"
+        : "A cleaner checked out away from the home",
+      `Their phone put them about ${Math.round(distance)} metres from the booking address. That can be a GPS glitch, or they may not be at the right place.`,
+      {
+        booking_id: bookingId,
+        "How they marked it": action === "checkin" ? "Arrived" : "Finished",
+        "Rough distance": `About ${Math.round(distance)} metres`,
+      },
     );
     return { distance, radius, valid: false as const };
   }
@@ -152,16 +158,16 @@ export async function validateBookingGeofence({
       } catch {
         await alertAdmins(
           "payment_failed",
-          "Could not schedule next-day capture",
-          `Checkout succeeded but capture scheduling failed for ${bookingId}.`,
+          "The clean finished but we could not set up the charge",
+          "The cleaner marked the job complete, but taking payment the next day could not be set up. Please open the booking and follow up so the customer is still charged.",
           { booking_id: bookingId },
         );
       }
     } else if (booking.payment_status === "unpaid") {
       await alertAdmins(
         "payment_failed",
-        "Checkout without payment hold",
-        `Booking ${bookingId} checked out while payment was still unpaid.`,
+        "A clean finished before payment was set up",
+        "The cleaner marked the job complete, but we still do not have a payment hold on the customer’s card. Please open the booking and sort payment.",
         { booking_id: bookingId },
       );
     }

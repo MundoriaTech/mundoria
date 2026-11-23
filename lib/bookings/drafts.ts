@@ -248,8 +248,8 @@ export async function processAbandonedBookingReminders(limit = 40) {
     if (reminderCount === 0) {
       await alertAdmins(
         "booking_draft.abandoned",
-        `Unfinished booking: ${row.email}`,
-        `${row.email} started a booking and has not finished. First reminder sent.`,
+        `${row.email} didn’t finish booking`,
+        `${row.email} started a booking and left before paying. We have sent them a reminder to finish.`,
         {
           actionUrl: `${appUrl()}/admin/abandoned-bookings`,
           email: row.email,

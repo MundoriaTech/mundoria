@@ -186,8 +186,8 @@ async function handOver(lead: LeadRow, reason: string, text: string) {
   );
   await alertAdmins(
     "lead.needs_human",
-    `Lead needs a reply: ${leadName(lead) || lead.email || lead.phone}`,
-    `${reason}. They wrote: "${text.slice(0, 280)}"`,
+    `${leadName(lead) || lead.email || lead.phone || "Someone"} needs a reply`,
+    `${reason}. They wrote: “${text.slice(0, 280)}”`,
     { leadId: lead.id, link: `${appUrl()}/admin/leads/${lead.id}` },
   );
 }

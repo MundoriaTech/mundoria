@@ -40,8 +40,8 @@ export async function POST() {
       await auth.admin.from("payouts").update({ status: "failed" }).eq("id", payout.id);
       await alertAdmins(
         "payout_failed",
-        "Cleaner transfer failed",
-        `Payout ${payout.id.slice(0, 8)} could not be transferred to Stripe.`,
+        "A cleaner could not be paid",
+        "We could not send this payout to the cleaner’s Stripe account. Please try again from Payouts, or check their payout setup.",
         { error: message, payout_id: payout.id },
       );
       results.push({

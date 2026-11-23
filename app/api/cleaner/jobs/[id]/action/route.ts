@@ -130,9 +130,14 @@ export async function POST(
       .eq("id", params.id);
     await alertAdmins(
       "geofence_override",
-      "Manual location review requested",
-      `Cleaner requested a ${eventType} override from ${Math.round(distance)}m away.`,
-      { booking_id: params.id, cleaner_id: user.id, event_type: eventType },
+      eventType === "checkin"
+        ? "A cleaner asked you to accept their arrival"
+        : "A cleaner asked you to accept that they have finished",
+      `Their phone put them about ${Math.round(distance)} metres from the home. Please decide whether to accept this or call them first.`,
+      {
+        booking_id: params.id,
+        "Rough distance": `About ${Math.round(distance)} metres`,
+      },
     );
   }
   return NextResponse.json({

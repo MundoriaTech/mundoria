@@ -319,11 +319,15 @@ export async function runMatchingEngine(
       .eq("id", bookingId);
     await alertAdmins(
       "matching_failed",
-      "No cleaner available",
-      `Booking ${bookingId.slice(0, 8)} remains unmatched (${formatServiceName(booking.service_type)} · ${booking.scheduled_date} ${booking.scheduled_start_time} · ${booking.address.postcode}). Open Admin → Bookings to rematch.`,
+      "We could not find a cleaner for a booking",
+      `Nobody was available for this ${formatServiceName(booking.service_type)} visit. Please assign someone by hand.`,
       {
         booking_id: bookingId,
-        bookingUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin/bookings`,
+        bookingUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin/matching`,
+        postcode: booking.address.postcode,
+        scheduledDate: booking.scheduled_date,
+        scheduledTime: booking.scheduled_start_time,
+        serviceName: formatServiceName(booking.service_type),
       },
     );
     return { considered, matched: false as const };

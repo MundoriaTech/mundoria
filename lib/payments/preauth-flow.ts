@@ -833,7 +833,7 @@ export async function cancelUnpaidAwaitingPayment(
 
   await alertAdmins(
     "payment_failed",
-    "Booking cancelled after payment authorisation window",
+    "A booking was cancelled because payment could not be authorised",
     reason,
     { booking_id: bookingId },
   );

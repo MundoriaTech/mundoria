@@ -60,9 +60,9 @@ export async function GET(request: Request) {
       user_id: cleaner.id,
     });
     await admin.from("admin_alert_queue").insert({
-      body: `${name}'s Public Liability insurance expired on ${cleaner.insurance_expiry_date}. They are excluded from matching until renewed.`,
-      data: { cleaner_id: cleaner.id },
-      title: "Cleaner insurance expired",
+      body: `${name}’s public liability insurance ran out on ${cleaner.insurance_expiry_date}. They will not be offered new jobs until a new certificate is checked.`,
+      data: { cleanerName: name, cleaner_id: cleaner.id, name },
+      title: "A cleaner’s insurance has expired",
       type: "insurance_expired",
     });
 

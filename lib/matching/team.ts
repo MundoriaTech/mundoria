@@ -78,12 +78,11 @@ export async function offerTeamSlots({
 
   await alertAdmins(
     "multi_cleaner_job",
-    "Multi-cleaner office job, team slots open",
-    `Booking ${bookingId.slice(0, 8)} needs ${stillOpen} more cleaner(s). Primary matched; secondaries invited to claim.`,
+    "An office job still needs more cleaners",
+    `The first cleaner is assigned. This visit still needs ${stillOpen} more cleaner${stillOpen === 1 ? "" : "s"}.`,
     {
-      allocated_cleaners: allocatedCleaners,
       booking_id: bookingId,
-      open_slots: stillOpen,
+      "Still needed": stillOpen,
     },
   );
 

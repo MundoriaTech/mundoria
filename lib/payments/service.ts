@@ -159,8 +159,10 @@ export async function captureBookingPayment(bookingId: string) {
   } catch (error) {
     await alertAdmins(
       "payout_failed",
-      "Cleaner payout was not created",
-      error instanceof Error ? error.message : "Payout scheduling failed.",
+      "A cleaner could not be paid",
+      error instanceof Error
+        ? `We could not set up this cleaner’s payout. ${error.message}`
+        : "We could not set up this cleaner’s payout.",
       { booking_id: bookingId },
     );
   }

@@ -25,8 +25,8 @@ export async function GET(request: Request) {
       await admin.from("payouts").update({ status: "failed" }).eq("id", payout.id);
       await alertAdmins(
         "payout_failed",
-        "Cleaner payout failed",
-        `Scheduled payout ${payout.id.slice(0, 8)} could not be processed.`,
+        "A scheduled cleaner payout failed",
+        "A payout we tried to send automatically did not go through. Please check Payouts and the cleaner’s bank details.",
         {
           error: error instanceof Error ? error.message : "Transfer failed",
           payout_id: payout.id,

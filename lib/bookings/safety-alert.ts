@@ -124,8 +124,8 @@ export async function createSafetyAlert({
 
   await alertAdmins(
     "sos",
-    "SAFETY ALERT",
-    `${raisedByRole} raised a safety alert on booking #${shortId}: ${reasonLabel}. ${adminHref}`,
+    "Safety alert: please look at this now",
+    `A ${raisedByRole} raised a safety alert: ${reasonLabel}. Please open this straight away.`,
     {
       alert_id: alert.id,
       booking_id: bookingId,
@@ -216,8 +216,8 @@ export async function withdrawSafetyAlert({
 
   await alertAdmins(
     "sos",
-    "Safety alert withdrawn",
-    `The raiser withdrew safety alert ${alertId.slice(0, 8)} on booking ${alert.booking_id.slice(0, 8)}. Hold remains until ops clear it.`,
+    "A safety alert was withdrawn",
+    "The person who raised the safety alert has withdrawn it. Please still check the booking and only lift the hold if you are sure it is safe to continue.",
     { alert_id: alertId, booking_id: alert.booking_id },
   );
 

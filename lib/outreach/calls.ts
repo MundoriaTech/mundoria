@@ -241,8 +241,9 @@ export async function handleVapiEvent(body: { message?: VapiMessage }) {
       });
       await alertAdmins(
         "lead.needs_human",
-        `Lead needs a person: ${name}`,
-        analysis.summary ?? "The AI call ended with a request for the team.",
+        `${name} needs a person to call them`,
+        analysis.summary ??
+          "The automated call ended and they still need someone from the team.",
         { leadId: lead.id, link: `${appUrl()}/admin/leads/${lead.id}` },
       );
       break;

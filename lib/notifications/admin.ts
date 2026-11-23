@@ -1,8 +1,9 @@
-import { resolveAdminNotificationEmail } from "@/lib/email/send-email";
+import { composeAdminAlertEmail } from "@/lib/email/admin-alert";
 import {
-  sendEmail,
-  sendPushNotification,
-} from "@/lib/notifications/send";
+  resolveAdminNotificationEmail,
+  sendBrandedEmail,
+} from "@/lib/email/send-email";
+import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function alertAdmins(
@@ -17,20 +18,34 @@ export async function alertAdmins(
     .select("id,email")
     .eq("role", "admin");
 
+  const briefing = composeAdminAlertEmail(type, title, body, data);
+
   const sent = new Set<string>();
   await Promise.all(
     (admins ?? []).flatMap((recipient) => {
       const address = recipient.email?.trim().toLowerCase();
       if (address) sent.add(address);
       return [
-        sendPushNotification(recipient.id, title, body, data),
-        sendEmail(recipient.email, title, type, data),
+        sendPushNotification(recipient.id, briefing.title, body, data),
+        address
+          ? sendBrandedEmail({
+              data: briefing,
+              subject: briefing.subject,
+              template: "admin.alert",
+              to: address,
+            })
+          : Promise.resolve(false),
       ];
     }),
   );
 
   const ops = resolveAdminNotificationEmail().toLowerCase();
   if (!sent.has(ops)) {
-    await sendEmail(ops, title, type, data);
+    await sendBrandedEmail({
+      data: briefing,
+      subject: briefing.subject,
+      template: "admin.alert",
+      to: ops,
+    });
   }
 }

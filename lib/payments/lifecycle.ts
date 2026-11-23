@@ -519,8 +519,10 @@ export async function processDueCaptures(limit = 50) {
       failures.push(booking.id);
       await alertAdmins(
         "payment_failed",
-        "Scheduled payment capture failed",
-        error instanceof Error ? error.message : "Capture failed.",
+        "We could not take payment after a clean",
+        error instanceof Error
+          ? `The customer’s card could not be charged after the visit. ${error.message}`
+          : "The customer’s card could not be charged after the visit.",
         { booking_id: booking.id },
       );
     }
@@ -583,7 +585,7 @@ export async function markPreauthFailure(
     );
     await alertAdmins(
       "payment_failed",
-      "Pre-authorisation failed during active visit",
+      "Payment failed while a clean was in progress",
       reason,
       { booking_id: bookingId },
     );
@@ -699,7 +701,7 @@ export async function markPreauthFailure(
 
   await alertAdmins(
     "payment_failed",
-    "Booking cancelled after pre-authorisation failure",
+    "A booking was cancelled because the card could not be held",
     reason,
     { booking_id: bookingId },
   );

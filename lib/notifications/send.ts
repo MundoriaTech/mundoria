@@ -1,5 +1,6 @@
 import twilio from "twilio";
 
+import { composeAdminAlertEmail } from "@/lib/email/admin-alert";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -88,17 +89,16 @@ export async function sendEmail(
   templateName: string,
   data: Record<string, unknown> = {},
 ) {
-  return sendBrandedEmail({
-    data: {
-      ...data,
-      subject,
-      templateName,
-      title: subject,
-      tone: "admin",
-      type: templateName,
-    },
+  const briefing = composeAdminAlertEmail(
+    templateName,
     subject,
-    template: "system.generic",
+    typeof data.body === "string" ? data.body : subject,
+    data,
+  );
+  return sendBrandedEmail({
+    data: briefing,
+    subject: briefing.subject,
+    template: "admin.alert",
     to,
   });
 }

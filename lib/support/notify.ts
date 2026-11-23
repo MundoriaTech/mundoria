@@ -9,8 +9,8 @@ export async function notifyAdminsOfSupportMessage({
   preview: string;
 }) {
   const admin = createAdminClient();
-  const title = "New support message";
-  const body = preview.slice(0, 180);
+  const title = "A visitor sent a support message";
+  const body = `They wrote: “${preview.slice(0, 180)}”`;
   const data = { conversation_id: conversationId, entity_id: conversationId };
 
   const { data: admins } = await admin

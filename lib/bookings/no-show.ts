@@ -46,8 +46,8 @@ export async function handleNoShow(bookingId: string) {
   await Promise.all([
     alertAdmins(
       "cleaner_no_show",
-      "Cleaner no-show",
-      `Booking ${bookingId.slice(0, 8)} needs a replacement.`,
+      "A cleaner did not arrive",
+      "The assigned cleaner did not show up. Please find a replacement and tell the customer what will happen.",
       { booking_id: bookingId, cleaner_id: cleanerId },
     ),
     sendPushNotification(

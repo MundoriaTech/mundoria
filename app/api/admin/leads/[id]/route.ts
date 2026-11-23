@@ -87,15 +87,27 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     input.status === "unsubscribed" ||
     input.doNotContact === true;
   if (important) {
-    const who = leadName(next) || next.email || next.phone || "Lead";
+    const who = leadName(next) || next.email || next.phone || "This person";
     const summary = input.doNotContact
-      ? "Do not contact"
-      : `Status: ${input.status}`;
+      ? `${who} should not be contacted again.`
+      : input.status === "booked"
+        ? `${who} has booked.`
+        : input.status === "lost"
+          ? `${who} is marked as not going ahead.`
+          : input.status === "unsubscribed"
+            ? `${who} has unsubscribed.`
+            : `${who} was updated.`;
     void alertAdmins(
       "lead.updated",
-      `Lead update: ${who}`,
-      `${summary} (${auth.profile.full_name ?? "admin"}). ${next.email ?? ""} ${next.phone ?? ""}`.trim(),
-      { actionUrl: `${appUrl()}/admin/leads/${lead.id}`, leadId: lead.id },
+      `${who} was updated`,
+      `${summary} This was changed by ${auth.profile.full_name ?? "the team"}.`,
+      {
+        actionUrl: `${appUrl()}/admin/leads/${lead.id}`,
+        email: next.email,
+        leadId: lead.id,
+        name: who,
+        phone: next.phone,
+      },
     );
   }
 

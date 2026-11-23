@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { composeAdminAlertEmail } from "@/lib/email/admin-alert";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { sendOneSignalNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -37,17 +38,17 @@ export async function GET(request: Request) {
         });
       }
       if (preferences.email !== false && process.env.RESEND_API_KEY) {
-        await sendBrandedEmail({
-          data: {
-            actionUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin}/admin/dashboard`,
-            body: alert.body,
-            createdAt: alert.created_at,
-            subject: `[Mundoria] ${alert.title}`,
-            title: alert.title,
-            type: alert.type,
-            ...(alert.data as Record<string, unknown> | null),
+        const briefing = composeAdminAlertEmail(
+          String(alert.type ?? "admin.alert"),
+          String(alert.title ?? "Mundoria team update"),
+          String(alert.body ?? ""),
+          {
+            ...((alert.data as Record<string, unknown> | null) ?? {}),
           },
-          subject: `[Mundoria] ${alert.title}`,
+        );
+        await sendBrandedEmail({
+          data: briefing,
+          subject: briefing.subject,
           template: "admin.alert",
           to: recipient.email,
         });

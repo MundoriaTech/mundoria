@@ -809,9 +809,9 @@ export async function POST(request: Request) {
     Sentry.captureException(pushError);
   }
   await admin.from("admin_alert_queue").insert({
-    body: `${value.full_name} booked a 30-minute onboarding call for ${interviewWhen}.`,
-    data: { cleaner_id: user.id },
-    title: "New cleaner application",
+    body: `${value.full_name} applied to clean with Mundoria and booked a 30-minute onboarding call for ${interviewWhen}. Please review their documents before the call.`,
+    data: { cleanerName: value.full_name, cleaner_id: user.id, name: value.full_name },
+    title: "A cleaner has applied",
     type: "cleaner_application",
   });
 
