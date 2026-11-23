@@ -111,12 +111,17 @@ export function CallbackLeadDesk({ row }: { row: CallbackLeadRow }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [notes, setNotes] = useState(row.notes ?? "");
   const [town, setTown] = useState(row.town ?? "");
+  const [storedNotes, setStoredNotes] = useState(row.notes ?? "");
+  const [storedTown, setStoredTown] = useState(row.town ?? "");
+  const textDirty = storedTown !== town || storedNotes !== notes;
 
-  async function save(patch: Record<string, unknown>) {
+  async function save(patch: Record<string, unknown>, textFields = false) {
     setBusy(true);
     setError(null);
+    if (textFields) setSaved(false);
     try {
       const response = await fetch(`/api/admin/callback-leads/${row.id}`, {
         body: JSON.stringify(patch),
@@ -130,10 +135,19 @@ export function CallbackLeadDesk({ row }: { row: CallbackLeadRow }) {
         setError(result.error ?? "Could not save.");
         return;
       }
+      if (textFields) {
+        setStoredTown(town);
+        setStoredNotes(notes);
+        setSaved(true);
+      }
       router.refresh();
     } finally {
       setBusy(false);
     }
+  }
+
+  function saveTextFields() {
+    void save({ notes, town }, true);
   }
 
   const when = new Date(row.created_at).toLocaleString("en-GB", {
@@ -217,10 +231,10 @@ export function CallbackLeadDesk({ row }: { row: CallbackLeadRow }) {
           <input
             className={fieldClass}
             disabled={busy}
-            onBlur={() => {
-              if ((row.town ?? "") !== town) void save({ town });
+            onChange={(event) => {
+              setSaved(false);
+              setTown(event.target.value);
             }}
-            onChange={(event) => setTown(event.target.value)}
             placeholder="Lincoln, Bromsgrove…"
             value={town}
           />
@@ -232,14 +246,28 @@ export function CallbackLeadDesk({ row }: { row: CallbackLeadRow }) {
           <textarea
             className="min-h-[88px] w-full rounded-xl border border-[#E1E1EA] bg-white px-3 py-2.5 text-[15px] text-[#1c133b] outline-none focus:border-[#524096]"
             disabled={busy}
-            onBlur={() => {
-              if ((row.notes ?? "") !== notes) void save({ notes });
+            onChange={(event) => {
+              setSaved(false);
+              setNotes(event.target.value);
             }}
-            onChange={(event) => setNotes(event.target.value)}
             placeholder="What they said on the call"
             value={notes}
           />
         </label>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          className="inline-flex h-11 items-center rounded-full bg-[#1c133b] px-5 text-[15px] font-semibold text-white disabled:opacity-50"
+          disabled={busy || !textDirty}
+          onClick={saveTextFields}
+          type="button"
+        >
+          {busy && textDirty ? "Saving…" : "Save"}
+        </button>
+        {saved && !textDirty ? (
+          <p className="m-0 text-[14px] font-medium text-[#1c133b]">Saved</p>
+        ) : null}
       </div>
 
       {error ? (

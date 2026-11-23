@@ -16,6 +16,9 @@ export function adminParentBackLink(
   if (/^\/admin\/booking\/[^/]+\/?$/.test(pathname)) {
     return { href: "/admin/bookings", label: "Bookings" };
   }
+  if (/^\/admin\/callback-leads\/[^/]+\/?$/.test(pathname)) {
+    return { href: "/admin/callback-leads", label: "callback leads" };
+  }
   if (/^\/admin\/disputes\/[^/]+\/?$/.test(pathname)) {
     return { href: "/admin/disputes", label: "Disputes" };
   }

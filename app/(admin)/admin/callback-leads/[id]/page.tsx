@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AdminBackLink } from "@/components/admin/admin-back-link";
 import { CallbackLeadDesk } from "@/components/admin/callback-lead-desk";
 import { mapCallbackLeadRow } from "@/lib/admin/callback-desk";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -25,12 +25,7 @@ export default async function AdminCallbackLeadPage({
 
   return (
     <div className="min-w-0 space-y-4">
-      <Link
-        className="text-sm font-semibold text-[#524096] hover:underline"
-        href="/admin/callback-leads"
-      >
-        Back to callback leads
-      </Link>
+      <AdminBackLink href="/admin/callback-leads" label="callback leads" />
       <CallbackLeadDesk row={row} />
     </div>
   );
