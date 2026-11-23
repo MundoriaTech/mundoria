@@ -1618,7 +1618,7 @@ export function OnboardingWizard({
                   Online video call
                 </span>
                 <span className="inline-flex items-center gap-2 text-[#8b8798]">
-                  Times shown in UK time
+                  At least 48 hours from now, UK time
                 </span>
               </div>
             ) : null}
@@ -2325,7 +2325,8 @@ function AppointmentPicker({
         <div className="space-y-8 p-5 sm:p-7">
           {days.length === 0 ? (
             <p className="text-sm text-[#8b8798]">
-              No appointment times are open right now. Check back shortly.
+              No appointment times are open at least 48 hours from now. Check
+              back shortly.
             </p>
           ) : (
             <>
@@ -3869,11 +3870,11 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
       return issue("slot", "Choose a time for your appointment.");
     }
     // Taken slots are re-checked by the server; here we only reject times
-    // that have passed or are not on the interview schedule.
+    // that are too soon or are not on the interview schedule.
     if (!isBookableInterviewSlot(data.interview_scheduled_at)) {
       return issue(
         "slot",
-        "That appointment time has passed. Choose a new time.",
+        "Choose a time at least 48 hours from now.",
       );
     }
   }

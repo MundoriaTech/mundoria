@@ -6,6 +6,7 @@ import { z } from "zod";
 import { listTakenInterviewSlots } from "@/lib/cleaner/interview-availability";
 import {
   formatInterviewSlot,
+  interviewEarliestStartsAt,
   isBookableInterviewSlot,
   upcomingInterviewDays,
 } from "@/lib/cleaner/interview-slots";
@@ -461,6 +462,15 @@ export async function POST(request: Request) {
   if (Date.parse(parsed.data.interview_scheduled_at) <= Date.now()) {
     return NextResponse.json(
       { error: "That appointment time has passed. Choose a new time." },
+      { status: 400 },
+    );
+  }
+  if (
+    Date.parse(parsed.data.interview_scheduled_at) <=
+    interviewEarliestStartsAt().getTime()
+  ) {
+    return NextResponse.json(
+      { error: "Choose a time at least 48 hours from now." },
       { status: 400 },
     );
   }

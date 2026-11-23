@@ -1,6 +1,14 @@
 export const INTERVIEW_TIME_ZONE = "Europe/London";
 export const INTERVIEW_DURATION_MINUTES = 30;
 export const INTERVIEW_HOURS = [9, 11, 13, 14, 15] as const;
+/** Onboarding calls need this much notice before the slot start. */
+export const INTERVIEW_MIN_LEAD_HOURS = 48;
+
+export function interviewEarliestStartsAt(now = new Date()) {
+  return new Date(
+    now.getTime() + INTERVIEW_MIN_LEAD_HOURS * 60 * 60 * 1000,
+  );
+}
 
 export type InterviewSlot = {
   label: string;
@@ -59,6 +67,7 @@ export function upcomingInterviewDays(
       .map((value) => Math.floor(value / 60_000)),
   );
   const start = londonDateParts(now);
+  const earliest = interviewEarliestStartsAt(now).getTime();
   const days: InterviewDay[] = [];
   for (let offset = 0; days.length < dayCount && offset < 30; offset += 1) {
     const date = addCalendarDays(start, offset);
@@ -74,7 +83,7 @@ export function upcomingInterviewDays(
         hour,
         0,
       );
-      if (startsAt.getTime() <= now.getTime()) return [];
+      if (startsAt.getTime() <= earliest) return [];
       if (takenMinutes.has(Math.floor(startsAt.getTime() / 60_000))) return [];
       return [
         {
