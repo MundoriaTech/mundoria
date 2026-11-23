@@ -16,15 +16,15 @@ export const metadata = { title: "Leads" };
 export const dynamic = "force-dynamic";
 
 const VIEWS = [
+  { id: "all", label: "All" },
   { id: "needs_human", label: "Needs a person" },
   { id: "active", label: "In follow-up" },
   { id: "booked", label: "Booked" },
   { id: "lost", label: "Lost / unsubscribed" },
-  { id: "all", label: "All" },
 ] as const;
 
 export default async function AdminLeadsPage({ searchParams }: { searchParams: { view?: string } }) {
-  const view = VIEWS.some((item) => item.id === searchParams.view) ? searchParams.view! : "needs_human";
+  const view = VIEWS.some((item) => item.id === searchParams.view) ? searchParams.view! : "all";
   const admin = createAdminClient();
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 

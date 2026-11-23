@@ -105,6 +105,11 @@ import {
   resolveFlowStepIndex,
   type BookingFlowStepId,
 } from "@/lib/customer/booking-flow";
+import {
+  FIRST_VISIT_OFFER_FREE_HOURS,
+  firstVisitOfferAppliesToService,
+  firstVisitOfferSessionEligible,
+} from "@/lib/bookings/first-visit-offer";
 import { rememberSignupEmail } from "@/lib/auth/signup-email-pending";
 import {
   BOOKING_STEP_STORAGE_KEY,
@@ -414,6 +419,7 @@ export function BookingWizard({
   const router = useRouter();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [basketOpen, setBasketOpen] = useState(false);
+  const [firstVisitOfferEligible, setFirstVisitOfferEligible] = useState(false);
   const [draft, setDraft] = useState<BookingDraft>(() => {
     const seededCategory = initialDraft?.serviceCategory ?? "residential";
     const seededService =
@@ -577,6 +583,13 @@ export function BookingWizard({
         ? true
         : draft.numBedrooms != null && draft.numBathrooms != null);
   const pricedServiceType = pricingServiceTypeFor(draft);
+  const appliedOfferHours =
+    firstVisitOfferEligible &&
+    pricedServiceType &&
+    firstVisitOfferAppliesToService(pricedServiceType) &&
+    firstVisitOfferSessionEligible(draft.estimatedDurationHours)
+      ? FIRST_VISIT_OFFER_FREE_HOURS
+      : 0;
   const priceBreakdown =
     pricedServiceType &&
     selectedStandard &&
@@ -593,6 +606,7 @@ export function BookingWizard({
           },
           {
             durationHours: draft.estimatedDurationHours,
+            offerFreeHours: appliedOfferHours,
             officeSpaces: draft.officeSpaces,
             pricing,
             rooms: {
@@ -1145,6 +1159,25 @@ export function BookingWizard({
     if (!hydrated || !allowBookingPersist || !persistBookingRef.current) return;
     window.localStorage.setItem(BOOKING_STEP_KEY, stepId);
   }, [hydrated, stepId]);
+
+  useEffect(() => {
+    if (!hydrated || !userId) {
+      setFirstVisitOfferEligible(false);
+      return;
+    }
+    let cancelled = false;
+    void fetch("/api/bookings/first-visit-offer")
+      .then((response) => response.json())
+      .then((payload: { eligible?: boolean }) => {
+        if (!cancelled) setFirstVisitOfferEligible(Boolean(payload.eligible));
+      })
+      .catch(() => {
+        if (!cancelled) setFirstVisitOfferEligible(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, userId, profileNeedsPhone]);
 
   useEffect(() => {
     if (!hydrated || !userId) return;
@@ -1819,7 +1852,18 @@ export function BookingWizard({
       ? estimatedAmount - promoAmount
       : 0;
   const addOnLines = priceBreakdown
-    ? priceBreakdown.addOns.map((item) => {
+    ? [
+        ...(appliedOfferHours > 0
+          ? [
+              {
+                amount: 0,
+                hourly: false,
+                label: "1 hour free (first visit)",
+                quiet: true,
+              },
+            ]
+          : []),
+        ...priceBreakdown.addOns.map((item) => {
         const def = availableAddOns(draft.serviceType!).find(
           (addOn) => addOn.id === item.id,
         );
@@ -1836,7 +1880,8 @@ export function BookingWizard({
           label: item.label,
           quiet,
         };
-      })
+      }),
+      ]
     : draft.serviceType
       ? availableAddOns(draft.serviceType)
           .filter((item) => draft.selectedAddOns.includes(item.id))
@@ -1863,10 +1908,14 @@ export function BookingWizard({
   const durationHoursForBasket =
     draft.serviceType === "office" && priceBreakdown
       ? priceBreakdown.visitHours
-      : (draft.estimatedDurationHours ?? priceBreakdown?.visitHours ?? null);
+      : appliedOfferHours > 0 && priceBreakdown
+        ? priceBreakdown.visitHours
+        : (draft.estimatedDurationHours ?? priceBreakdown?.visitHours ?? null);
   const durationHint =
     draft.serviceType === "office" && priceBreakdown
       ? `${priceBreakdown.billableHours.toFixed(1).replace(/\.0$/, "")} cleaner-hours`
+      : appliedOfferHours > 0
+        ? `includes ${appliedOfferHours} hour free`
       : priceBreakdown?.scheduleLabel ??
         (draft.scheduledDate && draft.scheduledTime
           ? schedulePriceLabel(
@@ -2149,6 +2198,7 @@ export function BookingWizard({
                   address={roomsAddress}
                   amountPence={Math.max(0, displayAmount)}
                   customerFirstName={customerFirstName}
+                  firstVisitOfferHours={appliedOfferHours}
                   draft={{
                     ...draft,
                     cleaningStandard: selectedStandard,
@@ -4278,6 +4328,7 @@ function CheckoutStep({
   address,
   amountPence,
   customerFirstName = null,
+  firstVisitOfferHours = 0,
   draft,
   draftResumeToken = null,
   onAddressPersisted,
@@ -4289,6 +4340,7 @@ function CheckoutStep({
   address: Address;
   amountPence: number;
   customerFirstName?: string | null;
+  firstVisitOfferHours?: number;
   draft: BookingDraft & {
     cleaningStandard: CleaningStandard;
     serviceType: ServiceType;
@@ -4798,6 +4850,12 @@ function CheckoutStep({
           ? `Ready to book your clean, ${firstName}?`
           : "Ready to book your clean?"}
       </h2>
+      {firstVisitOfferHours > 0 ? (
+        <p className="mt-3 text-sm leading-6 text-[#5a5470]">
+          Your first visit includes {firstVisitOfferHours} extra hour free. You
+          pay for the hours you chose; the cleaner stays for the extra hour.
+        </p>
+      ) : null}
 
       <div className="mt-5">
         <FormField

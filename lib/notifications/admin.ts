@@ -1,3 +1,4 @@
+import { resolveAdminNotificationEmail } from "@/lib/email/send-email";
 import {
   sendEmail,
   sendPushNotification,
@@ -16,10 +17,20 @@ export async function alertAdmins(
     .select("id,email")
     .eq("role", "admin");
 
+  const sent = new Set<string>();
   await Promise.all(
-    (admins ?? []).flatMap((recipient) => [
-      sendPushNotification(recipient.id, title, body, data),
-      sendEmail(recipient.email, title, type, data),
-    ]),
+    (admins ?? []).flatMap((recipient) => {
+      const address = recipient.email?.trim().toLowerCase();
+      if (address) sent.add(address);
+      return [
+        sendPushNotification(recipient.id, title, body, data),
+        sendEmail(recipient.email, title, type, data),
+      ];
+    }),
   );
+
+  const ops = resolveAdminNotificationEmail().toLowerCase();
+  if (!sent.has(ops)) {
+    await sendEmail(ops, title, type, data);
+  }
 }

@@ -17,6 +17,10 @@ import {
   serviceDefinition,
 } from "@/lib/customer/services";
 import { createRecurringFollowOnBookings } from "@/lib/bookings/recurring";
+import {
+  resolveFirstVisitOffer,
+  stampFirstVisitOfferLead,
+} from "@/lib/bookings/redeem-first-visit-offer";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -190,6 +194,33 @@ export async function POST(request: Request) {
     });
   }
 
+  const metadataOfferHours = Number(metadata.offer_free_hours ?? 0);
+  const metadataWorkHours = Number(metadata.work_hours ?? 0);
+  let offerLeadId = metadata.offer_callback_lead_id || "";
+  let offerFreeHours =
+    Number.isFinite(metadataOfferHours) && metadataOfferHours > 0
+      ? metadataOfferHours
+      : 0;
+  let estimatedDurationHours = parsed.data.estimatedDurationHours;
+  if (offerFreeHours > 0 && Number.isFinite(metadataWorkHours) && metadataWorkHours > 0) {
+    estimatedDurationHours = metadataWorkHours;
+  } else {
+    const offer = await resolveFirstVisitOffer({
+      admin,
+      customerId: user.id,
+      durationHours: parsed.data.estimatedDurationHours,
+      email: profile.email,
+      phone: profile.phone,
+      serviceType: parsed.data.serviceType,
+    });
+    if (offer) {
+      offerLeadId = offer.leadId;
+      offerFreeHours = offer.freeHours;
+      estimatedDurationHours =
+        parsed.data.estimatedDurationHours + offer.freeHours;
+    }
+  }
+
   const { data: booking, error } = await admin
     .from("bookings")
     .insert({
@@ -202,7 +233,8 @@ export async function POST(request: Request) {
       cleaning_standard: parsed.data.cleaningStandard,
       commercial_spaces: officeQuote ? parsed.data.officeSpaces : null,
       customer_id: user.id,
-      estimated_duration_hours: parsed.data.estimatedDurationHours,
+      estimated_duration_hours: estimatedDurationHours,
+      offer_free_hours: offerFreeHours,
       is_recurring: parsed.data.isRecurring,
       payment_status: "unpaid",
       promo_code_id: metadata.promo_code_id || null,
@@ -307,6 +339,14 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+  }
+
+  if (offerLeadId && offerFreeHours > 0) {
+    await stampFirstVisitOfferLead({
+      admin,
+      bookingId: booking.id,
+      leadId: offerLeadId,
+    });
   }
 
   await admin.from("notifications").insert({

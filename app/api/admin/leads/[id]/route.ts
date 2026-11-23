@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
+import { alertAdmins } from "@/lib/notifications/admin";
 import { startLeadCall } from "@/lib/outreach/calls";
 import { sendLeadEmail, sendLeadSms } from "@/lib/outreach/channels";
+import { appUrl } from "@/lib/outreach/config";
 import { enrollLead, runDueEnrollments, stopEnrollments } from "@/lib/outreach/engine";
 import { JOURNEYS, type JourneyId } from "@/lib/outreach/journeys";
-import { getLead, logLeadEvent, recordConsent, updateLead } from "@/lib/outreach/leads";
+import { getLead, leadName, logLeadEvent, recordConsent, updateLead } from "@/lib/outreach/leads";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +80,25 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     entityType: "lead",
     metadata: input,
   });
+
+  const important =
+    input.status === "booked" ||
+    input.status === "lost" ||
+    input.status === "unsubscribed" ||
+    input.doNotContact === true;
+  if (important) {
+    const who = leadName(next) || next.email || next.phone || "Lead";
+    const summary = input.doNotContact
+      ? "Do not contact"
+      : `Status: ${input.status}`;
+    void alertAdmins(
+      "lead.updated",
+      `Lead update: ${who}`,
+      `${summary} (${auth.profile.full_name ?? "admin"}). ${next.email ?? ""} ${next.phone ?? ""}`.trim(),
+      { actionUrl: `${appUrl()}/admin/leads/${lead.id}`, leadId: lead.id },
+    );
+  }
+
   return NextResponse.json({ lead: next });
 }
 

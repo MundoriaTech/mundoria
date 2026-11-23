@@ -16,6 +16,7 @@ export type ParentBooking = {
   customer_id: string;
   estimated_duration_hours: number | null;
   id: string;
+  offer_free_hours?: number | null;
   pause_ends_on?: string | null;
   pause_starts_on?: string | null;
   prefer_same_cleaner: boolean | null;
@@ -66,11 +67,11 @@ function followOnRow(
     amount_cleaner: parent.amount_cleaner,
     amount_platform: parent.amount_platform,
     amount_total: parent.amount_total,
-    cleaner_hours: parent.cleaner_hours,
     cleaning_standard: parent.cleaning_standard,
     commercial_spaces: parent.commercial_spaces,
     customer_id: parent.customer_id,
-    estimated_duration_hours: parent.estimated_duration_hours,
+    estimated_duration_hours: followOnDurationHours(parent),
+    cleaner_hours: followOnCleanerHours(parent),
     is_recurring: true,
     parent_booking_id: parent.id,
     payment_status: "unpaid" as const,
@@ -88,6 +89,25 @@ function followOnRow(
     special_instructions: parent.special_instructions,
     status: "pending_match" as const,
   };
+}
+
+function followOnGiftHours(parent: ParentBooking) {
+  const gift = Number(parent.offer_free_hours ?? 0);
+  return Number.isFinite(gift) && gift > 0 ? gift : 0;
+}
+
+function followOnDurationHours(parent: ParentBooking) {
+  const work = Number(parent.estimated_duration_hours ?? 0);
+  const billed = work - followOnGiftHours(parent);
+  if (!Number.isFinite(work) || work <= 0) return parent.estimated_duration_hours;
+  return Math.max(1, Number(billed.toFixed(2)));
+}
+
+function followOnCleanerHours(parent: ParentBooking) {
+  if (parent.cleaner_hours == null) return parent.cleaner_hours;
+  const billed = Number(parent.cleaner_hours) - followOnGiftHours(parent);
+  if (!Number.isFinite(billed)) return parent.cleaner_hours;
+  return Math.max(0, Number(billed.toFixed(2)));
 }
 
 /**
@@ -148,7 +168,7 @@ export async function ensureUpcomingRecurringFollowOns(
   const { data: parents, error } = await admin
     .from("bookings")
     .select(
-      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,commercial_spaces,customer_id,estimated_duration_hours,pause_ends_on,pause_starts_on,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions,stripe_payment_method_id",
+      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,commercial_spaces,customer_id,estimated_duration_hours,offer_free_hours,pause_ends_on,pause_starts_on,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions,stripe_payment_method_id",
     )
     .eq("is_recurring", true)
     .is("parent_booking_id", null)

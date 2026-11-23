@@ -119,7 +119,8 @@ export function Book2Get1FreePage() {
           </p>
           <p className="mt-3 max-w-xl text-pretty text-[15px] leading-6 text-white/85 sm:text-base sm:leading-7">
             Book your first 2 hours and we&apos;ll give you 1 extra hour of
-            cleaning FREE.
+            cleaning FREE. When you book online with the same email or phone,
+            the extra hour is added automatically at checkout.
           </p>
         </div>
       </section>
@@ -138,6 +139,10 @@ export function Book2Get1FreePage() {
                 <p className="text-[15px] leading-7 text-[#5a5470]">
                   We&apos;ve received your details. A member of our team will be
                   in touch shortly.
+                </p>
+                <p className="text-[15px] leading-7 text-[#5a5470]">
+                  Book 2 hours of house cleaning with this email or phone and
+                  the extra hour is added at checkout — no promo code.
                 </p>
                 <p className="text-[15px] leading-7 text-[#5a5470]">
                   Want to get started right away?{" "}

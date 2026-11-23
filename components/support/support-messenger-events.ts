@@ -1,7 +1,5 @@
 /**
- * Tiny, dependency-free half of the support messenger: the open event and its
- * dispatcher. Kept apart so buttons that open the messenger do not pull the
- * full widget (and its emoji/GIF pickers) into the page bundle.
+ * Opens the site support chat. The launcher listens and shows SalesIQ.
  */
 
 export const SUPPORT_MESSENGER_EVENT = "mundoria:open-support-messenger";

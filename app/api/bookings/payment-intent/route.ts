@@ -8,8 +8,9 @@ import {
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
+import { resolveFirstVisitOffer } from "@/lib/bookings/redeem-first-visit-offer";
 import {
-  estimatePrice,
+  estimatePriceBreakdown,
   isOfferedService,
   serviceDefinition,
 } from "@/lib/customer/services";
@@ -126,7 +127,15 @@ export async function POST(request: Request) {
       isRecurring: parsed.data.isRecurring,
       serviceType: parsed.data.serviceType,
     }) ?? parsed.data.serviceType;
-  const baseAmount = estimatePrice(
+  const offer = await resolveFirstVisitOffer({
+    admin,
+    customerId: user.id,
+    durationHours: parsed.data.estimatedDurationHours,
+    email: profile.email,
+    phone: profile.phone,
+    serviceType: pricedServiceType,
+  });
+  const breakdown = estimatePriceBreakdown(
     pricedServiceType,
     pricedAddress,
     parsed.data.cleaningStandard,
@@ -137,6 +146,7 @@ export async function POST(request: Request) {
     },
     {
       durationHours: parsed.data.estimatedDurationHours,
+      offerFreeHours: offer?.freeHours ?? 0,
       officeSpaces: parsed.data.officeSpaces,
       pricing,
       rooms: {
@@ -146,6 +156,7 @@ export async function POST(request: Request) {
       },
     },
   );
+  const baseAmount = breakdown.totalPence;
   const discount = promo
     ? promo.discount_type === "percentage"
       ? Math.round(baseAmount * (promo.discount_value / 100))
@@ -171,12 +182,16 @@ export async function POST(request: Request) {
 
   const metadata = {
     address_id: parsed.data.addressId,
+    billed_hours: String(parsed.data.estimatedDurationHours),
     cleaning_standard: parsed.data.cleaningStandard,
+    offer_callback_lead_id: offer?.leadId ?? "",
+    offer_free_hours: String(offer?.freeHours ?? 0),
     promo_code_id: promo?.id ?? "",
     scheduled_date: parsed.data.scheduledDate,
     scheduled_time: parsed.data.scheduledTime,
     selected_add_ons: parsed.data.selectedAddOns.join(","),
     service_type: parsed.data.serviceType,
+    work_hours: String(breakdown.visitHours),
   };
 
   const baseIdempotency = [

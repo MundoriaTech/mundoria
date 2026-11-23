@@ -154,7 +154,7 @@ const PAGE_SUBTITLES: Record<string, string> = {
   "/admin/matching": "Bookings that need a cleaner, a chase, or a human on the desk.",
   "/admin/bookings": "Search, inspect, and resolve booking edge cases.",
   "/admin/abandoned-bookings": "Leads who started the booking flow but didn't complete it.",
-  "/admin/callback-leads": "Ads and promo callback requests waiting for a call.",
+  "/admin/callback-leads": "Ads callbacks. Filter To call when you sit down to ring; All is the full list.",
   "/admin/leads": "Every prospect, their follow-ups, AI replies and calls, and who needs a person.",
   "/admin/leads/reports": "Weekly lead automation reports.",
   "/admin/inbox": "Support conversations with customers and cleaners.",
@@ -194,6 +194,12 @@ function pageTitle(pathname: string) {
     if (match.href === "/admin/inbox" && pathname !== "/admin/inbox") return "Conversation";
     if (match.href === "/admin/leads" && pathname === "/admin/leads/reports") return "Lead reports";
     if (match.href === "/admin/leads" && pathname !== "/admin/leads") return "Lead";
+    if (
+      match.href === "/admin/callback-leads" &&
+      pathname !== "/admin/callback-leads"
+    ) {
+      return "Callback lead";
+    }
     return match.label;
   }
   if (pathname.startsWith("/admin/booking/")) return "Booking";

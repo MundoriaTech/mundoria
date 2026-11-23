@@ -826,6 +826,11 @@ export type EstimatePriceOptions = {
    * Ignored for office quotes, which always use calculated cleaner-hours.
    */
   durationHours?: number | null;
+  /**
+   * Extra on-site hours that are not billed (first-visit gift hour).
+   * Adds to visit length only; labour still uses the chosen session.
+   */
+  offerFreeHours?: number | null;
   officeSpaces?: OfficeSpaceSelection[];
   pricing?: ServicePricingConfig;
   /** Prefer draft room counts over the saved address when sizing the formula. */
@@ -905,8 +910,10 @@ export function estimatePriceBreakdown(
         ? Number(chosen)
         : formulaHours;
     const freeHours = freeAddOnDurationHours(selectedAddOns);
+    const giftHours = Math.max(0, Number(options?.offerFreeHours ?? 0));
     // Session length includes free extras (ironing); labour ignores that carve-out.
-    visitHours = sessionHours;
+    // A first-visit gift hour extends time on site without changing the charge.
+    visitHours = Number((sessionHours + giftHours).toFixed(2));
     billableHours = Math.max(1, Number((sessionHours - freeHours).toFixed(2)));
     labourBasePence = Math.round(billableHours * rate);
   }

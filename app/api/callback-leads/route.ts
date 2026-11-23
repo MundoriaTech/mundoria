@@ -2,7 +2,9 @@ import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { notifyCallbackDeskChange } from "@/lib/admin/notify-callback-desk";
 import { storedPhone } from "@/lib/auth/uk-phone";
+import { outreachEnabled } from "@/lib/outreach/config";
 import { captureCallbackLead } from "@/lib/outreach/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -94,6 +96,25 @@ export async function POST(request: Request) {
       { error: "We could not save that just now. Please try again." },
       { status: 500 },
     );
+  }
+
+  if (!outreachEnabled()) {
+    try {
+      await notifyCallbackDeskChange({
+        lead: {
+          email: parsed.data.email,
+          first_name: firstName,
+          id: callback.id,
+          last_name: lastName,
+          phone,
+        },
+        summary: `New callback request${
+          parsed.data.availableIn10Min ? " (free in the next 10 minutes)" : ""
+        } from ${parsed.data.source?.trim() || "book-2-get-1-free"}`,
+      });
+    } catch (notifyError) {
+      Sentry.captureException(notifyError);
+    }
   }
 
   // Lead automation: alert the team, start the AI call / follow-ups.

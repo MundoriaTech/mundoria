@@ -143,6 +143,8 @@ export interface Booking {
   scheduled_date: string;
   scheduled_start_time: string;
   estimated_duration_hours: number | null;
+  /** Gifted on-site hours on this visit only (not copied to recurring follow-ons). */
+  offer_free_hours?: number | null;
   cleaner_hours?: number | null;
   allocated_cleaners?: number | null;
   commercial_spaces?: OfficeSpaceDraft[] | null;

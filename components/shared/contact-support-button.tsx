@@ -2,31 +2,28 @@
 
 import type { CSSProperties, ReactNode } from "react";
 
-import { openSupportMessenger } from "@/components/support/support-messenger-events";
+import { openZohoSupportChat } from "@/components/shared/zoho-salesiq";
 import { cn } from "@/lib/utils";
 
-type SupportTab = "home" | "messages" | "help";
-
 /**
- * Opens the Mundoria support messenger (Home / Messages / Help).
- * Label stays generic, never mentions the chat provider or email.
+ * Opens the site support chat (SalesIQ). Label stays generic.
  */
 export function ContactSupportButton({
   className,
   label = "Contact us",
   style,
-  tab = "messages",
 }: {
   className?: string;
   label?: ReactNode;
   style?: CSSProperties;
-  tab?: SupportTab;
+  /** @deprecated SalesIQ has a single window; ignored. */
+  tab?: "home" | "messages" | "help";
 }) {
   return (
     <button
       className={cn(className)}
       onClick={() => {
-        openSupportMessenger(tab);
+        void openZohoSupportChat();
       }}
       style={style}
       type="button"

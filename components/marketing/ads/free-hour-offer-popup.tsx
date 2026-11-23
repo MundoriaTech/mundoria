@@ -100,7 +100,7 @@ export function FreeHourOfferPopup({ bookingHref }: { bookingHref: string }) {
       className="max-w-lg"
       description={
         submitted
-          ? "Book now to lock in the offer."
+          ? "Book 2 hours of house cleaning with this email or phone. The extra hour is added at checkout — no promo code."
           : "Book 2 hours at £17.50/h and get 1 extra hour free. Leave your email and phone to claim it."
       }
       onClose={close}

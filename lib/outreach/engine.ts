@@ -356,7 +356,20 @@ export async function syncDraftLeads(limit = 50) {
       // Drafts are picked up 30+ minutes after they stopped; the first email follows 45 minutes later.
       { exclusive: true, once: true },
     );
-    if (started) enrolled += 1;
+    if (started) {
+      enrolled += 1;
+      await alertAdmins(
+        "booking_draft.abandoned",
+        `Unfinished booking: ${email}`,
+        `${email} started a booking and has not finished. Follow-up is queued.`,
+        {
+          actionUrl: `${appUrl()}/admin/abandoned-bookings`,
+          email,
+          leadId: lead.id,
+          resumeUrl: bookingDraftResumeUrl(draft.resume_token as string),
+        },
+      );
+    }
   }
   return { enrolled };
 }
