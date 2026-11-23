@@ -221,7 +221,7 @@ Every follow-up email has a one-click unsubscribe header, which Gmail and Yahoo 
 | `OUTREACH_MAX_CALLS` | Optional | Max AI calls per lead, default 2 |
 | `CRON_SECRET` | The two cron jobs (already set) | Existing |
 | `NEXT_PUBLIC_APP_URL` | Links and webhook signatures (already set) | `https://www.mundoria.co.uk` |
-| `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN` | Optional: copies leads into Zoho CRM | `docs/zoho-crm.md` |
+| `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN` | Optional: callback requests become Sales leads in Zoho CRM; opt-outs tick Email Opt Out there | `docs/zoho-crm.md` |
 
 ### Rough monthly costs
 These are estimates to check against each provider's current pricing.

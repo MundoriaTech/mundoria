@@ -68,12 +68,12 @@ its Preview deployment. Share the Preview URL for verification.
 | Create a booking using Stripe test mode, then confirm a cleaner and secure the test payment | The two different CPaaS templates render the date in UK time. Check the Bookings agent log and the test inbox. From and Reply-To both show `bookings@notify.mundoria.co.uk`. |
 | Use public support chat on a fresh session with optional cookies declined, then allow statistics cookies and try again | The built-in messenger works with consent declined. After a fresh page load, the existing launcher opens the SalesIQ widget when consent and its URL are configured. Withdraw consent and check the widget closes. |
 
-The callback is saved before CRM is contacted. The Preview form attempts eligible
-CRM sync immediately. In production the existing authenticated `run-outreach`
-heartbeat drains due callbacks on its usual schedule. Failed attempts stay in
+The callback is saved before CRM is contacted. The form then attempts eligible
+CRM sync immediately, in Preview and production. The authenticated
+`run-outreach` heartbeat retries anything that failed. Failed attempts stay in
 `zoho_sales_intake` for retry. An eligible CRM duplicate of the same entry is
 accepted only when Zoho reports the configured unique field. The code opts out
-of creating a marketing subscription from the callback.
+of marketing email (Email Opt Out) unless the person opted in to marketing.
 
 The CPaaS pilot covers the two template emails in Preview. Payment collection,
 booking and notification code continue to use the current production paths.

@@ -136,6 +136,8 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
       .eq("id", profile.id);
     setSaving(false);
     if (error) { setStatus(error.message); return; }
+    // Keep the Zoho contact's phone in step; never blocks the save.
+    void fetch("/api/profile/crm-sync", { method: "POST" }).catch(() => undefined);
     trackCrmEvent("account_updated", {
       action: "save_profile",
       customer_id: profile.id,

@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { changeZohoEmail } from "@/lib/zoho/crm";
 
 export async function notifyEmailChangeCompleted({
   appUrl,
@@ -63,6 +64,10 @@ export async function notifyEmailChangeCompleted({
   } catch (error) {
     Sentry.captureException(error);
   }
+
+  // Move the CRM record to the new address; an email-keyed upsert on the next
+  // booking would otherwise create a second Contact. Never throws.
+  await changeZohoEmail(previousEmail, user.email);
 
   await admin.auth.admin.updateUserById(user.id, {
     user_metadata: {
