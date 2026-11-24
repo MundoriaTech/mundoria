@@ -8,9 +8,16 @@ import {
   frequencyLabelForBooking,
   petsFromNotes,
 } from "@/lib/customer/booking-flow";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { hourlyRatePence } from "@/lib/customer/rate-card";
 import { loadMatchingList } from "@/lib/matching/emergency-list";
-import { formatMoney, formatServiceName, standardLabel } from "@/lib/customer/services";
+import {
+  estimatePriceBreakdown,
+  formatHourlyRate,
+  formatMoney,
+  formatServiceName,
+  standardLabel,
+} from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import type { Address } from "@/types/customer";
@@ -113,6 +120,32 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     recommendation ? ["Recommendation", recommendation] : null,
     extraNotes ? ["Customer notes", extraNotes] : null,
   ].filter((row): row is [string, string] => Boolean(row));
+  const pricing = await loadServicePricing();
+  const sessionHours = Math.max(0, (durationHours ?? 0) - offerHours);
+  const breakdown = address
+    ? estimatePriceBreakdown(
+        booking.service_type,
+        address,
+        booking.cleaning_standard ?? "enhanced",
+        addOnRows
+          .map((row) => row.add_on_id)
+          .filter((id): id is string => Boolean(id)),
+        {
+          date: booking.scheduled_date,
+          time: booking.scheduled_start_time,
+        },
+        {
+          durationHours: sessionHours || null,
+          offerFreeHours: offerHours,
+          pricing,
+          rooms: {
+            bathrooms: address.num_bathrooms,
+            bedrooms: address.num_bedrooms,
+            otherRooms: address.num_other_rooms,
+          },
+        },
+      )
+    : null;
   return (
     <div className="min-w-0 space-y-5 sm:space-y-6">
       <div>
@@ -175,8 +208,19 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             </div>
           </section>
           <BookingSummaryCard
-            addOns={addOnRows.map((addOn) => ({
-              amount: Number(addOn.amount ?? 0),
+            addOns={(
+              breakdown?.addOns ??
+              addOnRows.map((row) => ({
+                amountPence: Number(row.amount ?? 0),
+                id: row.add_on_id ?? row.label,
+                label: row.label,
+                ratePence: undefined as number | undefined,
+              }))
+            ).map((addOn) => ({
+              amount: addOn.amountPence,
+              detail: addOn.ratePence
+                ? `${formatHourlyRate(addOn.ratePence)} × ${formatVisitHours(breakdown?.billableHours ?? sessionHours)}`
+                : undefined,
               label: addOn.label,
             }))}
             address={address}
@@ -189,20 +233,26 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             durationHint={
               officeHours != null
                 ? `${officeHours.toFixed(1).replace(/\.0$/, "")} cleaner-hours`
-                : offerHours > 0
-                  ? `${formatVisitHours(offerHours)} free on this visit`
-                  : null
+                : breakdown && breakdown.visitHours !== breakdown.billableHours
+                  ? `${formatVisitHours(breakdown.visitHours)} on site, ${formatVisitHours(breakdown.billableHours)} charged`
+                  : offerHours > 0
+                    ? `${formatVisitHours(offerHours)} free on this visit`
+                    : null
             }
-            durationHours={durationHours}
+            durationHours={breakdown?.billableHours ?? durationHours}
             frequencyLabel={frequencyLabelForBooking({
               is_recurring: Boolean(booking.is_recurring),
               recurrence_pattern: booking.recurrence_pattern ?? null,
             })}
             hasPets={petsFromNotes(booking.special_instructions)}
-            hourlyRatePence={hourlyRatePence(
-              booking.service_type,
-              booking.cleaning_standard ?? "enhanced",
-            )}
+            hourlyRatePence={
+              breakdown?.ratePence ??
+              hourlyRatePence(
+                booking.service_type,
+                booking.cleaning_standard ?? "enhanced",
+                pricing,
+              )
+            }
             priorityAreas={booking.special_attention_areas ?? []}
             scheduledDate={booking.scheduled_date}
             scheduledTime={booking.scheduled_start_time}
@@ -210,6 +260,53 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             standardLabel={standardLabel(booking.cleaning_standard ?? "enhanced")}
             title="What they booked"
           />
+          {breakdown ? (
+            <section className="rounded-xl border bg-card p-4 sm:p-5">
+              <h2 className="font-semibold">How the price adds up</h2>
+              <ul className="mt-4 space-y-2 text-sm">
+                <li>
+                  Cleaning {formatVisitHours(breakdown.billableHours)} ×{" "}
+                  {formatHourlyRate(breakdown.ratePence)} ={" "}
+                  {formatMoney(
+                    Math.round(breakdown.billableHours * breakdown.ratePence),
+                  )}
+                </li>
+                {breakdown.scheduleMult !== 1 && breakdown.scheduleLabel ? (
+                  <li>
+                    {breakdown.scheduleLabel} × {breakdown.scheduleMult} ={" "}
+                    {formatMoney(breakdown.labourPence)}
+                  </li>
+                ) : null}
+                {breakdown.addOns
+                  .filter((addOn) => addOn.amountPence > 0)
+                  .map((addOn) => (
+                    <li key={addOn.id}>
+                      {addOn.label}
+                      {addOn.ratePence
+                        ? ` ${formatHourlyRate(addOn.ratePence)} × ${formatVisitHours(breakdown.billableHours)}`
+                        : ""}{" "}
+                      = {formatMoney(addOn.amountPence)}
+                    </li>
+                  ))}
+                {breakdown.addOns.some((addOn) => addOn.amountPence === 0) ? (
+                  <li>
+                    {breakdown.addOns
+                      .filter((addOn) => addOn.amountPence === 0)
+                      .map((addOn) => addOn.label)
+                      .join(", ")}{" "}
+                    included in the {formatVisitHours(breakdown.visitHours)}{" "}
+                    visit, not charged separately
+                  </li>
+                ) : null}
+                <li>
+                  <b>Total {formatMoney(booking.amount_total)}</b>
+                  {breakdown.totalPence !== Number(booking.amount_total ?? 0)
+                    ? ` (current rates would be ${formatMoney(breakdown.totalPence)})`
+                    : null}
+                </li>
+              </ul>
+            </section>
+          ) : null}
           {extraRows.length ? (
             <section className="rounded-xl border bg-card p-4 sm:p-5">
               <h2 className="font-semibold">Also captured</h2>

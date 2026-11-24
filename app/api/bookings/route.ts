@@ -12,6 +12,7 @@ import {
   addOnAmountPence,
   formatMoney,
   formatServiceName,
+  freeAddOnDurationHours,
   isOfferedService,
   SERVICE_ADD_ONS,
   serviceDefinition,
@@ -311,8 +312,10 @@ export async function POST(request: Request) {
   }
 
   if (selectedAddOnDefs.length) {
+    const sessionHours = parsed.data.estimatedDurationHours ?? 0;
     const supplyHours =
-      officeQuote?.cleanerHours ?? parsed.data.estimatedDurationHours ?? 0;
+      officeQuote?.cleanerHours ??
+      Math.max(1, sessionHours - freeAddOnDurationHours(parsed.data.selectedAddOns));
     const { error: addOnError } = await admin.from("booking_add_ons").insert(
       selectedAddOnDefs.map((addOn) => ({
         add_on_id: addOn.id,
