@@ -8,6 +8,8 @@ import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import { calculateOfficeQuote } from "@/lib/customer/office-pricing";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
+import { holdTimingSentence } from "@/lib/customer/payment-status";
+import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import {
   addOnAmountPence,
   formatMoney,
@@ -373,7 +375,9 @@ export async function POST(request: Request) {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Card saved for ${formatMoney(amountPence)}, we hold funds about 24 hours before your clean, then charge the next day after it’s done.`;
+  const { payment_auth_open_hours_before: holdOpenHours } =
+    await getPaymentTimingSettings();
+  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Card saved for ${formatMoney(amountPence)}. ${holdTimingSentence(holdOpenHours)}`;
   const preferences = profile.notification_preferences as {
     email?: boolean;
     sms?: boolean;
@@ -400,6 +404,7 @@ export async function POST(request: Request) {
           bookingUrl: `${appUrl}/booking/${booking.id}`,
           firstName: profile.full_name?.split(" ")[0],
           fullName: profile.full_name,
+          holdOpenHours,
           scheduledDate: parsed.data.scheduledDate,
           scheduledTime: parsed.data.scheduledTime,
           serviceName: formatServiceName(parsed.data.serviceType),

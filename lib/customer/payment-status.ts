@@ -20,9 +20,19 @@ export function paymentStatusLabel(
   }
 }
 
+/** Default "Auth window opens" hours; the live value is in admin Settings. */
+export const DEFAULT_HOLD_OPEN_HOURS = 48;
+
+/** Customer wording for when the card hold is placed, from the live setting. */
+export function holdTimingSentence(
+  holdOpenHours: number = DEFAULT_HOLD_OPEN_HOURS,
+) {
+  return `We’ll place a hold on your card from ${holdOpenHours} hours before your clean, once a cleaner is confirmed, and charge it the day after the clean.`;
+}
+
 export function paymentStatusDescription(
   status: CustomerPaymentStatus,
-  options?: { hasPaymentMethod?: boolean },
+  options?: { hasPaymentMethod?: boolean; holdOpenHours?: number },
 ) {
   switch (status) {
     case "held":
@@ -34,7 +44,7 @@ export function paymentStatusDescription(
     case "unpaid":
     default:
       return options?.hasPaymentMethod
-        ? "Your card is saved. We’ll place a hold about 24 hours before the clean once a cleaner is confirmed."
+        ? `Your card is saved. ${holdTimingSentence(options?.holdOpenHours)}`
         : "Save a card for this visit so we can match a cleaner.";
   }
 }

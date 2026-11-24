@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 export function RescheduleModal({
   bookingId,
   durationHours,
+  freeCancelHours = 24,
   initialDate,
   initialTime,
   onClose,
@@ -20,6 +21,7 @@ export function RescheduleModal({
 }: {
   bookingId: string;
   durationHours: number;
+  freeCancelHours?: number;
   initialDate: string;
   initialTime: string;
   onClose: () => void;
@@ -69,8 +71,8 @@ export function RescheduleModal({
         <div className="border-b px-5 py-4">
           <h2 className="text-lg font-semibold">Change date &amp; time</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Free when you move the visit at least 24 hours before the original
-            start.
+            Free when you move the visit at least {freeCancelHours} hours before
+            the original start.
           </p>
         </div>
         <div className="overflow-y-auto px-5 py-4">

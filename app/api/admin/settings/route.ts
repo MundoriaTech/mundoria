@@ -9,7 +9,6 @@ import {
 } from "@/lib/customer/pricing-config";
 
 const schema = z.object({
-  cancellation_window_hours: z.number().int().min(0).max(72),
   geofence_radius_meters: z.number().int().min(50).max(5000),
   payment_auth_open_hours_before: z.number().int().min(2).max(168),
   payment_capture_hour_uk: z.number().int().min(0).max(23),
@@ -17,7 +16,6 @@ const schema = z.object({
   payment_preauth_hours_before: z.number().int().min(1).max(168),
   platform_commission_percent: z.number().min(0).max(100),
   service_pricing: z.unknown().optional(),
-  support_email: z.string().email().nullable(),
 });
 
 export async function POST(request: Request) {
@@ -34,24 +32,20 @@ export async function POST(request: Request) {
       : undefined;
 
   const {
-    cancellation_window_hours,
     geofence_radius_meters,
     payment_auth_open_hours_before,
     payment_capture_hour_uk,
     payment_capture_minute_uk,
     payment_preauth_hours_before,
     platform_commission_percent,
-    support_email,
   } = parsed.data;
   const platformFields = {
-    cancellation_window_hours,
     geofence_radius_meters,
     payment_auth_open_hours_before,
     payment_capture_hour_uk,
     payment_capture_minute_uk,
     payment_preauth_hours_before,
     platform_commission_percent,
-    support_email,
   };
   const { error } = await auth.admin
     .from("platform_settings")

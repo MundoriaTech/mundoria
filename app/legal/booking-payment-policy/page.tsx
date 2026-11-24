@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
+import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { buildPageMetadata } from "@/lib/seo/site";
+
+// Hold timing comes from admin Settings; refresh within 5 minutes of a change.
+export const revalidate = 300;
+
+const HOLD_HOURS_TOKEN = "{holdOpenHours}";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
@@ -28,7 +34,7 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Your earnings are the booking price less Mundoria’s service fee, as shown on the offer and in your Earnings page.",
-      "Customer cards are saved at booking. Payment is pre-authorised about 24 hours before the visit once a cleaner has confirmed, and captured the next calendar day after checkout.",
+      `Customer cards are saved at booking. Payment is pre-authorised from ${HOLD_HOURS_TOKEN} hours before the visit once a cleaner has confirmed, and captured the next calendar day after checkout.`,
       "Earnings may change if the agreed scope is changed by the customer before or during the visit. Any change will be shown in the app.",
       "Tips, where offered, are passed on to you in full, subject to payment provider fees.",
     ],
@@ -84,12 +90,20 @@ const sections: LegalSection[] = [
   },
 ];
 
-export default function BookingPaymentPolicyPage() {
+export default async function BookingPaymentPolicyPage() {
+  const { payment_auth_open_hours_before: holdOpenHours } =
+    await getPaymentTimingSettings();
+  const liveSections = sections.map((section) => ({
+    ...section,
+    bullets: section.bullets?.map((bullet) =>
+      bullet.replace(HOLD_HOURS_TOKEN, String(holdOpenHours)),
+    ),
+  }));
   return (
     <LegalPage
       intro="How offers, earnings, payouts, cancellations and no-shows work for cleaners on Mundoria."
       lastUpdated="22 October 2026"
-      sections={sections}
+      sections={liveSections}
       title="Booking & Payment Policy"
     />
   );

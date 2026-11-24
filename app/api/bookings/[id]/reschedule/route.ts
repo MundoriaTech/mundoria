@@ -7,6 +7,7 @@ import {
 } from "@/lib/bookings/schedule";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createInAppNotification } from "@/lib/notifications/send";
+import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
@@ -45,10 +46,13 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const { payment_preauth_hours_before: freeCancelHours } =
+    await getPaymentTimingSettings();
   if (
     !canCustomerReschedule({
       actualStartTime: booking.actual_start_time,
       checkinVerified: booking.checkin_verified,
+      freeCancelHours,
       scheduledDate: booking.scheduled_date,
       scheduledStartTime: booking.scheduled_start_time,
       status: booking.status,
@@ -57,7 +61,7 @@ export async function POST(
     return NextResponse.json(
       {
         error:
-          "Reschedule is available at least 24 hours before your visit. Within 24 hours, cancel instead.",
+          `Reschedule is available at least ${freeCancelHours} hours before your visit. Within ${freeCancelHours} hours, cancel instead.`,
       },
       { status: 400 },
     );

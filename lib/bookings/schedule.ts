@@ -1,5 +1,6 @@
 import {
   cancellationFeePence,
+  DEFAULT_FREE_CANCEL_HOURS,
   hoursUntilBookingStart,
 } from "@/lib/bookings/fees";
 
@@ -80,30 +81,38 @@ export function canCustomerChangeSchedule({
 
 export function scheduleChangeFeePreview({
   amountTotal,
+  freeCancelHours = DEFAULT_FREE_CANCEL_HOURS,
   scheduledDate,
   scheduledStartTime,
 }: {
   amountTotal: number;
+  freeCancelHours?: number;
   scheduledDate: string;
   scheduledStartTime: string;
 }): { feePence: number; hoursLeft: number } {
   const hoursLeft = hoursUntilBookingStart(scheduledDate, scheduledStartTime);
   return {
-    feePence: cancellationFeePence({ amountTotal, hoursUntilStart: hoursLeft }),
+    feePence: cancellationFeePence({
+      amountTotal,
+      freeCancelHours,
+      hoursUntilStart: hoursLeft,
+    }),
     hoursLeft,
   };
 }
 
-/** Reschedule is free when ≥24h out; otherwise redirect to cancel+rebook. */
+/** Reschedule is free outside the free-cancel window; otherwise cancel+rebook. */
 export function canCustomerReschedule({
   actualStartTime,
   checkinVerified,
+  freeCancelHours = DEFAULT_FREE_CANCEL_HOURS,
   scheduledDate,
   scheduledStartTime,
   status,
 }: {
   actualStartTime?: string | null;
   checkinVerified?: boolean | null;
+  freeCancelHours?: number;
   scheduledDate: string;
   scheduledStartTime: string;
   status: string;
@@ -117,5 +126,7 @@ export function canCustomerReschedule({
   })) {
     return false;
   }
-  return hoursUntilBookingStart(scheduledDate, scheduledStartTime) >= 24;
+  return (
+    hoursUntilBookingStart(scheduledDate, scheduledStartTime) >= freeCancelHours
+  );
 }

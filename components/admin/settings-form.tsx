@@ -16,7 +16,6 @@ import {
 import type { ServiceType } from "@/types/customer";
 
 interface Settings {
-  cancellation_window_hours: number;
   geofence_radius_meters: number;
   payment_auth_open_hours_before: number;
   payment_capture_hour_uk: number;
@@ -24,7 +23,6 @@ interface Settings {
   payment_preauth_hours_before: number;
   platform_commission_percent: number;
   service_pricing?: unknown;
-  support_email: string | null;
 }
 
 function penceToPoundsInput(pence: number) {
@@ -40,7 +38,6 @@ function poundsInputToPence(value: string) {
 export function SettingsForm({ initial }: { initial: Settings | null }) {
   const { success } = useFeedback();
   const [settings, setSettings] = useState({
-    cancellation_window_hours: initial?.cancellation_window_hours ?? 24,
     geofence_radius_meters: initial?.geofence_radius_meters ?? 150,
     payment_auth_open_hours_before:
       initial?.payment_auth_open_hours_before ?? 48,
@@ -48,7 +45,6 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
     payment_capture_minute_uk: initial?.payment_capture_minute_uk ?? 0,
     payment_preauth_hours_before: initial?.payment_preauth_hours_before ?? 24,
     platform_commission_percent: initial?.platform_commission_percent ?? 20,
-    support_email: initial?.support_email ?? null,
   });
   const [pricing, setPricing] = useState<ServicePricingConfig>(() =>
     normalizeServicePricing(initial?.service_pricing),
@@ -128,31 +124,6 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               }
               type="number"
               value={settings.geofence_radius_meters}
-            />
-          </Field>
-          <Field label="Cancellation window (hours)">
-            <Input
-              min={0}
-              onChange={(event) =>
-                setSettings({
-                  ...settings,
-                  cancellation_window_hours: Number(event.target.value),
-                })
-              }
-              type="number"
-              value={settings.cancellation_window_hours}
-            />
-          </Field>
-          <Field label="Support email">
-            <Input
-              onChange={(event) =>
-                setSettings({
-                  ...settings,
-                  support_email: event.target.value || null,
-                })
-              }
-              type="email"
-              value={settings.support_email ?? ""}
             />
           </Field>
         </div>
@@ -361,10 +332,13 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           Customer payments
         </h2>
         <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          Card is saved at booking. After a cleaner accepts, holds open in the
-          auth window below (default 48h). Soft declines retry up to 5 times
-          until the free-cancel deadline (default 24h). Capture runs the next
-          UK calendar day after checkout.
+          Card is saved at booking. After a cleaner accepts, the payment hold is
+          placed from the auth window below (default 48h); soft declines retry up
+          to 5 times until the free-cancel deadline. The same deadline sets the
+          cancellation rule: customers cancel or reschedule free before it, and
+          pay the full booking amount inside it. Capture runs the next UK
+          calendar day after checkout. FAQ and terms pages say 24 hours, so
+          update them too if you change the deadline.
         </p>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
           <Field label="Auth window opens (hours before visit)">
@@ -381,7 +355,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
               value={settings.payment_auth_open_hours_before}
             />
           </Field>
-          <Field label="Free-cancel / auth deadline (hours before)">
+          <Field label="Free-cancel deadline (hours before visit)">
             <Input
               max={168}
               min={1}

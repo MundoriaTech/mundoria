@@ -1,5 +1,6 @@
 import { MUNDORIA_WORDMARK_SRC } from "@/lib/brand";
 import { FAQ_LINKS } from "@/lib/seo/faq-links";
+import { holdTimingSentence } from "@/lib/customer/payment-status";
 
 export type EmailTemplateId =
   | "admin.alert"
@@ -225,7 +226,7 @@ function resolveTemplate(
     case "customer.booking_confirmed":
       return {
         body:
-          "Your booking is confirmed and your card is saved. We’ll place a hold about 24 hours before your clean once a cleaner is confirmed, then capture payment the next day after the clean. You can follow payment progress on your booking page.",
+          `Your booking is confirmed and your card is saved. ${holdTimingSentence(Number(data.holdOpenHours) || undefined)} You can follow payment progress on your booking page.`,
         buttonHref: string(data.bookingUrl),
         buttonLabel: "View booking",
         cards: bookingCards(data),

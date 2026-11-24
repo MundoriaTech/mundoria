@@ -61,6 +61,8 @@ export function BookingDetail({
   customerId,
   hasCompletionConfirmation,
   hasRating,
+  freeCancelHours = 24,
+  holdOpenHours,
   initialBooking,
   offerExpiresAt = null,
 }: {
@@ -68,6 +70,10 @@ export function BookingDetail({
   customerId: string;
   hasCompletionConfirmation: boolean;
   hasRating: boolean;
+  /** Admin "Free-cancel deadline"; cancel and reschedule rules use it. */
+  freeCancelHours?: number;
+  /** Admin "Auth window opens" hours, for payment status wording. */
+  holdOpenHours?: number;
   initialBooking: Booking;
   offerExpiresAt?: string | null;
 }) {
@@ -104,20 +110,22 @@ export function BookingDetail({
       canCustomerReschedule({
         actualStartTime: booking.actual_start_time,
         checkinVerified: booking.checkin_verified,
+        freeCancelHours,
         scheduledDate: booking.scheduled_date,
         scheduledStartTime: booking.scheduled_start_time,
         status: booking.status,
       }),
-    [booking],
+    [booking, freeCancelHours],
   );
   const feePreview = useMemo(
     () =>
       scheduleChangeFeePreview({
         amountTotal: Number(booking.amount_total ?? 0),
+        freeCancelHours,
         scheduledDate: booking.scheduled_date,
         scheduledStartTime: booking.scheduled_start_time,
       }),
-    [booking],
+    [booking, freeCancelHours],
   );
   const hasPaymentMethod = Boolean(booking.stripe_payment_method_id);
   const needsPayment =
@@ -487,6 +495,7 @@ export function BookingDetail({
           <p className="mt-1 leading-6">
             {paymentStatusDescription(booking.payment_status, {
               hasPaymentMethod,
+              holdOpenHours,
             })}{" "}
             <Link
               className="font-semibold underline-offset-2 hover:underline"
@@ -591,6 +600,7 @@ export function BookingDetail({
               <p className="mt-2 leading-6">
                 {paymentStatusDescription(booking.payment_status, {
                   hasPaymentMethod,
+                  holdOpenHours,
                 })}{" "}
                 <Link
                   className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
@@ -860,9 +870,9 @@ export function BookingDetail({
           confirmDisabled={reason.trim().length < 3}
           description={
             feePreview.feePence <= 0
-              ? "Free cancellation. You’re more than 24 hours before the visit. Eligible refunds go to your original payment method."
+              ? `Free cancellation. You’re more than ${freeCancelHours} hours before the visit. Eligible refunds go to your original payment method.`
               : feePreview.feePence >= Number(booking.amount_total ?? 0)
-                ? "Within 24 hours of the visit, the full booking amount is retained. Tell us why you’re cancelling."
+                ? `Within ${freeCancelHours} hours of the visit, the full booking amount is retained. Tell us why you’re cancelling.`
                 : `A ${formatMoney(feePreview.feePence)} cancellation fee applies. The rest is refunded to your original payment method.`
           }
           onCancel={() => setShowCancel(false)}
@@ -944,6 +954,7 @@ export function BookingDetail({
         <RescheduleModal
           bookingId={booking.id}
           durationHours={booking.estimated_duration_hours ?? 2}
+          freeCancelHours={freeCancelHours}
           initialDate={booking.scheduled_date}
           initialTime={booking.scheduled_start_time}
           onClose={() => setShowReschedule(false)}

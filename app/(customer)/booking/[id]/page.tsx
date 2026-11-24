@@ -5,6 +5,7 @@ import {
   isCleanerVisibleToCustomer,
   isWaitingForCleanerAcceptance,
 } from "@/lib/customer/booking-visibility";
+import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import type {
@@ -86,6 +87,8 @@ export default async function CustomerBookingPage({
     booking.cleaner = null;
   }
 
+  const paymentTiming = await getPaymentTimingSettings();
+
   return (
     <>
       {searchParams?.series === "failed" ? (
@@ -97,6 +100,8 @@ export default async function CustomerBookingPage({
       ) : null}
     <BookingDetail
       customerId={user!.id}
+      freeCancelHours={paymentTiming.payment_preauth_hours_before}
+      holdOpenHours={paymentTiming.payment_auth_open_hours_before}
       checklistItems={(checklist ?? []) as BookingChecklistItem[]}
       hasCompletionConfirmation={Boolean(confirmation)}
       hasRating={Boolean(rating)}

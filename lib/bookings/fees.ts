@@ -1,12 +1,17 @@
-/** Soft cancellation fee window: free at 24h or more; full amount within 24h. */
+/** Default free-cancel window; the live value is the admin "Free-cancel deadline". */
+export const DEFAULT_FREE_CANCEL_HOURS = 24;
+
+/** Free at or beyond the free-cancel window; full amount inside it. */
 export function cancellationFeePence({
   amountTotal,
+  freeCancelHours = DEFAULT_FREE_CANCEL_HOURS,
   hoursUntilStart,
 }: {
   amountTotal: number;
+  freeCancelHours?: number;
   hoursUntilStart: number;
 }): number {
-  if (hoursUntilStart >= 24) return 0;
+  if (hoursUntilStart >= freeCancelHours) return 0;
   return amountTotal;
 }
 

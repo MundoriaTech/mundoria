@@ -9,6 +9,7 @@ import {
 import { canCustomerChangeSchedule } from "@/lib/bookings/schedule";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { changePro, cancelSeriesVisits } from "@/lib/bookings/series-actions";
+import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
@@ -93,8 +94,11 @@ export async function POST(
   }
 
   const total = Number(booking.amount_total ?? 0);
+  const { payment_preauth_hours_before: freeCancelHours } =
+    await getPaymentTimingSettings();
   const fee = cancellationFeePence({
     amountTotal: total,
+    freeCancelHours,
     hoursUntilStart: hoursLeft,
   });
   const refundAmount = Math.max(0, total - fee);
