@@ -527,6 +527,25 @@ export function composeBookingNotes(draft: BookingDraft) {
   return parts.join("\n\n");
 }
 
+export function frequencyLabelForBooking(booking: {
+  is_recurring: boolean;
+  recurrence_pattern: string | null;
+}) {
+  if (!booking.is_recurring) return "Once";
+  if (booking.recurrence_pattern === "weekly") return "Once a week";
+  if (booking.recurrence_pattern === "fortnightly") return "Once a fortnight";
+  if (booking.recurrence_pattern === "monthly") return "Once a month";
+  if (booking.recurrence_pattern === "custom") return "Custom calendar";
+  return "Recurring";
+}
+
+export function petsFromNotes(notes: string | null) {
+  if (!notes) return null;
+  if (/pets present/i.test(notes)) return true;
+  if (/no pets/i.test(notes)) return false;
+  return null;
+}
+
 export function guestAddressComplete(
   guest: BookingDraft["guestAddress"],
 ): guest is NonNullable<BookingDraft["guestAddress"]> {

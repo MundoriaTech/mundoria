@@ -24,7 +24,11 @@ import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
-import { formatBookingDate } from "@/lib/customer/booking-flow";
+import {
+  formatBookingDate,
+  frequencyLabelForBooking,
+  petsFromNotes,
+} from "@/lib/customer/booking-flow";
 import {
   formatConfirmByDeadline,
   isCleanerVisibleToCustomer,
@@ -1088,22 +1092,6 @@ function LookingForCleanerCard({
       </ol>
     </section>
   );
-}
-
-function frequencyLabelForBooking(booking: Booking) {
-  if (!booking.is_recurring) return "Once";
-  if (booking.recurrence_pattern === "weekly") return "Once a week";
-  if (booking.recurrence_pattern === "fortnightly") return "Once a fortnight";
-  if (booking.recurrence_pattern === "monthly") return "Once a month";
-  if (booking.recurrence_pattern === "custom") return "Custom calendar";
-  return "Recurring";
-}
-
-function petsFromNotes(notes: string | null) {
-  if (!notes) return null;
-  if (/pets present/i.test(notes)) return true;
-  if (/no pets/i.test(notes)) return false;
-  return null;
 }
 
 function Modal({

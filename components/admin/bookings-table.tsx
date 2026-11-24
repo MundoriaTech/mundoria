@@ -210,7 +210,11 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
                 <div className="min-w-0">
                   <p className="text-[15px] font-semibold">{booking.customer?.full_name ?? "Customer"}</p>
                   <p className="mt-0.5 truncate text-[13.5px] text-[#5F5F66]">
-                    {formatServiceName(booking.service_type)} · {booking.scheduled_date}
+                    {formatServiceName(booking.service_type)}
+                    {booking.estimated_duration_hours != null
+                      ? ` · ${booking.estimated_duration_hours}h`
+                      : ""}{" "}
+                    · {booking.scheduled_date}
                   </p>
                   <p className="mt-1 font-mono text-xs text-[#5F5F66]">{booking.id.slice(0, 8)}</p>
                 </div>
@@ -269,7 +273,12 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
                   <span className="truncate text-[15px] font-semibold text-black">{customerName}</span>
                 </span>
                 <span className="truncate text-[15px] text-[#5F5F66]">{booking.cleaner_profile?.full_name ?? "Unassigned"}</span>
-                <span className="truncate text-[15px] text-[#3D335F]">{formatServiceName(booking.service_type)}</span>
+                <span className="truncate text-[15px] text-[#3D335F]">
+                  {formatServiceName(booking.service_type)}
+                  {booking.estimated_duration_hours != null
+                    ? ` · ${booking.estimated_duration_hours}h`
+                    : ""}
+                </span>
                 <span className="tabular-nums text-[14.5px] text-[#3D335F]">{booking.scheduled_date}</span>
                 <StatusPill status={booking.status as BookingStatus} />
                 <span className="text-right text-[15px] font-semibold tabular-nums text-[#523F97]">
