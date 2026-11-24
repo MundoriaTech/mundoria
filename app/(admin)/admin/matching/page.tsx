@@ -1,6 +1,4 @@
 import { MatchingQueue } from "@/components/admin/matching-queue";
-import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
-import { OPS_REFRESH_MS } from "@/lib/dashboard/live-refresh";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminBooking } from "@/types/admin";
 
@@ -59,7 +57,6 @@ export default async function AdminMatchingPage() {
 
   return (
     <div className="min-w-0">
-      <LiveDashboardRefresh intervalMs={OPS_REFRESH_MS} scope="admin-matching" />
       <MatchingQueue bookings={bookings} cleaners={cleaners} today={today} />
     </div>
   );

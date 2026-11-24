@@ -20,3 +20,22 @@ export function bookingWatchesFor(role: "customer" | "cleaner"): LiveWatch[] {
     { table: "booking_team_members" },
   ];
 }
+
+/** Admin shell: any of these changing should refresh the open ops page. */
+export function adminOpsWatches(): LiveWatch[] {
+  return [
+    { table: "bookings" },
+    { table: "booking_add_ons" },
+    { table: "booking_status_history" },
+    { table: "matching_decisions" },
+    { table: "cleaner_job_responses" },
+    { table: "booking_team_members" },
+    { table: "callback_leads" },
+    { table: "leads" },
+    { table: "booking_drafts" },
+    { table: "disputes" },
+    { table: "messages" },
+    { table: "support_conversations" },
+    { table: "support_messages" },
+  ];
+}

@@ -12,9 +12,7 @@ import Link from "next/link";
 import { OperationsMap } from "@/components/admin/operations-map";
 import { RematchButton } from "@/components/admin/rematch-button";
 import { RevenueChart } from "@/components/admin/revenue-chart";
-import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { loadAdminUserCounts } from "@/lib/admin/user-counts";
-import { OPS_REFRESH_MS } from "@/lib/dashboard/live-refresh";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminBooking, RevenuePoint } from "@/types/admin";
@@ -143,8 +141,6 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-5">
-      <LiveDashboardRefresh intervalMs={OPS_REFRESH_MS} scope="admin-dashboard" />
-
       {/* Today banner + action */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div

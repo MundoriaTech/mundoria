@@ -36,7 +36,12 @@ import {
 } from "@/components/admin/admin-back-link";
 import { AdminAlerts } from "@/components/admin/admin-alerts";
 import { SessionTimeoutGuard } from "@/components/auth/session-timeout-guard";
+import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import {
+  adminOpsWatches,
+  OPS_REFRESH_MS,
+} from "@/lib/dashboard/live-refresh";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
@@ -490,6 +495,11 @@ export function AdminShell({
       style={{ fontFamily: "'Instrument Sans', system-ui, sans-serif" }}
     >
       <SessionTimeoutGuard audience="admin" />
+      <LiveDashboardRefresh
+        intervalMs={OPS_REFRESH_MS}
+        scope={`admin-shell-${admin.id}`}
+        watches={adminOpsWatches()}
+      />
 
       {/* Mobile drawer backdrop */}
       {drawerOpen ? (
