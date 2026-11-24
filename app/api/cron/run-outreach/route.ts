@@ -5,6 +5,7 @@ import { isAuthorizedCron } from "@/lib/cron/auth";
 import { outreachEnabled } from "@/lib/outreach/config";
 import { markBookedLeads, runDueEnrollments, syncDraftLeads } from "@/lib/outreach/engine";
 import { syncZohoSalesEnquiries } from "@/lib/zoho/sales-intake";
+import { syncCleanerCalendar } from "@/lib/zoho/calendar-sync";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -20,6 +21,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   await syncZohoSalesEnquiries().catch((error) => Sentry.captureException(error));
+  // Independent of marketing/outreach being enabled. Transactional scheduling
+  // uses the existing heartbeat, so no new paid cron service is required.
+  await syncCleanerCalendar().catch(() => Sentry.captureException(new Error("CALENDAR_HEARTBEAT_FAILED")));
   try {
     const booked = await markBookedLeads();
     if (!outreachEnabled()) {

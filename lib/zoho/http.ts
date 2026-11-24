@@ -1,9 +1,10 @@
 const accountsHost = /^accounts\.(?:zoho\.(?:com(?:\.au|\.cn)?|eu|in|jp|sa|uk)|zohocloud\.ca)$/;
 const crmHost = /^www\.zohoapis\.(?:com(?:\.au|\.cn)?|eu|in|jp|sa|uk|ca)$/;
 const recruitHost = /^recruit\.zoho\.(?:com(?:\.au|\.cn)?|eu|in|jp|sa|uk|ca)$/;
+const calendarHost = /^calendar\.zoho\.(?:com(?:\.au|\.cn)?|eu|in|jp|sa|uk|ca)$/;
 
-export function zohoOrigin(value: string, service: "accounts" | "crm" | "recruit") {
-  const patterns = { accounts: accountsHost, crm: crmHost, recruit: recruitHost };
+export function zohoOrigin(value: string, service: "accounts" | "crm" | "recruit" | "calendar") {
+  const patterns = { accounts: accountsHost, crm: crmHost, recruit: recruitHost, calendar: calendarHost };
   let url: URL;
   try {
     url = new URL(value);

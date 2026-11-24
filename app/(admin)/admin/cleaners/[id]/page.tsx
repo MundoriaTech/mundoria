@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
+import { CalendarSyncStatus } from "@/components/admin/calendar-sync-status";
 import { DocumentChecksSection } from "@/components/admin/document-checks-section";
 import { RemoveUserButton } from "@/components/admin/remove-user-button";
 import { PagedHistoryTable } from "@/components/admin/paged-history-table";
@@ -218,6 +219,8 @@ export default async function AdminCleanerPage({
         totalJobs={cleaner.total_jobs}
         yearsExperience={cleaner.years_experience ?? 0}
       />
+
+      <CalendarSyncStatus cleanerId={params.id} />
 
       <DocumentChecksSection
         cleanerId={params.id}
