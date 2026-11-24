@@ -182,7 +182,7 @@ export async function POST(request: Request) {
 
   const metadata = {
     address_id: parsed.data.addressId,
-    billed_hours: String(parsed.data.estimatedDurationHours),
+    billed_hours: String(breakdown.billableHours),
     cleaning_standard: parsed.data.cleaningStandard,
     offer_callback_lead_id: offer?.leadId ?? "",
     offer_free_hours: String(offer?.freeHours ?? 0),

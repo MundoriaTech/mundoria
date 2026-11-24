@@ -73,8 +73,8 @@ export interface ServiceAddOnDefinition {
   /** Extra cleaner time when selected (non-hourly add-ons). Defaults to 0.25h. */
   durationHours?: number;
   /**
-   * When true, `durationHours` lengthens the visit for scheduling but is not
-   * charged (e.g. ironing adds 30 minutes at no extra cost).
+   * When true, the add-on has no separate price: `durationHours` is added to
+   * the session and billed as cleaning time (e.g. ironing adds 30 minutes).
    */
   freeDuration?: boolean;
   id: string;
@@ -370,9 +370,9 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     amount: 0,
     categories: ["residential"],
     description:
-      "Pressing and folding during the visit. Adds about 30 minutes to the booking at no extra charge.",
+      "Pressing and folding during the visit. Adds about 30 minutes to the booking, charged at your cleaning rate.",
     detail:
-      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much ironing you have. Ironing itself isn’t charged; you only pay for the cleaning time.\n\nKindly note: you’ll need to provide the ironing board. If you’ve asked the professional to bring cleaning equipment, they can also bring an iron, but the ironing board is not included.",
+      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much ironing you have. There’s no separate charge for ironing; the extra time is charged at your hourly cleaning rate.\n\nKindly note: you’ll need to provide the ironing board. If you’ve asked the professional to bring cleaning equipment, they can also bring an iron, but the ironing board is not included.",
     durationHours: 0.5,
     freeDuration: true,
     id: "ironing",
@@ -382,9 +382,9 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     amount: 0,
     categories: ["residential"],
     description:
-      "Wash, dry and fold during the visit. Adds about 30 minutes at no extra charge.",
+      "Wash, dry and fold during the visit. Adds about 30 minutes, charged at your cleaning rate.",
     detail:
-      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much laundry you have. Laundry itself isn’t charged; you only pay for the cleaning time.\n\nPlease have detergent available, and note the machine must be usable during the visit.",
+      "We’ll add 30 minutes to your booking to start with, and you can adjust the time depending on how much laundry you have. There’s no separate charge for laundry; the extra time is charged at your hourly cleaning rate.\n\nPlease have detergent available, and note the machine must be usable during the visit.",
     durationHours: 0.5,
     freeDuration: true,
     id: "laundry",
@@ -394,9 +394,9 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     amount: 0,
     categories: ["residential", "moving_home", "short_term_rental", "recovery"],
     description:
-      "Interior fridge clean and wipe-down. Adds about 30 minutes at no extra charge.",
+      "Interior fridge clean and wipe-down. Adds about 30 minutes, charged at your cleaning rate.",
     detail:
-      "We’ll add 30 minutes for shelves, drawers and seals. Fridge cleaning itself isn’t charged; you only pay for the cleaning time.\n\nPlease empty perishables you don’t want moved.",
+      "We’ll add 30 minutes for shelves, drawers and seals. There’s no separate charge for fridge cleaning; the extra time is charged at your hourly cleaning rate.\n\nPlease empty perishables you don’t want moved.",
     durationHours: 0.5,
     freeDuration: true,
     id: "inside_fridge",
@@ -406,9 +406,9 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
     amount: 0,
     categories: ["residential", "moving_home", "short_term_rental", "recovery"],
     description:
-      "Oven interior clean for grease and residue. Adds about 30 minutes at no extra charge.",
+      "Oven interior clean for grease and residue. Adds about 30 minutes, charged at your cleaning rate.",
     detail:
-      "We’ll add 30 minutes for interior walls, racks and door glass. Oven cleaning itself isn’t charged; you only pay for the cleaning time.\n\nSelf-cleaning cycles should be finished before the visit.",
+      "We’ll add 30 minutes for interior walls, racks and door glass. There’s no separate charge for oven cleaning; the extra time is charged at your hourly cleaning rate.\n\nSelf-cleaning cycles should be finished before the visit.",
     durationHours: 0.5,
     freeDuration: true,
     id: "inside_oven",
@@ -424,9 +424,9 @@ export const SERVICE_ADD_ONS: ServiceAddOnDefinition[] = [
       "recovery",
     ],
     description:
-      "Interior window glass and sill clean. Adds about 30 minutes at no extra charge.",
+      "Interior window glass and sill clean. Adds about 30 minutes, charged at your cleaning rate.",
     detail:
-      "We’ll add 30 minutes for inside glass and accessible sills. Window cleaning itself isn’t charged; you only pay for the cleaning time.\n\nThis does not cover exterior glazing or high atrium windows.",
+      "We’ll add 30 minutes for inside glass and accessible sills. There’s no separate charge for window cleaning; the extra time is charged at your hourly cleaning rate.\n\nThis does not cover exterior glazing or high atrium windows.",
     durationHours: 0.5,
     freeDuration: true,
     id: "interior_windows",
@@ -724,7 +724,10 @@ export function selectedAddOnTotal(
   );
 }
 
-/** Session minutes added for free (not charged as labour), e.g. ironing. */
+/**
+ * Session time added by extras with no separate price (e.g. ironing). Billed as
+ * cleaning time; only subtracted when re-pricing legacy bookings.
+ */
 export function freeAddOnDurationHours(selectedAddOns: string[]) {
   const selected = new Set(selectedAddOns);
   return SERVICE_ADD_ONS.filter(
@@ -827,6 +830,12 @@ export type EstimatePriceOptions = {
    */
   durationHours?: number | null;
   /**
+   * Legacy rule for bookings priced before extra time was billed: subtract
+   * the time of no-separate-charge extras (fridge, oven, ironing…) from the
+   * billable hours. Only for re-explaining old bookings; never for new quotes.
+   */
+  legacyFreeExtraTime?: boolean;
+  /**
    * Extra on-site hours that are not billed (first-visit gift hour).
    * Adds to visit length only; labour still uses the chosen session.
    */
@@ -909,9 +918,12 @@ export function estimatePriceBreakdown(
       chosen != null && Number.isFinite(chosen) && chosen >= 1
         ? Number(chosen)
         : formulaHours;
-    const freeHours = freeAddOnDurationHours(selectedAddOns);
+    // Extras with no separate price (fridge, oven, ironing…) still add their
+    // time to the session, and that time is billed as cleaning time.
+    const freeHours = options?.legacyFreeExtraTime
+      ? freeAddOnDurationHours(selectedAddOns)
+      : 0;
     const giftHours = Math.max(0, Number(options?.offerFreeHours ?? 0));
-    // Session length includes free extras (ironing); labour ignores that carve-out.
     // A first-visit gift hour extends time on site without changing the charge.
     visitHours = Number((sessionHours + giftHours).toFixed(2));
     billableHours = Math.max(1, Number((sessionHours - freeHours).toFixed(2)));

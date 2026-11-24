@@ -3675,10 +3675,6 @@ function AddOnsStep({
                     )} while the cleaner is on site`
                   : `+${formatMoney(addOnAmountPence(detailAddOn, addOnPriceContext))}`}
               </p>
-            ) : detailAddOn.freeDuration ? (
-              <p className="font-semibold text-[#1c133b]">
-                Included in your session time, with no extra charge
-              </p>
             ) : null}
           </div>
           <div className="mt-6">

@@ -122,30 +122,43 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
   ].filter((row): row is [string, string] => Boolean(row));
   const pricing = await loadServicePricing();
   const sessionHours = Math.max(0, (durationHours ?? 0) - offerHours);
-  const breakdown = address
-    ? estimatePriceBreakdown(
-        booking.service_type,
-        address,
-        booking.cleaning_standard ?? "enhanced",
-        addOnRows
-          .map((row) => row.add_on_id)
-          .filter((id): id is string => Boolean(id)),
-        {
-          date: booking.scheduled_date,
-          time: booking.scheduled_start_time,
-        },
-        {
-          durationHours: sessionHours || null,
-          offerFreeHours: offerHours,
-          pricing,
-          rooms: {
-            bathrooms: address.num_bathrooms,
-            bedrooms: address.num_bedrooms,
-            otherRooms: address.num_other_rooms,
+  const priceBooking = (legacyFreeExtraTime: boolean) =>
+    address
+      ? estimatePriceBreakdown(
+          booking.service_type,
+          address,
+          booking.cleaning_standard ?? "enhanced",
+          addOnRows
+            .map((row) => row.add_on_id)
+            .filter((id): id is string => Boolean(id)),
+          {
+            date: booking.scheduled_date,
+            time: booking.scheduled_start_time,
           },
-        },
-      )
-    : null;
+          {
+            durationHours: sessionHours || null,
+            legacyFreeExtraTime,
+            offerFreeHours: offerHours,
+            pricing,
+            rooms: {
+              bathrooms: address.num_bathrooms,
+              bedrooms: address.num_bedrooms,
+              otherRooms: address.num_other_rooms,
+            },
+          },
+        )
+      : null;
+  // Bookings priced before extra time was billed keep their agreed price;
+  // explain them with the rule that actually produced the charged total.
+  const currentBreakdown = priceBooking(false);
+  const legacyBreakdown = priceBooking(true);
+  const chargedTotal = Number(booking.amount_total ?? 0);
+  const pricedOnLegacyRule = Boolean(
+    currentBreakdown &&
+      currentBreakdown.totalPence !== chargedTotal &&
+      legacyBreakdown?.totalPence === chargedTotal,
+  );
+  const breakdown = pricedOnLegacyRule ? legacyBreakdown : currentBreakdown;
   return (
     <div className="min-w-0 space-y-5 sm:space-y-6">
       <div>
@@ -294,8 +307,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
                       .filter((addOn) => addOn.amountPence === 0)
                       .map((addOn) => addOn.label)
                       .join(", ")}{" "}
-                    included in the {formatVisitHours(breakdown.visitHours)}{" "}
-                    visit, not charged separately
+                    {pricedOnLegacyRule
+                      ? `included in the ${formatVisitHours(breakdown.visitHours)} visit, time not charged (priced before extra time was billed)`
+                      : `have no separate price; their time is in the ${formatVisitHours(breakdown.billableHours)} charged above`}
                   </li>
                 ) : null}
                 <li>

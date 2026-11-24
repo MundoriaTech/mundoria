@@ -163,8 +163,10 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           Service hourly rates (£/h)
         </h2>
         <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          One labour rate per service. Heavier jobs still cost more when they
-          take longer.
+          One labour rate per service, charged for the whole session. That
+          includes the 30 minutes each that fridge, oven, window, ironing and
+          laundry extras add: they have no separate price, but their time is
+          charged at this rate.
         </p>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
@@ -203,6 +205,10 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
         <h2 className="text-base font-semibold text-[#1c133b]">
           Supply rates (£/h)
         </h2>
+        <p className="mt-1 text-sm leading-6 text-[#5a5470]">
+          Charged for every hour of the session, including time added by
+          extras. Schedule multipliers do not apply to supplies.
+        </p>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
           <Field label="Cleaning products (home)">
             <Input
@@ -280,8 +286,9 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           Flat add-on prices (£)
         </h2>
         <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          Fixed extras charged on top of labour time (ironing still adds time at
-          checkout; set £0 here if it is time-only).
+          Fixed extras charged on top of labour time. Fridge, oven, window,
+          ironing and laundry extras are not listed: they have no separate
+          price, and their time is charged at the service rate.
         </p>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
           {ADMIN_FLAT_ADD_ONS.map((addOn) => (
@@ -315,7 +322,8 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
           Schedule price multipliers
         </h2>
         <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          Multipliers on labour (1.0 = normal). Example: 1.15 = +15%.
+          Multipliers on labour only, not supplies (1.0 = normal). Example: 1.15
+          = +15%.
         </p>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
           {(
