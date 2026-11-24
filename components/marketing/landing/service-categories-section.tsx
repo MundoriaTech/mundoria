@@ -5,7 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-import { marketingServiceBySlug } from "@/lib/seo/marketing";
+import {
+  categoryFromRoot,
+  serviceTypeFromSegment,
+} from "@/lib/seo/public-paths";
 import { cn } from "@/lib/utils";
 
 const GROUPS = [
@@ -194,11 +197,10 @@ export function ServiceCategoriesSection({
             <ul className="mt-4 divide-y divide-[#eadfce] border-b border-[#eadfce] sm:mt-6">
               {active.items.map((item) => {
                 const open = openLabel === item.label;
-                const slug = item.href.replace(/^\/cleaning\//, "").split("/")[0] ?? "";
-                const service = marketingServiceBySlug(slug);
-                const bookHref =
-                  setupOnly || !service ? bookingHref : service.bookingHref;
-                const panelId = `category-actions-${slug}`;
+                const bookHref = setupOnly
+                  ? bookingHref
+                  : bookingHrefForPage(item.href, bookingHref);
+                const panelId = `category-actions-${item.href.split("/").filter(Boolean).join("-")}`;
                 return (
                   <li key={item.label}>
                     <button
@@ -255,4 +257,17 @@ export function ServiceCategoriesSection({
       </div>
     </section>
   );
+}
+
+/**
+ * Book straight into the service a public page is about, e.g.
+ * `/house-cleaning/one-off` → `/booking/new?service=one_off`. Falls back to
+ * the page's category, then the plain booking link.
+ */
+function bookingHrefForPage(pageHref: string, fallback: string) {
+  const [root, segment] = pageHref.split("/").filter(Boolean);
+  const serviceType = segment ? serviceTypeFromSegment(segment) : undefined;
+  if (serviceType) return `/booking/new?service=${serviceType}`;
+  const category = root ? categoryFromRoot(root) : null;
+  return category ? `/booking/new?category=${category}` : fallback;
 }
