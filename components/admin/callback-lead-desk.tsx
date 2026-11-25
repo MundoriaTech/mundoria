@@ -253,6 +253,19 @@ export function CallbackLeadDesk({ row }: { row: CallbackLeadRow }) {
             placeholder="What they said on the call"
             value={notes}
           />
+          {row.notes_updated_at ? (
+            <span className="mt-1.5 block text-[13px] text-[#5F5F66]">
+              Last saved by {row.notes_updated_by_name ?? "an admin"} ·{" "}
+              {new Date(row.notes_updated_at).toLocaleString("en-GB", {
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                month: "short",
+                timeZone: "Europe/London",
+                year: "numeric",
+              })}
+            </span>
+          ) : null}
         </label>
       </div>
 

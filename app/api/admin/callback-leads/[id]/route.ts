@@ -84,6 +84,11 @@ export async function PATCH(
     town: nextTown,
     updated_at: new Date().toISOString(),
   };
+  // Who wrote or edited the notes, only when the text actually changed.
+  if (nextNotes !== ((existing.notes as string | null) ?? null)) {
+    patch.notes_updated_at = new Date().toISOString();
+    patch.notes_updated_by = auth.profile.id;
+  }
 
   const { data: saved, error } = await admin
     .from("callback_leads")

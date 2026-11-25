@@ -62,6 +62,8 @@ export type CallbackLeadRow = {
   id: string;
   last_name: string;
   notes: string | null;
+  notes_updated_at: string | null;
+  notes_updated_by_name: string | null;
   outcome: CallbackOutcome | null;
   phone: string;
   source: string;
@@ -82,6 +84,13 @@ export function mapCallbackLeadRow(row: Record<string, unknown>): CallbackLeadRo
     id: row.id as string,
     last_name: row.last_name as string,
     notes: (row.notes as string | null) ?? null,
+    notes_updated_at: (row.notes_updated_at as string | null) ?? null,
+    notes_updated_by_name: (() => {
+      const editor = Array.isArray(row.notes_editor)
+        ? row.notes_editor[0]
+        : row.notes_editor;
+      return (editor as { full_name?: string | null } | null)?.full_name ?? null;
+    })(),
     outcome: parseOutcome(row.outcome),
     phone: row.phone as string,
     source: row.source as string,

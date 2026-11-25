@@ -15,7 +15,7 @@ export default async function AdminCallbackLeadPage({
   const { data, error } = await createAdminClient()
     .from("callback_leads")
     .select(
-      "id,first_name,last_name,phone,email,available_in_10_min,source,utm_source,utm_medium,utm_campaign,created_at,call_status,outcome,area,town,notes",
+      "id,first_name,last_name,phone,email,available_in_10_min,source,utm_source,utm_medium,utm_campaign,created_at,call_status,outcome,area,town,notes,notes_updated_at,notes_editor:profiles!callback_leads_notes_updated_by_fkey(full_name)",
     )
     .eq("id", params.id)
     .maybeSingle();
