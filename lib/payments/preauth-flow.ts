@@ -711,13 +711,33 @@ export async function cancelUnpaidAwaitingPayment(
   const { data: booking } = await admin
     .from("bookings")
     .select(
-      "id,status,cleaner_id,customer_id,payment_status,scheduled_date,scheduled_start_time,stripe_payment_intent_id,cancelled_at,customer:profiles!bookings_customer_id_fkey(email,full_name)",
+      "id,status,cleaner_id,customer_id,payment_status,scheduled_date,scheduled_start_time,stripe_payment_intent_id,cancelled_at,auto_cancel_exempt,customer:profiles!bookings_customer_id_fkey(email,full_name)",
     )
     .eq("id", bookingId)
     .maybeSingle();
 
   if (!booking || booking.cancelled_at || booking.status === "cancelled") {
     return { authorized: false, cancelled: false, reason: "Already cancelled." };
+  }
+  // Protected bookings are never cancelled automatically: stop retrying and
+  // tell admins so someone sorts payment with the customer.
+  if (booking.auto_cancel_exempt) {
+    await admin
+      .from("bookings")
+      .update({
+        payment_auth_next_attempt_at: null,
+        payment_auth_stop_retries: true,
+        payment_preauth_failed_at: failedAt,
+        payment_preauth_failure_reason: reason,
+      })
+      .eq("id", bookingId);
+    await alertAdmins(
+      "payment_failed",
+      "Card hold failed on a protected booking",
+      `${reason} This booking is protected from automatic cancellation, so it stays open. Please contact the customer about payment.`,
+      { booking_id: bookingId },
+    ).catch(() => undefined);
+    return { authorized: false, cancelled: false, reason };
   }
   if (booking.payment_status === "held" || booking.payment_status === "released") {
     return { authorized: true, cancelled: false };

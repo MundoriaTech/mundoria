@@ -98,6 +98,7 @@ export async function enforceMatchCutoffs(now: Date = new Date()) {
     )
     .in("status", UNACCEPTED)
     .lte("scheduled_date", horizon)
+    .eq("auto_cancel_exempt", false)
     .limit(200);
 
   let warned = 0;

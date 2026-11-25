@@ -562,7 +562,7 @@ export async function markPreauthFailure(
   const { data: booking } = await admin
     .from("bookings")
     .select(
-      "id,status,cleaner_id,payment_status,scheduled_date,scheduled_start_time,stripe_payment_intent_id,cancelled_at",
+      "id,status,cleaner_id,payment_status,scheduled_date,scheduled_start_time,stripe_payment_intent_id,cancelled_at,auto_cancel_exempt",
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -571,9 +571,10 @@ export async function markPreauthFailure(
     return { cancelled: false as const };
   }
 
-  const shouldCancel = (
-    CANCEL_ON_PREAUTH_FAIL_STATUSES as readonly string[]
-  ).includes(booking.status);
+  // Protected bookings are never cancelled automatically; admins follow up.
+  const shouldCancel =
+    !booking.auto_cancel_exempt &&
+    (CANCEL_ON_PREAUTH_FAIL_STATUSES as readonly string[]).includes(booking.status);
 
   if (!shouldCancel) {
     await admin

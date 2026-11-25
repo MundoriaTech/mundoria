@@ -36,7 +36,9 @@ export async function settleOutstandingOffers(scope?: {
         "id,status,scheduled_date,scheduled_start_time,payment_status,stripe_payment_intent_id",
       )
       .in("status", ["pending_match", "matched"])
-      .lte("scheduled_date", today);
+      .lte("scheduled_date", today)
+      // Bookings an admin protected are never cancelled automatically.
+      .eq("auto_cancel_exempt", false);
     if (scope?.customerId) query = query.eq("customer_id", scope.customerId);
     if (scope?.cleanerId) query = query.eq("cleaner_id", scope.cleanerId);
     const { data } = await query.range(page * 200, page * 200 + 199);

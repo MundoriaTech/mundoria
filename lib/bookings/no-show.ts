@@ -67,12 +67,15 @@ export async function cancelExpiredReplacement(bookingId: string) {
   const admin = createAdminClient();
   const { data: booking } = await admin
     .from("bookings")
-    .select("customer_id,status,payment_status,stripe_payment_intent_id,customer:profiles!bookings_customer_id_fkey(email)")
+    .select("customer_id,status,payment_status,stripe_payment_intent_id,auto_cancel_exempt,customer:profiles!bookings_customer_id_fkey(email)")
     .eq("id", bookingId)
     .single();
   if (!booking || !["no_show", "pending_match"].includes(booking.status)) {
     return false;
   }
+  // Protected bookings are never cancelled automatically (admins were
+  // already alerted about the no-show).
+  if (booking.auto_cancel_exempt) return false;
   const customer = Array.isArray(booking.customer)
     ? booking.customer[0]
     : booking.customer;
