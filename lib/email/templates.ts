@@ -20,6 +20,7 @@ export type EmailTemplateId =
   | "auth.signup_confirmation"
   | "auth.signup_otp"
   | "auth.welcome"
+  | "cleaner.account_update"
   | "cleaner.application_approved"
   | "cleaner.application_needs_info"
   | "cleaner.application_rejected"
@@ -502,6 +503,17 @@ function resolveTemplate(
         subject: "Your Mundoria cleaner account is certified",
         title: "You are certified",
         tone: "success",
+      };
+    case "cleaner.account_update":
+      return {
+        body: string(data.body) || "There’s an update on your Mundoria cleaner account.",
+        buttonHref: `${appUrl}/cleaner/dashboard`,
+        buttonLabel: "Open Mundoria",
+        cards: [{ label: "Note from Mundoria", value: data.reason }],
+        preview: string(data.title) || "An update on your Mundoria cleaner account.",
+        subject: `Mundoria: ${string(data.title) || "account update"}`,
+        title: string(data.title) || "Account update",
+        tone: "warning",
       };
     case "cleaner.application_needs_info":
       return {

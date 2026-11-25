@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationBell } from "@/components/shared/notification-bell";
 import {
   CalendarDays,
   Check,
@@ -1598,11 +1599,18 @@ export function OnboardingWizard({
                 src={STEP_HEADER_ICONS[activeStep.id]}
                 width={64}
               />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <h2 className="text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-[#312c79] sm:text-[2.55rem] sm:leading-none">
                   {activeStep.label}
                 </h2>
               </div>
+              {/* Admin messages about the application (more info needed,
+                  document feedback, call outcome) land here during onboarding. */}
+              {!preview ? (
+                <div className="shrink-0 self-start">
+                  <NotificationBell userId={profile.id} />
+                </div>
+              ) : null}
             </div>
             <p className="mt-2.5 max-w-xl text-sm leading-6 text-[#5a5470] sm:mt-3.5 sm:text-base sm:leading-7">
               {STEP_WHY[activeStep.id]}

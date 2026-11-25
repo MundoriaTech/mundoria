@@ -338,9 +338,9 @@ export async function POST(
     action === "approve"
       ? "You are approved and can now receive cleaning jobs."
       : action === "reject"
-        ? "Your application is on hold. Mundoria will follow up if more is needed."
+        ? `Your application is on hold. Note from Mundoria: ${reason}`
         : action === "request_info"
-          ? "We need a little more information to finish reviewing your application. Check your email for details."
+          ? `We need a little more information to finish reviewing your application: ${reason}`
           : action === "review_document" && document_decision === "verified"
             ? `Your ${documentLabel} document was accepted.`
             : action === "review_document" && document_decision === "rejected"
@@ -350,11 +350,11 @@ export async function POST(
         : action === "complete_interview"
           ? "Your onboarding call is complete. Mundoria will finish document review shortly."
           : action === "fail_interview"
-            ? "Your onboarding call didn’t lead to approval this time. Mundoria will follow up with next steps."
+            ? `Your onboarding call didn’t lead to approval this time. Note from Mundoria: ${reason}`
             : action === "suspend"
-              ? "Your cleaner account has been temporarily suspended."
+              ? `Your cleaner account has been temporarily suspended. Reason: ${reason}`
               : action === "remove"
-                ? "Your cleaner account has been removed from Mundoria."
+                ? `Your cleaner account has been removed from Mundoria. Reason: ${reason}`
                 : `Your cleaner account was updated: ${action}.`;
 
   const notificationTitle =
@@ -374,7 +374,11 @@ export async function POST(
           ? "Onboarding call complete"
           : action === "fail_interview"
             ? "Onboarding call update"
-            : "Account update";
+            : action === "suspend"
+              ? "Account suspended"
+              : action === "remove"
+                ? "Account removed"
+                : "Account update";
 
   await createInAppNotification(
     params.id,
@@ -399,6 +403,28 @@ export async function POST(
         data: { action },
         playerId: (recipient?.onesignal_player_id as string | null) ?? null,
         title: notificationTitle,
+      });
+    }
+
+    if (
+      (action === "fail_interview" ||
+        action === "suspend" ||
+        action === "remove") &&
+      recipient?.email
+    ) {
+      const fullName = (recipient.full_name as string | null) ?? "";
+      await sendBrandedEmail({
+        data: {
+          appUrl:
+            process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin,
+          body: notificationBody,
+          firstName: fullName.split(" ")[0] || undefined,
+          fullName: fullName || undefined,
+          reason,
+          title: notificationTitle,
+        },
+        template: "cleaner.account_update",
+        to: recipient.email as string,
       });
     }
 

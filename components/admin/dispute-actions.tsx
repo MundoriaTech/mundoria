@@ -77,7 +77,7 @@ export function DisputeActions({ disputeId }: { disputeId: string }) {
       <textarea
         className="mt-4 min-h-24 w-full rounded-md border p-3 text-sm"
         onChange={(event) => setNotes(event.target.value)}
-        placeholder="Resolution notes"
+        placeholder="Resolution notes (sent to the customer and cleaner)"
       />
       <Input
         className="mt-3"

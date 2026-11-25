@@ -269,7 +269,7 @@ export function CleanerReviewPanel({
             </Button>
             <label className="mt-1 block">
               <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Note if they didn’t proceed
+                Note if they didn’t proceed (shared with the cleaner)
               </span>
               <Input
                 onChange={(event) => setReason(event.target.value)}
@@ -366,7 +366,7 @@ export function CleanerReviewPanel({
         <DecisionPhase
           step={showInterviewActions ? "4" : "3"}
           title="Restrict account"
-          hint="Note is required and logged"
+          hint="Note is required, logged and shared with the cleaner"
         >
           <Input
             onChange={(event) => setReason(event.target.value)}
