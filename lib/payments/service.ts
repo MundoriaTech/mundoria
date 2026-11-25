@@ -55,7 +55,7 @@ export async function scheduleCleanerPayout(
   const { data: booking } = await admin
     .from("bookings")
     .select(
-      "cleaner_id,amount_total,amount_cleaner,allocated_cleaners,access_penalty_pence,access_penalty_charged_at",
+      "cleaner_id,amount_total,amount_cleaner,amount_platform,allocated_cleaners,access_penalty_pence,access_penalty_charged_at",
     )
     .eq("id", bookingId)
     .single();
@@ -78,15 +78,22 @@ export async function scheduleCleanerPayout(
   const grossShare = Math.floor(
     Number(booking.amount_total ?? 0) / Math.max(1, cleanerIds.length),
   );
-  // A collected waiting charge goes to the cleaner who waited (primary).
+  // A collected waiting charge goes to the cleaner who waited (primary),
+  // less the same platform commission the booking was priced with.
   const waiting =
     booking.access_penalty_charged_at && charges.waitingChargeId
       ? Number(booking.access_penalty_pence ?? 0)
       : 0;
+  const bookingTotal = Number(booking.amount_total ?? 0);
+  const commissionRate =
+    bookingTotal > 0 ? Number(booking.amount_platform ?? 0) / bookingTotal : 0;
+  const waitingCleanerShare = waiting - Math.round(waiting * commissionRate);
 
   let lastPayoutId: string | null = null;
   for (const cleanerId of cleanerIds) {
-    const extra = cleanerId === booking.cleaner_id ? waiting : 0;
+    const isPrimary = cleanerId === booking.cleaner_id;
+    const extraGross = isPrimary ? waiting : 0;
+    const extra = isPrimary ? waitingCleanerShare : 0;
     const { data: cleaner } = await admin
       .from("cleaner_profiles")
       .select("payout_preference")
@@ -113,7 +120,7 @@ export async function scheduleCleanerPayout(
       await admin
         .from("payouts")
         .update({
-          gross_amount: Number(existing.gross_amount) + grossShare + extra,
+          gross_amount: Number(existing.gross_amount) + grossShare + extraGross,
           net_amount: Number(existing.net_amount) + share + extra,
           total_jobs: existing.total_jobs + 1,
         })
@@ -124,7 +131,7 @@ export async function scheduleCleanerPayout(
         .from("payouts")
         .insert({
           cleaner_id: cleanerId,
-          gross_amount: grossShare + extra,
+          gross_amount: grossShare + extraGross,
           net_amount: share + extra,
           period_end: periodEnd.toISOString().slice(0, 10),
           period_start: periodStart.toISOString().slice(0, 10),
