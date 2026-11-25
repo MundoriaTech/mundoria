@@ -108,6 +108,7 @@ export async function POST(request: Request) {
       if (input.kind === "dbs") updates.dbs_path = "have";
     } else if (input.kind === "utr") {
       updates.utr_document_url = input.paths[0];
+      updates.utr_path = "have";
     } else if (input.kind === "insurance") {
       if (input.expiry_date <= new Date().toISOString().slice(0, 10)) {
         return NextResponse.json(

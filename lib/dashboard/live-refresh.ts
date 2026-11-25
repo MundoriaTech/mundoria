@@ -37,5 +37,7 @@ export function adminOpsWatches(): LiveWatch[] {
     { table: "messages" },
     { table: "support_conversations" },
     { table: "support_messages" },
+    { table: "cleaner_profiles" },
+    { table: "profiles" },
   ];
 }

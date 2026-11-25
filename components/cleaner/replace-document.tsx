@@ -8,6 +8,7 @@ import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CleanerDocumentKind } from "@/lib/cleaner/document-reviews";
+import { sanitiseCleanerUploadFileName } from "@/lib/cleaner/document-urls";
 import {
   formatShareCode,
   normaliseShareCode,
@@ -20,8 +21,9 @@ import { createBrowserClient } from "@/lib/supabase/client";
 const MULTI_PAGE: CleanerDocumentKind[] = ["id", "dbs"];
 
 /**
- * Lets a cleaner replace a rejected, missing or expired document from their
- * profile (or add right-to-work details). Only that item goes back for review.
+ * Lets a cleaner replace a rejected, missing, pending or expired document
+ * from their profile (or add right-to-work details). Only that item goes
+ * back for review.
  */
 export function ReplaceDocument({
   initial,
@@ -78,7 +80,7 @@ export function ReplaceDocument({
         const paths: string[] = [];
         for (let index = 0; index < files.length; index += 1) {
           const file = files[index];
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80);
+          const safeName = sanitiseCleanerUploadFileName(file.name);
           const path = `${userId}/${kind}-replacement-${Date.now()}-${index + 1}-${safeName}`;
           const { error: uploadError } = await supabase.storage
             .from("cleaner-documents")

@@ -52,7 +52,9 @@ export function DocumentReviewControls({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const label = CLEANER_DOCUMENT_LABELS[kind];
-  const hasUpload = documents.some((doc) => Boolean(doc.url)) || Boolean(reviewable);
+  const hasUpload =
+    documents.some((doc) => Boolean(doc.url) || Boolean(doc.path)) ||
+    Boolean(reviewable);
   const reasonOk = reason.trim().length >= 3;
   const decided = status === "verified" || status === "rejected";
 
@@ -124,6 +126,13 @@ export function DocumentReviewControls({
                 path={document.path}
                 url={document.url}
               />
+            ) : document.path ? (
+              <span
+                className="inline-flex h-9 items-center px-2 text-xs text-muted-foreground"
+                key={document.label}
+              >
+                On file
+              </span>
             ) : null,
           )}
           {hasUpload ? (

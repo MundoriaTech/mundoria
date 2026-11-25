@@ -10,7 +10,8 @@ function documentKind(pathOrUrl: string | null | undefined) {
   const source = (pathOrUrl ?? "").toLowerCase();
   if (/\.(png|jpe?g|webp|gif|heic)(\?|$)/.test(source)) return "image" as const;
   if (/\.pdf(\?|$)/.test(source)) return "pdf" as const;
-  return "unknown" as const;
+  // Phone screenshots often lose the suffix after the file name is shortened.
+  return "image" as const;
 }
 
 export function DocumentViewerButton({
@@ -47,7 +48,7 @@ export function DocumentViewerButton({
       </Button>
       {open ? (
         <DocumentModal
-          kind={kind}
+          kind={kind === "pdf" ? "pdf" : "image"}
           label={label}
           onClose={() => setOpen(false)}
           titleId={titleId}

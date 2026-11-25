@@ -42,6 +42,7 @@ import {
   parseDocumentList,
   parseDocumentUrls,
   removeDocumentAt,
+  sanitiseCleanerUploadFileName,
   withDocumentAt,
   withDocumentSide,
 } from "@/lib/cleaner/document-urls";
@@ -974,7 +975,7 @@ export function OnboardingWizard({
         });
         return;
       }
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80);
+      const safeName = sanitiseCleanerUploadFileName(file.name);
       const sideTag = isSingleDocKind(kind)
         ? kind
         : isListDocKind(kind)

@@ -93,3 +93,21 @@ export function hasAnyDocument(stored: string | null | undefined) {
 }
 
 export const MAX_DBS_DOCUMENT_PAGES = 6;
+
+/** Keep a short safe stem and the original extension so admin can open the file. */
+export function sanitiseCleanerUploadFileName(
+  fileName: string,
+  maxStem = 60,
+) {
+  const trimmed = fileName.trim();
+  const lastDot = trimmed.lastIndexOf(".");
+  const rawExt =
+    lastDot >= 0 ? trimmed.slice(lastDot + 1).toLowerCase() : "";
+  const ext = rawExt.replace(/[^a-z0-9]/g, "").slice(0, 8);
+  const stemSource = lastDot >= 0 ? trimmed.slice(0, lastDot) : trimmed;
+  const stem = stemSource
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, maxStem) || "file";
+  return ext ? `${stem}.${ext}` : stem;
+}

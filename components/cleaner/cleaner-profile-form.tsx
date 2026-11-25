@@ -475,6 +475,7 @@ export function CleanerProfileForm({
                   (status === "rejected" ||
                     status === "missing" ||
                     status === "expired" ||
+                    status === "pending" ||
                     !status) ? (
                     <ReplaceDocument
                       initial={
