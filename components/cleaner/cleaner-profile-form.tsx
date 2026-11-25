@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { normalizePhone } from "@/lib/auth/phone-verify";
+import { isValidUkPhone, storedPhone } from "@/lib/auth/uk-phone";
 import {
   CLEANER_DOCUMENT_KINDS,
   CLEANER_DOCUMENT_LABELS,
@@ -78,12 +79,13 @@ export function CleanerProfileForm({
   const [status, setStatus] = useState<string | null>(null);
 
   async function save() {
-    const phone = profile.phone?.trim() ?? "";
-    if (phone.length < 7) {
-      setPhoneError("Enter a valid phone number.");
+    const typedPhone = profile.phone?.trim() ?? "";
+    if (!isValidUkPhone(typedPhone)) {
+      setPhoneError("Enter a full UK phone number, like 07700 900123.");
       setStatus(null);
       return;
     }
+    const phone = storedPhone(typedPhone);
     setPhoneError(null);
     setStatus("Saving…");
     const supabase = createBrowserClient();

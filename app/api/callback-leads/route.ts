@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { notifyCallbackDeskChange } from "@/lib/admin/notify-callback-desk";
-import { storedPhone } from "@/lib/auth/uk-phone";
+import { isValidUkPhone, storedPhone } from "@/lib/auth/uk-phone";
 import { outreachEnabled } from "@/lib/outreach/config";
 import { captureCallbackLead } from "@/lib/outreach/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   }
 
   const phone = storedPhone(parsed.data.phone);
-  if (phone.replace(/\D/g, "").length < 11) {
+  if (!isValidUkPhone(phone)) {
     return NextResponse.json(
       { error: "Enter a valid UK phone number." },
       { status: 400 },
@@ -73,9 +73,9 @@ export async function POST(request: Request) {
   }
 
   const fromFull = splitFullName(parsed.data.fullName);
-  const firstName =
-    parsed.data.firstName.trim() || fromFull.firstName || "Guest";
-  const lastName = parsed.data.lastName.trim() || fromFull.lastName || "Lead";
+  // callback_leads caps each name at 80 characters; a long full name would 500.
+  const firstName = (parsed.data.firstName.trim() || fromFull.firstName || "Guest").slice(0, 80);
+  const lastName = (parsed.data.lastName.trim() || fromFull.lastName || "Lead").slice(0, 80);
 
   const admin = createAdminClient();
   const { data: callback, error } = await admin.from("callback_leads").insert({

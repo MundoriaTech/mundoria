@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   createZohoSalesEnquiry,
   findZohoRecordsByEmail,
+  flagZohoRepeatEnquiry,
   isZohoCrmConfigured,
   markZohoEmailOptOut,
   updateZohoCrmRecord,
@@ -41,9 +42,18 @@ export function salesIntakeConfig() {
 export async function queueZohoSalesEnquiry(leadId: string, callbackId: string, email: string) {
   if (!salesIntakeConfig() || !maySyncZohoEmail(email)) return;
 
+  // One queue row per lead. A new callback re-arms it (latest request, retry
+  // count reset) so a repeat request reaches the existing CRM lead too.
   const { error } = await createAdminClient().from("zoho_sales_intake").upsert(
-    { lead_id: leadId, callback_id: callbackId },
-    { onConflict: "lead_id", ignoreDuplicates: true },
+    {
+      attempts: 0,
+      callback_id: callbackId,
+      completed_at: null,
+      last_error: null,
+      lead_id: leadId,
+      next_attempt_at: new Date().toISOString(),
+    },
+    { onConflict: "lead_id" },
   );
   if (error) {
     // Queue table missing or unavailable: still get the request to Sales now.
@@ -168,6 +178,9 @@ async function pushSalesEnquiry(
     const existing = await adoptableLead(enquiry.email, leadId, config.keyField);
     if (existing) {
       const untouched = !existing.Lead_Status || LEGACY_AUTOMATION_STATUSES.has(existing.Lead_Status);
+      // A popup request has no name ("Guest Lead"); a later form with a name fills it in.
+      const realName = !isPlaceholderName(enquiry.first_name, enquiry.last_name);
+      const placeholderInCrm = isPlaceholderName(existing.First_Name, existing.Last_Name);
       await updateZohoCrmRecord("Leads", existing.id, {
         ...enquiryFields,
         [config.keyField]: leadId,
@@ -175,6 +188,18 @@ async function pushSalesEnquiry(
         // Values the old sync wrote are replaced; a Chat source is kept.
         ...(existing.Lead_Source === "Chat" ? {} : { Lead_Source: leadSource }),
         ...(untouched ? { Company: "Household enquiry", Description: description, Lead_Status: CRM_LEAD_STATUS.newUntouched } : {}),
+        ...(realName && placeholderInCrm
+          ? { First_Name: enquiry.first_name.slice(0, 40), Last_Name: enquiry.last_name.slice(0, 80) }
+          : {}),
+      });
+      // Assignment rules (and their call task) only run on create: tell Sales
+      // about this new request with a note and a task due today.
+      await flagZohoRepeatEnquiry({
+        dueDate: ukDate(),
+        leadId: existing.id,
+        note: description,
+        ownerId: ownerIdOf(existing),
+        subject: `Call back: new website request (${enquiry.source})`,
       });
       return { zohoLeadId: existing.id };
     }
@@ -206,7 +231,7 @@ async function pushSalesEnquiry(
  * still stops repeats).
  */
 async function adoptableLead(email: string, leadId: string, keyField: string) {
-  const matches = await findZohoRecordsByEmail("Leads", email, [keyField]);
+  const matches = await findZohoRecordsByEmail("Leads", email, [keyField, "First_Name", "Last_Name", "Owner"]);
   if (!matches?.length) return null;
   const key = (match: ZohoCrmMatch) => match[keyField];
   return matches.find((match) => key(match) === leadId)
@@ -242,6 +267,18 @@ export async function markZohoProspectOptOut(leadId: string, email: string | nul
   if (!isZohoCrmConfigured()) return;
   const zohoLeadId = await zohoLeadIdFor(leadId).catch(() => null);
   await markZohoEmailOptOut(email, zohoLeadId ? [zohoLeadId] : []);
+}
+
+/** The callback form's stand-in when no name was given (see /api/callback-leads). */
+function isPlaceholderName(first: unknown, last: unknown) {
+  const a = typeof first === "string" ? first.trim().toLowerCase() : "";
+  const b = typeof last === "string" ? last.trim().toLowerCase() : "";
+  return (!a || a === "guest") && (!b || b === "lead");
+}
+
+function ownerIdOf(match: ZohoCrmMatch) {
+  const owner = match.Owner as { id?: unknown } | null | undefined;
+  return typeof owner?.id === "string" ? owner.id : null;
 }
 
 function minutesFromNow(minutes: number) {

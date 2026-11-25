@@ -72,9 +72,11 @@ export async function notifyEmailChangeCompleted({
   await admin.auth.admin.updateUserById(user.id, {
     user_metadata: {
       ...(user.user_metadata ?? {}),
+      email_change_expires_at: null,
       email_change_from: null,
       email_change_requested_at: null,
       email_change_to: null,
+      email_change_token_hash: null,
     },
   });
 

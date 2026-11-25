@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+import { isValidUkPhone } from "@/lib/auth/uk-phone";
+
+/** A complete UK number (stored as "+44 …"). */
+export const ukPhoneSchema = z
+  .string()
+  .trim()
+  .min(7, "Enter a valid phone number")
+  .max(30, "Phone number is too long")
+  .refine(isValidUkPhone, "Enter a full UK phone number, like 07700 900123");
+
 /** New passwords: 8+, capital, lowercase, number, and symbol. */
 export const passwordSchema = z
   .string()
@@ -26,11 +36,7 @@ export const signupSchema = z.object({
     .max(100, "Name is too long"),
   email: z.string().trim().email("Enter a valid email address"),
   password: passwordSchema,
-  phone: z
-    .string()
-    .trim()
-    .min(7, "Enter a valid phone number")
-    .max(30, "Phone number is too long"),
+  phone: ukPhoneSchema,
   role: z.enum(["customer", "cleaner"]),
   referral_code: z.string().trim().max(40).optional().or(z.literal("")),
   marketing_opt_in: z.boolean().optional().default(false),
@@ -51,11 +57,7 @@ export const completeProfileSchema = z.object({
     .trim()
     .min(2, "Enter your full name")
     .max(100, "Name is too long"),
-  phone: z
-    .string()
-    .trim()
-    .min(7, "Enter a valid phone number")
-    .max(30, "Phone number is too long"),
+  phone: ukPhoneSchema,
 });
 
 export const updatePasswordSchema = z

@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import {
-  emailChangeRedirectPath,
+  createEmailChangeToken,
+  EMAIL_CHANGE_TTL_MS,
   normalizeEmail,
 } from "@/lib/auth/change-email";
 import { sendBrandedEmail } from "@/lib/email/send-email";
@@ -71,31 +72,68 @@ export async function POST(request: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
+  const admin = createAdminClient();
+  const { data: taken } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("email", newEmail)
+    .neq("id", user.id)
+    .limit(1);
+  if (taken?.length) {
+    return NextResponse.json(
+      { error: "Another Mundoria account already uses that email." },
+      { status: 400 },
+    );
+  }
+
   const origin = new URL(request.url).origin;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? origin;
-  const nextPath = emailChangeRedirectPath(profile?.role);
-  const emailRedirectTo = `${appUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`;
 
-  const admin = createAdminClient();
-  await admin.auth.admin.updateUserById(user.id, {
+  // Supabase's own mailer does not reach customers (and its redirect list
+  // still points at the retired domain), so the confirmation link is ours,
+  // sent through Resend like every other auth email.
+  const { hash, token } = await createEmailChangeToken();
+  const { error: metadataError } = await admin.auth.admin.updateUserById(user.id, {
     user_metadata: {
       ...(user.user_metadata ?? {}),
+      email_change_expires_at: new Date(Date.now() + EMAIL_CHANGE_TTL_MS).toISOString(),
       email_change_from: currentEmail,
       email_change_requested_at: new Date().toISOString(),
       email_change_to: newEmail,
+      email_change_token_hash: hash,
     },
   });
-
-  const { error: updateError } = await supabase.auth.updateUser(
-    { email: newEmail },
-    { emailRedirectTo },
-  );
-
-  if (updateError) {
-    Sentry.captureException(updateError);
+  if (metadataError) {
+    Sentry.captureException(metadataError);
     return NextResponse.json(
-      { error: updateError.message || "Unable to start the email change." },
-      { status: 400 },
+      { error: "Unable to start the email change. Please try again." },
+      { status: 500 },
+    );
+  }
+
+  const confirmUrl = new URL("/confirm-email-change", appUrl);
+  confirmUrl.searchParams.set("uid", user.id);
+  confirmUrl.searchParams.set("token", token);
+  const sent = await sendBrandedEmail({
+    data: {
+      appUrl,
+      confirmUrl: confirmUrl.toString(),
+      firstName: profile?.full_name?.split(" ")[0],
+      fullName: profile?.full_name,
+      newEmail,
+      previousEmail: currentEmail,
+      status: "confirm",
+    },
+    template: "auth.email_changed",
+    to: newEmail,
+  }).catch((error) => {
+    Sentry.captureException(error);
+    return false;
+  });
+  if (!sent) {
+    return NextResponse.json(
+      { error: "We couldn't send the confirmation email. Check the address and try again." },
+      { status: 502 },
     );
   }
 

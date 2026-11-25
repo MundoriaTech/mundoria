@@ -175,6 +175,22 @@ function resolveTemplate(
         tone: "security",
       };
     case "auth.email_changed": {
+      if (string(data.status) === "confirm") {
+        return {
+          body: "Confirm this is the new email address for your Mundoria account. The link works once and expires in 24 hours. Until you confirm, your current email stays active.",
+          buttonHref: string(data.confirmUrl),
+          buttonLabel: "Confirm new email",
+          cards: [
+            { label: "Current email", value: data.previousEmail },
+            { label: "New email", value: data.newEmail },
+          ],
+          intro: firstName ? `Hi ${firstName},` : "Hi there,",
+          preview: "Confirm the new email for your Mundoria account.",
+          subject: "Confirm your new Mundoria email",
+          title: "Confirm your new email",
+          tone: "security",
+        };
+      }
       const pending = string(data.status) === "requested";
       return {
         body: pending
