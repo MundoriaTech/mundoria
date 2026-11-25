@@ -40,15 +40,18 @@ export function buildAppAuthLink({
 
   try {
     const intended = new URL(redirectTo);
-    const nextFromQuery = intended.searchParams.get("next");
-    if (nextFromQuery) {
-      url.searchParams.set("next", nextFromQuery);
-    } else if (type === "recovery") {
+    if (type === "recovery") {
+      // A password reset must land on the update-password page first; its own
+      // `next` (e.g. /admin/dashboard) is where they go after saving. Taking
+      // that `next` here skipped the password step entirely.
       const path = `${intended.pathname}${intended.search}`;
       url.searchParams.set(
         "next",
-        path.startsWith("/") ? path : "/update-password",
+        path.startsWith("/update-password") ? path : "/update-password",
       );
+    } else {
+      const nextFromQuery = intended.searchParams.get("next");
+      if (nextFromQuery) url.searchParams.set("next", nextFromQuery);
     }
   } catch {
     if (type === "recovery") {
