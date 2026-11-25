@@ -484,6 +484,7 @@ export function CleanerProfileForm({
                               right_to_work_expires_on: cleaner.right_to_work_expires_on,
                               right_to_work_route: cleaner.right_to_work_route,
                               right_to_work_share_code: cleaner.right_to_work_share_code,
+                              right_to_work_visa_type: cleaner.right_to_work_visa_type,
                             }
                           : undefined
                       }

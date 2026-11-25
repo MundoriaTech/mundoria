@@ -48,6 +48,7 @@ export interface CleanerProfile {
   right_to_work_share_code?: string | null;
   right_to_work_expires_on?: string | null;
   right_to_work_status?: DocumentReviewStatus;
+  right_to_work_visa_type?: string | null;
   id_verified: boolean;
   id_document_url: string | null;
   id_document_status: DocumentReviewStatus;

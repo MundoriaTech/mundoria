@@ -13,6 +13,7 @@ import {
   normaliseShareCode,
   RIGHT_TO_WORK_SHARE_CODE_URL,
   type RightToWorkRoute,
+  VISA_TYPES,
 } from "@/lib/cleaner/right-to-work";
 import { createBrowserClient } from "@/lib/supabase/client";
 
@@ -32,6 +33,7 @@ export function ReplaceDocument({
     right_to_work_expires_on?: string | null;
     right_to_work_route?: RightToWorkRoute | null;
     right_to_work_share_code?: string | null;
+    right_to_work_visa_type?: string | null;
   };
   kind: CleanerDocumentKind;
   userId: string;
@@ -45,6 +47,7 @@ export function ReplaceDocument({
   const [dob, setDob] = useState(initial?.date_of_birth ?? "");
   const [shareCode, setShareCode] = useState(initial?.right_to_work_share_code ?? "");
   const [rtwExpiry, setRtwExpiry] = useState(initial?.right_to_work_expires_on ?? "");
+  const [visaType, setVisaType] = useState(initial?.right_to_work_visa_type ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +63,7 @@ export function ReplaceDocument({
           right_to_work_expires_on: rtwExpiry,
           right_to_work_route: route,
           right_to_work_share_code: shareCode,
+          right_to_work_visa_type: visaType,
         };
       } else {
         if (!files.length) {
@@ -145,6 +149,21 @@ export function ReplaceDocument({
           </label>
           {route === "share_code" ? (
             <>
+              <label className="block text-sm">
+                <span className="mb-1 block font-medium text-[#1c133b]">Visa or immigration status</span>
+                <select
+                  className="h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
+                  onChange={(event) => setVisaType(event.target.value)}
+                  value={visaType}
+                >
+                  <option value="">Choose…</option>
+                  {VISA_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="block text-sm">
                 <span className="mb-1 block font-medium text-[#1c133b]">Share code</span>
                 <Input

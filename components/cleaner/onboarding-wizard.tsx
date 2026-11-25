@@ -471,6 +471,7 @@ type OnboardingData = {
   right_to_work_expires_on: string;
   right_to_work_route: RightToWorkRoute | "";
   right_to_work_share_code: string;
+  right_to_work_visa_type: string;
   emergency_alt_phone: string;
   emergency_country: string;
   emergency_email: string;
@@ -606,6 +607,7 @@ export function OnboardingWizard({
     right_to_work_expires_on: cleaner.right_to_work_expires_on ?? "",
     right_to_work_route: cleaner.right_to_work_route ?? "",
     right_to_work_share_code: cleaner.right_to_work_share_code ?? "",
+    right_to_work_visa_type: cleaner.right_to_work_visa_type ?? "",
     emergency_alt_phone: cleaner.emergency_contact?.alt_phone ?? "",
     emergency_country:
       cleaner.emergency_contact?.country ?? "United Kingdom",
@@ -2030,8 +2032,10 @@ function StepBody({
           onShareCode={(next) =>
             onUpdate("right_to_work_share_code", normaliseShareCode(next))
           }
+          onVisaType={(next) => onUpdate("right_to_work_visa_type", next)}
           route={data.right_to_work_route}
           shareCode={data.right_to_work_share_code}
+          visaType={data.right_to_work_visa_type}
         />
       </div>
     );
@@ -3816,6 +3820,7 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     right_to_work_share_code: normaliseShareCode(
       String(value.right_to_work_share_code ?? ""),
     ),
+    right_to_work_visa_type: String(value.right_to_work_visa_type ?? "").trim(),
     emergency_alt_phone: String(value.emergency_alt_phone ?? "").trim(),
     emergency_country: String(value.emergency_country ?? "").trim() || "United Kingdom",
     emergency_email: String(value.emergency_email ?? "").trim(),

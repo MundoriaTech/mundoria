@@ -36,6 +36,7 @@ import {
   formatShareCode,
   RIGHT_TO_WORK_SHARE_CODE_URL,
   type RightToWorkRoute,
+  VISA_TYPES,
 } from "@/lib/cleaner/right-to-work";
 import { WORLD_COUNTRY_SELECT_OPTIONS } from "@/lib/countries";
 import { cn } from "@/lib/utils";
@@ -111,8 +112,10 @@ export function RightToWorkSection({
   onExpiresOn,
   onRoute,
   onShareCode,
+  onVisaType,
   route,
   shareCode,
+  visaType,
 }: {
   dateOfBirth: string;
   error?: string;
@@ -121,8 +124,10 @@ export function RightToWorkSection({
   onExpiresOn: (next: string) => void;
   onRoute: (next: RightToWorkRoute) => void;
   onShareCode: (next: string) => void;
+  onVisaType: (next: string) => void;
   route: RightToWorkRoute | "";
   shareCode: string;
+  visaType: string;
 }) {
   const today = new Date().toISOString().slice(0, 10);
   const latestBirth = new Date();
@@ -149,6 +154,15 @@ export function RightToWorkSection({
         ]}
         value={route || null}
       />
+      {route === "share_code" ? (
+        <OnboardingSelect
+          label="Visa or immigration status"
+          onChange={onVisaType}
+          options={VISA_TYPES.map((type) => ({ label: type.label, value: type.value }))}
+          placeholder="Choose your status"
+          value={visaType}
+        />
+      ) : null}
       {route ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <OnboardingDateField

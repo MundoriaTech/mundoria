@@ -111,6 +111,7 @@ const schema = z
       .optional()
       .default(""),
     right_to_work_share_code: z.string().trim().optional().default(""),
+    right_to_work_visa_type: z.string().trim().optional().default(""),
     emergency_alt_phone: z.string().trim().optional().default(""),
     emergency_country: z.string().trim().optional().default("United Kingdom"),
     emergency_email: z.string().trim().optional().default(""),
@@ -243,6 +244,7 @@ const schema = z
       right_to_work_expires_on: value.right_to_work_expires_on ?? "",
       right_to_work_route: (value.right_to_work_route ?? "") as RightToWorkRoute | "",
       right_to_work_share_code: value.right_to_work_share_code ?? "",
+      right_to_work_visa_type: value.right_to_work_visa_type ?? "",
     });
     if (rightToWork) {
       ctx.addIssue({
@@ -648,6 +650,10 @@ export async function POST(request: Request) {
           ? normaliseShareCode(value.right_to_work_share_code)
           : null,
       right_to_work_status: "pending",
+      right_to_work_visa_type:
+        value.right_to_work_route === "share_code"
+          ? value.right_to_work_visa_type || null
+          : null,
       insurance_activity_confirmed:
         value.insurance_path === "have"
           ? value.insurance_activity_confirmed

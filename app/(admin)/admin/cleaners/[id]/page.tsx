@@ -3,6 +3,8 @@ import {
   RIGHT_TO_WORK_CHECK_URL,
   RIGHT_TO_WORK_ROUTE_LABELS,
   type RightToWorkRoute,
+  visaRestrictsSelfEmployment,
+  visaTypeLabel,
 } from "@/lib/cleaner/right-to-work";
 import { notFound, redirect } from "next/navigation";
 
@@ -333,6 +335,10 @@ export default async function AdminCleanerPage({
                   RIGHT_TO_WORK_ROUTE_LABELS[
                     cleaner.right_to_work_route as RightToWorkRoute
                   ],
+                  visaTypeLabel(cleaner.right_to_work_visa_type),
+                  visaRestrictsSelfEmployment(cleaner.right_to_work_visa_type)
+                    ? "⚠ this visa usually doesn't allow self-employment: check the GOV.UK result before approving"
+                    : null,
                   cleaner.right_to_work_share_code
                     ? `share code ${formatShareCode(cleaner.right_to_work_share_code)}`
                     : null,

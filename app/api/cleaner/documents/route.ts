@@ -32,6 +32,7 @@ const schema = z.discriminatedUnion("kind", [
     right_to_work_expires_on: z.string().trim().optional().default(""),
     right_to_work_route: z.enum(["british_irish", "share_code"]),
     right_to_work_share_code: z.string().trim().optional().default(""),
+    right_to_work_visa_type: z.string().trim().optional().default(""),
   }),
 ]);
 
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
       right_to_work_expires_on: input.right_to_work_expires_on,
       right_to_work_route: input.right_to_work_route,
       right_to_work_share_code: input.right_to_work_share_code,
+      right_to_work_visa_type: input.right_to_work_visa_type,
     });
     if (issue) return NextResponse.json({ error: issue }, { status: 400 });
     Object.assign(updates, {
@@ -89,6 +91,10 @@ export async function POST(request: Request) {
       right_to_work_share_code:
         input.right_to_work_route === "share_code"
           ? normaliseShareCode(input.right_to_work_share_code)
+          : null,
+      right_to_work_visa_type:
+        input.right_to_work_route === "share_code"
+          ? input.right_to_work_visa_type || null
           : null,
     });
   } else {
