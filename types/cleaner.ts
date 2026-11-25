@@ -43,6 +43,11 @@ export interface CleanerProfile {
   dbs_path: string | null;
   dbs_certificate_number: string | null;
   dbs_issued_on: string | null;
+  date_of_birth?: string | null;
+  right_to_work_route?: "british_irish" | "share_code" | null;
+  right_to_work_share_code?: string | null;
+  right_to_work_expires_on?: string | null;
+  right_to_work_status?: DocumentReviewStatus;
   id_verified: boolean;
   id_document_url: string | null;
   id_document_status: DocumentReviewStatus;

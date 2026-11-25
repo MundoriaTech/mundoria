@@ -32,6 +32,11 @@ import {
   type InsurancePath,
   type UtrPath,
 } from "@/lib/cleaner/onboarding-compliance";
+import {
+  formatShareCode,
+  RIGHT_TO_WORK_SHARE_CODE_URL,
+  type RightToWorkRoute,
+} from "@/lib/cleaner/right-to-work";
 import { WORLD_COUNTRY_SELECT_OPTIONS } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
@@ -93,6 +98,100 @@ function SectionHeading({
       {subtitle ? (
         <p className="mt-1.5 text-sm leading-6 text-[#5a5470]">{subtitle}</p>
       ) : null}
+    </div>
+  );
+}
+
+/** Standard UK right-to-work check (part of the identity step). */
+export function RightToWorkSection({
+  dateOfBirth,
+  error,
+  expiresOn,
+  onDateOfBirth,
+  onExpiresOn,
+  onRoute,
+  onShareCode,
+  route,
+  shareCode,
+}: {
+  dateOfBirth: string;
+  error?: string;
+  expiresOn: string;
+  onDateOfBirth: (next: string) => void;
+  onExpiresOn: (next: string) => void;
+  onRoute: (next: RightToWorkRoute) => void;
+  onShareCode: (next: string) => void;
+  route: RightToWorkRoute | "";
+  shareCode: string;
+}) {
+  const today = new Date().toISOString().slice(0, 10);
+  const latestBirth = new Date();
+  latestBirth.setFullYear(latestBirth.getFullYear() - 18);
+  return (
+    <div className="space-y-4">
+      <SectionHeading subtitle="UK law asks us to check that everyone working through Mundoria has the right to work in the UK.">
+        Right to work
+      </SectionHeading>
+      <DecisionStrip
+        label="How can you prove your right to work?"
+        onChange={(next) => onRoute(next as RightToWorkRoute)}
+        options={[
+          {
+            hint: "Your UK or Irish passport above is enough. No passport? Upload your birth certificate and a letter showing your National Insurance number.",
+            label: "British or Irish citizen",
+            value: "british_irish",
+          },
+          {
+            hint: "Visa, eVisa, EU Settlement Scheme or other immigration status. You'll need a share code from GOV.UK.",
+            label: "I have a share code",
+            value: "share_code",
+          },
+        ]}
+        value={route || null}
+      />
+      {route ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+          <OnboardingDateField
+            id="onboarding-date-of-birth"
+            label="Date of birth"
+            maxDate={latestBirth.toISOString().slice(0, 10)}
+            onChange={onDateOfBirth}
+            value={dateOfBirth}
+          />
+          {route === "share_code" ? (
+            <OnboardingField
+              autoCapitalize="characters"
+              hint="9 characters, e.g. W12 345 678"
+              id="onboarding-share-code"
+              label="Right to work share code"
+              maxLength={11}
+              onChange={(event) => onShareCode(event.target.value)}
+              value={formatShareCode(shareCode)}
+            />
+          ) : null}
+          {route === "share_code" ? (
+            <OnboardingDateField
+              id="onboarding-rtw-expiry"
+              label="Permission ends (if time-limited)"
+              minDate={today}
+              onChange={onExpiresOn}
+              value={expiresOn}
+            />
+          ) : null}
+        </div>
+      ) : null}
+      {route === "share_code" ? (
+        <div className="space-y-3">
+          <InfoCallout>
+            Get your share code from GOV.UK (&ldquo;Prove your right to work
+            to an employer&rdquo;). We check it with your date of birth. Leave
+            the end date empty if your permission is not time-limited, such as
+            settled status.
+          </InfoCallout>
+          <ExternalCta href={RIGHT_TO_WORK_SHARE_CODE_URL} label="Get a share code on GOV.UK" secondary />
+        </div>
+      ) : null}
+      {error ? <FieldError message={error} /> : null}
     </div>
   );
 }

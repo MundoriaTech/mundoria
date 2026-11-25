@@ -1,3 +1,8 @@
+import {
+  normaliseShareCode,
+  rightToWorkIssue,
+  type RightToWorkRoute,
+} from "@/lib/cleaner/right-to-work";
 import { getRequestUser } from "@/lib/supabase/request-client";
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
@@ -99,6 +104,13 @@ const schema = z
     dbs_document_url: z.string().trim().optional().default(""),
     dbs_issued_on: z.string().trim().optional().default(""),
     dbs_path: z.enum(["have", "apply", "waiting"]),
+    date_of_birth: z.string().trim().optional().default(""),
+    right_to_work_expires_on: z.string().trim().optional().default(""),
+    right_to_work_route: z
+      .enum(["british_irish", "share_code", ""])
+      .optional()
+      .default(""),
+    right_to_work_share_code: z.string().trim().optional().default(""),
     emergency_alt_phone: z.string().trim().optional().default(""),
     emergency_country: z.string().trim().optional().default("United Kingdom"),
     emergency_email: z.string().trim().optional().default(""),
@@ -224,6 +236,20 @@ const schema = z
           path: ["utr_clarity_confirmed"],
         });
       }
+    }
+
+    const rightToWork = rightToWorkIssue({
+      date_of_birth: value.date_of_birth ?? "",
+      right_to_work_expires_on: value.right_to_work_expires_on ?? "",
+      right_to_work_route: (value.right_to_work_route ?? "") as RightToWorkRoute | "",
+      right_to_work_share_code: value.right_to_work_share_code ?? "",
+    });
+    if (rightToWork) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: rightToWork,
+        path: ["right_to_work_route"],
+      });
     }
 
     if (value.dbs_path === "have") {
@@ -611,6 +637,17 @@ export async function POST(request: Request) {
       info_accuracy_confirmed_at: now,
       id_document_status: "pending",
       id_document_url: value.id_document_url,
+      date_of_birth: value.date_of_birth || null,
+      right_to_work_expires_on:
+        value.right_to_work_route === "share_code" && value.right_to_work_expires_on
+          ? value.right_to_work_expires_on
+          : null,
+      right_to_work_route: value.right_to_work_route || null,
+      right_to_work_share_code:
+        value.right_to_work_route === "share_code"
+          ? normaliseShareCode(value.right_to_work_share_code)
+          : null,
+      right_to_work_status: "pending",
       insurance_activity_confirmed:
         value.insurance_path === "have"
           ? value.insurance_activity_confirmed

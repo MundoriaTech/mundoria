@@ -53,6 +53,7 @@ import {
 import {
   AgreementsReviewStep,
   DbsComplianceStep,
+  RightToWorkSection,
   EmergencyContactStep,
   EquipmentComplianceStep,
   InsuranceComplianceStep,
@@ -92,6 +93,11 @@ import {
   offeredServices,
   servicesForCategory,
 } from "@/lib/customer/services";
+import {
+  normaliseShareCode,
+  rightToWorkIssue,
+  type RightToWorkRoute,
+} from "@/lib/cleaner/right-to-work";
 import { ownStoragePath } from "@/lib/storage/own-object";
 import { uploadWithProgress } from "@/lib/storage/upload-with-progress";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -459,8 +465,12 @@ type OnboardingData = {
   cleaning_skills: string[];
   dbs_certificate_number: string;
   dbs_document_url: string;
+  date_of_birth: string;
   dbs_issued_on: string;
   dbs_path: DbsPath | null;
+  right_to_work_expires_on: string;
+  right_to_work_route: RightToWorkRoute | "";
+  right_to_work_share_code: string;
   emergency_alt_phone: string;
   emergency_country: string;
   emergency_email: string;
@@ -590,8 +600,12 @@ export function OnboardingWizard({
     cleaning_skills: cleaner.cleaning_skills ?? [],
     dbs_certificate_number: cleaner.dbs_certificate_number ?? "",
     dbs_document_url: cleaner.dbs_document_url ?? "",
+    date_of_birth: cleaner.date_of_birth ?? "",
     dbs_issued_on: cleaner.dbs_issued_on ?? "",
     dbs_path: (cleaner.dbs_path as DbsPath | null) ?? null,
+    right_to_work_expires_on: cleaner.right_to_work_expires_on ?? "",
+    right_to_work_route: cleaner.right_to_work_route ?? "",
+    right_to_work_share_code: cleaner.right_to_work_share_code ?? "",
     emergency_alt_phone: cleaner.emergency_contact?.alt_phone ?? "",
     emergency_country:
       cleaner.emergency_contact?.country ?? "United Kingdom",
@@ -1996,15 +2010,30 @@ function StepBody({
 
   if (stepId === "identity") {
     return (
-      <IdentityStep
-        idUrls={parseDocumentList(data.id_document_url)}
-        issue={issueFor("id")}
-        onFile={(file, slot) => onFile("id", file, slot)}
-        onRemove={(slot) => onRemove("id", slot)}
-        pagePreviews={docPreviews}
-        uploadProgress={uploadProgress}
-        uploadingSlot={uploadingSlot}
-      />
+      <div className="space-y-8">
+        <IdentityStep
+          idUrls={parseDocumentList(data.id_document_url)}
+          issue={issueFor("id")}
+          onFile={(file, slot) => onFile("id", file, slot)}
+          onRemove={(slot) => onRemove("id", slot)}
+          pagePreviews={docPreviews}
+          uploadProgress={uploadProgress}
+          uploadingSlot={uploadingSlot}
+        />
+        <RightToWorkSection
+          dateOfBirth={data.date_of_birth}
+          error={issueFor("right_to_work")}
+          expiresOn={data.right_to_work_expires_on}
+          onDateOfBirth={(next) => onUpdate("date_of_birth", next)}
+          onExpiresOn={(next) => onUpdate("right_to_work_expires_on", next)}
+          onRoute={(next) => onUpdate("right_to_work_route", next)}
+          onShareCode={(next) =>
+            onUpdate("right_to_work_share_code", normaliseShareCode(next))
+          }
+          route={data.right_to_work_route}
+          shareCode={data.right_to_work_share_code}
+        />
+      </div>
     );
   }
 
@@ -3775,8 +3804,18 @@ function sanitizeOnboardingData(value: OnboardingData): OnboardingData {
     cleaning_skills: stringList(value.cleaning_skills),
     dbs_certificate_number: String(value.dbs_certificate_number ?? "").trim(),
     dbs_document_url: String(value.dbs_document_url ?? "").trim(),
+    date_of_birth: String(value.date_of_birth ?? "").trim(),
     dbs_issued_on: String(value.dbs_issued_on ?? "").trim(),
     dbs_path: dbsPath,
+    right_to_work_expires_on: String(value.right_to_work_expires_on ?? "").trim(),
+    right_to_work_route:
+      value.right_to_work_route === "british_irish" ||
+      value.right_to_work_route === "share_code"
+        ? value.right_to_work_route
+        : "",
+    right_to_work_share_code: normaliseShareCode(
+      String(value.right_to_work_share_code ?? ""),
+    ),
     emergency_alt_phone: String(value.emergency_alt_phone ?? "").trim(),
     emergency_country: String(value.emergency_country ?? "").trim() || "United Kingdom",
     emergency_email: String(value.emergency_email ?? "").trim(),
@@ -4042,6 +4081,10 @@ function validateStep(stepId: StepId, value: OnboardingData): FieldIssue | null 
 
   if (stepId === "identity" && !hasAnyDocument(data.id_document_url)) {
     return issue("id", "Upload your government-issued ID.");
+  }
+  if (stepId === "identity") {
+    const rightToWork = rightToWorkIssue(data);
+    if (rightToWork) return issue("right_to_work", rightToWork);
   }
 
   if (stepId === "dbs") {
