@@ -14,6 +14,7 @@ type DocFile = {
 type CheckItem = {
   checkLink?: { href: string; label: string } | null;
   detail: string;
+  facts?: Array<{ label: string; value: string }>;
   reviewable?: boolean;
   documents: DocFile[];
   kind: CleanerDocumentKind;
@@ -64,6 +65,7 @@ export function DocumentChecksSection({
             cleanerId={cleanerId}
             detail={item.detail}
             documents={item.documents}
+            facts={item.facts}
             key={item.kind}
             kind={item.kind}
             note={item.note}

@@ -327,33 +327,80 @@ export default async function AdminCleanerPage({
               cleaner.right_to_work_route === "share_code"
                 ? {
                     href: RIGHT_TO_WORK_CHECK_URL,
-                    label: "Check the share code on GOV.UK",
+                    label: "Check GOV.UK",
                   }
                 : null,
             detail: cleaner.right_to_work_route
               ? [
-                  RIGHT_TO_WORK_ROUTE_LABELS[
-                    cleaner.right_to_work_route as RightToWorkRoute
-                  ],
+                  reviewLabel(cleaner.right_to_work_status),
                   visaTypeLabel(cleaner.right_to_work_visa_type),
-                  visaRestrictsSelfEmployment(cleaner.right_to_work_visa_type)
-                    ? "⚠ this visa usually doesn't allow self-employment: check the GOV.UK result before approving"
-                    : null,
-                  cleaner.right_to_work_share_code
-                    ? `share code ${formatShareCode(cleaner.right_to_work_share_code)}`
-                    : null,
-                  cleaner.date_of_birth ? `born ${cleaner.date_of_birth}` : null,
                   cleaner.right_to_work_expires_on
-                    ? `permission ends ${cleaner.right_to_work_expires_on}`
-                    : cleaner.right_to_work_route === "share_code"
-                      ? "no end date"
-                      : "check the passport or birth certificate + NI above",
+                    ? `expires ${formatUkDate(cleaner.right_to_work_expires_on)}`
+                    : cleaner.right_to_work_route === "british_irish"
+                      ? "British or Irish"
+                      : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")
               : "Not provided yet",
             documents:
-              cleaner.right_to_work_route === "british_irish" ? docsByPrefix.id : [],
+              cleaner.right_to_work_route === "british_irish"
+                ? docsByPrefix.id
+                : [],
+            facts: cleaner.right_to_work_route
+              ? [
+                  {
+                    label: "How they proved it",
+                    value:
+                      RIGHT_TO_WORK_ROUTE_LABELS[
+                        cleaner.right_to_work_route as RightToWorkRoute
+                      ],
+                  },
+                  ...(cleaner.right_to_work_share_code
+                    ? [
+                        {
+                          label: "Share code",
+                          value: formatShareCode(
+                            cleaner.right_to_work_share_code,
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(visaTypeLabel(cleaner.right_to_work_visa_type)
+                    ? [
+                        {
+                          label: "Visa or status",
+                          value: visaTypeLabel(cleaner.right_to_work_visa_type)!,
+                        },
+                      ]
+                    : []),
+                  ...(cleaner.date_of_birth
+                    ? [
+                        {
+                          label: "Date of birth",
+                          value: formatUkDate(cleaner.date_of_birth),
+                        },
+                      ]
+                    : []),
+                  {
+                    label: "Permission ends",
+                    value: cleaner.right_to_work_expires_on
+                      ? formatUkDate(cleaner.right_to_work_expires_on)
+                      : cleaner.right_to_work_route === "share_code"
+                        ? "No end date given"
+                        : "Check the passport or birth certificate",
+                  },
+                  ...(visaRestrictsSelfEmployment(cleaner.right_to_work_visa_type)
+                    ? [
+                        {
+                          label: "Self-employment",
+                          value:
+                            "This visa usually does not allow self-employment. Check the GOV.UK result before approving.",
+                        },
+                      ]
+                    : []),
+                ]
+              : undefined,
             kind: "right_to_work",
             note: documentReviewNoteFor(verificationFlags, "right_to_work")?.note,
             reviewable: Boolean(cleaner.right_to_work_route),
@@ -485,5 +532,15 @@ export default async function AdminCleanerPage({
       />
     </div>
   );
+}
+
+function formatUkDate(isoDate: string) {
+  const date = new Date(`${isoDate.slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return isoDate;
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 

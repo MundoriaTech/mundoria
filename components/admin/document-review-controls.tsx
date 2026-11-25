@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, FileText } from "lucide-react";
+import { ChevronDown, ExternalLink, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -26,6 +26,7 @@ export function DocumentReviewControls({
   cleanerId,
   detail,
   documents,
+  facts,
   kind,
   note,
   open,
@@ -38,6 +39,8 @@ export function DocumentReviewControls({
   cleanerId: string;
   detail: string;
   documents: DocFile[];
+  /** Labeled answers shown in the review panel (share code, dates). */
+  facts?: Array<{ label: string; value: string }>;
   kind: CleanerDocumentKind;
   note?: string | null;
   open: boolean;
@@ -135,6 +138,14 @@ export function DocumentReviewControls({
               </span>
             ) : null,
           )}
+          {checkLink ? (
+            <Button asChild className="h-9 px-3" variant="outline">
+              <a href={checkLink.href} rel="noreferrer" target="_blank">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                {checkLink.label}
+              </a>
+            </Button>
+          ) : null}
           {hasUpload ? (
             <Button
               aria-expanded={open}
@@ -159,15 +170,17 @@ export function DocumentReviewControls({
 
       {open && hasUpload ? (
         <div className="mt-3 rounded-lg border bg-muted/40 p-3">
-          {checkLink ? (
-            <a
-              className="mb-3 inline-flex text-sm font-semibold text-primary underline"
-              href={checkLink.href}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {checkLink.label}
-            </a>
+          {facts && facts.length > 0 ? (
+            <dl className="mb-3 grid gap-3 text-sm sm:grid-cols-2">
+              {facts.map((fact) => (
+                <div key={fact.label}>
+                  <dt className="text-xs font-medium text-muted-foreground">
+                    {fact.label}
+                  </dt>
+                  <dd className="font-medium text-foreground">{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
           ) : null}
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
