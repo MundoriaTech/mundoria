@@ -6,6 +6,7 @@ import {
 } from "@/components/shared/pagination-controls";
 import { activityEventLabel } from "@/lib/analytics/user-activity";
 import { PAGE_SIZES } from "@/lib/pagination";
+import { ukDateTime } from "@/lib/admin/format";
 
 export type UserActivityRow = {
   created_at: string;
@@ -43,7 +44,7 @@ export function UserActivityTimeline({
                 {activityEventLabel(event.event_name, event.metadata)}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {new Date(event.created_at).toLocaleString("en-GB")}
+                {ukDateTime(event.created_at)}
                 {event.path ? ` · ${event.path}` : ""}
               </p>
             </div>

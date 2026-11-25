@@ -12,6 +12,7 @@ import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ukDate } from "@/lib/admin/format";
 
 export interface AdminInvitationRow {
   accepted_at: string | null;
@@ -221,7 +222,7 @@ export function AdminInvitationsManager({
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
               Expires{" "}
-              {new Date(invitation.expires_at).toLocaleDateString("en-GB")}
+              {ukDate(invitation.expires_at)}
             </p>
             {invitation.status === "pending" ? (
               <Button
@@ -267,10 +268,10 @@ export function AdminInvitationsManager({
                 <td className="capitalize">{invitation.status}</td>
                 <td>{invitation.invited_by_profile?.full_name ?? "-"}</td>
                 <td>
-                  {new Date(invitation.expires_at).toLocaleDateString("en-GB")}
+                  {ukDate(invitation.expires_at)}
                 </td>
                 <td>
-                  {new Date(invitation.created_at).toLocaleDateString("en-GB")}
+                  {ukDate(invitation.created_at)}
                 </td>
                 <td className="p-3 text-right">
                   {invitation.status === "pending" ? (

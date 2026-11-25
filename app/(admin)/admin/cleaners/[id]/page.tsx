@@ -8,6 +8,11 @@ import {
 } from "@/lib/cleaner/right-to-work";
 import { notFound, redirect } from "next/navigation";
 
+import {
+  CleanerApplicationAnswers,
+  type AvailabilityRow,
+  type WorkingAreaRow,
+} from "@/components/admin/cleaner-application-answers";
 import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
 import { DocumentChecksSection } from "@/components/admin/document-checks-section";
 import { RemoveUserButton } from "@/components/admin/remove-user-button";
@@ -23,6 +28,7 @@ import {
   hardDeleteBlockMessage,
 } from "@/lib/admin/delete-user";
 import { adminCleanerStatusLabel } from "@/lib/admin/cleaner-status";
+import { coverAmount, ukDate } from "@/lib/admin/format";
 import { documentReviewNoteFor } from "@/lib/cleaner/document-reviews";
 import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
 import { verificationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
@@ -52,6 +58,10 @@ export default async function AdminCleanerPage({
     { data: ratings },
     { data: activity },
     eligibility,
+    { data: services },
+    { data: availability },
+    { data: areas },
+    { data: authUser },
   ] = await Promise.all([
     admin.from("profiles").select("*").eq("id", params.id).single(),
     admin.from("cleaner_profiles").select("*").eq("id", params.id).single(),
@@ -85,6 +95,16 @@ export default async function AdminCleanerPage({
       actorAdminId: user.id,
       userId: params.id,
     }),
+    admin.from("cleaner_services").select("service_type,is_active").eq("cleaner_id", params.id),
+    admin
+      .from("cleaner_availability")
+      .select("day_of_week,start_time,end_time,is_available")
+      .eq("cleaner_id", params.id),
+    admin
+      .from("cleaner_working_areas")
+      .select("postcode_prefix,latitude,longitude")
+      .eq("cleaner_id", params.id),
+    admin.auth.admin.getUserById(params.id),
   ]);
   if (!profile || !cleaner) notFound();
   const dbsSlots = parseDocumentUrls(cleaner.dbs_document_url);
@@ -124,7 +144,7 @@ export default async function AdminCleanerPage({
                 ? [
                     [
                       idSlots.length > 1
-                        ? `ID ${index === 0 ? "front" : "back"}`
+                        ? `ID page ${index + 1}`
                         : "Government ID",
                       path,
                       "storage",
@@ -293,10 +313,10 @@ export default async function AdminCleanerPage({
               }),
               cleaner.insurance_provider,
               cleaner.insurance_cover_amount
-                ? `£${cleaner.insurance_cover_amount}`
+                ? coverAmount(cleaner.insurance_cover_amount)
                 : null,
               cleaner.insurance_expiry_date
-                ? `expires ${cleaner.insurance_expiry_date}`
+                ? `expires ${ukDate(cleaner.insurance_expiry_date)}`
                 : null,
             ]
               .filter(Boolean)
@@ -342,9 +362,9 @@ export default async function AdminCleanerPage({
                   cleaner.right_to_work_share_code
                     ? `share code ${formatShareCode(cleaner.right_to_work_share_code)}`
                     : null,
-                  cleaner.date_of_birth ? `born ${cleaner.date_of_birth}` : null,
+                  cleaner.date_of_birth ? `born ${ukDate(cleaner.date_of_birth)}` : null,
                   cleaner.right_to_work_expires_on
-                    ? `permission ends ${cleaner.right_to_work_expires_on}`
+                    ? `permission ends ${ukDate(cleaner.right_to_work_expires_on)}`
                     : cleaner.right_to_work_route === "share_code"
                       ? "no end date"
                       : "check the passport or birth certificate + NI above",
@@ -384,7 +404,7 @@ export default async function AdminCleanerPage({
               ),
           },
           {
-            label: "Equipment",
+            label: "Equipment check",
             value: `${
               cleaner.equipment_status === "update_required"
                 ? verificationLifecycleLabel(cleaner.equipment_status, null, {
@@ -400,31 +420,33 @@ export default async function AdminCleanerPage({
             }`,
           },
           {
-            label: "Specialist skills",
-            value: (cleaner.skills_assessment_status ?? "not set").replaceAll(
-              "_",
-              " ",
-            ),
-          },
-          {
-            label: "Emergency contact",
-            value: cleaner.emergency_contact?.name
-              ? `${cleaner.emergency_contact.name}${
-                  cleaner.emergency_contact.mobile
-                    ? ` · ${cleaner.emergency_contact.mobile}`
-                    : ""
-                }`
-              : "Not provided",
+            label: "Skills assessment",
+            value:
+              cleaner.skills_assessment_status === "additional_assessment"
+                ? "Extra check needed (under 1 year's experience)"
+                : (cleaner.skills_assessment_status ?? "not set").replaceAll("_", " "),
           },
           {
             label: "Agreements",
             value:
               Array.isArray(cleaner.agreement_acceptances) &&
               cleaner.agreement_acceptances.length > 0
-                ? `${cleaner.agreement_acceptances.length} accepted`
+                ? `${cleaner.agreement_acceptances.length} accepted (details below)`
                 : "None logged",
           },
         ]}
+      />
+
+      <CleanerApplicationAnswers
+        areas={(areas ?? []) as WorkingAreaRow[]}
+        availability={(availability ?? []) as AvailabilityRow[]}
+        cleaner={{ ...cleaner, created_at: profile.created_at }}
+        services={services ?? []}
+        signupMarketingOptIn={
+          typeof authUser?.user?.user_metadata?.marketing_opt_in === "boolean"
+            ? authUser.user.user_metadata.marketing_opt_in
+            : null
+        }
       />
 
       <UserActivityTimeline events={(activity ?? []) as UserActivityRow[]} />
@@ -432,7 +454,7 @@ export default async function AdminCleanerPage({
       <PagedHistoryTable
         headers={["Date", "Event", "Score", "Tier change", "Notes"]}
         rows={(medallionEvents ?? []).map((item) => [
-          new Date(item.created_at).toLocaleDateString("en-GB"),
+          ukDate(item.created_at),
           item.event_type.replaceAll("_", " "),
           `${item.score_before ?? "-"} → ${item.score_after ?? "-"}`,
           `${item.tier_before ?? "-"} → ${item.tier_after ?? "-"}`,
@@ -463,7 +485,7 @@ export default async function AdminCleanerPage({
       <PagedHistoryTable
         headers={["Date", "Mood", "Internal score", "Status", "Comment"]}
         rows={(ratings ?? []).map((item) => [
-          new Date(item.created_at).toLocaleDateString("en-GB"),
+          ukDate(item.created_at),
           item.mood ?? item.overall_score,
           item.internal_score ?? "-",
           item.application_status ?? "applied",

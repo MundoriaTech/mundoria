@@ -54,6 +54,7 @@ export function IncidentsTable({ rows }: { rows: IncidentRow[] }) {
                   href={`/admin/incidents/${row.id}`}
                 >
                   {new Date(row.created_at).toLocaleString("en-GB", {
+    timeZone: "Europe/London",
                     day: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",

@@ -199,7 +199,7 @@ export function answerIsComplete(
   return typeof answer === "number";
 }
 
-function answerIsCorrect(
+export function answerIsCorrect(
   question: SkillsExamQuestion,
   answer: SkillsExamAnswer | undefined,
 ) {

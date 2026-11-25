@@ -42,6 +42,7 @@ export default async function AdminSafetyDetailPage({
         <p className="mt-2 text-sm text-muted-foreground">
           Raised{" "}
           {new Date(alert.created_at).toLocaleString("en-GB", {
+    timeZone: "Europe/London",
             dateStyle: "medium",
             timeStyle: "short",
           })}
@@ -89,6 +90,29 @@ export default async function AdminSafetyDetailPage({
               <dt className="text-muted-foreground">Address snapshot</dt>
               <dd className="font-medium">{alert.address_line ?? "-"}</dd>
             </div>
+            <div className="sm:col-span-2">
+              <dt className="text-muted-foreground">Where the phone was when they pressed it</dt>
+              <dd className="font-medium">
+                {alert.client_latitude != null && alert.client_longitude != null ? (
+                  <a
+                    className="text-[#524096] hover:underline"
+                    href={`https://www.google.com/maps?q=${alert.client_latitude},${alert.client_longitude}`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Open on map ({Number(alert.client_latitude).toFixed(5)}, {Number(alert.client_longitude).toFixed(5)})
+                  </a>
+                ) : (
+                  "Location not shared"
+                )}
+              </dd>
+            </div>
+            {alert.client_user_agent ? (
+              <div className="sm:col-span-2">
+                <dt className="text-muted-foreground">Device</dt>
+                <dd className="break-words text-xs">{alert.client_user_agent}</dd>
+              </div>
+            ) : null}
             {alert.outcome_notes ? (
               <div className="sm:col-span-2">
                 <dt className="text-muted-foreground">Outcome notes</dt>

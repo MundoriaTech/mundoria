@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PagedTable } from "@/components/shared/paged-list";
 import { PAGE_SIZES } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
+import { ukDateTime } from "@/lib/admin/format";
 
 export type LeadListRow = {
   callback_requested_at: string | null;
@@ -43,14 +44,10 @@ export function LeadStatusBadge({ status }: { status: string }) {
   );
 }
 
+/** UK time, with the year, so server and browser render the same. */
 export function formatWhen(iso: string | null) {
   if (!iso) return "–";
-  return new Date(iso).toLocaleString("en-GB", {
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-  });
+  return ukDateTime(iso);
 }
 
 export function LeadsTable({ rows, resetKey }: { rows: LeadListRow[]; resetKey: string }) {

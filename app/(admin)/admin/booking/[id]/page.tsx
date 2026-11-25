@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
+import { DetailSection } from "@/components/admin/detail-section";
+import { humanize, poundsFromPence, ukDateTime } from "@/lib/admin/format";
 import { MatchingDecisionLog } from "@/components/admin/matching-decision-log";
 import { BookingSummaryCard } from "@/components/customer/booking-basket";
 import {
@@ -25,7 +27,7 @@ import {
 } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
-import type { Address } from "@/types/customer";
+import type { Address, OfficeSpaceDraft } from "@/types/customer";
 
 export default async function AdminBookingPage({ params }: { params: { id: string } }) {
   const admin = createAdminClient();
@@ -39,6 +41,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     { data: team },
     { data: offers },
     reserves,
+    { data: draftRow },
   ] = await Promise.all([
     admin.from("bookings").select("*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone)").eq("id", params.id).single(),
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
@@ -54,8 +57,29 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       .order("offered_at", { ascending: false })
       .limit(5),
     loadMatchingList(params.id),
+    admin
+      .from("booking_drafts")
+      .select("created_at,prepared_at,prepared_by,marketing_opt_in")
+      .eq("completed_booking_id", params.id)
+      .maybeSingle(),
   ]);
   if (!booking) notFound();
+  const [{ data: promo }, { data: preferredCleaner }, { data: preparer }, { data: redeemedCallback }] = await Promise.all([
+    booking.promo_code_id
+      ? admin.from("promo_codes").select("code").eq("id", booking.promo_code_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    booking.preferred_cleaner_id
+      ? admin.from("profiles").select("id,full_name").eq("id", booking.preferred_cleaner_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    draftRow?.prepared_by
+      ? admin.from("profiles").select("full_name").eq("id", draftRow.prepared_by).maybeSingle()
+      : Promise.resolve({ data: null }),
+    admin
+      .from("callback_leads")
+      .select("id,source")
+      .eq("offer_redeemed_booking_id", params.id)
+      .maybeSingle(),
+  ]);
   const namedCleanerIds = Array.from(
     new Set(
       [
@@ -165,6 +189,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             pricing: legacySchedule
               ? { ...pricing, schedule: LEGACY_SCHEDULE_MULTIPLIERS }
               : pricing,
+            officeSpaces: (booking.commercial_spaces ?? undefined) as OfficeSpaceDraft[] | undefined,
             rooms: {
               bathrooms: address.num_bathrooms,
               bedrooms: address.num_bedrooms,
@@ -221,7 +246,19 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
                 </Link>
               </p>
               <p>
-                <b>Cleaner:</b> {booking.cleaner?.full_name ?? "Unassigned"}
+                <b>Cleaner:</b>{" "}
+                {booking.cleaner_id ? (
+                  <Link className="font-semibold text-[#524096] hover:underline" href={`/admin/cleaners/${booking.cleaner_id}`}>
+                    {booking.cleaner?.full_name ?? "Cleaner"}
+                  </Link>
+                ) : (
+                  "Unassigned"
+                )}
+                {booking.cleaner?.phone ? (
+                  <a className="ml-2 text-[#524096] hover:underline" href={`tel:${booking.cleaner.phone}`}>
+                    {booking.cleaner.phone}
+                  </a>
+                ) : null}
               </p>
               <p className="break-all">
                 <b>Email:</b>{" "}
@@ -327,6 +364,12 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
                     {formatMoney(breakdown.labourPence)}
                   </li>
                 ) : null}
+                {Number(booking.discount_pence ?? 0) > 0 ? (
+                  <li>
+                    {booking.offer_kind ? humanize(booking.offer_kind) : promo?.code ? `Code ${promo.code}` : "Discount"} = −
+                    {formatMoney(Number(booking.discount_pence))}
+                  </li>
+                ) : null}
                 {breakdown.addOns
                   .filter((addOn) => addOn.amountPence > 0)
                   .map((addOn) => (
@@ -363,6 +406,95 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
               </div>
             </section>
           ) : null}
+          <DetailSection
+            description="Everything else the customer gave us, plus how the booking was made."
+            rows={[
+              { label: "Booked", value: ukDateTime(booking.created_at) },
+              {
+                label: "How it was made",
+                value: draftRow?.prepared_by
+                  ? `Prepared by ${preparer?.full_name ?? "an admin"} ${ukDateTime(draftRow.prepared_at)}, confirmed by the customer`
+                  : draftRow
+                    ? `Online booking (started ${ukDateTime(draftRow.created_at)})`
+                    : "Online booking",
+              },
+              { label: "Service group", value: humanize(booking.service_category) },
+              { label: "Postcode", value: address?.postcode ?? null },
+              { label: "Property type", value: humanize(address?.property_type) },
+              { label: "Address label", value: address?.label ?? null },
+              {
+                label: "Map",
+                value:
+                  address?.latitude != null && address?.longitude != null ? (
+                    <a
+                      className="text-[#524096] hover:underline"
+                      href={`https://www.google.com/maps?q=${address.latitude},${address.longitude}`}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      Open pin ({Number(address.latitude).toFixed(5)}, {Number(address.longitude).toFixed(5)})
+                    </a>
+                  ) : null,
+              },
+              { label: "Access notes (address)", value: address?.special_requirements ?? null, wide: true },
+              {
+                label: "Office spaces",
+                value: Array.isArray(booking.commercial_spaces) && booking.commercial_spaces.length
+                  ? (booking.commercial_spaces as OfficeSpaceDraft[])
+                      .map((space) => `${space.quantity} × ${space.customLabel || humanize(space.spaceType)} (${humanize(space.size)})`)
+                      .join("\n")
+                  : null,
+                wide: Boolean(booking.commercial_spaces?.length),
+              },
+              {
+                label: "Preferred cleaner",
+                value: preferredCleaner ? (
+                  <Link className="text-[#524096] hover:underline" href={`/admin/cleaners/${preferredCleaner.id}`}>
+                    {preferredCleaner.full_name ?? "Cleaner"}
+                  </Link>
+                ) : booking.prefer_same_cleaner ? "Same cleaner as before" : "No preference",
+              },
+              {
+                label: "Promo code",
+                value: promo?.code ?? null,
+              },
+              {
+                label: "Offer",
+                value: booking.offer_kind
+                  ? humanize(booking.offer_kind)
+                  : Number(booking.offer_free_hours ?? 0) > 0
+                    ? `${booking.offer_free_hours}h free`
+                    : null,
+              },
+              { label: "Discount", value: Number(booking.discount_pence ?? 0) > 0 ? poundsFromPence(Number(booking.discount_pence)) : null },
+              {
+                label: "Came from an ad callback",
+                value: redeemedCallback ? (
+                  <Link className="text-[#524096] hover:underline" href={`/admin/callback-leads/${redeemedCallback.id}`}>
+                    Yes ({redeemedCallback.source})
+                  </Link>
+                ) : "No",
+              },
+              {
+                label: "Recommended standard",
+                value: booking.recommended_cleaning_standard ? standardLabel(booking.recommended_cleaning_standard) : null,
+              },
+              {
+                label: "Part of a series",
+                value: booking.parent_booking_id ? (
+                  <Link className="text-[#524096] hover:underline" href={`/admin/booking/${booking.parent_booking_id}`}>
+                    Repeat of booking {String(booking.parent_booking_id).slice(0, 8)}
+                  </Link>
+                ) : booking.is_recurring ? "First visit of a series" : "One-off",
+              },
+              {
+                label: "Customer notes, exactly as written",
+                value: notes || "None",
+                wide: true,
+              },
+            ]}
+            title="Booking record"
+          />
         </div>
         <BookingActions
           allocatedCleaners={booking.allocated_cleaners ?? 1}
@@ -390,7 +522,15 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             <p>Capturable: {formatMoney(payment.amount_capturable)}</p>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-muted-foreground">No payment intent.</p>
+          <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+            <p>
+              {booking.stripe_setup_intent_id || booking.stripe_payment_method_id
+                ? "Card saved; the hold is placed about 24 hours before the visit."
+                : "No card saved."}
+            </p>
+            {booking.stripe_setup_intent_id ? <p className="break-all">Setup: {booking.stripe_setup_intent_id}</p> : null}
+            {booking.stripe_payment_method_id ? <p className="break-all">Card: {booking.stripe_payment_method_id}</p> : null}
+          </div>
         )}
       </section>
       <MatchingDecisionLog
@@ -420,8 +560,8 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         offerOpen={Boolean(openOffer)}
         status={booking.status}
       />
-      <PagedSimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "-"])} />
-      <PagedSimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [item.created_at, item.sender?.full_name ?? "Unknown", item.content])} />
+      <PagedSimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [ukDateTime(item.created_at), `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "-"])} />
+      <PagedSimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [ukDateTime(item.created_at), item.sender?.full_name ?? "Unknown", item.content])} />
     </div>
   );
 }

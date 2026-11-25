@@ -46,11 +46,14 @@ function placeLabel(booking: AdminBooking) {
 }
 
 function visitLabel(booking: AdminBooking) {
+  // Date and start time are UK wall-clock values: read and print them as-is
+  // (UTC both ways) so neither the server nor the viewer's zone shifts them.
   const when = new Date(
-    `${booking.scheduled_date}T${booking.scheduled_start_time || "00:00:00"}`,
+    `${booking.scheduled_date}T${booking.scheduled_start_time || "00:00:00"}Z`,
   );
   if (Number.isNaN(when.getTime())) return booking.scheduled_date;
   return when.toLocaleString("en-GB", {
+    timeZone: "UTC",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",

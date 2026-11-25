@@ -18,7 +18,8 @@ type Metrics = {
 };
 
 const day = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  new Date(iso).toLocaleDateString("en-GB", {
+    timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" });
 
 export default async function AdminLeadReportsPage({
   searchParams,

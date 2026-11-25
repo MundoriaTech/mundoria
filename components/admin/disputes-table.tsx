@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminDispute } from "@/types/admin";
+import { ukDate } from "@/lib/admin/format";
 
 export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
   const [type, setType] = useState("");
@@ -80,7 +81,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {item.raised_by_profile?.full_name ?? "Unknown"} ·{" "}
-                  {new Date(item.created_at).toLocaleDateString("en-GB")}
+                  {ukDate(item.created_at)}
                 </p>
                 <p className="mt-1 font-mono text-xs text-muted-foreground">
                   Booking {item.booking_id.slice(0, 8)}
@@ -115,7 +116,7 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
             {pageItems.map((item) => (
               <tr className="border-t" key={item.id}>
                 <td className="p-3">
-                  {new Date(item.created_at).toLocaleDateString("en-GB")}
+                  {ukDate(item.created_at)}
                 </td>
                 <td className="capitalize">
                   {item.type.replaceAll("_", " ")}

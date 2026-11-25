@@ -11,6 +11,7 @@ import {
 } from "@/components/shared/pagination-controls";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { adminCleanerStatusLabel } from "@/lib/admin/cleaner-status";
+import { ukDate } from "@/lib/admin/format";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminCleaner } from "@/types/admin";
 
@@ -246,7 +247,10 @@ export function CleanersTable({
                   ) : null}
                 </span>
                 <span className="text-[14.5px] text-[#5F5F66]">
-                  {new Date(cleaner.created_at).toLocaleDateString("en-GB")}
+                  {/* Application submitted; signup date until they submit. */}
+                  {(cleaner.cleaner_profiles as { info_accuracy_confirmed_at?: string | null } | null)?.info_accuracy_confirmed_at
+                    ? ukDate((cleaner.cleaner_profiles as { info_accuracy_confirmed_at?: string | null }).info_accuracy_confirmed_at)
+                    : <span title="Signed up; application not submitted">{ukDate(cleaner.created_at)} (signed up)</span>}
                 </span>
               </Link>
             );

@@ -31,6 +31,7 @@ function displayName(conversation: SupportConversationWithUser) {
 function formatWhen(value: string) {
   try {
     return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
       dateStyle: "medium",
       timeStyle: "short",
     }).format(new Date(value));

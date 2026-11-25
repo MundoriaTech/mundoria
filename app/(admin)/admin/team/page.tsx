@@ -10,6 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/auth";
 import { redirect } from "next/navigation";
+import { ukDate } from "@/lib/admin/format";
 
 export default async function AdminTeamPage() {
   const session = createServerClient();
@@ -92,7 +93,7 @@ export default async function AdminTeamPage() {
                 </div>
                 <p className="hidden text-xs text-muted-foreground sm:block">
                   Joined{" "}
-                  {new Date(member.created_at).toLocaleDateString("en-GB")}
+                  {ukDate(member.created_at)}
                 </p>
               </li>
             );

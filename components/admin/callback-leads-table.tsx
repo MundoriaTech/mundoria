@@ -16,18 +16,12 @@ import {
   type CallbackLeadRow,
 } from "@/lib/admin/callback-desk";
 import { PAGE_SIZES } from "@/lib/pagination";
+import { callbackDisplayName } from "@/lib/admin/callback-desk";
+import { ukDateTime } from "@/lib/admin/format";
 
 const GRID = "minmax(200px,1.4fr) 160px 120px 140px minmax(140px,1fr) 88px";
 
-function formatWhen(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", {
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
+const formatWhen = ukDateTime;
 
 export function CallbackLeadsTable({
   basePath = "/admin/callback-leads",
@@ -87,7 +81,7 @@ export function CallbackLeadsTable({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="m-0 truncate text-[15px] font-semibold text-[#1c133b]">
-                  {row.first_name} {row.last_name}
+                  {callbackDisplayName(row)}
                 </p>
                 <p className="mt-0.5 mb-0 text-[13.5px] text-[#5F5F66]">{row.phone}</p>
                 <p className="mt-2 mb-0 text-[13px] text-[#5F5F66]">
@@ -134,11 +128,14 @@ export function CallbackLeadsTable({
             >
               <span className="min-w-0">
                 <span className="block truncate text-[15px] font-semibold text-[#1c133b]">
-                  {row.first_name} {row.last_name}
+                  {callbackDisplayName(row)}
                 </span>
                 <span className="block truncate text-[12.3px] text-[#5F5F66]">
-                  {row.notes || row.email}
+                  {row.email} · {row.source}
                 </span>
+                {row.notes ? (
+                  <span className="block truncate text-[12.3px] italic text-[#5F5F66]">{row.notes}</span>
+                ) : null}
               </span>
               <span className="text-[15px] text-[#3D335F]">{row.phone}</span>
               <span className="text-[14.5px] text-[#3D335F]">

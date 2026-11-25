@@ -134,3 +134,12 @@ export function filterCallbackLeads(
   }
   return rows.filter((row) => row.outcome === filter);
 }
+
+/** The popup has no name field; the form stores "Guest Lead" as a stand-in. */
+export function callbackDisplayName(row: { first_name: string; last_name: string }) {
+  const first = row.first_name.trim();
+  const last = row.last_name.trim();
+  if (first.toLowerCase() === "guest" && last.toLowerCase() === "lead") return "No name given";
+  return last.toLowerCase() === "lead" ? first : `${first} ${last}`.trim();
+}
+

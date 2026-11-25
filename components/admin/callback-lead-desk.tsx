@@ -16,6 +16,8 @@ import {
   type CallbackLeadRow,
   type CallbackOutcome,
 } from "@/lib/admin/callback-desk";
+import { callbackDisplayName } from "@/lib/admin/callback-desk";
+import { ukDateTime } from "@/lib/admin/format";
 
 const fieldClass =
   "h-11 w-full rounded-xl border border-[#E1E1EA] bg-white px-3 text-[15px] text-[#1c133b] outline-none focus:border-[#524096]";
@@ -150,13 +152,7 @@ export function CallbackLeadDesk({ row }: { row: CallbackLeadRow }) {
     void save({ notes, town }, true);
   }
 
-  const when = new Date(row.created_at).toLocaleString("en-GB", {
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const when = ukDateTime(row.created_at);
   const utm = [row.utm_source, row.utm_medium, row.utm_campaign]
     .filter(Boolean)
     .join(" / ");
@@ -166,7 +162,7 @@ export function CallbackLeadDesk({ row }: { row: CallbackLeadRow }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="m-0 text-[22px] font-semibold text-[#1c133b]">
-            {row.first_name} {row.last_name}
+            {callbackDisplayName(row)}
           </h2>
           <p className="mt-1 mb-0 text-[14.5px] text-[#5F5F66]">
             {row.source}

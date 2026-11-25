@@ -1,6 +1,7 @@
 import { PAGE_SIZES, parsePage, slicePage } from "@/lib/pagination";
 import { PaginationLinks } from "@/components/shared/pagination-controls";
 import { canSeeLeadSource } from "@/lib/admin/access";
+import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import { requireAdminArea } from "@/lib/admin/page-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -35,12 +36,30 @@ export default async function AdminLeadPage({
   if (!lead || !canSeeLeadSource(access, lead.source)) notFound();
   const admin = createAdminClient();
 
-  const [consents, events, messages, calls, enrollments] = await Promise.all([
+  const [consents, events, messages, calls, enrollments, consentRows, callbacks, account] = await Promise.all([
     currentConsents(lead.id),
     admin.from("lead_events").select("id,type,summary,payload,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }).limit(1000),
     admin.from("outreach_messages").select("id,channel,direction,status,subject,body,ai_generated,ai_intent,error,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }).limit(1000),
     admin.from("outreach_calls").select("id,purpose,status,outcome,summary,transcript,recording_url,duration_seconds,ended_reason,error,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }),
     admin.from("outreach_enrollments").select("id,journey,step_index,status,stop_reason,next_run_at,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }),
+    admin.from("lead_consents").select("channel,granted,basis,wording,source_page,captured_at").eq("lead_id", lead.id).order("captured_at", { ascending: false }),
+    lead.email || lead.phone
+      ? admin
+          .from("callback_leads")
+          .select("id,source,created_at,call_status,outcome")
+          .or(
+            [lead.email ? `email.eq.${lead.email}` : null, lead.phone ? `phone.eq.${lead.phone}` : null]
+              .filter(Boolean)
+              .join(","),
+          )
+          .order("created_at", { ascending: false })
+          .limit(20)
+      : Promise.resolve({ data: [] as Array<{ call_status: string; created_at: string; id: string; outcome: string | null; source: string }> }),
+    lead.profile_id
+      ? admin.from("profiles").select("id,role,full_name").eq("id", lead.profile_id).maybeSingle()
+      : lead.email
+        ? admin.from("profiles").select("id,role,full_name").eq("email", lead.email).maybeSingle()
+        : Promise.resolve({ data: null }),
   ]);
 
   const sentDraftIds = new Set(
@@ -118,7 +137,13 @@ export default async function AdminLeadPage({
               </p>
             ) : null}
             <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-              <Row label="Source" value={[lead.source, lead.utm_source, lead.utm_campaign].filter(Boolean).join(" / ")} />
+              <Row label="First came from" value={lead.source} />
+              <Row label="Ad / campaign" value={[lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(" / ")} />
+              <Row
+                label="Account"
+                link={account.data ? (account.data.role === "cleaner" ? `/admin/cleaners/${account.data.id}` : `/admin/customer/${account.data.id}`) : undefined}
+                value={account.data ? `${account.data.full_name ?? "Account"} (${account.data.role})` : "No account"}
+              />
               <Row label="Created" value={formatWhen(lead.created_at)} />
               <Row label="Callback requested" value={formatWhen(lead.callback_requested_at)} />
               <Row label="Booked" value={lead.booking_id ? formatWhen(lead.booked_at) : "–"} link={lead.booking_id ? `/admin/booking/${lead.booking_id}` : undefined} />
@@ -130,6 +155,53 @@ export default async function AdminLeadPage({
                   .join(" · ")}
               />
             </dl>
+          </section>
+
+          <section className="rounded-xl border bg-card p-5">
+            <h2 className="text-sm font-semibold text-[#1c133b]">Callback requests</h2>
+            {(callbacks.data ?? []).length ? (
+              <ul className="mt-3 space-y-1.5 text-sm">
+                {(callbacks.data ?? []).map((row) => (
+                  <li key={row.id}>
+                    <Link
+                      className="font-medium text-[#312c79] hover:underline"
+                      href={`/admin/${isMetaOfferSource(String(row.source)) ? "meta-leads" : "callback-leads"}/${row.id}`}
+                    >
+                      {formatWhen(row.created_at)} · {row.source}
+                    </Link>{" "}
+                    <span className="text-muted-foreground">
+                      ({String(row.call_status).replaceAll("_", " ")}
+                      {row.outcome ? `, ${String(row.outcome).replaceAll("_", " ")}` : ""})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No callback requests.</p>
+            )}
+          </section>
+
+          <section className="rounded-xl border bg-card p-5">
+            <h2 className="text-sm font-semibold text-[#1c133b]">Consent history</h2>
+            {(consentRows.data ?? []).length ? (
+              <ul className="mt-3 space-y-2 text-sm">
+                {(consentRows.data ?? []).map((row, index) => (
+                  <li key={`${row.channel}-${row.captured_at}-${index}`}>
+                    <span className="font-medium">
+                      {row.channel === "sms" ? "Text" : String(row.channel).charAt(0).toUpperCase() + String(row.channel).slice(1)}:{" "}
+                      {row.granted ? "yes" : "no"}
+                    </span>{" "}
+                    <span className="text-muted-foreground">
+                      ({String(row.basis).replaceAll("_", " ")} · {formatWhen(row.captured_at)}
+                      {row.source_page ? ` · ${row.source_page}` : ""})
+                    </span>
+                    {row.wording ? <p className="text-xs text-muted-foreground">“{row.wording}”</p> : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No consent recorded.</p>
+            )}
           </section>
 
           {(enrollments.data ?? []).length ? (

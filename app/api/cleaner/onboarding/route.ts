@@ -709,6 +709,7 @@ export async function POST(request: Request) {
         ? value.reference_relationship || null
         : null,
       safety_acknowledged_at: now,
+      skills_exam_answers: value.skills_exam_answers,
       skills_exam_completed_at: now,
       skills_exam_passed: true,
       skills_assessment_status: skillsAssessmentStatus,
@@ -741,15 +742,23 @@ export async function POST(request: Request) {
 
   let applicationReference = generateApplicationReference();
   let updateError: { code?: string; message: string } | null = null;
+  let update: Partial<typeof baseUpdate> = baseUpdate;
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const { error } = await admin
       .from("cleaner_profiles")
-      .update({ ...baseUpdate, application_reference: applicationReference })
+      .update({ ...update, application_reference: applicationReference })
       .eq("id", user.id);
     updateError = error;
     // 23505 = unique violation on application_reference; try a fresh code.
     if (error?.code === "23505") {
       applicationReference = generateApplicationReference();
+      continue;
+    }
+    // Before the skills_exam_answers migration is applied, save the rest.
+    if ((error?.code === "PGRST204" || error?.code === "42703") && "skills_exam_answers" in update) {
+      const { skills_exam_answers: _answers, ...rest } = update;
+      void _answers;
+      update = rest;
       continue;
     }
     break;

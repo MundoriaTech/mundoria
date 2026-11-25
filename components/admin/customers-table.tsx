@@ -10,6 +10,7 @@ import {
 } from "@/components/shared/pagination-controls";
 import { formatMoney } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
+import { ukDate } from "@/lib/admin/format";
 
 export type AdminCustomerRow = {
   addressLabel: string | null;
@@ -199,7 +200,7 @@ export function CustomersTable({ customers }: { customers: AdminCustomerRow[] })
               <span className="text-[15px] text-[#3D335F]">{customer.stats.completed}</span>
               <span className="text-right text-[15px] font-semibold text-[#523F97]">{formatMoney(customer.stats.spent)}</span>
               <span className="text-[14.5px] text-[#5F5F66]">
-                {new Date(customer.created_at).toLocaleDateString("en-GB")}
+                {ukDate(customer.created_at)}
               </span>
             </Link>
           ))}

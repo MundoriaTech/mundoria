@@ -12,10 +12,10 @@ export default async function AdminVerificationQueuePage() {
     createAdminClient()
     .from("cleaner_profiles")
     .select(
-      "id,status,utr_document_status,dbs_document_status,insurance_status,insurance_expiry_date,verification_flags,updated_at,profile:profiles!cleaner_profiles_id_fkey(full_name,email)",
+      "id,status,id_document_status,right_to_work_status,headshot_status,utr_document_status,dbs_document_status,insurance_status,insurance_expiry_date,verification_flags,updated_at,profile:profiles!cleaner_profiles_id_fkey(full_name,email)",
     )
     .or(
-      "utr_document_status.eq.pending,dbs_document_status.eq.pending,insurance_status.eq.pending",
+      "id_document_status.eq.pending,right_to_work_status.eq.pending,headshot_status.eq.pending,utr_document_status.eq.pending,dbs_document_status.eq.pending,insurance_status.eq.pending",
     )
     .order("updated_at", { ascending: true })
       .range(from, to),
