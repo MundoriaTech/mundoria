@@ -5,9 +5,11 @@ import {
   type RightToWorkRoute,
   visaRestrictsSelfEmployment,
   visaTypeLabel,
+  rightToWorkRestrictionLabel,
 } from "@/lib/cleaner/right-to-work";
 import { notFound, redirect } from "next/navigation";
 
+import { CleanerApplicationRecord } from "@/components/admin/cleaner-application-record";
 import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
 import { DocumentChecksSection } from "@/components/admin/document-checks-section";
 import { RemoveUserButton } from "@/components/admin/remove-user-button";
@@ -23,9 +25,15 @@ import {
   hardDeleteBlockMessage,
 } from "@/lib/admin/delete-user";
 import { adminCleanerStatusLabel } from "@/lib/admin/cleaner-status";
-import { documentReviewNoteFor } from "@/lib/cleaner/document-reviews";
-import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
-import { verificationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
+import {
+  adminVisibleVerificationFlags,
+  documentReviewNoteFor,
+} from "@/lib/cleaner/document-reviews";
+import { parseDocumentList } from "@/lib/cleaner/document-urls";
+import {
+  DBS_CHECK_URL,
+  verificationLifecycleLabel,
+} from "@/lib/cleaner/onboarding-compliance";
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
@@ -51,6 +59,9 @@ export default async function AdminCleanerPage({
     { data: bookings },
     { data: ratings },
     { data: activity },
+    { data: services },
+    { data: areas },
+    { data: availability },
     eligibility,
   ] = await Promise.all([
     admin.from("profiles").select("*").eq("id", params.id).single(),
@@ -81,16 +92,30 @@ export default async function AdminCleanerPage({
       .eq("user_id", params.id)
       .order("created_at", { ascending: false })
       .limit(100),
+    admin
+      .from("cleaner_services")
+      .select("service_type")
+      .eq("cleaner_id", params.id)
+      .eq("is_active", true),
+    admin
+      .from("cleaner_working_areas")
+      .select("postcode_prefix,latitude,longitude")
+      .eq("cleaner_id", params.id),
+    admin
+      .from("cleaner_availability")
+      .select("day_of_week,start_time,end_time,is_available")
+      .eq("cleaner_id", params.id)
+      .order("day_of_week", { ascending: true }),
     getHardDeleteEligibility({
       actorAdminId: user.id,
       userId: params.id,
     }),
   ]);
   if (!profile || !cleaner) notFound();
-  const dbsSlots = parseDocumentUrls(cleaner.dbs_document_url);
-  const idSlots = parseDocumentUrls(cleaner.id_document_url);
-  const dbsFilled = dbsSlots.filter(Boolean);
-  const idFilled = idSlots.filter(Boolean);
+  const dbsSlots = parseDocumentList(cleaner.dbs_document_url);
+  const idSlots = parseDocumentList(cleaner.id_document_url);
+  const dbsFilled = dbsSlots;
+  const idFilled = idSlots;
   const documentEntries: Array<[string, string | null, "storage" | "public"]> =
     [
       ...(dbsFilled.length
@@ -123,9 +148,11 @@ export default async function AdminCleanerPage({
               path
                 ? [
                     [
-                      idSlots.length > 1
+                      idSlots.length === 2
                         ? `ID ${index === 0 ? "front" : "back"}`
-                        : "Government ID",
+                        : idSlots.length > 1
+                          ? `ID page ${index + 1}`
+                          : "Government ID",
                       path,
                       "storage",
                     ],
@@ -147,9 +174,7 @@ export default async function AdminCleanerPage({
   const reviewLabel = verificationLifecycleLabel;
   const verificationFlags =
     (cleaner.verification_flags ?? {}) as Record<string, unknown>;
-  const verificationFlagList = Object.entries(verificationFlags)
-    .filter(([flag, flagged]) => Boolean(flagged) && flag !== "document_reviews")
-    .map(([flag]) => flag);
+  const verificationFlagList = adminVisibleVerificationFlags(verificationFlags);
   const signed = await Promise.all(
     documentEntries.map(async ([label, path, kind]) => {
       if (!path)
@@ -175,33 +200,6 @@ export default async function AdminCleanerPage({
     insurance: signed.filter((doc) => doc.label.startsWith("Insurance")),
     utr: signed.filter((doc) => doc.label.startsWith("UTR")),
   };
-
-  // Same rule the server applies on Approve: ID and right to work must be
-  // approved; any other uploaded document must be approved too.
-  const documentBlockers = [
-    !idFilled.length
-      ? "Government ID not uploaded"
-      : cleaner.id_document_status !== "verified"
-        ? "Government ID not approved"
-        : null,
-    !cleaner.right_to_work_route
-      ? "Right to work not provided"
-      : cleaner.right_to_work_status !== "verified"
-        ? "Right to work not approved"
-        : null,
-    cleaner.headshot_url && cleaner.headshot_status !== "verified"
-      ? "Headshot not approved"
-      : null,
-    docsByPrefix.dbs.length && cleaner.dbs_document_status !== "verified"
-      ? "DBS not approved"
-      : null,
-    cleaner.utr_document_url && cleaner.utr_document_status !== "verified"
-      ? "UTR proof not approved"
-      : null,
-    cleaner.insurance_certificate_url && cleaner.insurance_status !== "verified"
-      ? "Insurance not approved"
-      : null,
-  ].filter((item): item is string => Boolean(item));
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -232,11 +230,51 @@ export default async function AdminCleanerPage({
       <CleanerReviewPanel
         bio={cleaner.bio}
         cleanerId={params.id}
-        documentBlockers={documentBlockers}
         currentStatus={cleaner.status}
         currentTier={cleaner.tier as CleanerTier}
-        hasHeadshot={Boolean(cleaner.headshot_url)}
-        hasUtr={Boolean(cleaner.utr_number)}
+        documentChecks={[
+          {
+            done: cleaner.utr_document_status === "verified",
+            label: "UTR",
+            detail: reviewLabel(cleaner.utr_document_status, cleaner.utr_path, {
+              kind: "utr",
+            }),
+          },
+          {
+            done: cleaner.dbs_document_status === "verified",
+            label: "DBS",
+            detail: reviewLabel(cleaner.dbs_document_status, cleaner.dbs_path, {
+              kind: "dbs",
+            }),
+          },
+          {
+            done: cleaner.insurance_status === "verified",
+            label: "Insurance",
+            detail: reviewLabel(cleaner.insurance_status, cleaner.insurance_path, {
+              kind: "insurance",
+            }),
+          },
+          {
+            done: cleaner.id_document_status === "verified",
+            label: "Government ID",
+            detail: reviewLabel(cleaner.id_document_status),
+          },
+          {
+            done: cleaner.headshot_status === "verified",
+            label: "Headshot",
+            detail: reviewLabel(cleaner.headshot_status),
+          },
+          {
+            done: cleaner.right_to_work_status === "verified",
+            label: "Right to work",
+            detail: [
+              reviewLabel(cleaner.right_to_work_status),
+              rightToWorkRestrictionLabel(cleaner.right_to_work_restriction),
+            ]
+              .filter(Boolean)
+              .join(" · "),
+          },
+        ]}
         onboardingComplete={Boolean(cleaner.onboarding_complete)}
         interviewScheduledAt={
           (cleaner.interview_scheduled_at as string | null) ?? null
@@ -273,6 +311,10 @@ export default async function AdminCleanerPage({
             status: cleaner.utr_document_status,
           },
           {
+            checkLink: {
+              href: DBS_CHECK_URL,
+              label: "Check DBS",
+            },
             detail: [
               reviewLabel(cleaner.dbs_document_status, cleaner.dbs_path, {
                 kind: "dbs",
@@ -282,6 +324,24 @@ export default async function AdminCleanerPage({
               .filter(Boolean)
               .join(" · "),
             documents: docsByPrefix.dbs,
+            facts: [
+              ...(cleaner.dbs_certificate_number
+                ? [
+                    {
+                      label: "Certificate number",
+                      value: cleaner.dbs_certificate_number,
+                    },
+                  ]
+                : []),
+              ...(cleaner.dbs_issued_on
+                ? [
+                    {
+                      label: "Issued on",
+                      value: formatUkDate(cleaner.dbs_issued_on),
+                    },
+                  ]
+                : []),
+            ],
             kind: "dbs",
             note: documentReviewNoteFor(verificationFlags, "dbs")?.note,
             status: cleaner.dbs_document_status,
@@ -333,6 +393,9 @@ export default async function AdminCleanerPage({
             detail: cleaner.right_to_work_route
               ? [
                   reviewLabel(cleaner.right_to_work_status),
+                  rightToWorkRestrictionLabel(
+                    cleaner.right_to_work_restriction,
+                  ),
                   visaTypeLabel(cleaner.right_to_work_visa_type),
                   cleaner.right_to_work_expires_on
                     ? `expires ${formatUkDate(cleaner.right_to_work_expires_on)}`
@@ -399,12 +462,31 @@ export default async function AdminCleanerPage({
                         },
                       ]
                     : []),
+                  ...(rightToWorkRestrictionLabel(
+                    cleaner.right_to_work_restriction,
+                  )
+                    ? [
+                        {
+                          label: "GOV.UK check",
+                          value: rightToWorkRestrictionLabel(
+                            cleaner.right_to_work_restriction,
+                          )!,
+                        },
+                      ]
+                    : []),
                 ]
               : undefined,
             kind: "right_to_work",
             note: documentReviewNoteFor(verificationFlags, "right_to_work")?.note,
+            requireWorkRestriction:
+              cleaner.right_to_work_route === "share_code",
             reviewable: Boolean(cleaner.right_to_work_route),
             status: cleaner.right_to_work_status ?? "missing",
+            workRestriction:
+              cleaner.right_to_work_restriction === "restricted" ||
+              cleaner.right_to_work_restriction === "unrestricted"
+                ? cleaner.right_to_work_restriction
+                : null,
           },
         ]}
         meta={[
@@ -422,7 +504,7 @@ export default async function AdminCleanerPage({
                       className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900"
                       key={flag}
                     >
-                      {flag.replaceAll("_", " ")}
+                      {flag}
                     </span>
                   ))}
                 </span>
@@ -472,6 +554,62 @@ export default async function AdminCleanerPage({
                 : "None logged",
           },
         ]}
+      />
+
+      <CleanerApplicationRecord
+        agreements={
+          Array.isArray(cleaner.agreement_acceptances)
+            ? cleaner.agreement_acceptances
+            : []
+        }
+        areas={areas ?? []}
+        availability={availability ?? []}
+        bio={cleaner.bio}
+        cleaningSkills={cleaner.cleaning_skills ?? []}
+        cleaningSkillsOther={cleaner.cleaning_skills_other}
+        dbsCertificateNumber={cleaner.dbs_certificate_number}
+        dbsIssuedOn={cleaner.dbs_issued_on}
+        dbsPath={cleaner.dbs_path}
+        emergency={
+          (cleaner.emergency_contact as Record<string, string> | null) ?? null
+        }
+        equipmentOwned={cleaner.equipment_owned ?? []}
+        equipmentOther={cleaner.equipment_other}
+        equipmentOwnership={cleaner.equipment_ownership}
+        experienceBand={cleaner.experience_band}
+        fullName={profile.full_name}
+        gender={cleaner.gender}
+        insuranceActivityConfirmed={cleaner.insurance_activity_confirmed}
+        insuranceInsuredName={cleaner.insurance_insured_name}
+        insurancePath={cleaner.insurance_path}
+        insurancePolicyNumber={cleaner.insurance_policy_number}
+        insuranceProvider={cleaner.insurance_provider}
+        interviewScheduledAt={
+          (cleaner.interview_scheduled_at as string | null) ?? null
+        }
+        locationConsentAt={cleaner.location_tracking_consent_at}
+        marketingConsentAt={cleaner.marketing_consent_at}
+        phone={profile.phone}
+        preferredHoursBand={cleaner.preferred_hours_band}
+        productsOwned={cleaner.products_owned ?? []}
+        productsOther={cleaner.products_other}
+        productsOwnership={cleaner.products_ownership}
+        reference={{
+          company: cleaner.reference_company,
+          contactOk: cleaner.reference_contact_ok,
+          email: cleaner.reference_email,
+          name: cleaner.reference_name,
+          phone: cleaner.reference_phone,
+          relationship: cleaner.reference_relationship,
+        }}
+        safetyAcknowledgedAt={cleaner.safety_acknowledged_at}
+        services={(services ?? []).map((row) => row.service_type)}
+        skillsExamScore={cleaner.skills_exam_score}
+        transportMode={cleaner.transport_mode}
+        utrNumber={cleaner.utr_number}
+        utrPath={cleaner.utr_path}
+        workingRadiusKm={cleaner.working_radius_km ?? 0}
+        yearsExperience={cleaner.years_experience ?? 0}
       />
 
       <UserActivityTimeline events={(activity ?? []) as UserActivityRow[]} />

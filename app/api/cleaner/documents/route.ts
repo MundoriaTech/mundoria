@@ -96,6 +96,7 @@ export async function POST(request: Request) {
         input.right_to_work_route === "share_code"
           ? input.right_to_work_visa_type || null
           : null,
+      right_to_work_restriction: null,
     });
   } else {
     // Files must be in the cleaner's own folder of the private bucket.
@@ -128,6 +129,7 @@ export async function POST(request: Request) {
     flags.unreadable_doc = false;
     flags.unreadable_doc_hint = null;
     flags.unreadable_doc_kind = null;
+    flags.unreadable_doc_flagged_at = null;
     updates.verification_flags = flags;
   }
 

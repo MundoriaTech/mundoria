@@ -39,6 +39,7 @@ const schema = z.object({
     .enum(["dbs", "id", "utr", "insurance", "headshot", "right_to_work"])
     .optional(),
   document_decision: z.enum(["verified", "rejected"]).optional(),
+  work_restriction: z.enum(["unrestricted", "restricted"]).optional(),
   flag_unreadable_doc: z.boolean().optional().default(false),
   reason: z.string().trim().optional().default(""),
   tier: z.enum(["bronze", "silver", "gold", "rose_gold", "elite"]).optional(),
@@ -82,6 +83,7 @@ export async function POST(
     document_kind,
     flag_unreadable_doc,
     tier,
+    work_restriction,
   } = parsed.data;
   let reason = parsed.data.reason.trim();
   if (
@@ -110,7 +112,7 @@ export async function POST(
   const { data: current } = await auth.admin
     .from("cleaner_profiles")
     .select(
-      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,right_to_work_route,right_to_work_status,verification_flags",
+      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,right_to_work_route,right_to_work_status,right_to_work_restriction,verification_flags",
     )
     .eq("id", params.id)
     .single();
@@ -152,9 +154,12 @@ export async function POST(
         { status: 400 },
       );
     }
-    if (!current?.utr_number) {
+    if (
+      current?.utr_document_status !== "verified" &&
+      !current?.utr_number
+    ) {
       return NextResponse.json(
-        { error: "Cleaner has not provided a UTR number." },
+        { error: "Cleaner has not provided a UTR." },
         { status: 400 },
       );
     }
@@ -203,6 +208,14 @@ export async function POST(
           ? "Right to work"
           : "Right to work (not provided yet)",
       );
+    } else if (
+      current?.right_to_work_route === "share_code" &&
+      current?.right_to_work_restriction !== "unrestricted" &&
+      current?.right_to_work_restriction !== "restricted"
+    ) {
+      pendingDocs.push(
+        "Right to work (record restricted or non-restricted work from the GOV.UK check)",
+      );
     }
     if (pendingDocs.length > 0) {
       return NextResponse.json(
@@ -246,6 +259,22 @@ export async function POST(
   }
 
   if (action === "review_document" && document_kind && document_decision) {
+    if (document_kind === "right_to_work" && document_decision === "verified") {
+      if (current?.right_to_work_route === "share_code") {
+        if (!work_restriction) {
+          return NextResponse.json(
+            {
+              error:
+                "After you check the share code on GOV.UK, mark restricted work or non-restricted work.",
+            },
+            { status: 400 },
+          );
+        }
+        updates.right_to_work_restriction = work_restriction;
+      } else if (current?.right_to_work_route === "british_irish") {
+        updates.right_to_work_restriction = "unrestricted";
+      }
+    }
     const statusColumn = documentStatusColumn(document_kind);
     const verifiedColumn = documentVerifiedColumn(document_kind);
     updates[statusColumn] = document_decision;
@@ -266,10 +295,11 @@ export async function POST(
     // the application stays as it is. Approving clears the re-upload ask.
     if (document_decision === "verified") {
       const flags = updates.verification_flags as Record<string, unknown>;
-      if (flags.unreadable_doc_kind === document_kind) {
+      if (flags.unreadable_doc_kind === document_kind || flags.unreadable_doc) {
         flags.unreadable_doc = false;
         flags.unreadable_doc_hint = null;
         flags.unreadable_doc_kind = null;
+        flags.unreadable_doc_flagged_at = null;
       }
     }
   }

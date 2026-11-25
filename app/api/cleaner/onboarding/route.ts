@@ -654,6 +654,7 @@ export async function POST(request: Request) {
         value.right_to_work_route === "share_code"
           ? value.right_to_work_visa_type || null
           : null,
+      right_to_work_restriction: null,
       insurance_activity_confirmed:
         value.insurance_path === "have"
           ? value.insurance_activity_confirmed

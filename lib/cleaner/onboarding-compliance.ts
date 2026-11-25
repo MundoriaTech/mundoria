@@ -352,6 +352,8 @@ export const HMRC_REGISTER_URL =
   "https://www.gov.uk/register-for-self-assessment";
 export const HMRC_FIND_UTR_URL = "https://www.gov.uk/find-utr-number";
 export const DBS_APPLY_URL = "https://www.gov.uk/request-copy-criminal-record";
+/** Official Basic DBS / CRB online check (same role as the GOV.UK share-code check). */
+export const DBS_CHECK_URL = "https://secure.crbonline.gov.uk/crsc/check";
 
 export const INSURANCE_COVER_PRESETS = ["1m", "2m", "5m"] as const;
 export const TRANSPORT_MODE_PRESETS = [

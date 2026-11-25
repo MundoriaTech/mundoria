@@ -10,6 +10,24 @@ export const RIGHT_TO_WORK_ROUTE_LABELS: Record<RightToWorkRoute, string> = {
   share_code: "Share code (visa, eVisa or EU Settlement)",
 };
 
+/** What the GOV.UK share-code check showed. Admin records this after checking. */
+export const RIGHT_TO_WORK_RESTRICTIONS = [
+  { label: "Non-restricted work", value: "unrestricted" },
+  { label: "Restricted work", value: "restricted" },
+] as const;
+
+export type RightToWorkRestriction =
+  (typeof RIGHT_TO_WORK_RESTRICTIONS)[number]["value"];
+
+export function rightToWorkRestrictionLabel(
+  value: string | null | undefined,
+) {
+  return (
+    RIGHT_TO_WORK_RESTRICTIONS.find((item) => item.value === value)?.label ??
+    null
+  );
+}
+
 /**
  * Immigration status for share-code holders. Mundoria cleaners are
  * self-employed; `selfEmploymentRestricted` marks visas whose conditions

@@ -20,6 +20,8 @@ type CheckItem = {
   kind: CleanerDocumentKind;
   note?: string | null;
   status: string;
+  workRestriction?: "unrestricted" | "restricted" | null;
+  requireWorkRestriction?: boolean;
 };
 
 export function DocumentChecksSection({
@@ -75,8 +77,10 @@ export function DocumentChecksSection({
               )
             }
             open={openKind === item.kind}
+            requireWorkRestriction={item.requireWorkRestriction}
             reviewable={item.reviewable}
             status={item.status}
+            workRestriction={item.workRestriction}
           />
         ))}
       </div>

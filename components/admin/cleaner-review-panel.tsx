@@ -34,9 +34,7 @@ export function CleanerReviewPanel({
   cleanerId,
   currentStatus,
   currentTier,
-  documentBlockers = [],
-  hasHeadshot,
-  hasUtr,
+  documentChecks = [],
   onboardingComplete = true,
   interviewScheduledAt = null,
   interviewStatus,
@@ -52,15 +50,12 @@ export function CleanerReviewPanel({
   cleanerId: string;
   currentStatus: string;
   currentTier: CleanerTier;
-  hasHeadshot: boolean;
-  hasUtr: boolean;
+  documentChecks?: Array<{ detail: string; done: boolean; label: string }>;
   onboardingComplete?: boolean;
   interviewScheduledAt?: string | null;
   interviewStatus: InterviewStatus;
   medallionScore: number;
   skillsAssessmentStatus?: string | null;
-  /** Documents that still stop approval (same rule as the server). */
-  documentBlockers?: string[];
   skillsExamPassed: boolean;
   skillsExamScore: number | null;
   specialistReviewRequired?: boolean;
@@ -180,21 +175,11 @@ export function CleanerReviewPanel({
         ? `Passed${skillsExamScore != null ? ` (${skillsExamScore})` : ""}`
         : "Not passed",
     },
-    {
-      done: hasHeadshot,
-      label: "Profile photo",
-      detail: hasHeadshot ? "Uploaded" : "Missing",
-    },
-    {
-      done: hasUtr,
-      label: "UTR",
-      detail: hasUtr ? "Provided" : "Missing",
-    },
-    {
-      done: documentBlockers.length === 0,
-      label: "Documents & right to work approved",
-      detail: documentBlockers.length ? documentBlockers.join(", ") : undefined,
-    },
+    ...documentChecks.map((check) => ({
+      done: check.done,
+      label: check.label,
+      detail: check.detail,
+    })),
   ];
   const approvalBlockers = readiness
     .filter((item) => !item.done)

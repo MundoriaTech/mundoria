@@ -1,3 +1,4 @@
+import { reasonSuggestsUnreadableDoc } from "@/lib/cleaner/onboarding-compliance";
 import type { DocumentReviewStatus } from "@/types/cleaner";
 
 export const CLEANER_DOCUMENT_KINDS = [
@@ -113,13 +114,41 @@ export function writeDocumentReview(
     [kind]: review,
   };
   current.document_reviews = reviews;
-  if (kind && review.decision === "rejected") {
+  if (kind && review.decision === "rejected" && reasonSuggestsUnreadableDoc(review.note)) {
     current.unreadable_doc = true;
     current.unreadable_doc_kind = kind;
     current.unreadable_doc_hint = review.note;
     current.unreadable_doc_flagged_at = review.reviewed_at;
   }
+  if (review.decision === "verified" && current.unreadable_doc_kind === kind) {
+    current.unreadable_doc = false;
+    current.unreadable_doc_hint = null;
+    current.unreadable_doc_kind = null;
+    current.unreadable_doc_flagged_at = null;
+  }
   return current;
+}
+
+const FLAG_LABELS: Record<string, string> = {
+  duplicate_utr: "Same UTR as another cleaner",
+  name_mismatch: "Insurance name does not match their profile",
+  unreadable_doc: "A document may be hard to read",
+};
+
+/** Flags that should actually show on the admin profile, not leftover timestamps. */
+export function adminVisibleVerificationFlags(
+  flags: Record<string, unknown> | null | undefined,
+): string[] {
+  if (!flags) return [];
+  return Object.entries(flags)
+    .filter(([key, value]) => {
+      if (key === "document_reviews") return false;
+      if (key.endsWith("_at") || key.endsWith("_hint") || key.endsWith("_kind")) {
+        return false;
+      }
+      return value === true;
+    })
+    .map(([key]) => FLAG_LABELS[key] ?? key.replaceAll("_", " "));
 }
 
 export function documentReviewNoteFor(

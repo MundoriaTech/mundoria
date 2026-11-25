@@ -13,6 +13,10 @@ import {
   CLEANER_DOCUMENT_LABELS,
   type CleanerDocumentKind,
 } from "@/lib/cleaner/document-reviews";
+import {
+  RIGHT_TO_WORK_RESTRICTIONS,
+  type RightToWorkRestriction,
+} from "@/lib/cleaner/right-to-work";
 import { cn } from "@/lib/utils";
 
 type DocFile = {
@@ -31,8 +35,10 @@ export function DocumentReviewControls({
   note,
   open,
   onToggle,
+  requireWorkRestriction,
   reviewable,
   status,
+  workRestriction,
 }: {
   /** External check to do before deciding (e.g. GOV.UK right to work). */
   checkLink?: { href: string; label: string } | null;
@@ -45,13 +51,18 @@ export function DocumentReviewControls({
   note?: string | null;
   open: boolean;
   onToggle: () => void;
+  requireWorkRestriction?: boolean;
   /** Reviewable without a file (e.g. a right-to-work share code). */
   reviewable?: boolean;
   status: string;
+  workRestriction?: RightToWorkRestriction | null;
 }) {
   const router = useRouter();
   const { success } = useFeedback();
   const [reason, setReason] = useState(note ?? "");
+  const [restriction, setRestriction] = useState<RightToWorkRestriction | "">(
+    workRestriction ?? "",
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const label = CLEANER_DOCUMENT_LABELS[kind];
@@ -67,6 +78,17 @@ export function DocumentReviewControls({
       setError("Add a short reason so the cleaner knows what to fix.");
       return;
     }
+    if (
+      decision === "verified" &&
+      requireWorkRestriction &&
+      restriction !== "unrestricted" &&
+      restriction !== "restricted"
+    ) {
+      setError(
+        "Check the share code on GOV.UK, then mark restricted work or non-restricted work.",
+      );
+      return;
+    }
     setBusy(true);
     setError(null);
     const response = await fetch(`/api/admin/cleaners/${cleanerId}`, {
@@ -75,6 +97,9 @@ export function DocumentReviewControls({
         document_decision: decision,
         document_kind: kind,
         ...(reason.trim() ? { reason: reason.trim() } : {}),
+        ...(requireWorkRestriction && restriction
+          ? { work_restriction: restriction }
+          : {}),
       }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
@@ -116,28 +141,13 @@ export function DocumentReviewControls({
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-          {documents.map((document) =>
-            document.url ? (
-              <DocumentViewerButton
-                className="h-9 px-3"
-                key={document.label}
-                label={
-                  documents.length > 1
-                    ? document.label.replace(`${label} `, "")
-                    : "Open"
-                }
-                path={document.path}
-                url={document.url}
-              />
-            ) : document.path ? (
-              <span
-                className="inline-flex h-9 items-center px-2 text-xs text-muted-foreground"
-                key={document.label}
-              >
-                On file
-              </span>
-            ) : null,
-          )}
+          {documents.some((document) => document.url || document.path) ? (
+            <DocumentViewerButton
+              className="h-9 px-3"
+              files={documents}
+              label="Open"
+            />
+          ) : null}
           {checkLink ? (
             <Button asChild className="h-9 px-3" variant="outline">
               <a href={checkLink.href} rel="noreferrer" target="_blank">
@@ -182,6 +192,28 @@ export function DocumentReviewControls({
               ))}
             </dl>
           ) : null}
+          {requireWorkRestriction ? (
+            <div className="mb-3">
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                After the GOV.UK check, this person may do
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {RIGHT_TO_WORK_RESTRICTIONS.map((option) => (
+                  <Button
+                    className="min-h-10"
+                    key={option.value}
+                    onClick={() => setRestriction(option.value)}
+                    type="button"
+                    variant={
+                      restriction === option.value ? "secondary" : "outline"
+                    }
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Note (optional to approve, required to reject)
@@ -199,7 +231,13 @@ export function DocumentReviewControls({
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
               className="min-h-10"
-              disabled={busy || status === "verified"}
+              disabled={
+                busy ||
+                status === "verified" ||
+                (requireWorkRestriction &&
+                  restriction !== "unrestricted" &&
+                  restriction !== "restricted")
+              }
               onClick={() => void review("verified")}
               type="button"
             >
