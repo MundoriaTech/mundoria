@@ -192,7 +192,6 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
   const pricedOnOlderRules = Boolean(
     currentBreakdown && currentBreakdown.totalPence !== chargedTotal && explained,
   );
-  const pricedOnLegacyRule = pricedOnOlderRules && Boolean(explained?.freeTime);
   const breakdown = pricedOnOlderRules
     ? explained!.breakdown
     : currentBreakdown;
@@ -338,17 +337,6 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
                       = {formatMoney(addOn.amountPence)}
                     </li>
                   ))}
-                {breakdown.addOns.some((addOn) => addOn.amountPence === 0) ? (
-                  <li>
-                    {breakdown.addOns
-                      .filter((addOn) => addOn.amountPence === 0)
-                      .map((addOn) => addOn.label)
-                      .join(", ")}{" "}
-                    {pricedOnLegacyRule
-                      ? `included in the ${formatVisitHours(breakdown.visitHours)} visit, time not charged (priced before extra time was billed)`
-                      : `have no separate price; their time is in the ${formatVisitHours(breakdown.billableHours)} charged above`}
-                  </li>
-                ) : null}
                 <li>
                   <b>Total {formatMoney(booking.amount_total)}</b>
                 </li>
