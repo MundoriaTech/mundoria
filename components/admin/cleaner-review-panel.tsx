@@ -34,6 +34,7 @@ export function CleanerReviewPanel({
   cleanerId,
   currentStatus,
   currentTier,
+  documentBlockers = [],
   hasHeadshot,
   hasUtr,
   onboardingComplete = true,
@@ -58,6 +59,8 @@ export function CleanerReviewPanel({
   interviewStatus: InterviewStatus;
   medallionScore: number;
   skillsAssessmentStatus?: string | null;
+  /** Documents that still stop approval (same rule as the server). */
+  documentBlockers?: string[];
   skillsExamPassed: boolean;
   skillsExamScore: number | null;
   specialistReviewRequired?: boolean;
@@ -186,6 +189,11 @@ export function CleanerReviewPanel({
       done: hasUtr,
       label: "UTR",
       detail: hasUtr ? "Provided" : "Missing",
+    },
+    {
+      done: documentBlockers.length === 0,
+      label: "Documents & right to work approved",
+      detail: documentBlockers.length ? documentBlockers.join(", ") : undefined,
     },
   ];
   const approvalBlockers = readiness

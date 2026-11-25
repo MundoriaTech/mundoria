@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { ChangeEmailForm } from "@/components/auth/change-email-form";
 import { PhoneVerifyPanel } from "@/components/cleaner/phone-verify-panel";
+import { ReplaceDocument } from "@/components/cleaner/replace-document";
 import {
   StripeEmbeddedPayouts,
   useStripeEmbeddedPayouts,
@@ -430,8 +431,8 @@ export function CleanerProfileForm({
 
         <Panel eyebrow="Checks" title="Documents">
           <p className="text-sm leading-6 text-[#5c5670]">
-            Mundoria reviews each upload separately. Rejected documents include
-            a note explaining what to fix.
+            Mundoria reviews each document separately. If one needs another
+            look, you&apos;ll see why here and can upload a new one.
           </p>
           <div className="mt-3 space-y-3">
             {CLEANER_DOCUMENT_KINDS.map((kind) => {
@@ -469,6 +470,26 @@ export function CleanerProfileForm({
                     <p className="mt-2 text-sm leading-5 text-[#5c5670]">
                       {review.note}
                     </p>
+                  ) : null}
+                  {kind !== "headshot" &&
+                  (status === "rejected" ||
+                    status === "missing" ||
+                    status === "expired" ||
+                    !status) ? (
+                    <ReplaceDocument
+                      initial={
+                        kind === "right_to_work"
+                          ? {
+                              date_of_birth: cleaner.date_of_birth,
+                              right_to_work_expires_on: cleaner.right_to_work_expires_on,
+                              right_to_work_route: cleaner.right_to_work_route,
+                              right_to_work_share_code: cleaner.right_to_work_share_code,
+                            }
+                          : undefined
+                      }
+                      kind={kind}
+                      userId={profile.id}
+                    />
                   ) : null}
                 </div>
               );

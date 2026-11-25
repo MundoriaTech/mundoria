@@ -36,7 +36,7 @@ const schema = z.object({
     "review_document",
   ]),
   document_kind: z
-    .enum(["dbs", "id", "utr", "insurance", "headshot"])
+    .enum(["dbs", "id", "utr", "insurance", "headshot", "right_to_work"])
     .optional(),
   document_decision: z.enum(["verified", "rejected"]).optional(),
   flag_unreadable_doc: z.boolean().optional().default(false),
@@ -50,13 +50,13 @@ const NOTE_REQUIRED_ACTIONS = new Set([
   "fail_interview",
   "suspend",
   "remove",
-  "review_document",
 ]);
 
 const DEFAULT_ACTION_NOTES: Record<string, string> = {
   approve: "Approved for live jobs after onboarding call and document checks.",
   approve_skills: "Specialist skills approved.",
   complete_interview: "Onboarding call marked complete.",
+  review_document: "Approved.",
   set_tier: "Tier updated by admin.",
 };
 
@@ -84,6 +84,16 @@ export async function POST(
     tier,
   } = parsed.data;
   let reason = parsed.data.reason.trim();
+  if (
+    action === "review_document" &&
+    parsed.data.document_decision === "rejected" &&
+    reason.length < 3
+  ) {
+    return NextResponse.json(
+      { error: "Add a short reason so the cleaner knows what to fix." },
+      { status: 400 },
+    );
+  }
   if (NOTE_REQUIRED_ACTIONS.has(action) && reason.length < 3) {
     return NextResponse.json(
       {
@@ -100,7 +110,7 @@ export async function POST(
   const { data: current } = await auth.admin
     .from("cleaner_profiles")
     .select(
-      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,verification_flags",
+      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,right_to_work_route,right_to_work_status,verification_flags",
     )
     .eq("id", params.id)
     .single();
@@ -183,6 +193,17 @@ export async function POST(
       current?.insurance_status,
       Boolean(current?.insurance_certificate_url),
     );
+    // Identity and right to work are always required.
+    if (!parseDocumentUrls(current?.id_document_url).some(Boolean)) {
+      pendingDocs.push("Government ID (not uploaded)");
+    }
+    if (current?.right_to_work_status !== "verified") {
+      pendingDocs.push(
+        current?.right_to_work_route
+          ? "Right to work"
+          : "Right to work (not provided yet)",
+      );
+    }
     if (pendingDocs.length > 0) {
       return NextResponse.json(
         {
@@ -241,8 +262,15 @@ export async function POST(
         reviewed_by: auth.user.id,
       },
     );
-    if (document_decision === "rejected") {
-      updates.status = "in_training";
+    // A rejected document only needs that document replaced; the rest of
+    // the application stays as it is. Approving clears the re-upload ask.
+    if (document_decision === "verified") {
+      const flags = updates.verification_flags as Record<string, unknown>;
+      if (flags.unreadable_doc_kind === document_kind) {
+        flags.unreadable_doc = false;
+        flags.unreadable_doc_hint = null;
+        flags.unreadable_doc_kind = null;
+      }
     }
   }
 
@@ -344,7 +372,7 @@ export async function POST(
           : action === "review_document" && document_decision === "verified"
             ? `Your ${documentLabel} document was accepted.`
             : action === "review_document" && document_decision === "rejected"
-              ? `Your ${documentLabel} document needs another look. ${reason}`
+              ? `Your ${documentLabel} needs another look: ${reason} You can upload a new one from your profile.`
           : action === "approve_skills"
             ? "Your specialist skills have been reviewed and approved."
         : action === "complete_interview"

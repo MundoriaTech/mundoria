@@ -6,6 +6,7 @@ export const CLEANER_DOCUMENT_KINDS = [
   "utr",
   "insurance",
   "headshot",
+  "right_to_work",
 ] as const;
 
 export type CleanerDocumentKind = (typeof CLEANER_DOCUMENT_KINDS)[number];
@@ -15,6 +16,7 @@ export const CLEANER_DOCUMENT_LABELS: Record<CleanerDocumentKind, string> = {
   headshot: "Headshot",
   id: "Government ID",
   insurance: "Insurance",
+  right_to_work: "Right to work",
   utr: "UTR",
 };
 
@@ -42,7 +44,8 @@ export function documentStatusColumn(
   | "id_document_status"
   | "utr_document_status"
   | "insurance_status"
-  | "headshot_status" {
+  | "headshot_status"
+  | "right_to_work_status" {
   switch (kind) {
     case "dbs":
       return "dbs_document_status";
@@ -54,6 +57,8 @@ export function documentStatusColumn(
       return "insurance_status";
     case "headshot":
       return "headshot_status";
+    case "right_to_work":
+      return "right_to_work_status";
   }
 }
 

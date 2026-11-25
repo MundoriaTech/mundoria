@@ -1,3 +1,9 @@
+import {
+  formatShareCode,
+  RIGHT_TO_WORK_CHECK_URL,
+  RIGHT_TO_WORK_ROUTE_LABELS,
+  type RightToWorkRoute,
+} from "@/lib/cleaner/right-to-work";
 import { notFound, redirect } from "next/navigation";
 
 import { CleanerReviewPanel } from "@/components/admin/cleaner-review-panel";
@@ -168,6 +174,33 @@ export default async function AdminCleanerPage({
     utr: signed.filter((doc) => doc.label.startsWith("UTR")),
   };
 
+  // Same rule the server applies on Approve: ID and right to work must be
+  // approved; any other uploaded document must be approved too.
+  const documentBlockers = [
+    !idFilled.length
+      ? "Government ID not uploaded"
+      : cleaner.id_document_status !== "verified"
+        ? "Government ID not approved"
+        : null,
+    !cleaner.right_to_work_route
+      ? "Right to work not provided"
+      : cleaner.right_to_work_status !== "verified"
+        ? "Right to work not approved"
+        : null,
+    cleaner.headshot_url && cleaner.headshot_status !== "verified"
+      ? "Headshot not approved"
+      : null,
+    docsByPrefix.dbs.length && cleaner.dbs_document_status !== "verified"
+      ? "DBS not approved"
+      : null,
+    cleaner.utr_document_url && cleaner.utr_document_status !== "verified"
+      ? "UTR proof not approved"
+      : null,
+    cleaner.insurance_certificate_url && cleaner.insurance_status !== "verified"
+      ? "Insurance not approved"
+      : null,
+  ].filter((item): item is string => Boolean(item));
+
   return (
     <div className="space-y-5 sm:space-y-6">
       <div className="flex items-start gap-3 sm:gap-4">
@@ -197,6 +230,7 @@ export default async function AdminCleanerPage({
       <CleanerReviewPanel
         bio={cleaner.bio}
         cleanerId={params.id}
+        documentBlockers={documentBlockers}
         currentStatus={cleaner.status}
         currentTier={cleaner.tier as CleanerTier}
         hasHeadshot={Boolean(cleaner.headshot_url)}
@@ -285,6 +319,39 @@ export default async function AdminCleanerPage({
             kind: "headshot",
             note: documentReviewNoteFor(verificationFlags, "headshot")?.note,
             status: cleaner.headshot_status,
+          },
+          {
+            checkLink:
+              cleaner.right_to_work_route === "share_code"
+                ? {
+                    href: RIGHT_TO_WORK_CHECK_URL,
+                    label: "Check the share code on GOV.UK",
+                  }
+                : null,
+            detail: cleaner.right_to_work_route
+              ? [
+                  RIGHT_TO_WORK_ROUTE_LABELS[
+                    cleaner.right_to_work_route as RightToWorkRoute
+                  ],
+                  cleaner.right_to_work_share_code
+                    ? `share code ${formatShareCode(cleaner.right_to_work_share_code)}`
+                    : null,
+                  cleaner.date_of_birth ? `born ${cleaner.date_of_birth}` : null,
+                  cleaner.right_to_work_expires_on
+                    ? `permission ends ${cleaner.right_to_work_expires_on}`
+                    : cleaner.right_to_work_route === "share_code"
+                      ? "no end date"
+                      : "check the passport or birth certificate + NI above",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : "Not provided yet",
+            documents:
+              cleaner.right_to_work_route === "british_irish" ? docsByPrefix.id : [],
+            kind: "right_to_work",
+            note: documentReviewNoteFor(verificationFlags, "right_to_work")?.note,
+            reviewable: Boolean(cleaner.right_to_work_route),
+            status: cleaner.right_to_work_status ?? "missing",
           },
         ]}
         meta={[

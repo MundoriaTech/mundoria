@@ -12,7 +12,9 @@ type DocFile = {
 };
 
 type CheckItem = {
+  checkLink?: { href: string; label: string } | null;
   detail: string;
+  reviewable?: boolean;
   documents: DocFile[];
   kind: CleanerDocumentKind;
   note?: string | null;
@@ -30,7 +32,8 @@ export function DocumentChecksSection({
 }) {
   const firstPending = items.find(
     (item) =>
-      item.status === "pending" && item.documents.some((doc) => Boolean(doc.url)),
+      item.status === "pending" &&
+      (item.reviewable || item.documents.some((doc) => Boolean(doc.url))),
   )?.kind;
   const [openKind, setOpenKind] = useState<CleanerDocumentKind | null>(
     firstPending ?? null,
@@ -42,7 +45,8 @@ export function DocumentChecksSection({
         <div>
           <h2 className="font-semibold">Checks & documents</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Open a file, then Review to approve or reject with a note.
+            Open a file, then Review. Approve in one click; rejecting needs a
+            reason, which the cleaner sees so they can upload a new one.
           </p>
         </div>
         <p className="text-xs text-muted-foreground">
@@ -56,6 +60,7 @@ export function DocumentChecksSection({
       <div className="mt-3 divide-y divide-border">
         {items.map((item) => (
           <DocumentReviewControls
+            checkLink={item.checkLink}
             cleanerId={cleanerId}
             detail={item.detail}
             documents={item.documents}
@@ -68,6 +73,7 @@ export function DocumentChecksSection({
               )
             }
             open={openKind === item.kind}
+            reviewable={item.reviewable}
             status={item.status}
           />
         ))}

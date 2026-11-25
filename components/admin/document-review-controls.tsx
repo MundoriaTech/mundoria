@@ -22,6 +22,7 @@ type DocFile = {
 };
 
 export function DocumentReviewControls({
+  checkLink,
   cleanerId,
   detail,
   documents,
@@ -29,8 +30,11 @@ export function DocumentReviewControls({
   note,
   open,
   onToggle,
+  reviewable,
   status,
 }: {
+  /** External check to do before deciding (e.g. GOV.UK right to work). */
+  checkLink?: { href: string; label: string } | null;
   cleanerId: string;
   detail: string;
   documents: DocFile[];
@@ -38,6 +42,8 @@ export function DocumentReviewControls({
   note?: string | null;
   open: boolean;
   onToggle: () => void;
+  /** Reviewable without a file (e.g. a right-to-work share code). */
+  reviewable?: boolean;
   status: string;
 }) {
   const router = useRouter();
@@ -46,13 +52,14 @@ export function DocumentReviewControls({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const label = CLEANER_DOCUMENT_LABELS[kind];
-  const hasUpload = documents.some((doc) => Boolean(doc.url));
+  const hasUpload = documents.some((doc) => Boolean(doc.url)) || Boolean(reviewable);
   const reasonOk = reason.trim().length >= 3;
   const decided = status === "verified" || status === "rejected";
 
   async function review(decision: "verified" | "rejected") {
-    if (!reasonOk) {
-      setError("Add a short note (at least 3 characters) before deciding.");
+    // Approving is one click; rejecting needs a reason the cleaner will see.
+    if (decision === "rejected" && !reasonOk) {
+      setError("Add a short reason so the cleaner knows what to fix.");
       return;
     }
     setBusy(true);
@@ -62,7 +69,7 @@ export function DocumentReviewControls({
         action: "review_document",
         document_decision: decision,
         document_kind: kind,
-        reason: reason.trim(),
+        ...(reason.trim() ? { reason: reason.trim() } : {}),
       }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
@@ -75,7 +82,10 @@ export function DocumentReviewControls({
     }
     success({
       kind: "done",
-      note: "The cleaner is notified when a document is rejected.",
+      note:
+        decision === "verified"
+          ? "The cleaner has been told it's approved."
+          : "The cleaner has been told what to fix and can upload a new one.",
       title:
         decision === "verified" ? `${label} approved` : `${label} rejected`,
     });
@@ -140,16 +150,26 @@ export function DocumentReviewControls({
 
       {open && hasUpload ? (
         <div className="mt-3 rounded-lg border bg-muted/40 p-3">
+          {checkLink ? (
+            <a
+              className="mb-3 inline-flex text-sm font-semibold text-primary underline"
+              href={checkLink.href}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {checkLink.label}
+            </a>
+          ) : null}
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              Review note
+              Note (optional to approve, required to reject)
             </span>
             <Input
               onChange={(event) => setReason(event.target.value)}
               placeholder={
                 decided
                   ? "Update the note if you change this decision"
-                  : `e.g. ${label} clear and matches the application`
+                  : `Reason if rejecting, e.g. ${label} is blurry, please upload a clearer copy`
               }
               value={reason}
             />
@@ -157,15 +177,15 @@ export function DocumentReviewControls({
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
               className="min-h-10"
-              disabled={busy || !reasonOk}
+              disabled={busy || status === "verified"}
               onClick={() => void review("verified")}
               type="button"
             >
-              Approve
+              {status === "verified" ? "Approved" : "Approve"}
             </Button>
             <Button
               className="min-h-10"
-              disabled={busy || !reasonOk}
+              disabled={busy || status === "rejected" || !reasonOk}
               onClick={() => void review("rejected")}
               type="button"
               variant="outline"
