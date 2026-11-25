@@ -402,7 +402,7 @@ function townTopicFaq(town: string, topic: TownTopic): LocationFaq {
         question: `Is there a travel charge for cleaning in ${town}?`,
         answer: P(
           "No. The same hourly rates apply in every area Mundoria covers, and there is no separate travel or booking fee.",
-          "The full price, including any products, equipment or early, evening or weekend rates you choose, is shown before you confirm.",
+          "The full price, including any products or equipment you choose, is shown before you confirm.",
         ),
       };
   }

@@ -178,7 +178,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
         </h2>
         <p className="mt-1 text-sm leading-6 text-[#5a5470]">
           Charged for every hour of the session, including time added by
-          extras. Schedule multipliers do not apply to supplies.
+          extras.
         </p>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
           <Field label="Cleaning products (home)">
@@ -282,45 +282,6 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
                     DEFAULT_SERVICE_PRICING.addOns[addOn.id] ??
                     0,
                 )}
-              />
-            </Field>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl border bg-card p-4 sm:p-6">
-        <h2 className="text-base font-semibold text-[#1c133b]">
-          Schedule price multipliers
-        </h2>
-        <p className="mt-1 text-sm leading-6 text-[#5a5470]">
-          Multipliers on labour only, not supplies (1.0 = normal). Example: 1.15
-          = +15%.
-        </p>
-        <div className="mt-4 grid gap-5 sm:grid-cols-2">
-          {(
-            [
-              ["early", "Early weekday (before 9:00)"],
-              ["evening", "Evening weekday (from 17:00)"],
-              ["weekend", "Weekend daytime"],
-              ["weekendPeak", "Weekend peak (early/evening)"],
-            ] as const
-          ).map(([key, label]) => (
-            <Field key={key} label={label}>
-              <Input
-                max={3}
-                min={1}
-                onChange={(event) =>
-                  setPricing((prev) => ({
-                    ...prev,
-                    schedule: {
-                      ...prev.schedule,
-                      [key]: Number(event.target.value),
-                    },
-                  }))
-                }
-                step="0.01"
-                type="number"
-                value={pricing.schedule[key]}
               />
             </Field>
           ))}

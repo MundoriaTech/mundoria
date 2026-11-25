@@ -47,7 +47,7 @@ function factsSection(services: MarketingService[]) {
 - Name: ${office.brandName} (legal name ${office.legalName}). ${companyRegistrationSentence()}
 - What it is: a marketplace. Cleaners are independent, self-employed professionals who are vetted and onboarded by Mundoria; they are not Mundoria employees.
 - Where: ${LAUNCH_CITY.name} and nearby West Midlands towns (see "Areas covered").
-- Prices: each service has an hourly rate${regular ? `; house cleaning starts from ${regular.fromPrice}` : ""}. The total is the rate multiplied by the hours the property needs, plus any add-ons and early, evening or weekend timing. The full price is shown before the customer confirms.
+- Prices: each service has an hourly rate${regular ? `; house cleaning starts from ${regular.fromPrice}` : ""}. The total is the rate multiplied by the hours the property needs, plus any add-ons. Early, evening and weekend visits cost the same as weekday daytime. The full price is shown before the customer confirms.
 - Booking: choose a service, enter a postcode and property details, see the price, pick a date and time, then save a card to confirm.
 - Payment: nothing is charged when booking. From 48 hours before the visit, once a cleaner is assigned, a temporary hold is placed on the card; the payment is taken the day after the clean. If the hold cannot be placed by 24 hours before, the booking is cancelled free of charge. Payments run through Stripe and customers never pay the cleaner directly.
 - Cancellation: free 24 hours or more before the start time; the full booking price within 24 hours. Statutory consumer rights are unaffected.

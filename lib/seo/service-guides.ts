@@ -18,7 +18,7 @@ export function serviceGuide(service: MarketingService, topic: ServiceGuideTopic
       description: `${service.label} in Birmingham starts from ${service.fromPrice}. The total changes with property size, timing and add-ons.`,
       paragraphs: [
         `${service.label} in Birmingham starts from ${service.fromPrice}. That figure is the opening estimate, before bedrooms, bathrooms, condition and any extras are added.`,
-        "Mundoria shows the price in the booking flow before you pay. A larger home, early, evening or weekend timing, or add-ons such as cleaning products change the total.",
+        "Mundoria shows the price in the booking flow before you pay. A larger home or add-ons such as cleaning products change the total; the day and time you choose do not.",
         "You can compare the same service in Harborne, Edgbaston, Moseley and the other Birmingham neighbourhoods we cover. The starting price is the same; the visit is sized to the property.",
       ],
       metaTitle: `${service.label} Prices in Birmingham`,

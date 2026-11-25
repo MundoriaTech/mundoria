@@ -61,11 +61,12 @@ export const DEFAULT_SERVICE_PRICING: ServicePricingConfig = {
     equipmentDefault: 300,
     equipmentDeepClean: 500,
   },
+  // No surcharges for early, evening or weekend visits (removed 25 Nov 2026).
   schedule: {
-    early: 1.1,
-    evening: 1.15,
-    weekend: 1.18,
-    weekendPeak: 1.28,
+    early: 1,
+    evening: 1,
+    weekend: 1,
+    weekendPeak: 1,
   },
   addOns: {
     ironing: 0,
@@ -92,12 +93,6 @@ function asPositiveInt(value: unknown, fallback: number) {
   const n = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(n) || n < 0) return fallback;
   return Math.round(n);
-}
-
-function asMultiplier(value: unknown, fallback: number) {
-  const n = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(n) || n < 1 || n > 3) return fallback;
-  return Math.round(n * 1000) / 1000;
 }
 
 /** Accept a plain pence number, or legacy `{ standard, deep }` band (uses standard). */
@@ -138,10 +133,6 @@ export function normalizeServicePricing(raw: unknown): ServicePricingConfig {
     input.supply && typeof input.supply === "object"
       ? (input.supply as Record<string, unknown>)
       : {};
-  const scheduleIn =
-    input.schedule && typeof input.schedule === "object"
-      ? (input.schedule as Record<string, unknown>)
-      : {};
   const addOnsIn =
     input.addOns && typeof input.addOns === "object"
       ? (input.addOns as Record<string, unknown>)
@@ -173,15 +164,9 @@ export function normalizeServicePricing(raw: unknown): ServicePricingConfig {
         base.supply.equipmentDeepClean,
       ),
     },
-    schedule: {
-      early: asMultiplier(scheduleIn.early, base.schedule.early),
-      evening: asMultiplier(scheduleIn.evening, base.schedule.evening),
-      weekend: asMultiplier(scheduleIn.weekend, base.schedule.weekend),
-      weekendPeak: asMultiplier(
-        scheduleIn.weekendPeak,
-        base.schedule.weekendPeak,
-      ),
-    },
+    // Schedule surcharges are switched off: every day and time is priced the
+    // same, whatever older settings rows still store.
+    schedule: { ...DEFAULT_SERVICE_PRICING.schedule },
     addOns,
   };
 }
@@ -344,3 +329,14 @@ export const ADMIN_FLAT_ADD_ONS: Array<{ id: string; label: string }> = [
   { id: "linen_change", label: "Linen change" },
   { id: "recovery_priority", label: "Recovery priority care" },
 ];
+
+/**
+ * Schedule surcharges in force until 25 Nov 2026. Only used to explain the
+ * agreed price of bookings made before they were removed; never for quotes.
+ */
+export const LEGACY_SCHEDULE_MULTIPLIERS: ServicePricingConfig["schedule"] = {
+  early: 1.1,
+  evening: 1.15,
+  weekend: 1.18,
+  weekendPeak: 1.28,
+};

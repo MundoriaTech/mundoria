@@ -35,7 +35,7 @@ export function howItWorksSteps(
     },
     {
       title: "See the price before you commit",
-      body: `Before you confirm you see the hourly rate, the estimated hours, any extras and early, evening or weekend rates, the full price and the cancellation rule. House cleaning starts from ${houseCleaningFromLabel(pricing)}, and there is no booking fee.`,
+      body: `Before you confirm you see the hourly rate, the estimated hours, any extras, the full price and the cancellation rule. House cleaning starts from ${houseCleaningFromLabel(pricing)}, and there is no booking fee.`,
     },
     {
       title: "Save your card and request the clean",

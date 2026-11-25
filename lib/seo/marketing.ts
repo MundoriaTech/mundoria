@@ -626,7 +626,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "Each service has an hourly rate. Your price is that rate multiplied by the hours your property needs (based on its size and condition), plus any add-ons such as cleaning products or equipment, and any early, evening or weekend timing. You see the full price before you confirm.",
+      "Each service has an hourly rate. Your price is that rate multiplied by the hours your property needs (based on its size and condition), plus any add-ons such as cleaning products or equipment. Early, evening and weekend visits cost the same. You see the full price before you confirm.",
     question: "How is pricing calculated?",
   },
   {

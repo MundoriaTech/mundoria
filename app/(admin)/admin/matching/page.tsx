@@ -12,7 +12,7 @@ export default async function AdminMatchingPage() {
     admin
       .from("bookings")
       .select(
-        "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name),cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)",
+        "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,email),cleaner_profile:profiles!bookings_cleaner_id_fkey(full_name)",
       )
       .in("status", [
         "pending_match",
@@ -36,14 +36,18 @@ export default async function AdminMatchingPage() {
       .order("full_name", { ascending: true }),
   ]);
 
-  const cleaners = (cleanerRows ?? []).map((row) => ({
-    id: row.id as string,
-    full_name: `${(row.full_name as string) || "Cleaner"}${
-      isSeedEmail(row.email as string | null) ? " (test account)" : ""
-    }`,
-  }));
+  // Live operations only: test (seed) cleaners and test customers' bookings
+  // never appear here.
+  const cleaners = (cleanerRows ?? [])
+    .filter((row) => !isSeedEmail(row.email as string | null))
+    .map((row) => ({
+      id: row.id as string,
+      full_name: (row.full_name as string) || "Cleaner",
+    }));
 
   const bookings = ((data ?? []) as AdminBooking[]).filter((booking) => {
+    const customer = booking.customer as { email?: string | null } | null;
+    if (isSeedEmail(customer?.email)) return false;
     if (booking.status === "cancelled") {
       return booking.payment_status === "held";
     }

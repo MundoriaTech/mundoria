@@ -1,4 +1,4 @@
-import { sameAudience } from "@/lib/matching/seed-accounts";
+import { filterCleanersForBooking, sameAudience } from "@/lib/matching/seed-accounts";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -9,7 +9,10 @@ import {
   frequencyLabelForBooking,
   petsFromNotes,
 } from "@/lib/customer/booking-flow";
-import { loadServicePricing } from "@/lib/customer/pricing-config";
+import {
+  LEGACY_SCHEDULE_MULTIPLIERS,
+  loadServicePricing,
+} from "@/lib/customer/pricing-config";
 import { hourlyRatePence } from "@/lib/customer/rate-card";
 import { loadMatchingList } from "@/lib/matching/emergency-list";
 import {
@@ -70,6 +73,21 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     ),
   );
   const decisionNames = await loadCleanerNames(admin, namedCleanerIds);
+  // Older history can include test (seed) cleaners from before seed isolation;
+  // only show cleaners who could actually work this booking.
+  const audienceCleanerIds = new Set(
+    await filterCleanersForBooking(
+      admin,
+      params.id,
+      Array.from(
+        new Set(
+          (matching ?? [])
+            .map((item) => item.cleaner_id as string | null)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ),
+    ),
+  );
   const openOffer = (offers ?? []).find(
     (offer) =>
       !offer.responded_at &&
@@ -123,7 +141,10 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
   ].filter((row): row is [string, string] => Boolean(row));
   const pricing = await loadServicePricing();
   const sessionHours = Math.max(0, (durationHours ?? 0) - offerHours);
-  const priceBooking = (legacyFreeExtraTime: boolean) =>
+  const priceBooking = (
+    legacyFreeExtraTime: boolean,
+    legacySchedule = false,
+  ) =>
     address
       ? estimatePriceBreakdown(
           booking.service_type,
@@ -140,7 +161,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             durationHours: sessionHours || null,
             legacyFreeExtraTime,
             offerFreeHours: offerHours,
-            pricing,
+            pricing: legacySchedule
+              ? { ...pricing, schedule: LEGACY_SCHEDULE_MULTIPLIERS }
+              : pricing,
             rooms: {
               bathrooms: address.num_bathrooms,
               bedrooms: address.num_bedrooms,
@@ -149,17 +172,30 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           },
         )
       : null;
-  // Bookings priced before extra time was billed keep their agreed price;
-  // explain them with the rule that actually produced the charged total.
-  const currentBreakdown = priceBooking(false);
-  const legacyBreakdown = priceBooking(true);
+  // Older bookings keep their agreed price. Explain each with the rules that
+  // actually produced it: before extra time was billed, and/or before the
+  // early/evening/weekend surcharges were removed.
   const chargedTotal = Number(booking.amount_total ?? 0);
-  const pricedOnLegacyRule = Boolean(
-    currentBreakdown &&
-      currentBreakdown.totalPence !== chargedTotal &&
-      legacyBreakdown?.totalPence === chargedTotal,
+  const currentBreakdown = priceBooking(false);
+  const explained = (
+    [
+      [true, false],
+      [false, true],
+      [true, true],
+    ] as const
+  )
+    .map(([freeTime, schedule]) => ({
+      breakdown: priceBooking(freeTime, schedule),
+      freeTime,
+    }))
+    .find((candidate) => candidate.breakdown?.totalPence === chargedTotal);
+  const pricedOnOlderRules = Boolean(
+    currentBreakdown && currentBreakdown.totalPence !== chargedTotal && explained,
   );
-  const breakdown = pricedOnLegacyRule ? legacyBreakdown : currentBreakdown;
+  const pricedOnLegacyRule = pricedOnOlderRules && Boolean(explained?.freeTime);
+  const breakdown = pricedOnOlderRules
+    ? explained!.breakdown
+    : currentBreakdown;
   return (
     <div className="min-w-0 space-y-5 sm:space-y-6">
       <div>
@@ -317,7 +353,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
                   <b>Total {formatMoney(booking.amount_total)}</b>
                   {breakdown.totalPence !== Number(booking.amount_total ?? 0)
                     ? ` (current rates would be ${formatMoney(breakdown.totalPence)})`
-                    : null}
+                    : pricedOnOlderRules && currentBreakdown
+                      ? ` (agreed price; today's rates would be ${formatMoney(currentBreakdown.totalPence)})`
+                      : null}
                 </li>
               </ul>
             </section>
@@ -372,7 +410,12 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       <MatchingDecisionLog
         cleanerName={booking.cleaner?.full_name ?? null}
         customerName={booking.customer?.full_name ?? null}
-        decisions={(matching ?? []).map((item) => ({
+        decisions={(matching ?? [])
+          .filter(
+            (item) =>
+              !item.cleaner_id || audienceCleanerIds.has(item.cleaner_id),
+          )
+          .map((item) => ({
           cleaner_id: item.cleaner_id,
           created_at: item.created_at,
           decision: item.decision,

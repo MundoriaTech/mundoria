@@ -1497,17 +1497,17 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Does Mundoria charge a booking fee?",
         answer:
-          "No.\n\nMundoria does not add a separate booking or platform fee on top of your cleaning price.\n\nWhat you see before you confirm is the cleaning rate for the estimated time, plus any products, equipment or schedule pricing you have selected.",
+          "No.\n\nMundoria does not add a separate booking or platform fee on top of your cleaning price.\n\nWhat you see before you confirm is the cleaning rate for the estimated time, plus any products or equipment you have selected.",
       },
       {
         question: "Does Mundoria charge extra at weekends?",
         answer:
-          "Yes, weekend and off-peak arrival times can cost more than weekday daytime cleaning.\n\nSaturday and Sunday daytime currently carries a weekend arrival rate. Early morning or evening arrivals at the weekend carry a higher weekend peak rate.\n\nWeekday early and evening slots can also have a higher rate than weekday daytime.\n\nAny schedule pricing that applies to your booking is shown before you confirm, so you can see the effect of the day and time you choose.",
+          "No.\n\nWeekend, early morning and evening visits cost the same as weekday daytime cleaning. The price depends on the service, the hours and any products or equipment you add, and you see it in full before you confirm.",
       },
       {
         question: "Does Mundoria charge extra on bank holidays?",
         answer:
-          "No separate bank-holiday surcharge currently applies.\n\nA bank holiday booking is priced like the equivalent day and time slot shown during booking. If that slot already includes weekend or evening schedule pricing, that is what you will see before you confirm.",
+          "No.\n\nBank holiday visits are priced the same as any other day. You see the full price before you confirm.",
       },
       {
         question: "Is VAT included?",
