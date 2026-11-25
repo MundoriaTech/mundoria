@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import {
   CLEANER_AGREEMENT_DOCS,
   PREFERRED_HOURS_BANDS,
@@ -44,6 +48,15 @@ const INSURANCE_PATH: Record<string, string> = {
 };
 
 type Fact = { label: string; value: string };
+type TabId = "about" | "work" | "checks" | "finish";
+type Section = { facts: Fact[]; title: string };
+
+const TABS: Array<{ id: TabId; label: string }> = [
+  { id: "about", label: "About" },
+  { id: "work", label: "Work" },
+  { id: "checks", label: "Checks & kit" },
+  { id: "finish", label: "Finish" },
+];
 
 export function CleanerApplicationRecord({
   agreements,
@@ -140,6 +153,7 @@ export function CleanerApplicationRecord({
   workingRadiusKm: number;
   yearsExperience: number;
 }) {
+  const [tab, setTab] = useState<TabId>("about");
   const hoursLabel =
     PREFERRED_HOURS_BANDS.find((band) => band.value === preferredHoursBand)
       ?.label ?? pretty(preferredHoursBand);
@@ -155,7 +169,8 @@ export function CleanerApplicationRecord({
     .filter(Boolean)
     .join(", ");
 
-  const groups: Array<{ title: string; facts: Fact[] }> = [
+  const sections: Record<TabId, Section[]> = {
+    about: [
     {
       title: "About you",
       facts: [
@@ -177,6 +192,8 @@ export function CleanerApplicationRecord({
         ),
       ],
     },
+    ],
+    work: [
     {
       title: "Your services",
       facts: [
@@ -214,6 +231,8 @@ export function CleanerApplicationRecord({
         fact("How they get there", transportLabel),
       ],
     },
+    ],
+    checks: [
     {
       title: "UTR",
       facts: [
@@ -276,6 +295,8 @@ export function CleanerApplicationRecord({
         ),
       ],
     },
+    ],
+    finish: [
     {
       title: "Location consent",
       facts: [
@@ -361,26 +382,65 @@ export function CleanerApplicationRecord({
         ),
       ],
     },
-  ];
+    ],
+  };
+
+  const open = sections[tab];
 
   return (
     <section className="rounded-xl border bg-card p-4 sm:p-5">
       <h2 className="font-semibold">Application answers</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Everything they filled in during onboarding, in the same order they saw
-        it.
+        What they filled in during onboarding, grouped the way they saw it.
       </p>
-      <div className="mt-4 space-y-5">
-        {groups.map((group) => (
+      <div className="mt-4 flex flex-wrap items-center gap-1 rounded-full bg-[#E7E7EF] px-[5px] py-[5px] sm:h-[46px] sm:flex-nowrap sm:py-0">
+        {TABS.map((item) => {
+          const active = tab === item.id;
+          return (
+            <button
+              className="whitespace-nowrap rounded-full text-[14.5px] font-semibold transition-colors"
+              key={item.id}
+              onClick={() => setTab(item.id)}
+              style={{
+                background: active ? "#524096" : "transparent",
+                border: "none",
+                color: active ? "#FFFFFF" : "#524096",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                height: "36px",
+                padding: "0 14px",
+              }}
+              type="button"
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-5 space-y-6">
+        {open.map((group) => (
           <div key={group.title}>
-            <h3 className="text-sm font-semibold text-foreground">
+            <h3 className="border-b border-border pb-2 text-base font-semibold tracking-tight text-[#1c133b]">
               {group.title}
             </h3>
-            <dl className="mt-2 grid gap-3 text-sm sm:grid-cols-2">
+            <dl className="mt-3 grid gap-x-6 gap-y-3.5 text-sm sm:grid-cols-2">
               {group.facts.map((row) => (
-                <div key={row.label}>
-                  <dt className="text-muted-foreground">{row.label}</dt>
-                  <dd className="whitespace-pre-wrap font-medium">{row.value}</dd>
+                <div
+                  className={
+                    row.label === "About them" ||
+                    row.label === "Usual days and times" ||
+                    row.label === "Work reference"
+                      ? "sm:col-span-2"
+                      : undefined
+                  }
+                  key={row.label}
+                >
+                  <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {row.label}
+                  </dt>
+                  <dd className="mt-0.5 whitespace-pre-wrap font-medium text-[#1c133b]">
+                    {row.value}
+                  </dd>
                 </div>
               ))}
             </dl>
