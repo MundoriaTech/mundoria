@@ -1,3 +1,7 @@
+import {
+  ADDRESS_NEEDS_STREET_MESSAGE,
+  addressHasStreet,
+} from "@/lib/customer/address-completeness";
 import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 
@@ -90,6 +94,16 @@ export async function POST(request: Request) {
           "Only customer accounts can book. Use a customer account, separate from your cleaner login.",
       },
       { status: 403 },
+    );
+  }
+
+  // Saved addresses from before this check may lack a house number/street.
+  if (!addressHasStreet(address)) {
+    return NextResponse.json(
+      {
+        error: `${ADDRESS_NEEDS_STREET_MESSAGE} Update the address in your booking, then try again.`,
+      },
+      { status: 400 },
     );
   }
 

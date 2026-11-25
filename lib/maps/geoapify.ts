@@ -15,9 +15,11 @@ export interface GeoapifyFeature {
     city?: string;
     country_code?: string;
     formatted?: string;
+    housenumber?: string;
     lat: number;
     lon: number;
     postcode?: string;
+    result_type?: string;
     street?: string;
   };
 }

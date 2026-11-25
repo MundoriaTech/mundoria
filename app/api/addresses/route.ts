@@ -1,3 +1,7 @@
+import {
+  ADDRESS_NEEDS_STREET_MESSAGE,
+  addressHasStreet,
+} from "@/lib/customer/address-completeness";
 import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -84,6 +88,19 @@ async function saveAddress(request: Request, mode: "create" | "update") {
     return NextResponse.json(
       { error: "Only customer accounts can save booking addresses. Cleaners use a separate customer account to book." },
       { status: 403 },
+    );
+  }
+
+  if (
+    !addressHasStreet({
+      address_line_1: parsed.data.address_line_1,
+      city: parsed.data.city,
+      postcode: parsed.data.postcode,
+    })
+  ) {
+    return NextResponse.json(
+      { error: ADDRESS_NEEDS_STREET_MESSAGE },
+      { status: 400 },
     );
   }
 

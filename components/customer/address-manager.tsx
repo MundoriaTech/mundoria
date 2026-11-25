@@ -20,6 +20,11 @@ import {
   type GeoapifyAutocompleteResponse,
   getGeoapifyApiKey,
 } from "@/lib/maps/geoapify";
+import {
+  ADDRESS_NEEDS_STREET_MESSAGE,
+  addressHasStreet,
+  composeStreetLine,
+} from "@/lib/customer/address-completeness";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { Address } from "@/types/customer";
 
@@ -331,6 +336,9 @@ export function AddressForm({
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // UK address search often returns only a postcode or a street. Then we
+  // ask for the house/flat number and street so the cleaner can find it.
+  const [detail, setDetail] = useState({ house: "", needed: false, street: "" });
   const loadedAddressId = address?.id ?? null;
   const syncedAddressIdRef = useRef<string | null>(address?.id ?? null);
   const mapsKey = getGeoapifyApiKey();
@@ -352,6 +360,8 @@ export function AddressForm({
 
   function applySelectedPlace(place: GeoapifyFeature) {
     const properties = place.properties;
+    const needed = !properties.housenumber;
+    setDetail({ house: "", needed, street: needed ? (properties.street ?? "") : "" });
 
     setValues((current) => ({
       ...current,
@@ -368,6 +378,57 @@ export function AddressForm({
     }));
   }
 
+  /** Line 1/2 to save, with the house number and street when we asked. */
+  function finalLines(current: AddressFormValues) {
+    if (!detail.needed) {
+      return {
+        line1: current.address_line_1.trim(),
+        line2: current.address_line_2.trim() || null,
+      };
+    }
+    return {
+      line1: [
+        composeStreetLine(detail.house, detail.street),
+        current.city.trim(),
+        current.postcode.trim().toUpperCase(),
+      ]
+        .filter(Boolean)
+        .join(", "),
+      line2: null,
+    };
+  }
+
+  function missingDetail() {
+    if (!detail.needed) return null;
+    if (!detail.house.trim()) return "Add your house or flat number (or house name).";
+    if (detail.street.trim().length < 2) return "Add your street name.";
+    return null;
+  }
+
+  function saveGuestAddress(current: AddressFormValues) {
+    const { line1, line2 } = finalLines(current);
+    const now = new Date().toISOString();
+    onSaved({
+      address_line_1: line1,
+      address_line_2: line2,
+      city: current.city.trim(),
+      created_at: now,
+      customer_id: "",
+      id: `guest-${crypto.randomUUID()}`,
+      is_default: false,
+      label: current.label.trim() || null,
+      latitude: current.latitude,
+      longitude: current.longitude,
+      num_bathrooms: current.num_bathrooms,
+      num_bedrooms: current.num_bedrooms,
+      num_other_rooms: current.num_other_rooms,
+      postcode: current.postcode.trim().toUpperCase(),
+      property_type: current.property_type,
+      special_requirements: current.special_requirements.trim() || null,
+      updated_at: now,
+    });
+  }
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
@@ -382,35 +443,33 @@ export function AddressForm({
       return;
     }
 
+    const missing = missingDetail();
+    if (missing) {
+      setError(missing);
+      return;
+    }
+    const lines = finalLines(values);
+    if (
+      !addressHasStreet({
+        address_line_1: lines.line1,
+        city: values.city,
+        postcode: values.postcode,
+      })
+    ) {
+      setError(ADDRESS_NEEDS_STREET_MESSAGE);
+      return;
+    }
+
     if (localOnly) {
-      const now = new Date().toISOString();
-      onSaved({
-        address_line_1: values.address_line_1.trim(),
-        address_line_2: values.address_line_2.trim() || null,
-        city: values.city.trim(),
-        created_at: now,
-        customer_id: "",
-        id: `guest-${crypto.randomUUID()}`,
-        is_default: false,
-        label: values.label.trim() || null,
-        latitude: values.latitude,
-        longitude: values.longitude,
-        num_bathrooms: values.num_bathrooms,
-        num_bedrooms: values.num_bedrooms,
-        num_other_rooms: values.num_other_rooms,
-        postcode: values.postcode.trim().toUpperCase(),
-        property_type: values.property_type,
-        special_requirements: values.special_requirements.trim() || null,
-        updated_at: now,
-      });
+      saveGuestAddress(values);
       return;
     }
 
     setSaving(true);
 
     const payload = {
-      address_line_1: values.address_line_1.trim(),
-      address_line_2: values.address_line_2.trim() || null,
+      address_line_1: lines.line1,
+      address_line_2: lines.line2,
       city: values.city.trim(),
       id: address?.id,
       is_default: values.is_default,
@@ -476,11 +535,6 @@ export function AddressForm({
               applySelectedPlace(place);
               if (localOnly && compact) {
                 const properties = place.properties;
-                const line1 =
-                  properties.formatted ||
-                  properties.address_line1 ||
-                  properties.street ||
-                  values.address_line_1;
                 const city =
                   properties.city || properties.address_line2 || values.city;
                 const postcode = properties.postcode ?? values.postcode;
@@ -490,9 +544,18 @@ export function AddressForm({
                   );
                   return;
                 }
+                setError(null);
+                // No house number in the suggestion: wait for the customer
+                // to add it ("Use this address" below).
+                if (!properties.housenumber) return;
                 const now = new Date().toISOString();
                 onSaved({
-                  address_line_1: line1.trim(),
+                  address_line_1: (
+                    properties.formatted ||
+                    properties.address_line1 ||
+                    properties.street ||
+                    values.address_line_1
+                  ).trim(),
                   address_line_2: properties.address_line2 || null,
                   city: city.trim(),
                   created_at: now,
@@ -516,6 +579,7 @@ export function AddressForm({
             value={values.address_line_1}
             onQueryChange={(next) => {
               update("address_line_1", next);
+              setDetail({ house: "", needed: false, street: "" });
               if (loadedAddressId && onClearSelection) {
                 syncedAddressIdRef.current = null;
                 onClearSelection();
@@ -554,6 +618,57 @@ export function AddressForm({
           </p>
         ) : null}
       </div>
+
+      {detail.needed ? (
+        <div className="space-y-3 rounded-xl border border-[#e8e0f5] bg-[#faf8ff] p-3">
+          <p className="text-sm text-[#1c133b]">
+            Add your house or flat number and street so your cleaner can find
+            you.
+          </p>
+          <FormField htmlFor={`${addressFieldId}-house`} label="House or flat number / name" plain>
+            <Input
+              autoComplete="address-line1"
+              id={`${addressFieldId}-house`}
+              onChange={(event) =>
+                setDetail((current) => ({ ...current, house: event.target.value }))
+              }
+              placeholder=" "
+              required
+              value={detail.house}
+            />
+          </FormField>
+          <FormField htmlFor={`${addressFieldId}-street`} label="Street" plain>
+            <Input
+              autoComplete="address-line2"
+              id={`${addressFieldId}-street`}
+              onChange={(event) =>
+                setDetail((current) => ({ ...current, street: event.target.value }))
+              }
+              placeholder=" "
+              required
+              value={detail.street}
+            />
+          </FormField>
+          {localOnly && compact ? (
+            <Button
+              className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
+              onClick={() => {
+                const missing = missingDetail();
+                if (missing) {
+                  setError(missing);
+                  return;
+                }
+                setError(null);
+                saveGuestAddress(values);
+              }}
+              type="button"
+            >
+              <Check className="mr-2 h-4 w-4" />
+              Use this address
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Tags + saving to account only apply when signed in. */}
       {!bare && !localOnly ? (
