@@ -351,11 +351,6 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
                 ) : null}
                 <li>
                   <b>Total {formatMoney(booking.amount_total)}</b>
-                  {breakdown.totalPence !== Number(booking.amount_total ?? 0)
-                    ? ` (current rates would be ${formatMoney(breakdown.totalPence)})`
-                    : pricedOnOlderRules && currentBreakdown
-                      ? ` (agreed price; today's rates would be ${formatMoney(currentBreakdown.totalPence)})`
-                      : null}
                 </li>
               </ul>
             </section>
