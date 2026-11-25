@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CustomersTable } from "@/components/admin/customers-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -93,7 +94,15 @@ export default async function AdminCustomersPage() {
   });
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 space-y-4">
+      <div className="flex justify-end">
+        <Link
+          className="inline-flex h-9 items-center rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white hover:bg-[#312c79]"
+          href="/admin/customers/new"
+        >
+          Create account / book for a customer
+        </Link>
+      </div>
       <CustomersTable customers={customers} />
     </div>
   );

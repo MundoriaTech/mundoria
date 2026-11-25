@@ -194,6 +194,7 @@ export async function processAbandonedBookingReminders(limit = 40) {
     .select(
       "id,resume_token,email,draft,reminder_count,last_reminded_at,updated_at",
     )
+    .is("prepared_by", null)
     .is("completed_at", null)
     .lt("reminder_count", MAX_REMINDERS)
     .order("updated_at", { ascending: true })

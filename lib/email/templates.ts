@@ -39,6 +39,8 @@ export type EmailTemplateId =
   | "customer.booking_cancelled"
   | "customer.booking_completed"
   | "customer.booking_confirmed"
+  | "customer.account_created"
+  | "customer.booking_prepared"
   | "customer.booking_requested"
   | "customer.no_cleaner_found"
   | "customer.booking_incomplete"
@@ -247,6 +249,36 @@ function resolveTemplate(
         ],
         subject: "Your Mundoria booking is confirmed",
         title: "Booking confirmed",
+        tone: "customer",
+      };
+    case "customer.account_created":
+      return {
+        body: data.serviceName
+          ? `We've set up your Mundoria account and prepared your ${string(data.serviceName).toLowerCase()} for ${string(data.scheduledDate)} at ${string(data.scheduledTime)}. Set your password, then check the details and add your card to confirm the booking. Nothing is charged until your cleaner is confirmed.`
+          : "We've set up your Mundoria account. Set your password to book cleans, see your visits and manage everything in one place. If you didn't ask us to set this up, you can ignore this email.",
+        buttonHref: string(data.setPasswordUrl),
+        buttonLabel: "Set your password",
+        cards: data.serviceName ? bookingCards(data) : [],
+        intro: firstName
+          ? `Hi ${firstName}, your Mundoria account is ready.`
+          : "Your Mundoria account is ready.",
+        preview: "Set your password to get started.",
+        subject: "Your Mundoria account is ready",
+        title: "Welcome to Mundoria",
+        tone: "customer",
+      };
+    case "customer.booking_prepared":
+      return {
+        body: `We've prepared your ${string(data.serviceName).toLowerCase()} for ${string(data.scheduledDate)} at ${string(data.scheduledTime)}. Check the details and add your card to confirm. Nothing is charged until your cleaner is confirmed.`,
+        buttonHref: string(data.bookingUrl),
+        buttonLabel: "Check and confirm",
+        cards: bookingCards(data),
+        intro: firstName
+          ? `Hi ${firstName}, your booking is ready to confirm.`
+          : "Your booking is ready to confirm.",
+        preview: "Check and confirm your Mundoria booking.",
+        subject: "Your Mundoria booking is ready to confirm",
+        title: "Booking ready to confirm",
         tone: "customer",
       };
     case "customer.booking_requested":

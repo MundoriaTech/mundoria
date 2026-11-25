@@ -332,6 +332,8 @@ export async function syncDraftLeads(limit = 50) {
     .from("booking_drafts")
     .select("id,email,resume_token,draft,marketing_opt_in,user_id,created_at,updated_at")
     .is("completed_at", null)
+    // Bookings an admin prepared aren't abandoned; they have their own email.
+    .is("prepared_by", null)
     .lt("updated_at", olderThan)
     .gt("created_at", newerThan)
     .order("created_at", { ascending: true })
