@@ -30,6 +30,8 @@ const UNACCEPTED = ["pending_match", "matched"];
 
 export function matchCutoffAt(booking: {
   created_at?: string | null;
+  payment_status?: string | null;
+  previous_cleaner_id?: string | null;
   scheduled_date: string;
   scheduled_start_time: string;
 }) {
@@ -38,11 +40,15 @@ export function matchCutoffAt(booking: {
     String(booking.scheduled_start_time).slice(0, 5),
   );
   if (!start) return null;
+  const short = new Date(start.getTime() - SHORT_NOTICE_CUTOFF_HOURS * HOUR);
+  // A replacement (the confirmed cleaner dropped out or missed a
+  // confirmation gate inside the last 24h) keeps looking until 2h before.
+  if (booking.previous_cleaner_id || booking.payment_status === "held") {
+    return short;
+  }
   const standard = new Date(start.getTime() - MATCH_CUTOFF_HOURS * HOUR);
   const created = booking.created_at ? new Date(booking.created_at) : null;
-  if (created && created.getTime() > standard.getTime()) {
-    return new Date(start.getTime() - SHORT_NOTICE_CUTOFF_HOURS * HOUR);
-  }
+  if (created && created.getTime() > standard.getTime()) return short;
   return standard;
 }
 
@@ -67,6 +73,7 @@ type Row = {
   customer_id: string;
   id: string;
   payment_status: string;
+  previous_cleaner_id: string | null;
   scheduled_date: string;
   scheduled_start_time: string;
   service_type: ServiceType;
@@ -87,7 +94,7 @@ export async function enforceMatchCutoffs(now: Date = new Date()) {
   const { data } = await admin
     .from("bookings")
     .select(
-      "id,customer_id,status,payment_status,stripe_payment_intent_id,service_type,scheduled_date,scheduled_start_time,created_at,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
+      "id,customer_id,status,payment_status,previous_cleaner_id,stripe_payment_intent_id,service_type,scheduled_date,scheduled_start_time,created_at,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
     )
     .in("status", UNACCEPTED)
     .lte("scheduled_date", horizon)
