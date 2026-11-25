@@ -620,11 +620,7 @@ export function AddressForm({
       </div>
 
       {detail.needed ? (
-        <div className="space-y-3 rounded-xl border border-[#e8e0f5] bg-[#faf8ff] p-3">
-          <p className="text-sm text-[#1c133b]">
-            Add your house or flat number and street so your cleaner can find
-            you.
-          </p>
+        <div className="space-y-4">
           <FormField htmlFor={`${addressFieldId}-house`} label="House or flat number / name" plain>
             <Input
               autoComplete="address-line1"
@@ -649,6 +645,10 @@ export function AddressForm({
               value={detail.street}
             />
           </FormField>
+          <p className="-mt-2 text-xs text-muted-foreground">
+            Add your house or flat number and street so your cleaner can find
+            you.
+          </p>
           {localOnly && compact ? (
             <Button
               className="h-11 rounded-full bg-[#c79c66] px-5 font-semibold text-[#1c133b] hover:bg-[#b8894e]"
