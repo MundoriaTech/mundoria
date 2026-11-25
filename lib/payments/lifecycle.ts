@@ -517,12 +517,21 @@ export async function processDueCaptures(limit = 50) {
       captured += 1;
     } catch (error) {
       failures.push(booking.id);
+      const reason = error instanceof Error ? error.message : "Capture failed";
+      // Record the failure once and stop retrying every 15 minutes; an admin
+      // follows up from the booking.
+      await admin
+        .from("bookings")
+        .update({
+          payment_capture_failed_at: new Date().toISOString(),
+          payment_capture_failure_reason: reason,
+          payment_capture_scheduled_for: null,
+        })
+        .eq("id", booking.id);
       await alertAdmins(
         "payment_failed",
         "We could not take payment after a clean",
-        error instanceof Error
-          ? `The customer’s card could not be charged after the visit. ${error.message}`
-          : "The customer’s card could not be charged after the visit.",
+        `The customer’s card could not be charged after the visit, and we won't retry automatically. ${reason}`,
         { booking_id: booking.id },
       );
     }
@@ -750,4 +759,23 @@ async function notifyCustomerPaymentIssue(
   await sendPushNotification(customerId, title, body, {
     booking_id: bookingId,
   });
+}
+
+/**
+ * Cron: visits the customer never confirmed are completed automatically
+ * 48 hours after the cleaner checked out (payment is captured separately,
+ * the day after the clean).
+ */
+export async function autoCompleteFinishedVisits(limit = 100) {
+  const admin = createAdminClient();
+  const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const { data } = await admin
+    .from("bookings")
+    .update({ status: "completed" })
+    .eq("status", "awaiting_customer_confirmation")
+    .not("cleaner_marked_complete_at", "is", null)
+    .lte("cleaner_marked_complete_at", cutoff)
+    .select("id")
+    .limit(limit);
+  return { completed: data?.length ?? 0 };
 }

@@ -44,7 +44,10 @@ export function nextConfirmationGate(
       gate: "t1",
     };
   }
-  if (hoursToStart <= 7 && hoursToStart > 5.5) {
+  // T−6 lands overnight for morning cleans (09:00 → ~03:00). A sleeping
+  // cleaner would lose the job, so skip it in UK quiet hours; T−24 and T−1
+  // still apply.
+  if (hoursToStart <= 7 && hoursToStart > 5.5 && !isUkQuietHour(now)) {
     return {
       dueAt: addMinutes(now, CONFIRMATION_WINDOWS_MINUTES.t6),
       gate: "t6",
@@ -57,6 +60,20 @@ export function nextConfirmationGate(
     };
   }
   return null;
+}
+
+const QUIET_START_HOUR_UK = 22;
+const QUIET_END_HOUR_UK = 7;
+
+function isUkQuietHour(date: Date) {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      hourCycle: "h23",
+      timeZone: "Europe/London",
+    }).format(date),
+  );
+  return hour >= QUIET_START_HOUR_UK || hour < QUIET_END_HOUR_UK;
 }
 
 export async function formEmergencyList(

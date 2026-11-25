@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
+import { ensureCaptureScheduled } from "@/lib/bookings/geofence";
 import { formatMoney } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import {
@@ -132,6 +133,17 @@ export async function POST(
       status,
     })
     .eq("id", params.id);
+  // Restart a charge the dispute paused (unless the admin refunded it).
+  if (action !== "refund" && dispute.booking?.payment_capture_paused_at) {
+    await auth.admin
+      .from("bookings")
+      .update({ payment_capture_paused_at: null })
+      .eq("id", dispute.booking_id);
+    if (dispute.booking.payment_status === "held") {
+      await ensureCaptureScheduled(dispute.booking_id, "held");
+    }
+  }
+
   await notifyDisputeOutcome({
     action,
     admin: auth.admin,

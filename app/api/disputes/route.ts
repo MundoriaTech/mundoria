@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   const admin = createAdminClient();
   const { data: booking } = await admin
     .from("bookings")
-    .select("id,customer_id,cleaner_id")
+    .select("id,customer_id,cleaner_id,payment_status,payment_capture_scheduled_for")
     .eq("id", value.booking_id)
     .single();
 
@@ -69,6 +69,23 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  // A customer's dispute about a visit pauses the next-day charge until an
+  // admin resolves it (resolving restarts it; a refund releases the hold).
+  if (
+    !value.rating_id &&
+    user.id === booking.customer_id &&
+    booking.payment_status === "held" &&
+    booking.payment_capture_scheduled_for
+  ) {
+    await admin
+      .from("bookings")
+      .update({
+        payment_capture_paused_at: new Date().toISOString(),
+        payment_capture_scheduled_for: null,
+      })
+      .eq("id", booking.id);
   }
 
   if (value.rating_id) {

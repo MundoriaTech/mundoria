@@ -4,7 +4,9 @@ import { z } from "zod";
 
 import { validateBookingGeofence } from "@/lib/bookings/geofence";
 import { getDistanceInMetres } from "@/lib/maps/distance";
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { alertAdmins } from "@/lib/notifications/admin";
+import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
@@ -56,6 +58,7 @@ export async function POST(
       .update({ status: "cleaner_en_route" })
       .eq("id", params.id)
       .eq("cleaner_id", user.id);
+    await notifyCustomerEnRoute(params.id).catch(() => undefined);
     return NextResponse.json({ success: true });
   }
 
@@ -145,4 +148,51 @@ export async function POST(
     overrideRequested: true,
     success: true,
   });
+}
+
+/** Tell the customer their cleaner has set off (push + email). */
+async function notifyCustomerEnRoute(bookingId: string) {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("bookings")
+    .select(
+      "customer_id,scheduled_date,scheduled_start_time,service_type,cleaner:profiles!bookings_cleaner_id_fkey(full_name),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
+    )
+    .eq("id", bookingId)
+    .single();
+  if (!data) return;
+  const one = <T,>(value: T | T[] | null) =>
+    Array.isArray(value) ? (value[0] ?? null) : value;
+  const cleaner = one(data.cleaner as { full_name?: string | null } | null);
+  const customer = one(
+    data.customer as {
+      email?: string | null;
+      full_name?: string | null;
+      notification_preferences?: { email?: boolean } | null;
+    } | null,
+  );
+  const cleanerName = cleaner?.full_name?.split(" ")[0] || "Your cleaner";
+  await sendPushNotification(
+    data.customer_id,
+    "Your cleaner is on the way",
+    `${cleanerName} is on the way. You can follow them on the map in your booking.`,
+    { booking_id: bookingId },
+  );
+  if (customer?.email && customer.notification_preferences?.email !== false) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    await sendBrandedEmail({
+      data: {
+        appUrl,
+        bookingId,
+        bookingUrl: `${appUrl}/booking/${bookingId}`,
+        cleanerName,
+        firstName: customer.full_name?.split(" ")[0],
+        scheduledDate: data.scheduled_date,
+        scheduledTime: String(data.scheduled_start_time ?? "").slice(0, 5),
+        serviceName: String(data.service_type).replaceAll("_", " "),
+      },
+      template: "customer.cleaner_en_route",
+      to: customer.email,
+    });
+  }
 }

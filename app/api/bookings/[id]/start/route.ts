@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { confirmCleanStart } from "@/lib/bookings/start-clean";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
   role: z.enum(["cleaner", "customer"]),
@@ -27,21 +26,8 @@ export async function POST(
       role: parsed.data.role,
       userId: user.id,
     });
-    if (result.started && (result.penaltyPence ?? 0) > 0) {
-      const admin = createAdminClient();
-      const { data: booking } = await admin
-        .from("bookings")
-        .select("amount_total")
-        .eq("id", params.id)
-        .single();
-      await admin
-        .from("bookings")
-        .update({
-          amount_total:
-            Number(booking?.amount_total ?? 0) + (result.penaltyPence ?? 0),
-        })
-        .eq("id", params.id);
-    }
+    // A waiting charge is stored on the booking (access_penalty_pence) and
+    // collected as its own payment after the main capture.
     return NextResponse.json({ ...result, success: true });
   } catch (error) {
     return NextResponse.json(

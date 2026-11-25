@@ -1,3 +1,4 @@
+import { bookingStartUtc } from "@/lib/payments/uk-schedule";
 import { addDays, format } from "date-fns";
 import { NextResponse } from "next/server";
 
@@ -40,9 +41,11 @@ export async function GET(request: Request) {
   const closed: string[] = [];
 
   for (const booking of active ?? []) {
-    const start = new Date(
-      `${booking.scheduled_date}T${booking.scheduled_start_time}`,
+    const start = bookingStartUtc(
+      booking.scheduled_date,
+      String(booking.scheduled_start_time).slice(0, 5),
     );
+    if (!start) continue;
 
     if (start.getTime() <= now.getTime()) {
       if (booking.booking_protected) {

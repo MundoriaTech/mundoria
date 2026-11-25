@@ -306,7 +306,7 @@ export function BookingDetail({
         ? result.penaltyPence
           ? `A waiting charge of £${(result.penaltyPence / 100).toFixed(2)} applies after the 5-minute grace.`
           : "You both confirmed, so the clean has started."
-        : "Your cleaner still needs to tap Start cleaning.",
+        : "Thanks. Your cleaner will start as soon as they're ready.",
     });
     router.refresh();
   }
@@ -343,7 +343,9 @@ export function BookingDetail({
   const onSafetyHold = Boolean(booking.safety_hold_at);
   const canMessage = cleanerVisible && Boolean(booking.cleaner_id);
   const needsStartConfirm =
-    Boolean(booking.arrived_at) && !booking.customer_start_confirmed_at;
+    Boolean(booking.arrived_at) &&
+    !booking.customer_start_confirmed_at &&
+    ["confirmed", "cleaner_en_route"].includes(booking.status);
 
   return (
     <div className="min-w-0 space-y-6 sm:space-y-8">

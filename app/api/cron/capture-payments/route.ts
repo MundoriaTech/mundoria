@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { isAuthorizedCron } from "@/lib/cron/auth";
-import { processDueCaptures } from "@/lib/payments/lifecycle";
+import {
+  autoCompleteFinishedVisits,
+  processDueCaptures,
+} from "@/lib/payments/lifecycle";
 
 /**
- * Captures held payments whose next-day UK capture time has arrived.
+ * Captures held payments whose next-day UK capture time has arrived, and
+ * completes visits the customer never confirmed after 48 hours.
  */
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
@@ -13,7 +17,8 @@ export async function GET(request: Request) {
 
   try {
     const result = await processDueCaptures();
-    return NextResponse.json(result);
+    const autoCompleted = await autoCompleteFinishedVisits();
+    return NextResponse.json({ ...result, autoCompleted });
   } catch (error) {
     return NextResponse.json(
       {

@@ -17,7 +17,7 @@ export async function handleNoShow(bookingId: string) {
     .eq("id", bookingId)
     .single();
   if (!booking) throw new Error("Booking not found.");
-  if (!["matched", "confirmed", "cleaner_en_route"].includes(booking.status)) {
+  if (!["confirmed", "cleaner_en_route"].includes(booking.status)) {
     throw new Error(`Booking cannot be marked no-show from ${booking.status}.`);
   }
   const cleanerId = booking.cleaner_id as string | null;
@@ -67,26 +67,38 @@ export async function cancelExpiredReplacement(bookingId: string) {
   const admin = createAdminClient();
   const { data: booking } = await admin
     .from("bookings")
-    .select("customer_id,customer:profiles!bookings_customer_id_fkey(email)")
+    .select("customer_id,status,payment_status,stripe_payment_intent_id,customer:profiles!bookings_customer_id_fkey(email)")
     .eq("id", bookingId)
     .single();
-  if (!booking) return false;
+  if (!booking || !["no_show", "pending_match"].includes(booking.status)) {
+    return false;
+  }
   const customer = Array.isArray(booking.customer)
     ? booking.customer[0]
     : booking.customer;
-  await refundBookingPayment(bookingId);
-  await admin
+  // Release/refund only when there is a payment; an unpaid booking has none.
+  if (
+    booking.stripe_payment_intent_id &&
+    ["held", "released"].includes(booking.payment_status)
+  ) {
+    await refundBookingPayment(bookingId);
+  }
+  const { data: cancelledRow } = await admin
     .from("bookings")
     .update({
       cancelled_at: new Date().toISOString(),
       cancellation_reason: "No replacement cleaner found within one hour.",
       status: "cancelled",
     })
-    .eq("id", bookingId);
+    .eq("id", bookingId)
+    .in("status", ["no_show", "pending_match"])
+    .select("id")
+    .maybeSingle();
+  if (!cancelledRow) return false;
   await sendPushNotification(
     booking.customer_id,
     "Booking cancelled",
-    "We could not find a replacement within one hour. Your payment has been refunded.",
+    "We could not find a replacement within one hour, so we've cancelled the visit. You have not been charged.",
     { booking_id: bookingId },
   );
   if (customer?.email) {
@@ -97,7 +109,7 @@ export async function cancelExpiredReplacement(bookingId: string) {
         bookingId,
         bookingUrl: `${appUrl}/booking/${bookingId}`,
         reason:
-          "We could not find a replacement within one hour. Your payment has been refunded.",
+          "We could not find a replacement within one hour, so we've cancelled the visit. You have not been charged.",
       },
       template: "customer.booking_cancelled",
       to: customer.email,

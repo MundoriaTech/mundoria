@@ -8,15 +8,27 @@ import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+type BookingAction =
+  | "reassign"
+  | "status"
+  | "rematch"
+  | "assignTeam"
+  | "approve_checkin"
+  | "approve_checkout";
+
 export function BookingActions({
   allocatedCleaners = 1,
   bookingId,
+  checkinOverrideRequested = false,
+  checkoutOverrideRequested = false,
   cleaners,
   currentStatus,
   teamMemberIds = [],
 }: {
   allocatedCleaners?: number;
   bookingId: string;
+  checkinOverrideRequested?: boolean;
+  checkoutOverrideRequested?: boolean;
   cleaners: { id: string; full_name: string }[];
   currentStatus: string;
   teamMemberIds?: string[];
@@ -30,9 +42,7 @@ export function BookingActions({
   const [message, setMessage] = useState("");
   const needsTeam = allocatedCleaners > 1;
 
-  async function act(
-    action: "reassign" | "status" | "rematch" | "assignTeam",
-  ) {
+  async function act(action: BookingAction) {
     if (action === "rematch") {
       const ok = await confirm({
         action: "Find replacement",
@@ -72,7 +82,11 @@ export function BookingActions({
             ? "Rematch started"
             : action === "assignTeam"
               ? "Team assigned"
-              : "Booking updated",
+              : action === "approve_checkin"
+                ? "Arrival accepted"
+                : action === "approve_checkout"
+                  ? "Finish accepted"
+                  : "Booking updated",
       note: "The change is in the audit trail.",
     });
     router.refresh();
@@ -189,6 +203,24 @@ export function BookingActions({
           Update status
         </Button>
       </div>
+      {checkinOverrideRequested || checkoutOverrideRequested ? (
+        <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <p>
+            The cleaner&apos;s {checkinOverrideRequested ? "arrival" : "finish"}{" "}
+            failed the location check. Call them if unsure, then accept it so
+            the visit can carry on{checkoutOverrideRequested ? " and the customer is charged" : ""}.
+          </p>
+          <Button
+            className="mt-2 min-h-11 w-full"
+            disabled={note.length < 3}
+            onClick={() =>
+              void act(checkinOverrideRequested ? "approve_checkin" : "approve_checkout")
+            }
+          >
+            {checkinOverrideRequested ? "Accept arrival" : "Accept finish"}
+          </Button>
+        </div>
+      ) : null}
       <Button
         className="mt-3 min-h-11 w-full"
         disabled={note.length < 3}

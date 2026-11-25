@@ -1,3 +1,4 @@
+import { sendBrandedEmail } from "@/lib/email/send-email";
 import { NextResponse } from "next/server";
 
 import { isAuthorizedCron } from "@/lib/cron/auth";
@@ -23,6 +24,28 @@ export async function GET(request: Request) {
       results.push({ id: payout.id, status: "paid", transfer: transfer.id });
     } catch (error) {
       await admin.from("payouts").update({ status: "failed" }).eq("id", payout.id);
+      // Tell the cleaner too, so they can check their payout details.
+      const { data: failed } = await admin
+        .from("payouts")
+        .select("net_amount,period_start,period_end,profile:profiles!payouts_cleaner_id_fkey(email,full_name)")
+        .eq("id", payout.id)
+        .single();
+      const profile = (Array.isArray(failed?.profile) ? failed?.profile[0] : failed?.profile) as
+        | { email?: string | null; full_name?: string | null }
+        | null
+        | undefined;
+      if (profile?.email) {
+        await sendBrandedEmail({
+          data: {
+            amount: `£${(Number(failed?.net_amount ?? 0) / 100).toFixed(2)}`,
+            appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "",
+            firstName: profile.full_name?.split(" ")[0],
+            period: `${failed?.period_start} to ${failed?.period_end}`,
+          },
+          template: "cleaner.payout_failed",
+          to: profile.email,
+        }).catch(() => undefined);
+      }
       await alertAdmins(
         "payout_failed",
         "A scheduled cleaner payout failed",

@@ -366,6 +366,8 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         <BookingActions
           allocatedCleaners={booking.allocated_cleaners ?? 1}
           bookingId={params.id}
+          checkinOverrideRequested={Boolean(booking.checkin_override_requested)}
+          checkoutOverrideRequested={Boolean(booking.checkout_override_requested)}
           cleaners={(cleaners ?? [])
             .filter((cleaner) =>
               sameAudience(booking.customer?.email, cleaner.email),

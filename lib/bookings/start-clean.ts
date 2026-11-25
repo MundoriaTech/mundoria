@@ -5,11 +5,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const GRACE_MS = 5 * 60 * 1000;
 const PENALTY_PENCE_PER_MINUTE = 50;
 
+/** The waiting charge is capped at 30 minutes (£15). */
+const PENALTY_MAX_MINUTES = 30;
+
 export function accessPenaltyPence(graceEndsAt: string | null, confirmedAt: Date) {
   if (!graceEndsAt) return 0;
   const lateMs = confirmedAt.getTime() - new Date(graceEndsAt).getTime();
   if (lateMs <= 0) return 0;
-  return Math.ceil(lateMs / 60_000) * PENALTY_PENCE_PER_MINUTE;
+  const minutes = Math.min(PENALTY_MAX_MINUTES, Math.ceil(lateMs / 60_000));
+  return minutes * PENALTY_PENCE_PER_MINUTE;
 }
 
 export async function confirmCleanStart({
@@ -37,6 +41,9 @@ export async function confirmCleanStart({
     throw new Error("The clean can start after the cleaner has arrived.");
   }
   if (booking.status === "in_progress") return { started: true };
+  if (!["confirmed", "cleaner_en_route"].includes(booking.status)) {
+    throw new Error(`The clean can't start while this booking is ${booking.status}.`);
+  }
 
   const now = new Date();
   const patch =
@@ -50,7 +57,9 @@ export async function confirmCleanStart({
       ? now.toISOString()
       : booking.customer_start_confirmed_at;
 
-  if (cleanerConfirmed && customerConfirmed) {
+  // The cleaner can start alone once they've arrived (the customer may not
+  // be home: key safe, Airbnb, office). The customer's tap is optional.
+  if (cleanerConfirmed) {
     const penalty = accessPenaltyPence(booking.access_grace_ends_at, now);
     await admin
       .from("bookings")
@@ -66,8 +75,10 @@ export async function confirmCleanStart({
       booking.customer_id,
       "Cleaning has started",
       penalty > 0
-        ? `You both confirmed the start. A waiting charge of £${(penalty / 100).toFixed(2)} applies after the 5-minute grace.`
-        : "You both confirmed, so the clean has started.",
+        ? `Your clean has started. A waiting charge of £${(penalty / 100).toFixed(2)} applies for the wait after the 5-minute grace.`
+        : customerConfirmed
+          ? "You both confirmed, so the clean has started."
+          : "Your cleaner has started the clean.",
       { booking_id: bookingId },
     );
     return { penaltyPence: penalty, started: true };
@@ -79,9 +90,7 @@ export async function confirmCleanStart({
     await sendPushNotification(
       otherId,
       "Confirm the clean can start",
-      role === "cleaner"
-        ? "Your cleaner is ready to start. Confirm when you have let them in."
-        : "The customer has confirmed. Tap Start cleaning if you have not already.",
+      "The customer has confirmed. Tap Start cleaning when you're ready.",
       { booking_id: bookingId },
     );
   }
