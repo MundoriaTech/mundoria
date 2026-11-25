@@ -2,6 +2,7 @@ import { BriefcaseBusiness, CalendarCheck } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ApplicationStatus } from "@/components/cleaner/application-status";
 import { ConnectPayoutCard } from "@/components/cleaner/connect-payout-card";
 import { CleanerHeroStage } from "@/components/cleaner/hero-stage";
 import { CleanerOfferHighlight } from "@/components/cleaner/offer-highlight";
@@ -27,6 +28,7 @@ import {
 import { formatMoney, formatServiceName } from "@/lib/customer/services";
 import { sessionPhotoForService } from "@/lib/customer/booking-visibility";
 import { cleanerHero, type CleanerHeroMoment } from "@/lib/avatars/hero-poses";
+import { isAwaitingApproval } from "@/lib/cleaner/approval";
 import { createServerClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Cleaner dashboard" };
@@ -46,6 +48,9 @@ export default async function CleanerDashboardPage() {
   const profile = context.profile;
   if (!cleaner || !profile) redirect("/");
   const firstName = profile.full_name.trim().split(/\s+/)[0] || "there";
+  if (isAwaitingApproval(cleaner)) {
+    return <ApplicationStatus cleaner={cleaner} firstName={firstName} />;
+  }
   const today = new Date().toISOString().slice(0, 10);
   const activeJobs = jobs
     .filter((job) => !["cancelled", "completed"].includes(job.status))

@@ -232,8 +232,9 @@ export default async function AdminDashboardPage() {
         <div className="space-y-3 rounded-[1.5rem] border border-amber-300/60 bg-[#fff8ef] p-4 sm:p-5">
           <p className="font-semibold text-[#1c133b]">
             <AlertTriangle className="mr-2 inline h-5 w-5 text-amber-600" />
-            {alerts.length} cancelled booking{alerts.length > 1 ? "s" : ""} still
-            need a new cleaner (payment held).
+            {alerts.length === 1
+              ? "1 cancelled booking still needs a new cleaner (payment held)."
+              : `${alerts.length} cancelled bookings still need a new cleaner (payment held).`}
           </p>
           {alerts.slice(0, 3).map((booking) => (
             <div

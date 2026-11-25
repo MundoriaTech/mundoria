@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { cn } from "@/lib/utils";
+import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
 
 export type AccountMenuItem = {
   href: string;
@@ -103,6 +104,7 @@ export function AccountMenu({
     // Loaded on demand so public pages that show this menu don't ship supabase-js up front.
     const { createBrowserClient } = await import("@/lib/supabase/client");
     await createBrowserClient().auth.signOut();
+    clearPersonalBrowserData();
     const loginPath = pathname.startsWith("/cleaner")
       ? "/login/cleaner"
       : pathname.startsWith("/admin")

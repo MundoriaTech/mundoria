@@ -48,6 +48,7 @@ import type { AdminAccess, AdminArea } from "@/lib/admin/access";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
+import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
 
 type NavItem = {
   /** Only shown to admins with access to this section. */
@@ -235,8 +236,9 @@ function pageEyebrow(pathname: string) {
 }
 
 function pageSubtitle(pathname: string) {
-  const base = `/${pathname.split("/").slice(1, 3).join("/")}`;
-  return PAGE_SUBTITLES[base] ?? PAGE_SUBTITLES[pathname] ?? "";
+  // List pages only: a detail page (e.g. one callback) shouldn't repeat the
+  // list's instructions ("Filter To call when you sit down to ring…").
+  return PAGE_SUBTITLES[pathname.replace(/\/$/, "")] ?? "";
 }
 
 function SidebarNav({
@@ -402,6 +404,7 @@ export function AdminShell({
   async function logout() {
     setSigningOut(true);
     await createBrowserClient().auth.signOut();
+    clearPersonalBrowserData();
     router.replace("/admin/login");
     router.refresh();
   }

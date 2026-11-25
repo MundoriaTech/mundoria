@@ -10,6 +10,7 @@ import { FormField } from "@/components/auth/form-field";
 import { AppModal } from "@/components/shared/app-modal";
 import { FieldError } from "@/components/shared/action-error";
 import { Input } from "@/components/ui/input";
+import { readConsent } from "@/lib/analytics/consent";
 
 const STORAGE_KEY = "mundoria_free_hour_popup_dismissed_until";
 const DELAY_MS = 10_000;
@@ -50,8 +51,18 @@ export function FreeHourOfferPopup({ bookingHref }: { bookingHref: string }) {
     if (SKIP_PATHS.has(pathname)) return;
     if (dismissedUntil() > Date.now()) return;
 
-    const timer = window.setTimeout(() => setOpen(true), DELAY_MS);
-    return () => window.clearTimeout(timer);
+    // Never open over the cookie banner: wait until the visitor has answered it.
+    let timer: number | undefined;
+    const start = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setOpen(true), DELAY_MS);
+    };
+    if (readConsent()) start();
+    window.addEventListener("mundoria:consent-updated", start);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("mundoria:consent-updated", start);
+    };
   }, [pathname]);
 
   function close() {

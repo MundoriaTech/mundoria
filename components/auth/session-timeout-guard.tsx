@@ -11,6 +11,7 @@ import {
   type SessionAudience,
 } from "@/lib/auth/session-policy";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
 
 export function SessionTimeoutGuard({
   audience,
@@ -30,6 +31,7 @@ export function SessionTimeoutGuard({
       setWarning(false);
       try {
         await createBrowserClient().auth.signOut();
+        clearPersonalBrowserData();
       } finally {
         window.sessionStorage.removeItem(SESSION_STARTED_KEY);
         window.sessionStorage.removeItem(SESSION_ACTIVITY_KEY);
