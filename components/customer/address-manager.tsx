@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import {
   type GeoapifyFeature,
   type GeoapifyAutocompleteResponse,
+  type GeoapifyParsedQuery,
   getGeoapifyApiKey,
 } from "@/lib/maps/geoapify";
 import {
@@ -338,7 +339,13 @@ export function AddressForm({
   const [saving, setSaving] = useState(false);
   // UK address search often returns only a postcode or a street. Then we
   // ask for the house/flat number and street so the cleaner can find it.
-  const [detail, setDetail] = useState({ house: "", needed: false, street: "" });
+  // `auto`: the customer typed the number, so we use it without asking.
+  const [detail, setDetail] = useState({
+    auto: false,
+    house: "",
+    needed: false,
+    street: "",
+  });
   const loadedAddressId = address?.id ?? null;
   const syncedAddressIdRef = useRef<string | null>(address?.id ?? null);
   const mapsKey = getGeoapifyApiKey();
@@ -358,10 +365,9 @@ export function AddressForm({
     setValues((current) => ({ ...current, [key]: value }));
   }
 
-  function applySelectedPlace(place: GeoapifyFeature) {
+  function applySelectedPlace(place: GeoapifyFeature, typed?: GeoapifyParsedQuery | null) {
     const properties = place.properties;
-    const needed = !properties.housenumber;
-    setDetail({ house: "", needed, street: needed ? (properties.street ?? "") : "" });
+    setDetail(houseDetailFor(place, typed));
 
     setValues((current) => ({
       ...current,
@@ -527,12 +533,12 @@ export function AddressForm({
             apiKey={mapsKey}
             id={addressFieldId}
             label={addressLabel}
-            onPlaceSelected={(place) => {
+            onPlaceSelected={(place, typed) => {
               if (loadedAddressId && onClearSelection) {
                 syncedAddressIdRef.current = null;
                 onClearSelection();
               }
-              applySelectedPlace(place);
+              applySelectedPlace(place, typed);
               if (localOnly && compact) {
                 const properties = place.properties;
                 const city =
@@ -545,18 +551,25 @@ export function AddressForm({
                   return;
                 }
                 setError(null);
-                // No house number in the suggestion: wait for the customer
-                // to add it ("Use this address" below).
-                if (!properties.housenumber) return;
+                const house = houseDetailFor(place, typed);
+                // No house number anywhere: wait for the customer to add it
+                // ("Use this address" below).
+                if (house.needed && !house.auto) return;
                 const now = new Date().toISOString();
                 onSaved({
-                  address_line_1: (
-                    properties.formatted ||
-                    properties.address_line1 ||
-                    properties.street ||
-                    values.address_line_1
-                  ).trim(),
-                  address_line_2: properties.address_line2 || null,
+                  address_line_1: house.auto
+                    ? [
+                        composeStreetLine(house.house, house.street),
+                        city.trim(),
+                        postcode.trim().toUpperCase(),
+                      ].join(", ")
+                    : (
+                        properties.formatted ||
+                        properties.address_line1 ||
+                        properties.street ||
+                        values.address_line_1
+                      ).trim(),
+                  address_line_2: house.auto ? null : properties.address_line2 || null,
                   city: city.trim(),
                   created_at: now,
                   customer_id: "",
@@ -579,7 +592,7 @@ export function AddressForm({
             value={values.address_line_1}
             onQueryChange={(next) => {
               update("address_line_1", next);
-              setDetail({ house: "", needed: false, street: "" });
+              setDetail({ auto: false, house: "", needed: false, street: "" });
               if (loadedAddressId && onClearSelection) {
                 syncedAddressIdRef.current = null;
                 onClearSelection();
@@ -619,7 +632,7 @@ export function AddressForm({
         ) : null}
       </div>
 
-      {detail.needed ? (
+      {detail.needed && !detail.auto ? (
         <div className="space-y-4">
           <FormField htmlFor={`${addressFieldId}-house`} label="House or flat number / name" plain>
             <Input
@@ -739,6 +752,30 @@ export function AddressForm({
   );
 }
 
+function titleCase(value: string) {
+  return value.replace(/\b([a-z])/g, (letter) => letter.toUpperCase());
+}
+
+/**
+ * Whether we still need a house number. A suggestion with a number is
+ * complete. Without one, use the number the customer typed (Geoapify parses
+ * it even when its suggestion is street- or postcode-level).
+ */
+function houseDetailFor(
+  place: GeoapifyFeature,
+  typed?: GeoapifyParsedQuery | null,
+) {
+  const properties = place.properties;
+  if (properties.housenumber) {
+    return { auto: false, house: "", needed: false, street: "" };
+  }
+  const house = typed?.housenumber?.trim().toUpperCase() ?? "";
+  const street =
+    properties.street?.trim() ||
+    (typed?.street ? titleCase(typed.street.trim()) : "");
+  return { auto: Boolean(house && street), house, needed: true, street };
+}
+
 function AddressAutocompleteInput({
   apiKey,
   id,
@@ -750,11 +787,14 @@ function AddressAutocompleteInput({
   apiKey: string;
   id: string;
   label: string;
-  onPlaceSelected: (place: GeoapifyFeature) => void;
+  onPlaceSelected: (place: GeoapifyFeature, typed?: GeoapifyParsedQuery | null) => void;
   onQueryChange: (value: string) => void;
   value: string;
 }) {
   const [suggestions, setSuggestions] = useState<GeoapifyFeature[]>([]);
+  // Geoapify's reading of what was typed (e.g. the house number), kept with
+  // the suggestions it came with.
+  const parsedQueryRef = useRef<GeoapifyParsedQuery | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -803,6 +843,7 @@ function AddressAutocompleteInput({
         }
 
         const data = (await response.json()) as GeoapifyAutocompleteResponse;
+        parsedQueryRef.current = data.query?.parsed ?? null;
         setSuggestions(data.features ?? []);
         setOpen(true);
       } catch (error) {
@@ -944,7 +985,7 @@ function AddressAutocompleteInput({
                           suggestion.properties.address_line1 ||
                           value;
                         onQueryChange(formatted);
-                        onPlaceSelected(suggestion);
+                        onPlaceSelected(suggestion, parsedQueryRef.current);
                         setOpen(false);
                         setSuggestions([]);
                       }}

@@ -24,6 +24,13 @@ export interface GeoapifyFeature {
   };
 }
 
+/** What Geoapify read from the customer's typed text. */
+export interface GeoapifyParsedQuery {
+  housenumber?: string;
+  street?: string;
+}
+
 export interface GeoapifyAutocompleteResponse {
   features: GeoapifyFeature[];
+  query?: { parsed?: GeoapifyParsedQuery };
 }
