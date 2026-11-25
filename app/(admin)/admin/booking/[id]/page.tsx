@@ -1,3 +1,4 @@
+import { sameAudience } from "@/lib/matching/seed-accounts";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -39,7 +40,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     admin.from("matching_decisions").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("booking_status_history").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("messages").select("*,sender:profiles!messages_sender_id_fkey(full_name)").eq("booking_id", params.id).order("created_at"),
-    admin.from("profiles").select("id,full_name,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
+    admin.from("profiles").select("id,full_name,email,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)").eq("role", "cleaner").in("cleaner_profiles.status", ["certified", "active"]),
     admin.from("booking_add_ons").select("*").eq("booking_id", params.id).order("created_at"),
     admin.from("booking_team_members").select("cleaner_id").eq("booking_id", params.id),
     admin
@@ -344,7 +345,11 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         <BookingActions
           allocatedCleaners={booking.allocated_cleaners ?? 1}
           bookingId={params.id}
-          cleaners={(cleaners ?? []).map((cleaner) => ({
+          cleaners={(cleaners ?? [])
+            .filter((cleaner) =>
+              sameAudience(booking.customer?.email, cleaner.email),
+            )
+            .map((cleaner) => ({
             id: cleaner.id,
             full_name: cleaner.full_name,
           }))}

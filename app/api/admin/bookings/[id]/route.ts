@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 import { runMatchingEngine } from "@/lib/matching/engine";
+import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
 import { maybeAuthorizeBookingIfDue } from "@/lib/payments/lifecycle";
 
 const schema = z.object({
@@ -53,6 +54,29 @@ export async function POST(
 
   let updates: Record<string, unknown> = {};
   let excludeCleanerIds: string[] = [];
+
+  const requestedCleaners = Array.from(
+    new Set([...(cleanerIds ?? []), ...(cleanerId ? [cleanerId] : [])]),
+  );
+  if (
+    (action === "assignTeam" || action === "reassign") &&
+    requestedCleaners.length
+  ) {
+    const allowed = await filterCleanersForBooking(
+      auth.admin,
+      params.id,
+      requestedCleaners,
+    );
+    if (allowed.length !== requestedCleaners.length) {
+      return NextResponse.json(
+        {
+          error:
+            "Test (seed) cleaners can't be assigned to real bookings, and real cleaners can't be assigned to test bookings.",
+        },
+        { status: 400 },
+      );
+    }
+  }
 
   if (action === "assignTeam") {
     const ids = Array.from(new Set(cleanerIds ?? []));

@@ -4,6 +4,7 @@ import { parseTransportModes } from "@/lib/cleaner/onboarding-compliance";
 import { formatServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
+import { sameAudience } from "@/lib/matching/seed-accounts";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -102,7 +103,19 @@ export async function runMatchingEngine(
     Number(booking.estimated_duration_hours ?? 2) * 60,
   );
   const excluded = new Set(options.excludeCleanerIds ?? []);
-  const considered = (candidates ?? []).flatMap((candidate) => {
+  const bookingCustomer = Array.isArray(booking.customer)
+    ? booking.customer[0]
+    : booking.customer;
+  // Seed/test cleaners never see real bookings (and real cleaners never see
+  // seed bookings). They are dropped before scoring, so they can't become the
+  // primary, a reserve, or a team invite.
+  const audienceCandidates = (candidates ?? []).filter((candidate) =>
+    sameAudience(
+      bookingCustomer?.email as string | null | undefined,
+      candidate.email as string | null,
+    ),
+  );
+  const considered = audienceCandidates.flatMap((candidate) => {
     const cleanerProfile = Array.isArray(candidate.cleaner_profiles)
       ? candidate.cleaner_profiles[0]
       : candidate.cleaner_profiles;

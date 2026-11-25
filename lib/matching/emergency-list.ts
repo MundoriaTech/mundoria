@@ -8,6 +8,7 @@
 
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 
+import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -314,8 +315,17 @@ export async function activateEmergencyList(
     .eq("status", "reserve")
     .order("rank", { ascending: true });
 
+  const allowedReserves = new Set(
+    await filterCleanersForBooking(
+      admin,
+      bookingId,
+      (reserves ?? []).map((row) => row.cleaner_id as string),
+    ),
+  );
   const wave = (reserves ?? [])
-    .filter((row) => !excluded.has(row.cleaner_id))
+    .filter(
+      (row) => !excluded.has(row.cleaner_id) && allowedReserves.has(row.cleaner_id),
+    )
     .slice(0, waveSize);
 
   if (!wave.length) {

@@ -1,3 +1,4 @@
+import { isSeedEmail } from "@/lib/matching/seed-accounts";
 import { MatchingQueue } from "@/components/admin/matching-queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminBooking } from "@/types/admin";
@@ -29,7 +30,7 @@ export default async function AdminMatchingPage() {
       .limit(800),
     admin
       .from("profiles")
-      .select("id,full_name,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)")
+      .select("id,full_name,email,cleaner_profiles!cleaner_profiles_id_fkey!inner(status)")
       .eq("role", "cleaner")
       .in("cleaner_profiles.status", ["certified", "active"])
       .order("full_name", { ascending: true }),
@@ -37,7 +38,9 @@ export default async function AdminMatchingPage() {
 
   const cleaners = (cleanerRows ?? []).map((row) => ({
     id: row.id as string,
-    full_name: (row.full_name as string) || "Cleaner",
+    full_name: `${(row.full_name as string) || "Cleaner"}${
+      isSeedEmail(row.email as string | null) ? " (test account)" : ""
+    }`,
   }));
 
   const bookings = ((data ?? []) as AdminBooking[]).filter((booking) => {

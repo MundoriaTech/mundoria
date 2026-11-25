@@ -7,6 +7,7 @@ import {
   markReservePromoted,
   notifyCustomerCleanerChanged,
 } from "@/lib/matching/emergency-list";
+import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { onCleanerAcceptedForPayment } from "@/lib/payments/preauth-flow";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -49,6 +50,14 @@ export async function POST(
     ) {
       return NextResponse.json(
         { error: "This offer has expired." },
+        { status: 409 },
+      );
+    }
+
+    const allowed = await filterCleanersForBooking(admin, bookingId, [user.id]);
+    if (!allowed.length) {
+      return NextResponse.json(
+        { error: "This job is no longer available." },
         { status: 409 },
       );
     }
