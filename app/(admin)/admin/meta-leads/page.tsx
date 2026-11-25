@@ -53,7 +53,7 @@ export default async function AdminMetaLeadsPage() {
     <div className="min-w-0 space-y-5">
       <p className="text-sm text-muted-foreground">
         People who asked for a callback on the 20% off page (/20-off-first-clean).
-        Only Maritha, Bosoye and Thelma can see this section.
+        Only admins given access can see this section.
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((tile) => (

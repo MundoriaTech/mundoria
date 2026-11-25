@@ -228,7 +228,11 @@ async function touchesThisWeek(leadId: string) {
 export async function alertStaffAboutLead(lead: LeadRow, ctx: JourneyContext) {
   const name = leadName(lead) || "A new lead";
   const when = ctx.availableNow ? "is free to talk now" : "asked for a callback";
-  const link = `${appUrl()}/admin/leads/${lead.id}`;
+  // Meta 20% leads are worked from their own section (some of its admins
+  // can't open Leads).
+  const link = isMetaOfferSource(lead.source)
+    ? `${appUrl()}/admin/meta-leads`
+    : `${appUrl()}/admin/leads/${lead.id}`;
   await alertAdmins(
     "lead.callback_request",
     `${name} wants a call`,

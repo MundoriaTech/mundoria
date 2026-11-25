@@ -21,13 +21,13 @@ export default function TwentyOffFirstCleanRoute() {
         <CallbackOfferPage
           copy={{
             intro: [
-              "House cleaning from £17.50 an hour, with vetted, insured cleaners.",
-              "Get 20% off the total of your first clean. Leave your details below to claim it, then book online with the same email or phone (or we'll book it for you) and the 20% comes off automatically. No code needed.",
+              "Come home to a spotless house, cleaned by vetted, insured local cleaners from £17.50 an hour.",
+              "Leave your details below to lock in 20% off your first clean. We'll call to sort everything for you, or book online in minutes and your 20% comes off automatically. No code. No catch. Free cancellation up to 24 hours before.",
             ],
             item: META_OFFER_SOURCE,
             source: META_OFFER_SOURCE,
             thanks:
-              "Book your first clean online with this email or phone and 20% comes off the total at checkout — no promo code.",
+              "Your 20% is locked in. We'll be in touch shortly, or book online now with the same email or phone and the discount comes off automatically.",
             title: "Get 20% off your first clean.",
           }}
         />

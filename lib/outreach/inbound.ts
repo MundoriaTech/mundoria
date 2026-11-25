@@ -189,7 +189,12 @@ async function handOver(lead: LeadRow, reason: string, text: string) {
     "lead.needs_human",
     `${leadName(lead) || lead.email || lead.phone || "Someone"} needs a reply`,
     `${reason}. They wrote: “${text.slice(0, 280)}”`,
-    { leadId: lead.id, link: `${appUrl()}/admin/leads/${lead.id}` },
+    {
+      leadId: lead.id,
+      link: isMetaOfferSource(lead.source)
+        ? `${appUrl()}/admin/meta-leads`
+        : `${appUrl()}/admin/leads/${lead.id}`,
+    },
     { area: isMetaOfferSource(lead.source) ? "meta_leads" : "leads" },
   );
 }

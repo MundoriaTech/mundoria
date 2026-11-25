@@ -247,7 +247,12 @@ export async function handleVapiEvent(body: { message?: VapiMessage }) {
         `${name} needs a person to call them`,
         analysis.summary ??
           "The automated call ended and they still need someone from the team.",
-        { leadId: lead.id, link: `${appUrl()}/admin/leads/${lead.id}` },
+        {
+          leadId: lead.id,
+          link: isMetaOfferSource(lead.source)
+            ? `${appUrl()}/admin/meta-leads`
+            : `${appUrl()}/admin/leads/${lead.id}`,
+        },
         { area: isMetaOfferSource(lead.source) ? "meta_leads" : "leads" },
       );
       break;
