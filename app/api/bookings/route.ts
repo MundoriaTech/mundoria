@@ -1,3 +1,4 @@
+import { PERCENT_OFFER_KIND } from "@/lib/bookings/percent-offer";
 import { getRequestUser } from "@/lib/supabase/request-client";
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
@@ -203,7 +204,11 @@ export async function POST(request: Request) {
       ? metadataOfferHours
       : 0;
   let estimatedDurationHours = parsed.data.estimatedDurationHours;
-  if (offerFreeHours > 0 && Number.isFinite(metadataWorkHours) && metadataWorkHours > 0) {
+  // 20% off the first clean was applied at checkout; it replaces the free hour.
+  const percentOfferApplied = metadata.offer_kind === PERCENT_OFFER_KIND;
+  if (percentOfferApplied) {
+    offerFreeHours = 0;
+  } else if (offerFreeHours > 0 && Number.isFinite(metadataWorkHours) && metadataWorkHours > 0) {
     estimatedDurationHours = metadataWorkHours;
   } else {
     const offer = await resolveFirstVisitOffer({
@@ -230,6 +235,8 @@ export async function POST(request: Request) {
       amount_cleaner: cleanerAmount,
       amount_platform: platformAmount,
       amount_total: amountPence,
+      discount_pence: Math.max(0, Number(metadata.discount_pence ?? 0) || 0),
+      offer_kind: metadata.offer_kind || null,
       cleaner_hours: officeQuote?.cleanerHours ?? null,
       cleaning_standard: parsed.data.cleaningStandard,
       commercial_spaces: officeQuote ? parsed.data.officeSpaces : null,
@@ -344,7 +351,7 @@ export async function POST(request: Request) {
     }
   }
 
-  if (offerLeadId && offerFreeHours > 0) {
+  if (offerLeadId && (offerFreeHours > 0 || percentOfferApplied)) {
     await stampFirstVisitOfferLead({
       admin,
       bookingId: booking.id,

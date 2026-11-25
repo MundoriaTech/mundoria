@@ -1,3 +1,4 @@
+import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import * as Sentry from "@sentry/nextjs";
 
 import { bookingDraftResumeUrl } from "@/lib/bookings/drafts";
@@ -239,6 +240,7 @@ export async function alertStaffAboutLead(lead: LeadRow, ctx: JourneyContext) {
       name,
       phone: lead.phone,
     },
+    { area: isMetaOfferSource(lead.source) ? "meta_leads" : "leads" },
   );
   const onCall = onCallPhone();
   if (onCall) {

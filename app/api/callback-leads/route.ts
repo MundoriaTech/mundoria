@@ -102,6 +102,7 @@ export async function POST(request: Request) {
     try {
       await notifyCallbackDeskChange({
         isNew: true,
+        source: parsed.data.source?.trim() || "book-2-get-1-free",
         lead: {
           email: parsed.data.email,
           first_name: firstName,

@@ -29,7 +29,14 @@ function formatWhen(iso: string) {
   });
 }
 
-export function CallbackLeadsTable({ rows }: { rows: CallbackLeadRow[] }) {
+export function CallbackLeadsTable({
+  basePath = "/admin/callback-leads",
+  rows,
+}: {
+  /** Where a row links to (the Meta 20% section uses its own path). */
+  basePath?: string;
+  rows: CallbackLeadRow[];
+}) {
   const [filter, setFilter] = useState<CallbackDeskFilter>("to_call");
   const visible = useMemo(
     () => filterCallbackLeads(rows, filter),
@@ -74,7 +81,7 @@ export function CallbackLeadsTable({ rows }: { rows: CallbackLeadRow[] }) {
         {pageItems.map((row) => (
           <Link
             className="block rounded-[14px] bg-[#F3F4F6] p-4 transition hover:bg-[#ECEAF5]"
-            href={`/admin/callback-leads/${row.id}`}
+            href={`${basePath}/${row.id}`}
             key={row.id}
           >
             <div className="flex items-start justify-between gap-3">
@@ -121,7 +128,7 @@ export function CallbackLeadsTable({ rows }: { rows: CallbackLeadRow[] }) {
           {pageItems.map((row) => (
             <Link
               className="mb-[2px] grid items-center gap-3 rounded-[12px] px-3 py-3 transition-colors hover:bg-white"
-              href={`/admin/callback-leads/${row.id}`}
+              href={`${basePath}/${row.id}`}
               key={row.id}
               style={{ gridTemplateColumns: GRID }}
             >

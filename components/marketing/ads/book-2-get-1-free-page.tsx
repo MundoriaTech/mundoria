@@ -19,7 +19,35 @@ const BOOK_HREF = "/booking/new?category=residential";
 const FORM_ID = "callback-lead-form";
 const MOBILE_MAX = "(max-width: 767px)";
 
+export type CallbackOfferCopy = {
+  /** Shown under the headline. */
+  intro: string[];
+  /** Ads/CRM item name for click tracking. */
+  item: string;
+  /** callback_leads.source; also decides which offer is unlocked. */
+  source: string;
+  thanks: string;
+  title: string;
+};
+
+const BOOK_2_GET_1_FREE: CallbackOfferCopy = {
+  intro: [
+    "House cleaning from £17.50 an hour.",
+    "Book your first 2 hours and we'll give you 1 extra hour of cleaning FREE. When you book online with the same email or phone, the extra hour is added automatically at checkout.",
+  ],
+  item: "book-2-get-1-free",
+  source: "book-2-get-1-free",
+  thanks:
+    "Book 2 hours of house cleaning with this email or phone and the extra hour is added at checkout — no promo code.",
+  title: "Book 2 hours. Get 1 hour FREE.",
+};
+
 export function Book2Get1FreePage() {
+  return <CallbackOfferPage copy={BOOK_2_GET_1_FREE} />;
+}
+
+/** Ads landing page with a callback form that unlocks an offer. */
+export function CallbackOfferPage({ copy }: { copy: CallbackOfferCopy }) {
   const searchParams = useSearchParams();
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -61,7 +89,7 @@ export function Book2Get1FreePage() {
           email,
           fullName,
           phone: nationalNumber,
-          source: "book-2-get-1-free",
+          source: copy.source,
           utmCampaign: searchParams.get("utm_campaign"),
           utmMedium: searchParams.get("utm_medium"),
           utmSource: searchParams.get("utm_source"),
@@ -112,16 +140,19 @@ export function Book2Get1FreePage() {
             Limited offer
           </p>
           <h1 className="mt-3 max-w-2xl text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white min-[400px]:text-[2.35rem] sm:text-5xl">
-            Book 2 hours. Get 1 hour FREE.
+            {copy.title}
           </h1>
-          <p className="mt-4 max-w-xl text-pretty text-[15px] leading-6 text-white/90 sm:text-base sm:leading-7">
-            House cleaning from £17.50 an hour.
-          </p>
-          <p className="mt-3 max-w-xl text-pretty text-[15px] leading-6 text-white/85 sm:text-base sm:leading-7">
-            Book your first 2 hours and we&apos;ll give you 1 extra hour of
-            cleaning FREE. When you book online with the same email or phone,
-            the extra hour is added automatically at checkout.
-          </p>
+          {copy.intro.map((line, index) => (
+            <p
+              className={cn(
+                "max-w-xl text-pretty text-[15px] leading-6 sm:text-base sm:leading-7",
+                index === 0 ? "mt-4 text-white/90" : "mt-3 text-white/85",
+              )}
+              key={line}
+            >
+              {line}
+            </p>
+          ))}
         </div>
       </section>
 
@@ -141,8 +172,7 @@ export function Book2Get1FreePage() {
                   in touch shortly.
                 </p>
                 <p className="text-[15px] leading-7 text-[#5a5470]">
-                  Book 2 hours of house cleaning with this email or phone and
-                  the extra hour is added at checkout — no promo code.
+                  {copy.thanks}
                 </p>
                 <p className="text-[15px] leading-7 text-[#5a5470]">
                   Want to get started right away?{" "}
@@ -151,7 +181,7 @@ export function Book2Get1FreePage() {
                     crmEvent="booking_cta_click"
                     crmPayload={{
                       action: "Book your clean",
-                      item: "book-2-get-1-free",
+                      item: copy.item,
                     }}
                     href={BOOK_HREF}
                   >
@@ -263,7 +293,7 @@ export function Book2Get1FreePage() {
                     crmEvent="booking_cta_click"
                     crmPayload={{
                       action: "Book your clean",
-                      item: "book-2-get-1-free",
+                      item: copy.item,
                     }}
                     href={BOOK_HREF}
                   >

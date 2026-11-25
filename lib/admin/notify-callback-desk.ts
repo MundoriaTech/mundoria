@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import { alertAdmins } from "@/lib/notifications/admin";
 
 function leadName(row: { first_name: string; last_name: string }) {
@@ -17,11 +18,14 @@ export async function notifyCallbackDeskChange(input: {
     phone: string;
   };
   isNew?: boolean;
+  /** Callback source; 20%-off (Meta) leads only alert admins who can see them. */
+  source?: string | null;
   summary: string;
 }) {
+  const meta = isMetaOfferSource(input.source);
   const name = leadName(input.lead);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.mundoria.co.uk";
-  const link = `${appUrl.replace(/\/$/, "")}/admin/callback-leads/${input.lead.id}`;
+  const link = `${appUrl.replace(/\/$/, "")}/admin/${meta ? "meta-leads" : "callback-leads"}/${input.lead.id}`;
   const title = input.isNew
     ? `${name} asked for a callback`
     : `Callback update for ${name}`;
@@ -42,6 +46,7 @@ export async function notifyCallbackDeskChange(input: {
         name,
         phone: input.lead.phone,
       },
+      { area: meta ? "meta_leads" : "callback_leads" },
     );
   } catch (error) {
     Sentry.captureException(error);

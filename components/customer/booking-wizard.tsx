@@ -420,6 +420,8 @@ export function BookingWizard({
   const [addresses, setAddresses] = useState(initialAddresses);
   const [basketOpen, setBasketOpen] = useState(false);
   const [firstVisitOfferEligible, setFirstVisitOfferEligible] = useState(false);
+  // 20% off the first clean (Meta page callback), 0 when not eligible.
+  const [percentOfferOff, setPercentOfferOff] = useState(0);
   const [draft, setDraft] = useState<BookingDraft>(() => {
     const seededCategory = initialDraft?.serviceCategory ?? "residential";
     const seededService =
@@ -1163,16 +1165,22 @@ export function BookingWizard({
   useEffect(() => {
     if (!hydrated || !userId) {
       setFirstVisitOfferEligible(false);
+      setPercentOfferOff(0);
       return;
     }
     let cancelled = false;
     void fetch("/api/bookings/first-visit-offer")
       .then((response) => response.json())
-      .then((payload: { eligible?: boolean }) => {
-        if (!cancelled) setFirstVisitOfferEligible(Boolean(payload.eligible));
+      .then((payload: { eligible?: boolean; percentOff?: number }) => {
+        if (cancelled) return;
+        setFirstVisitOfferEligible(Boolean(payload.eligible));
+        setPercentOfferOff(Number(payload.percentOff) || 0);
       })
       .catch(() => {
-        if (!cancelled) setFirstVisitOfferEligible(false);
+        if (!cancelled) {
+          setFirstVisitOfferEligible(false);
+          setPercentOfferOff(0);
+        }
       });
     return () => {
       cancelled = true;
@@ -1800,7 +1808,17 @@ export function BookingWizard({
     setPromoAmount(response.ok ? (result.amount ?? null) : null);
   }
 
-  const displayAmount = promoAmount ?? estimatedAmount;
+  // One discount per booking, whichever is bigger (same rule as checkout).
+  const percentOfferPence =
+    percentOfferOff > 0 && estimatedAmount > 0
+      ? Math.round((estimatedAmount * percentOfferOff) / 100)
+      : 0;
+  const percentOfferWins =
+    percentOfferPence > 0 &&
+    (promoAmount == null || estimatedAmount - percentOfferPence <= promoAmount);
+  const displayAmount = percentOfferWins
+    ? Math.max(100, estimatedAmount - percentOfferPence)
+    : (promoAmount ?? estimatedAmount);
   const displayHourlyRatePence =
     priceBreakdown?.ratePence ??
     (pricedServiceType && selectedStandard
@@ -1847,8 +1865,9 @@ export function BookingWizard({
     displayHourlyRatePence != null
       ? formatHourlyRate(displayHourlyRatePence)
       : null;
-  const promoDiscountPence =
-    promoAmount != null && estimatedAmount > promoAmount
+  const promoDiscountPence = percentOfferWins
+    ? percentOfferPence
+    : promoAmount != null && estimatedAmount > promoAmount
       ? estimatedAmount - promoAmount
       : 0;
   const addOnLines = priceBreakdown
@@ -1955,6 +1974,9 @@ export function BookingWizard({
             onValidate: () => void validatePromo(),
           }
         : null,
+    promoDiscountLabel: percentOfferWins
+      ? `${percentOfferOff}% off your first clean`
+      : undefined,
     promoDiscountPence,
     scheduledDate: draft.scheduledDate,
     scheduledTime: draft.scheduledTime,

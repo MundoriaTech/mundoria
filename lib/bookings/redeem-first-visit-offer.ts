@@ -5,6 +5,7 @@ import {
   firstVisitOfferSessionEligible,
   ukPhoneMatchKey,
 } from "@/lib/bookings/first-visit-offer";
+import { PERCENT_OFFER_PERCENT, PERCENT_OFFER_SOURCES } from "@/lib/bookings/percent-offer";
 import type { createAdminClient } from "@/lib/supabase/admin";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -101,8 +102,8 @@ async function findUnusedFirstVisitOfferLead(
   admin: AdminClient,
   email: string | null | undefined,
   phone: string | null | undefined,
+  sources: string[] = [...FIRST_VISIT_OFFER_SOURCES],
 ) {
-  const sources = [...FIRST_VISIT_OFFER_SOURCES];
   const normalisedEmail = email?.trim().toLowerCase() ?? "";
 
   if (normalisedEmail) {
@@ -133,4 +134,26 @@ async function findUnusedFirstVisitOfferLead(
     (row) => ukPhoneMatchKey(row.phone as string) === phoneKey,
   );
   return match?.id ? { id: match.id as string } : null;
+}
+
+/**
+ * 20% off the first booking for someone who asked for a callback on the
+ * Meta offer page (same email or phone), if they have no booking yet.
+ */
+export async function resolvePercentOffer({
+  admin,
+  customerId,
+  email,
+  phone,
+}: {
+  admin: AdminClient;
+  customerId: string;
+  email: string | null | undefined;
+  phone: string | null | undefined;
+}) {
+  if (await customerHasPriorBooking(admin, customerId)) return null;
+  const lead = await findUnusedFirstVisitOfferLead(admin, email, phone, [
+    ...PERCENT_OFFER_SOURCES,
+  ]);
+  return lead ? { leadId: lead.id, percent: PERCENT_OFFER_PERCENT } : null;
 }

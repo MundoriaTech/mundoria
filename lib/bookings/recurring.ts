@@ -15,6 +15,7 @@ export type ParentBooking = {
   amount_total: number | null;
   cleaner_hours: number | null;
   cleaning_standard: string | null;
+  discount_pence?: number | null;
   commercial_spaces: unknown;
   customer_id: string;
   estimated_duration_hours: number | null;
@@ -150,7 +151,11 @@ async function followOnPricing(admin: AdminClient, parent: ParentBooking) {
           amount_total: parent.amount_total,
         };
       }
-      const labour = Math.max(0, parentTotal - addOnTotal);
+      // A first-visit discount (promo, 20% offer) doesn't carry to repeats.
+      const labour = Math.max(
+        0,
+        parentTotal + Number(parent.discount_pence ?? 0) - addOnTotal,
+      );
       const mult = schedulePriceMultiplier(
         date,
         parent.scheduled_start_time?.slice(0, 5),
@@ -246,7 +251,7 @@ export async function ensureUpcomingRecurringFollowOns(
   const { data: parents, error } = await admin
     .from("bookings")
     .select(
-      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,commercial_spaces,customer_id,estimated_duration_hours,offer_free_hours,pause_ends_on,pause_starts_on,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions,stripe_payment_method_id",
+      "id,address_id,allocated_cleaners,amount_cleaner,amount_platform,amount_total,cleaner_hours,cleaning_standard,discount_pence,commercial_spaces,customer_id,estimated_duration_hours,offer_free_hours,pause_ends_on,pause_starts_on,prefer_same_cleaner,preferred_cleaner_id,property_condition,recently_moved,recurrence_pattern,scheduled_date,scheduled_start_time,service_category,service_type,special_attention_areas,special_instructions,stripe_payment_method_id",
     )
     .eq("is_recurring", true)
     .is("parent_booking_id", null)

@@ -1,3 +1,5 @@
+import { META_OFFER_SOURCE } from "@/lib/bookings/percent-offer";
+import { requireAdminArea } from "@/lib/admin/page-access";
 import { CallbackLeadsTable } from "@/components/admin/callback-leads-table";
 import { mapCallbackLeadRow } from "@/lib/admin/callback-desk";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -8,9 +10,12 @@ const COLUMNS =
   "id,first_name,last_name,phone,email,available_in_10_min,source,utm_source,utm_medium,utm_campaign,created_at,call_status,outcome,area,town,notes";
 
 export default async function AdminCallbackLeadsPage() {
+  await requireAdminArea("callback_leads");
   const { data, error } = await createAdminClient()
     .from("callback_leads")
     .select(COLUMNS)
+    // 20%-off (Meta) leads have their own section.
+    .neq("source", META_OFFER_SOURCE)
     .order("created_at", { ascending: false });
 
   return (

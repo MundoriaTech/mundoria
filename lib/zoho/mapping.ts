@@ -48,7 +48,7 @@ export const RECRUIT_LIFECYCLE = {
 } as const;
 
 /** The ads landing page; other website forms count as the website. */
-const AD_PAGES = new Set(["book-2-get-1-free"]);
+const AD_PAGES = new Set(["book-2-get-1-free", "meta-20-off"]);
 const PAID_MEDIUM = /(^|[^a-z])(cpc|ppc|paid|ads?|display|paidsocial|paid_social|paid-social)([^a-z]|$)/i;
 
 export function crmLeadSource(input: { source?: string | null; utmMedium?: string | null }) {

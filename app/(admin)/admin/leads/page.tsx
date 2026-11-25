@@ -1,3 +1,5 @@
+import { META_OFFER_SOURCE } from "@/lib/bookings/percent-offer";
+import { requireAdminArea } from "@/lib/admin/page-access";
 import Link from "next/link";
 
 import { LeadsTable, type LeadListRow } from "@/components/admin/leads-table";
@@ -24,6 +26,7 @@ const VIEWS = [
 ] as const;
 
 export default async function AdminLeadsPage({ searchParams }: { searchParams: { view?: string } }) {
+  const access = await requireAdminArea("leads");
   const view = VIEWS.some((item) => item.id === searchParams.view) ? searchParams.view! : "all";
   const admin = createAdminClient();
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -35,6 +38,8 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: {
     )
     .order("updated_at", { ascending: false })
     .limit(500);
+  // 20%-off (Meta) leads are only for admins with that section.
+  if (!access.meta_leads) query = query.neq("source", META_OFFER_SOURCE);
   if (view === "needs_human") query = query.eq("needs_human", true);
   if (view === "active") query = query.in("status", ["new", "contacted", "engaged"]);
   if (view === "booked") query = query.eq("status", "booked");

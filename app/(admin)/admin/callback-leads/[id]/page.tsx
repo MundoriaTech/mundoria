@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
+import { requireAdminArea } from "@/lib/admin/page-access";
 import { notFound } from "next/navigation";
 
 import { AdminBackLink } from "@/components/admin/admin-back-link";
@@ -12,6 +15,7 @@ export default async function AdminCallbackLeadPage({
 }: {
   params: { id: string };
 }) {
+  await requireAdminArea("callback_leads");
   const { data, error } = await createAdminClient()
     .from("callback_leads")
     .select(
@@ -21,6 +25,7 @@ export default async function AdminCallbackLeadPage({
     .maybeSingle();
 
   if (error || !data) notFound();
+  if (isMetaOfferSource(data.source as string)) redirect(`/admin/meta-leads/${params.id}`);
   const row = mapCallbackLeadRow(data as Record<string, unknown>);
 
   return (

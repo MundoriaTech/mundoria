@@ -56,6 +56,8 @@ type BasketProps = {
   promo?: BasketPromo | null;
   /** Promo reduction in pence (shown as a negative line when applied). */
   promoDiscountPence?: number | null;
+  /** Label for the discount row (defaults to "Promo"). */
+  promoDiscountLabel?: string;
   scheduledDate: string;
   scheduledTime: string;
   serviceLabel: string | null;
@@ -207,6 +209,7 @@ function BasketPanel({
   hourlyRatePence = null,
   priorityAreas = [],
   promo = null,
+  promoDiscountLabel,
   promoDiscountPence = null,
   scheduledDate,
   scheduledTime,
@@ -372,7 +375,7 @@ function BasketPanel({
   if (promoDiscountPence != null && promoDiscountPence > 0) {
     serviceLines.push({
       key: "promo",
-      label: "Promo",
+      label: promoDiscountLabel ?? "Promo",
       price: `−${formatMoney(promoDiscountPence)}`,
     });
   }

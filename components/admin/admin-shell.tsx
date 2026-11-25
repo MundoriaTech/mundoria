@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Newspaper,
   Percent,
+  Megaphone,
   PhoneCall,
   Settings,
   ShieldAlert,
@@ -43,11 +44,14 @@ import {
   OPS_REFRESH_MS,
 } from "@/lib/dashboard/live-refresh";
 import { createBrowserClient } from "@/lib/supabase/client";
+import type { AdminAccess, AdminArea } from "@/lib/admin/access";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
 
 type NavItem = {
+  /** Only shown to admins with access to this section. */
+  area?: AdminArea;
   href: string;
   icon: LucideIcon;
   label: string;
@@ -67,6 +71,7 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
       },
       { href: "/admin/bookings", icon: BookOpenCheck, label: "Bookings" },
       {
+        area: "leads",
         href: "/admin/leads",
         icon: Target,
         label: "Leads",
@@ -79,11 +84,19 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
         match: (p) => p === "/admin/abandoned-bookings" || p.startsWith("/admin/abandoned-bookings/"),
       },
       {
+        area: "callback_leads",
         href: "/admin/callback-leads",
         icon: PhoneCall,
         label: "Callback leads",
         match: (p) =>
           p === "/admin/callback-leads" || p.startsWith("/admin/callback-leads/"),
+      },
+      {
+        area: "meta_leads",
+        href: "/admin/meta-leads",
+        icon: Megaphone,
+        label: "Meta 20% leads",
+        match: (p) => p === "/admin/meta-leads" || p.startsWith("/admin/meta-leads/"),
       },
       {
         href: "/admin/inbox",
@@ -160,6 +173,7 @@ const PAGE_SUBTITLES: Record<string, string> = {
   "/admin/bookings": "Search, inspect, and resolve booking edge cases.",
   "/admin/abandoned-bookings": "Leads who started the booking flow but didn't complete it.",
   "/admin/callback-leads": "Ads callbacks. Filter To call when you sit down to ring; All is the full list.",
+  "/admin/meta-leads": "Callback requests from the Meta 20% off page, with campaign results.",
   "/admin/leads": "Every prospect, their follow-ups, AI replies and calls, and who needs a person.",
   "/admin/leads/reports": "Weekly lead automation reports.",
   "/admin/inbox": "Support conversations with customers and cleaners.",
@@ -226,10 +240,12 @@ function pageSubtitle(pathname: string) {
 }
 
 function SidebarNav({
+  access,
   collapsed,
   onNavigate,
   pathname,
 }: {
+  access: AdminAccess;
   collapsed: boolean;
   onNavigate?: () => void;
   pathname: string;
@@ -240,7 +256,10 @@ function SidebarNav({
       style={{ scrollbarWidth: "none" }}
     >
       <div className="flex flex-col gap-[18px] pb-4">
-        {NAV_GROUPS.map((group) => (
+        {NAV_GROUPS.map((group) => ({
+          ...group,
+          items: group.items.filter((item) => !item.area || access[item.area]),
+        })).map((group) => (
           <div className="flex flex-col gap-[2px]" key={group.label}>
             {collapsed ? (
               <span className="mx-7 mb-2 h-px bg-[#E1E1EA]" />
@@ -343,10 +362,12 @@ function SidebarFooter({
 }
 
 export function AdminShell({
+  access,
   admin,
   children,
   notifications,
 }: {
+  access: AdminAccess;
   admin: Profile;
   children: React.ReactNode;
   notifications: Notification[];
@@ -474,6 +495,7 @@ export function AdminShell({
       </div>
 
       <SidebarNav
+        access={access}
         collapsed={collapsed && !inDrawer}
         onNavigate={inDrawer ? () => setDrawerOpen(false) : undefined}
         pathname={pathname}

@@ -1,3 +1,5 @@
+import { canSeeLeadSource } from "@/lib/admin/access";
+import { requireAdminArea } from "@/lib/admin/page-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -20,8 +22,9 @@ type TimelineItem = {
 };
 
 export default async function AdminLeadPage({ params }: { params: { id: string } }) {
+  const access = await requireAdminArea("leads");
   const lead = await getLead(params.id);
-  if (!lead) notFound();
+  if (!lead || !canSeeLeadSource(access, lead.source)) notFound();
   const admin = createAdminClient();
 
   const [consents, events, messages, calls, enrollments] = await Promise.all([

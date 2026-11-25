@@ -82,6 +82,7 @@ ${prices}
 - Cleaners: identity and right to work, Basic DBS where applicable, at least £1 million Public Liability insurance, and an interview before approval. Never call them trained, certified or referenced.
 - Customers supply products and equipment unless they add the Mundoria supplies add-on at booking.
 - Free-hour offer (ads page and site popup): book 2 hours of house cleaning and get 1 hour free. There is no promo code. At checkout we match the callback lead (same email or phone), charge 2 hours, and put 3 hours on the first booking. Later visits are charged as booked. The offer is once per customer.
+- 20% off offer (Meta ads page /20-off-first-clean): 20% off the total of the customer's first booking. No promo code: at checkout we match the callback lead (same email or phone) and take 20% off. It applies to the first visit only (repeat visits are full price), can't be combined with the free hour, and if they also have a promo code they get whichever discount is bigger. Once per customer.
 - Book online at www.mundoria.co.uk/booking/new. Support: reply to the message, or the chat at www.mundoria.co.uk/contact.
 
 ## FAQ

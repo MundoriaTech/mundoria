@@ -33,6 +33,8 @@ const hi = (ctx: JourneyContext) => (ctx.firstName ? `Hi ${ctx.firstName}` : "Hi
 const bookUrl = () => `${appUrl()}/booking/new?utm_source=outreach`;
 const offerLead = (ctx: JourneyContext) =>
   Boolean(ctx.source && /free|book-2-get-1|1h/i.test(ctx.source));
+/** 20% off the first clean (Meta page). */
+const percentLead = (ctx: JourneyContext) => ctx.source === "meta-20-off";
 
 export const JOURNEYS: Record<JourneyId, { description: string; label: string; steps: JourneyStep[] }> = {
   callback_request: {
@@ -50,7 +52,9 @@ export const JOURNEYS: Record<JourneyId, { description: string; label: string; s
       {
         action: "sms",
         copy: (ctx) =>
-          offerLead(ctx)
+          percentLead(ctx)
+            ? `${hi(ctx)}, it's Mundoria. Thanks for asking about 20% off your first clean. It's saved for you: book at ${bookUrl()} with this email or phone and it comes off automatically, or reply here and we'll book it for you.`
+            : offerLead(ctx)
             ? `${hi(ctx)}, it's Mundoria. Thanks for asking about the free hour on a 2-hour clean. It's saved for you: book at ${bookUrl()} or reply here and we'll book it for you.`
             : `${hi(ctx)}, it's Mundoria. Thanks for asking us to call. Book online at ${bookUrl()} or reply here with a good time and we'll ring you.`,
         delayMinutes: 10,
@@ -62,13 +66,19 @@ export const JOURNEYS: Record<JourneyId, { description: string; label: string; s
           actionLabel: "Book your clean",
           actionUrl: bookUrl(),
           body: [
-            offerLead(ctx)
+            percentLead(ctx)
+              ? "Thanks for your interest in our offer: 20% off the total of your first clean. We've saved it for you. Book with this email or phone number and the 20% comes off automatically at checkout, no code needed."
+              : offerLead(ctx)
               ? "Thanks for your interest in our offer: book 2 hours of house cleaning and get 1 hour free. We've saved it for you, and our team adds the free hour to your booking."
               : "Thanks for asking us to get in touch. We'd love to help with your cleaning.",
             "Booking takes a couple of minutes. You choose the date and time, we match a vetted, insured cleaner, and your card is only saved at booking. Payment is taken the day after your clean.",
             "Prefer to talk? Just reply to this email with a good time to call, or a question, and we'll get back to you.",
           ].join("\n\n"),
-          subject: offerLead(ctx) ? "Your free cleaning hour is saved" : "Thanks for getting in touch",
+          subject: percentLead(ctx)
+            ? "Your 20% off is saved"
+            : offerLead(ctx)
+              ? "Your free cleaning hour is saved"
+              : "Thanks for getting in touch",
         }),
         delayMinutes: 5,
         name: "Confirmation email",
@@ -76,7 +86,7 @@ export const JOURNEYS: Record<JourneyId, { description: string; label: string; s
       {
         action: "sms",
         copy: (ctx) =>
-          `${hi(ctx)}, just checking in from Mundoria. Still keen on a clean${offerLead(ctx) ? " with your free hour" : ""}? Book at ${bookUrl()} or reply with any question.`,
+          `${hi(ctx)}, just checking in from Mundoria. Still keen on a clean${percentLead(ctx) ? " with 20% off" : offerLead(ctx) ? " with your free hour" : ""}? Book at ${bookUrl()} or reply with any question.`,
         delayMinutes: 24 * 60,
         name: "Day-1 nudge text",
       },
@@ -92,13 +102,19 @@ export const JOURNEYS: Record<JourneyId, { description: string; label: string; s
           actionLabel: "Book now",
           actionUrl: bookUrl(),
           body: [
-            offerLead(ctx)
+            percentLead(ctx)
+              ? "A quick reminder that your 20% off is still saved. Book your first clean with this email or phone number and it comes off automatically."
+              : offerLead(ctx)
               ? "A quick reminder that your free hour is still saved. Book a 2-hour house clean and our team adds the third hour free."
               : "A quick reminder that we're ready when you are.",
             "Cancelling is free up to 24 hours before your clean, so there's no risk in getting a date in the diary.",
             "Any questions? Reply to this email and we'll answer straight away.",
           ].join("\n\n"),
-          subject: offerLead(ctx) ? "Your free hour is still waiting" : "Still thinking about a clean?",
+          subject: percentLead(ctx)
+            ? "Your 20% off is still waiting"
+            : offerLead(ctx)
+              ? "Your free hour is still waiting"
+              : "Still thinking about a clean?",
         }),
         delayMinutes: 2 * 24 * 60,
         name: "Last reminder email",

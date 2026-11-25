@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { adminAccessFor } from "@/lib/admin/access";
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
 import {
   logLeadEvent,
@@ -48,6 +49,9 @@ const schema = z
 export async function POST(request: Request) {
   const auth = await requireAdmin();
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await adminAccessFor(auth.profile.email)).leads) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json(

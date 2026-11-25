@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { adminAccessFor } from "@/lib/admin/access";
 import { logAdminAction, requireAdmin } from "@/lib/admin/auth";
+import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import {
   CALLBACK_AREA_LABELS,
   CALLBACK_AREAS,
@@ -44,11 +46,16 @@ export async function PATCH(
   const { data: existing, error: loadError } = await admin
     .from("callback_leads")
     .select(
-      "id,first_name,last_name,phone,email,call_status,outcome,area,town,notes",
+      "id,first_name,last_name,phone,email,call_status,outcome,area,town,notes,source",
     )
     .eq("id", params.id)
     .maybeSingle();
   if (loadError || !existing) {
+    return NextResponse.json({ error: "Lead not found." }, { status: 404 });
+  }
+  // 20%-off (Meta) leads need meta_leads access; others need callback_leads.
+  const access = await adminAccessFor(auth.profile.email);
+  if (!access[isMetaOfferSource(existing.source as string) ? "meta_leads" : "callback_leads"]) {
     return NextResponse.json({ error: "Lead not found." }, { status: 404 });
   }
 
@@ -186,6 +193,7 @@ export async function PATCH(
         last_name: saved.last_name as string,
         phone: saved.phone as string,
       },
+      source: existing.source as string,
       summary: bits.join(". "),
     });
   }

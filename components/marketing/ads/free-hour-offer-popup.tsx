@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 const STORAGE_KEY = "mundoria_free_hour_popup_dismissed_until";
 const DELAY_MS = 10_000;
 const DISMISS_DAYS = 14;
-const SKIP_PATHS = new Set(["/book-2-get-1-free"]);
+const SKIP_PATHS = new Set(["/book-2-get-1-free", "/20-off-first-clean"]);
 
 function dismissedUntil() {
   try {

@@ -1,3 +1,4 @@
+import { adminAccessFor, canSeeLeadSource } from "@/lib/admin/access";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -50,7 +51,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   const parsed = patchSchema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: "Invalid update" }, { status: 400 });
   const lead = await getLead(params.id);
-  if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+  if (!lead || !canSeeLeadSource(await adminAccessFor(auth.profile.email), lead.source)) {
+    return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+  }
 
   const input = parsed.data;
   const patch: Parameters<typeof updateLead>[1] = {};
@@ -120,7 +123,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const parsed = actionSchema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   const lead = await getLead(params.id);
-  if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+  if (!lead || !canSeeLeadSource(await adminAccessFor(auth.profile.email), lead.source)) {
+    return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+  }
   const input = parsed.data;
   const who = auth.profile.full_name ?? "admin";
 

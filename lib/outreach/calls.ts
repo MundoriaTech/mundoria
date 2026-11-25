@@ -5,6 +5,7 @@
  * is configured in the Vapi dashboard; see docs/lead-automation-playbook.md.
  */
 
+import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import * as Sentry from "@sentry/nextjs";
 
 import { alertAdmins } from "@/lib/notifications/admin";
@@ -78,6 +79,8 @@ export async function startLeadCall(lead: LeadRow, purpose: string, enrollmentId
             bookingUrl: `${appUrl()}/booking/new`,
             firstName: lead.first_name || "there",
             offerEligible: /free|book-2-get-1|1h/i.test(lead.source) ? "yes" : "no",
+            // 20% off the first clean (Meta page); see the playbook for the prompt line.
+            percentOffer: isMetaOfferSource(lead.source) ? "yes" : "no",
             purpose,
             source: lead.source,
           },
@@ -245,6 +248,7 @@ export async function handleVapiEvent(body: { message?: VapiMessage }) {
         analysis.summary ??
           "The automated call ended and they still need someone from the team.",
         { leadId: lead.id, link: `${appUrl()}/admin/leads/${lead.id}` },
+        { area: isMetaOfferSource(lead.source) ? "meta_leads" : "leads" },
       );
       break;
     case "not_interested":

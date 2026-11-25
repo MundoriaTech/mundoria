@@ -1,3 +1,4 @@
+import { requireAdminArea } from "@/lib/admin/page-access";
 import Link from "next/link";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,6 +19,7 @@ const day = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export default async function AdminLeadReportsPage() {
+  await requireAdminArea("leads");
   const { data, error } = await createAdminClient()
     .from("outreach_reports")
     .select("id,period_start,period_end,metrics,summary,created_at")

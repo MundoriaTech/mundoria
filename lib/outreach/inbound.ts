@@ -1,3 +1,4 @@
+import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { decideReply } from "@/lib/outreach/ai";
 import { sendLeadEmail, sendLeadSms } from "@/lib/outreach/channels";
@@ -189,5 +190,6 @@ async function handOver(lead: LeadRow, reason: string, text: string) {
     `${leadName(lead) || lead.email || lead.phone || "Someone"} needs a reply`,
     `${reason}. They wrote: “${text.slice(0, 280)}”`,
     { leadId: lead.id, link: `${appUrl()}/admin/leads/${lead.id}` },
+    { area: isMetaOfferSource(lead.source) ? "meta_leads" : "leads" },
   );
 }

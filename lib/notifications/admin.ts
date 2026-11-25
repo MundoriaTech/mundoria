@@ -1,3 +1,4 @@
+import { adminIdsWithAccess, type AdminArea } from "@/lib/admin/access";
 import { composeAdminAlertEmail } from "@/lib/email/admin-alert";
 import {
   resolveAdminNotificationEmail,
@@ -11,12 +12,16 @@ export async function alertAdmins(
   title: string,
   body: string,
   data: Record<string, unknown> = {},
+  options: { area?: AdminArea } = {},
 ) {
   const admin = createAdminClient();
-  const { data: admins } = await admin
+  const { data: allAdmins } = await admin
     .from("profiles")
     .select("id,email")
     .eq("role", "admin");
+  // Alerts about a restricted section only go to admins who can see it.
+  const allowed = options.area ? new Set(await adminIdsWithAccess(options.area)) : null;
+  const admins = (allAdmins ?? []).filter((row) => !allowed || allowed.has(row.id as string));
 
   const briefing = composeAdminAlertEmail(type, title, body, data);
 
@@ -40,7 +45,8 @@ export async function alertAdmins(
   );
 
   const ops = resolveAdminNotificationEmail().toLowerCase();
-  if (!sent.has(ops)) {
+  // The shared ops inbox doesn't get alerts for grant-only sections.
+  if (!sent.has(ops) && options.area !== "meta_leads") {
     await sendBrandedEmail({
       data: briefing,
       subject: briefing.subject,

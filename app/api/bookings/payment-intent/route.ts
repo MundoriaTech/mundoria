@@ -12,7 +12,14 @@ import {
 import { bookingDraftSchema } from "@/lib/customer/booking-schema";
 import { resolvePromoForCheckout } from "@/lib/customer/referrals";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
-import { resolveFirstVisitOffer } from "@/lib/bookings/redeem-first-visit-offer";
+import {
+  PERCENT_OFFER_KIND,
+  percentOfferDiscountPence,
+} from "@/lib/bookings/percent-offer";
+import {
+  resolveFirstVisitOffer,
+  resolvePercentOffer,
+} from "@/lib/bookings/redeem-first-visit-offer";
 import {
   estimatePriceBreakdown,
   isOfferedService,
@@ -141,7 +148,14 @@ export async function POST(request: Request) {
       isRecurring: parsed.data.isRecurring,
       serviceType: parsed.data.serviceType,
     }) ?? parsed.data.serviceType;
-  const offer = await resolveFirstVisitOffer({
+  // 20% off the first clean (Meta page) replaces the free hour; never both.
+  const percentOffer = await resolvePercentOffer({
+    admin,
+    customerId: user.id,
+    email: profile.email,
+    phone: profile.phone,
+  });
+  const offer = percentOffer ? null : await resolveFirstVisitOffer({
     admin,
     customerId: user.id,
     durationHours: parsed.data.estimatedDurationHours,
@@ -171,11 +185,16 @@ export async function POST(request: Request) {
     },
   );
   const baseAmount = breakdown.totalPence;
-  const discount = promo
+  const promoDiscount = promo
     ? promo.discount_type === "percentage"
       ? Math.round(baseAmount * (promo.discount_value / 100))
       : Math.round(promo.discount_value)
     : 0;
+  const percentDiscount = percentOffer ? percentOfferDiscountPence(baseAmount) : 0;
+  // One discount per booking: whichever is bigger.
+  const usePercentOffer = percentDiscount > 0 && percentDiscount >= promoDiscount;
+  if (usePercentOffer) promo = null;
+  const discount = usePercentOffer ? percentDiscount : promoDiscount;
   const amount = Math.max(100, baseAmount - discount);
   const stripe = getStripe();
   let stripeCustomerId = profile.stripe_customer_id as string | null;
@@ -198,8 +217,10 @@ export async function POST(request: Request) {
     address_id: parsed.data.addressId,
     billed_hours: String(breakdown.billableHours),
     cleaning_standard: parsed.data.cleaningStandard,
-    offer_callback_lead_id: offer?.leadId ?? "",
+    discount_pence: String(Math.max(0, baseAmount - amount)),
+    offer_callback_lead_id: usePercentOffer ? percentOffer!.leadId : (offer?.leadId ?? ""),
     offer_free_hours: String(offer?.freeHours ?? 0),
+    offer_kind: usePercentOffer ? PERCENT_OFFER_KIND : offer ? "free_hour" : "",
     promo_code_id: promo?.id ?? "",
     scheduled_date: parsed.data.scheduledDate,
     scheduled_time: parsed.data.scheduledTime,

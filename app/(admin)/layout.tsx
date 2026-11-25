@@ -3,6 +3,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
+import { adminAccessFor } from "@/lib/admin/access";
 import { buildPrivateMetadata } from "@/lib/seo/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
@@ -36,8 +37,10 @@ export default async function AdminLayout({
       .limit(15),
   ]);
   if (profile?.role !== "admin") redirect("/");
+  const access = await adminAccessFor(profile.email as string | null);
   return (
     <AdminShell
+      access={access}
       admin={profile as Profile}
       notifications={(notifications ?? []) as Notification[]}
     >
