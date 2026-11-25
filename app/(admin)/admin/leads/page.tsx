@@ -100,6 +100,12 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: {
         <Link className="ml-auto text-sm font-semibold text-[#312c79] hover:underline" href="/admin/leads/reports">
           Weekly reports
         </Link>
+        <Link
+          className="inline-flex h-9 items-center rounded-full bg-[#1c133b] px-4 text-sm font-semibold text-white hover:bg-[#312c79]"
+          href="/admin/leads/new"
+        >
+          Add lead
+        </Link>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
