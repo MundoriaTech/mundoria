@@ -22,7 +22,7 @@ export default function TwentyOffFirstCleanRoute() {
           copy={{
             intro: [
               "Come home to a spotless house, cleaned by vetted, insured local cleaners from £17.50 an hour.",
-              "Leave your details below to lock in 20% off your first clean. We'll call to sort everything for you, or book online in minutes and your 20% comes off automatically. No code. No catch. Free cancellation up to 24 hours before.",
+              "Leave your details below to lock in 20% off your first clean. We'll call to sort everything for you, or book online in minutes and your 20% comes off automatically.",
             ],
             item: META_OFFER_SOURCE,
             source: META_OFFER_SOURCE,
