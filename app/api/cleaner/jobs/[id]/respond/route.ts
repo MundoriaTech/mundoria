@@ -8,6 +8,7 @@ import {
   notifyCustomerCleanerChanged,
 } from "@/lib/matching/emergency-list";
 import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
+import { getAvailableJobs } from "@/lib/cleaner/server";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { onCleanerAcceptedForPayment } from "@/lib/payments/preauth-flow";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -30,6 +31,18 @@ export async function POST(
 
   const admin = createAdminClient();
   const bookingId = params.id;
+
+  const { data: cleanerProfile } = await admin
+    .from("cleaner_profiles")
+    .select("status")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!cleanerProfile || !["certified", "active"].includes(cleanerProfile.status)) {
+    return NextResponse.json(
+      { error: "Only approved cleaners can respond to jobs." },
+      { status: 403 },
+    );
+  }
 
   if (parsed.data.response === "accepted") {
     const { data: offer } = await admin
@@ -54,8 +67,21 @@ export async function POST(
       );
     }
 
+    // Accept only a live offer made to this cleaner, or a job their own job
+    // board shows them (right services, area, tier, availability, and never
+    // a test booking for a real cleaner or the other way round).
+    const hasLiveOffer = Boolean(
+      offer &&
+        !offer.responded_at &&
+        offer.expires_at &&
+        new Date(offer.expires_at).getTime() > Date.now(),
+    );
     const allowed = await filterCleanersForBooking(admin, bookingId, [user.id]);
-    if (!allowed.length) {
+    const onBoard =
+      !hasLiveOffer &&
+      allowed.length > 0 &&
+      (await getAvailableJobs(user.id)).some((job) => job.id === bookingId);
+    if (!allowed.length || (!hasLiveOffer && !onBoard)) {
       return NextResponse.json(
         { error: "This job is no longer available." },
         { status: 409 },

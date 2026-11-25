@@ -99,6 +99,14 @@ export async function settleOutstandingOffers(scope?: {
     const booking = Array.isArray(row.bookings) ? row.bookings[0] : row.bookings;
     if (!booking) continue;
     if (scope?.customerId && booking.customer_id !== scope.customerId) continue;
+    // Close the offer so it is handled once and never re-read on later runs.
+    await admin
+      .from("cleaner_job_responses")
+      .update({ responded_at: nowIso })
+      .eq("booking_id", row.booking_id)
+      .eq("cleaner_id", row.cleaner_id)
+      .is("responded_at", null);
+
     const start = visitStart(
       booking.scheduled_date,
       booking.scheduled_start_time,
@@ -106,16 +114,39 @@ export async function settleOutstandingOffers(scope?: {
     if (!Number.isNaN(start.getTime()) && start.getTime() <= now.getTime()) {
       continue;
     }
-    if (
-      booking.cleaner_id !== row.cleaner_id ||
-      !["matched", "pending_match"].includes(booking.status)
-    ) {
-      continue;
-    }
+
+    if (!["matched", "pending_match"].includes(booking.status)) continue;
+    // The primary held the booking and let it lapse, or a reserve wave (no
+    // cleaner on the booking) has run out. Anything else is already handled.
+    const primaryLapsed = booking.cleaner_id === row.cleaner_id;
+    const waveLapsed =
+      booking.cleaner_id === null && booking.status === "pending_match";
+    if (!primaryLapsed && !waveLapsed) continue;
     if (seen.has(booking.id)) continue;
+
+    const { data: offers } = await admin
+      .from("cleaner_job_responses")
+      .select("cleaner_id,expires_at,responded_at")
+      .eq("booking_id", booking.id);
+    // Wait while anyone from the current wave can still accept.
+    const stillOpen = (offers ?? []).some(
+      (offer) =>
+        !offer.responded_at &&
+        offer.expires_at &&
+        new Date(offer.expires_at).getTime() > now.getTime(),
+    );
+    if (stillOpen) continue;
+
     seen.add(booking.id);
+    // Don't re-offer to anyone who already let this booking expire; when
+    // nobody is left, matching alerts the admins once.
     await activateEmergencyList(booking.id, {
-      excludeCleanerIds: [row.cleaner_id],
+      excludeCleanerIds: Array.from(
+        new Set([
+          row.cleaner_id as string,
+          ...(offers ?? []).map((offer) => offer.cleaner_id as string),
+        ]),
+      ),
     });
     cascaded.push(booking.id);
   }

@@ -4,6 +4,7 @@ import { parseTransportModes } from "@/lib/cleaner/onboarding-compliance";
 import { formatServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
+import { postcodeInArea } from "@/lib/matching/postcode";
 import { sameAudience } from "@/lib/matching/seed-accounts";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
@@ -148,12 +149,8 @@ export async function runMatchingEngine(
         { end, start },
       );
     });
-    const postcodeMatch = areas.some(
-      (area) =>
-        area.postcode_prefix &&
-        booking.address.postcode
-          .toUpperCase()
-          .startsWith(area.postcode_prefix.toUpperCase()),
+    const postcodeMatch = areas.some((area) =>
+      postcodeInArea(booking.address.postcode, area.postcode_prefix),
     );
     const distances = areas
       .filter(

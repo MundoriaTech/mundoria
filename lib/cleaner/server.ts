@@ -1,5 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { postcodeInArea } from "@/lib/matching/postcode";
+import { sameAudience } from "@/lib/matching/seed-accounts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   CleanerArea,
@@ -294,7 +296,7 @@ export async function getAvailableJobs(cleanerId: string) {
       serviceSet.has(booking.service_type) &&
       tierRank[cleanerTier as keyof typeof tierRank] >=
         tierRank[requiredTier] &&
-      prefixes.some((prefix) => postcode.startsWith(prefix)) &&
+      prefixes.some((prefix) => postcodeInArea(postcode, prefix)) &&
       booking.scheduled_start_time >= slot.start_time &&
       booking.scheduled_start_time <= slot.end_time &&
       !declined.has(booking.id)
@@ -343,9 +345,30 @@ export async function getAvailableJobs(cleanerId: string) {
     }
   }
 
-  return [
+  const jobs = [
     ...openOffers,
     ...teamOffers.filter((job) => !offeredIds.has(job.id)),
     ...primaryOffers,
   ];
+  // Test (seed) cleaners only see test bookings; real cleaners only real ones.
+  const customerIds = Array.from(
+    new Set(
+      jobs
+        .map((job) => (job as { customer_id?: string | null }).customer_id)
+        .filter(Boolean) as string[],
+    ),
+  );
+  const { data: people } = await admin
+    .from("profiles")
+    .select("id,email")
+    .in("id", [cleanerId, ...customerIds]);
+  const emailOf = new Map(
+    (people ?? []).map((row) => [row.id as string, row.email as string | null]),
+  );
+  return jobs.filter((job) =>
+    sameAudience(
+      emailOf.get((job as { customer_id?: string | null }).customer_id ?? ""),
+      emailOf.get(cleanerId),
+    ),
+  );
 }

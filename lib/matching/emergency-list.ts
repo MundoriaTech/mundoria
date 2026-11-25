@@ -361,6 +361,7 @@ export async function activateEmergencyList(
         cleaner_id: member.cleaner_id,
         expires_at: addMinutes(new Date(), 15).toISOString(),
         offered_at: new Date().toISOString(),
+        responded_at: null,
         response: "expired",
       },
       { onConflict: "booking_id,cleaner_id" },
