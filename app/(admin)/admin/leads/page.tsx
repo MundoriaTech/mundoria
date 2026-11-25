@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { META_OFFER_SOURCE } from "@/lib/bookings/percent-offer";
 import { requireAdminArea } from "@/lib/admin/page-access";
 import Link from "next/link";
@@ -31,22 +32,24 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: {
   const admin = createAdminClient();
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  let query = admin
-    .from("leads")
-    .select(
-      "id,email,phone,first_name,last_name,status,source,utm_source,utm_campaign,needs_human,needs_human_reason,callback_requested_at,last_inbound_at,last_outbound_at,created_at,updated_at",
-    )
-    .order("updated_at", { ascending: false })
-    .limit(500);
-  // 20%-off (Meta) leads are only for admins with that section.
-  if (!access.meta_leads) query = query.neq("source", META_OFFER_SOURCE);
-  if (view === "needs_human") query = query.eq("needs_human", true);
-  if (view === "active") query = query.in("status", ["new", "contacted", "engaged"]);
-  if (view === "booked") query = query.eq("status", "booked");
-  if (view === "lost") query = query.in("status", ["lost", "unsubscribed"]);
+  const buildQuery = (from: number, to: number) => {
+    let query = admin
+      .from("leads")
+      .select(
+        "id,email,phone,first_name,last_name,status,source,utm_source,utm_campaign,needs_human,needs_human_reason,callback_requested_at,last_inbound_at,last_outbound_at,created_at,updated_at",
+      )
+      .order("updated_at", { ascending: false });
+    // 20%-off (Meta) leads are only for admins with that section.
+    if (!access.meta_leads) query = query.neq("source", META_OFFER_SOURCE);
+    if (view === "needs_human") query = query.eq("needs_human", true);
+    if (view === "active") query = query.in("status", ["new", "contacted", "engaged"]);
+    if (view === "booked") query = query.eq("status", "booked");
+    if (view === "lost") query = query.in("status", ["lost", "unsubscribed"]);
+    return query.range(from, to);
+  };
 
   const [{ data, error }, newWeek, bookedWeek, waiting, calls] = await Promise.all([
-    query,
+    fetchAllRows(buildQuery),
     admin.from("leads").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
     admin.from("leads").select("id", { count: "exact", head: true }).gte("booked_at", weekAgo),
     admin.from("leads").select("id", { count: "exact", head: true }).eq("needs_human", true),

@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
+import { PAGE_SIZES } from "@/lib/pagination";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -21,6 +27,10 @@ interface Promo {
 }
 
 export function PromosManager({ promos }: { promos: Promo[] }) {
+  const { page, pageItems: pagedPromos, setPage, totalItems } = usePagedItems(
+    promos,
+    PAGE_SIZES.admin,
+  );
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -127,7 +137,7 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
       </section>
 
       <div className="mt-6 space-y-3 md:hidden">
-        {promos.map((promo) => (
+        {pagedPromos.map((promo) => (
           <div
             className="rounded-xl border border-border bg-card p-4"
             key={promo.id}
@@ -175,7 +185,7 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
             </tr>
           </thead>
           <tbody>
-            {promos.map((promo) => (
+            {pagedPromos.map((promo) => (
               <tr className="border-t" key={promo.id}>
                 <td className="p-3 font-mono font-bold">{promo.code}</td>
                 <td>
@@ -216,6 +226,13 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
           </tbody>
         </table>
       </div>
+      <ClientPagination
+        className="mt-4"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </div>
   );
 }

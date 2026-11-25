@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
+import { PAGE_SIZES } from "@/lib/pagination";
+
 import { Newspaper, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,6 +26,10 @@ function formatDate(iso: string | null) {
 }
 
 export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
+  const { page, pageItems: pagedPosts, setPage, totalItems } = usePagedItems(
+    posts,
+    PAGE_SIZES.admin,
+  );
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +147,7 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
                 </tr>
               </thead>
               <tbody>
-                {posts.map((post) => (
+                {pagedPosts.map((post) => (
                   <tr className="border-b last:border-0" key={post.id}>
                     <td className="px-4 py-3">
                       <p className="font-semibold text-[#1c133b]">{post.title}</p>
@@ -211,7 +221,7 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
           </div>
 
           <div className="mt-6 space-y-3 md:hidden">
-            {posts.map((post) => (
+            {pagedPosts.map((post) => (
               <article
                 className="rounded-[1.25rem] border bg-card p-4"
                 key={post.id}
@@ -311,6 +321,13 @@ export function MagPostsManager({ posts }: { posts: MagPostAdminRow[] }) {
           {toast}
         </div>
       ) : null}
+      <ClientPagination
+        className="mt-4"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </div>
   );
 }

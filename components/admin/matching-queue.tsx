@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
+import { PAGE_SIZES } from "@/lib/pagination";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -371,6 +377,11 @@ export function MatchingQueue({
     MATCHING_QUEUES.find((id) => groups[id].length > 0) ?? "needs_cleaner";
   const [tab, setTab] = useState<MatchingQueueId>(defaultTab);
   const rows = groups[tab];
+  const { page, pageItems: pagedRows, setPage, totalItems } = usePagedItems(
+    rows,
+    PAGE_SIZES.admin,
+    tab,
+  );
 
   return (
     <div className="flex flex-col gap-4 rounded-[18px] bg-white p-5">
@@ -445,7 +456,7 @@ export function MatchingQueue({
               ),
             )}
           </div>
-          {rows.map((booking) => (
+          {pagedRows.map((booking) => (
             <QueueRow
               booking={booking}
               cleaners={cleaners}
@@ -471,6 +482,12 @@ export function MatchingQueue({
           ) : null}
         </div>
       </div>
+      <ClientPagination
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </div>
   );
 }

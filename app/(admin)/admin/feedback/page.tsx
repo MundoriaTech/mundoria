@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import {
   FeedbackList,
   type GuestFeedbackRow,
@@ -5,12 +6,15 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminFeedbackPage() {
-  const { data, error } = await createAdminClient()
+  const { data, error } = await fetchAllRows((from, to) =>
+    createAdminClient()
     .from("guest_feedback")
     .select(
       "id, client_name, service_label, service_date, invoice_number, mood, comment, created_at",
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+      .range(from, to),
+  );
 
   const rows = (data ?? []) as GuestFeedbackRow[];
 

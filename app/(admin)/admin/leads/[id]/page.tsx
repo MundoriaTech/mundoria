@@ -1,3 +1,5 @@
+import { PAGE_SIZES, parsePage, slicePage } from "@/lib/pagination";
+import { PaginationLinks } from "@/components/shared/pagination-controls";
 import { canSeeLeadSource } from "@/lib/admin/access";
 import { requireAdminArea } from "@/lib/admin/page-access";
 import Link from "next/link";
@@ -21,7 +23,13 @@ type TimelineItem = {
   link?: string | null;
 };
 
-export default async function AdminLeadPage({ params }: { params: { id: string } }) {
+export default async function AdminLeadPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { page?: string };
+}) {
   const access = await requireAdminArea("leads");
   const lead = await getLead(params.id);
   if (!lead || !canSeeLeadSource(access, lead.source)) notFound();
@@ -29,8 +37,8 @@ export default async function AdminLeadPage({ params }: { params: { id: string }
 
   const [consents, events, messages, calls, enrollments] = await Promise.all([
     currentConsents(lead.id),
-    admin.from("lead_events").select("id,type,summary,payload,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }).limit(200),
-    admin.from("outreach_messages").select("id,channel,direction,status,subject,body,ai_generated,ai_intent,error,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }).limit(200),
+    admin.from("lead_events").select("id,type,summary,payload,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }).limit(1000),
+    admin.from("outreach_messages").select("id,channel,direction,status,subject,body,ai_generated,ai_intent,error,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }).limit(1000),
     admin.from("outreach_calls").select("id,purpose,status,outcome,summary,transcript,recording_url,duration_seconds,ended_reason,error,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }),
     admin.from("outreach_enrollments").select("id,journey,step_index,status,stop_reason,next_run_at,created_at").eq("lead_id", lead.id).order("created_at", { ascending: false }),
   ]);
@@ -83,6 +91,7 @@ export default async function AdminLeadPage({ params }: { params: { id: string }
     (enrollments.data ?? []).filter((e) => e.status === "active").map((e) => e.journey as string),
   );
 
+  const timelinePage = parsePage(searchParams.page);
   return (
     <div className="min-w-0 space-y-5">
       <Link className="text-sm font-semibold text-[#312c79] hover:underline" href="/admin/leads">
@@ -148,7 +157,7 @@ export default async function AdminLeadPage({ params }: { params: { id: string }
           <section className="rounded-xl border bg-card p-5">
             <h2 className="text-sm font-semibold text-[#1c133b]">Timeline</h2>
             <ol className="mt-4 space-y-4">
-              {timeline.map((item, index) => (
+              {slicePage(timeline, timelinePage, PAGE_SIZES.admin).map((item, index) => (
                 <li className="border-l-2 pl-4" key={`${item.kind}-${index}`} style={{ borderColor: item.tone === "in" ? "#6a45b8" : item.tone === "warn" ? "#d97706" : item.tone === "out" ? "#c79c66" : "#e6e0f2" }}>
                   <p className="text-xs text-muted-foreground">{formatWhen(item.at)}</p>
                   <p className="text-sm font-medium text-[#1c133b]">{item.title}</p>
@@ -167,6 +176,13 @@ export default async function AdminLeadPage({ params }: { params: { id: string }
               ))}
               {!timeline.length ? <li className="text-sm text-muted-foreground">Nothing yet.</li> : null}
             </ol>
+            <PaginationLinks
+              className="mt-4"
+              page={timelinePage}
+              pageSize={PAGE_SIZES.admin}
+              pathname={`/admin/leads/${lead.id}`}
+              totalItems={timeline.length}
+            />
           </section>
         </div>
 

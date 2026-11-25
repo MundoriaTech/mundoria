@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
+import { PAGE_SIZES } from "@/lib/pagination";
+
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,6 +25,10 @@ interface Zone {
 }
 
 export function ZonesManager({ zones }: { zones: Zone[] }) {
+  const { page, pageItems: pagedZones, setPage, totalItems } = usePagedItems(
+    zones,
+    PAGE_SIZES.admin,
+  );
   const router = useRouter();
   const [name, setName] = useState("");
   const [prefixes, setPrefixes] = useState("");
@@ -85,7 +95,7 @@ export function ZonesManager({ zones }: { zones: Zone[] }) {
             Add zone
           </Button>
         </section>
-        {zones.map((zone) => (
+        {pagedZones.map((zone) => (
           <article className="rounded-xl border bg-card p-4" key={zone.id}>
             <div className="flex justify-between gap-3">
               <div>
@@ -112,6 +122,13 @@ export function ZonesManager({ zones }: { zones: Zone[] }) {
         ))}
       </div>
       <ZoneMap zones={zones} />
+      <ClientPagination
+        className="mt-4"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </div>
   );
 }

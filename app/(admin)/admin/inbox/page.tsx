@@ -1,16 +1,19 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { SupportInboxList } from "@/components/admin/support-inbox";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SupportConversationWithUser } from "@/types/support";
 
 export default async function AdminInboxPage() {
-  const { data, error } = await createAdminClient()
+  const { data, error } = await fetchAllRows((from, to) =>
+    createAdminClient()
     .from("support_conversations")
     .select(
       "id,user_id,guest_token,guest_name,guest_email,status,subject,last_message_at,last_message_preview,unread_admin,unread_user,created_at,updated_at,user:profiles!support_conversations_user_id_fkey(id,full_name,email)",
     )
     .eq("status", "open")
     .order("last_message_at", { ascending: false })
-    .limit(100);
+      .range(from, to),
+  );
 
   const conversations = ((data ?? []) as Array<
     SupportConversationWithUser & {

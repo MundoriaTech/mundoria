@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { AbandonedBookingLeadsTable } from "@/components/admin/abandoned-booking-leads-table";
 import { formatServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,13 +18,16 @@ function serviceLabelFromDraft(draft: unknown): string | null {
 }
 
 export default async function AdminAbandonedBookingsPage() {
-  const { data, error } = await createAdminClient()
+  const { data, error } = await fetchAllRows((from, to) =>
+    createAdminClient()
     .from("booking_drafts")
     .select(
       "id,email,user_id,current_step,reminder_count,last_reminded_at,created_at,completed_at,completed_booking_id,draft",
     )
     .gt("reminder_count", 0)
-    .order("last_reminded_at", { ascending: false, nullsFirst: false });
+    .order("last_reminded_at", { ascending: false, nullsFirst: false })
+      .range(from, to),
+  );
 
   const rows = (data ?? []).map((row) => ({
     completed_at: row.completed_at as string | null,

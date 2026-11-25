@@ -1,3 +1,5 @@
+import { parsePage } from "@/lib/pagination";
+import { PaginationLinks } from "@/components/shared/pagination-controls";
 import { requireAdminArea } from "@/lib/admin/page-access";
 import Link from "next/link";
 
@@ -18,13 +20,22 @@ type Metrics = {
 const day = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-export default async function AdminLeadReportsPage() {
+export default async function AdminLeadReportsPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const page = parsePage(searchParams.page);
+  const pageSize = 10;
   await requireAdminArea("leads");
   const { data, error } = await createAdminClient()
     .from("outreach_reports")
     .select("id,period_start,period_end,metrics,summary,created_at")
     .order("period_start", { ascending: false })
-    .limit(26);
+    .range((page - 1) * pageSize, page * pageSize - 1);
+  const { count: reportCount } = await createAdminClient()
+    .from("outreach_reports")
+    .select("id", { count: "exact", head: true });
 
   return (
     <div className="min-w-0 space-y-5">
@@ -82,6 +93,12 @@ export default async function AdminLeadReportsPage() {
           );
         })
       )}
+      <PaginationLinks
+        page={page}
+        pageSize={pageSize}
+        pathname="/admin/leads/reports"
+        totalItems={reportCount ?? 0}
+      />
     </div>
   );
 }

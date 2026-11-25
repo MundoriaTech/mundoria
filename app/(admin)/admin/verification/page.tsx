@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import {
   VerificationQueueTable,
   type VerificationQueueRow,
@@ -7,7 +8,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
 
 export default async function AdminVerificationQueuePage() {
-  const { data } = await createAdminClient()
+  const { data } = await fetchAllRows((from, to) =>
+    createAdminClient()
     .from("cleaner_profiles")
     .select(
       "id,status,utr_document_status,dbs_document_status,insurance_status,insurance_expiry_date,verification_flags,updated_at,profile:profiles!cleaner_profiles_id_fkey(full_name,email)",
@@ -16,7 +18,8 @@ export default async function AdminVerificationQueuePage() {
       "utr_document_status.eq.pending,dbs_document_status.eq.pending,insurance_status.eq.pending",
     )
     .order("updated_at", { ascending: true })
-    .limit(200);
+      .range(from, to),
+  );
 
   const rows = (data ?? []) as VerificationQueueRow[];
 

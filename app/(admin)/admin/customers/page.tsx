@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import Link from "next/link";
 import { CustomersTable } from "@/components/admin/customers-table";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -19,22 +20,32 @@ export default async function AdminCustomersPage() {
   const admin = createAdminClient();
   const [{ data: profiles }, { data: bookings }, { data: addresses }] =
     await Promise.all([
-      admin
-        .from("profiles")
-        .select("id,full_name,email,phone,created_at,referral_code,avatar_url")
-        .eq("role", "customer")
-        .order("created_at", { ascending: false }),
-      admin
-        .from("bookings")
-        .select("customer_id,status,amount_total,payment_status"),
-      admin
-        .from("addresses")
-        .select(
-          "customer_id,address_line_1,city,postcode,is_default,created_at",
-        )
-        .is("archived_at", null)
-        .order("is_default", { ascending: false })
-        .order("created_at", { ascending: true }),
+      fetchAllRows((from, to) =>
+        admin
+          .from("profiles")
+          .select("id,full_name,email,phone,created_at,referral_code,avatar_url")
+          .eq("role", "customer")
+          .order("created_at", { ascending: false })
+          .range(from, to),
+      ),
+      fetchAllRows((from, to) =>
+        admin
+          .from("bookings")
+          .select("customer_id,status,amount_total,payment_status")
+          .order("id")
+          .range(from, to),
+      ),
+      fetchAllRows((from, to) =>
+        admin
+          .from("addresses")
+          .select(
+            "customer_id,address_line_1,city,postcode,is_default,created_at",
+          )
+          .is("archived_at", null)
+          .order("is_default", { ascending: false })
+          .order("created_at", { ascending: true })
+          .range(from, to),
+      ),
     ]);
 
   const stats = new Map<

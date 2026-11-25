@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { CallbackLeadsTable } from "@/components/admin/callback-leads-table";
 import { mapCallbackLeadRow } from "@/lib/admin/callback-desk";
 import { requireAdminArea } from "@/lib/admin/page-access";
@@ -12,11 +13,14 @@ const COLUMNS =
 
 export default async function AdminMetaLeadsPage() {
   await requireAdminArea("meta_leads");
-  const { data, error } = await createAdminClient()
+  const { data, error } = await fetchAllRows((from, to) =>
+    createAdminClient()
     .from("callback_leads")
     .select(COLUMNS)
     .eq("source", META_OFFER_SOURCE)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+      .range(from, to),
+  );
 
   const rows = (data ?? []) as Array<Record<string, unknown>>;
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;

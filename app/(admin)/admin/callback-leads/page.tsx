@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { META_OFFER_SOURCE } from "@/lib/bookings/percent-offer";
 import { requireAdminArea } from "@/lib/admin/page-access";
 import { CallbackLeadsTable } from "@/components/admin/callback-leads-table";
@@ -11,12 +12,15 @@ const COLUMNS =
 
 export default async function AdminCallbackLeadsPage() {
   await requireAdminArea("callback_leads");
-  const { data, error } = await createAdminClient()
+  const { data, error } = await fetchAllRows((from, to) =>
+    createAdminClient()
     .from("callback_leads")
     .select(COLUMNS)
     // 20%-off (Meta) leads have their own section.
     .neq("source", META_OFFER_SOURCE)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+      .range(from, to),
+  );
 
   return (
     <div className="min-w-0">

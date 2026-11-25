@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { ProcessPayoutsButton } from "@/components/admin/process-payouts-button";
 import {
   PayoutsTable,
@@ -7,10 +8,13 @@ import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminPayoutsPage() {
-  const { data } = await createAdminClient()
+  const { data } = await fetchAllRows((from, to) =>
+    createAdminClient()
     .from("payouts")
     .select("*,cleaner:profiles!payouts_cleaner_id_fkey(full_name)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+      .range(from, to),
+  );
   const payouts = (data ?? []) as AdminPayoutRow[];
   const now = new Date();
   const week = payouts

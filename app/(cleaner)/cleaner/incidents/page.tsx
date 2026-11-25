@@ -1,3 +1,5 @@
+import { PAGE_SIZES, parsePage, slicePage } from "@/lib/pagination";
+import { PaginationLinks } from "@/components/shared/pagination-controls";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -29,7 +31,11 @@ const STATUS_LABELS: Record<string, string> = {
   under_review: "Under review",
 };
 
-export default async function CleanerIncidentsPage() {
+export default async function CleanerIncidentsPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
   const supabase = createServerClient();
   const {
     data: { user },
@@ -48,6 +54,8 @@ export default async function CleanerIncidentsPage() {
   if (!context.cleanerProfile || !context.profile) redirect("/");
 
   const incidents = (data ?? []) as IncidentRow[];
+  const page = parsePage(searchParams.page);
+  const pagedIncidents = slicePage(incidents, page, PAGE_SIZES.app);
   const bookings: IncidentBookingOption[] = [...jobs]
     .sort((a, b) => b.scheduled_date.localeCompare(a.scheduled_date))
     .slice(0, 30)
@@ -89,7 +97,7 @@ export default async function CleanerIncidentsPage() {
           </h2>
           {incidents.length ? (
             <ul className="mt-4 space-y-3">
-              {incidents.map((incident) => (
+              {pagedIncidents.map((incident) => (
                 <li
                   className="rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-4"
                   key={incident.id}
@@ -122,6 +130,15 @@ export default async function CleanerIncidentsPage() {
                 </li>
               ))}
             </ul>
+          ) : null}
+          {incidents.length ? (
+            <PaginationLinks
+              className="mt-4"
+              page={page}
+              pageSize={PAGE_SIZES.app}
+              pathname="/cleaner/incidents"
+              totalItems={incidents.length}
+            />
           ) : (
             <p className="mt-4 rounded-2xl border-2 border-dashed border-[#1c133b]/30 bg-[#f9f6ef] p-5 text-sm text-[#5a5470]">
               No reports yet. If something goes wrong on a job, you can report

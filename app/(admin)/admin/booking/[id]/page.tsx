@@ -1,3 +1,4 @@
+import { PagedSimpleTable } from "@/components/admin/paged-simple-table";
 import { filterCleanersForBooking, sameAudience } from "@/lib/matching/seed-accounts";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -419,8 +420,8 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         offerOpen={Boolean(openOffer)}
         status={booking.status}
       />
-      <SimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "-"])} />
-      <SimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [item.created_at, item.sender?.full_name ?? "Unknown", item.content])} />
+      <PagedSimpleTable title="Status timeline" rows={(timeline ?? []).map((item) => [item.created_at, `${item.from_status ?? "created"} → ${item.to_status}`, item.note ?? "-"])} />
+      <PagedSimpleTable title="Messages thread" rows={(messages ?? []).map((item) => [item.created_at, item.sender?.full_name ?? "Unknown", item.content])} />
     </div>
   );
 }
@@ -482,28 +483,3 @@ function alternateTimesFromNotes(notes: string) {
     .filter(Boolean);
 }
 
-function SimpleTable({ rows, title }: { rows: string[][]; title: string }) {
-  return (
-    <section className="overflow-hidden rounded-xl border bg-card p-4 sm:p-5">
-      <h2 className="mb-3 font-semibold">{title}</h2>
-      <div className="-mx-4 overflow-x-auto sm:mx-0">
-        <table className="w-full min-w-[480px] text-sm">
-          <tbody>
-            {rows.map((row, i) => (
-              <tr className="border-b" key={i}>
-                {row.map((cell, j) => (
-                  <td className="break-words p-2 first:pl-4 sm:first:pl-2" key={j}>
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {!rows.length ? (
-        <p className="text-sm text-muted-foreground">No records.</p>
-      ) : null}
-    </section>
-  );
-}

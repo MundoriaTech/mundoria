@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ClientPagination,
+  usePagedItems,
+} from "@/components/shared/pagination-controls";
+import { PAGE_SIZES } from "@/lib/pagination";
+
 import { useMemo, useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
@@ -40,6 +46,10 @@ export function AdminInvitationsManager({
     () =>
       [...invitations].sort((a, b) => b.created_at.localeCompare(a.created_at)),
     [invitations],
+  );
+  const { page, pageItems: pagedInvitations, setPage, totalItems } = usePagedItems(
+    sortedInvitations,
+    PAGE_SIZES.admin,
   );
 
   async function inviteAdmin(event: React.FormEvent<HTMLFormElement>) {
@@ -191,7 +201,7 @@ export function AdminInvitationsManager({
       ) : null}
 
       <div className="mt-6 space-y-3 md:hidden">
-        {sortedInvitations.map((invitation) => (
+        {pagedInvitations.map((invitation) => (
           <div
             className="rounded-xl border border-border p-4"
             key={invitation.id}
@@ -246,7 +256,7 @@ export function AdminInvitationsManager({
             </tr>
           </thead>
           <tbody>
-            {sortedInvitations.map((invitation) => (
+            {pagedInvitations.map((invitation) => (
               <tr className="border-t" key={invitation.id}>
                 <td className="p-3">
                   <b>{invitation.full_name ?? "-"}</b>
@@ -286,6 +296,13 @@ export function AdminInvitationsManager({
           </tbody>
         </table>
       </div>
+      <ClientPagination
+        className="mt-4"
+        onPageChange={setPage}
+        page={page}
+        pageSize={PAGE_SIZES.admin}
+        totalItems={totalItems}
+      />
     </section>
   );
 }
