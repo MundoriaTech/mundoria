@@ -38,6 +38,8 @@ export type EmailTemplateId =
   | "customer.booking_cancelled"
   | "customer.booking_completed"
   | "customer.booking_confirmed"
+  | "customer.booking_requested"
+  | "customer.no_cleaner_found"
   | "customer.booking_incomplete"
   | "customer.checklist_confirmation"
   | "customer.cleaner_checked_in"
@@ -244,6 +246,46 @@ function resolveTemplate(
         ],
         subject: "Your Mundoria booking is confirmed",
         title: "Booking confirmed",
+        tone: "customer",
+      };
+    case "customer.booking_requested":
+      return {
+        body:
+          "We’re finding your cleaner now. As soon as a cleaner accepts, we’ll email and text you to confirm your visit. Your card is saved and nothing is charged yet. If no cleaner can take it, we’ll cancel at no charge and let you know at least 24 hours before.",
+        buttonHref: string(data.bookingUrl),
+        buttonLabel: "View booking",
+        cards: bookingCards(data),
+        intro: firstName
+          ? `Hi ${firstName}, we’ve received your booking request.`
+          : "We’ve received your booking request.",
+        preview: "We’re finding your cleaner.",
+        relatedLinks: [
+          {
+            href: publicEmailAssetUrl(FAQ_LINKS.whenCharged),
+            label: "When will I be charged?",
+          },
+          {
+            href: publicEmailAssetUrl(FAQ_LINKS.cancellationFee),
+            label: "Cancellation fees",
+          },
+        ],
+        subject: "We’ve received your Mundoria booking request",
+        title: "Request received",
+        tone: "customer",
+      };
+    case "customer.no_cleaner_found":
+      return {
+        body:
+          "We’re sorry. No cleaner was available for this visit, so we’ve cancelled it. You have not been charged. Pick another time and we’ll find you a cleaner.",
+        buttonHref: string(data.bookingUrl),
+        buttonLabel: "Choose another time",
+        cards: bookingCards(data),
+        intro: firstName
+          ? `Hi ${firstName}, we couldn’t find a cleaner for this visit.`
+          : "We couldn’t find a cleaner for this visit.",
+        preview: "No cleaner was available. You have not been charged.",
+        subject: "We couldn’t find a cleaner for your visit",
+        title: "No cleaner available",
         tone: "customer",
       };
     case "customer.booking_incomplete":

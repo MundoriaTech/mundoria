@@ -1059,13 +1059,14 @@ function LookingForCleanerCard({
             We are looking for your cleaner
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c6570]">
-            Their name stays hidden until they accept. You’ll get an email when
-            the session is confirmed.
+            Their name stays hidden until they accept. We’ll email and text you
+            as soon as a cleaner accepts. If nobody can take it, we’ll cancel at
+            no charge and let you know.
           </p>
         </div>
         <div className="rounded-2xl bg-[#f7f4fb] px-4 py-3.5 sm:px-5 lg:min-w-[17rem] lg:text-right">
           <p className="text-xs font-medium text-[#8b8798]">
-            {confirmByLabel ? "Confirmed no later than" : "Confirmation"}
+            {confirmByLabel ? "Cleaner confirmed by" : "Confirmation"}
           </p>
           <p className="mt-1 text-base font-semibold leading-6 text-[#312c79] sm:text-lg">
             {confirmByLabel ?? "We’ll email you as soon as a cleaner accepts."}

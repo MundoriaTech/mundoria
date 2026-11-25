@@ -1,3 +1,4 @@
+import { matchCutoffAt } from "@/lib/bookings/match-cutoff";
 import { notFound } from "next/navigation";
 
 import { BookingDetail } from "@/components/customer/booking-detail";
@@ -6,7 +7,6 @@ import {
   isWaitingForCleanerAcceptance,
 } from "@/lib/customer/booking-visibility";
 import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import type {
   Booking,
@@ -58,22 +58,11 @@ export default async function CustomerBookingPage({
   const booking = data as Booking;
   booking.add_ons = (addOns ?? []) as Booking["add_ons"];
 
+  // When nobody has accepted yet, show the cutoff: by then a cleaner has
+  // accepted, or the visit is cancelled at no charge and the customer told.
   let offerExpiresAt: string | null = null;
   if (isWaitingForCleanerAcceptance(booking.status)) {
-    const admin = createAdminClient();
-    if (booking.cleaner_id) {
-      const { data: offer } = await admin
-        .from("cleaner_job_responses")
-        .select("expires_at")
-        .eq("booking_id", booking.id)
-        .eq("cleaner_id", booking.cleaner_id)
-        .maybeSingle();
-      offerExpiresAt = offer?.expires_at ?? null;
-    }
-    if (!offerExpiresAt) {
-      const created = new Date(booking.created_at).getTime();
-      offerExpiresAt = new Date(created + 2 * 60 * 60 * 1000).toISOString();
-    }
+    offerExpiresAt = matchCutoffAt(booking)?.toISOString() ?? null;
   }
 
   if (booking.cleaner_id && isCleanerVisibleToCustomer(booking.status)) {

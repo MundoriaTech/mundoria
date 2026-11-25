@@ -401,19 +401,6 @@ export async function runMatchingEngine(
     { onConflict: "booking_id,cleaner_id" },
   );
 
-  const customerPushTitle = previousCleanerId
-    ? "We’re arranging a new cleaner"
-    : "We’re looking for your cleaner";
-  const customerPushBody = previousCleanerId
-    ? "Your previous cleaner couldn’t take this job. We’re finding another Mundoria professional for you."
-    : `Your session will be confirmed no later than ${respondBy.toLocaleString("en-GB", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        hour: "2-digit",
-        minute: "2-digit",
-      })}.`;
-
   await Promise.all([
     sendPushNotification(
       winner.cleanerId,
@@ -421,14 +408,18 @@ export async function runMatchingEngine(
       `A ${booking.service_type.replaceAll("_", " ")} job is waiting for you.`,
       { booking_id: bookingId },
     ),
-    sendPushNotification(
-      booking.customer_id,
-      customerPushTitle,
-      customerPushBody,
-      { booking_id: bookingId },
-    ),
+    // The customer already has "request received" from checkout and hears
+    // again when a cleaner accepts. Matching can run many times, so it only
+    // speaks up when a cleaner dropped out.
+    previousCleanerId
+      ? sendPushNotification(
+          booking.customer_id,
+          "We’re arranging a new cleaner",
+          "Your previous cleaner couldn’t take this job. We’re finding another Mundoria professional for you.",
+          { booking_id: bookingId },
+        )
+      : null,
     sendCleanerJobOfferEmail(),
-    sendCustomerLookingForCleanerEmail(),
   ]);
   return { cleanerId: winner.cleanerId, considered, matched: true as const };
 
@@ -449,39 +440,6 @@ export async function runMatchingEngine(
       },
       template: "cleaner.job_offer",
       to: winner.email,
-    });
-  }
-
-  function sendCustomerLookingForCleanerEmail() {
-    const customer = Array.isArray(booking.customer)
-      ? booking.customer[0]
-      : booking.customer;
-    const preferences = customer?.notification_preferences as
-      | { email?: boolean }
-      | undefined;
-    if (!customer?.email || preferences?.email === false) return false;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    return sendBrandedEmail({
-      data: {
-        address: `${booking.address.address_line_1}, ${booking.address.city}, ${booking.address.postcode}`,
-        appUrl,
-        bookingId,
-        bookingUrl: `${appUrl}/booking/${bookingId}`,
-        confirmBy: respondBy.toLocaleString("en-GB", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        firstName: customer.full_name?.split(" ")[0],
-        fullName: customer.full_name,
-        scheduledDate: booking.scheduled_date,
-        scheduledTime: booking.scheduled_start_time?.slice(0, 5),
-        serviceName: String(booking.service_type).replaceAll("_", " "),
-      },
-      template: "customer.cleaner_matched",
-      to: customer.email,
     });
   }
 }

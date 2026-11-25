@@ -655,19 +655,9 @@ async function promoteToConfirmed(bookingId: string) {
         scheduledTime: String(booking.scheduled_start_time),
         serviceName: formatServiceName(booking.service_type),
       }).catch((error) => Sentry.captureException(error));
-    } else if (customer?.email) {
-      await sendBrandedEmail({
-        data: {
-          appUrl: url,
-          bookingId,
-          bookingUrl: `${url}/booking/${bookingId}`,
-          scheduledDate: booking.scheduled_date,
-          scheduledTime: String(booking.scheduled_start_time).slice(0, 5),
-        },
-        template: "customer.booking_confirmed",
-        to: customer.email,
-      }).catch(() => undefined);
     }
+    // No email here: the customer was emailed and texted "your cleaner is
+    // confirmed" when the cleaner accepted (cleaner respond route).
     try {
       await upsertZohoContact(
         {

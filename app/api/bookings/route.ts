@@ -8,7 +8,6 @@ import { frequencyAllowsOneOff } from "@/lib/customer/booking-flow";
 import { createBookingSchema } from "@/lib/customer/booking-schema";
 import { calculateOfficeQuote } from "@/lib/customer/office-pricing";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
-import { holdTimingSentence } from "@/lib/customer/payment-status";
 import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import {
   addOnAmountPence,
@@ -280,38 +279,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  let recurringError: string | null = null;
-  if (parsed.data.isRecurring) {
-    try {
-      const followOnIds = await createRecurringFollowOnBookings({
-        admin,
-        customDates: parsed.data.customRecurrenceDates ?? [],
-        parent: booking,
-        pattern: parsed.data.recurrencePattern,
-      });
-      for (const followOnId of followOnIds) {
-        try {
-          await runMatchingEngine(followOnId);
-        } catch (matchError) {
-          Sentry.captureException(matchError);
-        }
-      }
-    } catch (seriesError) {
-      Sentry.captureException(seriesError);
-      recurringError =
-        seriesError instanceof Error
-          ? seriesError.message
-          : "The next visit in this series could not be created.";
-      await admin.from("notifications").insert({
-        body: "Your first visit is booked. The next visit in the series could not be created yet, contact support if it does not appear in your bookings.",
-        data: { booking_id: booking.id },
-        title: "Recurring visit needs attention",
-        type: "booking_created",
-        user_id: user.id,
-      });
-    }
-  }
-
   if (selectedAddOnDefs.length) {
     const sessionHours = parsed.data.estimatedDurationHours ?? 0;
     const supplyHours =
@@ -344,6 +311,39 @@ export async function POST(request: Request) {
     }
   }
 
+  // After the add-ons are saved, so each follow-on copies them.
+  let recurringError: string | null = null;
+  if (parsed.data.isRecurring) {
+    try {
+      const followOnIds = await createRecurringFollowOnBookings({
+        admin,
+        customDates: parsed.data.customRecurrenceDates ?? [],
+        parent: booking,
+        pattern: parsed.data.recurrencePattern,
+      });
+      for (const followOnId of followOnIds) {
+        try {
+          await runMatchingEngine(followOnId);
+        } catch (matchError) {
+          Sentry.captureException(matchError);
+        }
+      }
+    } catch (seriesError) {
+      Sentry.captureException(seriesError);
+      recurringError =
+        seriesError instanceof Error
+          ? seriesError.message
+          : "The next visit in this series could not be created.";
+      await admin.from("notifications").insert({
+        body: "Your first visit is booked. The next visit in the series could not be created yet, contact support if it does not appear in your bookings.",
+        data: { booking_id: booking.id },
+        title: "Recurring visit needs attention",
+        type: "booking_created",
+        user_id: user.id,
+      });
+    }
+  }
+
   if (offerLeadId && offerFreeHours > 0) {
     await stampFirstVisitOfferLead({
       admin,
@@ -353,9 +353,9 @@ export async function POST(request: Request) {
   }
 
   await admin.from("notifications").insert({
-    body: `Your ${formatServiceName(parsed.data.serviceType)} is booked for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}.`,
+    body: `We're finding a cleaner for your ${formatServiceName(parsed.data.serviceType)} on ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. We'll let you know as soon as one accepts.`,
     data: { booking_id: booking.id },
-    title: "Booking confirmed",
+    title: "Booking request received",
     type: "booking_created",
     user_id: user.id,
   });
@@ -377,7 +377,7 @@ export async function POST(request: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
   const { payment_auth_open_hours_before: holdOpenHours } =
     await getPaymentTimingSettings();
-  const message = `Your Mundoria booking is confirmed for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. Card saved for ${formatMoney(amountPence)}. ${holdTimingSentence(holdOpenHours)}`;
+  const message = `Mundoria: we've received your booking request for ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime} and are finding your cleaner. We'll text you as soon as a cleaner accepts. Card saved for ${formatMoney(amountPence)}, nothing charged yet.`;
   const preferences = profile.notification_preferences as {
     email?: boolean;
     sms?: boolean;
@@ -409,7 +409,7 @@ export async function POST(request: Request) {
           scheduledTime: parsed.data.scheduledTime,
           serviceName: formatServiceName(parsed.data.serviceType),
         },
-        template: "customer.booking_confirmed",
+        template: "customer.booking_requested",
         to: profile.email,
       });
     }

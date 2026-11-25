@@ -1,5 +1,8 @@
 import { addDays, addMonths, addWeeks, format, parseISO } from "date-fns";
 
+import { NO_CLEANER_REASON } from "@/lib/bookings/no-cleaner";
+import { loadServicePricing } from "@/lib/customer/pricing-config";
+import { schedulePriceMultiplier } from "@/lib/customer/services";
 import type { createAdminClient } from "@/lib/supabase/admin";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -110,6 +113,90 @@ function followOnCleanerHours(parent: ParentBooking) {
   return Math.max(0, Number(billed.toFixed(2)));
 }
 
+type AddOnRow = { add_on_id: string; amount: number | null; label: string | null };
+
+/**
+ * A follow-on visit keeps the parent's agreed rate and add-ons, but its
+ * labour is re-priced for its own day and time (a monthly series can move
+ * from a weekday to a weekend). Supplies and flat add-ons are unchanged:
+ * schedule multipliers never apply to them.
+ */
+async function followOnPricing(admin: AdminClient, parent: ParentBooking) {
+  const [{ data: addOns }, pricing] = await Promise.all([
+    admin
+      .from("booking_add_ons")
+      .select("add_on_id,amount,label")
+      .eq("booking_id", parent.id),
+    loadServicePricing(),
+  ]);
+  const rows = (addOns ?? []) as AddOnRow[];
+  const addOnTotal = rows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const parentTotal = Number(parent.amount_total ?? 0);
+  const parentMult = schedulePriceMultiplier(
+    parent.scheduled_date,
+    parent.scheduled_start_time?.slice(0, 5),
+    pricing,
+  );
+  const platformShare =
+    parentTotal > 0 ? Number(parent.amount_platform ?? 0) / parentTotal : 0;
+
+  return {
+    addOns: rows,
+    amountsFor(date: string) {
+      if (!parentTotal) {
+        return {
+          amount_cleaner: parent.amount_cleaner,
+          amount_platform: parent.amount_platform,
+          amount_total: parent.amount_total,
+        };
+      }
+      const labour = Math.max(0, parentTotal - addOnTotal);
+      const mult = schedulePriceMultiplier(
+        date,
+        parent.scheduled_start_time?.slice(0, 5),
+        pricing,
+      );
+      const total = Math.round((labour * mult) / (parentMult || 1)) + addOnTotal;
+      const platform = Math.round(total * platformShare);
+      return {
+        amount_cleaner: total - platform,
+        amount_platform: platform,
+        amount_total: total,
+      };
+    },
+  };
+}
+
+async function insertFollowOns(
+  admin: AdminClient,
+  parent: ParentBooking,
+  dates: string[],
+  pattern: ParentBooking["recurrence_pattern"],
+) {
+  const pricing = await followOnPricing(admin, parent);
+  const rows = dates.map((date) => ({
+    ...followOnRow(parent, date, pattern),
+    ...pricing.amountsFor(date),
+  }));
+  const { data, error } = await admin.from("bookings").insert(rows).select("id");
+  if (error) throw new Error(error.message);
+  const ids = (data ?? []).map((row) => row.id as string);
+  if (ids.length && pricing.addOns.length) {
+    const { error: addOnError } = await admin.from("booking_add_ons").insert(
+      ids.flatMap((booking_id) =>
+        pricing.addOns.map((row) => ({
+          add_on_id: row.add_on_id,
+          amount: row.amount,
+          booking_id,
+          label: row.label,
+        })),
+      ),
+    );
+    if (addOnError) throw new Error(addOnError.message);
+  }
+  return ids;
+}
+
 /**
  * Creates unpaid follow-on booking(s) after checkout.
  * - weekly / fortnightly / monthly: only the next visit (rolled forward by cron)
@@ -142,16 +229,7 @@ export async function createRecurringFollowOnBookings({
 
   if (!dates.length) return [];
 
-  const rows = dates.map((scheduled_date) =>
-    followOnRow(parent, scheduled_date, pattern),
-  );
-
-  const { data, error } = await admin
-    .from("bookings")
-    .insert(rows)
-    .select("id");
-  if (error) throw new Error(error.message);
-  return (data ?? []).map((row) => row.id as string);
+  return insertFollowOns(admin, parent, dates, pattern);
 }
 
 /**
@@ -172,7 +250,9 @@ export async function ensureUpcomingRecurringFollowOns(
     )
     .eq("is_recurring", true)
     .is("parent_booking_id", null)
-    .neq("status", "cancelled")
+    // A visit cancelled only because no cleaner was free doesn't end the
+    // customer's series.
+    .or(`status.neq.cancelled,cancellation_reason.eq."${NO_CLEANER_REASON}"`)
     .not("recurrence_pattern", "is", null)
     .neq("recurrence_pattern", "custom")
     .limit(limit);
@@ -223,17 +303,18 @@ export async function ensureUpcomingRecurringFollowOns(
     }
     if (!next) continue;
 
-    const { data: inserted, error: insertError } = await admin
-      .from("bookings")
-      .insert(followOnRow(parent, next, pattern))
-      .select("id")
-      .single();
-    if (!insertError && inserted?.id) {
+    let insertedId: string | undefined;
+    try {
+      [insertedId] = await insertFollowOns(admin, parent, [next], pattern);
+    } catch {
+      insertedId = undefined;
+    }
+    if (insertedId) {
       created += 1;
       if (parent.stripe_payment_method_id) {
         try {
           const { runMatchingEngine } = await import("@/lib/matching/engine");
-          await runMatchingEngine(inserted.id);
+          await runMatchingEngine(insertedId);
         } catch {
           // The visit exists. Matching can be retried from admin.
         }

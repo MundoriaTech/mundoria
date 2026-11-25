@@ -9,7 +9,10 @@ import {
 } from "@/lib/matching/emergency-list";
 import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
 import { getAvailableJobs } from "@/lib/cleaner/server";
-import { sendPushNotification } from "@/lib/notifications/send";
+import { formatServiceName } from "@/lib/customer/services";
+import { sendBrandedEmail } from "@/lib/email/send-email";
+import { sendPushNotification, sendSMS } from "@/lib/notifications/send";
+import type { ServiceType } from "@/types/customer";
 import { onCleanerAcceptedForPayment } from "@/lib/payments/preauth-flow";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -103,7 +106,7 @@ export async function POST(
       .in("status", ["pending_match", "matched"])
       .or(`cleaner_id.is.null,cleaner_id.eq.${user.id}`)
       .select(
-        "id,customer_id,scheduled_date,scheduled_start_time,service_type,address:addresses(address_line_1,city,postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
+        "id,customer_id,scheduled_date,scheduled_start_time,service_type,address:addresses(address_line_1,city,postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
       )
       .maybeSingle();
 
@@ -163,10 +166,14 @@ export async function POST(
         previousName,
         cleanerName,
       );
-    } else if (authResult?.authorized) {
-      // Full confirmation emails/pushes are sent from promoteToConfirmed.
     } else if (!authResult?.cancelled) {
-      await notifyCustomerProvisionalAccept(bookingId, booking, cleanerName);
+      // The confirmation moment: a cleaner has accepted.
+      await notifyCustomerCleanerConfirmed(
+        bookingId,
+        booking,
+        cleanerName,
+        Boolean(authResult?.authorized),
+      );
     }
   }
 
@@ -251,27 +258,77 @@ export async function POST(
   return NextResponse.json({ success: true });
 }
 
-async function notifyCustomerProvisionalAccept(
+type AcceptedBooking = {
+  customer?: unknown;
+  customer_id: string;
+  scheduled_date: string;
+  scheduled_start_time: string;
+  service_type: string;
+};
+
+async function notifyCustomerCleanerConfirmed(
   bookingId: string,
-  booking: { customer_id: string },
+  booking: AcceptedBooking,
   cleanerName: string,
+  alreadyPushed: boolean,
 ) {
   const firstName = cleanerName.split(" ")[0] || "Your cleaner";
   const admin = createAdminClient();
+  const customer = (
+    Array.isArray(booking.customer) ? booking.customer[0] : booking.customer
+  ) as
+    | {
+        email?: string | null;
+        full_name?: string | null;
+        notification_preferences?: { email?: boolean; sms?: boolean } | null;
+        phone?: string | null;
+      }
+    | null
+    | undefined;
+  const prefs = customer?.notification_preferences ?? {};
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const time = String(booking.scheduled_start_time).slice(0, 5);
+  const date = new Date(`${booking.scheduled_date}T12:00:00`).toLocaleDateString(
+    "en-GB",
+    { day: "numeric", month: "long", weekday: "long" },
+  );
+  const line = `${firstName} has accepted your ${formatServiceName(booking.service_type as ServiceType).toLowerCase()} on ${date} at ${time}. Your visit is confirmed.`;
 
   await Promise.all([
-    sendPushNotification(
-      booking.customer_id,
-      "Cleaner accepted: confirming payment",
-      `${firstName} accepted. We’re securing payment to confirm your visit.`,
-      { booking_id: bookingId },
-    ),
+    alreadyPushed
+      ? null
+      : sendPushNotification(booking.customer_id, "Your cleaner is confirmed", line, {
+          booking_id: bookingId,
+        }),
     admin.from("notifications").insert({
-      body: `${firstName} accepted. We’re securing payment to confirm your visit.`,
+      body: line,
       data: { booking_id: bookingId },
-      title: "Cleaner accepted: confirming payment",
-      type: "session_pending_payment",
+      title: "Your cleaner is confirmed",
+      type: "booking_confirmed",
       user_id: booking.customer_id,
     }),
+    customer?.email && prefs.email !== false
+      ? sendBrandedEmail({
+          data: {
+            appUrl,
+            bookingId,
+            bookingUrl: `${appUrl}/booking/${bookingId}`,
+            cleanerName: firstName,
+            firstName: customer.full_name?.split(" ")[0],
+            fullName: customer.full_name,
+            scheduledDate: booking.scheduled_date,
+            scheduledTime: time,
+            serviceName: formatServiceName(booking.service_type as ServiceType),
+          },
+          template: "customer.session_confirmed",
+          to: customer.email,
+        }).catch(() => undefined)
+      : null,
+    customer?.phone && prefs.sms !== false
+      ? sendSMS(
+          customer.phone,
+          `Mundoria: ${line} Details: ${appUrl}/booking/${bookingId}`,
+        ).catch(() => undefined)
+      : null,
   ]);
 }
