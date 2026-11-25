@@ -17,7 +17,7 @@ export async function CallbackLeadContext({ callbackId }: { callbackId: string }
   const admin = createAdminClient();
   const { data: callback } = await admin
     .from("callback_leads")
-    .select("id,email,phone,user_agent,offer_redeemed_booking_id,offer_redeemed_at,created_at")
+    .select("*")
     .eq("id", callbackId)
     .maybeSingle();
   if (!callback) return null;
@@ -178,9 +178,30 @@ export async function CallbackLeadContext({ callbackId }: { callbackId: string }
             </Link>
           ) : "Not used yet",
         },
+        {
+          label: "Ad / first visit",
+          value: attributionLine(callback.attribution as Record<string, unknown> | null),
+          wide: true,
+        },
         { label: "Device", value: callback.user_agent ? String(callback.user_agent) : null, wide: true },
       ]}
       title="About this person"
     />
   );
+}
+
+/** "google / cpc / spring-sale · gclid … · landed on /cleaning/b15 · from instagram.com" */
+export function attributionLine(value: Record<string, unknown> | null | undefined) {
+  if (!value || typeof value !== "object") return null;
+  const get = (key: string) => (typeof value[key] === "string" && value[key] ? String(value[key]) : null);
+  const parts = [
+    [get("utm_source"), get("utm_medium"), get("utm_campaign")].filter(Boolean).join(" / ") || null,
+    get("utm_term") ? `term "${get("utm_term")}"` : null,
+    get("utm_content") ? `ad "${get("utm_content")}"` : null,
+    get("gclid") ? "Google Ads click" : null,
+    get("fbclid") ? "Facebook/Instagram click" : null,
+    get("landing_path") ? `landed on ${get("landing_path")}` : null,
+    get("referrer") ? `from ${get("referrer")}` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
 }

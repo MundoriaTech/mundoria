@@ -35,6 +35,8 @@ export async function POST(request: Request) {
     marketing_opt_in,
   } = parsed.data;
   const email = parsed.data.email.trim().toLowerCase();
+  const attribution = cleanAttribution(body.attribution);
+  const referralCodeEntered = referral_code?.trim().toUpperCase() || null;
   const admin = createAdminClient();
   const appUrl = resolveAppUrl(request);
   const defaultNext = role === "cleaner" ? "/cleaner/dashboard" : "/dashboard";
@@ -92,9 +94,11 @@ export async function POST(request: Request) {
     email_confirm: softEmailConfirm,
     password,
     user_metadata: {
+      ...(attribution ? { attribution } : {}),
       full_name,
       marketing_opt_in: Boolean(marketing_opt_in),
       phone: phone.trim(),
+      ...(referralCodeEntered ? { referral_code_entered: referralCodeEntered } : {}),
       role,
       ...(softEmailConfirm ? { send_welcome_on_email_link: true } : {}),
     },
@@ -213,6 +217,9 @@ export async function POST(request: Request) {
         marketingOptIn: Boolean(marketing_opt_in),
         phone,
         profileId: user.id,
+        utmCampaign: attribution?.utm_campaign ?? null,
+        utmMedium: attribution?.utm_medium ?? null,
+        utmSource: attribution?.utm_source ?? null,
       });
     } catch (leadError) {
       Sentry.captureException(leadError);
@@ -227,4 +234,28 @@ export async function POST(request: Request) {
     role,
     welcomeEmailSent: false,
   });
+}
+
+const ATTRIBUTION_KEYS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "gclid",
+  "fbclid",
+  "referrer",
+  "landing_path",
+  "captured_at",
+] as const;
+
+/** Only known string keys, trimmed and capped, from the client's first-touch record. */
+function cleanAttribution(value: unknown) {
+  if (!value || typeof value !== "object") return null;
+  const out: Partial<Record<(typeof ATTRIBUTION_KEYS)[number], string>> = {};
+  for (const key of ATTRIBUTION_KEYS) {
+    const item = (value as Record<string, unknown>)[key];
+    if (typeof item === "string" && item.trim()) out[key] = item.trim().slice(0, 300);
+  }
+  return Object.keys(out).length ? out : null;
 }

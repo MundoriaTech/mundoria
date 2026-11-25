@@ -13,6 +13,7 @@ import { LANDING_NAV_BLOCK } from "@/components/marketing/landing/nav-metrics";
 import { FieldError } from "@/components/shared/action-error";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { getAttribution } from "@/lib/analytics/attribution";
 
 const HERO_IMAGE = "/images/marketing/landing/residential-hero.jpg";
 const BOOK_HREF = "/booking/new?category=residential";
@@ -90,9 +91,10 @@ export function CallbackOfferPage({ copy }: { copy: CallbackOfferCopy }) {
           fullName,
           phone: nationalNumber,
           source: copy.source,
-          utmCampaign: searchParams.get("utm_campaign"),
-          utmMedium: searchParams.get("utm_medium"),
-          utmSource: searchParams.get("utm_source"),
+          attribution: getAttribution(),
+          utmCampaign: searchParams.get("utm_campaign") ?? getAttribution().utm_campaign ?? null,
+          utmMedium: searchParams.get("utm_medium") ?? getAttribution().utm_medium ?? null,
+          utmSource: searchParams.get("utm_source") ?? getAttribution().utm_source ?? null,
         }),
       });
       const payload = (await response.json().catch(() => null)) as {

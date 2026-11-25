@@ -167,6 +167,18 @@ export async function PATCH(
     }
   }
 
+  // Someone spoke to them: a lead still at "new" is now "contacted".
+  if (callChanged && parseCallStatus(saved.call_status) === "spoke" && !outcomeChanged) {
+    const automation = await findLead({ email: saved.email as string, phone: saved.phone as string });
+    if (automation && automation.status === "new") {
+      await updateLead(
+        automation,
+        { status: "contacted" },
+        { actorId: auth.profile.id, summary: "Callback desk: spoke to them", type: "callback_desk.spoke" },
+      );
+    }
+  }
+
   if (important) {
     const bits = [
       callChanged

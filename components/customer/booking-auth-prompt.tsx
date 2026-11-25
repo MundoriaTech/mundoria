@@ -34,6 +34,7 @@ import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { isUserRole } from "@/types/auth";
+import { getAttribution } from "@/lib/analytics/attribution";
 
 export type BookingAuthMode = "ask" | "create" | "signin";
 
@@ -176,6 +177,7 @@ export function BookingAuthPrompt({
     try {
       const response = await fetch("/api/auth/signup", {
         body: JSON.stringify({
+          attribution: getAttribution(),
           email: email.trim(),
           full_name: fullName.trim(),
           marketing_opt_in: marketingOptIn,

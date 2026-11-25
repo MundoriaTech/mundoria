@@ -87,6 +87,7 @@ import { trackClientActivity } from "@/lib/analytics/track-client";
 import { createBrowserClient } from "@/lib/supabase/client";
 import {
   composeBookingNotes,
+  SPECIAL_INSTRUCTIONS_MAX,
   defaultServiceForCategory,
   durationSummary,
   formatBookingDate,
@@ -3825,6 +3826,7 @@ function RecoveryPreferencesStep({
         </span>
         <textarea
           className="mt-2 min-h-[110px] w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] focus:ring-2"
+          maxLength={SPECIAL_INSTRUCTIONS_MAX}
           onChange={(event) => update("specialInstructions", event.target.value)}
           placeholder="e.g. fragrance-free only, avoid bleach, leave bedroom door closed…"
           value={draft.specialInstructions}
@@ -4884,6 +4886,7 @@ function CheckoutStep({
         >
           <textarea
             id="checkout-special-requirements"
+            maxLength={SPECIAL_INSTRUCTIONS_MAX}
             onChange={(event) =>
               update("specialInstructions", event.target.value)
             }

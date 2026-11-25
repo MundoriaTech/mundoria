@@ -18,6 +18,7 @@ import type { AdminCleaner } from "@/types/admin";
 const STATUS_TABS = [
   { value: "all", label: "All" },
   { value: "pending", label: "Needs review" },
+  { value: "not_applied", label: "Not applied yet" },
   { value: "in_training", label: "On hold" },
   { value: "certified", label: "Approved" },
   { value: "active", label: "Legacy" },
@@ -68,8 +69,11 @@ export function CleanersTable({
         const areas = workingAreas[cleaner.id];
         return (
           (tab === "all" ||
-            (tab === "pending" && status === "pending") ||
-            status === tab) &&
+            // Applied and waiting; people who signed up but never finished the
+            // application have their own tab.
+            (tab === "pending" && status === "pending" && cleaner.cleaner_profiles?.onboarding_complete !== false) ||
+            (tab === "not_applied" && status === "pending" && cleaner.cleaner_profiles?.onboarding_complete === false) ||
+            (tab !== "pending" && tab !== "not_applied" && status === tab)) &&
           matchesCleanerSearch(cleaner, areas, search) &&
           (!tier || cleaner.cleaner_profiles?.tier === tier) &&
           (!area || areas?.some((prefix) => prefix.startsWith(area.toUpperCase())))

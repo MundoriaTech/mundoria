@@ -4,6 +4,7 @@ import {
   CustomerBookingsPanel,
   type AdminCustomerBookingRow,
 } from "@/components/admin/customer-bookings-panel";
+import { attributionLine } from "@/components/admin/callback-lead-context";
 import { DetailSection } from "@/components/admin/detail-section";
 import { RemoveUserButton } from "@/components/admin/remove-user-button";
 import {
@@ -152,6 +153,8 @@ export default async function AdminCustomerPage({
               .map((key) => `${key === "sms" ? "Text" : humanize(key)}: ${prefs[key] === false ? "off" : "on"}`)
               .join(" · "),
           },
+          { label: "Ad / first visit", value: attributionLine(meta.attribution as Record<string, unknown> | null) },
+          { label: "Referral code typed at sign-up", value: typeof meta.referral_code_entered === "string" ? meta.referral_code_entered : null },
           {
             label: "Referred by",
             value: referrer ? (

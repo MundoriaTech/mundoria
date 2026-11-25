@@ -27,6 +27,7 @@ import {
 } from "@/lib/auth/uk-phone";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/types/auth";
+import { getAttribution } from "@/lib/analytics/attribution";
 
 interface SignupResponse {
   devCode?: string;
@@ -215,6 +216,7 @@ export function SignupForm({
       const response = await fetch("/api/auth/signup", {
         body: JSON.stringify({
           ...values,
+          attribution: getAttribution(),
           next: nextPath,
           role,
         }),

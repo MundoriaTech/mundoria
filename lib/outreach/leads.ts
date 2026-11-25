@@ -46,7 +46,7 @@ export const CONSENT_WORDING = {
     "Started a booking and gave an email address. Follow-ups about that booking, with an unsubscribe link in every email (PECR soft opt-in).",
   callbackRequest:
     "By continuing you agree we may contact you about this offer. (Callback request form: phone call, text and email about the request.)",
-  marketingOptIn: "Ticked: send me offers and cleaning tips by email.",
+  marketingOptIn: "Ticked: I agree to receive Mundoria’s offers and news by email and SMS.",
 } as const;
 
 type UpsertLeadInput = {

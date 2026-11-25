@@ -76,7 +76,7 @@ export default async function AdminAbandonedBookingsPage() {
     admin
       .from("booking_drafts")
       .select(
-        "id,email,user_id,current_step,reminder_count,last_reminded_at,created_at,updated_at,completed_at,completed_booking_id,draft,prepared_by,prepared_at",
+        "id,email,user_id,current_step,reminder_count,last_reminded_at,created_at,updated_at,completed_at,completed_booking_id,draft,prepared_by,prepared_at,marketing_opt_in",
       )
       .order("updated_at", { ascending: false })
       .range(from, to),
@@ -104,7 +104,7 @@ export default async function AdminAbandonedBookingsPage() {
       completed_booking_id: row.completed_booking_id as string | null,
       created_at: row.created_at as string,
       current_step: row.current_step as string | null,
-      details: draftDetails(draft),
+      details: [...draftDetails(draft), ...(row.marketing_opt_in ? ["Marketing emails: opted in"] : [])],
       email: row.email as string,
       full_name: person?.full_name ?? null,
       id: row.id as string,

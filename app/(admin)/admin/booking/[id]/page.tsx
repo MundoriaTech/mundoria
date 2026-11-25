@@ -124,7 +124,19 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     const intent = await getStripe().paymentIntents.retrieve(booking.stripe_payment_intent_id);
     payment = { id: intent.id, status: intent.status, amount: intent.amount, amount_capturable: intent.amount_capturable };
   }
-  const address = (booking.address ?? null) as Address | null;
+  const liveAddress = (booking.address ?? null) as Address | null;
+  // Prefer the rooms captured when this booking was made; older bookings
+  // (before the snapshot) fall back to the address as it is today.
+  const hasSnapshot = booking.booked_num_bedrooms != null || booking.booked_num_bathrooms != null;
+  const address = liveAddress
+    ? ({
+        ...liveAddress,
+        num_bathrooms: booking.booked_num_bathrooms ?? liveAddress.num_bathrooms,
+        num_bedrooms: booking.booked_num_bedrooms ?? liveAddress.num_bedrooms,
+        num_other_rooms: booking.booked_num_other_rooms ?? liveAddress.num_other_rooms,
+        property_type: booking.booked_property_type ?? liveAddress.property_type,
+      } as Address)
+    : null;
   const addOnRows = addOns ?? [];
   const durationHours =
     booking.estimated_duration_hours != null
@@ -151,7 +163,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       : null;
   const extraRows: [string, string][] = [
     booking.recently_moved != null
-      ? ["Recently moved", booking.recently_moved ? "Yes" : "No"]
+      ? ["Moving in or out", booking.recently_moved ? "Yes (from the service chosen)" : "No"]
       : null,
     conditionLabel ? ["Access / first-clean need", conditionLabel] : null,
     allocated > 1 ? ["Cleaners on this visit", String(allocated)] : null,
@@ -421,6 +433,12 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
               { label: "Service group", value: humanize(booking.service_category) },
               { label: "Postcode", value: address?.postcode ?? null },
               { label: "Property type", value: humanize(address?.property_type) },
+              {
+                label: "Rooms shown",
+                value: hasSnapshot
+                  ? `As booked${Array.isArray(booking.booked_other_room_types) && booking.booked_other_room_types.length ? ` · other rooms: ${booking.booked_other_room_types.join(", ")}` : ""}`
+                  : "From the address today (booked before rooms were saved per booking)",
+              },
               { label: "Address label", value: address?.label ?? null },
               {
                 label: "Map",

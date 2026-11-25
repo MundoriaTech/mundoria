@@ -10,6 +10,7 @@ import { FormField } from "@/components/auth/form-field";
 import { AppModal } from "@/components/shared/app-modal";
 import { FieldError } from "@/components/shared/action-error";
 import { Input } from "@/components/ui/input";
+import { getAttribution } from "@/lib/analytics/attribution";
 
 const STORAGE_KEY = "mundoria_free_hour_popup_dismissed_until";
 const DELAY_MS = 10_000;
@@ -71,9 +72,10 @@ export function FreeHourOfferPopup({ bookingHref }: { bookingHref: string }) {
           email,
           phone: nationalNumber,
           source: "site-popup-1h-free",
-          utmCampaign: searchParams.get("utm_campaign"),
-          utmMedium: searchParams.get("utm_medium"),
-          utmSource: searchParams.get("utm_source"),
+          attribution: getAttribution(),
+          utmCampaign: searchParams.get("utm_campaign") ?? getAttribution().utm_campaign ?? null,
+          utmMedium: searchParams.get("utm_medium") ?? getAttribution().utm_medium ?? null,
+          utmSource: searchParams.get("utm_source") ?? getAttribution().utm_source ?? null,
         }),
       });
       const payload = (await response.json().catch(() => null)) as {
