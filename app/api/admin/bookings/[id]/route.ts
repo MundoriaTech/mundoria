@@ -7,6 +7,7 @@ import {
   recordArrival,
   recordCheckout,
 } from "@/lib/bookings/geofence";
+import { offerAdminAssignedJob } from "@/lib/matching/admin-offer";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
@@ -308,6 +309,16 @@ export async function POST(
   ) {
     // Cancelling here releases the card hold (no charge).
     await refundBookingPayment(params.id).catch(() => undefined);
+  }
+
+  // A hand-picked cleaner gets a live offer to accept, plus a push and email.
+  if (action === "reassign" && cleanerId) {
+    await offerAdminAssignedJob(params.id, cleanerId).catch(() => undefined);
+  }
+  if (action === "assignTeam" && !booking.cleaner_id && updates.cleaner_id) {
+    await offerAdminAssignedJob(params.id, String(updates.cleaner_id)).catch(
+      () => undefined,
+    );
   }
 
   let matchResult: unknown = null;

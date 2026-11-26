@@ -26,6 +26,7 @@ import {
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { splitBookingAmount } from "@/lib/payments/cleaner-pay";
 import { getStripe } from "@/lib/stripe/server";
 import { sendZohoBookingEmailPreview, usesZohoBookingEmailPreview } from "@/lib/zoho/booking-email";
 import { upsertZohoContact } from "@/lib/zoho/crm";
@@ -145,20 +146,7 @@ export async function POST(request: Request) {
   const selectedAddOnDefs = SERVICE_ADD_ONS.filter((addOn) =>
     parsed.data.selectedAddOns.includes(addOn.id),
   );
-  const [{ data: commissionRow }, pricing] = await Promise.all([
-    admin
-      .from("platform_settings")
-      .select("platform_commission_percent")
-      .eq("id", true)
-      .maybeSingle(),
-    loadServicePricing(),
-  ]);
-  const commissionPercent = Math.min(
-    100,
-    Math.max(0, Number(commissionRow?.platform_commission_percent ?? 20)),
-  );
-  const platformAmount = Math.round(amountPence * (commissionPercent / 100));
-  const cleanerAmount = amountPence - platformAmount;
+  const pricing = await loadServicePricing();
   const officeQuote =
     parsed.data.serviceType === "office" && parsed.data.officeSpaces.length
       ? calculateOfficeQuote(
@@ -233,8 +221,12 @@ export async function POST(request: Request) {
   const bookingRow = {
       address_id: parsed.data.addressId,
       allocated_cleaners: officeQuote?.allocatedCleaners ?? 1,
-      amount_cleaner: cleanerAmount,
-      amount_platform: platformAmount,
+      // £13 an hour for every hour worked, free first-visit hours included.
+      ...splitBookingAmount(amountPence, {
+        allocatedCleaners: officeQuote?.allocatedCleaners ?? 1,
+        cleanerHours: officeQuote?.cleanerHours ?? null,
+        estimatedDurationHours,
+      }),
       amount_total: amountPence,
       discount_pence: Math.max(0, Number(metadata.discount_pence ?? 0) || 0),
       offer_kind: metadata.offer_kind || null,

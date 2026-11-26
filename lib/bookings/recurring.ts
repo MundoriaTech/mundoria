@@ -3,6 +3,7 @@ import { addDays, addMonths, addWeeks, format, parseISO } from "date-fns";
 import { NO_CLEANER_REASON } from "@/lib/bookings/no-cleaner";
 import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { schedulePriceMultiplier } from "@/lib/customer/services";
+import { splitBookingAmount } from "@/lib/payments/cleaner-pay";
 import type { createAdminClient } from "@/lib/supabase/admin";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -68,8 +69,7 @@ function followOnRow(
   return {
     address_id: parent.address_id,
     allocated_cleaners: parent.allocated_cleaners ?? 1,
-    amount_cleaner: parent.amount_cleaner,
-    amount_platform: parent.amount_platform,
+    ...followOnSplit(parent, Number(parent.amount_total ?? 0)),
     amount_total: parent.amount_total,
     cleaning_standard: parent.cleaning_standard,
     commercial_spaces: parent.commercial_spaces,
@@ -114,6 +114,15 @@ function followOnCleanerHours(parent: ParentBooking) {
   return Math.max(0, Number(billed.toFixed(2)));
 }
 
+/** £13 an hour for the hours a follow-on visit actually books. */
+function followOnSplit(parent: ParentBooking, totalPence: number) {
+  return splitBookingAmount(totalPence, {
+    allocatedCleaners: parent.allocated_cleaners,
+    cleanerHours: followOnCleanerHours(parent),
+    estimatedDurationHours: followOnDurationHours(parent),
+  });
+}
+
 type AddOnRow = { add_on_id: string; amount: number | null; label: string | null };
 
 /**
@@ -138,16 +147,13 @@ async function followOnPricing(admin: AdminClient, parent: ParentBooking) {
     parent.scheduled_start_time?.slice(0, 5),
     pricing,
   );
-  const platformShare =
-    parentTotal > 0 ? Number(parent.amount_platform ?? 0) / parentTotal : 0;
 
   return {
     addOns: rows,
     amountsFor(date: string) {
       if (!parentTotal) {
         return {
-          amount_cleaner: parent.amount_cleaner,
-          amount_platform: parent.amount_platform,
+          ...followOnSplit(parent, Number(parent.amount_total ?? 0)),
           amount_total: parent.amount_total,
         };
       }
@@ -162,12 +168,7 @@ async function followOnPricing(admin: AdminClient, parent: ParentBooking) {
         pricing,
       );
       const total = Math.round((labour * mult) / (parentMult || 1)) + addOnTotal;
-      const platform = Math.round(total * platformShare);
-      return {
-        amount_cleaner: total - platform,
-        amount_platform: platform,
-        amount_total: total,
-      };
+      return { ...followOnSplit(parent, total), amount_total: total };
     },
   };
 }

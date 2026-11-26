@@ -8,6 +8,7 @@ import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ExtraTimeRow } from "@/lib/bookings/extra-time";
+import { extraTimeCleanerPence } from "@/lib/payments/cleaner-pay";
 
 const OPTIONS = [30, 60, 90] as const;
 
@@ -30,14 +31,17 @@ const STATUS: Record<ExtraTimeRow["status"], string> = {
   pending: "Waiting for the customer",
 };
 
-function History({ rows }: { rows: ExtraTimeRow[] }) {
+function History({ earnings = false, rows }: { earnings?: boolean; rows: ExtraTimeRow[] }) {
   if (!rows.length) return null;
   return (
     <ul className="mt-3 space-y-1.5 text-sm">
       {rows.map((row) => (
         <li className="flex flex-wrap justify-between gap-2" key={row.id}>
           <span>
-            +{label(row.minutes)} · {money(row.amount_pence)}
+            +{label(row.minutes)} ·{" "}
+            {earnings
+              ? `you earn ${money(extraTimeCleanerPence(row.minutes))}`
+              : money(row.amount_pence)}
           </span>
           <span className="text-muted-foreground">{STATUS[row.status]}</span>
         </li>
@@ -114,7 +118,7 @@ export function CleanerExtraTime({
         </p>
       ) : null}
       {error ? <div className="mt-3"><ActionError message={error} title="Couldn’t send the request" /></div> : null}
-      <History rows={rows} />
+      <History earnings rows={rows} />
     </section>
   );
 }
