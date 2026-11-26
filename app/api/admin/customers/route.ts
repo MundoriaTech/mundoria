@@ -110,7 +110,7 @@ export async function POST(request: Request) {
   // Existing account?
   const { data: existing } = await admin
     .from("profiles")
-    .select("id,role,full_name")
+    .select("id,role,full_name,phone")
     .ilike("email", input.email)
     .maybeSingle();
   if (existing && existing.role !== "customer") {
@@ -131,6 +131,14 @@ export async function POST(request: Request) {
 
   let customerId = existing?.id as string | undefined;
   const newAccount = !existing;
+  // Existing account: fill in a missing name or phone from what the admin
+  // typed (never overwrite what the customer set themselves).
+  if (existing) {
+    const fill: Record<string, string> = {};
+    if (!String(existing.full_name ?? "").trim() && fullName) fill.full_name = fullName;
+    if (!String(existing.phone ?? "").trim() && phone) fill.phone = phone;
+    if (Object.keys(fill).length) await admin.from("profiles").update(fill).eq("id", existing.id);
+  }
   if (!customerId) {
     const { data: created, error } = await admin.auth.admin.createUser({
       email: input.email,

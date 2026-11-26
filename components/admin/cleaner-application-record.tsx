@@ -9,6 +9,11 @@ import {
   parseTransportModes,
 } from "@/lib/cleaner/onboarding-compliance";
 import { formatInterviewSlot } from "@/lib/cleaner/interview-slots";
+import {
+  SKILLS_EXAM_QUESTIONS,
+  answerIsCorrect,
+  type SkillsExamAnswer,
+} from "@/lib/cleaner/skills-exam";
 import { formatServiceName } from "@/lib/customer/services";
 import type { ServiceType } from "@/types/customer";
 
@@ -91,6 +96,7 @@ export function CleanerApplicationRecord({
   reference,
   safetyAcknowledgedAt,
   services,
+  skillsExamAnswers,
   skillsExamScore,
   transportMode,
   utrNumber,
@@ -146,6 +152,7 @@ export function CleanerApplicationRecord({
   };
   safetyAcknowledgedAt: string | null;
   services: string[];
+  skillsExamAnswers?: Record<string, SkillsExamAnswer> | null;
   skillsExamScore: number | null;
   transportMode: string | null;
   utrNumber: string | null;
@@ -291,7 +298,22 @@ export function CleanerApplicationRecord({
       facts: [
         fact(
           "Score",
-          skillsExamScore != null ? `${skillsExamScore} out of 12` : null,
+          skillsExamScore != null
+            ? `${skillsExamScore} out of ${SKILLS_EXAM_QUESTIONS.length}`
+            : null,
+        ),
+        fact(
+          "Answered wrongly",
+          skillsExamAnswers
+            ? SKILLS_EXAM_QUESTIONS.filter(
+                (question) =>
+                  !answerIsCorrect(question, skillsExamAnswers[question.id]),
+              )
+                .map((question) => question.prompt)
+                .join(" · ") || "None"
+            : skillsExamScore != null
+              ? "Not recorded (took the quiz before answers were saved)"
+              : null,
         ),
       ],
     },

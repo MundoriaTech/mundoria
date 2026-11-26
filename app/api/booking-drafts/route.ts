@@ -34,7 +34,13 @@ export async function POST(request: Request) {
       currentStep: parsed.data.currentStep ?? null,
       draft: parsed.data.draft as Record<string, unknown>,
       email: parsed.data.email,
-      marketingOptIn: parsed.data.marketingOptIn,
+      // The wizard never sends it; a signed-in customer's sign-up choice is
+      // the answer we have.
+      marketingOptIn:
+        parsed.data.marketingOptIn ??
+        (typeof user?.user_metadata?.marketing_opt_in === "boolean"
+          ? (user.user_metadata.marketing_opt_in as boolean)
+          : undefined),
       resumeToken: parsed.data.resumeToken,
       userId: user?.id ?? null,
     });

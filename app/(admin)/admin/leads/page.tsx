@@ -36,7 +36,7 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: {
     let query = admin
       .from("leads")
       .select(
-        "id,email,phone,first_name,last_name,status,source,utm_source,utm_campaign,needs_human,needs_human_reason,callback_requested_at,last_inbound_at,last_outbound_at,created_at,updated_at",
+        "id,email,phone,first_name,last_name,status,source,utm_source,utm_medium,utm_campaign,needs_human,needs_human_reason,callback_requested_at,last_inbound_at,last_outbound_at,created_at,updated_at",
       )
       .order("updated_at", { ascending: false });
     // 20%-off (Meta) leads are only for admins with that section.
@@ -71,7 +71,7 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: {
     phone: (row.phone as string | null) ?? null,
     source: row.source as string,
     status: row.status as string,
-    utm: [row.utm_source, row.utm_campaign].filter(Boolean).join(" / "),
+    utm: [row.utm_source, row.utm_medium, row.utm_campaign].filter(Boolean).join(" / "),
   }));
 
   const services = [

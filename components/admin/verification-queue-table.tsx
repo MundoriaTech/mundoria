@@ -3,10 +3,17 @@
 import Link from "next/link";
 
 import { PagedTable } from "@/components/shared/paged-list";
+import { ukDate } from "@/lib/admin/format";
 import { PAGE_SIZES } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
 
+// Flags the detail page handles separately; not real warnings.
+const HIDDEN_FLAGS = new Set(["document_reviews", "unreadable_doc_hint", "unreadable_doc_kind"]);
+
 const CHECKS = [
+  { column: "id_document_status", label: "ID" },
+  { column: "right_to_work_status", label: "Right to work" },
+  { column: "headshot_status", label: "Headshot" },
   { column: "utr_document_status", label: "UTR" },
   { column: "dbs_document_status", label: "DBS" },
   { column: "insurance_status", label: "Insurance" },
@@ -14,7 +21,10 @@ const CHECKS = [
 
 export type VerificationQueueRow = {
   dbs_document_status: string | null;
+  headshot_status: string | null;
   id: string;
+  id_document_status: string | null;
+  right_to_work_status: string | null;
   insurance_expiry_date: string | null;
   insurance_status: string | null;
   profile:
@@ -36,16 +46,16 @@ export function VerificationQueueTable({
     <div className="overflow-x-auto rounded-xl border bg-card">
       <PagedTable
         empty="Nothing waiting for verification."
-        headers={["Cleaner", "UTR", "DBS", "Insurance", "Flags", "Updated"]}
+        headers={["Cleaner", ...CHECKS.map((check) => check.label), "Flags", "Updated"]}
         items={rows}
-        minWidthClassName="min-w-[720px]"
+        minWidthClassName="min-w-[960px]"
         pageSize={PAGE_SIZES.admin}
         renderRow={(row) => {
           const profile = Array.isArray(row.profile)
             ? row.profile[0]
             : row.profile;
           const flags = Object.entries(row.verification_flags ?? {})
-            .filter(([, on]) => Boolean(on))
+            .filter(([flag, on]) => Boolean(on) && !HIDDEN_FLAGS.has(flag))
             .map(([flag]) => flag.replaceAll("_", " "));
           return (
             <tr className="border-b last:border-0" key={row.id}>
@@ -87,12 +97,7 @@ export function VerificationQueueTable({
                 )}
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                {row.updated_at
-                  ? new Date(row.updated_at).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                    })
-                  : "-"}
+                {row.updated_at ? ukDate(row.updated_at) : "-"}
               </td>
             </tr>
           );

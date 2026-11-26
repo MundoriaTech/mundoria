@@ -311,6 +311,9 @@ export async function captureSignupLead(input: {
   marketingOptIn: boolean;
   phone?: string;
   profileId: string;
+  utmCampaign?: string | null;
+  utmMedium?: string | null;
+  utmSource?: string | null;
 }) {
   const [firstName, ...rest] = input.fullName.trim().split(/\s+/);
   const result = await upsertLead({
@@ -320,10 +323,15 @@ export async function captureSignupLead(input: {
     phone: input.phone,
     profileId: input.profileId,
     source: "signup",
+    utmCampaign: input.utmCampaign,
+    utmMedium: input.utmMedium,
+    utmSource: input.utmSource,
   });
   if (!result) return;
   if (input.marketingOptIn) {
     await recordConsent(result.lead.id, "email", true, "opt_in", CONSENT_WORDING.marketingOptIn, "/signup");
+    // The sign-up tick-box offers news "by email and SMS".
+    if (input.phone) await recordConsent(result.lead.id, "sms", true, "opt_in", CONSENT_WORDING.marketingOptIn, "/signup");
     // First email a day after signup, only if they still haven't booked.
     await enrollLead(result.lead, "signup_no_booking", {}, { exclusive: true, once: true, startDelayMinutes: 24 * 60 });
   }

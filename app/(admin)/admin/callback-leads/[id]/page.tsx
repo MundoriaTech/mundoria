@@ -3,6 +3,7 @@ import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import { requireAdminArea } from "@/lib/admin/page-access";
 import { notFound } from "next/navigation";
 
+import { CallbackLeadContext } from "@/components/admin/callback-lead-context";
 import { CallbackLeadDesk } from "@/components/admin/callback-lead-desk";
 import { mapCallbackLeadRow } from "@/lib/admin/callback-desk";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -31,6 +32,7 @@ export default async function AdminCallbackLeadPage({
     <div className="min-w-0 space-y-4">
       {/* The admin shell already shows "Back to callback leads" here. */}
       <CallbackLeadDesk row={row} />
+      <CallbackLeadContext callbackId={params.id} />
     </div>
   );
 }

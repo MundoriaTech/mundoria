@@ -75,7 +75,8 @@ export async function upsertBookingDraftLead(input: {
           current_step: input.currentStep ?? null,
           draft: input.draft,
           email,
-          marketing_opt_in: Boolean(input.marketingOptIn),
+          // Only change the marketing choice when we actually know it.
+          ...(input.marketingOptIn === undefined ? {} : { marketing_opt_in: input.marketingOptIn }),
           updated_at: now,
           ...(input.userId ? { user_id: input.userId } : {}),
         })

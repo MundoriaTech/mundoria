@@ -227,9 +227,10 @@ export async function POST(request: Request) {
     }
   }
 
-  const { data: booking, error } = await admin
-    .from("bookings")
-    .insert({
+  // "Recently moved" is only asked implicitly by the move-in/move-out and
+  // end-of-tenancy services; on any other service it is not an answer.
+  const movingService = /move|tenancy/i.test(parsed.data.serviceType);
+  const bookingRow = {
       address_id: parsed.data.addressId,
       allocated_cleaners: officeQuote?.allocatedCleaners ?? 1,
       amount_cleaner: cleanerAmount,
@@ -246,10 +247,11 @@ export async function POST(request: Request) {
       is_recurring: parsed.data.isRecurring,
       payment_status: "unpaid",
       promo_code_id: metadata.promo_code_id || null,
-      prefer_same_cleaner: Boolean(preferredCleanerId),
+      // The customer's wish, even when there is no past cleaner to pin yet.
+      prefer_same_cleaner: Boolean(parsed.data.preferSameCleaner || preferredCleanerId),
       preferred_cleaner_id: preferredCleanerId,
       property_condition: parsed.data.propertyCondition,
-      recently_moved: parsed.data.recentlyMoved,
+      recently_moved: movingService ? parsed.data.recentlyMoved : null,
       recommendation_outcome: parsed.data.recommendationOutcome,
       recommended_cleaning_standard: parsed.data.recommendedCleaningStandard,
       recommended_service_type: parsed.data.recommendedServiceType,
@@ -265,9 +267,29 @@ export async function POST(request: Request) {
       status: "pending_match",
       stripe_payment_method_id: paymentMethodId,
       stripe_setup_intent_id: setupIntent.id,
-    })
+  };
+  // Rooms and property type as they were when booked; the address row is
+  // shared and edited by later bookings.
+  const snapshot = {
+    booked_num_bathrooms: address.num_bathrooms ?? null,
+    booked_num_bedrooms: address.num_bedrooms ?? null,
+    booked_num_other_rooms: address.num_other_rooms ?? null,
+    booked_other_room_types: parsed.data.otherRoomTypes.length ? parsed.data.otherRoomTypes : null,
+    booked_property_type: address.property_type ?? null,
+  };
+  let { data: booking, error } = await admin
+    .from("bookings")
+    .insert({ ...bookingRow, ...snapshot })
     .select()
     .single();
+  // Before the snapshot migration is applied, book without it.
+  if (error && (error.code === "PGRST204" || error.code === "42703")) {
+    ({ data: booking, error } = await admin
+      .from("bookings")
+      .insert(bookingRow)
+      .select()
+      .single());
+  }
 
   if (error) {
     const { data: raced } = await admin

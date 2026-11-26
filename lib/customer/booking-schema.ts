@@ -100,7 +100,8 @@ export const bookingDraftSchema = z.object({
   specialInstructions: z
     .string()
     .trim()
-    .max(2000, "Please keep special instructions under 2,000 characters."),
+    // 2,000 typed characters plus the pets / backup-times lines composeBookingNotes adds.
+    .max(2600, "Please keep special instructions under 2,000 characters."),
   officeSpaces: z
     .array(
       z.object({

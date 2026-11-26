@@ -527,6 +527,13 @@ export function AddressForm({
         <ActionError message={error} title="Couldn’t save this address" />
       ) : null}
 
+      {/* Asked first: a guest's address is saved as soon as they pick it. */}
+      {!bare ? (
+        <PropertyTypeField
+          onChange={(type) => update("property_type", type)}
+          value={values.property_type}
+        />
+      ) : null}
       <div className="space-y-2">
         {mapsKey ? (
           <AddressAutocompleteInput
@@ -1013,6 +1020,46 @@ function AddressAutocompleteInput({
             document.body,
           )
         : null}
+    </div>
+  );
+}
+
+const PROPERTY_TYPES = [
+  { label: "House", value: "house" },
+  { label: "Flat", value: "flat" },
+  { label: "Office", value: "office" },
+  { label: "Other", value: "other" },
+] as const;
+
+/** Lets the customer say what the property is (it used to be saved as "flat" without asking). */
+function PropertyTypeField({
+  onChange,
+  value,
+}: {
+  onChange: (type: AddressFormValues["property_type"]) => void;
+  value: AddressFormValues["property_type"];
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium">Property type</p>
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Property type">
+        {PROPERTY_TYPES.map((type) => (
+          <button
+            aria-checked={value === type.value}
+            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+              value === type.value
+                ? "border-[#1c133b] bg-[#1c133b] text-white"
+                : "border-transparent bg-[#efe9df] text-[#5a5470] hover:bg-[#e8e0d0]"
+            }`}
+            key={type.value}
+            onClick={() => onChange(type.value)}
+            role="radio"
+            type="button"
+          >
+            {type.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

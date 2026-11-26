@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { AdminBackLink } from "@/components/admin/admin-back-link";
+import { CallbackLeadContext } from "@/components/admin/callback-lead-context";
 import { CallbackLeadDesk } from "@/components/admin/callback-lead-desk";
 import { mapCallbackLeadRow } from "@/lib/admin/callback-desk";
 import { requireAdminArea } from "@/lib/admin/page-access";
@@ -25,6 +26,7 @@ export default async function AdminMetaLeadPage({ params }: { params: { id: stri
     <div className="min-w-0 space-y-4">
       <AdminBackLink href="/admin/meta-leads" label="Meta 20% leads" />
       <CallbackLeadDesk row={mapCallbackLeadRow(data as Record<string, unknown>)} />
+      <CallbackLeadContext callbackId={params.id} />
     </div>
   );
 }

@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 function formatDate(iso: string | null) {
   if (!iso) return "-";
   return new Date(iso).toLocaleDateString("en-GB", {
+    timeZone: "Europe/London",
     day: "numeric",
     month: "short",
     year: "numeric",

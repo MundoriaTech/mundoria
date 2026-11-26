@@ -8,7 +8,25 @@ import { outreachEnabled } from "@/lib/outreach/config";
 import { captureCallbackLead } from "@/lib/outreach/engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+const attributionSchema = z
+  .object({
+    fbclid: z.string().max(200).optional(),
+    gclid: z.string().max(200).optional(),
+    landing_path: z.string().max(200).optional(),
+    referrer: z.string().max(300).optional(),
+    utm_campaign: z.string().max(200).optional(),
+    utm_content: z.string().max(200).optional(),
+    utm_medium: z.string().max(200).optional(),
+    utm_source: z.string().max(200).optional(),
+    utm_term: z.string().max(200).optional(),
+    captured_at: z.string().max(40).optional(),
+  })
+  .partial()
+  .optional()
+  .nullable();
+
 const schema = z.object({
+  attribution: attributionSchema,
   availableIn10Min: z.boolean().optional(),
   email: z.string().trim().email("Enter a valid email address").max(254),
   firstName: z
@@ -78,7 +96,7 @@ export async function POST(request: Request) {
   const lastName = (parsed.data.lastName.trim() || fromFull.lastName || "Lead").slice(0, 80);
 
   const admin = createAdminClient();
-  const { data: callback, error } = await admin.from("callback_leads").insert({
+  const callbackRow = {
     available_in_10_min: parsed.data.availableIn10Min ?? false,
     email: parsed.data.email.toLowerCase(),
     first_name: firstName,
@@ -89,7 +107,17 @@ export async function POST(request: Request) {
     utm_campaign: parsed.data.utmCampaign?.trim() || null,
     utm_medium: parsed.data.utmMedium?.trim() || null,
     utm_source: parsed.data.utmSource?.trim() || null,
-  }).select("id").single();
+  };
+  const attribution = parsed.data.attribution && Object.keys(parsed.data.attribution).length ? parsed.data.attribution : null;
+  let { data: callback, error } = await admin
+    .from("callback_leads")
+    .insert({ ...callbackRow, attribution })
+    .select("id")
+    .single();
+  // Before the attribution migration is applied, save without it.
+  if (error && (error.code === "PGRST204" || error.code === "42703")) {
+    ({ data: callback, error } = await admin.from("callback_leads").insert(callbackRow).select("id").single());
+  }
 
   if (error || !callback) {
     return NextResponse.json(

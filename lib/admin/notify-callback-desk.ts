@@ -1,11 +1,8 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { callbackDisplayName } from "@/lib/admin/callback-desk";
 import { isMetaOfferSource } from "@/lib/bookings/percent-offer";
 import { alertAdmins } from "@/lib/notifications/admin";
-
-function leadName(row: { first_name: string; last_name: string }) {
-  return `${row.first_name} ${row.last_name}`.trim() || "This person";
-}
 
 export async function notifyCallbackDeskChange(input: {
   actorEmail?: string | null;
@@ -23,7 +20,9 @@ export async function notifyCallbackDeskChange(input: {
   summary: string;
 }) {
   const meta = isMetaOfferSource(input.source);
-  const name = leadName(input.lead);
+  const display = callbackDisplayName(input.lead);
+  // Popup requests carry no name: lead with the phone number instead.
+  const name = display === "No name given" ? `Someone (${input.lead.phone})` : display;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.mundoria.co.uk";
   const link = `${appUrl.replace(/\/$/, "")}/admin/${meta ? "meta-leads" : "callback-leads"}/${input.lead.id}`;
   const title = input.isNew

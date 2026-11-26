@@ -25,6 +25,7 @@ import {
   hardDeleteBlockMessage,
 } from "@/lib/admin/delete-user";
 import { adminCleanerStatusLabel } from "@/lib/admin/cleaner-status";
+import { coverAmount, ukDate } from "@/lib/admin/format";
 import {
   adminVisibleVerificationFlags,
   documentReviewNoteFor,
@@ -363,10 +364,10 @@ export default async function AdminCleanerPage({
               }),
               cleaner.insurance_provider,
               cleaner.insurance_cover_amount
-                ? `£${cleaner.insurance_cover_amount}`
+                ? coverAmount(cleaner.insurance_cover_amount)
                 : null,
               cleaner.insurance_expiry_date
-                ? `expires ${cleaner.insurance_expiry_date}`
+                ? `expires ${ukDate(cleaner.insurance_expiry_date)}`
                 : null,
             ]
               .filter(Boolean)
@@ -523,7 +524,7 @@ export default async function AdminCleanerPage({
               ),
           },
           {
-            label: "Equipment",
+            label: "Equipment check",
             value: `${
               cleaner.equipment_status === "update_required"
                 ? verificationLifecycleLabel(cleaner.equipment_status, null, {
@@ -539,28 +540,18 @@ export default async function AdminCleanerPage({
             }`,
           },
           {
-            label: "Specialist skills",
-            value: (cleaner.skills_assessment_status ?? "not set").replaceAll(
-              "_",
-              " ",
-            ),
-          },
-          {
-            label: "Emergency contact",
-            value: cleaner.emergency_contact?.name
-              ? `${cleaner.emergency_contact.name}${
-                  cleaner.emergency_contact.mobile
-                    ? ` · ${cleaner.emergency_contact.mobile}`
-                    : ""
-                }`
-              : "Not provided",
+            label: "Skills assessment",
+            value:
+              cleaner.skills_assessment_status === "additional_assessment"
+                ? "Extra check needed (under 1 year's experience)"
+                : (cleaner.skills_assessment_status ?? "not set").replaceAll("_", " "),
           },
           {
             label: "Agreements",
             value:
               Array.isArray(cleaner.agreement_acceptances) &&
               cleaner.agreement_acceptances.length > 0
-                ? `${cleaner.agreement_acceptances.length} accepted`
+                ? `${cleaner.agreement_acceptances.length} accepted (details below)`
                 : "None logged",
           },
         ]}
@@ -614,6 +605,9 @@ export default async function AdminCleanerPage({
         }}
         safetyAcknowledgedAt={cleaner.safety_acknowledged_at}
         services={(services ?? []).map((row) => row.service_type)}
+        skillsExamAnswers={
+          (cleaner.skills_exam_answers as Record<string, number | number[]> | null) ?? null
+        }
         skillsExamScore={cleaner.skills_exam_score}
         transportMode={cleaner.transport_mode}
         utrNumber={cleaner.utr_number}
@@ -627,7 +621,7 @@ export default async function AdminCleanerPage({
       <PagedHistoryTable
         headers={["Date", "Event", "Score", "Tier change", "Notes"]}
         rows={(medallionEvents ?? []).map((item) => [
-          new Date(item.created_at).toLocaleDateString("en-GB"),
+          ukDate(item.created_at),
           item.event_type.replaceAll("_", " "),
           `${item.score_before ?? "-"} → ${item.score_after ?? "-"}`,
           `${item.tier_before ?? "-"} → ${item.tier_after ?? "-"}`,
@@ -658,7 +652,7 @@ export default async function AdminCleanerPage({
       <PagedHistoryTable
         headers={["Date", "Mood", "Internal score", "Status", "Comment"]}
         rows={(ratings ?? []).map((item) => [
-          new Date(item.created_at).toLocaleDateString("en-GB"),
+          ukDate(item.created_at),
           item.mood ?? item.overall_score,
           item.internal_score ?? "-",
           item.application_status ?? "applied",

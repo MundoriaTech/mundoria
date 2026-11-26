@@ -13,13 +13,16 @@ import { OperationsMap } from "@/components/admin/operations-map";
 import { RematchButton } from "@/components/admin/rematch-button";
 import { RevenueChart } from "@/components/admin/revenue-chart";
 import { loadAdminUserCounts } from "@/lib/admin/user-counts";
+import { META_OFFER_SOURCE } from "@/lib/bookings/percent-offer";
 import { formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AdminBooking, RevenuePoint } from "@/types/admin";
+import { ukDateTime } from "@/lib/admin/format";
 
 export default async function AdminDashboardPage() {
   const admin = createAdminClient();
-  const today = new Date().toISOString().slice(0, 10);
+  // UK calendar day, not UTC (they differ for an hour after midnight in summer).
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
   const chartFrom = new Date();
   chartFrom.setDate(chartFrom.getDate() - 90);
   const chartFromIso = chartFrom.toISOString().slice(0, 10);
@@ -40,6 +43,11 @@ export default async function AdminDashboardPage() {
     { count: pendingReviewCount },
     { data: ratings },
     people,
+    { count: callbacksToCall },
+    { count: newLeadsWeek },
+    { count: openDrafts },
+    { count: openSupport },
+    { count: openSafety },
   ] = await Promise.all([
     admin
       .from("bookings")
@@ -110,6 +118,22 @@ export default async function AdminDashboardPage() {
       .eq("application_status", "applied")
       .limit(500),
     loadAdminUserCounts(),
+    admin
+      .from("callback_leads")
+      .select("id", { count: "exact", head: true })
+      .eq("call_status", "to_call")
+      .neq("source", META_OFFER_SOURCE),
+    admin
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+    admin
+      .from("booking_drafts")
+      .select("id", { count: "exact", head: true })
+      .is("completed_at", null)
+      .gte("updated_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+    admin.from("support_conversations").select("id", { count: "exact", head: true }).eq("status", "open"),
+    admin.from("booking_safety_alerts").select("id", { count: "exact", head: true }).eq("status", "open"),
   ]);
 
   const todayBookings = todayBookingsData ?? [];
@@ -134,6 +158,7 @@ export default async function AdminDashboardPage() {
   const alerts = rematchAlerts ?? [];
   const mapBookings = (liveMapBookings ?? []) as AdminBooking[];
   const weekday = new Date().toLocaleDateString("en-GB", {
+    timeZone: "Europe/London",
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -192,6 +217,25 @@ export default async function AdminDashboardPage() {
               <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1E1848]">{value}</p>
             </div>
           </div>
+        ))}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {[
+          { href: "/admin/callback-leads", label: "Callbacks to ring", value: callbacksToCall ?? 0 },
+          { href: "/admin/leads", label: "New leads (7 days)", value: newLeadsWeek ?? 0 },
+          { href: "/admin/abandoned-bookings", label: "Unfinished bookings (7 days)", value: openDrafts ?? 0 },
+          { href: "/admin/inbox", label: "Open support chats", value: openSupport ?? 0 },
+          { href: "/admin/safety", label: "Open safety alerts", value: openSafety ?? 0 },
+        ].map((tile) => (
+          <Link
+            className="rounded-[1.25rem] border border-[#EDEAF5] bg-white p-5 shadow-[0_4px_12px_rgba(82,64,150,0.05)] transition hover:border-[#524096]"
+            href={tile.href}
+            key={tile.label}
+          >
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b8798]">{tile.label}</p>
+            <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1E1848]">{tile.value}</p>
+          </Link>
         ))}
       </div>
 
@@ -319,7 +363,7 @@ export default async function AdminDashboardPage() {
                   {item.text}
                 </span>
                 <span className="shrink-0 text-[#5a5470]">
-                  {new Date(item.date).toLocaleString("en-GB")}
+                  {ukDateTime(item.date)}
                 </span>
               </div>
             ))}

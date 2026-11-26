@@ -30,6 +30,7 @@ export default async function AdminIncidentDetailPage({
   const fmt = (value?: string | null) =>
     value
       ? new Date(value).toLocaleString("en-GB", {
+    timeZone: "Europe/London",
           dateStyle: "medium",
           timeStyle: "short",
         })

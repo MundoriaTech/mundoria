@@ -493,6 +493,9 @@ export function durationSummary(args: {
   };
 }
 
+/** What the customer may type; the booking API allows room for the pets and backup-times lines added after it. */
+export const SPECIAL_INSTRUCTIONS_MAX = 2000;
+
 export function composeBookingNotes(draft: BookingDraft) {
   const parts: string[] = [];
   if (draft.specialInstructions.trim()) {

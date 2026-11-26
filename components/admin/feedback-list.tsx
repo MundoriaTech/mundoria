@@ -6,6 +6,7 @@ import {
   guestFeedbackMoodLabel,
 } from "@/lib/guest-feedback";
 import { PAGE_SIZES } from "@/lib/pagination";
+import { ukDateTime } from "@/lib/admin/format";
 
 export type GuestFeedbackRow = {
   client_name: string;
@@ -32,7 +33,7 @@ export function FeedbackList({ rows }: { rows: GuestFeedbackRow[] }) {
         >
           <p className="text-sm font-semibold text-[#312c79]">
             {[
-              row.client_name.trim(),
+              row.client_name.trim() || "No name given",
               row.mood ? guestFeedbackMoodLabel(row.mood) : "",
             ]
               .filter(Boolean)
@@ -56,6 +57,7 @@ export function FeedbackList({ rows }: { rows: GuestFeedbackRow[] }) {
           ) : (
             <p className="mt-3 text-sm text-[#5a5470]">No written comment.</p>
           )}
+          <p className="mt-3 text-xs text-[#5a5470]">Sent {ukDateTime(row.created_at)}</p>
         </article>
       )}
     />

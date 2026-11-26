@@ -8,6 +8,7 @@ import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { FeedbackProvider } from "@/components/shared/feedback-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthHashHandler } from "@/components/auth/auth-hash-handler";
+import { AttributionCapture } from "@/components/shared/attribution-capture";
 import { PageTransition } from "@/components/shared/page-transition";
 import { ScrollToTopOnLoad } from "@/components/shared/scroll-to-top-on-load";
 import { sora } from "@/lib/fonts";
@@ -92,6 +93,7 @@ export default function RootLayout({
           <FeedbackProvider>
             <AnalyticsProvider>
               <AuthHashHandler />
+              <AttributionCapture />
               <ScrollToTopOnLoad />
               <PageTransition>{children}</PageTransition>
             </AnalyticsProvider>
