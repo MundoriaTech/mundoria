@@ -16,6 +16,7 @@ import type {
   BookingChecklistItem,
   CleanerPublicProfile,
 } from "@/types/customer";
+import { CleanCountdown } from "@/components/shared/clean-countdown";
 
 export default async function CustomerBookingPage({
   params,
@@ -95,6 +96,16 @@ export default async function CustomerBookingPage({
           contact support if it does not appear.
         </p>
       ) : null}
+    {booking.status === "in_progress" ? (
+      <div className="mb-4">
+        <CleanCountdown
+          bookingId={booking.id}
+          durationHours={booking.estimated_duration_hours}
+          role="customer"
+          startedAt={booking.actual_start_time}
+        />
+      </div>
+    ) : null}
     {(extraTime ?? []).length ? (
       <div className="mb-4">
         <CustomerExtraTime bookingId={booking.id} rows={(extraTime ?? []) as ExtraTimeRow[]} />

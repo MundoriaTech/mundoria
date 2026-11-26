@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import type { CleanerJob } from "@/types/cleaner";
 import type { BookingAddOn } from "@/types/customer";
+import { CleanCountdown } from "@/components/shared/clean-countdown";
 
 export default async function CleanerJobPage({
   params,
@@ -59,8 +60,20 @@ export default async function CleanerJobPage({
 
   const { data: extraTime } = await createAdminClient()
     .from("booking_time_extensions").select("id,minutes,amount_pence,reason,status,created_at,decided_at").eq("booking_id", job.id).order("created_at", { ascending: false });
+  const extensionPending = (extraTime ?? []).some((row) => row.status === "pending");
   return (
     <>
+      {job.status === "in_progress" ? (
+        <div className="mx-auto mb-6 max-w-3xl px-4 sm:px-0">
+          <CleanCountdown
+            bookingId={job.id}
+            durationHours={job.estimated_duration_hours}
+            extensionPending={extensionPending}
+            role="cleaner"
+            startedAt={job.actual_start_time}
+          />
+        </div>
+      ) : null}
       <JobDetail initialJob={job} />
       {data.cleaner_id === user!.id ? (
         <div className="mx-auto mt-6 max-w-3xl px-4 sm:px-0">
