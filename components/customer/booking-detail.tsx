@@ -593,49 +593,22 @@ export function BookingDetail({
             title="Booking details"
           />
 
-          {booking.status !== "cancelled" ? (
-            <div className="rounded-[1.25rem] border border-[#e8d4b0]/70 bg-[#fffefb] px-5 py-4 text-sm text-[#5a5470]">
-              <div className="flex items-center justify-between gap-3 text-[#1c133b]">
-                <span className="font-semibold">Payment</span>
-                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8b6bc4]">
-                  {paymentStatusLabel(booking.payment_status, {
-                    hasPaymentMethod,
-                  })}
-                </span>
-              </div>
-              <p className="mt-2 leading-6">
-                {paymentStatusDescription(booking.payment_status, {
-                  hasPaymentMethod,
-                  holdOpenHours,
-                })}{" "}
-                <Link
-                  className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-                  href={PAYMENT_HELP_HREF}
-                >
-                  How payment works
-                </Link>
-              </p>
-              {["completed", "awaiting_customer_confirmation"].includes(
-                booking.status,
-              ) || booking.payment_status === "released" ? (
-                <div className="mt-3">
-                  <Button
-                    asChild
-                    className="w-full rounded-full sm:w-auto"
-                    size="sm"
-                    variant="outline"
-                  >
-                    <a download href={`/api/bookings/${booking.id}/invoice`}>
-                      Download invoice
-                    </a>
-                  </Button>
-                </div>
-              ) : booking.payment_status === "held" ? (
-                <p className="mt-2 text-xs text-[#6f6a82]">
-                  Your receipt becomes available the day after the clean when
-                  payment is captured.
-                </p>
-              ) : null}
+          {booking.status !== "cancelled" &&
+          (["completed", "awaiting_customer_confirmation"].includes(
+            booking.status,
+          ) ||
+            booking.payment_status === "released") ? (
+            <div>
+              <Button
+                asChild
+                className="w-full rounded-full sm:w-auto"
+                size="sm"
+                variant="outline"
+              >
+                <a download href={`/api/bookings/${booking.id}/invoice`}>
+                  Download invoice
+                </a>
+              </Button>
             </div>
           ) : null}
         </div>
