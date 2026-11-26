@@ -17,6 +17,7 @@ import { ActionError } from "@/components/shared/action-error";
 import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import {
   ChevronDown,
+  ChevronLeft,
   ChevronUp,
   CreditCard,
   Info,
@@ -2296,11 +2297,22 @@ export function BookingWizard({
             {showBookingHelp ? (
               <BookingHelpContact className="mt-10 border-t border-[#e8e0d0]/90 pt-6 lg:hidden" />
             ) : null}
-            {/* Desktop: Next pinned to the bottom of the content column. */}
+            {/* Desktop: Back and a full-width Next sit right under the step, so the
+                pointer never has to travel to the bottom of the page (client feedback). */}
             {showBookingHelp ? (
-              <div className="mt-10 hidden lg:mt-auto lg:block lg:pt-10 lg:pb-2">
+              <div className="mt-8 hidden gap-3 lg:flex lg:pb-2">
+                {stepIndex > 0 ? (
+                  <button
+                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full border border-[#1c133b]/20 bg-white px-6 text-base font-semibold text-[#1c133b] transition hover:border-[#1c133b] hover:bg-[#f9f6ef] touch-manipulation"
+                    onClick={goBack}
+                    type="button"
+                  >
+                    <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
+                    Back
+                  </button>
+                ) : null}
                 <button
-                  className="inline-flex h-12 w-full max-w-sm items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
+                  className="inline-flex h-12 min-w-0 flex-1 items-center justify-center rounded-full bg-[#6a45b8] text-base font-semibold text-white transition hover:bg-[#5a38a3] disabled:cursor-not-allowed disabled:bg-[#1c133b]/25 disabled:text-white touch-manipulation"
                   disabled={!canContinue()}
                   onClick={goNext}
                   type="button"
