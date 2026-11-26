@@ -52,7 +52,7 @@ import {
   scheduleChangeFeePreview,
 } from "@/lib/bookings/schedule";
 import { cleanerTierLabel, medallionIconSrc } from "@/lib/cleaner/tier";
-import { isRescheduleTestBooking } from "@/lib/bookings/lead-time";
+import { isRescheduleTestCustomer } from "@/lib/bookings/lead-time";
 import { receiptAvailable } from "@/lib/customer/receipt";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -112,7 +112,7 @@ export function BookingDetail({
       canCustomerReschedule({
         actualStartTime: booking.actual_start_time,
         checkinVerified: booking.checkin_verified,
-        cutoffHours: isRescheduleTestBooking(booking.id) ? 0 : undefined,
+        cutoffHours: isRescheduleTestCustomer(booking.customer_id) ? 0 : undefined,
         scheduledDate: booking.scheduled_date,
         scheduledStartTime: booking.scheduled_start_time,
         status: booking.status,
@@ -948,6 +948,7 @@ export function BookingDetail({
       {showReschedule ? (
         <RescheduleModal
           bookingId={booking.id}
+          sameDayAllowed={isRescheduleTestCustomer(booking.customer_id)}
           durationHours={booking.estimated_duration_hours ?? 2}
           initialDate={booking.scheduled_date}
           initialTime={booking.scheduled_start_time}

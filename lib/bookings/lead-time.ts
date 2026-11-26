@@ -19,14 +19,14 @@ export function hoursFromNow(date: string, time: string, now: Date = new Date())
 export const RESCHEDULE_CUTOFF_HOURS = 48;
 
 /**
- * TEMPORARY test exception (26 Nov 2026): these bookings can be rescheduled
- * at any time, to any future time including the same day, skipping both
- * 48-hour rules. Remove once the test is done.
+ * TEMPORARY test exception (26 Nov 2026): bookings by these customers can be
+ * rescheduled at any time, to any future time including the same day,
+ * skipping both 48-hour rules. Remove once the test is done.
  */
-const RESCHEDULE_TEST_BOOKING_IDS = new Set<string>([
-  "412bc491-ebe2-4875-9da4-8f72c4a13639", // bosoye, Sat 28 Nov 18:00
+const RESCHEDULE_TEST_CUSTOMER_IDS = new Set<string>([
+  "5af11b68-8ae3-4a5f-ab2f-2bc476e5a4ae", // bosoye, testing with Maritha Miracle
 ]);
 
-export function isRescheduleTestBooking(bookingId: string | null | undefined) {
-  return Boolean(bookingId && RESCHEDULE_TEST_BOOKING_IDS.has(bookingId));
+export function isRescheduleTestCustomer(customerId: string | null | undefined) {
+  return Boolean(customerId && RESCHEDULE_TEST_CUSTOMER_IDS.has(customerId));
 }

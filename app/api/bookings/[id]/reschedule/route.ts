@@ -5,7 +5,7 @@ import { z } from "zod";
 import {
   BOOKING_MIN_LEAD_HOURS,
   hoursFromNow,
-  isRescheduleTestBooking,
+  isRescheduleTestCustomer,
   RESCHEDULE_CUTOFF_HOURS,
 } from "@/lib/bookings/lead-time";
 import {
@@ -55,7 +55,7 @@ export async function POST(
     !canCustomerReschedule({
       actualStartTime: booking.actual_start_time,
       checkinVerified: booking.checkin_verified,
-      cutoffHours: isRescheduleTestBooking(booking.id) ? 0 : RESCHEDULE_CUTOFF_HOURS,
+      cutoffHours: isRescheduleTestCustomer(booking.customer_id) ? 0 : RESCHEDULE_CUTOFF_HOURS,
       scheduledDate: booking.scheduled_date,
       scheduledStartTime: booking.scheduled_start_time,
       status: booking.status,
@@ -80,7 +80,7 @@ export async function POST(
   }
   // The new time needs the same notice as a new booking.
   if (
-    !isRescheduleTestBooking(booking.id) &&
+    !isRescheduleTestCustomer(booking.customer_id) &&
     hoursFromNow(parsed.data.scheduledDate, time) < BOOKING_MIN_LEAD_HOURS
   ) {
     return NextResponse.json(
