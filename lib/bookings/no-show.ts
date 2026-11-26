@@ -8,6 +8,7 @@ import {
 } from "@/lib/notifications/send";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
 
 export async function handleNoShow(bookingId: string) {
   const admin = createAdminClient();
@@ -75,7 +76,7 @@ export async function cancelExpiredReplacement(bookingId: string) {
   }
   // Protected bookings are never cancelled automatically (admins were
   // already alerted about the no-show).
-  if (booking.auto_cancel_exempt) return false;
+  if (isAutoCancelProtected(booking)) return false;
   const customer = Array.isArray(booking.customer)
     ? booking.customer[0]
     : booking.customer;

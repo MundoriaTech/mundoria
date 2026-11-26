@@ -22,6 +22,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendZohoBookingEmailPreview, usesZohoBookingEmailPreview } from "@/lib/zoho/booking-email";
 import { upsertZohoContact } from "@/lib/zoho/crm";
 import { getStripe } from "@/lib/stripe/server";
+import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
 
 /** Free-cancel / payment-fail deadline before the visit (policy). */
 export const PAYMENT_CANCEL_HOURS_BEFORE = 24;
@@ -721,7 +722,7 @@ export async function cancelUnpaidAwaitingPayment(
   }
   // Protected bookings are never cancelled automatically: stop retrying and
   // tell admins so someone sorts payment with the customer.
-  if (booking.auto_cancel_exempt) {
+  if (isAutoCancelProtected(booking)) {
     await admin
       .from("bookings")
       .update({

@@ -12,6 +12,7 @@ import { bookingStartUtc, PAYMENT_TIME_ZONE } from "@/lib/payments/uk-schedule";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ServiceType } from "@/types/customer";
+import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
 
 /**
  * If no cleaner has accepted by the cutoff, the visit is cancelled at no
@@ -104,6 +105,7 @@ export async function enforceMatchCutoffs(now: Date = new Date()) {
   let warned = 0;
   let cancelled = 0;
   for (const booking of (data ?? []) as Row[]) {
+    if (isAutoCancelProtected(booking)) continue;
     const cutoff = matchCutoffAt(booking);
     const start = bookingStartUtc(
       booking.scheduled_date,

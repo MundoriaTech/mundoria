@@ -2,6 +2,7 @@ import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import { activateEmergencyList } from "@/lib/matching/emergency-list";
+import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
 
 function visitStart(date: string, time: string) {
   return new Date(`${date}T${String(time).slice(0, 5)}:00`);
@@ -33,7 +34,7 @@ export async function settleOutstandingOffers(scope?: {
     let query = admin
       .from("bookings")
       .select(
-        "id,status,scheduled_date,scheduled_start_time,payment_status,stripe_payment_intent_id",
+        "id,customer_id,status,scheduled_date,scheduled_start_time,payment_status,stripe_payment_intent_id",
       )
       .in("status", ["pending_match", "matched"])
       .lte("scheduled_date", today)
@@ -43,7 +44,7 @@ export async function settleOutstandingOffers(scope?: {
     if (scope?.cleanerId) query = query.eq("cleaner_id", scope.cleanerId);
     const { data } = await query.range(page * 200, page * 200 + 199);
     if (!data?.length) break;
-    past.push(...data);
+    past.push(...data.filter((row) => !isAutoCancelProtected(row)));
     if (data.length < 200) break;
   }
 

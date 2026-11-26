@@ -11,6 +11,7 @@ import {
 } from "@/lib/payments/uk-schedule";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
+import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
 
 const PREAUTH_STATUSES = [
   "awaiting_payment",
@@ -570,7 +571,7 @@ export async function markPreauthFailure(
   const { data: booking } = await admin
     .from("bookings")
     .select(
-      "id,status,cleaner_id,payment_status,scheduled_date,scheduled_start_time,stripe_payment_intent_id,cancelled_at,auto_cancel_exempt",
+      "id,status,cleaner_id,customer_id,payment_status,scheduled_date,scheduled_start_time,stripe_payment_intent_id,cancelled_at,auto_cancel_exempt",
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -581,7 +582,7 @@ export async function markPreauthFailure(
 
   // Protected bookings are never cancelled automatically; admins follow up.
   const shouldCancel =
-    !booking.auto_cancel_exempt &&
+    !isAutoCancelProtected(booking) &&
     (CANCEL_ON_PREAUTH_FAIL_STATUSES as readonly string[]).includes(booking.status);
 
   if (!shouldCancel) {
