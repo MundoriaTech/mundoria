@@ -11,6 +11,7 @@ import {
   slotsFinishingByWindowEnd,
 } from "@/components/shared/time-slot-picker";
 import { Button } from "@/components/ui/button";
+import { isRescheduleTestBooking } from "@/lib/bookings/lead-time";
 
 export function RescheduleModal({
   bookingId,
@@ -27,8 +28,10 @@ export function RescheduleModal({
   onClose: () => void;
   onSaved: (payload: { date: string; time: string }) => void;
 }) {
-  // A new time needs the same 48 hours' notice as a new booking.
-  const minDate = useMemo(() => earliestBookableDateKey(BOOKING_MIN_LEAD_HOURS), []);
+  // A new time needs the same 48 hours' notice as a new booking
+  // (except the temporary same-day test booking).
+  const leadHours = isRescheduleTestBooking(bookingId) ? 0 : BOOKING_MIN_LEAD_HOURS;
+  const minDate = useMemo(() => earliestBookableDateKey(leadHours), [leadHours]);
   const [date, setDate] = useState(initialDate >= minDate ? initialDate : "");
   const [time, setTime] = useState(initialDate >= minDate ? initialTime.slice(0, 5) : "");
   const [saving, setSaving] = useState(false);
@@ -37,9 +40,10 @@ export function RescheduleModal({
     () =>
       slotsFinishingByWindowEnd(durationHours || 2, {
         date,
-        minLeadHours: BOOKING_MIN_LEAD_HOURS,
+        // A tiny lead still hides times that have already passed today.
+        minLeadHours: leadHours || 0.01,
       }),
-    [date, durationHours],
+    [date, durationHours, leadHours],
   );
 
   async function save() {
