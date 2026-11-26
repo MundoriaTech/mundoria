@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
 import { buildPageMetadata } from "@/lib/seo/site";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
@@ -14,7 +15,7 @@ export const metadata: Metadata = buildPageMetadata({
 const sections: LegalSection[] = [
   {
     body:
-      "Mundoria operates a two-sided cleaning services marketplace for customers, independent cleaning professionals and platform administrators. For privacy questions, use Contact us chat on the website, the Help Centre, or email support@mundoriauk.com.",
+      `Mundoria operates a two-sided cleaning services marketplace for customers, independent cleaning professionals and platform administrators. For privacy questions, use Contact us chat on the website, the Help Centre, or email ${MUNDORIA_IDENTITY.supportEmail}.`,
     title: "Who we are",
   },
   {

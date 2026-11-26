@@ -80,7 +80,8 @@ const sections: LegalSection[] = [
     bullets: [
       "A cleaner no-show is where you do not attend or check in without telling us. It can lead to loss of earnings for that job, a lower score and suspension if repeated.",
       "A customer no-show is where you arrive on time and cannot gain access after reasonable attempts to contact them. Contact support from the job screen and wait for the time we advise before leaving.",
-      "Where a customer no-show is confirmed, you may be paid a share of the booking value as set out in the app.",
+      "Once you have checked in, the customer has 5 minutes to let you in. After that they are charged a waiting fee of 50p a minute, for up to 30 minutes, and you receive part of it in your payout.",
+      "If you still cannot get in, contact support from the job screen before you leave. Mundoria reviews each case and tells you in the app whether the visit is charged and what you are paid.",
     ],
     title: "7. No-shows",
   },

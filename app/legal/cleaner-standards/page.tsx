@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
 import { buildPageMetadata } from "@/lib/seo/site";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 
 export const metadata: Metadata = buildPageMetadata({
   description:
@@ -81,7 +82,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "We review reports, ratings, check-in records and customer feedback fairly. Where there is a concern, we will usually explain it and give you a chance to respond, except where immediate action is needed to protect someone. Questions about these standards can be sent to support@mundoriauk.com.",
+      `We review reports, ratings, check-in records and customer feedback fairly. Where there is a concern, we will usually explain it and give you a chance to respond, except where immediate action is needed to protect someone. Questions about these standards can be sent to ${MUNDORIA_IDENTITY.supportEmail}.`,
     title: "9. How standards are reviewed",
   },
 ];

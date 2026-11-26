@@ -545,7 +545,7 @@ export async function addPayoutAmount({
   chargeId: string | null;
   cleanerId: string;
   grossPence: number;
-  kind: "extra_time" | "waiting_charge";
+  kind: "extra_time" | "tip" | "waiting_charge";
   netPence: number;
 }) {
   if (netPence <= 0) return null;
