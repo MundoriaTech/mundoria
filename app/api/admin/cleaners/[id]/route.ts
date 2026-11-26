@@ -112,7 +112,7 @@ export async function POST(
   const { data: current } = await auth.admin
     .from("cleaner_profiles")
     .select(
-      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,right_to_work_route,right_to_work_status,right_to_work_restriction,verification_flags",
+      "tier,performance_score,total_jobs,interview_status,skills_exam_passed,headshot_url,headshot_status,utr_number,utr_document_url,utr_document_status,dbs_document_url,dbs_document_status,id_document_url,id_document_status,insurance_certificate_url,insurance_status,right_to_work_route,right_to_work_status,right_to_work_restriction,verification_flags,insurance_expiry_date",
     )
     .eq("id", params.id)
     .single();
@@ -216,6 +216,14 @@ export async function POST(
       pendingDocs.push(
         "Right to work (record restricted or non-restricted work from the GOV.UK check)",
       );
+    }
+    // An uploaded policy that has already run out doesn't cover live jobs.
+    if (
+      current?.insurance_certificate_url &&
+      current?.insurance_expiry_date &&
+      String(current.insurance_expiry_date) < new Date().toISOString().slice(0, 10)
+    ) {
+      pendingDocs.push("Insurance (expired: ask for the renewed certificate)");
     }
     if (pendingDocs.length > 0) {
       return NextResponse.json(
