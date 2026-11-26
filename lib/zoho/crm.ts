@@ -22,11 +22,15 @@ type ContactEnrichment = {
   serviceType?: string;
   /** Set on account creation only: source and sign-up date are not rewritten later. */
   signedUp?: boolean;
+  /** Account creation only: Email Opt Out is ticked unless they opted in. */
+  marketingOptIn?: boolean;
 };
 
 type LeadEnrichment = {
   applicationReference?: string;
   applicationSubmitted?: boolean;
+  /** Account creation only: Email Opt Out is ticked unless they opted in. */
+  marketingOptIn?: boolean;
 };
 
 type CachedToken = {
@@ -191,7 +195,12 @@ export async function upsertZohoContact(
       Last_Name: lastName,
       // A contact SalesIQ created from a chat keeps "Chat" after a booking.
       ...(enrichment?.signedUp
-        ? { Lead_Source: CRM_LEAD_SOURCE.website, Signup_Date: ukDate() }
+        ? {
+            // Same rule as website callbacks: no recorded opt-in, no marketing email.
+            Email_Opt_Out: !enrichment.marketingOptIn,
+            Lead_Source: CRM_LEAD_SOURCE.website,
+            Signup_Date: ukDate(),
+          }
         : {}),
       Phone: person.phone?.trim() || undefined,
       User_Type: CRM_USER_TYPE.customer,
@@ -228,6 +237,7 @@ export async function upsertZohoLead(
       Description: description,
       Email: email,
       ...(enrichment?.applicationSubmitted ? {} : { Enquiry_Date: ukDate() }),
+      ...(enrichment?.marketingOptIn === undefined ? {} : { Email_Opt_Out: !enrichment.marketingOptIn }),
       Enquiry_Type: CRM_ENQUIRY_TYPE.cleaner,
       First_Name: firstName || undefined,
       Last_Name: lastName,
@@ -247,6 +257,8 @@ export async function upsertZohoLead(
 export async function syncSignupToZoho(input: {
   email: string;
   fullName: string;
+  /** The sign-up form's marketing tick; absent (Google, admin-created) means no opt-in. */
+  marketingOptIn?: boolean;
   phone?: string | null;
   role: "customer" | "cleaner";
   userId: string;
@@ -258,11 +270,11 @@ export async function syncSignupToZoho(input: {
     userId: input.userId,
   };
   if (input.role === "cleaner") {
-    await upsertZohoLead(person);
+    await upsertZohoLead(person, { marketingOptIn: Boolean(input.marketingOptIn) });
     await upsertZohoCandidate(person, { accountCreated: true });
     return;
   }
-  await upsertZohoContact(person, { signedUp: true });
+  await upsertZohoContact(person, { marketingOptIn: Boolean(input.marketingOptIn), signedUp: true });
 }
 
 /**
@@ -425,6 +437,59 @@ export async function changeZohoEmail(previousEmail: string, nextEmail: string) 
         await updateZohoCrmRecord(moduleName, match.id, { Email: to });
       }
     }
+  } catch (error) {
+    Sentry.captureException(error);
+  }
+}
+
+/**
+ * A note plus a call-back task on an existing Sales lead, for a repeat
+ * website request (assignment rules only run on create, so nothing else tells
+ * Sales the person asked again). Each part soft-fails on its own so a missing
+ * Notes or Tasks scope never blocks the lead update or causes a retry.
+ */
+export async function flagZohoRepeatEnquiry(input: {
+  dueDate: string;
+  leadId: string;
+  note: string;
+  ownerId?: string | null;
+  subject: string;
+}) {
+  const token = await getAccessToken();
+  if (!token) return;
+  const headers = {
+    Authorization: `Zoho-oauthtoken ${token.accessToken}`,
+    "Content-Type": "application/json",
+  };
+  const leadPath = `${token.apiDomain}/crm/v8/Leads/${encodeURIComponent(input.leadId)}`;
+  try {
+    const response = await zohoFetch(`${leadPath}/Notes`, {
+      body: JSON.stringify({ data: [{ Note_Content: input.note.slice(0, 2000), Note_Title: input.subject.slice(0, 120) }] }),
+      headers,
+      method: "POST",
+    });
+    if (!response.ok) throw new Error(`Zoho note failed (${response.status})`);
+  } catch (error) {
+    Sentry.captureException(error);
+  }
+  try {
+    const response = await zohoFetch(`${token.apiDomain}/crm/v8/Tasks`, {
+      body: JSON.stringify({
+        data: [{
+          $se_module: "Leads",
+          Description: input.note.slice(0, 2000),
+          Due_Date: input.dueDate,
+          ...(input.ownerId ? { Owner: { id: input.ownerId } } : {}),
+          Priority: "High",
+          Status: "Not Started",
+          Subject: input.subject.slice(0, 120),
+          What_Id: { id: input.leadId },
+        }],
+      }),
+      headers,
+      method: "POST",
+    });
+    if (!response.ok) throw new Error(`Zoho task failed (${response.status})`);
   } catch (error) {
     Sentry.captureException(error);
   }

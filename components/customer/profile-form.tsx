@@ -9,6 +9,7 @@ import { ChangeEmailForm } from "@/components/auth/change-email-form";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { trackCrmEvent } from "@/lib/analytics/crm-events";
+import { isValidUkPhone, storedPhone } from "@/lib/auth/uk-phone";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/auth";
 
@@ -125,13 +126,18 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
 
   async function saveProfile(event: React.FormEvent) {
     event.preventDefault();
+    const typedPhone = profile.phone?.trim() ?? "";
+    if (typedPhone && !isValidUkPhone(typedPhone)) {
+      setStatus("Enter a full UK phone number, like 07700 900123.");
+      return;
+    }
     setSaving(true);
     setStatus(null);
     const { error } = await createBrowserClient()
       .from("profiles")
       .update({
         notification_preferences: profile.notification_preferences,
-        phone: profile.phone?.trim() || null,
+        phone: typedPhone ? storedPhone(typedPhone) : null,
       })
       .eq("id", profile.id);
     setSaving(false);

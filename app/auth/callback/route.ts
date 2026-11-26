@@ -18,6 +18,7 @@ import { trackUserActivity } from "@/lib/analytics/user-activity";
 import { notifyAdminUserSignedUp } from "@/lib/auth/notify-admin-signup";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isBookingResumePath } from "@/lib/customer/booking-auth-return";
+import { captureSignupLead } from "@/lib/outreach/engine";
 import { syncSignupToZoho } from "@/lib/zoho/crm";
 import { isUserRole, type UserRole } from "@/types/auth";
 
@@ -145,6 +146,21 @@ export async function GET(request: Request) {
         });
       } catch {
         // CRM sync must never block sign-in.
+      }
+      // Google sign-ups skip /api/auth/signup: give them a lead row like
+      // everyone else (no marketing tick on this path, so no opt-in).
+      if (profile.role === "customer") {
+        try {
+          await captureSignupLead({
+            email: profile.email ?? user.email ?? "",
+            fullName: profile.full_name ?? "",
+            marketingOptIn: false,
+            phone: profile.phone ?? undefined,
+            profileId: user.id,
+          });
+        } catch {
+          // Lead capture must never block sign-in.
+        }
       }
     }
 

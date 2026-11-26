@@ -49,16 +49,12 @@ export function MagEngageBand({ className }: { className?: string }) {
       return;
     }
     try {
-      const endpoint = process.env.NEXT_PUBLIC_NEWSLETTER_ENDPOINT;
-      if (endpoint) {
-        const response = await fetch(endpoint, {
-          body: JSON.stringify({ email: trimmed, source: "mundoria-mag" }),
-          headers: { "Content-Type": "application/json" },
-          method: "POST",
-        });
-        if (!response.ok) throw new Error("Newsletter signup failed");
-      }
-      // Fake success until a real endpoint is connected.
+      const response = await fetch("/api/newsletter", {
+        body: JSON.stringify({ email: trimmed, page: window.location.pathname }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Newsletter signup failed");
       setStatus("done");
       setEmail("");
     } catch {
@@ -147,8 +143,10 @@ export function MagEngageBand({ className }: { className?: string }) {
             </form>
           )}
           {status === "error" ? (
-            <p className="mt-2 text-sm text-[#d4694a]">
-              Enter a valid email address.
+            <p className="mt-2 text-sm text-[#d4694a]" role="alert">
+              {email.trim().includes("@")
+                ? "We couldn't sign you up just now. Please try again."
+                : "Enter a valid email address."}
             </p>
           ) : null}
         </div>

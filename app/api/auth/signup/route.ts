@@ -195,6 +195,7 @@ export async function POST(request: Request) {
     await syncSignupToZoho({
       email,
       fullName: full_name,
+      marketingOptIn: Boolean(marketing_opt_in),
       phone,
       role,
       userId: user.id,

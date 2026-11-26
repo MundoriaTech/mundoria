@@ -47,6 +47,8 @@ export const CONSENT_WORDING = {
   callbackRequest:
     "By continuing you agree we may contact you about this offer. (Callback request form: phone call, text and email about the request.)",
   marketingOptIn: "Ticked: send me offers and cleaning tips by email.",
+  newsletterSignup:
+    "Mundoria Mag newsletter form: \"Receive our newsletters directly, and take advantage of our little tips & advice!\" (pressed Subscribe).",
 } as const;
 
 type UpsertLeadInput = {

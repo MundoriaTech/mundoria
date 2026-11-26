@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { toE164 } from "@/lib/outreach/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getRequestUser } from "@/lib/supabase/request-client";
 import { syncProfileToZoho } from "@/lib/zoho/crm";
 
 /**
  * Called after the account settings form saves. Reads the saved profile
- * server-side (the body is ignored) and pushes name and phone to Zoho.
+ * server-side (the body is ignored) and pushes name and phone to Zoho and to
+ * the person's lead row, so the admin Leads page shows the number they use.
  */
 export async function POST(request: Request) {
   const { user } = await getRequestUser(request);
@@ -14,11 +16,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: profile } = await createAdminClient()
+  const admin = createAdminClient();
+  const { data: profile } = await admin
     .from("profiles")
     .select("email,full_name,phone,role")
     .eq("id", user.id)
     .maybeSingle();
+
+  const phone = toE164(profile?.phone ?? "");
+  if (phone) {
+    await admin
+      .from("leads")
+      .update({ phone, updated_at: new Date().toISOString() })
+      .eq("profile_id", user.id);
+  }
 
   if (profile?.email && profile.role) {
     await syncProfileToZoho({

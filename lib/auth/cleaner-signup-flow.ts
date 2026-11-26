@@ -315,6 +315,7 @@ export async function verifyCleanerEmailSignupOtp(input: {
     await syncSignupToZoho({
       email,
       fullName: payload.full_name,
+      marketingOptIn: Boolean(payload.marketing_opt_in),
       phone: payload.phone,
       role: "cleaner",
       userId: user.id,
