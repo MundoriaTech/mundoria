@@ -1,6 +1,6 @@
 /**
  * The customer journey on /how-it-works, written against the live platform:
- * card saved at booking, hold from 48h once a cleaner is assigned, capture the
+ * card saved at booking, hold from 5 days before once a cleaner accepts, capture the
  * day after the clean, free cancellation at 24h or more. Prices come from the
  * admin rate card, never hard-coded.
  */
@@ -43,7 +43,7 @@ export function howItWorksSteps(
     },
     {
       title: "Matching and payment hold",
-      body: "Mundoria matches a suitable cleaner on service, postcode, availability and reliability, and tells you when one is confirmed. From 48 hours before the visit, a temporary hold is placed on your card. If it cannot be placed by 24 hours before, the booking is cancelled free of charge.",
+      body: "Mundoria matches a suitable cleaner on service, postcode, availability and reliability, and tells you when one is confirmed. From 5 days before the visit (or as soon as your cleaner accepts, if that is later), a temporary hold is placed on your card. If it cannot be placed by 24 hours before, the booking is cancelled free of charge.",
     },
     {
       title: "The cleaning day",

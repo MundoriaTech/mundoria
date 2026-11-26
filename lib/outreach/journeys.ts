@@ -146,7 +146,7 @@ export const JOURNEYS: Record<JourneyId, { description: string; label: string; s
           actionLabel: "Finish my booking",
           actionUrl: ctx.resumeUrl || bookUrl(),
           body: [
-            "Booking with Mundoria is low risk: your card is saved with no charge, a hold is placed only from 48 hours before once a cleaner is assigned, and payment is taken the day after your clean.",
+            "Booking with Mundoria is low risk: your card is saved with no charge, a hold is placed only from 5 days before, once a cleaner accepts, and payment is taken the day after your clean.",
             "Every cleaner has passed identity, DBS and right-to-work checks where applicable, holds at least £1 million public liability insurance, and has been interviewed by our team.",
             "Your booking is still saved. Finish it in a minute, or reply with any question.",
           ].join("\n\n"),

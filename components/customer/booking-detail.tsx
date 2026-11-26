@@ -150,6 +150,27 @@ export function BookingDetail({
   }, [booking]);
 
   const waitingForCleaner = isWaitingForCleanerAcceptance(booking.status);
+  // When the card hold is due, in UK time; null once it's due now.
+  const holdAtLabel = useMemo(() => {
+    const raw =
+      (booking as { payment_auth_next_attempt_at?: string | null }).payment_auth_next_attempt_at ??
+      (booking as { payment_auth_window_opens_at?: string | null }).payment_auth_window_opens_at;
+    if (!raw) return null;
+    const at = new Date(raw);
+    if (Number.isNaN(at.getTime()) || at.getTime() <= Date.now()) return null;
+    const day = at.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      timeZone: "Europe/London",
+      weekday: "long",
+    });
+    const time = at.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/London",
+    });
+    return `${day} at ${time}`;
+  }, [booking]);
   const cleanerVisible = isCleanerVisibleToCustomer(booking.status);
 
   useEffect(() => {
@@ -465,8 +486,9 @@ export function BookingDetail({
         <div className="rounded-[1.25rem] border border-[#e4daf5] bg-white px-5 py-4 text-sm text-[#5a5470]">
           <p className="font-semibold text-[#1c133b]">Your cleaner has accepted</p>
           <p className="mt-1 leading-6">
-            We&apos;ll place the card hold {holdOpenHours ?? 48} hours before
-            your visit to confirm it. There&apos;s nothing you need to do.
+            {holdAtLabel
+              ? `We’ll confirm your visit when we place the card hold on ${holdAtLabel}. You don’t need to do anything.`
+              : "We’re placing the card hold now to confirm your visit. You don’t need to do anything."}
           </p>
         </div>
       ) : null}

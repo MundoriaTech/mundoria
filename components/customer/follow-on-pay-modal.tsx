@@ -86,7 +86,7 @@ function PayForm({
         <span className="font-semibold text-foreground">
           {formatMoney(amount)}
         </span>
-        . After your cleaner accepts we place a hold (from about 48 hours before
+        . After your cleaner accepts we place a hold (from about 5 days before
         the visit), then charge the next day after it&apos;s done.{" "}
         <Link
           className="font-medium text-primary underline-offset-2 hover:underline"

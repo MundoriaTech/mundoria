@@ -631,7 +631,7 @@ export const MARKETING_FAQS: Array<{ answer: string; question: string }> = [
   },
   {
     answer:
-      "You save a card when you book, so nothing is charged at that point. From 48 hours before the visit, once a cleaner is assigned, a temporary hold is placed on the card for the booking total. The payment is taken the day after the clean. Cancel 24 hours or more before the start time and there is no charge. Payments run through Stripe and you never pay the cleaner directly.",
+      "You save a card when you book, so nothing is charged at that point. From 5 days before the visit, once a cleaner has accepted, a temporary hold is placed on the card for the booking total. The payment is taken the day after the clean. Cancel 24 hours or more before the start time and there is no charge. Payments run through Stripe and you never pay the cleaner directly.",
     question: "When do I pay?",
   },
   {

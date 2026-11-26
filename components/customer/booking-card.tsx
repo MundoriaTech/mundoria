@@ -8,7 +8,7 @@ import type { Booking, BookingStatus } from "@/types/customer";
 const STATUS_PILL: Record<string, { bg: string; color: string; label: string }> = {
   pending_match:    { bg: "#FFF5E6", color: "#C17E24", label: "Matching cleaner" },
   matched:          { bg: "#FFF5E6", color: "#C17E24", label: "Matched" },
-  awaiting_payment: { bg: "#FFF5E6", color: "#C17E24", label: "Awaiting payment" },
+  awaiting_payment: { bg: "#EAE7F5", color: "#524096", label: "Cleaner accepted" },
   confirmed:        { bg: "#EAE7F5", color: "#524096", label: "Confirmed" },
   cleaner_en_route: { bg: "#E8F0FF", color: "#2D5BE3", label: "En route" },
   in_progress:      { bg: "#E0F4EB", color: "#1A7A4A", label: "In progress" },

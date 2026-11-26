@@ -1609,7 +1609,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "When will I be charged?",
         answer:
-          "Not when you book. At checkout Mundoria saves your card securely with Stripe. There is no charge and no hold at that point.\n\nFrom 48 hours before your clean, once a cleaner has been assigned, we place a temporary hold (an authorisation) for the booking amount. If no cleaner can take the booking, no hold is placed and you are not charged. This may show as a pending amount in your banking app. It reserves the funds but is not the final charge.\n\nThe payment is taken the next UK calendar day after the clean.\n\nIf you cancel 24 hours or more before the start time, there is no charge and any hold is released. Card providers can take a few days to remove a pending amount from your statement.",
+          "Not when you book. At checkout Mundoria saves your card securely with Stripe. There is no charge and no hold at that point.\n\nFrom 5 days before your clean, once a cleaner has accepted, we place a temporary hold (an authorisation) for the booking amount. If no cleaner can take the booking, no hold is placed and you are not charged. This may show as a pending amount in your banking app. It reserves the funds but is not the final charge.\n\nThe payment is taken the next UK calendar day after the clean.\n\nIf you cancel 24 hours or more before the start time, there is no charge and any hold is released. Card providers can take a few days to remove a pending amount from your statement.",
       },
       {
         question: "Can I get a receipt or invoice?",
@@ -1624,7 +1624,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "What happens if my payment fails?",
         answer:
-          "If the hold cannot be placed, we will let you know so you can update your payment method. We try again up to five times between 48 and 24 hours before the clean.\n\nThat can happen when a card has expired, the bank declines the hold, there are not enough funds, or the bank wants extra confirmation for a payment made while you are not in the app.\n\nIf the hold still cannot be placed 24 hours before the clean, the booking is cancelled free of charge. We do not want a cleaner travelling to a visit that has not been properly authorised, and no cancellation fee applies when a booking is cancelled for this reason.",
+          "If the hold cannot be placed, we will let you know so you can update your payment method. We try again up to five times before 24 hours ahead of the clean.\n\nThat can happen when a card has expired, the bank declines the hold, there are not enough funds, or the bank wants extra confirmation for a payment made while you are not in the app.\n\nIf the hold still cannot be placed 24 hours before the clean, the booking is cancelled free of charge. We do not want a cleaner travelling to a visit that has not been properly authorised, and no cancellation fee applies when a booking is cancelled for this reason.",
       },
       {
         question: "Can I update my payment method?",

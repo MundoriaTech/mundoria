@@ -108,7 +108,7 @@ export function coreLocationFaqs(
       question: "How do I book, and when is my clean confirmed?",
       answer: P(
         "Choose the service, enter your address and property details, pick a date and time and save a card. Nothing is charged at that point.",
-        "Your booking is a request until a cleaner accepts it. You can follow the status in your account and you are notified when a cleaner is confirmed. From 48 hours before the visit, once a cleaner is assigned, a temporary hold is placed on your card, and the payment is taken the day after the clean.",
+        "Your booking is a request until a cleaner accepts it. You can follow the status in your account and you are notified when a cleaner is confirmed. From 5 days before the visit, once a cleaner has accepted, a temporary hold is placed on your card, and the payment is taken the day after the clean.",
       ),
       links: [
         { href: "/how-it-works", label: "How Mundoria works" },

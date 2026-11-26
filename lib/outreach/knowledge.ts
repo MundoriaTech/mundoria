@@ -75,7 +75,7 @@ ${prices}
 
 ## Rules that are always true
 - Booking: the card is saved at booking with no charge.
-- A payment hold is placed from 48 hours before the clean, once a cleaner is assigned (up to five attempts). If it can't be authorised by 24 hours before, the booking is cancelled free of charge.
+- A payment hold is placed from 5 days before the clean, or straight away if the cleaner accepts later than that (up to five attempts). If it can't be authorised by 24 hours before, the booking is cancelled free of charge.
 - Payment is taken the day after the clean.
 - Cancellation is free 24 hours or more before the start time; within 24 hours the full price is charged.
 - Rescheduling (Change date & time) is possible from the booking page 48 hours or more ahead, to a new time at least 48 hours away. Within 48 hours the customer can only cancel.

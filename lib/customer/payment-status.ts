@@ -21,13 +21,22 @@ export function paymentStatusLabel(
 }
 
 /** Default "Auth window opens" hours; the live value is in admin Settings. */
-export const DEFAULT_HOLD_OPEN_HOURS = 48;
+export const DEFAULT_HOLD_OPEN_HOURS = 120;
 
 /** Customer wording for when the card hold is placed, from the live setting. */
+/** "5 days" for whole days, otherwise "36 hours". */
+export function holdWindowLabel(hours: number = DEFAULT_HOLD_OPEN_HOURS) {
+  if (hours >= 24 && hours % 24 === 0) {
+    const days = hours / 24;
+    return `${days} day${days === 1 ? "" : "s"}`;
+  }
+  return `${hours} hours`;
+}
+
 export function holdTimingSentence(
   holdOpenHours: number = DEFAULT_HOLD_OPEN_HOURS,
 ) {
-  return `We’ll place a hold on your card from ${holdOpenHours} hours before your clean, once a cleaner is confirmed, and charge it the day after the clean.`;
+  return `We’ll place a hold on your card from ${holdWindowLabel(holdOpenHours)} before your clean, once a cleaner is confirmed, and charge it the day after the clean.`;
 }
 
 export function paymentStatusDescription(

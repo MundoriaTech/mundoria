@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
 import { RESCHEDULE_CUTOFF_HOURS } from "@/lib/bookings/lead-time";
 import { CLEANER_HOURLY_RATE_PENCE } from "@/lib/payments/cleaner-pay";
+import { holdWindowLabel } from "@/lib/customer/payment-status";
 import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 import { buildPageMetadata } from "@/lib/seo/site";
@@ -42,7 +43,7 @@ const sections: LegalSection[] = [
       `Your hourly rate does not depend on what the customer pays. Discounts, offers and free first-visit hours do not reduce it. Mundoria keeps the rest of the booking price as its service fee.`,
       `On team jobs, each cleaner is paid ${HOURLY_RATE} an hour for their own hours.`,
       `If the customer approves extra time on the day, you are paid for it at the same ${HOURLY_RATE} an hour.`,
-      `Customer cards are saved at booking. Payment is pre-authorised from ${HOLD_HOURS_TOKEN} hours before the visit once a cleaner has confirmed, and captured the next calendar day after checkout.`,
+      `Customer cards are saved at booking. Payment is pre-authorised from ${HOLD_HOURS_TOKEN} before the visit once a cleaner has confirmed, and captured the next calendar day after checkout.`,
       "Earnings may change if the agreed scope is changed by the customer before or during the visit. Any change will be shown in the app.",
       "Tips, where offered, are passed on to you in full, subject to payment provider fees.",
     ],
@@ -109,7 +110,7 @@ export default async function BookingPaymentPolicyPage() {
     ...section,
     bullets: section.bullets?.map((bullet) =>
       bullet
-        .replace(HOLD_HOURS_TOKEN, String(holdOpenHours))
+        .replace(HOLD_HOURS_TOKEN, holdWindowLabel(holdOpenHours))
         .replace(FREE_CANCEL_HOURS_TOKEN, String(freeCancelHours)),
     ),
   }));

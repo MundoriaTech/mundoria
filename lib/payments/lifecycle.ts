@@ -53,7 +53,7 @@ export async function getPaymentTimingSettings(): Promise<PaymentTimingSettings>
     data = null;
   }
   return {
-    payment_auth_open_hours_before: data?.payment_auth_open_hours_before ?? 48,
+    payment_auth_open_hours_before: data?.payment_auth_open_hours_before ?? 120,
     payment_capture_hour_uk: data?.payment_capture_hour_uk ?? 10,
     payment_capture_minute_uk: data?.payment_capture_minute_uk ?? 0,
     payment_preauth_hours_before: data?.payment_preauth_hours_before ?? 24,

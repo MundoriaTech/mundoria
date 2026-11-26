@@ -41,7 +41,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
   const [settings, setSettings] = useState({
     geofence_radius_meters: initial?.geofence_radius_meters ?? 150,
     payment_auth_open_hours_before:
-      initial?.payment_auth_open_hours_before ?? 48,
+      initial?.payment_auth_open_hours_before ?? 120,
     payment_capture_hour_uk: initial?.payment_capture_hour_uk ?? 10,
     payment_capture_minute_uk: initial?.payment_capture_minute_uk ?? 0,
     payment_preauth_hours_before: initial?.payment_preauth_hours_before ?? 24,
