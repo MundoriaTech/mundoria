@@ -43,7 +43,7 @@ function FaqAnswerCard({
           </h3>
           <ChevronDown
             aria-hidden
-            className="mt-0.5 h-4 w-4 shrink-0 text-[#8b8798] transition group-open:rotate-180 group-open:text-[#6a45b8]"
+            className="mt-0.5 h-4 w-4 shrink-0 text-[#6f6a82] transition group-open:rotate-180 group-open:text-[#6a45b8]"
           />
         </span>
       </summary>
@@ -116,7 +116,7 @@ export function FaqHub({
 
         <label className="relative mt-6 block max-w-xl">
           <span className="sr-only">Search FAQs</span>
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8798]" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6f6a82]" />
           <input
             autoComplete="off"
             className="h-12 w-full rounded-full border border-[#e4daf5] bg-white pl-11 pr-11 text-sm text-[#1c133b] shadow-[0_8px_24px_rgba(49,44,121,0.04)] outline-none transition placeholder:text-[#9a95a8] focus:border-[#1c133b]/35 focus:shadow-[0_10px_28px_rgba(49,44,121,0.08)] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
@@ -128,7 +128,7 @@ export function FaqHub({
           {query ? (
             <button
               aria-label="Clear search"
-              className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#8b8798] transition hover:bg-[#f3eef8] hover:text-[#1c133b]"
+              className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#6f6a82] transition hover:bg-[#f3eef8] hover:text-[#1c133b]"
               onClick={() => setQuery("")}
               type="button"
             >
@@ -137,7 +137,7 @@ export function FaqHub({
           ) : null}
         </label>
         {results ? (
-          <p aria-live="polite" className="mt-3 text-sm text-[#8b8798]">
+          <p aria-live="polite" className="mt-3 text-sm text-[#6f6a82]">
             {results.length === 0
               ? "No matching answers."
               : `${results.length} ${results.length === 1 ? "answer" : "answers"}${results.length > MAX_RESULTS ? `, showing the first ${MAX_RESULTS}` : ""}`}
@@ -221,12 +221,12 @@ export function FaqHub({
                           <span className="text-[15px] font-semibold leading-snug text-[#1c133b]">
                             {section.title}
                           </span>
-                          <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-[#8b8798] transition group-hover:translate-x-0.5 group-hover:text-[#6a45b8]" />
+                          <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-[#6f6a82] transition group-hover:translate-x-0.5 group-hover:text-[#6a45b8]" />
                         </span>
                         <span className="mt-1.5 text-sm leading-6 text-[#5a5470]">
                           {section.description}
                         </span>
-                        <span className="mt-3 text-xs font-medium tabular-nums text-[#8b8798]">
+                        <span className="mt-3 text-xs font-medium tabular-nums text-[#6f6a82]">
                           {section.items.length}{" "}
                           {section.items.length === 1 ? "answer" : "answers"}
                         </span>

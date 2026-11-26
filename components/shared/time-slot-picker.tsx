@@ -164,7 +164,7 @@ export function TimeSlotPicker({
                 "border-2 border-transparent bg-[#6a45b8] font-semibold text-white",
               !selected && enabled && "hover:bg-[#ececef]",
               !enabled &&
-                "cursor-not-allowed bg-[#f3f3f5] text-[#8b8798] opacity-40",
+                "cursor-not-allowed bg-[#f3f3f5] text-[#6f6a82] opacity-40",
             )}
             disabled={!enabled}
             key={slot}
@@ -176,7 +176,7 @@ export function TimeSlotPicker({
               <span
                 className={cn(
                   "mt-0.5 text-[11px] leading-none",
-                  selected ? "text-white/85" : "text-[#8b8798]",
+                  selected ? "text-white/85" : "text-[#6f6a82]",
                 )}
               >
                 {priceLabel}

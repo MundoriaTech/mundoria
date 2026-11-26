@@ -87,7 +87,7 @@ export default async function CleanerMessagesListPage() {
 
   return (
     <div className="pb-4">
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
         Inbox
       </p>
       <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1c133b] dark:text-foreground sm:text-3xl">

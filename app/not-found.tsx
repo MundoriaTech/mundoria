@@ -80,7 +80,7 @@ export default async function NotFoundPage() {
             </Link>
           </div>
 
-          <p className="mt-8 text-sm text-[#8b8798]">
+          <p className="mt-8 text-sm text-[#6f6a82]">
             Or try{" "}
             <Link
               className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"

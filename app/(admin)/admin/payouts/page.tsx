@@ -58,7 +58,7 @@ export default async function AdminPayoutsPage() {
 function Card({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[1.25rem] border border-[#EDEAF5] bg-white p-4 shadow-[0_4px_12px_rgba(82,64,150,0.05)] sm:p-5">
-      <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b8798]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6f6a82]">
         {label}
       </p>
       <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[#1E1848]">

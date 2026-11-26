@@ -55,7 +55,7 @@ export default function EmailConfirmedPage({
               <Link href={continueHref}>{continueLabel}</Link>
             </Button>
           </div>
-          <p className="mt-6 text-sm text-[#8a8498]">
+          <p className="mt-6 text-sm text-[#6f6a82]">
             <Link className="font-medium text-[#1c133b] hover:underline" href="/">
               Browse all services
             </Link>

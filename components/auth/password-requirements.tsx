@@ -20,7 +20,7 @@ export function PasswordRequirementsList({ password }: { password: string }) {
           <Segment key={rule.id} rule={rule} />
         ))}
       </ul>
-      <p className="text-[11px] leading-4 text-[#8b8798]">
+      <p className="text-[11px] leading-4 text-[#6f6a82]">
         {allMet ? (
           <span className="font-medium text-[#291845]">Password looks good</span>
         ) : started ? (

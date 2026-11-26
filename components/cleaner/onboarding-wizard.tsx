@@ -1285,7 +1285,7 @@ export function OnboardingWizard({
 
           {applicationReference ? (
             <div className="mt-5 rounded-xl border-2 border-[#1c133b]/25 bg-[#f3eee4] px-4 py-3 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f6a82]">
                 Application reference
               </p>
               <p className="mt-1 text-lg font-semibold tracking-wide text-[#1c133b]">
@@ -1347,7 +1347,7 @@ export function OnboardingWizard({
               through Mundoria.
             </li>
           </ol>
-          <p className="mt-3 text-xs leading-5 text-[#8b8798]">
+          <p className="mt-3 text-xs leading-5 text-[#6f6a82]">
             You can track your progress at any time through your cleaner
             dashboard.
           </p>
@@ -1410,7 +1410,7 @@ export function OnboardingWizard({
 
             {desktopNavCollapsed ? (
               <div className="flex flex-1 flex-col items-center gap-3 overflow-y-auto overscroll-contain px-2 py-4">
-                <p className="text-center text-[10px] font-semibold tabular-nums text-[#8b8798]">
+                <p className="text-center text-[10px] font-semibold tabular-nums text-[#6f6a82]">
                   {completedCount}/{STEPS.length}
                 </p>
                 <div
@@ -1435,7 +1435,7 @@ export function OnboardingWizard({
                           ? "border-[#1c133b] bg-[#1c133b] text-white"
                           : complete
                             ? "border-[#312c79] bg-[#312c79] text-white"
-                            : "border-[#1c133b]/35 bg-[#f9f6ef] text-[#8b8798]",
+                            : "border-[#1c133b]/35 bg-[#f9f6ef] text-[#6f6a82]",
                       )}
                       key={step.id}
                       onClick={() => toggleStep(step.id)}
@@ -1458,7 +1458,7 @@ export function OnboardingWizard({
                     Your onboarding
                   </h1>
                   <div className="mt-4">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-[#8b8798]">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-[#6f6a82]">
                       <span>
                         {completedCount} of {STEPS.length} done
                       </span>
@@ -1486,13 +1486,13 @@ export function OnboardingWizard({
                   {!preview ? (
                     <div className="flex flex-col items-start gap-1.5">
                       <a
-                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-sm font-medium text-[#6f6a82] transition hover:text-[#1c133b]"
                         href="/help"
                       >
                         Help
                       </a>
                       <button
-                        className="text-left text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-left text-sm font-medium text-[#6f6a82] transition hover:text-[#1c133b]"
                         onClick={() => void logout()}
                         type="button"
                       >
@@ -1523,7 +1523,7 @@ export function OnboardingWizard({
           </div>
 
           <div className="mb-5 md:hidden">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#8b8798]">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[#6f6a82]">
               <span>
                 {completedCount} of {STEPS.length} done
               </span>
@@ -1544,7 +1544,7 @@ export function OnboardingWizard({
                 type="button"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6f6a82]">
                     Steps · {stepIndex} of {STEPS.length}
                   </span>
                   <span className="mt-0.5 block truncate text-sm font-semibold text-[#1c133b]">
@@ -1573,13 +1573,13 @@ export function OnboardingWizard({
                   {!preview ? (
                     <div className="mt-3 flex items-center gap-4 border-t border-[#e8e0d0] px-1 pt-3">
                       <a
-                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-sm font-medium text-[#6f6a82] transition hover:text-[#1c133b]"
                         href="/help"
                       >
                         Help
                       </a>
                       <button
-                        className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b]"
+                        className="text-sm font-medium text-[#6f6a82] transition hover:text-[#1c133b]"
                         onClick={() => void logout()}
                         type="button"
                       >
@@ -1637,7 +1637,7 @@ export function OnboardingWizard({
                   <Monitor className="h-4 w-4 text-[#1c133b]" strokeWidth={2} />
                   Online video call
                 </span>
-                <span className="inline-flex items-center gap-2 text-[#8b8798]">
+                <span className="inline-flex items-center gap-2 text-[#6f6a82]">
                   At least 48 hours from now, UK time
                 </span>
               </div>
@@ -1689,7 +1689,7 @@ export function OnboardingWizard({
 
           <div className="mt-8 hidden items-center justify-between gap-3 md:flex">
             <button
-              className="text-sm font-medium text-[#8b8798] hover:text-[#1c133b] disabled:opacity-40"
+              className="text-sm font-medium text-[#6f6a82] hover:text-[#1c133b] disabled:opacity-40"
               disabled={stepIndex <= 1}
               onClick={goBack}
               type="button"
@@ -1716,7 +1716,7 @@ export function OnboardingWizard({
             </div>
           </div>
           {isLastStep && !allComplete ? (
-            <p className="mt-3 hidden text-right text-xs text-[#8b8798] md:block">
+            <p className="mt-3 hidden text-right text-xs text-[#6f6a82] md:block">
               Complete every step before you submit. Incomplete steps are marked
               in the step list.
             </p>
@@ -1727,7 +1727,7 @@ export function OnboardingWizard({
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e8e0d0]/80 bg-[#f9f6ef]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:hidden">
         <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3">
           <button
-            className="shrink-0 px-1 text-sm font-medium text-[#8b8798] touch-manipulation disabled:opacity-40"
+            className="shrink-0 px-1 text-sm font-medium text-[#6f6a82] touch-manipulation disabled:opacity-40"
             disabled={stepIndex <= 1}
             onClick={goBack}
             type="button"
@@ -1757,7 +1757,7 @@ export function OnboardingWizard({
           </p>
         ) : null}
         {isLastStep && !allComplete ? (
-          <p className="mx-auto mt-2 max-w-[1200px] text-center text-[11px] leading-4 text-[#8b8798]">
+          <p className="mx-auto mt-2 max-w-[1200px] text-center text-[11px] leading-4 text-[#6f6a82]">
             Complete every step before you submit.
           </p>
         ) : null}
@@ -1786,7 +1786,7 @@ function OnboardingStepList({
         );
         return (
           <section key={group.title}>
-            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f6a82]">
               {group.title}
               {groupDone ? " · Done" : ""}
             </h2>
@@ -1826,7 +1826,7 @@ function OnboardingStepList({
                             ? "font-semibold text-[#1c133b]"
                             : complete
                               ? "font-medium text-[#291845]"
-                              : "font-medium text-[#8b8798]",
+                              : "font-medium text-[#6f6a82]",
                         )}
                       >
                         {step.label}
@@ -2251,7 +2251,7 @@ function StepBody({
             </div>
           </div>
         </div>
-        <p className="text-xs leading-5 text-[#8b8798]">
+        <p className="text-xs leading-5 text-[#6f6a82]">
           {askForPhone
             ? "Your name comes from your account. Change it later in "
             : "Name and phone come from your account. Change them later in "}
@@ -2361,7 +2361,7 @@ function AppointmentPicker({
       <div className="overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef]">
         <div className="space-y-8 p-5 sm:p-7">
           {days.length === 0 ? (
-            <p className="text-sm text-[#8b8798]">
+            <p className="text-sm text-[#6f6a82]">
               No appointment times are open at least 48 hours from now. Check
               back shortly.
             </p>
@@ -2406,7 +2406,7 @@ function AppointmentPicker({
                     Choose a time
                   </p>
                   {dayContext ? (
-                    <p className="text-xs font-medium text-[#8b8798]">
+                    <p className="text-xs font-medium text-[#6f6a82]">
                       {dayContext}
                     </p>
                   ) : null}
@@ -2414,7 +2414,7 @@ function AppointmentPicker({
 
                 {morning.length ? (
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-[#8b8798]">
+                    <p className="text-xs font-semibold text-[#6f6a82]">
                       Morning
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -2444,7 +2444,7 @@ function AppointmentPicker({
 
                 {afternoon.length ? (
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-[#8b8798]">
+                    <p className="text-xs font-semibold text-[#6f6a82]">
                       Afternoon
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -2489,7 +2489,7 @@ function AppointmentPicker({
                 {INTERVIEW_DURATION_MINUTES} min video call
               </span>
             </p>
-            <p className="text-xs text-[#8b8798]">
+            <p className="text-xs text-[#6f6a82]">
               We’ll email the meeting link. You can change the slot before you
               submit.
             </p>
@@ -2574,7 +2574,7 @@ function IdentityStep({
           ID tips
         </button>
       </div>
-      <p className="text-xs leading-5 text-[#8b8798]">
+      <p className="text-xs leading-5 text-[#6f6a82]">
         Passport photo page is usually enough. For a driving licence or BRP,
         add front and back.
       </p>
@@ -2752,7 +2752,7 @@ function HomeDistrictsPicker({
         }}
         type="button"
       >
-        <span className="inline-flex min-w-0 items-center gap-2 text-[#8b8798]">
+        <span className="inline-flex min-w-0 items-center gap-2 text-[#6f6a82]">
           <Search className="h-4 w-4 shrink-0" strokeWidth={2.5} />
           <span className="truncate">
             {atLimit
@@ -2774,11 +2774,11 @@ function HomeDistrictsPicker({
         <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] shadow-[0_18px_40px_rgba(28,19,59,0.14)]">
           <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
             <Search
-              className="h-4 w-4 shrink-0 text-[#8b8798]"
+              className="h-4 w-4 shrink-0 text-[#6f6a82]"
               strokeWidth={2.5}
             />
             <input
-              className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
+              className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#6f6a82]"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search districts…"
               ref={searchRef}
@@ -2788,7 +2788,7 @@ function HomeDistrictsPicker({
           </div>
           <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
             {filtered.length === 0 ? (
-              <li className="px-3 py-2.5 text-sm text-[#8b8798]">
+              <li className="px-3 py-2.5 text-sm text-[#6f6a82]">
                 {available.length === 0
                   ? "Every available district is already added."
                   : "No districts match that search."}
@@ -2928,7 +2928,7 @@ function CoverageStep({
         <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2">
           <div className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-2">
             <p className="text-sm font-medium text-[#291845]">Districts</p>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-xs leading-5 text-[#6f6a82]">
               First pick is your home base. Up to {MAX_WORKING_DISTRICTS}{" "}
               districts.
             </p>
@@ -2941,7 +2941,7 @@ function CoverageStep({
           </div>
           <div className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-2">
             <p className="text-sm font-medium text-[#291845]">Working radius</p>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-xs leading-5 text-[#6f6a82]">
               Travel from home base, up to {MAX_RADIUS_MILES} miles.
             </p>
             <div className="flex h-11 items-center gap-3">
@@ -2958,7 +2958,7 @@ function CoverageStep({
                 <p className="text-lg font-semibold leading-none tabular-nums text-[#291845]">
                   {miles}
                 </p>
-                <p className="mt-0.5 text-xs font-medium text-[#8b8798]">
+                <p className="mt-0.5 text-xs font-medium text-[#6f6a82]">
                   {miles === 1 ? "mile" : "miles"}
                 </p>
               </div>
@@ -2975,7 +2975,7 @@ function CoverageStep({
           </div>
         </div>
         {geocoding ? (
-          <p className="-mt-4 text-xs text-[#8b8798]">
+          <p className="-mt-4 text-xs text-[#6f6a82]">
             Finding that area on the map…
           </p>
         ) : null}
@@ -3231,7 +3231,7 @@ function ExperienceStepper({
         <p className="text-lg font-semibold tabular-nums tracking-[-0.02em] text-[#291845]">
           {years}
         </p>
-        <p className="text-xs font-medium text-[#8b8798]">
+        <p className="text-xs font-medium text-[#6f6a82]">
           {years === 1 ? "year" : "years"}
         </p>
       </div>
@@ -3464,7 +3464,7 @@ function HoursPicker({
           Start and end times
         </p>
         {active.length === 0 ? (
-          <p className="text-sm text-[#8b8798]">
+          <p className="text-sm text-[#6f6a82]">
             Select at least one day to set your hours.
           </p>
         ) : (
@@ -3491,7 +3491,7 @@ function HoursPicker({
                     type="time"
                     value={day.start_time}
                   />
-                  <span className="text-sm text-[#8b8798]">to</span>
+                  <span className="text-sm text-[#6f6a82]">to</span>
                   <Input
                     aria-label={`${days[dayOfWeek]} end`}
                     className={ONBOARDING_FIELD_CLASS}
@@ -3510,7 +3510,7 @@ function HoursPicker({
                 </div>
                 {showSecond ? (
                   <div className="grid grid-cols-[minmax(4.5rem,auto)_1fr_auto_1fr_auto] items-center gap-2">
-                    <span className="text-xs font-medium text-[#8b8798]">
+                    <span className="text-xs font-medium text-[#6f6a82]">
                       and
                     </span>
                     <Input
@@ -3528,7 +3528,7 @@ function HoursPicker({
                       type="time"
                       value={day.start_time_2 ?? ""}
                     />
-                    <span className="text-sm text-[#8b8798]">to</span>
+                    <span className="text-sm text-[#6f6a82]">to</span>
                     <Input
                       aria-label={`${days[dayOfWeek]} second end`}
                       className={ONBOARDING_FIELD_CLASS}
@@ -3687,7 +3687,7 @@ function ServicesPicker({
                     />
                     <ServiceIcon
                       aria-hidden
-                      className="h-4 w-4 shrink-0 text-[#8b8798]"
+                      className="h-4 w-4 shrink-0 text-[#6f6a82]"
                       strokeWidth={2}
                     />
                     <span className="font-medium">{service.label}</span>

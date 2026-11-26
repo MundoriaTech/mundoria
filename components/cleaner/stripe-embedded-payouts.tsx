@@ -178,7 +178,7 @@ export function StripeEmbeddedPayouts({
       >
         <div className="flex items-start justify-between gap-4 border-b border-[#ebe4da] px-5 py-4 sm:px-6">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
               Payouts
             </p>
             <h2 className="mt-1 text-lg font-semibold tracking-[-0.03em] text-[#1c133b]">

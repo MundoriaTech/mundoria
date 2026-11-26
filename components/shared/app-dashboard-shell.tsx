@@ -125,7 +125,7 @@ export function AppDashboardShell({
             >
               <div className="flex items-center justify-between gap-2 px-1">
                 {brandLabel ? (
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8b8798]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#6f6a82]">
                     {brandLabel}
                   </p>
                 ) : (
@@ -195,7 +195,7 @@ export function AppDashboardShell({
                 <Link
                   className={cn(
                     "flex flex-col items-center justify-center gap-1.5 rounded-xl text-[11px] font-medium transition",
-                    active ? "text-[#1c133b]" : "text-[#8b8798]",
+                    active ? "text-[#1c133b]" : "text-[#6f6a82]",
                   )}
                   href={item.href}
                   key={item.href}

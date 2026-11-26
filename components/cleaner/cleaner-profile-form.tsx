@@ -192,7 +192,7 @@ export function CleanerProfileForm({
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)]">
       <section className="rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-7">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
           You
         </p>
         <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
@@ -625,13 +625,13 @@ function AboutYou({
           <UserAvatar name={name} seed={seed} url={url} />
           <div>
             <p className="text-sm font-semibold text-[#1c133b]">{firstName}</p>
-            <p className="text-[11px] text-[#8b849c]">How customers see this</p>
+            <p className="text-[11px] text-[#6f6a82]">How customers see this</p>
           </div>
         </div>
         <label className="mt-3 block">
           <span className="sr-only">About you</span>
           <textarea
-            className="min-h-28 w-full resize-y bg-transparent text-sm leading-6 text-[#1c133b] outline-none placeholder:text-[#8b849c]"
+            className="min-h-28 w-full resize-y bg-transparent text-sm leading-6 text-[#1c133b] outline-none placeholder:text-[#6f6a82]"
             maxLength={2000}
             onChange={(event) => onChange(event.target.value)}
             placeholder="I look after homes nearby, and I like leaving a kitchen that feels easy to walk back into."
@@ -639,7 +639,7 @@ function AboutYou({
           />
         </label>
       </div>
-      <p className="mt-2 text-[11px] text-[#8b849c]">{guide}</p>
+      <p className="mt-2 text-[11px] text-[#6f6a82]">{guide}</p>
     </div>
   );
 }
@@ -677,7 +677,7 @@ function Panel({
   return (
     <section className="space-y-3 rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-6">
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
           {eyebrow}
         </p>
         <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">

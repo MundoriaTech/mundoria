@@ -3412,7 +3412,7 @@ function RoomCountStepper({
           <p className="text-base font-semibold leading-none tabular-nums text-[#291845] sm:text-lg">
             {!set ? "-" : value === 6 ? "6+" : value}
           </p>
-          <p className="mt-0.5 truncate text-[11px] font-medium text-[#8b8798] sm:text-xs">
+          <p className="mt-0.5 truncate text-[11px] font-medium text-[#6f6a82] sm:text-xs">
             {!set ? unitPlural : value === 1 ? unitSingular : unitPlural}
           </p>
         </div>
@@ -4899,7 +4899,7 @@ function CheckoutStep({
             value={draft.specialInstructions}
           />
         </FormField>
-        <p className="mt-1.5 px-0.5 text-xs leading-5 text-[#8a8498]">
+        <p className="mt-1.5 px-0.5 text-xs leading-5 text-[#6f6a82]">
           e.g. female pro preferred, key notes, fragrance-free products
         </p>
       </div>
@@ -4920,7 +4920,7 @@ function CheckoutStep({
                 },
               }}
             />
-            <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-[#8a8498]">
+            <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-[#6f6a82]">
               <span className="h-px flex-1 bg-[#e4daf5]" />
               or pay with card
               <span className="h-px flex-1 bg-[#e4daf5]" />
@@ -4996,7 +4996,7 @@ function CheckoutStep({
                             color: "#1c133b",
                             fontFamily: "system-ui, sans-serif",
                             fontSize: "16px",
-                            "::placeholder": { color: "#8a8498" },
+                            "::placeholder": { color: "#6f6a82" },
                           },
                         },
                       }}
@@ -5111,7 +5111,7 @@ function CheckoutStep({
                     ? "font-semibold text-[#1c133b]"
                     : done
                       ? "text-[#5b5478]"
-                      : "text-[#8b8798]",
+                      : "text-[#6f6a82]",
                 )}
                 key={step.id}
               >

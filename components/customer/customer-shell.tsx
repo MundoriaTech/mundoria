@@ -483,7 +483,7 @@ export function CustomerShell({
                   <Link
                     className={cn(
                       "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition",
-                      active ? "text-[#524096]" : "text-[#8b8798]",
+                      active ? "text-[#524096]" : "text-[#6f6a82]",
                     )}
                     href={item.href}
                     key={item.href}

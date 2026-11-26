@@ -58,7 +58,7 @@ export function AuthSignupLegal({
           I agree to receive Mundoria’s offers and news by email and SMS.
         </span>
       </label>
-      <p className="text-xs leading-5 text-[#8b8798]">
+      <p className="text-xs leading-5 text-[#6f6a82]">
         By creating an account, you accept Mundoria’s{" "}
         <Link className="underline underline-offset-2 hover:text-[#1c133b]" href="/terms">
           terms of service

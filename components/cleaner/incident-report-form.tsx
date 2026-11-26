@@ -211,7 +211,7 @@ export function IncidentReportForm({
       <Field label="What happened?" htmlFor="incident-description">
         <textarea
           className={cn(
-            "min-h-32 w-full rounded-md px-3 py-2 text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798] focus-visible:ring-2 [color-scheme:light]",
+            "min-h-32 w-full rounded-md px-3 py-2 text-sm text-[#1c133b] outline-none placeholder:text-[#6f6a82] focus-visible:ring-2 [color-scheme:light]",
             FIELD_CLASS,
           )}
           id="incident-description"

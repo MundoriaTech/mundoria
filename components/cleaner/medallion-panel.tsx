@@ -63,7 +63,7 @@ export function CleanerMedallionPanel({
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8b8798]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#6f6a82]">
               Activity insights
             </p>
             <span className="rounded-full bg-[#f3f1f7] px-2 py-0.5 text-[11px] font-bold text-[#1c133b]">
@@ -75,7 +75,7 @@ export function CleanerMedallionPanel({
           </p>
         </div>
         <Link
-          className="shrink-0 text-xs font-bold text-[#d4694a]"
+          className="shrink-0 text-xs font-bold text-[#a8482b]"
           href="/cleaner/performance"
         >
           View

@@ -211,7 +211,7 @@ export function SafetyAlertSheet({
             >
               Also alert Mundoria
             </Button>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-xs leading-5 text-[#6f6a82]">
               For cleaning quality, lateness or breakage, use Report issue
               instead, not a safety alert.
             </p>
@@ -357,7 +357,7 @@ export function SafetyAlertSheet({
                 </button>
               ) : null}
             </div>
-            <p className="text-xs leading-5 text-[#8b8798]">
+            <p className="text-xs leading-5 text-[#6f6a82]">
               Withdrawing notifies ops but does not clear the booking hold
               without Mundoria.{" "}
               <Link

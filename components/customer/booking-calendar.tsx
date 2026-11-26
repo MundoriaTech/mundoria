@@ -132,7 +132,7 @@ export function BookingCalendar({
           ›
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-[#8b8798]">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-[#6f6a82]">
         {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
           <span key={day}>{day}</span>
         ))}

@@ -156,7 +156,7 @@ export function AccountMenu({
         </span>
         <ChevronDown
           className={cn(
-            "hidden h-3.5 w-3.5 text-[#8b8798] transition sm:block",
+            "hidden h-3.5 w-3.5 text-[#6f6a82] transition sm:block",
             open && "rotate-180",
           )}
         />
@@ -172,7 +172,7 @@ export function AccountMenu({
             <p className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground">
               {profile.full_name}
             </p>
-            <p className="mt-0.5 text-[11px] text-[#8b8798]">Your account</p>
+            <p className="mt-0.5 text-[11px] text-[#6f6a82]">Your account</p>
           </div>
           {items.map((item) => (
             <Link

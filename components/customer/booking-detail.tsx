@@ -632,7 +632,7 @@ export function BookingDetail({
                   </Button>
                 </div>
               ) : booking.payment_status === "held" ? (
-                <p className="mt-2 text-xs text-[#8b8798]">
+                <p className="mt-2 text-xs text-[#6f6a82]">
                   Your receipt becomes available the day after the clean when
                   payment is captured.
                 </p>
@@ -927,7 +927,7 @@ export function BookingDetail({
           </p>
           <textarea
             autoFocus
-            className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] placeholder:text-[#8b8798] focus:ring-2"
+            className="min-h-24 w-full rounded-2xl border border-[#d9ccef] bg-white px-4 py-3 text-sm text-[#1c133b] outline-none ring-[#6a45b8] placeholder:text-[#6f6a82] focus:ring-2"
             onChange={(event) => setReason(event.target.value)}
             placeholder="Cancellation reason. Write “I want another pro” to search again instead of cancelling a one-off."
             value={reason}
@@ -1060,7 +1060,7 @@ function LookingForCleanerCard({
     <section className="overflow-hidden rounded-2xl border border-[#e6e8ee] bg-white">
       <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 text-sm font-semibold text-[#d4694a]">
+          <p className="flex items-center gap-2 text-sm font-semibold text-[#a8482b]">
             <span className="h-2 w-2 rounded-full bg-[#d4694a]" />
             Finding your cleaner
           </p>
@@ -1074,7 +1074,7 @@ function LookingForCleanerCard({
           </p>
         </div>
         <div className="rounded-2xl bg-[#f7f4fb] px-4 py-3.5 sm:px-5 lg:min-w-[17rem] lg:text-right">
-          <p className="text-xs font-medium text-[#8b8798]">
+          <p className="text-xs font-medium text-[#6f6a82]">
             {confirmByLabel ? "Cleaner confirmed by" : "Confirmation"}
           </p>
           <p className="mt-1 text-base font-semibold leading-6 text-[#312c79] sm:text-lg">

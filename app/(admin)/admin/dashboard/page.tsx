@@ -188,7 +188,7 @@ export default async function AdminDashboardPage() {
               <Icon className="h-5 w-5 text-[#524096]" strokeWidth={1.8} />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b8798]">{label}</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6f6a82]">{label}</p>
               <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-[#1E1848]">{value}</p>
             </div>
           </div>

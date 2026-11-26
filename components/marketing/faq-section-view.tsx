@@ -68,7 +68,7 @@ export function FaqSectionView({
   return (
     <>
       <header className="mx-auto max-w-6xl px-4 pb-8 pt-4 sm:px-8 sm:pb-10 sm:pt-6 lg:px-12">
-        <nav aria-label="Breadcrumb" className="text-sm text-[#8b8798]">
+        <nav aria-label="Breadcrumb" className="text-sm text-[#6f6a82]">
           <Link className="font-medium hover:text-[#1c133b]" href={FAQ_HUB_PATH}>
             FAQ
           </Link>
@@ -83,7 +83,7 @@ export function FaqSectionView({
         <p className="mt-2 max-w-2xl text-pretty text-base leading-7 text-[#5a5470]">
           {description}
         </p>
-        <p className="mt-2 text-xs font-medium tabular-nums text-[#8b8798]">
+        <p className="mt-2 text-xs font-medium tabular-nums text-[#6f6a82]">
           {items.length} {items.length === 1 ? "answer" : "answers"}
         </p>
       </header>
@@ -92,13 +92,13 @@ export function FaqSectionView({
         <div className="grid gap-14 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12">
           <aside className="hidden lg:block">
             <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pr-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8b8798]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6f6a82]">
                 Topics
               </p>
               <nav aria-label="FAQ topics" className="mt-4 space-y-5">
                 {groups.map((group) => (
                   <div key={group.id}>
-                    <p className="px-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c79c66]">
+                    <p className="px-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8a6533]">
                       {group.label}
                     </p>
                     <div className="mt-1.5 space-y-0.5">
@@ -143,7 +143,7 @@ export function FaqSectionView({
                         </h2>
                         <ChevronDown
                           aria-hidden
-                          className="mt-0.5 h-4 w-4 shrink-0 text-[#8b8798] transition group-open:rotate-180 group-open:text-[#6a45b8]"
+                          className="mt-0.5 h-4 w-4 shrink-0 text-[#6f6a82] transition group-open:rotate-180 group-open:text-[#6a45b8]"
                         />
                       </span>
                     </summary>
@@ -167,9 +167,9 @@ export function FaqSectionView({
                     className="group flex items-center gap-3 rounded-[1.25rem] border border-[#e4daf5] bg-white px-5 py-4 transition hover:border-[#1c133b]/25"
                     href={faqSectionPath(previous.id)}
                   >
-                    <ArrowLeft className="h-4 w-4 shrink-0 text-[#8b8798] transition group-hover:-translate-x-0.5" />
+                    <ArrowLeft className="h-4 w-4 shrink-0 text-[#6f6a82] transition group-hover:-translate-x-0.5" />
                     <span>
-                      <span className="block text-xs text-[#8b8798]">Previous topic</span>
+                      <span className="block text-xs text-[#6f6a82]">Previous topic</span>
                       <span className="block text-sm font-semibold text-[#1c133b]">
                         {previous.title}
                       </span>
@@ -184,12 +184,12 @@ export function FaqSectionView({
                     href={faqSectionPath(next.id)}
                   >
                     <span>
-                      <span className="block text-xs text-[#8b8798]">Next topic</span>
+                      <span className="block text-xs text-[#6f6a82]">Next topic</span>
                       <span className="block text-sm font-semibold text-[#1c133b]">
                         {next.title}
                       </span>
                     </span>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-[#8b8798] transition group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-4 w-4 shrink-0 text-[#6f6a82] transition group-hover:translate-x-0.5" />
                   </Link>
                 ) : null}
               </nav>

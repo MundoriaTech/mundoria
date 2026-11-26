@@ -22,7 +22,7 @@ export function ChatMessage({
       <div className="max-w-[85%] sm:max-w-[72%]">
         <p
           className={cn(
-            "mb-1 px-1 text-[11px] text-[#8b8798]",
+            "mb-1 px-1 text-[11px] text-[#6f6a82]",
             isOwn && "text-right",
           )}
         >
@@ -86,7 +86,7 @@ export function ChatMessage({
           <div
             className={cn(
               "flex items-center justify-end gap-1 px-3 pb-2 text-[10px]",
-              isOwn ? "text-white/65" : "text-[#8b8798]",
+              isOwn ? "text-white/65" : "text-[#6f6a82]",
               !text && attachments.length > 0 && "pt-1",
             )}
           >

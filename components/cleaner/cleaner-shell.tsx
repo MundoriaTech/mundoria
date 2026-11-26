@@ -108,7 +108,7 @@ function CleanerAccountBanner({ cleaner }: { cleaner: CleanerProfile }) {
           <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#312c79]" />
           <div>
             <p className="font-semibold">{title}</p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#8b8798]">
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#6f6a82]">
               Status: {lifecycle}
             </p>
             <p className="mt-1 text-sm leading-6 text-[#6b6588] dark:text-muted-foreground">

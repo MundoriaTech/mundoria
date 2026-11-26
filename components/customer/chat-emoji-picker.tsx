@@ -7,7 +7,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[22rem] items-center justify-center text-sm text-[#8b8798]">
+    <div className="flex h-[22rem] items-center justify-center text-sm text-[#6f6a82]">
       Loading emoji…
     </div>
   ),
@@ -19,7 +19,7 @@ const PICKER_VARS = {
   "--epr-text-color": "#1c133b",
   "--epr-search-input-bg-color": "#faf8ff",
   "--epr-search-input-text-color": "#1c133b",
-  "--epr-search-input-placeholder-color": "#8b8798",
+  "--epr-search-input-placeholder-color": "#6f6a82",
   "--epr-hover-bg-color": "#f3efe6",
   "--epr-focus-bg-color": "#efe8f8",
   "--epr-highlight-color": "#6a45b8",

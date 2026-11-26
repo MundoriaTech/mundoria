@@ -125,7 +125,7 @@ export default async function CustomerPaymentsPage() {
                       : "Promo"}
                 </p>
                 {voucher.valid_until ? (
-                  <p className="mt-2 text-xs text-[#8b8798]">
+                  <p className="mt-2 text-xs text-[#6f6a82]">
                     Valid until{" "}
                     {new Date(voucher.valid_until).toLocaleDateString("en-GB")}
                   </p>

@@ -124,10 +124,10 @@ export function OnboardingSelect({
                 className={cn(
                   "pointer-events-none absolute left-3.5 right-10 origin-left transition-all duration-150",
                   empty && !open
-                    ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#8b8798]"
+                    ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#6f6a82]"
                     : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-[#5a5470]",
                   open && "text-[#1c133b]",
-                  error && "text-[#d4694a]",
+                  error && "text-[#a8482b]",
                 )}
               >
                 {label}
@@ -149,7 +149,7 @@ export function OnboardingSelect({
           ) : (
             <span
               className={cn(
-                selected ? "font-medium text-[#1c133b]" : "text-[#8b8798]",
+                selected ? "font-medium text-[#1c133b]" : "text-[#6f6a82]",
               )}
             >
               <OptionLabel
@@ -173,11 +173,11 @@ export function OnboardingSelect({
             {searchable ? (
               <div className="flex items-center gap-2 border-b border-[#e8e0d0] px-3 py-2">
                 <Search
-                  className="h-4 w-4 shrink-0 text-[#8b8798]"
+                  className="h-4 w-4 shrink-0 text-[#6f6a82]"
                   strokeWidth={2.5}
                 />
                 <input
-                  className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#8b8798]"
+                  className="h-9 w-full bg-transparent text-sm text-[#1c133b] outline-none placeholder:text-[#6f6a82]"
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder={searchPlaceholder}
                   ref={searchRef}
@@ -188,7 +188,7 @@ export function OnboardingSelect({
             ) : null}
             <ul className="max-h-56 overflow-auto p-1.5" role="listbox">
               {filtered.length === 0 ? (
-                <li className="px-3 py-2.5 text-sm text-[#8b8798]">
+                <li className="px-3 py-2.5 text-sm text-[#6f6a82]">
                   No matches.
                 </li>
               ) : (
@@ -362,10 +362,10 @@ export function OnboardingDateField({
             className={cn(
               "pointer-events-none absolute left-3.5 right-10 origin-left transition-all duration-150",
               empty && !open
-                ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#8b8798]"
+                ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#6f6a82]"
                 : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-[#5a5470]",
               open && "text-[#1c133b]",
-              error && "text-[#d4694a]",
+              error && "text-[#a8482b]",
             )}
           >
             {label}
@@ -427,7 +427,7 @@ export function OnboardingDateField({
                 »
               </button>
             </div>
-            <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-[#8b8798]">
+            <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-[#6f6a82]">
               {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
                 <span key={day}>{day}</span>
               ))}
@@ -943,7 +943,7 @@ function DocumentFileRow({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-[#1c133b]">{name}</p>
-          <p className="mt-0.5 text-xs text-[#8b8798]">
+          <p className="mt-0.5 text-xs text-[#6f6a82]">
             {uploading ? `Uploading… ${percent ?? 0}%` : "Uploaded"}
           </p>
         </div>
@@ -1105,7 +1105,7 @@ export function DocumentUpload({
         <b className="mt-3 text-sm text-[#291845]">
           {atMax ? "Upload limit reached" : chooseLabel}
         </b>
-        <span className="mt-1 text-xs text-[#8b8798]">
+        <span className="mt-1 text-xs text-[#6f6a82]">
           {dragActive
             ? "Drop to upload"
             : imageOnly

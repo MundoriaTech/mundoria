@@ -135,7 +135,7 @@ function BasketSection({
       <span
         className={cn(
           "min-w-0 flex-1 text-sm line-clamp-2",
-          filled ? "font-bold text-[#1c133b]" : "font-semibold text-[#8a8498]",
+          filled ? "font-bold text-[#1c133b]" : "font-semibold text-[#6f6a82]",
         )}
       >
         {title}
@@ -144,7 +144,7 @@ function BasketSection({
         <span
           className={cn(
             "shrink-0 text-[11px] font-normal tabular-nums",
-            filled ? "text-[#5a5470]" : "text-[#8a8498]",
+            filled ? "text-[#5a5470]" : "text-[#6f6a82]",
           )}
         >
           {right}
@@ -173,7 +173,7 @@ function BasketSection({
           <button
             aria-expanded={open}
             aria-label={open ? "Hide details" : "Show details"}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#8b8798] touch-manipulation hover:bg-black/[0.03]"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#6f6a82] touch-manipulation hover:bg-black/[0.03]"
             onClick={onToggle}
             type="button"
           >
@@ -437,7 +437,7 @@ function BasketPanel({
                 <span className="min-w-0">
                   · {line.label}
                   {line.detail ? (
-                    <span className="mt-0.5 block text-[11px] font-normal text-[#8a8498]">
+                    <span className="mt-0.5 block text-[11px] font-normal text-[#6f6a82]">
                       {line.detail}
                     </span>
                   ) : null}
@@ -451,7 +451,7 @@ function BasketPanel({
             ))}
           </ul>
         ) : (
-          <p className="font-semibold text-[#8a8498]">
+          <p className="font-semibold text-[#6f6a82]">
             Choose your cleaning session.
           </p>
         )}
@@ -504,7 +504,7 @@ function BasketPanel({
                 </p>
               ) : null}
               {!promo.addressReady ? (
-                <p className="mt-2 text-center text-xs leading-5 text-[#8a8498]">
+                <p className="mt-2 text-center text-xs leading-5 text-[#6f6a82]">
                   Promo codes apply once your address is saved at payment.
                 </p>
               ) : null}

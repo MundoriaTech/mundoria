@@ -88,7 +88,7 @@ export function AuthPhoneField({
         />
       </div>
       {hint ? (
-        <p className="px-0.5 text-xs leading-5 text-[#8b8798]">{hint}</p>
+        <p className="px-0.5 text-xs leading-5 text-[#6f6a82]">{hint}</p>
       ) : null}
       {error?.message ? <FieldError message={error.message} /> : null}
     </div>

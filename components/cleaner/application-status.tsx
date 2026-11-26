@@ -48,7 +48,7 @@ export function ApplicationStatus({ cleaner, firstName }: { cleaner: CleanerProf
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <section className="rounded-[1.5rem] border border-[#e8e0f5] bg-white p-6 text-[#1c133b] shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b8798]">Your application</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f6a82]">Your application</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em]">
           {onHold ? `${firstName}, your application is on hold` : `Thanks, ${firstName}. We're reviewing your application`}
         </h1>
@@ -57,7 +57,7 @@ export function ApplicationStatus({ cleaner, firstName }: { cleaner: CleanerProf
             ? "Mundoria has paused your application. Check anything marked below, or message us if you're not sure what's needed."
             : "Jobs, your diary and earnings open once you're approved. Until then, this page shows where everything stands."}
         </p>
-        {reference ? <p className="mt-3 text-xs text-[#8b8798]">Reference {reference}</p> : null}
+        {reference ? <p className="mt-3 text-xs text-[#6f6a82]">Reference {reference}</p> : null}
       </section>
 
       <section className="rounded-[1.5rem] border border-[#e8e0f5] bg-white p-6 text-[#1c133b] shadow-sm">
@@ -89,7 +89,7 @@ export function ApplicationStatus({ cleaner, firstName }: { cleaner: CleanerProf
                 ) : item.needsYou ? (
                   <FileWarning className="h-4 w-4 text-[#b4532a]" />
                 ) : (
-                  <Clock3 className="h-4 w-4 text-[#8b8798]" />
+                  <Clock3 className="h-4 w-4 text-[#6f6a82]" />
                 )}
                 {item.label}
               </span>

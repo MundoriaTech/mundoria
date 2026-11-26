@@ -90,7 +90,7 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
         <div className="overflow-hidden rounded-2xl border border-[#1c133b]/08 bg-white shadow-[0_24px_60px_rgba(28,19,59,0.18)]">
           <div className="grid gap-0 sm:grid-cols-[1.15fr_0.85fr]">
             <div className="p-4 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4694a]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a8482b]">
                 Browse Mag
               </p>
               <ul className="mt-3 grid gap-1 sm:grid-cols-2">
@@ -147,7 +147,7 @@ function TopicsMegaMenu({ categories }: { categories: MagNavCategory[] }) {
                         onClick={() => setOpen(false)}
                         role="menuitem"
                       >
-                        <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d4694a]">
+                        <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a8482b]">
                           {post.category}
                         </span>
                         <span className="mt-0.5 block text-[13px] font-medium leading-5 text-[#1c133b] line-clamp-2">

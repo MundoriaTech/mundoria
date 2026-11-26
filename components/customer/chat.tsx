@@ -264,7 +264,7 @@ export function Chat({
         <h1 className="text-base font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
           {peerLabel ?? "Conversation"}
         </h1>
-        <p className="mt-0.5 text-xs text-[#8b8798]">
+        <p className="mt-0.5 text-xs text-[#6f6a82]">
           {subtitle ?? "Only you and your cleaner can see these messages."}
         </p>
       </div>
@@ -291,7 +291,7 @@ export function Chat({
           })
         ) : (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#c79c66]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a6533]">
               Messages
             </p>
             <p className="mt-2 text-sm font-light text-[#5a5470] dark:text-muted-foreground">
@@ -394,7 +394,7 @@ export function Chat({
             <Smile className="h-5 w-5" />
           </button>
           <textarea
-            className="max-h-28 min-h-11 flex-1 resize-none rounded-[1.1rem] border border-[#e8e4f0] bg-[#faf8ff] px-3.5 py-2.5 text-sm text-[#1c133b] outline-none transition placeholder:text-[#8b8798] focus:border-[#c4b5e0] dark:border-border dark:bg-background dark:text-foreground"
+            className="max-h-28 min-h-11 flex-1 resize-none rounded-[1.1rem] border border-[#e8e4f0] bg-[#faf8ff] px-3.5 py-2.5 text-sm text-[#1c133b] outline-none transition placeholder:text-[#6f6a82] focus:border-[#c4b5e0] dark:border-border dark:bg-background dark:text-foreground"
             onChange={(event) => setContent(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {

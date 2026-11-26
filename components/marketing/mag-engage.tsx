@@ -71,7 +71,7 @@ export function MagEngageBand({ className }: { className?: string }) {
     >
       <div className="grid items-start gap-12 md:grid-cols-2 md:gap-16">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d4694a]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#a8482b]">
             Social
           </p>
           <h2 className="mt-3 text-[2.5rem] font-black leading-[0.95] tracking-[-0.05em] text-[#1c133b] sm:text-[3.25rem]">
@@ -143,7 +143,7 @@ export function MagEngageBand({ className }: { className?: string }) {
             </form>
           )}
           {status === "error" ? (
-            <p className="mt-2 text-sm text-[#d4694a]" role="alert">
+            <p className="mt-2 text-sm text-[#a8482b]" role="alert">
               {email.trim().includes("@")
                 ? "We couldn't sign you up just now. Please try again."
                 : "Enter a valid email address."}

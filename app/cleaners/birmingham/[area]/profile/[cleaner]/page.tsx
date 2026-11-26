@@ -222,7 +222,7 @@ export default async function BirminghamCleanerPage({
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d4694a]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#a8482b]">
                     Independent cleaner · {area.name}
                   </p>
                   <h1 className="mt-2 text-[2.4rem] font-semibold leading-none tracking-[-0.045em] text-[#1c133b] sm:text-5xl">
@@ -260,7 +260,7 @@ export default async function BirminghamCleanerPage({
 
               {cleaner.services.length ? (
                 <div className="border-t border-[#efeaf8] px-6 py-6 sm:px-10">
-                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b8798]">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6f6a82]">
                     Services
                   </h2>
                   <ul className="mt-3 flex flex-wrap gap-2">
@@ -298,7 +298,7 @@ export default async function BirminghamCleanerPage({
                         </span>
                         {review.when ? ` · ${review.when}` : ""}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#d4694a]">
+                      <p className="mt-1 text-xs font-medium text-[#a8482b]">
                         {review.service}
                       </p>
                     </li>

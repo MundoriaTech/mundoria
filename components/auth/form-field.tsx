@@ -71,10 +71,10 @@ export function FormField({
           // Empty + idle: label is the large in-field placeholder
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-[15px]",
           "[&:has(input:placeholder-shown):not(:focus-within)_label]:font-normal",
-          "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-[#8b8798]",
+          "[&:has(input:placeholder-shown):not(:focus-within)_label]:text-[#6f6a82]",
           "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-[15px]",
           "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:font-normal",
-          "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-[#8b8798]",
+          "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:text-[#6f6a82]",
           multiline
             ? cn(
                 "[&:has(textarea:placeholder-shown):not(:focus-within)_label]:top-5",
@@ -92,7 +92,7 @@ export function FormField({
             dense ? "top-1.5" : "top-2.5",
             "origin-left text-[11px] font-semibold leading-none text-[#5a5470]",
             "transition-all duration-150",
-            error && "text-[#d4694a]",
+            error && "text-[#a8482b]",
             plain
               ? "group-focus-within/field:text-[#1c133b]"
               : "group-focus-within/field:text-[#6a45b8]",
@@ -125,7 +125,7 @@ export function FormField({
         </div>
       </div>
       {hint ? (
-        <p className="px-0.5 text-xs leading-5 text-[#8b8798]">{hint}</p>
+        <p className="px-0.5 text-xs leading-5 text-[#6f6a82]">{hint}</p>
       ) : null}
       {error?.message ? <FieldError message={error.message} /> : null}
     </div>

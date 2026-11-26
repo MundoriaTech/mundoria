@@ -34,7 +34,7 @@ export default function ContactPage() {
       />
       <section className="bg-white px-4 pb-16 pt-10 sm:px-8 sm:pb-20 sm:pt-14">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-[2.75rem] font-semibold leading-none tracking-[-0.04em] text-[#c79c66] sm:text-[3.5rem]">
+          <h1 className="text-[2.75rem] font-semibold leading-none tracking-[-0.04em] text-[#8a6533] sm:text-[3.5rem]">
             Contact us
           </h1>
 
@@ -94,7 +94,7 @@ export default function ContactPage() {
         aria-label="Breadcrumb"
         className="border-t border-[#ebe6f2] bg-white px-4 py-5 sm:px-8"
       >
-        <ol className="mx-auto flex max-w-6xl items-center gap-2 text-sm text-[#8b8798]">
+        <ol className="mx-auto flex max-w-6xl items-center gap-2 text-sm text-[#6f6a82]">
           <li>
             <Link className="transition hover:text-[#1c133b]" href="/">
               Home

@@ -107,7 +107,7 @@ export function TrainingSurvey({
 
       <div className="mt-6 flex items-center gap-4">
         <button
-          className="text-sm font-medium text-[#8b8798] transition hover:text-[#1c133b] disabled:opacity-40"
+          className="text-sm font-medium text-[#6f6a82] transition hover:text-[#1c133b] disabled:opacity-40"
           disabled={page === 0}
           onClick={() => {
             setPageError(null);
@@ -126,7 +126,7 @@ export function TrainingSurvey({
             Next →
           </button>
         ) : (
-          <p className="ml-auto text-sm text-[#8b8798]">
+          <p className="ml-auto text-sm text-[#6f6a82]">
             Tick every agreement, then submit your application below.
           </p>
         )}

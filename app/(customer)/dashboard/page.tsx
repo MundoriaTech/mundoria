@@ -146,7 +146,7 @@ function TimeTile({ booking }: { booking: Booking | null }) {
           <p className="m-0 text-[17px] font-semibold text-[#5F5F66]">
             No upcoming session
           </p>
-          <p className="mt-2 m-0 text-[13px] text-[#8b8798]">
+          <p className="mt-2 m-0 text-[13px] text-[#6f6a82]">
             Book a clean to see your arrival time
           </p>
         </div>

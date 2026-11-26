@@ -127,7 +127,7 @@ export async function CategoryMagLinks({
                   <p className="text-[15px] font-semibold leading-snug text-[#1c133b] transition group-hover:text-[#6a45b8]">
                     {post.title}
                   </p>
-                  <p className="mt-1.5 text-xs text-[#8b849c]">
+                  <p className="mt-1.5 text-xs text-[#6f6a82]">
                     {formatDate(post.published_at ?? post.created_at)}
                   </p>
                 </Link>
@@ -154,7 +154,7 @@ export async function CategoryMagLinks({
                     className="group grid grid-cols-[1.75rem_minmax(0,1fr)] items-baseline gap-1 py-3.5"
                     href={`/blog/${post.slug}`}
                   >
-                    <span className="text-base font-semibold text-[#c79c66]">
+                    <span className="text-base font-semibold text-[#8a6533]">
                       {position + 1}
                     </span>
                     <span className="text-[15px] font-medium leading-snug text-[#1c133b] transition group-hover:text-[#6a45b8]">

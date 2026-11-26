@@ -119,7 +119,7 @@ export function SupportInboxList({
                           "rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
                           item.status === "open"
                             ? "bg-[#efe8ff] text-[#312c79]"
-                            : "bg-[#f3f0f7] text-[#8b8798]",
+                            : "bg-[#f3f0f7] text-[#6f6a82]",
                         )}
                       >
                         {item.status}
@@ -130,7 +130,7 @@ export function SupportInboxList({
                     {formatMessagePreview(item.last_message_preview) ||
                       "No messages yet"}
                   </p>
-                  <p className="mt-2 text-xs text-[#8b8798]">
+                  <p className="mt-2 text-xs text-[#6f6a82]">
                     {formatWhen(item.last_message_at)}
                   </p>
                 </Link>
@@ -218,7 +218,7 @@ export function SupportInboxThread({
       <div className="rounded-2xl border border-[#e6e0f2] bg-white">
         <div className="border-b border-[#eadff5] px-4 py-3">
           <p className="text-sm font-semibold text-[#1c133b]">{title}</p>
-          <p className="text-xs text-[#8b8798]">
+          <p className="text-xs text-[#6f6a82]">
             {[conversation.user?.email, conversation.guest_email]
               .filter(Boolean)
               .join(" · ") || "Guest visitor"}
@@ -259,10 +259,10 @@ export function SupportInboxThread({
                     className={cn(
                       "mt-1 text-[10px]",
                       gifUrl
-                        ? "px-1 text-[#8b8798]"
+                        ? "px-1 text-[#6f6a82]"
                         : admin
                           ? "text-white/70"
-                          : "text-[#8b8798]",
+                          : "text-[#6f6a82]",
                     )}
                   >
                     {formatWhen(message.created_at)}
@@ -316,19 +316,19 @@ export function SupportInboxThread({
         <p className="font-semibold text-[#1c133b]">Details</p>
         <dl className="mt-3 space-y-2">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-[#8b8798]">
+            <dt className="text-xs uppercase tracking-wide text-[#6f6a82]">
               Status
             </dt>
             <dd className="capitalize">{conversation.status}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-[#8b8798]">
+            <dt className="text-xs uppercase tracking-wide text-[#6f6a82]">
               Started
             </dt>
             <dd>{formatWhen(conversation.created_at)}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-[#8b8798]">
+            <dt className="text-xs uppercase tracking-wide text-[#6f6a82]">
               Last message
             </dt>
             <dd>{formatWhen(conversation.last_message_at)}</dd>

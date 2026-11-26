@@ -421,7 +421,7 @@ export function MagPostEditor({
                     />
                     <span>
                       <span className="font-medium">{service.label}</span>
-                      <span className="mt-0.5 block text-[11px] text-[#8b849c]">
+                      <span className="mt-0.5 block text-[11px] text-[#6f6a82]">
                         {service.category}
                       </span>
                     </span>

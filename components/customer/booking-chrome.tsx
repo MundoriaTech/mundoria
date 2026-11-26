@@ -163,7 +163,7 @@ export function BookingChrome({
         {progressPct != null ? (
           <div>
             {progressLabel ? (
-              <p className="mx-auto w-full max-w-[1140px] px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8a8498] sm:px-5">
+              <p className="mx-auto w-full max-w-[1140px] px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6f6a82] sm:px-5">
                 {progressLabel}
               </p>
             ) : null}

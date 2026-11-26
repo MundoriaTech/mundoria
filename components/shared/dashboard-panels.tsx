@@ -28,13 +28,13 @@ export function DashboardWelcomeBanner({
       <div className="grid grid-cols-[minmax(0,1fr)_8.25rem] items-end gap-x-2 sm:grid-cols-[minmax(0,1fr)_16rem] sm:items-center sm:gap-x-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="min-w-0 pb-1">
           {eyebrow ? (
-            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#c79c66] sm:text-[11px]">
+            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#8a6533] sm:text-[11px]">
               {eyebrow}
             </p>
           ) : null}
           <h1 className={cn("text-[1.45rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1c133b] sm:text-[2.35rem]", eyebrow && "mt-2")}>
             Welcome back,{" "}
-            <span className="font-normal text-[#d4694a]">{firstName}</span>.
+            <span className="font-normal text-[#a8482b]">{firstName}</span>.
           </h1>
           <p className="mt-2 max-w-md text-[13px] font-light leading-5 text-[#5c5670] sm:text-[15px] sm:leading-7">
             {subtitle}
@@ -61,7 +61,7 @@ export function DashboardWelcomeBanner({
         <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 sm:mt-8 sm:grid-cols-4 sm:gap-6">
           {stats.map((stat) => (
             <div className="min-w-0" key={stat.label}>
-              <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#c79c66]">
+              <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#8a6533]">
                 {stat.label}
               </dt>
               <dd className="mt-1 truncate text-base font-semibold tracking-tight text-[#1c133b] sm:text-lg">
@@ -91,7 +91,7 @@ export function DashboardSection({
       <div className="flex items-end justify-between gap-3">
         <div>
           {eyebrow ? (
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
               {eyebrow}
             </p>
           ) : null}
@@ -199,7 +199,7 @@ export function DashboardHistoryList({
   if (!rows.length) {
     return (
       <div className="rounded-[1.75rem] bg-[#f3efe6] px-6 py-12 text-center shadow-[0_12px_28px_rgba(28,19,59,0.05)]">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#c79c66]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
           History
         </p>
         <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
