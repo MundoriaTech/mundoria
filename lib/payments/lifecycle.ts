@@ -36,14 +36,22 @@ export type PaymentTimingSettings = {
 };
 
 export async function getPaymentTimingSettings(): Promise<PaymentTimingSettings> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("platform_settings")
-    .select(
-      "payment_auth_open_hours_before,payment_preauth_hours_before,payment_capture_hour_uk,payment_capture_minute_uk",
-    )
-    .eq("id", true)
-    .maybeSingle();
+  // Preview builds have no service-role key: quote the defaults below rather
+  // than failing the prerender of pages that show these timings.
+  let data: Partial<PaymentTimingSettings> | null = null;
+  try {
+    const admin = createAdminClient();
+    const result = await admin
+      .from("platform_settings")
+      .select(
+        "payment_auth_open_hours_before,payment_preauth_hours_before,payment_capture_hour_uk,payment_capture_minute_uk",
+      )
+      .eq("id", true)
+      .maybeSingle();
+    data = result.data;
+  } catch {
+    data = null;
+  }
   return {
     payment_auth_open_hours_before: data?.payment_auth_open_hours_before ?? 48,
     payment_capture_hour_uk: data?.payment_capture_hour_uk ?? 10,

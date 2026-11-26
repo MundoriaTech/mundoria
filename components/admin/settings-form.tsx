@@ -13,6 +13,7 @@ import {
   normalizeServicePricing,
   type ServicePricingConfig,
 } from "@/lib/customer/pricing-config";
+import { CLEANER_HOURLY_RATE_PENCE } from "@/lib/payments/cleaner-pay";
 import type { ServiceType } from "@/types/customer";
 
 interface Settings {
@@ -99,19 +100,11 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
       <div className="rounded-xl border bg-card p-4 sm:p-6">
         <h2 className="text-base font-semibold text-[#1c133b]">Platform</h2>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
-          <Field label="Platform commission (%)">
-            <Input
-              max={100}
-              min={0}
-              onChange={(event) =>
-                setSettings({
-                  ...settings,
-                  platform_commission_percent: Number(event.target.value),
-                })
-              }
-              type="number"
-              value={settings.platform_commission_percent}
-            />
+          <Field label="Cleaner pay">
+            <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-[#1c133b]">
+              £{(CLEANER_HOURLY_RATE_PENCE / 100).toFixed(2)} an hour per cleaner, for
+              every hour worked. Mundoria keeps the rest of each booking.
+            </p>
           </Field>
           <Field label="Geofence radius (metres)">
             <Input

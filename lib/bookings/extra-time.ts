@@ -7,6 +7,7 @@ import {
   sendPushNotification,
   sendSMS,
 } from "@/lib/notifications/send";
+import { extraTimeCleanerPence } from "@/lib/payments/cleaner-pay";
 import { addPayoutAmount, chargeIdOf, chargeSavedCard } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { CleaningStandard, ServiceType } from "@/types/customer";
@@ -237,12 +238,12 @@ export async function chargeApprovedExtraTime(bookingId: string) {
   const [{ data: rows }, { data: booking }] = await Promise.all([
     admin
       .from("booking_time_extensions")
-      .select("id,amount_pence")
+      .select("id,amount_pence,minutes")
       .eq("booking_id", bookingId)
       .eq("status", "approved"),
     admin
       .from("bookings")
-      .select("customer_id,cleaner_id,stripe_payment_method_id,amount_total,amount_platform")
+      .select("customer_id,cleaner_id,stripe_payment_method_id")
       .eq("id", bookingId)
       .single(),
   ]);
@@ -267,15 +268,15 @@ export async function chargeApprovedExtraTime(bookingId: string) {
       })
       .in("id", ids);
     if (booking.cleaner_id) {
-      const bookingTotal = Number(booking.amount_total ?? 0);
-      const rate = bookingTotal > 0 ? Number(booking.amount_platform ?? 0) / bookingTotal : 0;
+      const minutes = pending.reduce((sum, row) => sum + Number(row.minutes ?? 0), 0);
       await addPayoutAmount({
         bookingId,
         chargeId: chargeIdOf(intent),
         cleanerId: booking.cleaner_id as string,
         grossPence: total,
         kind: "extra_time",
-        netPence: total - Math.round(total * rate),
+        // The cleaner earns £13 an hour for the extra time, not a share of the charge.
+        netPence: extraTimeCleanerPence(minutes),
       });
     }
     return { chargedPence: total };
