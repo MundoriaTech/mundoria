@@ -1917,7 +1917,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Can I reschedule my booking?",
         answer:
-          "Yes, where another suitable date and time is available.\n\nRescheduling at least 24 hours before the start time is free. The earlier you make the change, the easier it is to find another slot and update the professional's schedule.\n\nWithin 24 hours of the start time, a booking cannot be moved as a free reschedule. You would need to cancel under the cancellation rule and book again.",
+          "Yes, where another suitable date and time is available.\n\nYou can change the date and time free of charge up to 48 hours before the start time. The new time also needs to be at least 48 hours away. The earlier you make the change, the easier it is to find another slot and update the professional's schedule.\n\nWithin 48 hours of the start time, a booking cannot be rescheduled. You can cancel under the cancellation rule and book again.",
       },
       {
         question: "How much notice do I need to cancel?",
@@ -1932,7 +1932,7 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
       {
         question: "Is there a rescheduling fee?",
         answer:
-          "No fee if you reschedule at least 24 hours before the scheduled start time and another suitable slot is available.\n\nWithin 24 hours of the start time, the booking cannot be moved as a free reschedule. You would need to cancel under the cancellation terms and book again if you still want the clean.",
+          "No. Rescheduling is free up to 48 hours before the scheduled start time, to a new time at least 48 hours away, where another suitable slot is available.\n\nWithin 48 hours of the start time, the booking cannot be rescheduled. You can cancel under the cancellation terms and book again if you still want the clean.",
       },
       {
         question: "Can I change the booking date?",

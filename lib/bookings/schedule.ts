@@ -3,6 +3,7 @@ import {
   DEFAULT_FREE_CANCEL_HOURS,
   hoursUntilBookingStart,
 } from "@/lib/bookings/fees";
+import { RESCHEDULE_CUTOFF_HOURS } from "@/lib/bookings/lead-time";
 
 const SCHEDULE_CHANGE_STATUSES = [
   "pending_match",
@@ -101,18 +102,21 @@ export function scheduleChangeFeePreview({
   };
 }
 
-/** Reschedule is free outside the free-cancel window; otherwise cancel+rebook. */
+/**
+ * Customers can change the date and time until 48 hours before the visit
+ * (RESCHEDULE_CUTOFF_HOURS); after that they can only cancel.
+ */
 export function canCustomerReschedule({
   actualStartTime,
   checkinVerified,
-  freeCancelHours = DEFAULT_FREE_CANCEL_HOURS,
+  cutoffHours = RESCHEDULE_CUTOFF_HOURS,
   scheduledDate,
   scheduledStartTime,
   status,
 }: {
   actualStartTime?: string | null;
   checkinVerified?: boolean | null;
-  freeCancelHours?: number;
+  cutoffHours?: number;
   scheduledDate: string;
   scheduledStartTime: string;
   status: string;
@@ -127,6 +131,6 @@ export function canCustomerReschedule({
     return false;
   }
   return (
-    hoursUntilBookingStart(scheduledDate, scheduledStartTime) >= freeCancelHours
+    hoursUntilBookingStart(scheduledDate, scheduledStartTime) >= cutoffHours
   );
 }

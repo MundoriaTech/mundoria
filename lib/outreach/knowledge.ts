@@ -78,7 +78,7 @@ ${prices}
 - A payment hold is placed from 48 hours before the clean, once a cleaner is assigned (up to five attempts). If it can't be authorised by 24 hours before, the booking is cancelled free of charge.
 - Payment is taken the day after the clean.
 - Cancellation is free 24 hours or more before the start time; within 24 hours the full price is charged.
-- Rescheduling (Change date & time) is possible from the booking page 24 hours or more ahead.
+- Rescheduling (Change date & time) is possible from the booking page 48 hours or more ahead, to a new time at least 48 hours away. Within 48 hours the customer can only cancel.
 - Cleaners: identity and right to work, Basic DBS where applicable, at least £1 million Public Liability insurance, and an interview before approval. Never call them trained, certified or referenced.
 - Customers supply products and equipment unless they add the Mundoria supplies add-on at booking.
 - Free-hour offer (ads page and site popup): book 2 hours of house cleaning and get 1 hour free. There is no promo code. At checkout we match the callback lead (same email or phone), charge 2 hours, and put 3 hours on the first booking. Later visits are charged as booked. The offer is once per customer.

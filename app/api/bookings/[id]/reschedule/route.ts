@@ -2,13 +2,16 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { BOOKING_MIN_LEAD_HOURS, hoursFromNow } from "@/lib/bookings/lead-time";
+import {
+  BOOKING_MIN_LEAD_HOURS,
+  hoursFromNow,
+  RESCHEDULE_CUTOFF_HOURS,
+} from "@/lib/bookings/lead-time";
 import {
   canCustomerReschedule,
 } from "@/lib/bookings/schedule";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { createInAppNotification } from "@/lib/notifications/send";
-import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
@@ -47,13 +50,10 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { payment_preauth_hours_before: freeCancelHours } =
-    await getPaymentTimingSettings();
   if (
     !canCustomerReschedule({
       actualStartTime: booking.actual_start_time,
       checkinVerified: booking.checkin_verified,
-      freeCancelHours,
       scheduledDate: booking.scheduled_date,
       scheduledStartTime: booking.scheduled_start_time,
       status: booking.status,
@@ -62,7 +62,7 @@ export async function POST(
     return NextResponse.json(
       {
         error:
-          `Reschedule is available at least ${freeCancelHours} hours before your visit. Within ${freeCancelHours} hours, cancel instead.`,
+          `You can change the date and time up to ${RESCHEDULE_CUTOFF_HOURS} hours before your visit. Within ${RESCHEDULE_CUTOFF_HOURS} hours, you can only cancel.`,
       },
       { status: 400 },
     );

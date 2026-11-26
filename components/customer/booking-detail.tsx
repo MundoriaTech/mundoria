@@ -110,12 +110,11 @@ export function BookingDetail({
       canCustomerReschedule({
         actualStartTime: booking.actual_start_time,
         checkinVerified: booking.checkin_verified,
-        freeCancelHours,
         scheduledDate: booking.scheduled_date,
         scheduledStartTime: booking.scheduled_start_time,
         status: booking.status,
       }),
-    [booking, freeCancelHours],
+    [booking],
   );
   const feePreview = useMemo(
     () =>
@@ -961,7 +960,6 @@ export function BookingDetail({
         <RescheduleModal
           bookingId={booking.id}
           durationHours={booking.estimated_duration_hours ?? 2}
-          freeCancelHours={freeCancelHours}
           initialDate={booking.scheduled_date}
           initialTime={booking.scheduled_start_time}
           onClose={() => setShowReschedule(false)}

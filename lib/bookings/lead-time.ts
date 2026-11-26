@@ -10,3 +10,10 @@ export function hoursFromNow(date: string, time: string, now: Date = new Date())
   if (Number.isNaN(start.getTime())) return Number.NEGATIVE_INFINITY;
   return (start.getTime() - now.getTime()) / (1000 * 60 * 60);
 }
+
+/**
+ * Customers can change a visit's date and time only while it is at least this
+ * far away. Separate from the admin free-cancel deadline (cancellation fees
+ * and card-hold timing), which stays where it is.
+ */
+export const RESCHEDULE_CUTOFF_HOURS = 48;
