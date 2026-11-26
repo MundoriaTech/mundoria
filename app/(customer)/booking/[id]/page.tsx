@@ -62,7 +62,10 @@ export default async function CustomerBookingPage({
   // accepted, or the visit is cancelled at no charge and the customer told.
   let offerExpiresAt: string | null = null;
   if (isWaitingForCleanerAcceptance(booking.status)) {
-    offerExpiresAt = matchCutoffAt(booking)?.toISOString() ?? null;
+    // Protected bookings are never cancelled automatically: no cutoff shown.
+    offerExpiresAt = (booking as { auto_cancel_exempt?: boolean }).auto_cancel_exempt
+      ? null
+      : (matchCutoffAt(booking)?.toISOString() ?? null);
   }
 
   if (booking.cleaner_id && isCleanerVisibleToCustomer(booking.status)) {

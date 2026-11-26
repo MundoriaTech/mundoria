@@ -71,6 +71,9 @@ export function DocumentReviewControls({
     Boolean(reviewable);
   const reasonOk = reason.trim().length >= 3;
   const decided = status === "verified" || status === "rejected";
+  // Approved before the GOV.UK result was recorded: let the admin save it.
+  const missingRestriction = Boolean(requireWorkRestriction) && !workRestriction;
+  const approveLocked = status === "verified" && !missingRestriction;
 
   async function review(decision: "verified" | "rejected") {
     // Approving is one click; rejecting needs a reason the cleaner will see.
@@ -233,7 +236,7 @@ export function DocumentReviewControls({
               className="min-h-10"
               disabled={
                 busy ||
-                status === "verified" ||
+                approveLocked ||
                 (requireWorkRestriction &&
                   restriction !== "unrestricted" &&
                   restriction !== "restricted")
@@ -241,7 +244,11 @@ export function DocumentReviewControls({
               onClick={() => void review("verified")}
               type="button"
             >
-              {status === "verified" ? "Approved" : "Approve"}
+              {approveLocked
+                ? "Approved"
+                : status === "verified"
+                  ? "Save GOV.UK result"
+                  : "Approve"}
             </Button>
             <Button
               className="min-h-10"

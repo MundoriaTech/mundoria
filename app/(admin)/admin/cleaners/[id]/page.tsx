@@ -265,11 +265,21 @@ export default async function AdminCleanerPage({
             detail: reviewLabel(cleaner.headshot_status),
           },
           {
-            done: cleaner.right_to_work_status === "verified",
+            // Same rule as the server: a share code also needs the GOV.UK
+            // result (restricted / non-restricted work) recorded.
+            done:
+              cleaner.right_to_work_status === "verified" &&
+              (cleaner.right_to_work_route !== "share_code" ||
+                cleaner.right_to_work_restriction === "restricted" ||
+                cleaner.right_to_work_restriction === "unrestricted"),
             label: "Right to work",
             detail: [
               reviewLabel(cleaner.right_to_work_status),
-              rightToWorkRestrictionLabel(cleaner.right_to_work_restriction),
+              rightToWorkRestrictionLabel(cleaner.right_to_work_restriction) ??
+                (cleaner.right_to_work_status === "verified" &&
+                cleaner.right_to_work_route === "share_code"
+                  ? "record the GOV.UK result (restricted or non-restricted work)"
+                  : null),
             ]
               .filter(Boolean)
               .join(" · "),

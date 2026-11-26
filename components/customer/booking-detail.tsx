@@ -450,7 +450,12 @@ export function BookingDetail({
           )}
         </div>
       ) : waitingForCleaner ? (
-        <LookingForCleanerCard confirmByLabel={confirmByLabel} />
+        <LookingForCleanerCard
+          confirmByLabel={confirmByLabel}
+          protectedBooking={Boolean(
+            (booking as { auto_cancel_exempt?: boolean }).auto_cancel_exempt,
+          )}
+        />
       ) : null}
 
       {booking.status === "awaiting_payment" &&
@@ -1040,8 +1045,10 @@ export function BookingDetail({
 
 function LookingForCleanerCard({
   confirmByLabel,
+  protectedBooking = false,
 }: {
   confirmByLabel: string | null;
+  protectedBooking?: boolean;
 }) {
   const steps = [
     { label: "Booked", state: "done" as const },
@@ -1061,9 +1068,9 @@ function LookingForCleanerCard({
             We are looking for your cleaner
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c6570]">
-            Their name stays hidden until they accept. We’ll email and text you
-            as soon as a cleaner accepts. If nobody can take it, we’ll cancel at
-            no charge and let you know.
+            {protectedBooking
+              ? "Their name stays hidden until they accept. We’ll email and text you as soon as a cleaner accepts."
+              : "Their name stays hidden until they accept. We’ll email and text you as soon as a cleaner accepts. If nobody can take it, we’ll cancel at no charge and let you know."}
           </p>
         </div>
         <div className="rounded-2xl bg-[#f7f4fb] px-4 py-3.5 sm:px-5 lg:min-w-[17rem] lg:text-right">
