@@ -1,5 +1,6 @@
 "use client";
 
+import { useFeedback } from "@/components/shared/feedback-provider";
 import {
   CalendarDays,
   ChevronDown,
@@ -35,6 +36,7 @@ export function AccountMenu({
     id: string;
   };
 }) {
+  const { confirm } = useFeedback();
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -95,6 +97,14 @@ export function AccountMenu({
   }, [open]);
 
   async function logout() {
+    setOpen(false);
+    const confirmed = await confirm({
+      action: "Log out",
+      description: "You will need to sign in again to see your account.",
+      title: "Log out of Mundoria?",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     setSigningOut(true);
     const { trackCrmEvent } = await import("@/lib/analytics/crm-events");
     trackCrmEvent("logout", {

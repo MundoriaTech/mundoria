@@ -45,6 +45,7 @@ import {
 } from "@/lib/dashboard/live-refresh";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { AdminAccess, AdminArea } from "@/lib/admin/access";
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
 import type { Notification } from "@/types/customer";
@@ -374,6 +375,7 @@ export function AdminShell({
   children: React.ReactNode;
   notifications: Notification[];
 }) {
+  const { confirm } = useFeedback();
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -402,6 +404,13 @@ export function AdminShell({
   }
 
   async function logout() {
+    const confirmed = await confirm({
+      action: "Log out",
+      description: "You will need to sign in again to see your account.",
+      title: "Log out of Mundoria?",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     setSigningOut(true);
     await createBrowserClient().auth.signOut();
     clearPersonalBrowserData();

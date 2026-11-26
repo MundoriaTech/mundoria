@@ -91,7 +91,7 @@ export function AppDashboardShell({
 
       {!desktop ? (
         <header className="sticky top-0 z-30 border-b border-[#e5e7eb]/90 bg-[#f3f4f6]/92 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+          <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-5 md:h-14 md:px-4">
             <div className="min-w-0">
               <LandingLogo className="text-[1.25rem]" href={brandHref} />
               {brandLabel ? (
@@ -169,7 +169,7 @@ export function AppDashboardShell({
           </aside>
         ) : null}
 
-        <main className="min-w-0 flex-1 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:py-8 md:pb-10 md:pt-2">
+        <main className="min-w-0 flex-1 py-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:py-8 md:pb-10 md:pt-2">
           {backLink ? (
             <DashboardBackLink
               className="mb-3 -ml-1"
@@ -185,7 +185,7 @@ export function AppDashboardShell({
       {!desktop ? (
         <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e5e7eb] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
           <div
-            className="mx-auto grid h-16 max-w-lg"
+            className="mx-auto grid h-20 max-w-lg px-2 pt-1 pb-2.5"
             style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
           >
             {navItems.map((item) => {
@@ -194,7 +194,7 @@ export function AppDashboardShell({
               return (
                 <Link
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition",
+                    "flex flex-col items-center justify-center gap-1.5 rounded-xl text-[11px] font-medium transition",
                     active ? "text-[#1c133b]" : "text-[#8b8798]",
                   )}
                   href={item.href}
