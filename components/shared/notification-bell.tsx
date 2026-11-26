@@ -20,6 +20,12 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Notification } from "@/types/customer";
 
+/**
+ * One-off updates shown as a pop-up once, then dismissed, instead of sitting
+ * in the notification list.
+ */
+const POPUP_TYPES = new Set(["cleaner_changed"]);
+
 export function NotificationBell({
   initialNotifications,
   userId,
@@ -38,10 +44,30 @@ export function NotificationBell({
   const [isDesktop, setIsDesktop] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const unreadCount = useMemo(
-    () => notifications.filter((notification) => !notification.is_read).length,
+  const listed = useMemo(
+    () => notifications.filter((notification) => !POPUP_TYPES.has(notification.type)),
     [notifications],
   );
+  const popups = useMemo(
+    () =>
+      notifications.filter(
+        (notification) => POPUP_TYPES.has(notification.type) && !notification.is_read,
+      ),
+    [notifications],
+  );
+  const unreadCount = useMemo(
+    () => listed.filter((notification) => !notification.is_read).length,
+    [listed],
+  );
+
+  async function dismissPopups() {
+    const ids = popups.map((notification) => notification.id);
+    if (!ids.length) return;
+    setNotifications((current) =>
+      current.map((item) => (ids.includes(item.id) ? { ...item, is_read: true } : item)),
+    );
+    await createBrowserClient().from("notifications").update({ is_read: true }).in("id", ids);
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -219,8 +245,8 @@ export function NotificationBell({
         <LoadingSpinner label="Loading notifications" />
       </div>
     );
-  } else if (notifications.length) {
-    list = notifications.map((notification) => {
+  } else if (listed.length) {
+    list = listed.map((notification) => {
       const href = notificationHref(notification);
       const content = (
         <div
@@ -358,6 +384,36 @@ export function NotificationBell({
         ) : null}
       </Button>
       {panel}
+      {mounted && popups[0]
+        ? createPortal(
+            <div
+              aria-live="polite"
+              className="fixed inset-x-4 bottom-4 z-[60] mx-auto max-w-md rounded-2xl border border-border bg-background p-4 shadow-xl sm:inset-x-auto sm:right-6 sm:mx-0"
+              role="status"
+            >
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground">{popups[0].title}</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{popups[0].body}</p>
+                </div>
+                <button
+                  aria-label="Dismiss"
+                  className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+                  onClick={() => void dismissPopups()}
+                  type="button"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="mt-3 flex justify-end">
+                <Button onClick={() => void dismissPopups()} size="sm" type="button">
+                  Got it
+                </Button>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

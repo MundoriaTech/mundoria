@@ -1,7 +1,7 @@
 "use client";
 
 import { loadStripe } from "@stripe/stripe-js";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,6 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
 const MIN_POUNDS = 1;
 const MAX_POUNDS = 100;
-
-function declinedKey(bookingId: string) {
-  return `mundoria:tip-declined:${bookingId}`;
-}
 
 /** Parse "5", "5.5" or "£5.50" into pence; null when it isn't a valid amount. */
 function toPence(value: string) {
@@ -37,17 +33,14 @@ export function TipPanel({
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
 
-  useEffect(() => {
-    if (window.localStorage.getItem(declinedKey(bookingId))) setStep("declined");
-  }, [bookingId]);
-
   const pence = toPence(amount);
   const valid =
     pence !== null && pence >= MIN_POUNDS * 100 && pence <= MAX_POUNDS * 100;
 
   function decline() {
-    window.localStorage.setItem(declinedKey(bookingId), "1");
     setStep("declined");
+    // Saved on the booking, so the prompt stays hidden on every device.
+    void fetch(`/api/bookings/${bookingId}/tip/decline`, { method: "POST" });
   }
 
   async function send(event: React.FormEvent) {

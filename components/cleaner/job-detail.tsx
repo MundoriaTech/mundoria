@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { JobBrief } from "@/components/cleaner/job-brief";
+import { useFeedback } from "@/components/shared/feedback-provider";
 import { getCurrentCoords, locationErrorMessage } from "@/lib/geo/current-position";
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
@@ -70,6 +71,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     longitude: number;
   } | null>(null);
   const router = useRouter();
+  const { confirm } = useFeedback();
 
   useEffect(() => {
     if (job.status !== "cleaner_en_route" || !navigator.geolocation) return;
@@ -90,6 +92,17 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     );
     return () => navigator.geolocation.clearWatch(id);
   }, [job.id, job.status]);
+
+  async function releaseJob() {
+    const confirmed = await confirm({
+      action: "Release job",
+      description:
+        "The job goes back to other cleaners and the customer is told. Releasing a job you've accepted counts as a cancellation on your record.",
+      title: "Are you sure you want to release this job?",
+      variant: "destructive",
+    });
+    if (confirmed) await respond("declined");
+  }
 
   async function respond(response: "accepted" | "declined") {
     setWorking(true);
@@ -383,7 +396,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
               </Button>
               <Button
                 disabled={working}
-                onClick={() => void respond("declined")}
+                onClick={() => void releaseJob()}
                 variant="outline"
               >
                 Release this job
@@ -393,7 +406,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
           {job.status === "cleaner_en_route" && !job.checkin_verified ? (
             <Button
               disabled={working}
-              onClick={() => void respond("declined")}
+              onClick={() => void releaseJob()}
               variant="outline"
             >
               Release this job

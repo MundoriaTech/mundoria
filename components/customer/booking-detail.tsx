@@ -142,6 +142,7 @@ export function BookingDetail({
     (!booking.is_recurring || Boolean(booking.parent_booking_id));
   const tipOpen = useMemo(() => {
     if (Number(booking.tip_pence ?? 0) > 0) return false;
+    if ((booking as { tip_declined_at?: string | null }).tip_declined_at) return false;
     if (!["completed", "awaiting_customer_confirmation"].includes(booking.status)) {
       return false;
     }

@@ -8,6 +8,7 @@ import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import { getCustomerBookings } from "@/lib/customer/server";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Booking } from "@/types/customer";
+import { CleanCountdown } from "@/components/shared/clean-countdown";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -315,7 +316,17 @@ export default async function CustomerDashboardPage() {
         new Date(`${a.scheduled_date}T${a.scheduled_start_time}`).getTime() -
         new Date(`${b.scheduled_date}T${b.scheduled_start_time}`).getTime(),
     );
-  const next = upcoming[0] ?? null;
+  // A clean happening now (or a cleaner on the way to one today) takes the
+  // place of "Upcoming" until it's finished.
+  const current =
+    bookings.find((b) => b.status === "in_progress") ??
+    bookings.find((b) => {
+      if (b.status !== "cleaner_en_route") return false;
+      const start = new Date(`${b.scheduled_date}T${b.scheduled_start_time}`).getTime();
+      return start - now.getTime() <= 3 * 60 * 60 * 1000;
+    }) ??
+    null;
+  const next = current ?? upcoming[0] ?? null;
 
   return (
     <div className="flex flex-col gap-5">
@@ -340,7 +351,7 @@ export default async function CustomerDashboardPage() {
               className="relative m-0 font-semibold leading-none text-white"
               style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}
             >
-              Upcoming Cleaning
+              {current ? "Current Session" : "Upcoming Cleaning"}
             </h2>
           </div>
           <div className="flex flex-wrap gap-4">
@@ -403,11 +414,23 @@ export default async function CustomerDashboardPage() {
                 href={`/booking/${next.id}`}
                 style={{ height: "57px", padding: "0 24px", fontSize: "17.4px", border: "2px solid #524096", whiteSpace: "nowrap" }}
               >
-                View request
+                {current ? "View session" : "View request"}
               </CrmLink>
             ) : null}
           </div>
         </div>
+        {current?.status === "in_progress" ? (
+          <CleanCountdown
+            bookingId={current.id}
+            durationHours={current.estimated_duration_hours}
+            role="customer"
+            startedAt={current.actual_start_time}
+          />
+        ) : current ? (
+          <p className="m-0 text-[15px] font-semibold text-[#524096]">
+            Your cleaner is on the way.
+          </p>
+        ) : null}
         <div className="flex flex-wrap gap-5">
           <CalendarTile booking={next} />
           <TimeTile booking={next} />
