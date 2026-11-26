@@ -24,7 +24,7 @@ export const RESCHEDULE_CUTOFF_HOURS = 48;
  * 48-hour rules. Remove once the test is done.
  */
 const RESCHEDULE_TEST_BOOKING_IDS = new Set<string>([
-  "d11e6f9c-02a7-447e-9dee-3c97e8697a9e", // bosoye with Maritha, 28 Nov
+  "412bc491-ebe2-4875-9da4-8f72c4a13639", // bosoye, Sat 28 Nov 18:00
 ]);
 
 export function isRescheduleTestBooking(bookingId: string | null | undefined) {
