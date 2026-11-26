@@ -271,11 +271,12 @@ export function OnboardingDateField({
   const today = new Date().toISOString().slice(0, 10);
   const latest = maxDate ?? today;
   const earliest = minDate ?? "1990-01-01";
-  const [viewMonth, setViewMonth] = useState(() =>
-    value
-      ? new Date(`${value}T12:00:00`)
-      : new Date(`${latest}T12:00:00`),
-  );
+  // Open on the chosen date, else today kept inside the allowed range (an
+  // expiry field allows dates years ahead; opening there meant ~180 clicks back).
+  const [viewMonth, setViewMonth] = useState(() => {
+    const start = value || (today < earliest ? earliest : today > latest ? latest : today);
+    return new Date(`${start}T12:00:00`);
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -316,7 +317,14 @@ export function OnboardingDateField({
   const empty = !display;
 
   function shiftMonth(delta: number) {
-    const next = new Date(year, month + delta, 1);
+    let next = new Date(year, month + delta, 1);
+    // A whole-year jump past either end lands on the first/last allowed month.
+    if (Math.abs(delta) >= 12) {
+      const earliestMonth = new Date(`${earliest.slice(0, 7)}-01T12:00:00`);
+      const latestMonth = new Date(`${latest.slice(0, 7)}-01T12:00:00`);
+      if (next < earliestMonth) next = new Date(earliestMonth.getFullYear(), earliestMonth.getMonth(), 1);
+      if (next > latestMonth) next = new Date(latestMonth.getFullYear(), latestMonth.getMonth(), 1);
+    }
     const monthStart = toIsoDate(next.getFullYear(), next.getMonth(), 1);
     const monthEnd = toIsoDate(
       next.getFullYear(),
@@ -386,6 +394,14 @@ export function OnboardingDateField({
           >
             <div className="mb-1.5 flex items-center justify-between gap-1">
               <button
+                aria-label="Previous year"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
+                onClick={() => shiftMonth(-12)}
+                type="button"
+              >
+                «
+              </button>
+              <button
                 aria-label="Previous month"
                 className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
                 onClick={() => shiftMonth(-1)}
@@ -401,6 +417,14 @@ export function OnboardingDateField({
                 type="button"
               >
                 ›
+              </button>
+              <button
+                aria-label="Next year"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
+                onClick={() => shiftMonth(12)}
+                type="button"
+              >
+                »
               </button>
             </div>
             <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-[#8b8798]">

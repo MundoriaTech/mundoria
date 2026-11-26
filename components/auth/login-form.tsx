@@ -4,12 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { FormField } from "@/components/auth/form-field";
 import { FormStatus } from "@/components/auth/form-status";
 import { OAuthButton } from "@/components/auth/oauth-button";
-import { PasswordRequirementsList } from "@/components/auth/password-requirements";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -43,7 +42,6 @@ export function LoginForm({
     initialError ?? null,
   );
   const {
-    control,
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
@@ -52,7 +50,6 @@ export function LoginForm({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: initialEmail ?? "", password: "" },
   });
-  const passwordValue = useWatch({ control, name: "password", defaultValue: "" });
 
   useEffect(() => {
     if (initialEmail) return;
@@ -154,7 +151,6 @@ export function LoginForm({
               {...register("password")}
             />
           </FormField>
-          <PasswordRequirementsList password={passwordValue ?? ""} />
         </div>
 
         <div className="text-right">

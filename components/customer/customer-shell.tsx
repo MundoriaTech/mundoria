@@ -26,6 +26,7 @@ import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/auth";
+import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
 
 const NAV_ITEMS = [
   { exact: true, href: "/dashboard", icon: Home, label: "Dashboard" },
@@ -238,6 +239,7 @@ export function CustomerShell({
       customer_id: profile.id,
     });
     await createBrowserClient().auth.signOut();
+    clearPersonalBrowserData();
     router.replace("/login");
     router.refresh();
   }

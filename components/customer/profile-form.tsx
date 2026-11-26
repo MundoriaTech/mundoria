@@ -12,6 +12,7 @@ import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { isValidUkPhone, storedPhone } from "@/lib/auth/uk-phone";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/auth";
+import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
 
 function Toggle({ checked, label, onChange }: { checked: boolean; label: string; onChange: (v: boolean) => void }) {
   return (
@@ -176,6 +177,7 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
       customer_id: profile.id,
     });
     await createBrowserClient().auth.signOut();
+    clearPersonalBrowserData();
     router.replace("/login");
     router.refresh();
   }

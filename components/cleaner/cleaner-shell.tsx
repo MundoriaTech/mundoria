@@ -16,6 +16,7 @@ import { TierBadge } from "@/components/cleaner/tier-badge";
 import { CLEANER_ACCOUNT_MENU } from "@/components/shared/account-menu";
 import { AppDashboardShell } from "@/components/shared/app-dashboard-shell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
+import { isAwaitingApproval } from "@/lib/cleaner/approval";
 import { applicationLifecycleLabel } from "@/lib/cleaner/onboarding-compliance";
 import { formatInterviewSlot } from "@/lib/cleaner/interview-slots";
 import type { Profile } from "@/types/auth";
@@ -31,6 +32,14 @@ const nav = [
   { href: "/cleaner/profile", icon: UserRound, label: "Profile" },
 ];
 
+/** Until approved: the application page plus what an applicant can use. */
+const applicantNav = [
+  { exact: true, href: "/cleaner/dashboard", icon: Gauge, label: "Application" },
+  { href: "/cleaner/messages", icon: MessageCircle, label: "Messages" },
+  { href: "/cleaner/incidents", icon: ShieldAlert, label: "Incidents" },
+  { href: "/cleaner/profile", icon: UserRound, label: "Profile" },
+];
+
 export function CleanerShell({
   children,
   cleaner,
@@ -40,6 +49,7 @@ export function CleanerShell({
   cleaner: CleanerProfile;
   profile: Profile;
 }) {
+  const awaiting = isAwaitingApproval(cleaner);
   return (
     <>
       <SessionTimeoutGuard audience="cleaner" />
@@ -49,13 +59,15 @@ export function CleanerShell({
         brandHref="/cleaner/dashboard"
         brandLabel="Pro"
         headerExtra={
-          <TierBadge className="hidden min-[380px]:inline-flex" size="sm" tier={cleaner.tier} />
+          awaiting ? null : (
+            <TierBadge className="hidden min-[380px]:inline-flex" size="sm" tier={cleaner.tier} />
+          )
         }
-        navItems={nav}
+        navItems={awaiting ? applicantNav : nav}
         profile={profile}
         roleLabel="Cleaner"
         topSlot={
-          cleaner.status !== "certified" && cleaner.status !== "active" ? (
+          cleaner.status !== "certified" && cleaner.status !== "active" && !awaiting ? (
             <CleanerAccountBanner cleaner={cleaner} />
           ) : null
         }

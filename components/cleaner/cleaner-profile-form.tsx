@@ -37,6 +37,7 @@ import type {
   CleanerService,
   DocumentReviewStatus,
 } from "@/types/cleaner";
+import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
 
 export function CleanerProfileForm({
   areas: initialAreas,
@@ -175,6 +176,7 @@ export function CleanerProfileForm({
 
   async function logout() {
     await createBrowserClient().auth.signOut();
+    clearPersonalBrowserData();
     router.replace("/login");
   }
 
