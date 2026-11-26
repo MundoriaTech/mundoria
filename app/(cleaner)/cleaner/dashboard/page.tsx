@@ -30,6 +30,7 @@ import { sessionPhotoForService } from "@/lib/customer/booking-visibility";
 import { cleanerHero, type CleanerHeroMoment } from "@/lib/avatars/hero-poses";
 import { isAwaitingApproval } from "@/lib/cleaner/approval";
 import { createServerClient } from "@/lib/supabase/server";
+import { refreshCleanerStripeStatus } from "@/lib/stripe/cleaner-connect";
 
 export const metadata = { title: "Cleaner dashboard" };
 
@@ -47,6 +48,17 @@ export default async function CleanerDashboardPage() {
   const cleaner = context.cleanerProfile;
   const profile = context.profile;
   if (!cleaner || !profile) redirect("/");
+  if (
+    profile.stripe_account_id &&
+    !cleaner.stripe_onboarding_complete &&
+    (cleaner.status === "certified" || cleaner.status === "active")
+  ) {
+    cleaner.stripe_onboarding_complete = await refreshCleanerStripeStatus({
+      accountId: profile.stripe_account_id,
+      cleanerId: user.id,
+      current: false,
+    });
+  }
   const firstName = profile.full_name.trim().split(/\s+/)[0] || "there";
   if (isAwaitingApproval(cleaner)) {
     return <ApplicationStatus cleaner={cleaner} firstName={firstName} />;

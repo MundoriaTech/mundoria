@@ -80,6 +80,17 @@ export async function POST(request: Request) {
       account = await syncCleanerConnectAccount(stripe, accountId, identity);
     }
 
+    // Read the result straight from Stripe rather than waiting for the
+    // account.updated webhook, so a missed webhook never leaves a finished
+    // cleaner stuck on "Connect Stripe".
+    const stripeComplete = Boolean(account.details_submitted && account.payouts_enabled);
+    if (stripeComplete !== Boolean(cleaner.stripe_onboarding_complete)) {
+      await admin
+        .from("cleaner_profiles")
+        .update({ stripe_onboarding_complete: stripeComplete })
+        .eq("id", user.id);
+    }
+
     const session = await stripe.accountSessions.create({
       account: accountId,
       components: {
@@ -101,7 +112,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       bankFocused: isBankFocusedConnectAccount(account),
       clientSecret: session.client_secret,
-      stripeComplete: Boolean(cleaner.stripe_onboarding_complete),
+      stripeComplete,
     });
   } catch (error) {
     Sentry.captureException(error);

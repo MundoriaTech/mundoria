@@ -182,3 +182,32 @@ export async function syncCleanerConnectAccount(
     return stripe.accounts.retrieve(accountId);
   }
 }
+
+/**
+ * Re-read a cleaner's Connect account from Stripe and record whether payouts
+ * are set up. Used when the account.updated webhook may have been missed.
+ * Returns the up-to-date flag, or the current one if Stripe can't be reached.
+ */
+export async function refreshCleanerStripeStatus(input: {
+  accountId: string;
+  cleanerId: string;
+  current: boolean;
+}) {
+  try {
+    const [{ getStripe }, { createAdminClient }] = await Promise.all([
+      import("@/lib/stripe/server"),
+      import("@/lib/supabase/admin"),
+    ]);
+    const account = await getStripe().accounts.retrieve(input.accountId);
+    const complete = Boolean(account.details_submitted && account.payouts_enabled);
+    if (complete !== input.current) {
+      await createAdminClient()
+        .from("cleaner_profiles")
+        .update({ stripe_onboarding_complete: complete })
+        .eq("id", input.cleanerId);
+    }
+    return complete;
+  } catch {
+    return input.current;
+  }
+}
