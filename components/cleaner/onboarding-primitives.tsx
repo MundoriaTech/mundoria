@@ -207,6 +207,7 @@ export function OnboardingSelect({
                           onChange(option.value);
                           setOpen(false);
                         }}
+                        aria-selected={isSelected}
                         role="option"
                         type="button"
                       >

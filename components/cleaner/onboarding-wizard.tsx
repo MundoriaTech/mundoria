@@ -2803,6 +2803,7 @@ function HomeDistrictsPicker({
                       setQuery("");
                       setOpen(false);
                     }}
+                    aria-selected={false}
                     role="option"
                     type="button"
                   >

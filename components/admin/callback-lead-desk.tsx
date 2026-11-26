@@ -89,6 +89,7 @@ function DeskSelect({
                     setOpen(false);
                     if (option.value !== value) onChange(option.value);
                   }}
+                  aria-selected={selected}
                   role="option"
                   style={{
                     background: selected ? "#F3EEF8" : undefined,

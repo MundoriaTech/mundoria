@@ -203,22 +203,50 @@ export function Chat({
       type,
       url,
     }));
-    const response = await fetch("/api/messages", {
-      body: JSON.stringify({
+    // Show the message straight away; swap in the saved copy when it lands.
+    const tempId = `temp-${Date.now()}`;
+    const draft = { content, pending };
+    setMessages((current) => [
+      ...current,
+      {
         attachments,
-        bookingId,
+        booking_id: bookingId,
         content: text,
-      }),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-    const result = (await response.json()) as {
-      error?: string;
-      message?: Message;
-    };
+        created_at: new Date().toISOString(),
+        id: tempId,
+        is_read: false,
+        receiver_id: "",
+        sender_id: currentUserId,
+      },
+    ]);
+    setContent("");
+    setPending([]);
+    setEmojiOpen(false);
+
+    let result: { error?: string; message?: Message } = {};
+    let ok = false;
+    try {
+      const response = await fetch("/api/messages", {
+        body: JSON.stringify({
+          attachments,
+          bookingId,
+          content: text,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      ok = response.ok;
+      result = (await response.json().catch(() => ({}))) as typeof result;
+    } catch {
+      result = { error: "No connection. Check your signal and try again." };
+    }
     setSending(false);
 
-    if (!response.ok || !result.message) {
+    if (!ok || !result.message) {
+      // Roll back and give the text back so they can retry.
+      setMessages((current) => current.filter((message) => message.id !== tempId));
+      setContent(draft.content);
+      setPending(draft.pending);
       setError(result.error ?? "Unable to send message.");
       return;
     }
@@ -229,14 +257,13 @@ export function Chat({
       customer_id: currentUserId,
     });
 
-    setMessages((current) =>
-      current.some((message) => message.id === result.message!.id)
-        ? current
-        : [...current, result.message!],
-    );
-    setContent("");
-    setPending([]);
-    setEmojiOpen(false);
+    const saved = result.message;
+    setMessages((current) => {
+      const withoutTemp = current.filter((message) => message.id !== tempId);
+      return withoutTemp.some((message) => message.id === saved.id)
+        ? withoutTemp
+        : [...withoutTemp, saved];
+    });
   }
 
   function insertEmoji(emoji: string) {
@@ -281,12 +308,16 @@ export function Chat({
           messages.map((message) => {
             const mine = message.sender_id === currentUserId;
             return (
-              <ChatMessage
-                isOwn={mine}
+              <div
+                className={message.id.startsWith("temp-") ? "opacity-60" : undefined}
                 key={message.id}
-                message={message}
-                senderName={names[message.sender_id]}
-              />
+              >
+                <ChatMessage
+                  isOwn={mine}
+                  message={message}
+                  senderName={names[message.sender_id]}
+                />
+              </div>
             );
           })
         ) : (
