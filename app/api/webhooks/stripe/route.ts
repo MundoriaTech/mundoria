@@ -67,6 +67,23 @@ export async function POST(request: Request) {
       }
       break;
     }
+    case "charge.refunded": {
+      // Refunds made in the Stripe dashboard: mark the booking refunded once
+      // its own charge is refunded in full.
+      const charge = event.data.object;
+      const intentId =
+        typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : charge.payment_intent?.id;
+      if (intentId && charge.refunded) {
+        await admin
+          .from("bookings")
+          .update({ payment_status: "refunded" })
+          .eq("stripe_payment_intent_id", intentId)
+          .neq("payment_status", "refunded");
+      }
+      break;
+    }
     case "payment_intent.succeeded": {
       const intent = event.data.object;
       await admin
