@@ -1,5 +1,6 @@
 import { refundBookingPayment } from "@/lib/payments/service";
 import { runMatchingEngine } from "@/lib/matching/engine";
+import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type Admin = ReturnType<typeof createAdminClient>;
@@ -97,8 +98,22 @@ export async function changePro({
     .eq("customer_id", customerId)
     .single();
   if (!booking) throw new Error("Booking not found.");
-  if (!OPEN_STATUSES.includes(booking.status) && booking.status !== "matched") {
-    throw new Error("This visit can no longer change pro.");
+  // Once a cleaner has accepted, the customer can't swap them; support can.
+  const notAcceptedYet = ["pending_match", "matched"].includes(booking.status);
+  let accepted = false;
+  if (booking.cleaner_id) {
+    const { data: response } = await admin
+      .from("cleaner_job_responses")
+      .select("response")
+      .eq("booking_id", bookingId)
+      .eq("cleaner_id", booking.cleaner_id)
+      .maybeSingle();
+    accepted = response?.response === "accepted";
+  }
+  if (!notAcceptedYet || accepted) {
+    throw new Error(
+      "Your cleaner has already accepted this visit. To change cleaner, contact us through Help.",
+    );
   }
   if (booking.is_recurring && !booking.parent_booking_id) {
     throw new Error("Change pro is available from the second visit onward.");
@@ -140,6 +155,22 @@ export async function changePro({
     })
     .eq("id", booking.id);
   if (error) throw new Error(error.message);
+
+  if (previousCleanerId) {
+    // Close their offer and tell them it has gone.
+    await admin
+      .from("cleaner_job_responses")
+      .update({ responded_at: new Date().toISOString() })
+      .eq("booking_id", booking.id)
+      .eq("cleaner_id", previousCleanerId)
+      .is("responded_at", null);
+    await sendPushNotification(
+      previousCleanerId,
+      "Job offer withdrawn",
+      `The customer asked for a different cleaner for the visit on ${booking.scheduled_date}. It is no longer offered to you.`,
+      { booking_id: booking.id },
+    ).catch(() => undefined);
+  }
 
   await runMatchingEngine(booking.id, {
     excludeCleanerIds: previousCleanerId ? [previousCleanerId] : [],

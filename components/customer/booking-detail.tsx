@@ -131,9 +131,11 @@ export function BookingDetail({
     booking.payment_status === "unpaid" &&
     !hasPaymentMethod &&
     booking.status !== "cancelled";
+  // Only before the cleaner accepts; after that, changes go through support.
   const canChangePro =
     canCancel &&
     Boolean(booking.cleaner_id) &&
+    ["pending_match", "matched"].includes(booking.status) &&
     (!booking.is_recurring || Boolean(booking.parent_booking_id));
   const tipOpen = useMemo(() => {
     if (Number(booking.tip_pence ?? 0) > 0) return false;
@@ -459,19 +461,12 @@ export function BookingDetail({
 
       {booking.status === "awaiting_payment" &&
       !booking.payment_preauth_failed_at ? (
-        <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
-          <p className="font-semibold">Confirming payment</p>
+        <div className="rounded-[1.25rem] border border-[#e4daf5] bg-white px-5 py-4 text-sm text-[#5a5470]">
+          <p className="font-semibold text-[#1c133b]">Your cleaner has accepted</p>
           <p className="mt-1 leading-6">
-            Your cleaner has accepted. We&apos;re securing the card hold to
-            confirm this visit. You can update your card anytime if needed.
+            We&apos;ll place the card hold {holdOpenHours ?? 48} hours before
+            your visit to confirm it. There&apos;s nothing you need to do.
           </p>
-          <Button
-            className="mt-3 min-h-11 rounded-full"
-            onClick={() => setShowPay(true)}
-            size="sm"
-          >
-            Update card
-          </Button>
         </div>
       ) : null}
 
