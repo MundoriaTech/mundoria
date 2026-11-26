@@ -53,3 +53,8 @@ export function receiptSummary(booking: ReceiptBooking) {
     },
   };
 }
+
+/** Only a completed clean has a receipt or invoice (not cancellations or fees). */
+export function receiptAvailable(booking: { status: string }) {
+  return booking.status === "completed";
+}

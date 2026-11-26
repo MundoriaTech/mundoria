@@ -9,7 +9,7 @@ import {
   formatMoney,
 } from "@/lib/customer/services";
 import { paymentStatusLabel } from "@/lib/customer/payment-status";
-import { buildReceiptLines } from "@/lib/customer/receipt";
+import { buildReceiptLines, receiptAvailable } from "@/lib/customer/receipt";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Booking, BookingAddOn } from "@/types/customer";
 
@@ -46,10 +46,7 @@ export default async function BookingReceiptPage({
 
   if (!data) notFound();
   const booking = data as Booking;
-  if (
-    !["completed", "awaiting_customer_confirmation"].includes(booking.status) &&
-    booking.payment_status !== "released"
-  ) {
+  if (!receiptAvailable(booking)) {
     notFound();
   }
 

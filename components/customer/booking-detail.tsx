@@ -52,6 +52,7 @@ import {
   scheduleChangeFeePreview,
 } from "@/lib/bookings/schedule";
 import { cleanerTierLabel, medallionIconSrc } from "@/lib/cleaner/tier";
+import { receiptAvailable } from "@/lib/customer/receipt";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Booking, BookingChecklistItem } from "@/types/customer";
@@ -588,11 +589,7 @@ export function BookingDetail({
             title="Booking details"
           />
 
-          {booking.status !== "cancelled" &&
-          (["completed", "awaiting_customer_confirmation"].includes(
-            booking.status,
-          ) ||
-            booking.payment_status === "released") ? (
+          {receiptAvailable(booking) ? (
             <div>
               <Button
                 asChild

@@ -30,7 +30,8 @@ export default async function CustomerPaymentsPage() {
         .from("bookings")
         .select("*, address:addresses(city, postcode)")
         .eq("customer_id", user!.id)
-        .eq("payment_status", "released")
+        // Only completed cleans have receipts (not cancellation fees).
+        .eq("status", "completed")
         .order("scheduled_date", { ascending: false }),
       supabase
         .from("promo_codes")
@@ -53,8 +54,8 @@ export default async function CustomerPaymentsPage() {
     <div className="flex flex-col gap-5">
       <div className="rounded-[18px] bg-white p-5">
         <p className="m-0 text-[14px] leading-6 text-[#5F5F66]">
-          Save a card for visits that still need one, then find receipts after
-          payment is captured the day after a clean.{" "}
+          Save a card for visits that still need one. Receipts appear here once
+          a clean is completed.{" "}
           <Link
             className="font-semibold text-[#524096] underline-offset-2 hover:underline"
             href="/help/article/why-pay-in-advance"

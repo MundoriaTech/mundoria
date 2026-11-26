@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { paymentStatusLabel } from "@/lib/customer/payment-status";
+import { receiptAvailable } from "@/lib/customer/receipt";
 import { bookingServiceName } from "@/lib/customer/services";
 import { buildBookingInvoicePdf, type InvoiceLine } from "@/lib/invoices/booking-invoice-pdf";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -40,12 +41,9 @@ export async function GET(
   if (!booking) {
     return NextResponse.json({ error: "Booking not found." }, { status: 404 });
   }
-  if (
-    !["completed", "awaiting_customer_confirmation"].includes(booking.status) &&
-    booking.payment_status !== "released"
-  ) {
+  if (!receiptAvailable(booking)) {
     return NextResponse.json(
-      { error: "Your invoice is available once the clean is finished." },
+      { error: "Your invoice is available once the clean is completed." },
       { status: 409 },
     );
   }
