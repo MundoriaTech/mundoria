@@ -549,22 +549,29 @@ export function BookingDetail({
           title="Your booking is protected"
         />
       ) : null}
-      {cleanerVisible && booking.previous_cleaner_id && booking.cleaner ? (
+      {/* One banner for the stage the visit is at now, each closable. */}
+      {cleanerVisible &&
+      booking.previous_cleaner_id &&
+      booking.cleaner &&
+      ["awaiting_payment", "confirmed", "cleaner_en_route"].includes(booking.status) ? (
         <Notice
           body={`${booking.cleaner.full_name.split(" ")[0]} is now assigned to your clean.`}
+          dismissKey={`cleaner-changed:${booking.id}:${booking.cleaner_id}`}
           title="Your cleaning professional has changed"
         />
       ) : null}
 
-      {booking.checkin_verified ? (
+      {booking.status === "in_progress" ? (
         <Notice
           body="Your cleaner has arrived and checked in."
+          dismissKey={`started:${booking.id}`}
           title="Cleaning has started"
         />
       ) : null}
-      {booking.checkout_verified ? (
+      {booking.status === "awaiting_customer_confirmation" ? (
         <Notice
           body="Your cleaner has checked out. Please review the completed job."
+          dismissKey={`complete:${booking.id}`}
           title="Cleaning complete"
         />
       ) : null}
@@ -1135,11 +1142,40 @@ function Modal({
   );
 }
 
-function Notice({ body, title }: { body: string; title: string }) {
+function Notice({
+  body,
+  dismissKey,
+  title,
+}: {
+  body: string;
+  dismissKey?: string;
+  title: string;
+}) {
+  const storageKey = dismissKey ? `mundoria:notice:${dismissKey}` : null;
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    if (storageKey && window.localStorage.getItem(storageKey)) setHidden(true);
+  }, [storageKey]);
+  if (hidden) return null;
   return (
-    <div className="rounded-xl bg-emerald-100 p-4 text-emerald-950">
-      <p className="font-semibold">{title}</p>
-      <p className="mt-1 text-sm">{body}</p>
+    <div className="flex items-start gap-3 rounded-xl bg-emerald-100 p-4 text-emerald-950">
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">{title}</p>
+        <p className="mt-1 text-sm">{body}</p>
+      </div>
+      {storageKey ? (
+        <button
+          aria-label="Dismiss"
+          className="rounded-full p-1 text-emerald-900/70 hover:bg-emerald-200"
+          onClick={() => {
+            window.localStorage.setItem(storageKey, "1");
+            setHidden(true);
+          }}
+          type="button"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      ) : null}
     </div>
   );
 }
