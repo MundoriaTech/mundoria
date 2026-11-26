@@ -11,16 +11,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { JobBrief } from "@/components/cleaner/job-brief";
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
 import { safetyAlertAllowed } from "@/lib/bookings/safety-alert-shared";
 import { checkInWindowMessage } from "@/lib/bookings/schedule";
-import {
-  bookingServiceName,
-  formatMoney,
-  standardLabel,
-} from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { CleanerJob } from "@/types/cleaner";
 
@@ -331,26 +328,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <section className="rounded-xl border bg-background p-5">
-          <h2 className="font-semibold">Job details</h2>
-          <div className="mt-4 space-y-3 text-sm">
-            <p><b>Customer:</b> {job.customer?.full_name}</p>
-            <p><b>Standard:</b> {standardLabel(job.cleaning_standard ?? "enhanced")}</p>
-            <p><b>When:</b> {job.scheduled_date} at {job.scheduled_start_time.slice(0, 5)}</p>
-            <p><b>Address:</b> {job.address?.address_line_1}, {job.address?.city}, {job.address?.postcode}</p>
-            {job.special_attention_areas?.length ? (
-              <p><b>Special attention:</b> {job.special_attention_areas.join(", ")}</p>
-            ) : null}
-            {job.add_ons?.length ? (
-              <p>
-                <b>Add-ons:</b>{" "}
-                {job.add_ons.map((addOn) => addOn.label).join(", ")}
-              </p>
-            ) : null}
-            <p><b>Instructions:</b> {job.special_instructions ?? "None"}</p>
-            <p><b>Your earnings:</b> {formatMoney(job.amount_cleaner)}</p>
-          </div>
-        </section>
+        <JobBrief job={job} />
         <RouteMap job={job} />
       </div>
       {error ? (
