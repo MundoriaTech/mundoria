@@ -1083,7 +1083,7 @@ export function DocumentUpload({
     !files.some((row) => row.uploading);
 
   return (
-    <div className="mx-auto w-full max-w-sm space-y-3">
+    <div className="w-full space-y-3">
       <p className="text-sm font-medium text-[#291845]">{label}</p>
       <label
         className={cn(

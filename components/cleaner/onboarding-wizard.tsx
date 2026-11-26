@@ -1150,9 +1150,6 @@ export function OnboardingWizard({
   ).length;
   const activeStep =
     STEPS.find((step) => step.id === expanded) ?? STEPS[0];
-  const minutesLeft = STEPS.filter(
-    (step) => !isStepComplete(step.id, data),
-  ).reduce((sum, step) => sum + step.minutes, 0);
   const progressPercent = Math.round((completedCount / STEPS.length) * 100);
 
   function continueFromStep(source: OnboardingData = data) {
@@ -1433,7 +1430,7 @@ export function OnboardingWizard({
                       aria-current={isOpen ? "step" : undefined}
                       aria-label={step.label}
                       className={cn(
-                        "inline-flex h-8 w-8 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition",
+                        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition",
                         isOpen
                           ? "border-[#1c133b] bg-[#1c133b] text-white"
                           : complete
@@ -1465,7 +1462,6 @@ export function OnboardingWizard({
                       <span>
                         {completedCount} of {STEPS.length} done
                       </span>
-                      <span>~{Math.max(minutesLeft, 1)} min left</span>
                     </div>
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
                       <div
@@ -1531,7 +1527,6 @@ export function OnboardingWizard({
               <span>
                 {completedCount} of {STEPS.length} done
               </span>
-              <span>~{Math.max(minutesLeft, 1)} min left</span>
             </div>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e8e0d0]">
               <div
