@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import { BookingCalendar } from "@/components/customer/booking-calendar";
 import { ActionError } from "@/components/shared/action-error";
 import {
+  BOOKING_MIN_LEAD_HOURS,
+  earliestBookableDateKey,
   TimeSlotPicker,
   slotsFinishingByWindowEnd,
 } from "@/components/shared/time-slot-picker";
@@ -27,18 +29,19 @@ export function RescheduleModal({
   onClose: () => void;
   onSaved: (payload: { date: string; time: string }) => void;
 }) {
-  const tomorrow = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
-  }, []);
-  const [date, setDate] = useState(initialDate);
-  const [time, setTime] = useState(initialTime.slice(0, 5));
+  // A new time needs the same 48 hours' notice as a new booking.
+  const minDate = useMemo(() => earliestBookableDateKey(BOOKING_MIN_LEAD_HOURS), []);
+  const [date, setDate] = useState(initialDate >= minDate ? initialDate : "");
+  const [time, setTime] = useState(initialDate >= minDate ? initialTime.slice(0, 5) : "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const slots = useMemo(
-    () => slotsFinishingByWindowEnd(durationHours || 2),
-    [durationHours],
+    () =>
+      slotsFinishingByWindowEnd(durationHours || 2, {
+        date,
+        minLeadHours: BOOKING_MIN_LEAD_HOURS,
+      }),
+    [date, durationHours],
   );
 
   async function save() {
@@ -72,12 +75,13 @@ export function RescheduleModal({
           <h2 className="text-lg font-semibold">Change date &amp; time</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Free when you move the visit at least {freeCancelHours} hours before
-            the original start.
+            the original start. The new time must be at least{" "}
+            {BOOKING_MIN_LEAD_HOURS} hours from now.
           </p>
         </div>
         <div className="overflow-y-auto px-5 py-4">
           <BookingCalendar
-            minDate={tomorrow}
+            minDate={minDate}
             onChange={(dates) => {
               if (dates[0]) setDate(dates[0]);
             }}

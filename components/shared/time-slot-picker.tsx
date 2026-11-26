@@ -1,6 +1,9 @@
 "use client";
 
+import { BOOKING_MIN_LEAD_HOURS } from "@/lib/bookings/lead-time";
 import { cn } from "@/lib/utils";
+
+export { BOOKING_MIN_LEAD_HOURS };
 
 export type TimeSlotAvailability =
   | string[]
@@ -10,9 +13,6 @@ export type TimeSlotAvailability =
 /** Daytime bookable window: 07:00-23:00 (16 hours). */
 export const DAY_WINDOW_START_MINUTES = 7 * 60;
 export const DAY_WINDOW_END_MINUTES = 23 * 60;
-
-/** Bookings need this much notice before the slot start. */
-export const BOOKING_MIN_LEAD_HOURS = 48;
 
 /** First calendar day that can contain a slot past the lead window. */
 export function earliestBookableDateKey(

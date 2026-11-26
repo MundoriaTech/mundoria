@@ -32,6 +32,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import type { Address } from "@/types/customer";
+import { BOOKING_MIN_LEAD_HOURS, hoursFromNow } from "@/lib/bookings/lead-time";
 
 export async function POST(request: Request) {
   const parsed = bookingDraftSchema.safeParse(await request.json());
@@ -49,6 +50,20 @@ export async function POST(request: Request) {
   ) {
     return NextResponse.json(
       { error: "Workspace cleaning needs a repeat schedule." },
+      { status: 400 },
+    );
+  }
+
+  // Same notice the booking form asks for; stops an old or edited request
+  // booking a clean sooner than that.
+  if (
+    hoursFromNow(parsed.data.scheduledDate, parsed.data.scheduledTime) <
+    BOOKING_MIN_LEAD_HOURS
+  ) {
+    return NextResponse.json(
+      {
+        error: `Choose a time at least ${BOOKING_MIN_LEAD_HOURS} hours from now.`,
+      },
       { status: 400 },
     );
   }

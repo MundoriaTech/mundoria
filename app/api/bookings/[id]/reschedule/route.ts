@@ -2,6 +2,7 @@ import { getRequestUser } from "@/lib/supabase/request-client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { BOOKING_MIN_LEAD_HOURS, hoursFromNow } from "@/lib/bookings/lead-time";
 import {
   canCustomerReschedule,
 } from "@/lib/bookings/schedule";
@@ -72,6 +73,15 @@ export async function POST(
   if (Number.isNaN(newStart.getTime()) || newStart.getTime() <= Date.now()) {
     return NextResponse.json(
       { error: "Choose a future date and time." },
+      { status: 400 },
+    );
+  }
+  // The new time needs the same notice as a new booking.
+  if (hoursFromNow(parsed.data.scheduledDate, time) < BOOKING_MIN_LEAD_HOURS) {
+    return NextResponse.json(
+      {
+        error: `Choose a new time at least ${BOOKING_MIN_LEAD_HOURS} hours from now.`,
+      },
       { status: 400 },
     );
   }
