@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { diaryPlanError } from "@/lib/cleaner/diary-dates";
+import { applyCleanerPayDisplay } from "@/lib/cleaner/pay-display";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const eventSchema = z.object({
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     absences: absences ?? [],
     events: events ?? [],
-    jobs: (jobs ?? []).map(presentJob),
+    jobs: (await applyCleanerPayDisplay(jobs ?? [], user.id)).map(presentJob),
   });
 }
 

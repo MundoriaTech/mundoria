@@ -74,7 +74,7 @@ export default async function BookingReceiptPage({
           <Button asChild variant="outline">
             <Link href={`/booking/${booking.id}`}>Back to booking</Link>
           </Button>
-          <PrintReceiptButton />
+          <PrintReceiptButton bookingId={booking.id} />
         </div>
       </div>
 

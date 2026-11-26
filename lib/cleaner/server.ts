@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { applyCleanerPayDisplay } from "@/lib/cleaner/pay-display";
 import { postcodeInArea } from "@/lib/matching/postcode";
 import { sameAudience } from "@/lib/matching/seed-accounts";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -171,7 +172,7 @@ export async function getCleanerJobs(cleanerId: string) {
       ? a.scheduled_start_time.localeCompare(b.scheduled_start_time)
       : a.scheduled_date.localeCompare(b.scheduled_date),
   );
-  return merged;
+  return applyCleanerPayDisplay(merged, cleanerId);
 }
 
 export async function getAvailableJobs(cleanerId: string) {
@@ -365,10 +366,13 @@ export async function getAvailableJobs(cleanerId: string) {
   const emailOf = new Map(
     (people ?? []).map((row) => [row.id as string, row.email as string | null]),
   );
-  return jobs.filter((job) =>
-    sameAudience(
-      emailOf.get((job as { customer_id?: string | null }).customer_id ?? ""),
-      emailOf.get(cleanerId),
+  return applyCleanerPayDisplay(
+    jobs.filter((job) =>
+      sameAudience(
+        emailOf.get((job as { customer_id?: string | null }).customer_id ?? ""),
+        emailOf.get(cleanerId),
+      ),
     ),
+    cleanerId,
   );
 }

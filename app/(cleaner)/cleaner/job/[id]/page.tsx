@@ -3,6 +3,7 @@ import type { ExtraTimeRow } from "@/lib/bookings/extra-time";
 import { notFound } from "next/navigation";
 
 import { JobDetail } from "@/components/cleaner/job-detail";
+import { cleanerPayForDisplay } from "@/lib/cleaner/pay-display";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import type { CleanerJob } from "@/types/cleaner";
@@ -54,6 +55,7 @@ export default async function CleanerJobPage({
       job.amount_cleaner / Math.max(1, job.allocated_cleaners),
     );
   }
+  job.amount_cleaner = await cleanerPayForDisplay(job.id, user!.id, job.amount_cleaner);
 
   const { data: extraTime } = await createAdminClient()
     .from("booking_time_extensions").select("id,minutes,amount_pence,reason,status,created_at,decided_at").eq("booking_id", job.id).order("created_at", { ascending: false });

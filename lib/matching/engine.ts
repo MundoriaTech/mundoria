@@ -423,15 +423,21 @@ export async function runMatchingEngine(
   ]);
   return { cleanerId: winner.cleanerId, considered, matched: true as const };
 
-  function sendCleanerJobOfferEmail() {
+  async function sendCleanerJobOfferEmail() {
     if (winner.emailPreference === false || !winner.email) return false;
+    const { cleanerPayForDisplay } = await import("@/lib/cleaner/pay-display");
+    const shownPay = await cleanerPayForDisplay(
+      bookingId,
+      winner.cleanerId,
+      booking.amount_cleaner,
+    );
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     return sendBrandedEmail({
       data: {
         address: boroughOnly(booking.address.city, booking.address.postcode),
         appUrl,
         bookingId,
-        earnings: booking.amount_cleaner ? `£${(Number(booking.amount_cleaner) / 100).toFixed(2)}` : undefined,
+        earnings: shownPay != null ? `£${(Number(shownPay) / 100).toFixed(2)}` : undefined,
         jobUrl: `${appUrl}/cleaner/job/${bookingId}`,
         respondBy: respondBy.toLocaleString("en-GB"),
         scheduledDate: booking.scheduled_date,

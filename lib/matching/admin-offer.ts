@@ -1,5 +1,6 @@
 import { addHours, addMinutes } from "date-fns";
 
+import { cleanerPayForDisplay } from "@/lib/cleaner/pay-display";
 import { formatServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { sendPushNotification } from "@/lib/notifications/send";
@@ -62,6 +63,7 @@ export async function offerAdminAssignedJob(bookingId: string, cleanerId: string
   );
 
   const serviceName = formatServiceName(booking.service_type as ServiceType);
+  const shownPay = await cleanerPayForDisplay(bookingId, cleanerId, booking.amount_cleaner);
   const address = Array.isArray(booking.address) ? booking.address[0] : booking.address;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const wantsEmail =
@@ -92,9 +94,8 @@ export async function offerAdminAssignedJob(bookingId: string, cleanerId: string
               .join(", "),
             appUrl,
             bookingId,
-            earnings: booking.amount_cleaner
-              ? `£${(Number(booking.amount_cleaner) / 100).toFixed(2)}`
-              : undefined,
+            earnings:
+              shownPay != null ? `£${(Number(shownPay) / 100).toFixed(2)}` : undefined,
             jobUrl: `${appUrl}/cleaner/job/${bookingId}`,
             respondBy: respondBy.toLocaleString("en-GB"),
             scheduledDate: booking.scheduled_date,

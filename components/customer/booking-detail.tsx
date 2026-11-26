@@ -626,9 +626,9 @@ export function BookingDetail({
                     size="sm"
                     variant="outline"
                   >
-                    <Link href={`/booking/${booking.id}/receipt`}>
+                    <a download href={`/api/bookings/${booking.id}/invoice`}>
                       Download invoice
-                    </Link>
+                    </a>
                   </Button>
                 </div>
               ) : booking.payment_status === "held" ? (
