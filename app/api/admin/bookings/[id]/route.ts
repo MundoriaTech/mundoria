@@ -267,6 +267,7 @@ export async function POST(
     }
     if (status === "cancelled") {
       updates.cancelled_at = nowIso;
+      updates.cancelled_by = auth.user.id;
       updates.cancellation_reason = note;
     }
   }

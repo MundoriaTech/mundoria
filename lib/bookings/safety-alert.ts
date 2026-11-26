@@ -311,6 +311,7 @@ export async function adminUpdateSafetyAlert({
         .from("bookings")
         .update({
           cancellation_reason: `Cancelled after safety alert: ${notes}`,
+          cancelled_by: adminId,
           status: "cancelled",
         })
         .eq("id", alert.booking_id)
