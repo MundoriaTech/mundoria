@@ -12,7 +12,7 @@ import {
   composeStreetLine,
 } from "@/lib/customer/address-completeness";
 import {
-  formatServiceName,
+  bookingServiceName,
   recommendedStandardFor,
   SERVICES,
   SERVICE_ADD_ONS,
@@ -275,7 +275,10 @@ export async function POST(request: Request) {
           weekday: "long",
         }),
         scheduledTime: booking.scheduledTime,
-        serviceName: formatServiceName(booking.serviceType),
+        serviceName: bookingServiceName({
+          is_recurring: booking.frequency !== "once",
+          service_type: booking.serviceType,
+        }),
       }
     : { firstName: input.firstName };
   let emailSent = false;

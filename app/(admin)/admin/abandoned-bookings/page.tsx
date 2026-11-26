@@ -13,9 +13,15 @@ function str(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function regularBookedOnce(draft: Draft) {
+  return draft.serviceType === "regular" && Boolean(draft.frequencyChosen) && !draft.isRecurring;
+}
+
 function serviceLabelFromDraft(draft: Draft): string | null {
   const serviceType = str(draft.serviceType);
   if (!serviceType) return null;
+  // Regular cleaning chosen "once" is One-Off Cleaning, as in the basket.
+  if (regularBookedOnce(draft)) return formatServiceName("one_off");
   try {
     return formatServiceName(serviceType as ServiceType);
   } catch {
@@ -39,7 +45,7 @@ function draftDetails(draft: Draft): string[] {
   const alternates = Array.isArray(draft.alternateTimes) ? (draft.alternateTimes as string[]).filter(Boolean) : [];
   const officeSpaces = Array.isArray(draft.officeSpaces) ? (draft.officeSpaces as Draft[]) : [];
   const frequency =
-    draft.frequencyChosen || draft.isRecurring
+    !regularBookedOnce(draft) && (draft.frequencyChosen || draft.isRecurring)
       ? frequencyLabelForBooking({
           is_recurring: Boolean(draft.isRecurring),
           recurrence_pattern: (str(draft.recurrencePattern) as never) ?? null,
