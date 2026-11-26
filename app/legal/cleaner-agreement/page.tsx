@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
+import { CLEANER_HOURLY_RATE_PENCE } from "@/lib/payments/cleaner-pay";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -46,7 +48,7 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Customers pay through Mundoria. Payment is authorised at booking and captured after the visit, in line with the Booking & Payment Policy.",
-      "Your earnings for each job are shown before you accept. Mundoria deducts its service fee and pays the remainder to you.",
+      `You are paid £${(CLEANER_HOURLY_RATE_PENCE / 100).toFixed(2)} for every hour you are booked to work, as set out in the Booking & Payment Policy. Your earnings for each job are shown before you accept.`,
       "Payouts are made through Stripe Connect. You must complete Stripe onboarding and keep your account in good standing. Stripe’s own terms apply to that account.",
       "Mundoria may delay, withhold or reverse payments where there is a dispute, refund, chargeback, suspected fraud or breach of this agreement.",
       "You are solely responsible for declaring your income and paying any tax due.",
@@ -56,7 +58,7 @@ const sections: LegalSection[] = [
   {
     bullets: [
       "Cancel as early as possible through the app. Late cancellations, repeated cancellations and no-shows affect your performance score, tier and access to offers, and may lead to a fee being withheld from earnings.",
-      "If a customer cancels late, any compensation due to you is set out in the Booking & Payment Policy.",
+      "If a customer cancels a job, you are not paid for it. The Booking & Payment Policy explains the customer's cancellation and rescheduling rules.",
       "Genuine emergencies are treated sympathetically where you tell us promptly and give reasonable evidence.",
     ],
     title: "6. Cancellations",
@@ -86,7 +88,7 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "We handle your personal data as described in our Privacy Policy. We may update this agreement from time to time and will tell you in the app or by email before material changes take effect. This agreement is governed by the law of England and Wales, and the courts of England and Wales have jurisdiction, unless mandatory law gives you rights elsewhere in the UK. For questions, contact support@mundoriauk.com.",
+      `We handle your personal data as described in our Privacy Policy. We may update this agreement from time to time and will tell you in the app or by email before material changes take effect. This agreement is governed by the law of England and Wales, and the courts of England and Wales have jurisdiction, unless mandatory law gives you rights elsewhere in the UK. For questions, contact ${MUNDORIA_IDENTITY.supportEmail}.`,
     title: "10. Changes, data and governing law",
   },
 ];
@@ -95,7 +97,7 @@ export default function CleanerAgreementPage() {
   return (
     <LegalPage
       intro="This agreement explains how you work with Mundoria as an independent cleaning professional: what you can expect from us, what we expect from you, and how payment and termination work."
-      lastUpdated="22 October 2026"
+      lastUpdated="26 November 2026"
       sections={sections}
       title="Self-Employed Cleaner Agreement"
     />

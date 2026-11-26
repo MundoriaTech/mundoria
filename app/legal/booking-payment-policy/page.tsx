@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 
 import { LegalPage, type LegalSection } from "@/components/legal/legal-page";
+import { RESCHEDULE_CUTOFF_HOURS } from "@/lib/bookings/lead-time";
+import { CLEANER_HOURLY_RATE_PENCE } from "@/lib/payments/cleaner-pay";
 import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
+import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
 import { buildPageMetadata } from "@/lib/seo/site";
 
 // Hold timing comes from admin Settings; refresh within 5 minutes of a change.
 export const revalidate = 300;
 
 const HOLD_HOURS_TOKEN = "{holdOpenHours}";
+const FREE_CANCEL_HOURS_TOKEN = "{freeCancelHours}";
+const HOURLY_RATE = `£${(CLEANER_HOURLY_RATE_PENCE / 100).toFixed(2)}`;
 
 export const metadata: Metadata = buildPageMetadata({
   description:
@@ -33,7 +38,10 @@ const sections: LegalSection[] = [
   },
   {
     bullets: [
-      "Your earnings are the booking price less Mundoria’s service fee, as shown on the offer and in your Earnings page.",
+      `You are paid ${HOURLY_RATE} for every hour you are booked to work on a job. Your earnings for each job are shown on the offer and in your Earnings page.`,
+      `Your hourly rate does not depend on what the customer pays. Discounts, offers and free first-visit hours do not reduce it. Mundoria keeps the rest of the booking price as its service fee.`,
+      `On team jobs, each cleaner is paid ${HOURLY_RATE} an hour for their own hours.`,
+      `If the customer approves extra time on the day, you are paid for it at the same ${HOURLY_RATE} an hour.`,
       `Customer cards are saved at booking. Payment is pre-authorised from ${HOLD_HOURS_TOKEN} hours before the visit once a cleaner has confirmed, and captured the next calendar day after checkout.`,
       "Earnings may change if the agreed scope is changed by the customer before or during the visit. Any change will be shown in the app.",
       "Tips, where offered, are passed on to you in full, subject to payment provider fees.",
@@ -62,7 +70,8 @@ const sections: LegalSection[] = [
     bullets: [
       "If you need to cancel an accepted job, do so in the app as early as possible so we can find a replacement.",
       "Late cancellations and repeated cancellations affect your performance score, tier and access to offers, and may result in a fee being withheld.",
-      "If a customer cancels late, any compensation for you depends on how close to the start time they cancelled, and will be shown in the app.",
+      `Customers can cancel free of charge up to ${FREE_CANCEL_HOURS_TOKEN} hours before the start time. If a customer cancels a job, you are not paid for it, including when they cancel late.`,
+      `Customers can change the date and time of a visit up to ${RESCHEDULE_CUTOFF_HOURS} hours before it starts. A rescheduled visit is offered again and may go to a different cleaner, so it leaves your diary until you accept it again.`,
       "Genuine emergencies are considered where you tell us promptly.",
     ],
     title: "6. Cancellations",
@@ -85,24 +94,28 @@ const sections: LegalSection[] = [
   },
   {
     body:
-      "We may update this policy and will tell you in the app or by email before material changes take effect. For payment questions, contact support@mundoriauk.com or use the in-app help.",
+      `We may update this policy and will tell you in the app or by email before material changes take effect. For payment questions, contact ${MUNDORIA_IDENTITY.supportEmail} or use the in-app help.`,
     title: "9. Changes and support",
   },
 ];
 
 export default async function BookingPaymentPolicyPage() {
-  const { payment_auth_open_hours_before: holdOpenHours } =
-    await getPaymentTimingSettings();
+  const {
+    payment_auth_open_hours_before: holdOpenHours,
+    payment_preauth_hours_before: freeCancelHours,
+  } = await getPaymentTimingSettings();
   const liveSections = sections.map((section) => ({
     ...section,
     bullets: section.bullets?.map((bullet) =>
-      bullet.replace(HOLD_HOURS_TOKEN, String(holdOpenHours)),
+      bullet
+        .replace(HOLD_HOURS_TOKEN, String(holdOpenHours))
+        .replace(FREE_CANCEL_HOURS_TOKEN, String(freeCancelHours)),
     ),
   }));
   return (
     <LegalPage
       intro="How offers, earnings, payouts, cancellations and no-shows work for cleaners on Mundoria."
-      lastUpdated="22 October 2026"
+      lastUpdated="26 November 2026"
       sections={liveSections}
       title="Booking & Payment Policy"
     />
