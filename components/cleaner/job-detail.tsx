@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { JobBrief } from "@/components/cleaner/job-brief";
+import { getCurrentCoords, locationErrorMessage } from "@/lib/geo/current-position";
 import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ function CheckInAction({
 export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
   const [job, setJob] = useState(initialJob);
   const [error, setError] = useState<string | null>(null);
+  const [locationProblem, setLocationProblem] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [showSafety, setShowSafety] = useState(false);
   const [overrideCoords, setOverrideCoords] = useState<{
@@ -73,6 +75,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     if (job.status !== "cleaner_en_route" || !navigator.geolocation) return;
     const id = navigator.geolocation.watchPosition(
       (position) => {
+        setLocationProblem(null);
         void fetch(`/api/bookings/${job.id}/location`, {
           body: JSON.stringify({
             latitude: position.coords.latitude,
@@ -82,8 +85,8 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
           method: "POST",
         });
       },
-      () => undefined,
-      { enableHighAccuracy: true, maximumAge: 10_000 },
+      (watchError) => setLocationProblem(locationErrorMessage(watchError)),
+      { enableHighAccuracy: true, maximumAge: 10_000, timeout: 30_000 },
     );
     return () => navigator.geolocation.clearWatch(id);
   }, [job.id, job.status]);
@@ -119,18 +122,15 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     let longitude = overrideCoords?.longitude;
     if (value !== "en_route" && !overrideCoords) {
       try {
-        const coords = await new Promise<GeolocationCoordinates>(
-          (resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(
-              (position) => resolve(position.coords),
-              reject,
-              { enableHighAccuracy: true },
-            ),
-        );
+        const coords = await getCurrentCoords();
         latitude = coords.latitude;
         longitude = coords.longitude;
-      } catch {
-        setError("Enable location access to continue.");
+      } catch (locationError) {
+        setError(
+          locationError instanceof Error
+            ? locationError.message
+            : "We couldn't read your location. Check Location is on and try again.",
+        );
         setWorking(false);
         return;
       }
@@ -327,6 +327,12 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
         </section>
       ) : null}
 
+      {locationProblem && job.status === "cleaner_en_route" ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="font-semibold">Your location isn&apos;t being shared</p>
+          <p className="mt-1 leading-6">{locationProblem}</p>
+        </div>
+      ) : null}
       <div className="grid gap-5 lg:grid-cols-2">
         <JobBrief job={job} />
         <RouteMap job={job} />
