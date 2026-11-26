@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CleanerDocumentKind } from "@/lib/cleaner/document-reviews";
@@ -135,15 +136,16 @@ export function ReplaceDocument({
         <>
           <label className="block text-sm">
             <span className="mb-1 block font-medium text-[#1c133b]">How can you prove it?</span>
-            <select
-              className="h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
-              onChange={(event) => setRoute(event.target.value as RightToWorkRoute | "")}
+            <SimpleSelect
+              className="h-11 rounded-xl"
+              onChange={(value) => setRoute(value as RightToWorkRoute | "")}
+              options={[
+                { label: "British or Irish citizen (passport, or birth certificate + NI number)", value: "british_irish" },
+                { label: "Share code (visa, eVisa or EU Settlement)", value: "share_code" },
+              ]}
+              placeholder="Choose…"
               value={route}
-            >
-              <option value="">Choose…</option>
-              <option value="british_irish">British or Irish citizen (passport, or birth certificate + NI number)</option>
-              <option value="share_code">Share code (visa, eVisa or EU Settlement)</option>
-            </select>
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium text-[#1c133b]">Date of birth</span>
@@ -153,18 +155,13 @@ export function ReplaceDocument({
             <>
               <label className="block text-sm">
                 <span className="mb-1 block font-medium text-[#1c133b]">Visa or immigration status</span>
-                <select
-                  className="h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
-                  onChange={(event) => setVisaType(event.target.value)}
+                <SimpleSelect
+                  className="h-11 rounded-xl"
+                  onChange={setVisaType}
+                  options={VISA_TYPES.map((type) => ({ label: type.label, value: type.value }))}
+                  placeholder="Choose…"
                   value={visaType}
-                >
-                  <option value="">Choose…</option>
-                  {VISA_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </label>
               <label className="block text-sm">
                 <span className="mb-1 block font-medium text-[#1c133b]">Share code</span>

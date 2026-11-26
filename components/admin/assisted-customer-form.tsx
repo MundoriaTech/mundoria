@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SERVICES, SERVICE_ADD_ONS } from "@/lib/customer/services";
@@ -183,21 +184,10 @@ export function AssistedCustomerForm() {
             <h2 className="font-semibold">The clean</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Service">
-                <select className={selectClass} onChange={(e) => setB("serviceType", e.target.value)} value={booking.serviceType}>
-                  {ASSISTED_SERVICES.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
+                <SimpleSelect className={selectClass} onChange={(v) => setB("serviceType", v)} options={ASSISTED_SERVICES.map((item) => ({ label: item.label, value: item.value }))} value={booking.serviceType} />
               </Field>
               <Field label="Cleaning standard">
-                <select className={selectClass} onChange={(e) => setB("cleaningStandard", e.target.value)} value={booking.cleaningStandard}>
-                  <option value="">Recommended for this service</option>
-                  <option value="essential">Essential</option>
-                  <option value="enhanced">Enhanced</option>
-                  <option value="comprehensive">Comprehensive</option>
-                </select>
+                <SimpleSelect className={selectClass} emptyLabel="Recommended for this service" onChange={(v) => setB("cleaningStandard", v)} options={[{ label: "Essential", value: "essential" }, { label: "Enhanced", value: "enhanced" }, { label: "Comprehensive", value: "comprehensive" }]} value={booking.cleaningStandard} />
               </Field>
               <Field label="Date">
                 <Input min={tomorrow} onChange={(e) => setB("scheduledDate", e.target.value)} required type="date" value={booking.scheduledDate} />
@@ -209,12 +199,7 @@ export function AssistedCustomerForm() {
                 <Input max={12} min={1} onChange={(e) => setB("durationHours", e.target.value)} required step={0.5} type="number" value={booking.durationHours} />
               </Field>
               <Field label="How often">
-                <select className={selectClass} onChange={(e) => setB("frequency", e.target.value)} value={booking.frequency}>
-                  <option value="once">One visit</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="fortnightly">Fortnightly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
+                <SimpleSelect className={selectClass} onChange={(v) => setB("frequency", v)} options={[{ label: "One visit", value: "once" }, { label: "Weekly", value: "weekly" }, { label: "Fortnightly", value: "fortnightly" }, { label: "Monthly", value: "monthly" }]} value={booking.frequency} />
               </Field>
             </div>
             {availableAddOns.length ? (
@@ -257,18 +242,10 @@ export function AssistedCustomerForm() {
                 <Input onChange={(e) => setB("postcode", e.target.value)} required value={booking.postcode} />
               </Field>
               <Field label="Property type">
-                <select className={selectClass} onChange={(e) => setB("propertyType", e.target.value)} value={booking.propertyType}>
-                  <option value="flat">Flat</option>
-                  <option value="house">House</option>
-                  <option value="other">Other</option>
-                </select>
+                <SimpleSelect className={selectClass} onChange={(v) => setB("propertyType", v)} options={[{ label: "Flat", value: "flat" }, { label: "House", value: "house" }, { label: "Other", value: "other" }]} value={booking.propertyType} />
               </Field>
               <Field label="Pets at the property?">
-                <select className={selectClass} onChange={(e) => setB("hasPets", e.target.value)} value={booking.hasPets}>
-                  <option value="">Choose…</option>
-                  <option value="no">No pets</option>
-                  <option value="yes">Yes, pets</option>
-                </select>
+                <SimpleSelect className={selectClass} onChange={(v) => setB("hasPets", v)} options={[{ label: "No pets", value: "no" }, { label: "Yes, pets", value: "yes" }]} placeholder="Choose…" value={booking.hasPets} />
               </Field>
               <Field label="Bedrooms">
                 <Input max={12} min={0} onChange={(e) => setB("bedrooms", e.target.value)} required type="number" value={booking.bedrooms} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { SimpleSelect } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -110,16 +111,13 @@ export function CustomersTable({ customers }: { customers: AdminCustomerRow[] })
           />
         </label>
 
-        <select
-          className="h-[46px] shrink-0 rounded-full bg-white text-[14.5px] font-semibold text-[#3D335F] outline-none"
-          onChange={(e) => setSort(e.target.value)}
-          style={{ padding: "0 36px 0 16px", border: "1.5px solid #E1E1EA", cursor: "pointer" }}
+        <SimpleSelect
+          aria-label="Sort customers"
+          className="h-[46px] w-auto min-w-[10rem] shrink-0 rounded-full border-[1.5px] border-[#E1E1EA] px-4 text-[14.5px] font-semibold text-[#3D335F]"
+          onChange={setSort}
+          options={SORT_OPTS.map((o) => ({ label: o.label, value: o.value }))}
           value={sort}
-        >
-          {SORT_OPTS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        />
       </div>
 
       {/* Mobile cards */}

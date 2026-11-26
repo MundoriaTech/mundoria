@@ -1,5 +1,6 @@
 "use client";
 
+import { SimpleSelect } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -133,17 +134,14 @@ export function CleanersTable({
           ))}
         </div>
 
-        <select
-          className="h-[46px] shrink-0 rounded-full bg-white text-[14.5px] font-semibold text-[#3D335F] outline-none"
-          onChange={(e) => setTier(e.target.value)}
-          style={{ padding: "0 36px 0 16px", border: "1.5px solid #E1E1EA", cursor: "pointer" }}
+        <SimpleSelect
+          aria-label="Tier"
+          className="h-[46px] w-auto min-w-[10rem] shrink-0 rounded-full border-[1.5px] border-[#E1E1EA] px-4 text-[14.5px] font-semibold text-[#3D335F] capitalize"
+          emptyLabel="All tiers"
+          onChange={setTier}
+          options={["bronze", "silver", "gold", "rose_gold"].map((value) => ({ label: value.replace("_", " "), value }))}
           value={tier}
-        >
-          <option value="">All tiers</option>
-          {["bronze", "silver", "gold", "rose_gold"].map((value) => (
-            <option key={value} value={value}>{value.replace("_", " ")}</option>
-          ))}
-        </select>
+        />
 
         <label
           className="flex h-[46px] shrink-0 items-center rounded-full bg-white px-[14px]"

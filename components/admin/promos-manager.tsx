@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
+import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatMoney } from "@/lib/customer/services";
@@ -84,14 +85,16 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
             placeholder="CLEAN10"
             value={form.code}
           />
-          <select
-            className="rounded-md border border-[#e8e8eb] bg-white px-3 text-[#1c133b]"
-            onChange={(e) => setForm({ ...form, discount_type: e.target.value })}
+          <SimpleSelect
+            aria-label="Discount type"
+            className="w-auto min-w-[9rem]"
+            onChange={(value) => setForm({ ...form, discount_type: value })}
+            options={[
+              { label: "Percentage", value: "percentage" },
+              { label: "Fixed (£)", value: "fixed" },
+            ]}
             value={form.discount_type}
-          >
-            <option value="percentage">Percentage</option>
-            <option value="fixed">Fixed (£)</option>
-          </select>
+          />
           <Input
             min={0}
             onChange={(e) =>

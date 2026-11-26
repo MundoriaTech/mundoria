@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
+import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ExtraTimeRow } from "@/lib/bookings/extra-time";
@@ -197,17 +198,13 @@ export function AdminExtraTime({ bookingId, rows }: { bookingId: string; rows: E
         <p className="mt-1 text-sm text-muted-foreground">No extra time on this visit.</p>
       )}
       <div className="mt-4 grid gap-2 sm:grid-cols-[8rem_1fr_auto]">
-        <select
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-          onChange={(event) => setMinutes(event.target.value)}
+        <SimpleSelect
+          aria-label="Extra time"
+          className="h-10"
+          onChange={setMinutes}
+          options={[15, 30, 45, 60, 90, 120].map((value) => ({ label: `+${label(value)}`, value: String(value) }))}
           value={minutes}
-        >
-          {[15, 30, 45, 60, 90, 120].map((value) => (
-            <option key={value} value={value}>
-              +{label(value)}
-            </option>
-          ))}
-        </select>
+        />
         <Input
           onChange={(event) => setNote(event.target.value)}
           placeholder="How the customer agreed, e.g. by phone at 11:20"

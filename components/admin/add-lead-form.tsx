@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -86,17 +87,13 @@ export function AddLeadForm() {
           <Input inputMode="email" onChange={(e) => set("email", e.target.value)} type="email" value={form.email} />
         </Field>
         <Field label="Where did they come from?">
-          <select
-            className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
-            onChange={(e) => set("source", e.target.value)}
+          <SimpleSelect
+            aria-label="Source"
+            className="h-11"
+            onChange={(value) => set("source", value)}
+            options={SOURCES.map(([value, label]) => ({ label, value }))}
             value={form.source}
-          >
-            {SOURCES.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          />
         </Field>
       </div>
       <p className="-mt-2 text-xs text-muted-foreground">Add at least a phone number or an email.</p>

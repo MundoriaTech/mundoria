@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 
 import { EditorialBody } from "@/components/marketing/editorial-body";
 import { FileUpload } from "@/components/shared/file-upload";
+import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { renderEditorialBlocks } from "@/lib/content/editorial";
@@ -389,17 +390,13 @@ export function MagPostEditor({
             <label className="text-sm font-semibold text-[#1c133b]">
               Category
             </label>
-            <select
-              className="mt-2 w-full rounded-xl border border-[#e8e0f4] bg-white px-3 py-2.5 text-sm text-[#1c133b]"
-              onChange={(event) => setField("category", event.target.value)}
+            <SimpleSelect
+              aria-label="Category"
+              className="mt-2"
+              onChange={(value) => setField("category", value)}
+              options={MAG_POST_CATEGORIES.map((category) => ({ label: category, value: category }))}
               value={form.category}
-            >
-              {MAG_POST_CATEGORIES.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            />
 
             <label className="mt-4 block text-sm font-semibold text-[#1c133b]">
               Related services

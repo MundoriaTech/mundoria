@@ -50,6 +50,7 @@ import { AuthPhoneField } from "@/components/auth/auth-phone-field";
 import { FormField } from "@/components/auth/form-field";
 import { BookingAuthPrompt, type BookingAuthMode } from "@/components/customer/booking-auth-prompt";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
+import { SimpleSelect } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { AppModal } from "@/components/shared/app-modal";
 import { MUNDORIA_IDENTITY } from "@/lib/seo/identity";
@@ -3364,17 +3365,12 @@ function CountField({
   return (
     <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
       <span>{label}</span>
-      <select
-        className="h-12 w-full rounded-xl border border-[#e8e8eb] bg-white px-4 text-sm"
-        onChange={(event) => onChange(Number(event.target.value))}
-        value={value}
-      >
-        {ROOM_COUNT_OPTIONS.map((count) => (
-          <option key={count} value={count}>
-            {count === 6 ? "6+" : count}
-          </option>
-        ))}
-      </select>
+      <SimpleSelect
+        className="h-12 rounded-xl border-[#e8e8eb] px-4"
+        onChange={(next) => onChange(Number(next))}
+        options={ROOM_COUNT_OPTIONS.map((count) => ({ label: count === 6 ? "6+" : String(count), value: String(count) }))}
+        value={String(value)}
+      />
     </label>
   );
 }

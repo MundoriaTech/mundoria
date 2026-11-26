@@ -1,5 +1,6 @@
 "use client";
 
+import { SimpleSelect } from "@/components/ui/select";
 import { Repeat2 } from "lucide-react";
 
 export interface RecurringValue {
@@ -37,25 +38,24 @@ export function RecurringToggle({
         />
       </label>
       {value.enabled ? (
-        <select
+        <SimpleSelect
           aria-label="Recurring frequency"
-          className="h-11 w-full rounded-md border border-[#e8e8eb] bg-white px-3 text-sm text-[#1c133b]"
-          onChange={(event) =>
+          className="h-11 rounded-md border-[#e8e8eb] text-[#1c133b]"
+          onChange={(next) =>
             onChange({
               ...value,
-              frequency: event.target.value as RecurringValue["frequency"],
+              frequency: next as RecurringValue["frequency"],
               preferSameCleaner: false,
             })
           }
+          options={[
+            { label: "Weekly", value: "weekly" },
+            { label: "Fortnightly", value: "fortnightly" },
+            { label: "Monthly", value: "monthly" },
+          ]}
+          placeholder="Choose frequency"
           value={value.frequency ?? ""}
-        >
-          <option disabled value="">
-            Choose frequency
-          </option>
-          <option value="weekly">Weekly</option>
-          <option value="fortnightly">Fortnightly</option>
-          <option value="monthly">Monthly</option>
-        </select>
+        />
       ) : null}
     </div>
   );

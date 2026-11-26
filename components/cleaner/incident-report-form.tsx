@@ -4,6 +4,7 @@ import { CheckCircle2, PhoneCall } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { INCIDENT_CATEGORIES } from "@/lib/cleaner/onboarding-compliance";
@@ -132,21 +133,13 @@ export function IncidentReportForm({
       </div>
 
       <Field label="What type of incident?" htmlFor="incident-category">
-        <select
-          className={cn(
-            "h-11 w-full rounded-md px-3 text-sm text-[#1c133b] outline-none focus-visible:ring-2 [color-scheme:light]",
-            FIELD_CLASS,
-          )}
+        <SimpleSelect
+          className={cn("h-11 rounded-md text-[#1c133b]", FIELD_CLASS)}
           id="incident-category"
-          onChange={(event) => setCategory(event.target.value)}
+          onChange={setCategory}
+          options={INCIDENT_CATEGORIES.map((item) => ({ label: item.label, value: item.value }))}
           value={category}
-        >
-          {INCIDENT_CATEGORIES.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+        />
       </Field>
 
       <fieldset>
@@ -256,22 +249,14 @@ export function IncidentReportForm({
 
       {bookings.length ? (
         <Field label="Related booking (optional)" htmlFor="incident-booking">
-          <select
-            className={cn(
-              "h-11 w-full rounded-md px-3 text-sm text-[#1c133b] outline-none focus-visible:ring-2 [color-scheme:light]",
-              FIELD_CLASS,
-            )}
+          <SimpleSelect
+            className={cn("h-11 rounded-md text-[#1c133b]", FIELD_CLASS)}
+            emptyLabel="Not linked to a booking"
             id="incident-booking"
-            onChange={(event) => setBookingId(event.target.value)}
+            onChange={setBookingId}
+            options={bookings.map((booking) => ({ label: booking.label, value: booking.id }))}
             value={bookingId}
-          >
-            <option value="">Not linked to a booking</option>
-            {bookings.map((booking) => (
-              <option key={booking.id} value={booking.id}>
-                {booking.label}
-              </option>
-            ))}
-          </select>
+          />
         </Field>
       ) : null}
 

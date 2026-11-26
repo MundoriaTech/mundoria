@@ -1,5 +1,6 @@
 "use client";
 
+import { SimpleSelect } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -144,17 +145,14 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           ))}
         </div>
 
-        <select
-          className="h-[46px] shrink-0 rounded-full bg-white text-[14.5px] font-semibold text-[#3D335F] outline-none"
-          onChange={(e) => setService(e.target.value)}
-          style={{ padding: "0 36px 0 16px", border: "1.5px solid #E1E1EA", cursor: "pointer" }}
+        <SimpleSelect
+          aria-label="Service"
+          className="h-[46px] w-auto min-w-[10rem] shrink-0 rounded-full border-[1.5px] border-[#E1E1EA] px-4 text-[14.5px] font-semibold text-[#3D335F]"
+          emptyLabel="All services"
+          onChange={setService}
+          options={SERVICES.map((item) => ({ label: item.label, value: item.value }))}
           value={service}
-        >
-          <option value="">All services</option>
-          {SERVICES.map((item) => (
-            <option key={item.value} value={item.value}>{item.label}</option>
-          ))}
-        </select>
+        />
 
         <label
           className="flex h-[46px] shrink-0 items-center gap-2 rounded-full bg-white px-[14px] text-[13.5px] text-[#5F5F66]"
