@@ -1927,6 +1927,11 @@ export function BookingWizard({
       : [];
 
   const frequencyLabel = frequencyBasketLabel(draft);
+  // Regular cleaning chosen "once" is priced and shown as One-Off Cleaning.
+  const basketService =
+    pricedServiceType && pricedServiceType !== draft.serviceType
+      ? (SERVICES.find((item) => item.value === pricedServiceType) ?? service)
+      : service;
   const durationHoursForBasket =
     draft.serviceType === "office" && priceBreakdown
       ? priceBreakdown.visitHours
@@ -1994,7 +1999,7 @@ export function BookingWizard({
           ]
             .filter(Boolean)
             .join(" · ")
-        : service.label
+        : basketService?.label ?? service.label
       : null,
     standardLabel: null,
   };

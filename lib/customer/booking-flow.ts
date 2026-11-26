@@ -367,6 +367,9 @@ export function frequencyBasketLabel(
   const mode = frequencyModeFor(draft.serviceType);
   if (mode === "none") return "Once";
   if (!draft.frequencyChosen) return null;
+  // Regular cleaning chosen "once" is shown as One-Off Cleaning, which
+  // already says how often.
+  if (pricingServiceTypeFor(draft) !== draft.serviceType) return null;
   if (!draft.isRecurring) {
     return frequencyAllowsOneOff(draft.serviceType) ? "Once" : null;
   }
