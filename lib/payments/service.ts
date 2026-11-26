@@ -176,7 +176,7 @@ export async function scheduleCleanerPayout(
 }
 
 /** Charge the saved card off-session (no hold) for a set amount. */
-async function chargeSavedCard({
+export async function chargeSavedCard({
   amount,
   bookingId,
   customerId,
@@ -186,7 +186,7 @@ async function chargeSavedCard({
   amount: number;
   bookingId: string;
   customerId: string;
-  kind: "visit" | "waiting_charge";
+  kind: "visit" | "waiting_charge" | "extra_time";
   paymentMethodId: string | null;
 }) {
   const admin = createAdminClient();
@@ -207,7 +207,9 @@ async function chargeSavedCard({
       description:
         kind === "waiting_charge"
           ? "Mundoria waiting charge"
-          : "Mundoria cleaning visit",
+          : kind === "extra_time"
+            ? "Mundoria extra cleaning time"
+            : "Mundoria cleaning visit",
       metadata: { booking_id: bookingId, kind, supabase_user_id: customerId },
       off_session: true,
       payment_method: paymentMethodId,
@@ -220,7 +222,7 @@ async function chargeSavedCard({
   return intent;
 }
 
-function chargeIdOf(intent: { latest_charge?: unknown }) {
+export function chargeIdOf(intent: { latest_charge?: unknown }) {
   const charge = intent.latest_charge;
   if (!charge) return null;
   return typeof charge === "string" ? charge : (charge as { id: string }).id;
@@ -314,6 +316,13 @@ export async function captureBookingPayment(bookingId: string) {
         : "We could not set up this cleaner’s payout.",
       { booking_id: bookingId },
     );
+  }
+  // Approved extra time on the day: its own payment, added to the payout.
+  try {
+    const { chargeApprovedExtraTime } = await import("@/lib/bookings/extra-time");
+    await chargeApprovedExtraTime(bookingId);
+  } catch {
+    // Failures are recorded and alerted inside; never block the capture.
   }
   try {
     await maybeRewardReferrer(bookingId);
@@ -517,4 +526,105 @@ export function payoutDueDate(preference: "weekly" | "monthly") {
   return preference === "weekly"
     ? addDays(endOfWeek(now, { weekStartsOn: 1 }), 1)
     : addDays(endOfMonth(now), 1);
+}
+
+/**
+ * Add one extra amount (e.g. approved extra time) to a cleaner's current
+ * pending payout, with the charge it came from. Used when the visit's own
+ * payout already exists, so the visit isn't counted twice.
+ */
+export async function addPayoutAmount({
+  bookingId,
+  chargeId,
+  cleanerId,
+  grossPence,
+  kind,
+  netPence,
+}: {
+  bookingId: string;
+  chargeId: string | null;
+  cleanerId: string;
+  grossPence: number;
+  kind: "extra_time" | "waiting_charge";
+  netPence: number;
+}) {
+  if (netPence <= 0) return null;
+  const admin = createAdminClient();
+  const { data: cleaner } = await admin
+    .from("cleaner_profiles")
+    .select("payout_preference")
+    .eq("id", cleanerId)
+    .single();
+  const today = new Date();
+  const weekly = cleaner?.payout_preference !== "monthly";
+  const periodStart = (weekly ? startOfWeek(today, { weekStartsOn: 1 }) : startOfMonth(today))
+    .toISOString()
+    .slice(0, 10);
+  const periodEnd = (weekly ? endOfWeek(today, { weekStartsOn: 1 }) : endOfMonth(today))
+    .toISOString()
+    .slice(0, 10);
+  const { data: existing } = await admin
+    .from("payouts")
+    .select("id,gross_amount,net_amount")
+    .eq("cleaner_id", cleanerId)
+    .eq("period_start", periodStart)
+    .eq("period_end", periodEnd)
+    .eq("status", "pending")
+    .maybeSingle();
+  let payoutId = existing?.id as string | undefined;
+  if (existing) {
+    await admin
+      .from("payouts")
+      .update({
+        gross_amount: Number(existing.gross_amount) + grossPence,
+        net_amount: Number(existing.net_amount) + netPence,
+      })
+      .eq("id", existing.id);
+  } else {
+    const { data: created, error } = await admin
+      .from("payouts")
+      .insert({
+        cleaner_id: cleanerId,
+        gross_amount: grossPence,
+        net_amount: netPence,
+        period_end: periodEnd,
+        period_start: periodStart,
+        status: "pending",
+        total_jobs: 0,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    payoutId = created.id as string;
+  }
+  const { data: item } = await admin
+    .from("payout_items")
+    .select("id,amount,stripe_charge_id")
+    .eq("payout_id", payoutId!)
+    .eq("booking_id", bookingId)
+    .eq("kind", kind)
+    .maybeSingle();
+  if (item) {
+    await admin
+      .from("payout_items")
+      .update({
+        amount: Number(item.amount) + netPence,
+        // Two separate charges can't both be the transfer's source; send
+        // the combined amount as a plain transfer instead.
+        ...(item.stripe_charge_id && item.stripe_charge_id !== chargeId
+          ? { stripe_charge_id: null }
+          : {}),
+      })
+      .eq("id", item.id);
+  } else {
+    await admin.from("payout_items").insert({
+      amount: netPence,
+      booking_id: bookingId,
+      cleaner_id: cleanerId,
+      kind,
+      payout_id: payoutId!,
+      stripe_charge_id: chargeId,
+    });
+  }
+  return payoutId!;
 }

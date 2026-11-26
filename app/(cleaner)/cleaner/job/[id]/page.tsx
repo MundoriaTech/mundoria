@@ -1,3 +1,5 @@
+import { CleanerExtraTime } from "@/components/shared/extra-time";
+import type { ExtraTimeRow } from "@/lib/bookings/extra-time";
 import { notFound } from "next/navigation";
 
 import { JobDetail } from "@/components/cleaner/job-detail";
@@ -53,5 +55,20 @@ export default async function CleanerJobPage({
     );
   }
 
-  return <JobDetail initialJob={job} />;
+  const { data: extraTime } = await createAdminClient()
+    .from("booking_time_extensions").select("id,minutes,amount_pence,reason,status,created_at,decided_at").eq("booking_id", job.id).order("created_at", { ascending: false });
+  return (
+    <>
+      <JobDetail initialJob={job} />
+      {data.cleaner_id === user!.id ? (
+        <div className="mx-auto mt-6 max-w-3xl px-4 sm:px-0">
+          <CleanerExtraTime
+            bookingId={job.id}
+            inProgress={job.status === "in_progress"}
+            rows={(extraTime ?? []) as ExtraTimeRow[]}
+          />
+        </div>
+      ) : null}
+    </>
+  );
 }

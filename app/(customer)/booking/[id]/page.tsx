@@ -1,3 +1,6 @@
+import { createAdminClient } from "@/lib/supabase/admin";
+import { CustomerExtraTime } from "@/components/shared/extra-time";
+import type { ExtraTimeRow } from "@/lib/bookings/extra-time";
 import { matchCutoffAt } from "@/lib/bookings/match-cutoff";
 import { notFound } from "next/navigation";
 
@@ -60,6 +63,8 @@ export default async function CustomerBookingPage({
 
   // When nobody has accepted yet, show the cutoff: by then a cleaner has
   // accepted, or the visit is cancelled at no charge and the customer told.
+  const { data: extraTime } = await createAdminClient()
+    .from("booking_time_extensions").select("id,minutes,amount_pence,reason,status,created_at,decided_at").eq("booking_id", booking.id).order("created_at", { ascending: false });
   let offerExpiresAt: string | null = null;
   if (isWaitingForCleanerAcceptance(booking.status)) {
     // Protected bookings are never cancelled automatically: no cutoff shown.
@@ -90,6 +95,11 @@ export default async function CustomerBookingPage({
           contact support if it does not appear.
         </p>
       ) : null}
+    {(extraTime ?? []).length ? (
+      <div className="mb-4">
+        <CustomerExtraTime bookingId={booking.id} rows={(extraTime ?? []) as ExtraTimeRow[]} />
+      </div>
+    ) : null}
     <BookingDetail
       customerId={user!.id}
       freeCancelHours={paymentTiming.payment_preauth_hours_before}

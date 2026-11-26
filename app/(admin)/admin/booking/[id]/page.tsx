@@ -1,3 +1,5 @@
+import { AdminExtraTime } from "@/components/shared/extra-time";
+import type { ExtraTimeRow } from "@/lib/bookings/extra-time";
 import { PagedSimpleTable } from "@/components/admin/paged-simple-table";
 import { filterCleanersForBooking, sameAudience } from "@/lib/matching/seed-accounts";
 import Link from "next/link";
@@ -140,6 +142,8 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     recommendation ? ["Recommendation", recommendation] : null,
     extraNotes ? ["Customer notes", extraNotes] : null,
   ].filter((row): row is [string, string] => Boolean(row));
+  const { data: extraTime } = await admin
+    .from("booking_time_extensions").select("id,minutes,amount_pence,reason,status,created_at,decided_at").eq("booking_id", params.id).order("created_at", { ascending: false });
   const pricing = await loadServicePricing();
   const sessionHours = Math.max(0, (durationHours ?? 0) - offerHours);
   const priceBooking = (
@@ -364,6 +368,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             </section>
           ) : null}
         </div>
+        <AdminExtraTime bookingId={params.id} rows={(extraTime ?? []) as ExtraTimeRow[]} />
         <BookingActions
           allocatedCleaners={booking.allocated_cleaners ?? 1}
           bookingId={params.id}
