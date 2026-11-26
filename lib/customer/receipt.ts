@@ -1,6 +1,6 @@
 import {
+  bookingServiceName,
   formatMoney,
-  formatServiceName,
   standardLabel,
 } from "@/lib/customer/services";
 import type { Address, Booking, BookingAddOn } from "@/types/customer";
@@ -30,7 +30,7 @@ export function buildReceiptLines(booking: ReceiptBooking) {
 }
 
 export function receiptTitle(booking: ReceiptBooking) {
-  return `Mundoria receipt · ${formatServiceName(booking.service_type)}`;
+  return `Mundoria receipt · ${bookingServiceName(booking)}`;
 }
 
 export function receiptSummary(booking: ReceiptBooking) {
@@ -43,7 +43,7 @@ export function receiptSummary(booking: ReceiptBooking) {
     customerName: booking.customer?.full_name ?? "Customer",
     date: booking.scheduled_date,
     paymentStatus: booking.payment_status,
-    serviceName: formatServiceName(booking.service_type),
+    serviceName: bookingServiceName(booking),
     time: booking.scheduled_start_time.slice(0, 5),
     totals: {
       addOns: formatMoney(lines.addOnTotal),

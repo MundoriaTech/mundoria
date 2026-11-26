@@ -9,7 +9,7 @@ import {
   sendPushNotification,
 } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { getSiteUrl } from "@/lib/seo/site";
 
 /**
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
         continue;
       }
 
-      const serviceLabel = formatServiceName(booking.service_type);
+      const serviceLabel = bookingServiceName(booking);
       const when = `${booking.scheduled_date} at ${String(booking.scheduled_start_time).slice(0, 5)}`;
       const payHref = `${getSiteUrl()}/booking/${booking.id}`;
 

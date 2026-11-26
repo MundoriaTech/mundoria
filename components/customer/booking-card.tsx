@@ -2,7 +2,7 @@ import { ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
 
 import { CrmLink } from "@/components/analytics/crm-link";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import type { Booking, BookingStatus } from "@/types/customer";
 
 const STATUS_PILL: Record<string, { bg: string; color: string; label: string }> = {
@@ -64,7 +64,7 @@ export function BookingCard({
             booking_currency: "GBP",
             booking_datetime: `${booking.scheduled_date}T${booking.scheduled_start_time}`,
             booking_id: booking.id,
-            item: formatServiceName(booking.service_type),
+            item: bookingServiceName(booking),
             service: booking.service_type,
             service_location: place,
           }}
@@ -85,7 +85,7 @@ export function BookingCard({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span style={{ fontSize: "15px", fontWeight: 700, color: "#1E1848", whiteSpace: "nowrap" }}>
-                {formatServiceName(booking.service_type)}
+                {bookingServiceName(booking)}
               </span>
               <span
                 className="inline-flex items-center gap-1.5 rounded-full"

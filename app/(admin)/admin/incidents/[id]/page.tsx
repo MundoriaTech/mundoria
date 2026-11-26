@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { IncidentActions } from "@/components/admin/incident-actions";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export default async function AdminIncidentDetailPage({
   const { data: incident } = await createAdminClient()
     .from("cleaner_incidents")
     .select(
-      "*,cleaner:profiles!cleaner_incidents_cleaner_id_fkey(id,full_name,email,phone),booking:bookings(id,service_type,status,scheduled_date,scheduled_start_time)",
+      "*,cleaner:profiles!cleaner_incidents_cleaner_id_fkey(id,full_name,email,phone),booking:bookings(id,service_type,is_recurring,status,scheduled_date,scheduled_start_time)",
     )
     .eq("id", params.id)
     .maybeSingle();
@@ -105,7 +105,7 @@ export default async function AdminIncidentDetailPage({
                       className="text-primary underline-offset-2 hover:underline"
                       href={`/admin/booking/${booking.id}`}
                     >
-                      {formatServiceName(booking.service_type)} #
+                      {bookingServiceName(booking)} #
                       {booking.id.slice(0, 8)}
                     </Link>
                   ) : (

@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { alertAdmins } from "@/lib/notifications/admin";
 import {
   createInAppNotification,
@@ -609,7 +609,7 @@ async function promoteToConfirmed(bookingId: string) {
     .eq("id", bookingId)
     .eq("status", "awaiting_payment")
     .select(
-      "id,customer_id,cleaner_id,scheduled_date,scheduled_start_time,service_type,customer:profiles!bookings_customer_id_fkey(email,full_name),cleaner:profiles!bookings_cleaner_id_fkey(email,full_name)",
+      "id,customer_id,cleaner_id,scheduled_date,scheduled_start_time,service_type,is_recurring,customer:profiles!bookings_customer_id_fkey(email,full_name),cleaner:profiles!bookings_cleaner_id_fkey(email,full_name)",
     )
     .maybeSingle();
 
@@ -653,7 +653,7 @@ async function promoteToConfirmed(bookingId: string) {
         fullName: customer.full_name,
         scheduledDate: booking.scheduled_date,
         scheduledTime: String(booking.scheduled_start_time),
-        serviceName: formatServiceName(booking.service_type),
+        serviceName: bookingServiceName(booking),
       }).catch((error) => Sentry.captureException(error));
     }
     // No email here: the customer was emailed and texted "your cleaner is

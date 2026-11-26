@@ -4,9 +4,9 @@ import {
   formatConversationTime,
   messagePreviewLabel,
 } from "@/components/shared/conversation-list";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
-import type { MessageAttachment, ServiceType } from "@/types/customer";
+import type { MessageAttachment } from "@/types/customer";
 
 export const metadata = { title: "Messages" };
 
@@ -17,7 +17,7 @@ export default async function CustomerConversationsPage() {
   } = await supabase.auth.getUser();
   const { data: bookings } = await supabase
     .from("bookings")
-    .select("id, cleaner_id, service_type, scheduled_date")
+    .select("id, cleaner_id, service_type,is_recurring, scheduled_date")
     .eq("customer_id", user!.id)
     .not("cleaner_id", "is", null)
     .order("scheduled_date", { ascending: false });
@@ -89,7 +89,7 @@ export default async function CustomerConversationsPage() {
         preview: latest
           ? messagePreviewLabel(latest)
           : "Say hello to your cleaner",
-        subtitle: `${formatServiceName(booking.service_type as ServiceType)} · ${new Date(
+        subtitle: `${bookingServiceName(booking)} · ${new Date(
           `${booking.scheduled_date}T12:00:00`,
         ).toLocaleDateString("en-GB", {
           day: "numeric",

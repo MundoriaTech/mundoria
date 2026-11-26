@@ -25,7 +25,7 @@ import {
   nextTier,
   TIER_REQUIREMENTS,
 } from "@/lib/cleaner/tier";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { sessionPhotoForService } from "@/lib/customer/booking-visibility";
 import { cleanerHero, type CleanerHeroMoment } from "@/lib/avatars/hero-poses";
 import { isAwaitingApproval } from "@/lib/cleaner/approval";
@@ -216,7 +216,7 @@ export default async function CleanerDashboardPage() {
                 ? "waiting"
                 : "confirmed"
             }
-            title={formatServiceName(nextJob.service_type)}
+            title={bookingServiceName(nextJob)}
           />
         ) : (
           <DashboardEmptyCard
@@ -298,7 +298,7 @@ export default async function CleanerDashboardPage() {
             ),
             href: `/cleaner/job/${job.id}`,
             person: job.address?.city ?? "-",
-            service: formatServiceName(job.service_type),
+            service: bookingServiceName(job),
             status: "Completed",
           }))}
         />

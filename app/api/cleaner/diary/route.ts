@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     admin
       .from("bookings")
       .select(
-        "id,scheduled_date,scheduled_start_time,estimated_duration_hours,service_type,status,amount_cleaner,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(full_name)",
+        "id,scheduled_date,scheduled_start_time,estimated_duration_hours,service_type,is_recurring,status,amount_cleaner,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(full_name)",
       )
       .eq("cleaner_id", user.id)
       .gte("scheduled_date", from)

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ReceiptsList } from "@/components/customer/receipts-list";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { Button } from "@/components/ui/button";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Booking } from "@/types/customer";
 
@@ -78,7 +78,7 @@ export default async function CustomerPaymentsPage() {
               >
                 <div className="min-w-0">
                   <p className="font-medium text-amber-950">
-                    {formatServiceName(booking.service_type)}
+                    {bookingServiceName(booking)}
                   </p>
                   <p className="mt-1 text-sm text-amber-900/80">
                     {booking.scheduled_date}

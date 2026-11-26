@@ -5,8 +5,8 @@ import { PrintReceiptButton } from "@/components/customer/print-receipt-button";
 import { BrandMark } from "@/components/shared/brand-mark";
 import { Button } from "@/components/ui/button";
 import {
+  bookingServiceName,
   formatMoney,
-  formatServiceName,
 } from "@/lib/customer/services";
 import { paymentStatusLabel } from "@/lib/customer/payment-status";
 import { buildReceiptLines } from "@/lib/customer/receipt";
@@ -130,7 +130,7 @@ function ReceiptDocument({
             Service details
           </p>
           <p className="mt-2 font-semibold">
-            {formatServiceName(booking.service_type)}
+            {bookingServiceName(booking)}
           </p>
           <p className="text-sm text-muted-foreground">
             {booking.scheduled_date} at {booking.scheduled_start_time.slice(0, 5)}
@@ -160,7 +160,7 @@ function ReceiptDocument({
           <tbody className="divide-y">
             <tr>
               <td className="py-3">
-                {formatServiceName(booking.service_type)}
+                {bookingServiceName(booking)}
               </td>
               <td className="py-3 text-right">{formatMoney(lines.serviceAmount)}</td>
             </tr>

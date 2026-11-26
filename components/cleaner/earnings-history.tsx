@@ -6,7 +6,7 @@ import {
   PagedList,
   PagedTable,
 } from "@/components/shared/paged-list";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
 import type { Payout } from "@/types/cleaner";
@@ -44,7 +44,7 @@ export function CompletedJobsHistory({ jobs }: { jobs: DoneJob[] }) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-medium">
-                  {formatServiceName(job.service_type)}
+                  {bookingServiceName(job)}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {job.scheduled_date}
@@ -87,7 +87,7 @@ export function CompletedJobsHistory({ jobs }: { jobs: DoneJob[] }) {
         renderRow={(job) => (
           <tr className="border-b last:border-0" key={job.id}>
             <td className="p-3">{job.scheduled_date}</td>
-            <td>{formatServiceName(job.service_type)}</td>
+            <td>{bookingServiceName(job)}</td>
             <td>{formatMoney(job.amount_total)}</td>
             <td>
               {formatMoney(

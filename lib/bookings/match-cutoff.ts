@@ -1,6 +1,6 @@
 import { NO_CLEANER_REASON } from "@/lib/bookings/no-cleaner";
 import { closeEmergencyList } from "@/lib/matching/emergency-list";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { alertAdmins } from "@/lib/notifications/admin";
 import {
@@ -94,7 +94,7 @@ export async function enforceMatchCutoffs(now: Date = new Date()) {
   const { data } = await admin
     .from("bookings")
     .select(
-      "id,customer_id,status,payment_status,previous_cleaner_id,stripe_payment_intent_id,service_type,scheduled_date,scheduled_start_time,created_at,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
+      "id,customer_id,status,payment_status,previous_cleaner_id,stripe_payment_intent_id,service_type,is_recurring,scheduled_date,scheduled_start_time,created_at,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
     )
     .in("status", UNACCEPTED)
     .lte("scheduled_date", horizon)
@@ -139,14 +139,14 @@ async function warnAdminsOnce(booking: Row, cutoff: Date) {
   await alertAdmins(
     "matching_cutoff_warning",
     "A booking still has no cleaner",
-    `No cleaner has accepted this ${formatServiceName(booking.service_type)} visit. It will be cancelled at no charge on ${formatCutoff(cutoff)} unless someone is assigned.`,
+    `No cleaner has accepted this ${bookingServiceName(booking)} visit. It will be cancelled at no charge on ${formatCutoff(cutoff)} unless someone is assigned.`,
     {
       booking_id: booking.id,
       bookingUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin/booking/${booking.id}`,
       postcode: one(booking.address)?.postcode,
       scheduledDate: booking.scheduled_date,
       scheduledTime: booking.scheduled_start_time,
-      serviceName: formatServiceName(booking.service_type),
+      serviceName: bookingServiceName(booking),
     },
   );
   return true;
@@ -185,7 +185,7 @@ async function cancelForNoCleaner(booking: Row, now: Date) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const rebookUrl = `${appUrl}/booking/new?rebook=${booking.id}`;
-  const serviceName = formatServiceName(booking.service_type);
+  const serviceName = bookingServiceName(booking);
   const when = `${new Date(`${booking.scheduled_date}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", weekday: "long" })} at ${String(booking.scheduled_start_time).slice(0, 5)}`;
   const customer = one(booking.customer);
   const prefs = customer?.notification_preferences ?? {};

@@ -12,8 +12,8 @@ import { loadServicePricing } from "@/lib/customer/pricing-config";
 import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import {
   addOnAmountPence,
+  bookingServiceName,
   formatMoney,
-  formatServiceName,
   isOfferedService,
   SERVICE_ADD_ONS,
   serviceDefinition,
@@ -374,7 +374,7 @@ export async function POST(request: Request) {
   }
 
   await admin.from("notifications").insert({
-    body: `We're finding a cleaner for your ${formatServiceName(parsed.data.serviceType)} on ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. We'll let you know as soon as one accepts.`,
+    body: `We're finding a cleaner for your ${bookingServiceName({ is_recurring: parsed.data.isRecurring, service_type: parsed.data.serviceType })} on ${parsed.data.scheduledDate} at ${parsed.data.scheduledTime}. We'll let you know as soon as one accepts.`,
     data: { booking_id: booking.id },
     title: "Booking request received",
     type: "booking_created",
@@ -413,7 +413,7 @@ export async function POST(request: Request) {
         fullName: profile.full_name,
         scheduledDate: parsed.data.scheduledDate,
         scheduledTime: parsed.data.scheduledTime,
-        serviceName: formatServiceName(parsed.data.serviceType),
+        serviceName: bookingServiceName({ is_recurring: parsed.data.isRecurring, service_type: parsed.data.serviceType }),
       }).catch((error) => Sentry.captureException(error));
     } else if (preferences.email !== false && process.env.RESEND_API_KEY) {
       await sendBrandedEmail({
@@ -428,7 +428,7 @@ export async function POST(request: Request) {
           holdOpenHours,
           scheduledDate: parsed.data.scheduledDate,
           scheduledTime: parsed.data.scheduledTime,
-          serviceName: formatServiceName(parsed.data.serviceType),
+          serviceName: bookingServiceName({ is_recurring: parsed.data.isRecurring, service_type: parsed.data.serviceType }),
         },
         template: "customer.booking_requested",
         to: profile.email,
@@ -486,7 +486,7 @@ export async function POST(request: Request) {
       },
       {
         lastBookingDate: parsed.data.scheduledDate,
-        serviceType: formatServiceName(parsed.data.serviceType),
+        serviceType: bookingServiceName({ is_recurring: parsed.data.isRecurring, service_type: parsed.data.serviceType }),
       },
     );
   } catch (zohoError) {

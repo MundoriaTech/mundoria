@@ -9,7 +9,7 @@ import {
 } from "@/components/cleaner/incident-report-form";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
 import { INCIDENT_CATEGORIES } from "@/lib/cleaner/onboarding-compliance";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Report an incident" };
@@ -64,7 +64,7 @@ export default async function CleanerIncidentsPage({
       label: `${new Date(`${job.scheduled_date}T12:00:00`).toLocaleDateString(
         "en-GB",
         { day: "numeric", month: "short", year: "numeric" },
-      )} · ${formatServiceName(job.service_type)}${
+      )} · ${bookingServiceName(job)}${
         job.address?.city ? ` · ${job.address.city}` : ""
       }`,
     }));

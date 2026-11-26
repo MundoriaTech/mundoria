@@ -1,7 +1,7 @@
 import { addMinutes, areIntervalsOverlapping } from "date-fns";
 
 import { parseTransportModes } from "@/lib/cleaner/onboarding-compliance";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { getDistanceInMetres } from "@/lib/maps/distance";
 import { postcodeInArea } from "@/lib/matching/postcode";
@@ -330,14 +330,14 @@ export async function runMatchingEngine(
     await alertAdmins(
       "matching_failed",
       "We could not find a cleaner for a booking",
-      `Nobody was available for this ${formatServiceName(booking.service_type)} visit. Please assign someone by hand.`,
+      `Nobody was available for this ${bookingServiceName(booking)} visit. Please assign someone by hand.`,
       {
         booking_id: bookingId,
         bookingUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin/matching`,
         postcode: booking.address.postcode,
         scheduledDate: booking.scheduled_date,
         scheduledTime: booking.scheduled_start_time,
-        serviceName: formatServiceName(booking.service_type),
+        serviceName: bookingServiceName(booking),
       },
     );
     return { considered, matched: false as const };
@@ -405,7 +405,7 @@ export async function runMatchingEngine(
     sendPushNotification(
       winner.cleanerId,
       "New cleaning job",
-      `A ${booking.service_type.replaceAll("_", " ")} job is waiting for you.`,
+      `A ${bookingServiceName(booking).toLowerCase()} job is waiting for you.`,
       { booking_id: bookingId },
     ),
     // The customer already has "request received" from checkout and hears
@@ -442,7 +442,7 @@ export async function runMatchingEngine(
         respondBy: respondBy.toLocaleString("en-GB"),
         scheduledDate: booking.scheduled_date,
         scheduledTime: booking.scheduled_start_time?.slice(0, 5),
-        serviceName: String(booking.service_type).replaceAll("_", " "),
+        serviceName: bookingServiceName(booking),
       },
       template: "cleaner.job_offer",
       to: winner.email,

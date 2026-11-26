@@ -9,7 +9,7 @@ import {
   usePagedItems,
 } from "@/components/shared/pagination-controls";
 import { Button } from "@/components/ui/button";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { CleanerJob } from "@/types/cleaner";
 
@@ -126,7 +126,7 @@ export function JobFeed({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="break-words font-semibold">
-                      {formatServiceName(job.service_type)}
+                      {bookingServiceName(job)}
                     </h2>
                     {teamSlot ? (
                       <span className="rounded-full bg-[#efe6ff] px-2 py-0.5 text-[11px] font-semibold text-[#6a45b8]">

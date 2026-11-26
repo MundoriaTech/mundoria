@@ -8,6 +8,7 @@ import { sendBrandedEmail } from "@/lib/email/send-email";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { bookingServiceName } from "@/lib/customer/services";
 
 const schema = z.object({
   action: z.enum(["en_route", "checkin", "checkout", "override"]),
@@ -156,7 +157,7 @@ async function notifyCustomerEnRoute(bookingId: string) {
   const { data } = await admin
     .from("bookings")
     .select(
-      "customer_id,scheduled_date,scheduled_start_time,service_type,cleaner:profiles!bookings_cleaner_id_fkey(full_name),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
+      "customer_id,scheduled_date,scheduled_start_time,service_type,is_recurring,cleaner:profiles!bookings_cleaner_id_fkey(full_name),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
     )
     .eq("id", bookingId)
     .single();
@@ -189,7 +190,7 @@ async function notifyCustomerEnRoute(bookingId: string) {
         firstName: customer.full_name?.split(" ")[0],
         scheduledDate: data.scheduled_date,
         scheduledTime: String(data.scheduled_start_time ?? "").slice(0, 5),
-        serviceName: String(data.service_type).replaceAll("_", " "),
+        serviceName: bookingServiceName(data as { is_recurring?: boolean | null; service_type: string }),
       },
       template: "customer.cleaner_en_route",
       to: customer.email,

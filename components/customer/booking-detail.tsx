@@ -36,8 +36,8 @@ import {
 } from "@/lib/customer/booking-visibility";
 import { hourlyRatePence } from "@/lib/customer/rate-card";
 import {
+  bookingServiceName,
   formatMoney,
-  formatServiceName,
 } from "@/lib/customer/services";
 import {
   PAYMENT_HELP_HREF,
@@ -358,7 +358,7 @@ export function BookingDetail({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <h2 className="m-0 break-words text-xl font-semibold tracking-[-0.02em] text-[#1E1848] sm:text-2xl">
-              {formatServiceName(booking.service_type)}
+              {bookingServiceName(booking)}
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#5F5F66]">
               {[whenLabel, placeLabel, `#${booking.id.slice(0, 8)}`]
@@ -589,7 +589,7 @@ export function BookingDetail({
             priorityAreas={booking.special_attention_areas ?? []}
             scheduledDate={booking.scheduled_date}
             scheduledTime={booking.scheduled_start_time}
-            serviceLabel={formatServiceName(booking.service_type)}
+            serviceLabel={bookingServiceName(booking)}
             standardLabel={null}
             title="Booking details"
           />

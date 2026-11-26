@@ -17,8 +17,8 @@ import { Button } from "@/components/ui/button";
 import { safetyAlertAllowed } from "@/lib/bookings/safety-alert-shared";
 import { checkInWindowMessage } from "@/lib/bookings/schedule";
 import {
+  bookingServiceName,
   formatMoney,
-  formatServiceName,
   standardLabel,
 } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -273,7 +273,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
         <div>
           <p className="text-sm text-primary">Job #{job.id.slice(0, 8)}</p>
           <h1 className="text-3xl font-semibold">
-            {formatServiceName(job.service_type)}
+            {bookingServiceName(job)}
           </h1>
         </div>
         <Button asChild variant="outline">

@@ -9,10 +9,9 @@ import {
 } from "@/lib/matching/emergency-list";
 import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
 import { getAvailableJobs } from "@/lib/cleaner/server";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { sendPushNotification, sendSMS } from "@/lib/notifications/send";
-import type { ServiceType } from "@/types/customer";
 import { onCleanerAcceptedForPayment } from "@/lib/payments/preauth-flow";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -106,7 +105,7 @@ export async function POST(
       .in("status", ["pending_match", "matched"])
       .or(`cleaner_id.is.null,cleaner_id.eq.${user.id}`)
       .select(
-        "id,customer_id,scheduled_date,scheduled_start_time,service_type,address:addresses(address_line_1,city,postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
+        "id,customer_id,scheduled_date,scheduled_start_time,service_type,is_recurring,address:addresses(address_line_1,city,postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
       )
       .maybeSingle();
 
@@ -292,7 +291,7 @@ async function notifyCustomerCleanerConfirmed(
     "en-GB",
     { day: "numeric", month: "long", weekday: "long" },
   );
-  const line = `${firstName} has accepted your ${formatServiceName(booking.service_type as ServiceType).toLowerCase()} on ${date} at ${time}. Your visit is confirmed.`;
+  const line = `${firstName} has accepted your ${bookingServiceName(booking).toLowerCase()} on ${date} at ${time}. Your visit is confirmed.`;
 
   await Promise.all([
     alreadyPushed
@@ -318,7 +317,7 @@ async function notifyCustomerCleanerConfirmed(
             fullName: customer.full_name,
             scheduledDate: booking.scheduled_date,
             scheduledTime: time,
-            serviceName: formatServiceName(booking.service_type as ServiceType),
+            serviceName: bookingServiceName(booking),
           },
           template: "customer.session_confirmed",
           to: customer.email,

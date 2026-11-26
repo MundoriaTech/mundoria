@@ -10,7 +10,7 @@ import {
   usePagedItems,
 } from "@/components/shared/pagination-controls";
 import { PriceDisplay } from "@/components/shared/price-display";
-import { formatServiceName, SERVICES } from "@/lib/customer/services";
+import { bookingServiceName, SERVICES } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminBooking } from "@/types/admin";
 import type { BookingStatus } from "@/types/customer";
@@ -208,7 +208,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
                 <div className="min-w-0">
                   <p className="text-[15px] font-semibold">{booking.customer?.full_name ?? "Customer"}</p>
                   <p className="mt-0.5 truncate text-[13.5px] text-[#5F5F66]">
-                    {formatServiceName(booking.service_type)}
+                    {bookingServiceName(booking)}
                     {booking.estimated_duration_hours != null
                       ? ` · ${booking.estimated_duration_hours}h`
                       : ""}{" "}
@@ -272,7 +272,7 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
                 </span>
                 <span className="truncate text-[15px] text-[#5F5F66]">{booking.cleaner_profile?.full_name ?? "Unassigned"}</span>
                 <span className="truncate text-[15px] text-[#3D335F]">
-                  {formatServiceName(booking.service_type)}
+                  {bookingServiceName(booking)}
                   {booking.estimated_duration_hours != null
                     ? ` · ${booking.estimated_duration_hours}h`
                     : ""}

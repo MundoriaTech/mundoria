@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { paymentStatusLabel } from "@/lib/customer/payment-status";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { buildBookingInvoicePdf, type InvoiceLine } from "@/lib/invoices/booking-invoice-pdf";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getRequestUser } from "@/lib/supabase/request-client";
-import type { ServiceType } from "@/types/customer";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +32,7 @@ export async function GET(
   const { data: booking } = await admin
     .from("bookings")
     .select(
-      "id,customer_id,status,payment_status,service_type,scheduled_date,scheduled_start_time,estimated_duration_hours,amount_total,discount_pence,address:addresses(address_line_1,address_line_2,city,postcode),customer:profiles!bookings_customer_id_fkey(full_name,email)",
+      "id,customer_id,status,payment_status,service_type,is_recurring,scheduled_date,scheduled_start_time,estimated_duration_hours,amount_total,discount_pence,address:addresses(address_line_1,address_line_2,city,postcode),customer:profiles!bookings_customer_id_fkey(full_name,email)",
     )
     .eq("id", params.id)
     .eq("customer_id", user.id)
@@ -84,7 +83,7 @@ export async function GET(
     label: `Add-on: ${row.label ?? "Extra"}`,
   }));
   const addOnTotal = addOnRows.reduce((sum, row) => sum + row.amountPence, 0);
-  const serviceName = formatServiceName(booking.service_type as ServiceType);
+  const serviceName = bookingServiceName(booking);
   const extraRows = (extraTime ?? []).map((row) => ({
     amountPence: Number(row.amount_pence ?? 0),
     label: `Extra time on the day (${Number(row.minutes)} minutes)`,

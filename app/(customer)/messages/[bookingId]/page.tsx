@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 
 import { Chat } from "@/components/customer/chat";
 import { isCleanerVisibleToCustomer } from "@/lib/customer/booking-visibility";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
-import type { BookingStatus, Message, ServiceType } from "@/types/customer";
+import type { BookingStatus, Message } from "@/types/customer";
 
 export default async function CustomerMessagesPage({
   params,
@@ -19,7 +19,7 @@ export default async function CustomerMessagesPage({
     supabase
       .from("bookings")
       .select(
-        "customer_id, cleaner_id, status, service_type, scheduled_date, safety_hold_at",
+        "customer_id, cleaner_id, status, service_type, is_recurring, scheduled_date, safety_hold_at",
       )
       .eq("id", params.bookingId)
       .eq("customer_id", user!.id)
@@ -69,7 +69,7 @@ export default async function CustomerMessagesPage({
       }}
       peerLabel={cleanerName}
       safetyHold={Boolean(booking.safety_hold_at)}
-      subtitle={`${formatServiceName(booking.service_type as ServiceType)} · ${when}`}
+      subtitle={`${bookingServiceName(booking)} · ${when}`}
     />
   );
 }

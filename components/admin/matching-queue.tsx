@@ -17,7 +17,7 @@ import {
   stuckReason,
   type MatchingQueueId,
 } from "@/lib/admin/matching-queue";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import type { AdminBooking } from "@/types/admin";
 import type { BookingStatus } from "@/types/customer";
@@ -324,7 +324,7 @@ function QueueRow({
         {placeLabel(booking)}
       </span>
       <span className="truncate text-[14.5px] text-[#3D335F]">
-        {formatServiceName(booking.service_type)}
+        {bookingServiceName(booking)}
         {durationLabel(booking)}
       </span>
       <span className="min-w-0 truncate text-[14.5px] text-[#1E1848]">

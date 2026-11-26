@@ -6,6 +6,7 @@ import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { scheduleNextDayCapture } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { bookingServiceName } from "@/lib/customer/services";
 
 export async function validateBookingGeofence({
   action,
@@ -146,7 +147,7 @@ async function loadVisit(bookingId: string) {
   const { data } = await createAdminClient()
     .from("bookings")
     .select(
-      "customer_id,payment_status,scheduled_date,scheduled_start_time,service_type,address:addresses(address_line_1,city,postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
+      "customer_id,payment_status,scheduled_date,scheduled_start_time,service_type,is_recurring,address:addresses(address_line_1,city,postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,notification_preferences)",
     )
     .eq("id", bookingId)
     .single();
@@ -317,7 +318,7 @@ function sendVisitEmail(
       fullName: customer.full_name,
       scheduledDate: visit.scheduled_date,
       scheduledTime: visit.scheduled_start_time?.slice(0, 5),
-      serviceName: String(visit.service_type).replaceAll("_", " "),
+      serviceName: bookingServiceName(visit as { is_recurring?: boolean | null; service_type: string }),
     },
     template,
     to: customer.email,

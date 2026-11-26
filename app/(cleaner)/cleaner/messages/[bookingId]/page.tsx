@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { Chat } from "@/components/customer/chat";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Message, ServiceType } from "@/types/customer";
+import type { Message } from "@/types/customer";
 
 export default async function CleanerMessagesPage({
   params,
@@ -22,7 +22,7 @@ export default async function CleanerMessagesPage({
       admin
         .from("bookings")
         .select(
-          "customer_id,cleaner_id,service_type,scheduled_date,safety_hold_at",
+          "customer_id,cleaner_id,service_type,is_recurring,scheduled_date,safety_hold_at",
         )
         .eq("id", params.bookingId)
         .maybeSingle(),
@@ -75,7 +75,7 @@ export default async function CleanerMessagesPage({
       )}
       peerLabel={customerName.split(" ")[0] ?? customerName}
       safetyHold={Boolean(booking.safety_hold_at)}
-      subtitle={`${formatServiceName(booking.service_type as ServiceType)} · ${when}`}
+      subtitle={`${bookingServiceName(booking)} · ${when}`}
     />
   );
 }

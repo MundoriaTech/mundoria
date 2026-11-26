@@ -6,7 +6,7 @@ import {
   SAFETY_REASON_LABELS,
   type SafetyAlertReason,
 } from "@/lib/bookings/safety-alert-shared";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminSafetyDetailPage({
@@ -18,7 +18,7 @@ export default async function AdminSafetyDetailPage({
   const { data: alert } = await admin
     .from("booking_safety_alerts")
     .select(
-      "*,raised_by_profile:profiles!booking_safety_alerts_raised_by_fkey(full_name,email,phone),booking:bookings(id,service_type,status,scheduled_date,scheduled_start_time,safety_hold_at,customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone))",
+      "*,raised_by_profile:profiles!booking_safety_alerts_raised_by_fkey(full_name,email,phone),booking:bookings(id,service_type,is_recurring,status,scheduled_date,scheduled_start_time,safety_hold_at,customer:profiles!bookings_customer_id_fkey(full_name,email,phone),cleaner:profiles!bookings_cleaner_id_fkey(full_name,email,phone))",
     )
     .eq("id", params.id)
     .maybeSingle();
@@ -134,7 +134,7 @@ export default async function AdminSafetyDetailPage({
                     className="font-medium text-primary underline-offset-2 hover:underline"
                     href={`/admin/booking/${booking.id}`}
                   >
-                    {formatServiceName(booking.service_type)} #
+                    {bookingServiceName(booking)} #
                     {booking.id.slice(0, 8)}
                   </Link>
                 </p>

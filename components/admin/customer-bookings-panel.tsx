@@ -6,7 +6,7 @@ import {
   PagedList,
   PagedTable,
 } from "@/components/shared/paged-list";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { ServiceType } from "@/types/customer";
 
@@ -44,7 +44,7 @@ export function CustomerBookingsPanel({
             key={booking.id}
           >
             <p className="font-medium">
-              {formatServiceName(booking.service_type)}
+              {bookingServiceName(booking)}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               {booking.scheduled_date} · {booking.status.replaceAll("_", " ")}
@@ -71,7 +71,7 @@ export function CustomerBookingsPanel({
         pageSize={PAGE_SIZES.admin}
         renderRow={(booking) => (
           <tr className="border-t" key={booking.id}>
-            <td className="p-3">{formatServiceName(booking.service_type)}</td>
+            <td className="p-3">{bookingServiceName(booking)}</td>
             <td>
               {booking.scheduled_date}{" "}
               {booking.scheduled_start_time?.slice(0, 5)}

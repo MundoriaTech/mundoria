@@ -1,11 +1,10 @@
 import { addHours, addMinutes } from "date-fns";
 
 import { cleanerPayForDisplay } from "@/lib/cleaner/pay-display";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { ServiceType } from "@/types/customer";
 
 const MAX_WINDOW_HOURS = 12;
 const MIN_WINDOW_MINUTES = 30;
@@ -25,7 +24,7 @@ export async function offerAdminAssignedJob(bookingId: string, cleanerId: string
     admin
       .from("bookings")
       .select(
-        "id,amount_cleaner,scheduled_date,scheduled_start_time,service_type,address:addresses(city,postcode)",
+        "id,amount_cleaner,scheduled_date,scheduled_start_time,service_type,is_recurring,address:addresses(city,postcode)",
       )
       .eq("id", bookingId)
       .maybeSingle(),
@@ -62,7 +61,7 @@ export async function offerAdminAssignedJob(bookingId: string, cleanerId: string
     { onConflict: "booking_id,cleaner_id" },
   );
 
-  const serviceName = formatServiceName(booking.service_type as ServiceType);
+  const serviceName = bookingServiceName(booking);
   const shownPay = await cleanerPayForDisplay(bookingId, cleanerId, booking.amount_cleaner);
   const address = Array.isArray(booking.address) ? booking.address[0] : booking.address;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";

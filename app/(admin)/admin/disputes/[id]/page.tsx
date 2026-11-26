@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { DetailSection } from "@/components/admin/detail-section";
 import { DisputeActions } from "@/components/admin/dispute-actions";
 import { humanize, ukDate, ukDateTime } from "@/lib/admin/format";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { DISPUTE_OPTIONS, type DisputeOption } from "@/lib/disputes/options";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -85,7 +85,7 @@ export default async function DisputeDetailPage({ params }: { params: { id: stri
                   label: "Booking",
                   value: (
                     <Link className={linkClass} href={`/admin/booking/${booking.id}`}>
-                      {formatServiceName(booking.service_type)} · {ukDate(booking.scheduled_date, true)}
+                      {bookingServiceName(booking)} · {ukDate(booking.scheduled_date, true)}
                       {booking.scheduled_start_time ? ` at ${String(booking.scheduled_start_time).slice(0, 5)}` : ""}
                     </Link>
                   ),

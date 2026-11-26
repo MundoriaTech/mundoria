@@ -4,7 +4,7 @@ import {
   messagePreviewLabel,
 } from "@/components/shared/conversation-list";
 import { getCleanerJobs } from "@/lib/cleaner/server";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
 import type { MessageAttachment } from "@/types/customer";
 
@@ -69,7 +69,7 @@ export default async function CleanerMessagesListPage() {
         preview: latest
           ? messagePreviewLabel(latest)
           : "Start the conversation",
-        subtitle: `${formatServiceName(job.service_type)} · ${new Date(
+        subtitle: `${bookingServiceName(job)} · ${new Date(
           `${job.scheduled_date}T12:00:00`,
         ).toLocaleDateString("en-GB", {
           day: "numeric",

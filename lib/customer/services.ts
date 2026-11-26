@@ -1140,3 +1140,18 @@ export function indicativeFromPrice(
 export function formatServiceName(serviceType: ServiceType) {
   return serviceDefinition(serviceType).label;
 }
+
+/**
+ * A booking's service name. Regular cleaning booked once (not on a repeat
+ * schedule) is priced as One-Off Cleaning and is named that way everywhere.
+ * It stays stored as "regular" so cleaners who take regular work still match.
+ */
+export function bookingServiceName(booking: {
+  is_recurring?: boolean | null;
+  service_type: ServiceType | string;
+}) {
+  if (booking.service_type === "regular" && booking.is_recurring === false) {
+    return formatServiceName("one_off");
+  }
+  return formatServiceName(booking.service_type as ServiceType);
+}

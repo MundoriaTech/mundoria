@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { absenceError, diaryPlanError } from "@/lib/cleaner/diary-dates";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
 import type { ServiceType } from "@/types/customer";
 
@@ -353,7 +353,7 @@ export function DiaryBoard() {
           label="Up next"
           value={
             nextJob
-              ? `${formatServiceName(nextJob.service_type)} · ${parseDay(nextJob.scheduled_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} at ${clock(nextJob.scheduled_start_time)}`
+              ? `${bookingServiceName(nextJob)} · ${parseDay(nextJob.scheduled_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} at ${clock(nextJob.scheduled_start_time)}`
               : "No upcoming visit in view"
           }
         />
@@ -659,7 +659,7 @@ function WeekGrid({
                     key={job.id}
                     style={{ height: blockHeight, top: Math.max(0, top) }}
                   >
-                    <p className="truncate text-[11px] font-semibold">{formatServiceName(job.service_type)}</p>
+                    <p className="truncate text-[11px] font-semibold">{bookingServiceName(job)}</p>
                     <p className="truncate text-[10px] text-white/80">
                       {clock(job.scheduled_start_time)}
                       {job.area ? ` · ${job.area}` : ""}
@@ -719,7 +719,7 @@ function DayAgenda({
                 href={`/cleaner/job/${job.id}`}
               >
                 <p className="text-sm font-semibold text-[#312c79]">
-                  {clock(job.scheduled_start_time)} · {formatServiceName(job.service_type)}
+                  {clock(job.scheduled_start_time)} · {bookingServiceName(job)}
                 </p>
                 <p className="mt-1 text-sm text-[#5c5670]">
                   {statusLabel(job.status)}

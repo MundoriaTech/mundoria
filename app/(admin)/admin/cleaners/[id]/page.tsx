@@ -35,7 +35,7 @@ import {
   DBS_CHECK_URL,
   verificationLifecycleLabel,
 } from "@/lib/cleaner/onboarding-compliance";
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import type { CleanerTier, InterviewStatus } from "@/types/cleaner";
@@ -643,7 +643,7 @@ export default async function AdminCleanerPage({
         headers={["Date", "Service", "Status", "Net"]}
         rows={(bookings ?? []).map((item) => [
           item.scheduled_date,
-          formatServiceName(item.service_type),
+          bookingServiceName(item),
           item.status,
           formatMoney(item.amount_cleaner),
         ])}

@@ -21,6 +21,7 @@ import {
 import { hourlyRatePence } from "@/lib/customer/rate-card";
 import { loadMatchingList } from "@/lib/matching/emergency-list";
 import {
+  bookingServiceName,
   estimatePriceBreakdown,
   formatHourlyRate,
   formatMoney,
@@ -244,7 +245,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           {booking.id}
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-          {formatServiceName(booking.service_type)}
+          {bookingServiceName(booking)}
         </h1>
       </div>
       <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1fr_.6fr]">
@@ -359,7 +360,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             priorityAreas={booking.special_attention_areas ?? []}
             scheduledDate={booking.scheduled_date}
             scheduledTime={booking.scheduled_start_time}
-            serviceLabel={formatServiceName(booking.service_type)}
+            serviceLabel={bookingServiceName(booking)}
             standardLabel={standardLabel(booking.cleaning_standard ?? "enhanced")}
             title="What they booked"
           />

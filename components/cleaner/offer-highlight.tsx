@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { formatMoney, formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import type { CleanerJob } from "@/types/cleaner";
 
 const OFFER_WINDOW_MS = 30 * 60 * 1000;
@@ -61,7 +61,7 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
             Waiting for you
           </p>
           <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-            {formatServiceName(job.service_type)}
+            {bookingServiceName(job)}
           </h3>
           <p className="mt-1 text-sm leading-6 text-[#5c5670]">
             {when} at {time}, in {area}.

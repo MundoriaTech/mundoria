@@ -9,7 +9,7 @@ import {
 } from "@/components/shared/paged-list";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { Button } from "@/components/ui/button";
-import { formatServiceName } from "@/lib/customer/services";
+import { bookingServiceName } from "@/lib/customer/services";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { Booking } from "@/types/customer";
 
@@ -42,7 +42,7 @@ export function ReceiptsList({ receipts }: { receipts: ReceiptBooking[] }) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-medium text-foreground">
-                  {formatServiceName(booking.service_type)}
+                  {bookingServiceName(booking)}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {booking.scheduled_date}
@@ -75,7 +75,7 @@ export function ReceiptsList({ receipts }: { receipts: ReceiptBooking[] }) {
         renderRow={(booking) => (
           <tr className="border-t" key={booking.id}>
             <td className="p-3">{booking.scheduled_date}</td>
-            <td>{formatServiceName(booking.service_type)}</td>
+            <td>{bookingServiceName(booking)}</td>
             <td>
               {booking.address
                 ? `${booking.address.city}, ${booking.address.postcode}`
