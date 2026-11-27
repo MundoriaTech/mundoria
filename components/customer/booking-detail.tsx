@@ -13,12 +13,14 @@ import { BookingSummaryCard } from "@/components/customer/booking-basket";
 import { CleanerMap } from "@/components/customer/cleaner-map";
 import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
 import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
+import { ManageBooking } from "@/components/customer/booking/manage-booking";
+import { NeedAHand } from "@/components/customer/booking/need-a-hand";
+import { VisitStatusCard } from "@/components/customer/booking/visit-status-card";
 import { TipPanel } from "@/components/customer/tip-panel";
 import { RatingForm } from "@/components/customer/rating-form";
 import { RescheduleModal } from "@/components/customer/reschedule-modal";
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
 import { ActionError } from "@/components/shared/action-error";
-import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
@@ -51,12 +53,13 @@ import {
   canCustomerReschedule,
   scheduleChangeFeePreview,
 } from "@/lib/bookings/schedule";
-import { cleanerTierLabel, medallionIconSrc } from "@/lib/cleaner/tier";
-import { isRescheduleTestCustomer } from "@/lib/bookings/lead-time";
+import { isRescheduleTestCustomer, RESCHEDULE_CUTOFF_HOURS } from "@/lib/bookings/lead-time";
 import { receiptAvailable } from "@/lib/customer/receipt";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Booking, BookingChecklistItem } from "@/types/customer";
+
+const ACCESS_EDITABLE = ["pending_match", "matched", "awaiting_payment", "confirmed", "cleaner_en_route", "in_progress"];
 
 export function BookingDetail({
   checklistItems,
@@ -366,6 +369,58 @@ export function BookingDetail({
     booking.status,
     booking.scheduled_date,
   );
+
+  // Manage booking: self-serve where it is safe, the support team where a
+  // change affects price, the cleaner or matching.
+  const startAt = new Date(`${booking.scheduled_date}T${String(booking.scheduled_start_time).slice(0, 5)}:00`);
+  const shortWhen = (hoursBefore: number) =>
+    new Date(startAt.getTime() - hoursBefore * 60 * 60 * 1000).toLocaleString("en-GB", {
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      month: "short",
+      timeZone: "Europe/London",
+      weekday: "short",
+    });
+  const visitOpen = !["completed", "cancelled", "awaiting_customer_confirmation"].includes(booking.status);
+  const cardChangeable =
+    booking.payment_status === "unpaid" &&
+    ["pending_match", "matched", "awaiting_payment", "confirmed"].includes(booking.status);
+  const manageRows = [
+    {
+      hint: canReschedule
+        ? `Free until ${shortWhen(RESCHEDULE_CUTOFF_HOURS)}`
+        : `Date changes close ${RESCHEDULE_CUTOFF_HOURS} hours before the visit`,
+      key: "reschedule",
+      label: "Change date or time",
+      onClick: canReschedule ? () => setShowReschedule(true) : undefined,
+    },
+    ...(visitOpen
+      ? [
+          { hint: "Rooms, standard, add-ons or notes. Our team updates it with you.", key: "requirements", label: "Edit cleaning requirements", viaSupport: true },
+          { hint: "Longer or shorter visit. We confirm any price change first.", key: "duration", label: "Change cleaning duration", viaSupport: true },
+          { hint: "A different address. We check a cleaner can still come.", key: "address", label: "Update cleaning address", viaSupport: true },
+        ]
+      : []),
+    { hint: "Key safe, concierge, parking: only your cleaner sees it", key: "access", label: "Add access instructions" },
+    {
+      hint: cardChangeable
+        ? "Use a different card for this visit"
+        : booking.payment_status === "held"
+          ? "Your card is already held for this visit"
+          : "Not needed for this visit",
+      key: "payment",
+      label: "Manage payment method",
+      onClick: cardChangeable ? () => setShowPay(true) : undefined,
+    },
+    ...(canChangePro ? [{ hint: "Before your cleaner accepts", key: "pro", label: "Change cleaner", onClick: () => void changePro() }] : []),
+    ...(booking.is_recurring && canCancel ? [{ hint: "Skip visits while you are away", key: "pause", label: "Pause for a holiday", onClick: () => setShowPause(true) }] : []),
+    ...(showSos ? [{ danger: true, hint: "Urgent help during your visit", key: "sos", label: "Safety alert", onClick: () => setShowSafety(true) }] : []),
+    { hint: "Something not right with this visit", key: "report", label: "Report an issue", onClick: () => setShowDispute(true) },
+    ...(canCancel
+      ? [{ danger: true, hint: `Free until ${shortWhen(freeCancelHours ?? 24)}`, key: "cancel", label: "Cancel booking", onClick: () => setShowCancel(true) }]
+      : []),
+  ];
   const onSafetyHold = Boolean(booking.safety_hold_at);
   const canMessage = cleanerVisible && Boolean(booking.cleaner_id);
   const needsStartConfirm =
@@ -638,138 +693,18 @@ export function BookingDetail({
         </div>
 
         <aside className="space-y-4">
-          <section className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
-            <h2 className="text-base font-bold text-[#1c133b]">Your cleaner</h2>
-            {cleanerVisible && booking.cleaner ? (
-              <div className="mt-5 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#efe6ff] text-lg font-bold text-[#6a45b8]">
-                    {booking.cleaner.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        alt={booking.cleaner.full_name}
-                        className={avatarImageClass(
-                          resolveAvatarUrl(
-                            booking.cleaner.avatar_url,
-                            booking.cleaner.id,
-                          ),
-                        )}
-                        src={resolveAvatarUrl(
-                          booking.cleaner.avatar_url,
-                          booking.cleaner.id,
-                        )}
-                      />
-                    ) : (
-                      booking.cleaner.full_name.charAt(0)
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-[#1c133b]">
-                      {booking.cleaner.full_name}
-                    </p>
-                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#5a5470]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        alt=""
-                        aria-hidden
-                        className="h-5 w-5"
-                        src={medallionIconSrc(booking.cleaner.tier)}
-                      />
-                      {cleanerTierLabel(booking.cleaner.tier)} medallion
-                    </p>
-                  </div>
-                </div>
-                {booking.cleaner_id ? (
-                  <Button
-                    asChild
-                    className="h-11 w-full rounded-full"
-                    variant="outline"
-                  >
-                    <Link href={`/booking/new?rebook=${booking.id}&keep=1`}>
-                      Book this cleaner again
-                    </Link>
-                  </Button>
-                ) : null}
-              </div>
-            ) : waitingForCleaner ? (
-              <p className="mt-4 text-sm leading-6 text-[#5a5470]">
-                We’re looking for your cleaner. You’ll see their details once
-                your session is confirmed.
-              </p>
-            ) : (
-              <p className="mt-4 text-sm leading-6 text-[#5a5470]">
-                Cleaner details will appear here once your session is confirmed.
-              </p>
-            )}
-          </section>
-
-          <section className="overflow-hidden rounded-[1.25rem] border border-[#e4daf5] bg-white p-5 shadow-[0_10px_28px_rgba(28,19,59,0.05)]">
-            <h2 className="text-base font-bold text-[#1c133b]">Manage</h2>
-            <div className="mt-4 grid gap-2">
-              {canReschedule ? (
-                <Button
-                  className="h-11 justify-start rounded-full px-4"
-                  onClick={() => setShowReschedule(true)}
-                  variant="outline"
-                >
-                  Change date &amp; time
-                </Button>
-              ) : null}
-              {canChangePro ? (
-                <Button
-                  className="h-11 justify-start rounded-full px-4"
-                  onClick={() => void changePro()}
-                  variant="outline"
-                >
-                  Change pro
-                </Button>
-              ) : null}
-              {booking.is_recurring && canCancel ? (
-                <Button
-                  className="h-11 justify-start rounded-full px-4"
-                  onClick={() => setShowPause(true)}
-                  variant="outline"
-                >
-                  Pause for a holiday
-                </Button>
-              ) : null}
-              <Button
-                className="h-11 justify-start rounded-full px-4"
-                onClick={() => setShowDispute(true)}
-                variant="outline"
-              >
-                Report issue
-              </Button>
-            </div>
-          </section>
-
-          {showSos || canCancel ? (
-            <section className="rounded-[1.25rem] bg-[#faf7f5] px-5 py-4">
-              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#a67c52]">
-                Need help?
-              </p>
-              <div className="mt-3 flex flex-col gap-2">
-                {showSos ? (
-                  <button
-                    className="text-left text-sm font-semibold text-[#9f1239] underline-offset-2 hover:underline"
-                    onClick={() => setShowSafety(true)}
-                    type="button"
-                  >
-                    Safety alert
-                  </button>
-                ) : null}
-                {canCancel ? (
-                  <button
-                    className="text-left text-sm font-semibold text-[#9f1239] underline-offset-2 hover:underline"
-                    onClick={() => setShowCancel(true)}
-                    type="button"
-                  >
-                    Cancel booking
-                  </button>
-                ) : null}
-              </div>
-            </section>
-          ) : null}
+          <VisitStatusCard
+            booking={booking}
+            cleanerVisible={cleanerVisible}
+            holdAtLabel={holdAtLabel}
+          />
+          <ManageBooking
+            accessInstructions={(booking as { access_instructions?: string | null }).access_instructions ?? null}
+            bookingId={booking.id}
+            canEditAccess={ACCESS_EDITABLE.includes(booking.status)}
+            rows={manageRows}
+          />
+          <NeedAHand />
         </aside>
       </div>
 

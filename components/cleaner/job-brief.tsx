@@ -181,6 +181,15 @@ export function JobBrief({ job }: { job: CleanerJob }) {
           },
         ]
       : []),
+    ...((job as { access_instructions?: string | null }).access_instructions?.trim()
+      ? [
+          {
+            explain: "How to get in for this visit, from the customer. Follow these first.",
+            label: "Access instructions",
+            value: (job as { access_instructions?: string | null }).access_instructions!.trim(),
+          },
+        ]
+      : []),
     ...(address?.special_requirements?.trim()
       ? [
           {

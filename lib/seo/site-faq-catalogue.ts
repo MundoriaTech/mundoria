@@ -1746,6 +1746,16 @@ export const SITE_FAQ_CATALOGUE: CatalogueSection[] = [
     description: "How Mundoria chooses and assigns cleaners.",
     items: [
       {
+        question: "When will my cleaner be confirmed?",
+        answer:
+          "We email and text you as soon as a cleaner accepts your booking, and their name appears on your booking.\n\nYour visit is then confirmed when we place a temporary hold on your card: straight away if your clean is within 5 days, otherwise 5 days before it.\n\nYou can see where your booking is at any time from your account.",
+      },
+      {
+        question: "What happens if a cleaner isn't available?",
+        answer:
+          "We keep looking for a suitable cleaner right up to the cut-off.\n\nIf nobody has accepted by 24 hours before your clean (or 2 hours before, for bookings made at short notice), we cancel the booking at no charge and let you know. Any hold on your card is released.\n\nYou can then rebook for another time.",
+      },
+      {
         question: "How does Mundoria choose a cleaner for my booking?",
         answer:
           "Mundoria does not want matching to be a case of simply giving the job to whoever happens to be free first.\n\nWe look at the booking itself.\n\nThat can include the type of cleaning, your location, the expected duration, the professional's availability, relevant experience, travel practicality, service suitability and any important preferences attached to the booking.\n\nThe aim is to make the match make sense for both sides.\n\nA cleaner may be available, but if the location, timing or type of work is not a good fit, that does not automatically make them the right person for the booking.",
