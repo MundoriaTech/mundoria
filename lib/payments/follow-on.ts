@@ -36,9 +36,12 @@ export async function ensureBookingPaymentIntent({
   if (booking.payment_status !== "unpaid") {
     throw new Error("This booking does not need a payment method.");
   }
+  // A saved card can be swapped any time before the hold is placed.
   const replacingCard =
     Boolean(booking.stripe_payment_method_id) &&
-    booking.status === "awaiting_payment";
+    ["pending_match", "matched", "awaiting_payment", "confirmed"].includes(
+      booking.status,
+    );
   if (booking.stripe_payment_method_id && !replacingCard) {
     throw new Error("A payment method is already saved for this booking.");
   }
@@ -112,7 +115,11 @@ export async function ensureBookingPaymentIntent({
     .from("bookings")
     .update({
       stripe_setup_intent_id: setupIntent.id,
-      ...(replacingCard ? { stripe_payment_method_id: null } : {}),
+      // Only a failed hold clears the old card straight away; otherwise it
+      // stays on the booking until the new one is confirmed.
+      ...(replacingCard && booking.status === "awaiting_payment"
+        ? { stripe_payment_method_id: null }
+        : {}),
     })
     .eq("id", bookingId);
 
@@ -141,6 +148,7 @@ export async function confirmBookingPaymentHold(bookingId: string) {
   const stripe = getStripe();
   let paymentMethodId = booking.stripe_payment_method_id as string | null;
   let paymentStatus: "unpaid" | "held" | "released" = "unpaid";
+  let replacedCard = false;
 
   if (booking.stripe_setup_intent_id) {
     const setup = await stripe.setupIntents.retrieve(
@@ -152,7 +160,11 @@ export async function confirmBookingPaymentHold(bookingId: string) {
         typeof setup.payment_method === "string"
           ? setup.payment_method
           : setup.payment_method?.id ?? null;
-      if (fromSetup) paymentMethodId = fromSetup;
+      if (fromSetup) {
+        replacedCard =
+          setup.metadata?.replace_card === "1" && fromSetup !== paymentMethodId;
+        paymentMethodId = fromSetup;
+      }
     } else if (!paymentMethodId) {
       throw new Error("Card has not been saved yet.");
     }
@@ -184,7 +196,9 @@ export async function confirmBookingPaymentHold(bookingId: string) {
     .eq("id", bookingId)
     .in("payment_status", ["unpaid", "held"]);
 
-  if (booking.status === "pending_match") {
+  // A new booking starts matching once its card is saved; swapping the card
+  // on a booking already in matching must not restart it.
+  if (booking.status === "pending_match" && !replacedCard) {
     await runMatchingEngine(bookingId);
   }
 

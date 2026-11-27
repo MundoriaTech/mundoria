@@ -4,6 +4,7 @@ import {
   serviceDefinition,
   SERVICES,
 } from "@/lib/customer/services";
+import { servicePublicPath } from "@/lib/seo/public-paths";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ServiceType } from "@/types/customer";
 
@@ -12,6 +13,8 @@ export type PopularService = {
   href: string;
   image: string;
   label: string;
+  /** The service's public page, for Read more. */
+  pageHref: string | null;
   type: ServiceType;
 };
 
@@ -74,6 +77,10 @@ export async function getPopularServices(limit = 8): Promise<PopularService[]> {
         href: `/booking/new?fresh=1&service=${type}&returnTo=/dashboard`,
         image: bookingServiceImages[type as ServiceType],
         label: definition.label,
+        pageHref:
+          definition.category === "exterior"
+            ? null
+            : servicePublicPath(definition.category, type as ServiceType),
         type: type as ServiceType,
       };
     });

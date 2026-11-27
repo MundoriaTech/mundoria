@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CrmLink } from "@/components/analytics/crm-link";
@@ -69,38 +70,50 @@ export function PopularServices({ services }: { services: PopularService[] }) {
         ref={track}
       >
         {services.map((service, index) => (
-          <CrmLink
-            className="group relative block h-[200px] w-[78%] max-w-[300px] flex-none snap-start overflow-hidden rounded-[14px] bg-[#1E1848] sm:h-[220px] sm:w-[280px] sm:max-w-none"
-            crmEvent="recommendation_click"
-            crmPayload={{ action: "Book now", item: service.label, service: service.type }}
+          <article
+            className="flex w-[78%] max-w-[300px] flex-none snap-start flex-col rounded-[18px] bg-[#f6f1e7] p-2.5 sm:w-[280px] sm:max-w-none"
             data-card
-            href={service.href}
             key={service.type}
           >
-            <Image
-              alt=""
-              className="object-cover transition duration-300 group-hover:scale-[1.04]"
-              fill
-              priority={index < 2}
-              sizes="(max-width: 640px) 78vw, 280px"
-              src={service.image}
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0"
-              style={{ background: "linear-gradient(180deg,rgba(30,24,72,0.15) 0%,rgba(30,24,72,0.1) 45%,rgba(30,24,72,0.85) 100%)" }}
-            />
-            <div
-              className="absolute left-0 top-0 flex h-[46px] max-w-[85%] items-center px-4"
-              style={{ background: "rgba(0,0,0,0.32)", backdropFilter: "blur(6px)", borderRadius: "0 0 14px 0" }}
-            >
-              <span className="truncate text-[16px] font-bold text-white">{service.label}</span>
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[13px] bg-[#efe6d8]">
+              <Image
+                alt={service.label}
+                className="object-cover"
+                fill
+                priority={index < 2}
+                sizes="(max-width: 640px) 78vw, 280px"
+                src={service.image}
+              />
             </div>
-            <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
-              <p className="m-0 line-clamp-2 text-[13px] leading-[1.4] text-white/85">{service.description}</p>
-              <span className="mt-2 inline-block text-[14px] font-semibold text-white">Book now →</span>
+            <div className="flex flex-1 flex-col px-2 pb-1.5 pt-3.5">
+              <h3 className="m-0 text-[17px] font-semibold leading-tight tracking-[-0.02em] text-[#2a2158]">
+                {service.label}
+              </h3>
+              <p className="m-0 mt-1.5 line-clamp-2 text-[14px] leading-5 text-[#5c5670]">
+                {service.description}
+              </p>
+              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                {service.pageHref ? (
+                  <Link
+                    className="inline-flex h-10 items-center justify-center rounded-full border border-[#2a2158] px-4 text-[13.5px] font-semibold text-[#2a2158] transition hover:bg-[#2a2158] hover:text-white"
+                    href={service.pageHref}
+                  >
+                    Read more
+                    <span className="sr-only"> about {service.label}</span>
+                  </Link>
+                ) : null}
+                <CrmLink
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-[#2a2158] px-4 text-[13.5px] font-semibold text-white transition hover:bg-[#3d3470]"
+                  crmEvent="recommendation_click"
+                  crmPayload={{ action: "Book now", item: service.label, service: service.type }}
+                  href={service.href}
+                >
+                  Book now
+                  <span className="sr-only"> {service.label}</span>
+                </CrmLink>
+              </div>
             </div>
-          </CrmLink>
+          </article>
         ))}
       </div>
     </section>
