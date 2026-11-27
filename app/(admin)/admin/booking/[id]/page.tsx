@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
 import { BookingEditPanel } from "@/components/admin/booking-edit-panel";
+import { BookingEmailLog, type EmailLogEntry } from "@/components/admin/booking-email-log";
 import { BookingEditHistory, type HistoryEntry } from "@/components/admin/booking-edit-history";
 import { RESET_REASON_PREFIX, undoableEditId } from "@/lib/bookings/undo-booking-edit";
 import {
@@ -147,7 +148,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           .eq("customer_id", booking.customer_id)
       : { data: null };
   const editCategory = serviceDefinition(booking.service_type).category;
-  const [{ data: editRows }, { data: actionRows }] = await Promise.all([
+  const [{ data: editRows }, { data: actionRows }, { data: emailRows }] = await Promise.all([
     admin
       .from("booking_edits")
       .select("id,actor_type,actor_id,reason,changes,undo_of,undone_at,created_at")
@@ -161,7 +162,33 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       // Edits and undos are shown from booking_edits, with their changes.
       .not("action", "in", "(edit_booking,undo_booking_edit,reset_booking)")
       .order("created_at", { ascending: false }),
+    admin
+      .from("email_log")
+      .select("id,subject,template,status,error,user_id,recipient_email,created_at")
+      .eq("booking_id", params.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
+  const emailUserIds = Array.from(
+    new Set((emailRows ?? []).map((row) => row.user_id as string | null).filter((id): id is string => Boolean(id))),
+  );
+  const { data: emailPeople } = emailUserIds.length
+    ? await admin.from("profiles").select("id,full_name,role").in("id", emailUserIds)
+    : { data: [] as Array<{ full_name: string | null; id: string; role: string | null }> };
+  const emailPeopleById = new Map((emailPeople ?? []).map((row) => [row.id as string, row]));
+  const emailEntries: EmailLogEntry[] = (emailRows ?? []).map((row) => {
+    const person = row.user_id ? emailPeopleById.get(row.user_id as string) : undefined;
+    return {
+      createdAt: row.created_at as string,
+      error: row.error as string | null,
+      id: row.id as string,
+      recipient: person
+        ? `${person.full_name || "Unknown"} (${person.role ?? "account"})`
+        : String(row.recipient_email ?? "Unknown"),
+      status: row.status as string,
+      subject: String(row.subject || row.template),
+    };
+  });
   const historyNames = await loadCleanerNames(
     admin,
     Array.from(
@@ -656,6 +683,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           hasCleaner={Boolean(booking.cleaner_id)}
           undoableId={undoableId}
         />
+        <BookingEmailLog entries={emailEntries} />
         <BookingActions
           allocatedCleaners={booking.allocated_cleaners ?? 1}
           bookingId={params.id}

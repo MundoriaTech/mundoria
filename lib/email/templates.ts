@@ -45,6 +45,7 @@ export type EmailTemplateId =
   | "customer.no_cleaner_found"
   | "customer.booking_incomplete"
   | "customer.checklist_confirmation"
+  | "customer.checklist_confirmation_reminder"
   | "customer.cleaner_checked_in"
   | "customer.cleaner_checked_out"
   | "customer.cleaner_en_route"
@@ -417,6 +418,19 @@ function resolveTemplate(
         preview: "Confirm your completed cleaning checklist.",
         subject: "Please confirm your cleaning checklist",
         title: "Confirm job completion",
+        tone: "warning",
+      };
+    case "customer.checklist_confirmation_reminder":
+      return {
+        body: `How did your clean go? Please confirm the checklist, or tell us if anything wasn't done. Your card will be charged ${
+          string(data.chargeLabel) || "soon"
+        }, so let us know before then if something needs putting right.`,
+        buttonHref: string(data.bookingUrl),
+        buttonLabel: "Confirm or report a problem",
+        cards: bookingCards(data, [{ label: "Card charged", value: data.chargeLabel }]),
+        preview: "Please confirm your clean, or tell us if anything wasn't done.",
+        subject: "Reminder: please confirm your clean",
+        title: "How did your clean go?",
         tone: "warning",
       };
     case "customer.booking_completed":

@@ -7,6 +7,7 @@ import { sendPushNotification } from "@/lib/notifications/send";
 import { scheduleNextDayCapture } from "@/lib/payments/lifecycle";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { bookingServiceName } from "@/lib/customer/services";
+import { logEmail } from "@/lib/email/log";
 
 export async function validateBookingGeofence({
   action,
@@ -301,7 +302,15 @@ function sendVisitEmail(
   template: "customer.cleaner_checked_in" | "customer.checklist_confirmation",
 ) {
   const customer = visit.customer;
-  if (!customer?.email || customer.notification_preferences?.email === false) {
+  if (!customer?.email) return false;
+  if (customer.notification_preferences?.email === false) {
+    void logEmail({
+      data: { bookingId },
+      error: "Customer has email notifications turned off.",
+      status: "skipped",
+      template,
+      to: customer.email,
+    });
     return false;
   }
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

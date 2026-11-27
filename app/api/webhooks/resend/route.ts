@@ -1,90 +1,77 @@
-import * as Sentry from "@sentry/nextjs";
+import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 
-import { handleInbound } from "@/lib/outreach/inbound";
-import { findLead, logLeadEvent, optOutLead } from "@/lib/outreach/leads";
-import { htmlToText, parseAddress, stripQuotedReply } from "@/lib/outreach/email-parse";
-import { verifySvixSignature } from "@/lib/outreach/webhook-signature";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export const dynamic = "force-dynamic";
-export const maxDuration = 60;
-
-type ResendEvent = {
-  data?: {
-    email_id?: string;
-    from?: string;
-    subject?: string;
-    to?: string[] | string;
-  };
-  type?: string;
+/** Later or worse news wins; a late "delivered" never hides a bounce. */
+const RANK: Record<string, number> = {
+  bounced: 4,
+  complained: 4,
+  delivered: 3,
+  delivery_delayed: 2,
+  failed: 1,
+  sent: 1,
+  skipped: 0,
 };
 
-type ReceivedEmail = {
-  from?: string;
-  html?: string | null;
-  id?: string;
-  subject?: string;
-  text?: string | null;
+const EVENTS: Record<string, string> = {
+  "email.bounced": "bounced",
+  "email.complained": "complained",
+  "email.delivered": "delivered",
+  "email.delivery_delayed": "delivery_delayed",
 };
 
-/**
- * Resend webhook: inbound replies (email.received) go to the AI; spam
- * complaints opt the lead out of email; bounces are logged on the lead.
- * Point a Resend webhook at {NEXT_PUBLIC_APP_URL}/api/webhooks/resend and put
- * its signing secret in RESEND_WEBHOOK_SECRET.
- */
-export async function POST(request: Request) {
-  const raw = await request.text();
-  if (!verifySvixSignature(raw, request.headers, process.env.RESEND_WEBHOOK_SECRET ?? "")) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-  }
-
-  let event: ResendEvent;
-  try {
-    event = JSON.parse(raw) as ResendEvent;
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  try {
-    if (event.type === "email.received" && event.data?.email_id) {
-      const email = await fetchReceivedEmail(event.data.email_id);
-      const { address, name } = parseAddress(email?.from ?? event.data.from ?? "");
-      const body = stripQuotedReply(email?.text || htmlToText(email?.html ?? ""));
-      if (address && body) {
-        await handleInbound({
-          body,
-          channel: "email",
-          from: address,
-          fromName: name,
-          providerId: event.data.email_id,
-          subject: email?.subject ?? event.data.subject,
-        });
-      }
-    } else if (event.type === "email.complained" || event.type === "email.bounced") {
-      const recipients = Array.isArray(event.data?.to) ? event.data?.to : event.data?.to ? [event.data.to] : [];
-      for (const recipient of recipients ?? []) {
-        const lead = await findLead({ email: parseAddress(recipient).address });
-        if (!lead) continue;
-        if (event.type === "email.complained") {
-          await optOutLead(lead, "email", "Marked our email as spam");
-        } else {
-          await logLeadEvent(lead.id, "email.bounced", "Email bounced; check the address");
-        }
-      }
-    }
-  } catch (error) {
-    Sentry.captureException(error);
-  }
-  return NextResponse.json({ ok: true });
+/** Resend signs webhooks the Svix way: HMAC-SHA256 of "id.timestamp.body". */
+function verified(request: Request, body: string) {
+  const secret = process.env.RESEND_WEBHOOK_SECRET?.trim();
+  if (!secret) return false;
+  const id = request.headers.get("svix-id");
+  const timestamp = request.headers.get("svix-timestamp");
+  const header = request.headers.get("svix-signature");
+  if (!id || !timestamp || !header) return false;
+  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 5 * 60) return false;
+  const key = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
+  const expected = createHmac("sha256", key).update(`${id}.${timestamp}.${body}`).digest();
+  return header.split(" ").some((part) => {
+    const [, signature] = part.split(",");
+    if (!signature) return false;
+    const given = Buffer.from(signature, "base64");
+    return given.length === expected.length && timingSafeEqual(given, expected);
+  });
 }
 
-async function fetchReceivedEmail(id: string): Promise<ReceivedEmail | null> {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return null;
-  const response = await fetch(`https://api.resend.com/emails/receiving/${encodeURIComponent(id)}`, {
-    headers: { Authorization: `Bearer ${key}` },
-  });
-  if (!response.ok) return null;
-  return (await response.json()) as ReceivedEmail;
+/** Delivery reports from Resend, recorded against email_log rows. */
+export async function POST(request: Request) {
+  const body = await request.text();
+  if (!verified(request, body)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+  const event = JSON.parse(body) as {
+    data?: { bounce?: { message?: string }; email_id?: string };
+    type?: string;
+  };
+  const status = event.type ? EVENTS[event.type] : undefined;
+  const messageId = event.data?.email_id;
+  if (!status || !messageId) return NextResponse.json({ ignored: true });
+
+  const admin = createAdminClient();
+  const { data: rows } = await admin
+    .from("email_log")
+    .select("id,status")
+    .eq("provider_message_id", messageId);
+  const toUpdate = (rows ?? []).filter((row) => (RANK[status] ?? 0) >= (RANK[String(row.status)] ?? 0));
+  if (toUpdate.length) {
+    await admin
+      .from("email_log")
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+        ...(status === "bounced" ? { error: event.data?.bounce?.message?.slice(0, 500) ?? "Bounced" } : {}),
+      })
+      .in(
+        "id",
+        toUpdate.map((row) => row.id),
+      );
+  }
+  return NextResponse.json({ updated: toUpdate.length });
 }
