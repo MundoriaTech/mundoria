@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CrmLink } from "@/components/analytics/crm-link";
@@ -70,50 +69,40 @@ export function PopularServices({ services }: { services: PopularService[] }) {
         ref={track}
       >
         {services.map((service, index) => (
-          <article
-            className="flex w-[78%] max-w-[300px] flex-none snap-start flex-col rounded-[18px] bg-[#f6f1e7] p-2.5 sm:w-[280px] sm:max-w-none"
+          <CrmLink
+            aria-label={`Book ${service.label}`}
+            className="group relative block h-[190px] w-[70%] max-w-[260px] flex-none snap-start overflow-hidden rounded-[16px] bg-[#1E1848] sm:h-[210px] sm:w-[240px] sm:max-w-none"
+            crmEvent="recommendation_click"
+            crmPayload={{ action: "Book now", item: service.label, service: service.type }}
             data-card
+            href={service.href}
             key={service.type}
           >
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[13px] bg-[#efe6d8]">
-              <Image
-                alt={service.label}
-                className="object-cover"
-                fill
-                priority={index < 2}
-                sizes="(max-width: 640px) 78vw, 280px"
-                src={service.image}
-              />
-            </div>
-            <div className="flex flex-1 flex-col px-2 pb-1.5 pt-3.5">
-              <h3 className="m-0 text-[17px] font-semibold leading-tight tracking-[-0.02em] text-[#2a2158]">
+            <Image
+              alt=""
+              className="object-cover transition duration-500 group-hover:scale-[1.05]"
+              fill
+              priority={index < 2}
+              sizes="(max-width: 640px) 70vw, 240px"
+              src={service.image}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0"
+              style={{ background: "linear-gradient(0deg,rgba(24,18,58,0.88) 0%,rgba(24,18,58,0.45) 32%,rgba(24,18,58,0) 58%)" }}
+            />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+              <span className="text-[16px] font-semibold leading-tight tracking-[-0.01em] text-white [text-wrap:balance]">
                 {service.label}
-              </h3>
-              <p className="m-0 mt-1.5 line-clamp-2 text-[14px] leading-5 text-[#5c5670]">
-                {service.description}
-              </p>
-              <div className="mt-auto flex flex-wrap gap-2 pt-4">
-                {service.pageHref ? (
-                  <Link
-                    className="inline-flex h-10 items-center justify-center rounded-full border border-[#2a2158] px-4 text-[13.5px] font-semibold text-[#2a2158] transition hover:bg-[#2a2158] hover:text-white"
-                    href={service.pageHref}
-                  >
-                    Read more
-                    <span className="sr-only"> about {service.label}</span>
-                  </Link>
-                ) : null}
-                <CrmLink
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-[#2a2158] px-4 text-[13.5px] font-semibold text-white transition hover:bg-[#3d3470]"
-                  crmEvent="recommendation_click"
-                  crmPayload={{ action: "Book now", item: service.label, service: service.type }}
-                  href={service.href}
-                >
-                  Book now
-                  <span className="sr-only"> {service.label}</span>
-                </CrmLink>
-              </div>
+              </span>
+              <span
+                aria-hidden
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#524096] shadow-sm transition group-hover:translate-x-0.5"
+              >
+                <Arrow direction="right" />
+              </span>
             </div>
-          </article>
+          </CrmLink>
         ))}
       </div>
     </section>
