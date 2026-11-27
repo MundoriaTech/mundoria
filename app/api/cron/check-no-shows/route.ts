@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { cancelExpiredReplacement } from "@/lib/bookings/no-show";
 import { isAuthorizedCron } from "@/lib/cron/auth";
 import { alertAdmins } from "@/lib/notifications/admin";
-import { sendPushNotification } from "@/lib/notifications/send";
+import { notifyCleanerDayOf } from "@/lib/notifications/cleaner-day-of";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: Request) {
@@ -95,12 +95,12 @@ async function alertLateCleaner(admin: ReturnType<typeof createAdminClient>, boo
     { booking_id: bookingId, cleaner_id: booking.cleaner_id },
   );
   if (booking.cleaner_id) {
-    await sendPushNotification(
-      booking.cleaner_id,
-      "Please check in",
-      `Your visit started at ${String(booking.scheduled_start_time).slice(0, 5)}. Tap "I have arrived" when you get there, or message Mundoria if you're delayed.`,
-      { booking_id: bookingId },
-    ).catch(() => undefined);
+    await notifyCleanerDayOf({
+      body: `Your visit started at ${String(booking.scheduled_start_time).slice(0, 5)}. Tap "I have arrived" when you get there, or message Mundoria if you're delayed.`,
+      bookingId,
+      cleanerId: booking.cleaner_id,
+      title: "Please check in",
+    });
   }
   await admin.from("matching_decisions").insert({
     booking_id: bookingId,

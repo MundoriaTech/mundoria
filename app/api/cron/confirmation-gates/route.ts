@@ -9,7 +9,7 @@ import {
   pruneEmergencyListConflicts,
 } from "@/lib/matching/emergency-list";
 import { alertAdmins } from "@/lib/notifications/admin";
-import { sendPushNotification } from "@/lib/notifications/send";
+import { notifyCleanerDayOf } from "@/lib/notifications/cleaner-day-of";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -90,12 +90,12 @@ export async function GET(request: Request) {
         { booking_id: booking.id, cleaner_id: booking.cleaner_id, gate: booking.confirmation_gate },
       ).catch(() => undefined);
       if (booking.cleaner_id) {
-        await sendPushNotification(
-          booking.cleaner_id,
-          "Please confirm your visit",
-          `You didn't confirm the visit on ${when}. Open the job and confirm, or message Mundoria if you can't make it.`,
-          { booking_id: booking.id },
-        ).catch(() => undefined);
+        await notifyCleanerDayOf({
+          body: `You didn't confirm your visit on ${when}. Open the job and confirm, or message Mundoria if you can't make it.`,
+          bookingId: booking.id,
+          cleanerId: booking.cleaner_id,
+          title: "Please confirm your visit",
+        });
       }
       failed.push(booking.id);
       continue;
@@ -117,18 +117,18 @@ export async function GET(request: Request) {
         })
         .eq("id", booking.id);
 
-      await sendPushNotification(
-        booking.cleaner_id,
-        next.gate === "t1"
-          ? "Confirm you're on the way"
-          : "Please confirm this booking",
-        next.gate === "t24"
-          ? "Confirm within the next 2 hours that you can still take this clean."
-          : next.gate === "t6"
-            ? "Reconfirm this clean, the window is shorter now."
-            : "Mark yourself on the way so the customer stays protected.",
-        { booking_id: booking.id, gate: next.gate },
-      );
+      const visitAt = `${booking.scheduled_date} at ${String(booking.scheduled_start_time).slice(0, 5)}`;
+      await notifyCleanerDayOf({
+        body:
+          next.gate === "t24"
+            ? `Please confirm within 2 hours that you can still do your visit on ${visitAt}.`
+            : next.gate === "t6"
+              ? `Your visit on ${visitAt} is coming up. Please reconfirm you're still coming.`
+              : `Your visit at ${String(booking.scheduled_start_time).slice(0, 5)} starts in about an hour. Open the job and tap Confirm, then I'm on my way when you set off.`,
+        bookingId: booking.id,
+        cleanerId: booking.cleaner_id,
+        title: next.gate === "t1" ? "Your visit starts in an hour" : "Please confirm your visit",
+      });
       opened.push(booking.id);
     }
   }
@@ -182,12 +182,12 @@ async function chaseMissingCheckouts(
     const done = new Set((sent ?? []).map((row) => row.decision as string));
 
     if (!done.has("checkout_reminder") && booking.cleaner_id) {
-      await sendPushNotification(
-        booking.cleaner_id,
-        "Don't forget to check out",
-        "Your booked time has ended. Tap \"I've finished\" on the job so the visit is completed and you're paid.",
-        { booking_id: booking.id },
-      ).catch(() => undefined);
+      await notifyCleanerDayOf({
+        body: "Your booked time has ended. Tap \"I've finished\" on the job so the visit is completed and you're paid.",
+        bookingId: booking.id,
+        cleanerId: booking.cleaner_id,
+        title: "Don't forget to check out",
+      });
       await admin.from("matching_decisions").insert({
         booking_id: booking.id,
         cleaner_id: booking.cleaner_id,
