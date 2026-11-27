@@ -1,5 +1,6 @@
 "use client";
 
+import { ONGOING_STATUSES } from "@/lib/customer/session-tabs";
 import { useState } from "react";
 
 import { CrmLink } from "@/components/analytics/crm-link";
@@ -11,10 +12,19 @@ import {
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { Booking } from "@/types/customer";
 
-type BookingsTab = "upcoming" | "past" | "cancelled";
+type BookingsTab = "upcoming" | "ongoing" | "past" | "cancelled";
+
+
+function tabFor(status: string): BookingsTab {
+  if (status === "cancelled") return "cancelled";
+  if (status === "completed") return "past";
+  if (ONGOING_STATUSES.includes(status)) return "ongoing";
+  return "upcoming";
+}
 
 const TABS: Array<{ id: BookingsTab; label: string }> = [
   { id: "upcoming", label: "Upcoming" },
+  { id: "ongoing", label: "Ongoing" },
   { id: "past", label: "Completed" },
   { id: "cancelled", label: "Cancelled" },
 ];
@@ -28,22 +38,17 @@ export function BookingsList({
 }) {
   const [tab, setTab] = useState<BookingsTab>(initialTab);
 
-  const filtered = bookings.filter((b) => {
-    if (tab === "cancelled") return b.status === "cancelled";
-    if (tab === "past") return b.status === "completed";
-    return !["completed", "cancelled"].includes(b.status);
-  });
+  const filtered = bookings.filter((b) => tabFor(b.status) === tab);
 
   const { page, pageItems, setPage, totalItems } = usePagedItems(filtered, PAGE_SIZES.app, tab);
 
-  const upcomingCount = bookings.filter((b) => !["completed", "cancelled"].includes(b.status)).length;
-  const completedCount = bookings.filter((b) => b.status === "completed").length;
-  const cancelledCount = bookings.filter((b) => b.status === "cancelled").length;
+  const countOf = (id: BookingsTab) => bookings.filter((b) => tabFor(b.status) === id).length;
 
   const counts: Record<BookingsTab, number> = {
-    upcoming: upcomingCount,
-    past: completedCount,
-    cancelled: cancelledCount,
+    cancelled: countOf("cancelled"),
+    ongoing: countOf("ongoing"),
+    past: countOf("past"),
+    upcoming: countOf("upcoming"),
   };
 
   return (
@@ -120,14 +125,16 @@ export function BookingsList({
             </svg>
           </div>
           <p style={{ fontSize: "17.4px", fontWeight: 700, color: "#1E1848", margin: 0 }}>
-            {tab === "cancelled" ? "No cancelled sessions" : tab === "past" ? "No completed sessions" : "Nothing scheduled yet"}
+            {tab === "cancelled" ? "No cancelled sessions" : tab === "past" ? "No completed sessions" : tab === "ongoing" ? "Nothing happening right now" : "Nothing scheduled yet"}
           </p>
           <p style={{ fontSize: "14.5px", color: "#6B6B70", marginTop: "6px" }}>
             {tab === "cancelled"
               ? "Cancelled sessions will appear here."
               : tab === "past"
                 ? "Completed cleans will appear here."
-                : "Book your first clean and your sessions will appear here."}
+                : tab === "ongoing"
+                  ? "When your cleaner is on the way or cleaning, the visit shows here."
+                  : "Book your first clean and your sessions will appear here."}
           </p>
           {tab === "upcoming" && (
             <CrmLink
