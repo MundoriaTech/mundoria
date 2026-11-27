@@ -151,6 +151,8 @@ export async function POST(request: Request) {
       category: incident.category,
       cleaner_id: user.id,
       entity_id: incident.id,
+      // Where an admin's notification opens.
+      href: `/admin/incidents/${incident.id}`,
       incident_id: incident.id,
       severity: incident.severity,
     };

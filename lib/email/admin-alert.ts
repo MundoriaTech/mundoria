@@ -90,9 +90,12 @@ const PLAYBOOK: Record<string, Playbook> = {
     next: "Check their documents and be ready for the call. Approve them only when identity, DBS and insurance look complete.",
   },
   cleaner_incident: {
-    button: "Open safety",
+    button: "Open the incident",
     heading: "A cleaner reported an incident",
-    href: (data) => adminPath("/admin/safety", data),
+    href: (data) => {
+      const id = str(data, "incident_id", "entity_id");
+      return adminPath(id ? `/admin/incidents/${id}` : "/admin/incidents", data);
+    },
     next: "Read the report and call the cleaner if this is urgent. If anyone is in danger, make sure emergency services have been contacted.",
   },
   cleaner_no_show: {
