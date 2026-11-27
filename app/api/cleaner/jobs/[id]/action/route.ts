@@ -7,6 +7,7 @@ import { getDistanceInMetres } from "@/lib/maps/distance";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { sendPushNotification } from "@/lib/notifications/send";
+import { enRouteWindowMessage } from "@/lib/bookings/schedule";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { bookingServiceName } from "@/lib/customer/services";
 
@@ -31,7 +32,7 @@ export async function POST(
   const admin = createAdminClient();
   const { data: booking } = await admin
     .from("bookings")
-    .select("status,address:addresses(latitude,longitude)")
+    .select("status,scheduled_date,scheduled_start_time,address:addresses(latitude,longitude)")
     .eq("id", params.id)
     .eq("cleaner_id", user.id)
     .single();
@@ -43,6 +44,13 @@ export async function POST(
     : booking.address;
 
   if (parsed.data.action === "en_route") {
+    const tooEarly = enRouteWindowMessage({
+      scheduledDate: booking.scheduled_date,
+      scheduledStartTime: booking.scheduled_start_time,
+    });
+    if (booking.status === "confirmed" && tooEarly) {
+      return NextResponse.json({ error: tooEarly }, { status: 409 });
+    }
     if (booking.status !== "confirmed") {
       return NextResponse.json(
         {

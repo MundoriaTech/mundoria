@@ -1,3 +1,4 @@
+import { bookingStartUtc } from "@/lib/payments/uk-schedule";
 import {
   cancellationFeePence,
   DEFAULT_FREE_CANCEL_HOURS,
@@ -133,4 +134,37 @@ export function canCustomerReschedule({
   return (
     hoursUntilBookingStart(scheduledDate, scheduledStartTime) >= cutoffHours
   );
+}
+
+/** "I'm on my way" opens this long before the visit's UK start time. */
+export const EN_ROUTE_LEAD_HOURS = 2;
+
+/**
+ * Why the cleaner can't set off yet, or null when they can. Uses the visit's
+ * UK start time, whatever time zone the phone is in.
+ */
+export function enRouteWindowMessage({
+  now = Date.now(),
+  scheduledDate,
+  scheduledStartTime,
+}: {
+  now?: number;
+  scheduledDate: string;
+  scheduledStartTime: string;
+}) {
+  const start = bookingStartUtc(scheduledDate, scheduledStartTime);
+  if (!start) return null;
+  const opensAt = start.getTime() - EN_ROUTE_LEAD_HOURS * 60 * 60 * 1000;
+  if (now >= opensAt) return null;
+  const [h, m] = String(scheduledStartTime).slice(0, 5).split(":").map(Number);
+  const minutes = (((h * 60 + m - EN_ROUTE_LEAD_HOURS * 60) % 1440) + 1440) % 1440;
+  const clock = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  const sameDay = now >= start.getTime() - 24 * 60 * 60 * 1000;
+  const day = new Date(`${scheduledDate}T12:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+    weekday: "short",
+  });
+  return `Available from ${clock}${sameDay ? "" : ` on ${day}`}, ${EN_ROUTE_LEAD_HOURS} hours before the visit.`;
 }

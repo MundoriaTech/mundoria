@@ -18,7 +18,7 @@ import { GeoapifyMapView } from "@/components/shared/geoapify-map-view";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
 import { safetyAlertAllowed } from "@/lib/bookings/safety-alert-shared";
-import { checkInWindowMessage } from "@/lib/bookings/schedule";
+import { checkInWindowMessage, enRouteWindowMessage } from "@/lib/bookings/schedule";
 import { bookingServiceName } from "@/lib/customer/services";
 import { createBrowserClient } from "@/lib/supabase/client";
 import type { CleanerJob } from "@/types/cleaner";
@@ -64,6 +64,16 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
   const [job, setJob] = useState(initialJob);
   const [error, setError] = useState<string | null>(null);
   const [locationProblem, setLocationProblem] = useState<string | null>(null);
+  const [clockNow, setClockNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockNow(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const enRouteMessage = enRouteWindowMessage({
+    now: clockNow,
+    scheduledDate: job.scheduled_date,
+    scheduledStartTime: job.scheduled_start_time,
+  });
   const [working, setWorking] = useState(false);
   const [showSafety, setShowSafety] = useState(false);
   const [locationFailed, setLocationFailed] = useState(false);
@@ -395,9 +405,16 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
               it&apos;s locked in.
             </p>
           ) : null}
+          {job.status === "confirmed" && enRouteMessage ? (
+            <p className="w-full text-sm text-muted-foreground">{enRouteMessage}</p>
+          ) : null}
           {job.status === "confirmed" ? (
             <>
-              <Button disabled={working} onClick={() => void action("en_route")}>
+              <Button
+                disabled={working || Boolean(enRouteMessage)}
+                onClick={() => void action("en_route")}
+                title={enRouteMessage ?? undefined}
+              >
                 <Navigation className="mr-2 h-4 w-4" />I&apos;m On My Way
               </Button>
               <Button
