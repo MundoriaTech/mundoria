@@ -172,48 +172,31 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
 
   return (
     <form className="flex flex-col gap-4 sm:gap-5" onSubmit={saveProfile}>
-      {/* Profile banner, in the dashboard's location-card style */}
-      <section
-        className="relative overflow-hidden rounded-[22px] p-5 sm:p-6"
-        style={{ background: "#1E1848" }}
-      >
-        <svg aria-hidden className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <pattern height="22" id="profile-dots" patternUnits="userSpaceOnUse" width="22">
-              <circle cx="1.5" cy="1.5" fill="rgba(255,255,255,0.07)" r="1.5" />
-            </pattern>
-          </defs>
-          <rect fill="url(#profile-dots)" height="100%" width="100%" />
-        </svg>
-        <div
-          aria-hidden
-          className="pointer-events-none absolute rounded-full"
-          style={{ width: "260px", height: "260px", left: "-60px", top: "-90px", background: "radial-gradient(circle,rgba(130,113,177,0.4) 0%,transparent 70%)" }}
-        />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-          <AvatarUpload
-            currentUrl={profile.avatar_url}
-            onUpload={(url) => {
-              setProfile((c) => ({ ...c, avatar_url: url }));
-              success({ kind: "updated", title: "Photo updated", note: "Looking sharp." });
-            }}
-            userId={profile.id}
-          />
-          <div className="min-w-0">
-            <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#C69C66]">Your account</p>
-            <p className="m-0 mt-1 break-words text-[22px] font-bold leading-tight tracking-[-0.01em] text-white sm:text-[26px]">
+      {/* Profile header: photo on the left, who you are on the right */}
+      <section className="rounded-[22px] bg-white p-4 sm:p-5">
+        <div className="grid gap-4 rounded-[18px] bg-[#F3F4F6] p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-8">
+          <div className="min-w-0 lg:order-2">
+            <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70">Your account</p>
+            <p className="m-0 mt-1.5 break-words text-[24px] font-semibold leading-tight tracking-[-0.02em] text-[#1E1848] sm:text-[28px]">
               {profile.full_name}
             </p>
-            <p className="m-0 mt-1 break-all text-[15px] text-white/75">{profile.email}</p>
+            <p className="m-0 mt-1 break-all text-[15px] text-[#5F5F66]">{profile.email}</p>
             {since ? (
-              <span
-                className="mt-3 inline-flex items-center gap-2 rounded-full text-[13px] font-semibold text-white/85"
-                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", padding: "5px 12px 5px 8px" }}
-              >
+              <span className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[13px] font-medium text-[#5F5F66]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#8B7FC0]" />
                 Customer since {since}
               </span>
             ) : null}
+          </div>
+          <div className="min-w-0 lg:order-1">
+            <AvatarUpload
+              currentUrl={profile.avatar_url}
+              onUpload={(url) => {
+                setProfile((c) => ({ ...c, avatar_url: url }));
+                success({ kind: "updated", title: "Photo updated", note: "Looking sharp." });
+              }}
+              userId={profile.id}
+            />
           </div>
         </div>
       </section>
@@ -290,23 +273,15 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
         </div>
 
         <div className="flex flex-col gap-4 sm:gap-5">
-          {/* Refer a friend, in the dashboard's copper service-card style */}
+          {/* Refer a friend: kept quiet, no bright colours */}
           <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
             <SectionBanner title="Refer a friend" />
-            <div
-              className="relative overflow-hidden rounded-[14px] p-5 text-white"
-              style={{ background: "linear-gradient(145deg,#B85C38 0%,#D47848 100%)" }}
-            >
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0"
-                style={{ background: "radial-gradient(ellipse at 15% 15%,rgba(255,255,255,0.18) 0%,transparent 55%)" }}
-              />
-              <p className="relative m-0 text-[15px] font-semibold">You both get £10</p>
-              <div className="relative mt-3 flex items-center justify-between gap-3 rounded-[12px] bg-black/20 px-4 py-3">
-                <span className="truncate font-mono text-[22px] font-bold tracking-[0.12em]">{profile.referral_code}</span>
+            <div className="rounded-[14px] bg-[#F3F4F6] p-4">
+              <p className="m-0 text-[15px] font-semibold text-[#1E1848]">You both get £10</p>
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-[12px] bg-white px-4 py-3">
+                <span className="truncate font-mono text-[19px] font-semibold tracking-[0.12em] text-[#1E1848]">{profile.referral_code}</span>
                 <button
-                  className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 text-[13.5px] font-semibold text-[#B85C38] transition hover:bg-[#FFF1E8]"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-[#D4CCEA] px-3.5 text-[13.5px] font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
                   onClick={copyCode}
                   type="button"
                 >
@@ -314,7 +289,7 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
                   Copy
                 </button>
               </div>
-              <p className="relative m-0 mt-3 text-[13px] leading-[1.45] text-white/85">
+              <p className="m-0 mt-3 text-[13px] leading-[1.45] text-[#6B6B70]">
                 Friends get £10 off their first booking. You get a £10 voucher after their first completed clean, for up to 10 active referrals.
               </p>
             </div>
