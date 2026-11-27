@@ -35,9 +35,11 @@ export function matchingQueueFor(
   booking: AdminBooking,
   today: string,
 ): MatchingQueueId | null {
+  // A no-show has lost its cleaner, so it belongs with the bookings that need
+  // one (its card still shows "No-show" as the reason).
+  if (booking.status === "no_show") return "needs_cleaner";
   if (
     booking.status === "disputed" ||
-    booking.status === "no_show" ||
     booking.status === "awaiting_payment" ||
     (booking.status === "cancelled" && booking.payment_status === "held") ||
     Boolean(booking.payment_preauth_failed_at)
