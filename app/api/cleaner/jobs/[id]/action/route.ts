@@ -64,6 +64,21 @@ export async function POST(
   }
 
   const { latitude, longitude } = parsed.data;
+  // A manual review can be asked for even when the phone gives no location.
+  if (
+    parsed.data.action === "override" &&
+    (latitude === undefined || longitude === undefined)
+  ) {
+    return requestOverride({
+      bookingId: params.id,
+      cleanerId: user.id,
+      distance: null,
+      latitude: null,
+      longitude: null,
+      reason: parsed.data.reason ?? "Cleaner's phone could not share its location",
+      status: booking.status,
+    });
+  }
   if (latitude === undefined || longitude === undefined) {
     return NextResponse.json(
       { error: "GPS coordinates are required." },
@@ -99,30 +114,52 @@ export async function POST(
       { status: 400 },
     );
   }
-  const eventType = booking.status === "in_progress" ? "checkout" : "checkin";
   const distance = getDistanceInMetres(
     latitude,
     longitude,
     Number(address.latitude),
     Number(address.longitude),
   );
+  return requestOverride({
+    bookingId: params.id,
+    cleanerId: user.id,
+    distance,
+    latitude,
+    longitude,
+    reason: parsed.data.reason ?? "Cleaner requested manual location review",
+    status: booking.status,
+  });
+}
+
+/** Ask an admin to accept arrival or finish, with or without a location. */
+async function requestOverride(input: {
+  bookingId: string;
+  cleanerId: string;
+  distance: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  reason: string;
+  status: string;
+}) {
+  const admin = createAdminClient();
+  const eventType = input.status === "in_progress" ? "checkout" : "checkin";
   const { data: existing } = await admin
     .from("location_override_requests")
     .select("id")
-    .eq("booking_id", params.id)
-    .eq("cleaner_id", user.id)
+    .eq("booking_id", input.bookingId)
+    .eq("cleaner_id", input.cleanerId)
     .eq("event_type", eventType)
     .eq("status", "pending")
     .maybeSingle();
   if (!existing) {
     await admin.from("location_override_requests").insert({
-      booking_id: params.id,
-      cleaner_id: user.id,
-      distance_meters: distance,
+      booking_id: input.bookingId,
+      cleaner_id: input.cleanerId,
+      distance_meters: input.distance,
       event_type: eventType,
-      latitude,
-      longitude,
-      reason: parsed.data.reason ?? "Cleaner requested manual location review",
+      latitude: input.latitude,
+      longitude: input.longitude,
+      reason: input.reason,
     });
     await admin
       .from("bookings")
@@ -131,21 +168,26 @@ export async function POST(
           ? { checkin_override_requested: true }
           : { checkout_override_requested: true },
       )
-      .eq("id", params.id);
+      .eq("id", input.bookingId);
+    const where =
+      input.distance == null
+        ? "Their phone couldn't share its location."
+        : `Their phone put them about ${Math.round(input.distance)} metres from the home.`;
     await alertAdmins(
       "geofence_override",
       eventType === "checkin"
         ? "A cleaner asked you to accept their arrival"
         : "A cleaner asked you to accept that they have finished",
-      `Their phone put them about ${Math.round(distance)} metres from the home. Please decide whether to accept this or call them first.`,
+      `${where} Please decide whether to accept this or call them first.`,
       {
-        booking_id: params.id,
-        "Rough distance": `About ${Math.round(distance)} metres`,
+        booking_id: input.bookingId,
+        "Rough distance":
+          input.distance == null ? "No location shared" : `About ${Math.round(input.distance)} metres`,
       },
     );
   }
   return NextResponse.json({
-    distance,
+    distance: input.distance,
     overrideRequested: true,
     success: true,
   });

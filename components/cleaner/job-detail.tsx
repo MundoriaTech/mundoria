@@ -66,6 +66,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
   const [locationProblem, setLocationProblem] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [showSafety, setShowSafety] = useState(false);
+  const [locationFailed, setLocationFailed] = useState(false);
   const [overrideCoords, setOverrideCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -133,7 +134,8 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     setError(null);
     let latitude = overrideCoords?.latitude;
     let longitude = overrideCoords?.longitude;
-    if (value !== "en_route" && !overrideCoords) {
+    // A manual review is sent even without a location; everything else needs one.
+    if (value !== "en_route" && value !== "override" && !overrideCoords) {
       try {
         const coords = await getCurrentCoords();
         latitude = coords.latitude;
@@ -144,6 +146,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
             ? locationError.message
             : "We couldn't read your location. Check Location is on and try again.",
         );
+        setLocationFailed(true);
         setWorking(false);
         return;
       }
@@ -188,6 +191,7 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     if (value === "override") {
       setError("Manual override requested. An admin will review your location.");
       setOverrideCoords(null);
+      setLocationFailed(false);
       return;
     }
     setJob((current) => ({
@@ -353,14 +357,16 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
       {error ? (
         <div className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
           <div className="flex gap-2"><ShieldAlert className="h-5 w-5" />{error}</div>
-          {overrideCoords ? (
+          {overrideCoords || locationFailed ? (
             <Button
               className="mt-3"
               onClick={() => void action("override")}
               size="sm"
               variant="outline"
             >
-              Request manual override
+              {job.status === "in_progress"
+                ? "Ask Mundoria to accept that I've finished"
+                : "Ask Mundoria to accept my arrival"}
             </Button>
           ) : null}
         </div>

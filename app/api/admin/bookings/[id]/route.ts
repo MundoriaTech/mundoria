@@ -101,8 +101,9 @@ export async function POST(
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    const latitude = request ? Number(request.latitude) : null;
-    const longitude = request ? Number(request.longitude) : null;
+    // A request made without a location has none to record.
+    const latitude = request?.latitude != null ? Number(request.latitude) : null;
+    const longitude = request?.longitude != null ? Number(request.longitude) : null;
     if (eventType === "checkin") {
       if (booking.status === "confirmed") {
         // The cleaner app shows "Start cleaning" for en-route visits.
