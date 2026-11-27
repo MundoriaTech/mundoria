@@ -452,7 +452,7 @@ export function CustomerShell({
             </main>
           </div>
         ) : (
-          <div className="px-4 py-5 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+          <div className="min-h-[calc(100vh-3.5rem)] bg-[#F3F4F6] px-3 py-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:px-4 sm:py-5">
             {backLink ? (
               <DashboardBackLink
                 className="mb-3 -ml-1"

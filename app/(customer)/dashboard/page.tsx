@@ -4,6 +4,12 @@ import { CrmLink } from "@/components/analytics/crm-link";
 import { CrmPageView } from "@/components/analytics/crm-page-view";
 import { LiveDashboardRefresh } from "@/components/shared/live-dashboard-refresh";
 import { CalendarTile } from "@/components/customer/dashboard/calendar-tile";
+import {
+  pillOutline,
+  pillPrimary,
+  pillPrimaryStyle,
+  SectionBanner,
+} from "@/components/customer/dashboard/section-banner";
 import { bookingWatchesFor } from "@/lib/dashboard/live-refresh";
 import { getCustomerBookings } from "@/lib/customer/server";
 import { createServerClient } from "@/lib/supabase/server";
@@ -77,79 +83,28 @@ function TimeTile({ booking }: { booking: Booking | null }) {
   const ampm = hasTime ? (hours >= 12 ? "PM" : "AM") : null;
 
   return (
-    <div
-      className="relative h-[238px] rounded-[18px] bg-[#F3F4F6]"
-      style={{ minWidth: "240px", flex: "1 1 240px" }}
-    >
-      <p className="absolute left-5 top-5 m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70">
+    <div className="flex h-full min-h-[210px] flex-col rounded-[18px] bg-[#F3F4F6] p-5">
+      <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70">
         Arrival time
       </p>
       {hasTime ? (
-        <>
-          <svg
-            className="absolute"
-            height={180}
-            style={{ left: "50%", top: "29px", transform: "translateX(-50%)" }}
-            viewBox="0 0 180 180"
-            width={180}
-          >
-            <circle
-              cx="90"
-              cy="90"
-              fill="none"
-              r="73"
-              stroke="#2A2A2E"
-              strokeDasharray="1.6 5.1"
-              strokeWidth="9"
-              transform="rotate(-90 90 90)"
-            />
-            <circle
-              cx="90"
-              cy="90"
-              fill="none"
-              r="73"
-              stroke="#F3F4F6"
-              strokeDasharray={`${L + 6} ${C}`}
-              strokeWidth="12"
-              transform="rotate(-90 90 90)"
-            />
-            <circle
-              cx="90"
-              cy="90"
-              fill="none"
-              r="73"
-              stroke="#7262A9"
-              strokeDasharray={`${L} ${C}`}
-              strokeLinecap="round"
-              strokeWidth="18"
-              transform="rotate(-90 90 90)"
-            />
+        <div className="relative mx-auto mt-2 aspect-square w-full max-w-[164px] flex-none">
+          <svg aria-hidden className="absolute inset-0 h-full w-full" viewBox="0 0 180 180">
+            <circle cx="90" cy="90" fill="none" r="73" stroke="#2A2A2E" strokeDasharray="1.6 5.1" strokeWidth="9" transform="rotate(-90 90 90)" />
+            <circle cx="90" cy="90" fill="none" r="73" stroke="#F3F4F6" strokeDasharray={`${L + 6} ${C}`} strokeWidth="12" transform="rotate(-90 90 90)" />
+            <circle cx="90" cy="90" fill="none" r="73" stroke="#7262A9" strokeDasharray={`${L} ${C}`} strokeLinecap="round" strokeWidth="18" transform="rotate(-90 90 90)" />
           </svg>
-          <div
-            className="absolute left-0 right-0 flex items-baseline justify-center gap-[2px]"
-            style={{ top: "105px" }}
-          >
-            <span
-              style={{
-                fontSize: "28.8px",
-                lineHeight: "30px",
-                fontWeight: 600,
-                letterSpacing: "-0.02em",
-              }}
-            >
+          <p className="absolute inset-0 m-0 flex items-center justify-center gap-[2px]">
+            <span className="text-[26px] font-semibold tracking-[-0.02em] sm:text-[28px]">
               {h}:{m}
             </span>
-            <span style={{ fontSize: "13.5px", fontWeight: 600 }}>{ampm}</span>
-          </div>
-        </>
+            <span className="text-[13px] font-semibold">{ampm}</span>
+          </p>
+        </div>
       ) : (
-        <div className="absolute inset-x-5 top-[100px] text-center">
-          <p className="m-0 text-[17px] font-semibold text-[#5F5F66]">
-            No upcoming session
-          </p>
-          <p className="mt-2 m-0 text-[13px] text-[#6f6a82]">
-            Book a clean to see your arrival time
-          </p>
+        <div className="my-auto text-center">
+          <p className="m-0 text-[17px] font-semibold text-[#5F5F66]">No upcoming session</p>
+          <p className="m-0 mt-2 text-[13px] text-[#6f6a82]">Book a clean to see your arrival time</p>
         </div>
       )}
     </div>
@@ -164,11 +119,10 @@ function LocationTile({ booking }: { booking: Booking | null }) {
 
   return (
     <div
-      className="relative h-[238px] overflow-hidden rounded-[18px]"
-      style={{ minWidth: "240px", flex: "1 1 240px", background: "#1E1848" }}
+      className="relative flex h-full min-h-[210px] flex-col overflow-hidden rounded-[18px] p-5"
+      style={{ background: "#1E1848" }}
     >
-      {/* dot-grid background */}
-      <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
+      <svg aria-hidden className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
         <defs>
           <pattern id="dot-grid" width="22" height="22" patternUnits="userSpaceOnUse">
             <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(255,255,255,0.07)" />
@@ -176,72 +130,53 @@ function LocationTile({ booking }: { booking: Booking | null }) {
         </defs>
         <rect width="100%" height="100%" fill="url(#dot-grid)" />
       </svg>
-
-      {/* glow */}
       <div
+        aria-hidden
         className="pointer-events-none absolute rounded-full"
         style={{ width: "200px", height: "200px", left: "-40px", top: "-60px", background: "radial-gradient(circle,rgba(130,113,177,0.35) 0%,transparent 70%)" }}
       />
-
-      {/* decorative location pin */}
-      <svg
-        className="absolute opacity-10"
-        fill="none"
-        height={120}
-        style={{ right: "-18px", bottom: "-18px" }}
-        viewBox="0 0 100 120"
-        width={100}
-      >
+      <svg aria-hidden className="absolute opacity-10" fill="none" height={120} style={{ right: "-18px", bottom: "-18px" }} viewBox="0 0 100 120" width={100}>
         <path d="M50 10C31.2 10 16 25.2 16 44c0 24 34 66 34 66s34-42 34-66c0-18.8-15.2-34-34-34z" fill="#ffffff" />
         <circle cx="50" cy="44" fill="#1E1848" r="13" />
       </svg>
 
-      {/* content */}
-      <div className="absolute left-5 right-5" style={{ top: "32px" }}>
-        <div className="mb-3 flex items-center gap-2">
-          <span
-            className="flex items-center justify-center rounded-[6px]"
-            style={{ width: "24px", height: "24px", background: "rgba(255,255,255,0.12)" }}
-          >
-            <svg fill="none" height={14} stroke="#C69C66" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}>
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </span>
-          <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C69C66" }}>Service location</span>
-        </div>
-
-        {hasAddress ? (
-          <div>
-            {line1 && (
-              <p style={{ fontSize: "17.4px", fontWeight: 700, color: "#FFFFFF", lineHeight: "20px", letterSpacing: "-0.01em", margin: 0 }}>{line1}</p>
-            )}
-            {postcode && (
-              <p style={{ fontSize: "17.4px", fontWeight: 400, color: "rgba(255,255,255,0.7)", lineHeight: "22px", margin: 0 }}>{postcode}</p>
-            )}
-            {city && (
-              <div
-                className="mt-3 inline-flex items-center gap-2 rounded-full"
-                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", padding: "5px 12px 5px 8px" }}
-              >
-                <span className="rounded-full bg-[#524096]" style={{ width: "6px", height: "6px", flexShrink: 0 }} />
-                <span style={{ fontSize: "13.5px", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{city}</span>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div>
-            <p style={{ fontSize: "17.4px", fontWeight: 700, color: "rgba(255,255,255,0.4)", lineHeight: "22px", margin: 0 }}>No address set</p>
-            <a
-              href="/addresses"
-              style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "12px", fontSize: "13.5px", fontWeight: 600, color: "#C69C66", textDecoration: "none" }}
-            >
-              Add a location
-              <svg fill="none" height={14} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-            </a>
-          </div>
-        )}
+      <div className="relative flex items-center gap-2">
+        <span className="flex h-6 w-6 items-center justify-center rounded-[6px]" style={{ background: "rgba(255,255,255,0.12)" }}>
+          <svg fill="none" height={14} stroke="#C69C66" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}>
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+        </span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#C69C66]">Service location</span>
       </div>
+
+      {hasAddress ? (
+        <div className="relative mt-4 max-w-[90%]">
+          {line1 ? (
+            <p className="m-0 line-clamp-3 break-words text-[17px] font-bold leading-[1.3] tracking-[-0.01em] text-white">{line1}</p>
+          ) : null}
+          {postcode ? (
+            <p className="m-0 mt-1 text-[16px] leading-[1.35] text-white/70">{postcode}</p>
+          ) : null}
+          {city ? (
+            <span
+              className="mt-3 inline-flex items-center gap-2 rounded-full"
+              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", padding: "5px 12px 5px 8px" }}
+            >
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8B7FC0]" />
+              <span className="text-[13.5px] font-semibold text-white/85">{city}</span>
+            </span>
+          ) : null}
+        </div>
+      ) : (
+        <div className="relative mt-4">
+          <p className="m-0 text-[17px] font-bold text-white/40">No address set</p>
+          <a className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-[#C69C66] no-underline" href="/addresses">
+            Add a location
+            <svg fill="none" height={14} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+      )}
     </div>
   );
 }
@@ -250,7 +185,7 @@ function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
   const Icon = service.Icon;
   return (
     <CrmLink
-      className="group relative block min-w-[min(100%,280px)] shrink-0 overflow-hidden rounded-[14px] transition hover:brightness-110 sm:min-w-[300px]"
+      className="group relative block h-[150px] overflow-hidden rounded-[14px] transition hover:brightness-110 sm:h-[190px] xl:h-[210px]"
       crmEvent="recommendation_click"
       crmPayload={{
         action: "Book now",
@@ -258,15 +193,14 @@ function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
         service: service.label,
       }}
       href={service.href}
-      style={{ height: "220px", flex: "1 1 280px", maxWidth: "360px", background: service.bg, boxSizing: "border-box" }}
+      style={{ background: service.bg }}
     >
-      {/* Subtle radial highlight */}
       <div
+        aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at 15% 15%,rgba(255,255,255,0.14) 0%,transparent 55%)" }}
       />
-      {/* Dot-grid texture */}
-      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]" preserveAspectRatio="xMidYMid slice">
+      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]" preserveAspectRatio="xMidYMid slice">
         <defs>
           <pattern height="22" id={`dot-${service.label}`} patternUnits="userSpaceOnUse" width="22">
             <circle cx="2" cy="2" fill="white" r="1.5" />
@@ -274,27 +208,27 @@ function ServiceCard({ service }: { service: (typeof SERVICES)[number] }) {
         </defs>
         <rect fill={`url(#dot-${service.label})`} height="100%" width="100%" />
       </svg>
-      {/* Large decorative icon */}
       <div
+        aria-hidden
         className="pointer-events-none absolute opacity-[0.13]"
-        style={{ right: "-20px", bottom: "-20px", transform: "scale(3.6)", transformOrigin: "right bottom" }}
+        style={{ right: "-20px", bottom: "-20px", transform: "scale(3.2)", transformOrigin: "right bottom" }}
       >
         <Icon />
       </div>
-      {/* Top badge */}
       <div
-        className="absolute left-0 top-0 flex items-center gap-3"
-        style={{ height: "52px", paddingLeft: "18px", paddingRight: "24px", background: "rgba(0,0,0,0.22)", backdropFilter: "blur(6px)", borderRadius: "0 0 14px 0", boxSizing: "border-box" }}
+        className="absolute left-0 top-0 flex h-[48px] items-center gap-2.5 pl-4 pr-5 sm:h-[52px] sm:gap-3 sm:pl-[18px] sm:pr-6"
+        style={{ background: "rgba(0,0,0,0.22)", backdropFilter: "blur(6px)", borderRadius: "0 0 14px 0" }}
       >
-        <Icon />
-        <span style={{ fontSize: "17.4px", fontWeight: 700, color: "#FFFFFF" }}>{service.label}</span>
+        <span className="flex h-8 w-8 items-center justify-center [&>svg]:h-8 [&>svg]:w-8 sm:h-10 sm:w-10 sm:[&>svg]:h-10 sm:[&>svg]:w-10">
+          <Icon />
+        </span>
+        <span className="text-[16px] font-bold text-white sm:text-[17px]">{service.label}</span>
       </div>
-      {/* Bottom CTA strip */}
       <div
         className="absolute bottom-0 left-0 right-0 px-5 pb-4 pt-10"
         style={{ background: "linear-gradient(0deg,rgba(0,0,0,0.38) 0%,transparent 100%)" }}
       >
-        <span style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>Book now →</span>
+        <span className="text-[14px] font-semibold text-white/85">Book now →</span>
       </div>
     </CrmLink>
   );
@@ -329,7 +263,7 @@ export default async function CustomerDashboardPage() {
   const next = current ?? upcoming[0] ?? null;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 sm:gap-5">
       <CrmPageView customerId={user!.id} event="dashboard_view" />
       <LiveDashboardRefresh
         scope={`customer-dashboard-${user!.id}`}
@@ -337,50 +271,32 @@ export default async function CustomerDashboardPage() {
       />
 
       {/* Upcoming Cleaning */}
-      <section className="flex flex-col gap-5 rounded-[22px] bg-white p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-5">
-          <div
-            className="relative flex h-[70px] flex-1 items-center overflow-hidden rounded-[14px] px-6"
-            style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
-          >
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
-            />
-            <h2
-              className="relative m-0 font-semibold leading-none text-white"
-              style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}
-            >
-              {current ? "Current Session" : "Upcoming Cleaning"}
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-4">
+      <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:gap-5 sm:p-5">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:gap-4">
+          <SectionBanner
+            className="xl:flex-1"
+            title={current ? "Current Session" : "Upcoming Cleaning"}
+          />
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap xl:flex-nowrap">
             <CrmLink
-              className="flex items-center justify-center gap-3 rounded-full font-semibold text-white transition"
+              className={`${pillPrimary} col-span-2`}
               crmEvent="book_session_click"
               crmPayload={{ action: "Book a Session", customer_id: user!.id }}
               href="/booking/new?fresh=1&returnTo=/dashboard"
-              style={{
-                height: "57px",
-                padding: "0 24px",
-                fontSize: "17.4px",
-                background: "linear-gradient(90deg,#524096 0%,#8072B1 100%)",
-                whiteSpace: "nowrap",
-              }}
+              style={pillPrimaryStyle}
             >
-              <svg fill="none" height={24} stroke="#fff" strokeLinecap="round" strokeWidth={1.8} viewBox="0 0 24 24" width={24}>
+              <svg aria-hidden fill="none" height={20} stroke="#fff" strokeLinecap="round" strokeWidth={2} viewBox="0 0 24 24" width={20}>
                 <path d="M5 12h14M12 5v14" />
               </svg>
               Book a Session
             </CrmLink>
             <CrmLink
-              className="flex items-center justify-center gap-3 rounded-full font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+              className={`${pillOutline} ${next ? "" : "col-span-2"}`}
               crmEvent="view_sessions_click"
               crmPayload={{ action: "View Sessions", customer_id: user!.id }}
               href="/bookings"
-              style={{ height: "57px", padding: "0 24px", fontSize: "17.4px", border: "2px solid #524096", whiteSpace: "nowrap" }}
             >
-              <svg fill="none" height={26} stroke="#524096" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} viewBox="0 0 24 24" width={26}>
+              <svg aria-hidden fill="none" height={20} stroke="#524096" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} viewBox="0 0 24 24" width={20}>
                 <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5M16 2v4M8 2v4M3 10h5" />
                 <circle cx="16" cy="16" r="6" />
                 <path d="M17.5 17.5 16 16.3V14" />
@@ -389,7 +305,7 @@ export default async function CustomerDashboardPage() {
             </CrmLink>
             {next ? (
               <CrmLink
-                className="flex items-center justify-center gap-3 rounded-full font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+                className={pillOutline}
                 crmEvent="booking_request_view"
                 crmPayload={{
                   action: "View request",
@@ -412,7 +328,6 @@ export default async function CustomerDashboardPage() {
                       .join(", ") || null,
                 }}
                 href={`/booking/${next.id}`}
-                style={{ height: "57px", padding: "0 24px", fontSize: "17.4px", border: "2px solid #524096", whiteSpace: "nowrap" }}
               >
                 {current ? "View session" : "View request"}
               </CrmLink>
@@ -431,31 +346,19 @@ export default async function CustomerDashboardPage() {
             Your cleaner is on the way.
           </p>
         ) : null}
-        <div className="flex flex-wrap gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <CalendarTile booking={next} />
           <TimeTile booking={next} />
-          <LocationTile booking={next} />
+          <div className="sm:col-span-2 xl:col-span-1">
+            <LocationTile booking={next} />
+          </div>
         </div>
       </section>
 
       {/* Popular Services */}
-      <section className="flex flex-col gap-5 rounded-[22px] bg-white p-5">
-        <div
-          className="relative flex h-[70px] items-center overflow-hidden rounded-[14px] px-6"
-          style={{ background: "linear-gradient(90deg,#7F71B1 0%,#6A5BA6 55%,#524096 100%)" }}
-        >
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.07) 0 70px,rgba(255,255,255,0) 70px 140px)" }}
-          />
-          <h2
-            className="relative m-0 font-semibold leading-none text-white"
-            style={{ fontSize: "22.8px", letterSpacing: "-0.01em" }}
-          >
-            Popular Services
-          </h2>
-        </div>
-        <div className="flex flex-wrap gap-4">
+      <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:gap-5 sm:p-5">
+        <SectionBanner title="Popular Services" />
+        <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
           {SERVICES.map((s) => (
             <ServiceCard key={s.label} service={s} />
           ))}
