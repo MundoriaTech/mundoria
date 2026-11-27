@@ -6,6 +6,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
+import { BookingEditPanel } from "@/components/admin/booking-edit-panel";
+import {
+  FULLY_EDITABLE_STATUSES,
+  NOTES_ONLY_STATUSES,
+} from "@/lib/admin/booking-edit";
 import { DetailSection } from "@/components/admin/detail-section";
 import { humanize, poundsFromPence, ukDateTime } from "@/lib/admin/format";
 import { MatchingDecisionLog } from "@/components/admin/matching-decision-log";
@@ -26,6 +31,8 @@ import {
   formatHourlyRate,
   formatMoney,
   formatServiceName,
+  SERVICE_ADD_ONS,
+  serviceDefinition,
   standardLabel,
 } from "@/lib/customer/services";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -128,6 +135,16 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     payment = { id: intent.id, status: intent.status, amount: intent.amount, amount_capturable: intent.amount_capturable };
   }
   const liveAddress = (booking.address ?? null) as Address | null;
+  const editable = (FULLY_EDITABLE_STATUSES as readonly string[]).includes(booking.status);
+  const notesOnly = (NOTES_ONLY_STATUSES as readonly string[]).includes(booking.status);
+  const { data: customerAddresses } =
+    editable || notesOnly
+      ? await admin
+          .from("addresses")
+          .select("id,address_line_1,postcode")
+          .eq("customer_id", booking.customer_id)
+      : { data: null };
+  const editCategory = serviceDefinition(booking.service_type).category;
   // Prefer the rooms captured when this booking was made; older bookings
   // (before the snapshot) fall back to the address as it is today.
   const hasSnapshot = booking.booked_num_bedrooms != null || booking.booked_num_bathrooms != null;
@@ -520,6 +537,34 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           />
         </div>
         <AdminExtraTime bookingId={params.id} rows={(extraTime ?? []) as ExtraTimeRow[]} />
+        {editable || notesOnly ? (
+          <BookingEditPanel
+            addOnOptions={SERVICE_ADD_ONS.filter(
+              (addOn) => !addOn.categories || addOn.categories.includes(editCategory),
+            ).map((addOn) => ({ id: addOn.id, label: addOn.label }))}
+            addresses={(customerAddresses ?? []).map((address) => ({
+              id: address.id,
+              label: [address.address_line_1, address.postcode].filter(Boolean).join(", "),
+            }))}
+            bookingId={params.id}
+            hasCleaner={Boolean(booking.cleaner_id)}
+            initial={{
+              accessInstructions: booking.access_instructions ?? "",
+              addOns: (addOns ?? []).map((row) => String(row.add_on_id)),
+              addressId: booking.address_id,
+              bathrooms: booking.booked_num_bathrooms ?? liveAddress?.num_bathrooms ?? 1,
+              bedrooms: booking.booked_num_bedrooms ?? liveAddress?.num_bedrooms ?? 1,
+              cleaningStandard: booking.cleaning_standard ?? "enhanced",
+              durationHours: Number(booking.estimated_duration_hours ?? 2),
+              otherRooms: booking.booked_num_other_rooms ?? liveAddress?.num_other_rooms ?? 0,
+              scheduledDate: booking.scheduled_date,
+              scheduledTime: String(booking.scheduled_start_time).slice(0, 5),
+              specialInstructions: booking.special_instructions ?? "",
+            }}
+            isOffice={booking.service_type === "office" && Boolean(booking.commercial_spaces)}
+            notesOnly={notesOnly}
+          />
+        ) : null}
         <BookingActions
           allocatedCleaners={booking.allocated_cleaners ?? 1}
           bookingId={params.id}

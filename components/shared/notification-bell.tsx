@@ -24,7 +24,7 @@ import type { Notification } from "@/types/customer";
  * One-off updates shown as a pop-up once, then dismissed, instead of sitting
  * in the notification list.
  */
-const POPUP_TYPES = new Set(["cleaner_changed"]);
+const POPUP_TYPES = new Set(["cleaner_changed", "booking_updated"]);
 
 export function NotificationBell({
   initialNotifications,
