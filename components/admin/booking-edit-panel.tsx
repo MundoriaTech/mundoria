@@ -102,7 +102,9 @@ export function BookingEditPanel({
                   bathrooms: values.bathrooms,
                   bedrooms: values.bedrooms,
                   cleaningStandard: values.cleaningStandard,
-                  durationHours: values.durationHours,
+                  // Unchanged length lets extras add their own time.
+                  durationHours:
+                    values.durationHours !== initial.durationHours ? values.durationHours : undefined,
                   otherRooms: values.otherRooms,
                 }),
           }),

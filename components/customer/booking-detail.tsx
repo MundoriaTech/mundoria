@@ -13,6 +13,10 @@ import { CleanerMap } from "@/components/customer/cleaner-map";
 import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
 import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
 import { BookingOverview } from "@/components/customer/booking/booking-overview";
+import {
+  EditBookingDialog,
+  type EditFocus,
+} from "@/components/customer/booking/edit-booking-dialog";
 import { ManageBooking } from "@/components/customer/booking/manage-booking";
 import {
   pillOutline,
@@ -98,6 +102,7 @@ export function BookingDetail({
   const [pauseStart, setPauseStart] = useState("");
   const [pauseEnd, setPauseEnd] = useState("");
   const [showPause, setShowPause] = useState(false);
+  const [editing, setEditing] = useState<EditFocus | null>(null);
   const [showSafety, setShowSafety] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canCancel = useMemo(
@@ -398,9 +403,16 @@ export function BookingDetail({
     },
     ...(visitOpen
       ? [
-          { hint: "Rooms, standard, add-ons or notes. Our team updates it with you.", key: "requirements", label: "Edit cleaning requirements", viaSupport: true },
-          { hint: "Longer or shorter visit. We confirm any price change first.", key: "duration", label: "Change cleaning duration", viaSupport: true },
-          { hint: "A different address. We check a cleaner can still come.", key: "address", label: "Update cleaning address", viaSupport: true },
+          // Self-serve until the reschedule cut-off; after that, the support team.
+          ...(canReschedule
+            ? [
+                { hint: "Rooms, standard, extras or notes. See any price change first.", key: "requirements", label: "Edit cleaning requirements", onClick: () => setEditing("requirements") },
+                { hint: "Longer or shorter visit. See any price change first.", key: "duration", label: "Change cleaning duration", onClick: () => setEditing("duration") },
+                { hint: "One of your saved addresses. Your cleaner confirms it.", key: "address", label: "Update cleaning address", onClick: () => setEditing("address") },
+              ]
+            : [
+                { hint: `Changes close ${RESCHEDULE_CUTOFF_HOURS} hours before the visit. Message us and we'll help.`, key: "requirements", label: "Edit cleaning requirements", viaSupport: true },
+              ]),
         ]
       : []),
     { hint: "Key safe, concierge, parking: only your cleaner sees it", key: "access", label: "Add access instructions" },
@@ -702,6 +714,10 @@ export function BookingDetail({
 
       {tipOpen ? (
         <TipPanel bookingId={booking.id} onTipped={() => router.refresh()} />
+      ) : null}
+
+      {editing ? (
+        <EditBookingDialog bookingId={booking.id} focus={editing} onClose={() => setEditing(null)} />
       ) : null}
 
       {showPause ? (

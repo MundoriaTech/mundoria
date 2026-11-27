@@ -7,6 +7,7 @@ import {
   estimatePriceBreakdown,
   SERVICE_ADD_ONS,
   serviceDefinition,
+  standardLabel,
 } from "@/lib/customer/services";
 import { splitBookingAmount } from "@/lib/payments/cleaner-pay";
 import type { createAdminClient } from "@/lib/supabase/admin";
@@ -165,12 +166,24 @@ export async function planBookingEdit(
 
   const newDate = input.scheduledDate ?? oldDate;
   const newTime = input.scheduledTime ?? oldTime;
-  const newDuration = input.durationHours ?? oldDuration;
+  const newAddOnsEarly = input.addOns ? Array.from(new Set(input.addOns)).sort() : oldAddOns;
+  // Extras with no separate price (oven, fridge, ironing…) are paid for in
+  // time: adding one lengthens the visit, removing one shortens it, unless
+  // the length is being set at the same time.
+  const extraTime = (ids: string[]) =>
+    ids.reduce((sum, id) => {
+      const addOn = SERVICE_ADD_ONS.find((item) => item.id === id);
+      return sum + (addOn?.freeDuration ? Number(addOn.durationHours ?? 0.25) : 0);
+    }, 0);
+  const extraTimeDelta = extraTime(newAddOnsEarly) - extraTime(oldAddOns);
+  const newDuration =
+    input.durationHours ??
+    (extraTimeDelta ? Math.max(1, Math.round((oldDuration + extraTimeDelta) * 4) / 4) : oldDuration);
   const newStandard = input.cleaningStandard ?? oldStandard;
   const newBedrooms = input.bedrooms ?? oldBedrooms;
   const newBathrooms = input.bathrooms ?? oldBathrooms;
   const newOther = input.otherRooms ?? oldOther;
-  const newAddOns = input.addOns ? Array.from(new Set(input.addOns)).sort() : oldAddOns;
+  const newAddOns = newAddOnsEarly;
   const newAddressId = input.addressId ?? booking.address_id;
 
   const timeChanged = newDate !== oldDate || newTime !== oldTime;
@@ -247,7 +260,11 @@ export async function planBookingEdit(
   }
   if (newStandard !== oldStandard) {
     updates.cleaning_standard = newStandard;
-    changes.push({ field: "Cleaning standard", from: oldStandard, to: newStandard });
+    changes.push({
+      field: "Cleaning standard",
+      from: standardLabel(oldStandard),
+      to: standardLabel(newStandard),
+    });
   }
   if (newBedrooms !== oldBedrooms) {
     updates.booked_num_bedrooms = newBedrooms;
