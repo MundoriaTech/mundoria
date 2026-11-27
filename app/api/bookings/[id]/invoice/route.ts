@@ -62,14 +62,15 @@ export async function GET(
       .order("created_at"),
   ]);
 
-  await admin
-    .from("booking_invoices")
-    .upsert({ booking_id: booking.id }, { ignoreDuplicates: true, onConflict: "booking_id" });
-  const { data: invoice } = await admin
-    .from("booking_invoices")
-    .select("invoice_number,issued_at")
-    .eq("booking_id", booking.id)
-    .maybeSingle();
+  // Issues the next number only if this booking has none, so repeat
+  // downloads never use up numbers (no gaps in the series).
+  const { data: issued } = await admin.rpc("issue_booking_invoice", {
+    p_booking_id: booking.id,
+  });
+  const invoice = (Array.isArray(issued) ? issued[0] : issued) as
+    | { invoice_number: number; issued_at: string }
+    | null
+    | undefined;
   if (!invoice) {
     return NextResponse.json({ error: "Couldn't create your invoice. Try again." }, { status: 500 });
   }
