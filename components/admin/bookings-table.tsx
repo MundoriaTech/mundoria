@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { DatePickerField } from "@/components/shared/date-picker-field";
 import {
   ClientPagination,
   usePagedItems,
@@ -154,21 +155,32 @@ export function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
           value={service}
         />
 
-        <label
+        <div
           className="flex h-[46px] shrink-0 items-center gap-2 rounded-full bg-white px-[14px] text-[13.5px] text-[#5F5F66]"
           style={{ border: "1.5px solid #E1E1EA" }}
         >
           From
-          <input className="border-none bg-transparent text-[14.5px] text-[#3D335F] outline-none" onChange={(e) => setFrom(e.target.value)} type="date" value={from} />
-        </label>
+          <DatePickerField
+            bare
+            onChange={setFrom}
+            placeholder="Any"
+            value={from}
+          />
+        </div>
 
-        <label
+        <div
           className="flex h-[46px] shrink-0 items-center gap-2 rounded-full bg-white px-[14px] text-[13.5px] text-[#5F5F66]"
           style={{ border: "1.5px solid #E1E1EA" }}
         >
           To
-          <input className="border-none bg-transparent text-[14.5px] text-[#3D335F] outline-none" onChange={(e) => setTo(e.target.value)} type="date" value={to} />
-        </label>
+          <DatePickerField
+            bare
+            min={from || undefined}
+            onChange={setTo}
+            placeholder="Any"
+            value={to}
+          />
+        </div>
 
         <label
           className="flex h-[46px] shrink-0 items-center rounded-full bg-white px-[14px]"

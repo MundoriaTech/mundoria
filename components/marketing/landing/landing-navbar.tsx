@@ -582,6 +582,7 @@ function MobileNav({
         >
           <UserAvatar
             name={viewer.full_name}
+            preview={false}
             seed={viewer.id}
             size="sm"
             url={viewer.avatar_url}

@@ -1,5 +1,3 @@
-import { PAGE_SIZES, parsePage, slicePage } from "@/lib/pagination";
-import { PaginationLinks } from "@/components/shared/pagination-controls";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -7,12 +5,15 @@ import {
   IncidentReportForm,
   type IncidentBookingOption,
 } from "@/components/cleaner/incident-report-form";
+import { SectionHeading } from "@/components/customer/dashboard/section-banner";
+import { PaginationLinks } from "@/components/shared/pagination-controls";
 import { getCleanerContext, getCleanerJobs } from "@/lib/cleaner/server";
 import { INCIDENT_CATEGORIES } from "@/lib/cleaner/onboarding-compliance";
 import { bookingServiceName } from "@/lib/customer/services";
+import { PAGE_SIZES, parsePage, slicePage } from "@/lib/pagination";
 import { createServerClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Report an incident" };
+export const metadata = { title: "Incidents" };
 
 interface IncidentRow {
   category: string;
@@ -23,12 +24,12 @@ interface IncidentRow {
   title: string;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  action_required: "Action required",
-  closed: "Closed",
-  resolved: "Resolved",
-  submitted: "Submitted",
-  under_review: "Under review",
+const STATUS_PILL: Record<string, { bg: string; color: string; label: string }> = {
+  action_required: { bg: "#FFF5E6", color: "#C17E24", label: "Action required" },
+  closed: { bg: "#F0F0F0", color: "#6B6B70", label: "Closed" },
+  resolved: { bg: "#E0F4EB", color: "#1A7A4A", label: "Resolved" },
+  submitted: { bg: "#EAE7F5", color: "#524096", label: "Submitted" },
+  under_review: { bg: "#E8F0FF", color: "#2D5BE3", label: "Under review" },
 };
 
 export default async function CleanerIncidentsPage({
@@ -70,80 +71,87 @@ export default async function CleanerIncidentsPage({
     }));
 
   return (
-    <div className="space-y-8 pb-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-[#1c133b] sm:text-3xl">
-          Report an incident
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-[#5c5670] sm:text-base">
-          Tell us about injuries, damage, unsafe conditions, theft or anything
-          that worried you on a job. See our{" "}
-          <Link
-            className="font-semibold text-[#6a45b8] underline-offset-2 hover:underline"
-            href="/legal/cleaner-standards"
-          >
-            Cleaner Standards
-          </Link>{" "}
-          for more.
-        </p>
-      </div>
+    <div className="flex flex-col gap-4 sm:gap-5">
+      <p className="m-0 max-w-2xl text-[14px] leading-5 text-[#5F5F66]">
+        Tell us about injuries, damage, unsafe conditions, theft or anything
+        that worried you on a job. See our{" "}
+        <Link
+          className="font-semibold text-[#524096] underline-offset-2 hover:underline"
+          href="/legal/cleaner-standards"
+        >
+          Cleaner Standards
+        </Link>{" "}
+        for more.
+      </p>
 
-      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(17rem,0.85fr)] lg:gap-5">
         <IncidentReportForm bookings={bookings} />
 
-        <section>
-          <h2 className="text-lg font-semibold tracking-tight text-[#1c133b]">
-            Your reports
-          </h2>
+        <section className="flex flex-col gap-3 rounded-[22px] bg-white p-4 sm:p-5">
+          <SectionHeading title="Your reports" />
           {incidents.length ? (
-            <ul className="mt-4 space-y-3">
-              {pagedIncidents.map((incident) => (
-                <li
-                  className="rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-4"
-                  key={incident.id}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#8a6533]">
-                      {INCIDENT_CATEGORIES.find(
-                        (item) => item.value === incident.category,
-                      )?.label ?? incident.category}
-                    </p>
-                    <span className="rounded-full bg-[#1c133b] px-2.5 py-0.5 text-[11px] font-semibold text-white">
-                      {STATUS_LABELS[incident.status] ?? incident.status}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm font-semibold text-[#1c133b]">
-                    {incident.title}
-                  </p>
-                  <p className="mt-1 text-xs text-[#5a5470]">
-                    {new Date(incident.created_at).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                    {incident.severity !== "standard"
-                      ? ` · ${incident.severity === "emergency" ? "Emergency" : "Urgent"}`
-                      : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {incidents.length ? (
-            <PaginationLinks
-              className="mt-4"
-              page={page}
-              pageSize={PAGE_SIZES.app}
-              pathname="/cleaner/incidents"
-              totalItems={incidents.length}
-            />
+            <>
+              <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+                {pagedIncidents.map((incident) => {
+                  const status =
+                    STATUS_PILL[incident.status] ?? STATUS_PILL.submitted!;
+                  return (
+                    <li
+                      className="rounded-[18px] bg-[#F3F4F6] p-4"
+                      key={incident.id}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70">
+                          {INCIDENT_CATEGORIES.find(
+                            (item) => item.value === incident.category,
+                          )?.label ?? incident.category}
+                        </p>
+                        <span
+                          className="inline-flex rounded-full px-2.5 py-1 text-[12px] font-semibold"
+                          style={{ background: status.bg, color: status.color }}
+                        >
+                          {status.label}
+                        </span>
+                      </div>
+                      <p className="m-0 mt-2 text-[14px] font-semibold text-[#1E1848]">
+                        {incident.title}
+                      </p>
+                      <p className="m-0 mt-1 text-[12.5px] text-[#6B6B70]">
+                        {new Date(incident.created_at).toLocaleDateString(
+                          "en-GB",
+                          {
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )}
+                        {incident.severity !== "standard"
+                          ? ` · ${incident.severity === "emergency" ? "Emergency" : "Urgent"}`
+                          : ""}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+              <PaginationLinks
+                className="mt-1"
+                page={page}
+                pageSize={PAGE_SIZES.app}
+                pathname="/cleaner/incidents"
+                totalItems={incidents.length}
+              />
+            </>
           ) : (
-            <p className="mt-4 rounded-2xl border-2 border-dashed border-[#1c133b]/30 bg-[#f9f6ef] p-5 text-sm text-[#5a5470]">
-              No reports yet. If something goes wrong on a job, you can report
-              it here.
-            </p>
+            <div className="rounded-[18px] bg-[#F3F4F6] px-5 py-12 text-center">
+              <p className="m-0 text-[15px] font-semibold text-[#1E1848]">
+                No reports yet
+              </p>
+              <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-5 text-[#6B6B70]">
+                If something goes wrong on a job, you can report it here.
+              </p>
+            </div>
           )}
         </section>
       </div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import {
   createConsentPreferences,
   readConsent,
@@ -235,13 +236,7 @@ function CookieConsentBanner({
 
               <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-sm">
                 <label className="flex items-start gap-3">
-                  <input
-                    checked
-                    className="mt-1"
-                    disabled
-                    readOnly
-                    type="checkbox"
-                  />
+                  <RoundCheckbox checked className="mt-0.5" disabled readOnly />
                   <span>
                     <span className="font-bold text-foreground">Necessary</span>
                     <span className="mt-1 block text-muted-foreground">
@@ -251,11 +246,10 @@ function CookieConsentBanner({
                   </span>
                 </label>
                 <label className="flex items-start gap-3">
-                  <input
+                  <RoundCheckbox
                     checked={prefsEnabled}
-                    className="mt-1"
+                    className="mt-0.5"
                     onChange={(event) => setPrefsEnabled(event.target.checked)}
-                    type="checkbox"
                   />
                   <span>
                     <span className="font-bold text-foreground">Preferences</span>
@@ -266,11 +260,10 @@ function CookieConsentBanner({
                   </span>
                 </label>
                 <label className="flex items-start gap-3">
-                  <input
+                  <RoundCheckbox
                     checked={statistics}
-                    className="mt-1"
+                    className="mt-0.5"
                     onChange={(event) => setStatistics(event.target.checked)}
-                    type="checkbox"
                   />
                   <span>
                     <span className="font-bold text-foreground">Statistics</span>
@@ -281,11 +274,10 @@ function CookieConsentBanner({
                   </span>
                 </label>
                 <label className="flex items-start gap-3">
-                  <input
+                  <RoundCheckbox
                     checked={marketing}
-                    className="mt-1"
+                    className="mt-0.5"
                     onChange={(event) => setMarketing(event.target.checked)}
-                    type="checkbox"
                   />
                   <span>
                     <span className="font-bold text-foreground">Marketing</span>

@@ -44,6 +44,9 @@ type BookedRooms = {
   booked_property_type?: string | null;
 };
 
+const tileLabel =
+  "m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70";
+
 function plural(count: number, word: string) {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
@@ -68,8 +71,28 @@ function hoursLabel(hours: number) {
   return `${rounded} hour${rounded === 1 ? "" : "s"}`;
 }
 
+/** Format address without repeating city/postcode already in the street line. */
+export function formatJobAddress(address: CleanerJob["address"]) {
+  if (!address) return "Not available";
+  const line1 = address.address_line_1?.trim() || "";
+  const line2 = address.address_line_2?.trim() || "";
+  const city = address.city?.trim() || "";
+  const postcode = address.postcode?.trim() || "";
+  const lower = `${line1} ${line2}`.toLowerCase();
+  const parts = [line1 || null, line2 || null];
+  if (city && !lower.includes(city.toLowerCase())) parts.push(city);
+  if (postcode && !lower.includes(postcode.toLowerCase())) parts.push(postcode);
+  return parts.filter(Boolean).join(", ") || "Not available";
+}
+
 /** Everything a cleaner needs to know about a job, each with what it means for them. */
-export function JobBrief({ job }: { job: CleanerJob }) {
+export function JobBrief({
+  hidePay = false,
+  job,
+}: {
+  hidePay?: boolean;
+  job: CleanerJob;
+}) {
   const rooms = job as CleanerJob & BookedRooms;
   const address = job.address;
   const hours = Number(job.estimated_duration_hours ?? 0);
@@ -120,7 +143,8 @@ export function JobBrief({ job }: { job: CleanerJob }) {
     ...(team > 1
       ? [
           {
-            explain: "Other cleaners are booked for this visit. Agree who does which rooms when you arrive.",
+            explain:
+              "Other cleaners are booked for this visit. Agree who does which rooms when you arrive.",
             label: "Team size",
             value: `${team} cleaners`,
           },
@@ -129,8 +153,12 @@ export function JobBrief({ job }: { job: CleanerJob }) {
   ];
 
   const roomParts = [
-    rooms.booked_num_bedrooms != null ? plural(rooms.booked_num_bedrooms, "bedroom") : null,
-    rooms.booked_num_bathrooms != null ? plural(rooms.booked_num_bathrooms, "bathroom") : null,
+    rooms.booked_num_bedrooms != null
+      ? plural(rooms.booked_num_bedrooms, "bedroom")
+      : null,
+    rooms.booked_num_bathrooms != null
+      ? plural(rooms.booked_num_bathrooms, "bathroom")
+      : null,
     rooms.booked_num_other_rooms
       ? `${plural(rooms.booked_num_other_rooms, "other room")}${
           rooms.booked_other_room_types?.length
@@ -140,16 +168,15 @@ export function JobBrief({ job }: { job: CleanerJob }) {
       : null,
   ].filter(Boolean) as string[];
   const propertyType = rooms.booked_property_type ?? address?.property_type ?? null;
-  const condition = job.property_condition ? CONDITIONS[job.property_condition] : null;
+  const condition = job.property_condition
+    ? CONDITIONS[job.property_condition]
+    : null;
 
   const property: Fact[] = [
     {
       explain: "Where the clean takes place. Use the map to plan your journey.",
       label: "Address",
-      value:
-        [address?.address_line_1, address?.address_line_2, address?.city, address?.postcode]
-          .filter(Boolean)
-          .join(", ") || "Not available",
+      value: formatJobAddress(address),
     },
     ...(propertyType
       ? [
@@ -163,7 +190,8 @@ export function JobBrief({ job }: { job: CleanerJob }) {
     ...(roomParts.length
       ? [
           {
-            explain: "The rooms the customer booked for. The booked time is based on these.",
+            explain:
+              "The rooms the customer booked for. The booked time is based on these.",
             label: "Rooms",
             value: roomParts.join(", "),
           },
@@ -175,7 +203,8 @@ export function JobBrief({ job }: { job: CleanerJob }) {
     ...(job.recently_moved
       ? [
           {
-            explain: "Cupboards and surfaces may have dust or residue from the move.",
+            explain:
+              "Cupboards and surfaces may have dust or residue from the move.",
             label: "Recently moved",
             value: "Yes",
           },
@@ -184,16 +213,20 @@ export function JobBrief({ job }: { job: CleanerJob }) {
     ...((job as { access_instructions?: string | null }).access_instructions?.trim()
       ? [
           {
-            explain: "How to get in for this visit, from the customer. Follow these first.",
+            explain:
+              "How to get in for this visit, from the customer. Follow these first.",
             label: "Access instructions",
-            value: (job as { access_instructions?: string | null }).access_instructions!.trim(),
+            value: (
+              job as { access_instructions?: string | null }
+            ).access_instructions!.trim(),
           },
         ]
       : []),
     ...(address?.special_requirements?.trim()
       ? [
           {
-            explain: "Saved by the customer for this address, such as parking or how to get in.",
+            explain:
+              "Saved by the customer for this address, such as parking or how to get in.",
             label: "Address notes",
             value: address.special_requirements.trim(),
           },
@@ -222,7 +255,8 @@ export function JobBrief({ job }: { job: CleanerJob }) {
     ...(extras.length
       ? [
           {
-            explain: "Extra tasks the customer added. They are part of this job and included in the booked time.",
+            explain:
+              "Extra tasks the customer added. They are part of this job and included in the booked time.",
             label: "Add-ons",
             value: extras.map((item) => item.label).join(", "),
           },
@@ -246,46 +280,53 @@ export function JobBrief({ job }: { job: CleanerJob }) {
     },
   ];
 
-  const pay: Fact[] = [
-    {
-      explain:
-        "What you earn for this job. It is paid into your next payout after the visit, once the customer's payment is taken the day after the clean.",
-      label: "Your earnings",
-      value: formatMoney(job.amount_cleaner),
-    },
-  ];
-
   const groups: { facts: Fact[]; title: string }[] = [
     { facts: visit, title: "The visit" },
     { facts: property, title: "The property" },
     { facts: supplies, title: "Products and equipment" },
     { facts: requests, title: "Customer requests" },
-    { facts: pay, title: "Your pay" },
   ];
 
+  if (!hidePay) {
+    groups.push({
+      facts: [
+        {
+          explain:
+            "What you earn for this job. It is paid into your next payout after the visit, once the customer's payment is taken the day after the clean.",
+          label: "Your earnings",
+          value: formatMoney(job.amount_cleaner),
+        },
+      ],
+      title: "Your pay",
+    });
+  }
+
   return (
-    <section className="rounded-xl border bg-background p-5">
-      <h2 className="font-semibold">Job details</h2>
-      {job.customer?.full_name ? (
-        <p className="mt-1 text-sm text-muted-foreground">
-          Customer: {job.customer.full_name}
-        </p>
-      ) : null}
-      <div className="mt-4 space-y-6">
+    <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+      <h2 className="m-0 text-[18px] font-semibold tracking-[-0.02em] text-[#1E1848] sm:text-[20px]">
+        Job details
+      </h2>
+
+      <div className="flex flex-col gap-5">
         {groups.map((group) => (
           <div key={group.title}>
-            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {group.title}
-            </h3>
-            <dl className="mt-2 divide-y rounded-lg border">
+            <h3 className={tileLabel}>{group.title}</h3>
+            <div className="mt-2.5 grid gap-2">
               {group.facts.map((fact) => (
-                <div className="px-4 py-3" key={fact.label}>
-                  <dt className="text-xs font-medium text-muted-foreground">{fact.label}</dt>
-                  <dd className="mt-0.5 text-sm font-semibold text-foreground">{fact.value}</dd>
-                  <dd className="mt-1 text-xs leading-5 text-muted-foreground">{fact.explain}</dd>
+                <div
+                  className="rounded-[14px] bg-[#F3F4F6] px-4 py-3"
+                  key={fact.label}
+                >
+                  <p className={tileLabel}>{fact.label}</p>
+                  <p className="m-0 mt-1.5 text-[15px] font-semibold tracking-[-0.02em] text-[#1E1848]">
+                    {fact.value}
+                  </p>
+                  <p className="m-0 mt-1 text-[12.5px] leading-5 text-[#5F5F66]">
+                    {fact.explain}
+                  </p>
                 </div>
               ))}
-            </dl>
+            </div>
           </div>
         ))}
       </div>

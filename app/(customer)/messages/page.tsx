@@ -32,12 +32,13 @@ export default async function CustomerConversationsPage() {
     cleanerIds.length
       ? supabase
           .from("cleaner_public_profiles")
-          .select("id, full_name, avatar_url")
+          .select("id, full_name, avatar_url, tier")
           .in("id", cleanerIds)
       : Promise.resolve({ data: [] as Array<{
           id: string;
           full_name: string;
           avatar_url: string | null;
+          tier: "bronze" | "silver" | "gold" | "rose_gold" | "elite";
         }> }),
     bookingIds.length
       ? supabase
@@ -86,9 +87,11 @@ export default async function CustomerConversationsPage() {
         avatarUrl: cleaner?.avatar_url ?? null,
         bookingId: booking.id,
         href: `/messages/${booking.id}`,
+        medallionTier: cleaner?.tier ?? null,
         preview: latest
           ? messagePreviewLabel(latest)
           : "Say hello to your cleaner",
+        seed: booking.cleaner_id as string,
         subtitle: `${bookingServiceName(booking)} · ${new Date(
           `${booking.scheduled_date}T12:00:00`,
         ).toLocaleDateString("en-GB", {
@@ -106,7 +109,7 @@ export default async function CustomerConversationsPage() {
     );
 
   return (
-    <div className="flex flex-col gap-4 rounded-[18px] bg-white p-5">
+    <div className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:gap-5 sm:p-5">
       <CrmPageView customerId={user!.id} event="messages_view" />
       <ConversationList
         emptyBody="Conversations appear here once a cleaner is matched to your booking."

@@ -6,8 +6,11 @@ import {
   StripeEmbeddedPayouts,
   useStripeEmbeddedPayouts,
 } from "@/components/cleaner/stripe-embedded-payouts";
+import {
+  pillPrimaryStyle,
+  SectionHeading,
+} from "@/components/customer/dashboard/section-banner";
 import { ActionError } from "@/components/shared/action-error";
-import { Button } from "@/components/ui/button";
 
 export function ConnectPayoutCard({
   hasStripeAccount,
@@ -22,38 +25,39 @@ export function ConnectPayoutCard({
 
   return (
     <>
-      <section className="rounded-[1.75rem] border border-[#e8e0d6]/80 bg-white p-6 shadow-[0_12px_28px_rgba(28,19,59,0.06)] sm:p-7">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
-          Payouts
-        </p>
-        <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-          Let’s get you paid
-        </h2>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c5670]">
-          Set up payouts here in Mundoria. Your UK bank details go straight to
-          Stripe - we never store your sort code or account number.
-        </p>
-        <Button
-          className="mt-5 h-11 rounded-full bg-[#1c133b] px-5 font-semibold text-white hover:bg-[#312c79]"
-          disabled={payouts.busy}
-          onClick={() => void payouts.start("onboarding")}
-          type="button"
-        >
-          <CreditCard className="mr-2 h-4 w-4" />
-          {payouts.busy
-            ? "Loading…"
-            : hasStripeAccount
-              ? "Finish payout setup"
-              : "Set up payouts"}
-        </Button>
-        {payouts.error ? (
-          <div className="mt-4">
-            <ActionError
-              message={payouts.error}
-              title="Couldn’t open payout setup"
-            />
-          </div>
-        ) : null}
+      <section className="flex flex-col gap-3 rounded-[22px] bg-white p-4 sm:p-5">
+        <SectionHeading title="Payouts" />
+        <div>
+          <p className="m-0 text-[16px] font-semibold tracking-[-0.02em] text-[#1E1848]">
+            Let&apos;s get you paid
+          </p>
+          <p className="m-0 mt-2 max-w-xl text-[14px] leading-5 text-[#5F5F66]">
+            Set up payouts here in Mundoria. Your UK bank details go straight to
+            Stripe - we never store your sort code or account number.
+          </p>
+          <button
+            className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+            disabled={payouts.busy}
+            onClick={() => void payouts.start("onboarding")}
+            style={pillPrimaryStyle}
+            type="button"
+          >
+            <CreditCard className="h-4 w-4" />
+            {payouts.busy
+              ? "Loading…"
+              : hasStripeAccount
+                ? "Finish payout setup"
+                : "Set up payouts"}
+          </button>
+          {payouts.error ? (
+            <div className="mt-4">
+              <ActionError
+                message={payouts.error}
+                title="Couldn’t open payout setup"
+              />
+            </div>
+          ) : null}
+        </div>
       </section>
 
       <StripeEmbeddedPayouts

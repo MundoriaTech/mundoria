@@ -226,7 +226,7 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
               </FieldTile>
               <div className="sm:col-span-2">
                 <FieldTile label="Email address">
-                  <ChangeEmailForm currentEmail={profile.email} />
+                  <ChangeEmailForm currentEmail={profile.email} embedded />
                 </FieldTile>
               </div>
             </div>

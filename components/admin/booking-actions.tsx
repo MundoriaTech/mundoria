@@ -5,9 +5,10 @@ import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
-import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
+import { SimpleSelect } from "@/components/ui/select";
 
 type BookingAction =
   | "reassign"
@@ -179,11 +180,9 @@ export function BookingActions({
                 className="flex items-center gap-2 text-sm"
                 key={cleaner.id}
               >
-                <input
+                <RoundCheckbox
                   checked={teamIds.includes(cleaner.id)}
-                  className="accent-primary"
                   onChange={() => toggleTeamMember(cleaner.id)}
-                  type="checkbox"
                 />
                 {cleaner.full_name}
               </label>

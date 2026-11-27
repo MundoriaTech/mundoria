@@ -190,12 +190,12 @@ export default async function NewBookingPage({
         ) {
           const { data: cleaner } = await supabase
             .from("cleaner_public_profiles")
-            .select("id, full_name, avatar_url, rating")
+            .select("id, full_name, avatar_url, rating, tier")
             .eq("id", booking.cleaner_id)
             .maybeSingle();
           const profile = cleaner as Pick<
             CleanerPublicProfile,
-            "id" | "full_name" | "avatar_url" | "rating"
+            "id" | "full_name" | "avatar_url" | "rating" | "tier"
           > | null;
           if (profile) {
             knownCleaners = [
@@ -206,6 +206,7 @@ export default async function NewBookingPage({
                 id: profile.id,
                 lastVisitDate: booking.scheduled_date,
                 rating: Number(profile.rating ?? 0),
+                tier: profile.tier,
                 visitCount: 0,
               },
               ...knownCleaners,
@@ -346,7 +347,7 @@ async function loadKnownCleaners(
 
   const { data: profiles } = await supabase
     .from("cleaner_public_profiles")
-    .select("id, full_name, avatar_url, rating")
+    .select("id, full_name, avatar_url, rating, tier")
     .in("id", ids);
 
   const byId = new Map(
@@ -356,6 +357,7 @@ async function loadKnownCleaners(
         full_name: string;
         id: string;
         rating: number | null;
+        tier: CleanerPublicProfile["tier"];
       }>
     ).map((profile) => [profile.id, profile]),
   );
@@ -372,6 +374,7 @@ async function loadKnownCleaners(
         id: profile.id,
         lastVisitDate: summary.lastVisitDate,
         rating: Number(profile.rating ?? 0),
+        tier: profile.tier,
         visitCount: summary.visitCount,
       } satisfies KnownCleaner,
     ];

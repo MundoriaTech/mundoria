@@ -15,6 +15,7 @@ import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import {
   type GeoapifyFeature,
   type GeoapifyAutocompleteResponse,
@@ -701,11 +702,9 @@ export function AddressForm({
       {showAccountExtras ? (
         <>
       <label className="flex items-center gap-3 text-sm text-[#1c133b]">
-        <input
+        <RoundCheckbox
           checked={values.is_default}
-          className="h-4 w-4 accent-[#c79c66]"
           onChange={(event) => update("is_default", event.target.checked)}
-          type="checkbox"
         />
         Make this my default address
       </label>

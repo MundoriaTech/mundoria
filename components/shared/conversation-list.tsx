@@ -1,5 +1,7 @@
 import { ConversationListView } from "@/components/shared/conversation-list-view";
 
+import type { CleanerTier } from "@/types/cleaner";
+
 export type ConversationListItem = {
   bookingId: string;
   href: string;
@@ -7,6 +9,9 @@ export type ConversationListItem = {
   subtitle: string;
   preview: string;
   avatarUrl?: string | null;
+  /** When set, frames the avatar with the cleaner medallion ring. */
+  medallionTier?: CleanerTier | null;
+  seed?: string | null;
   unread?: boolean;
   timeLabel?: string | null;
 };

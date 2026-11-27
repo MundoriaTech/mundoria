@@ -14,7 +14,7 @@ import {
 } from "@stripe/stripe-js";
 
 import { ActionError } from "@/components/shared/action-error";
-import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
+import { MedallionAvatar } from "@/components/shared/medallion-avatar";
 import {
   ChevronDown,
   ChevronLeft,
@@ -2586,20 +2586,15 @@ function KnownCleanersStep({
               onClick={() => onSelect(cleaner.id)}
               type="button"
             >
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3eef9] text-lg font-bold text-[#6a45b8]">
-                {cleaner.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt=""
-                    className={avatarImageClass(
-                      resolveAvatarUrl(cleaner.avatarUrl, cleaner.id),
-                    )}
-                    src={resolveAvatarUrl(cleaner.avatarUrl, cleaner.id)}
-                  />
-                ) : (
-                  cleaner.fullName.charAt(0)
-                )}
-              </div>
+              <MedallionAvatar
+                avatarUrl={cleaner.avatarUrl}
+                className="h-14 w-14"
+                name={cleaner.fullName}
+                preview={false}
+                seed={cleaner.id}
+                size="md"
+                tier={cleaner.tier}
+              />
               <div className="min-w-0">
                 <p className="truncate font-semibold text-[#1c133b]">
                   Continue with {firstName}

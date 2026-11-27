@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
+import { DatePickerField } from "@/components/shared/date-picker-field";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -149,7 +150,12 @@ export function ReplaceDocument({
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium text-[#1c133b]">Date of birth</span>
-            <Input onChange={(event) => setDob(event.target.value)} type="date" value={dob} />
+            <DatePickerField
+              max={new Date().toISOString().slice(0, 10)}
+              min="1920-01-01"
+              onChange={setDob}
+              value={dob}
+            />
           </label>
           {route === "share_code" ? (
             <>
@@ -176,7 +182,11 @@ export function ReplaceDocument({
                 <span className="mb-1 block font-medium text-[#1c133b]">
                   Permission ends (leave empty if not time-limited)
                 </span>
-                <Input onChange={(event) => setRtwExpiry(event.target.value)} type="date" value={rtwExpiry} />
+                <DatePickerField
+                  min={new Date().toISOString().slice(0, 10)}
+                  onChange={setRtwExpiry}
+                  value={rtwExpiry}
+                />
               </label>
               <a
                 className="text-sm font-semibold text-[#312c79] underline"
@@ -205,7 +215,11 @@ export function ReplaceDocument({
           {kind === "insurance" ? (
             <label className="block text-sm">
               <span className="mb-1 block font-medium text-[#1c133b]">Insurance expiry date</span>
-              <Input onChange={(event) => setExpiry(event.target.value)} type="date" value={expiry} />
+              <DatePickerField
+                min={new Date().toISOString().slice(0, 10)}
+                onChange={setExpiry}
+                value={expiry}
+              />
             </label>
           ) : null}
         </>

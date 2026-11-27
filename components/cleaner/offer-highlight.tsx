@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { bookingServiceName, formatMoney } from "@/lib/customer/services";
+import { pillPrimaryStyle } from "@/components/customer/dashboard/section-banner";
 import type { CleanerJob } from "@/types/cleaner";
 
 const OFFER_WINDOW_MS = 30 * 60 * 1000;
 
-/** Offer waiting on the cleaner dashboard. */
-export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
+/** Accept / decline row for an open offer on the cleaner dashboard. */
+export function CleanerOfferActions({ job }: { job: CleanerJob }) {
   const router = useRouter();
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
@@ -26,16 +26,6 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
   const remaining = Math.max(0, expires - now);
   const mins = Math.floor(remaining / 60000);
   const secs = Math.floor((remaining % 60000) / 1000);
-  const area =
-    job.address?.city ??
-    job.address?.postcode?.split(" ")[0] ??
-    "Nearby";
-  const when = new Date(`${job.scheduled_date}T12:00:00`).toLocaleDateString(
-    "en-GB",
-    { weekday: "short", day: "numeric", month: "short" },
-  );
-  const time = job.scheduled_start_time.slice(0, 5);
-  const hours = job.estimated_duration_hours;
   const closed = remaining <= 0;
 
   async function respond(response: "accepted" | "declined") {
@@ -54,50 +44,24 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
   }
 
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-[#e6e0f2] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.06)]">
-      <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
-            Waiting for you
-          </p>
-          <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-            {bookingServiceName(job)}
-          </h3>
-          <p className="mt-1 text-sm leading-6 text-[#5c5670]">
-            {when} at {time}, in {area}.
-          </p>
-        </div>
-        <p className="shrink-0 rounded-full bg-[#fff4ee] px-3 py-1.5 text-sm font-semibold tabular-nums text-[#7a3b28]">
-          {closed ? "Closed" : `${mins}:${secs.toString().padStart(2, "0")}`}
-        </p>
-      </div>
-
-      <dl className="mt-5 grid grid-cols-2 gap-px border-y border-[#efe6ff] bg-[#efe6ff] sm:grid-cols-3">
-        <Fact label="When" value={`${when} · ${time}`} />
-        <Fact label="Area" value={area} />
-        <Fact
-          label="Your pay"
-          value={job.amount_cleaner ? formatMoney(job.amount_cleaner) : "-"}
-        />
-      </dl>
-
-      {hours ? (
-        <p className="px-5 pt-4 text-sm text-[#5c5670] sm:px-6">
-          About {hours} hour{hours === 1 ? "" : "s"}.
-        </p>
-      ) : null}
-
-      <div className="flex flex-col gap-2 p-5 sm:flex-row sm:flex-wrap sm:items-center sm:px-6">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <p className="m-0 text-[15px] font-semibold tabular-nums text-[#524096]">
+        {closed
+          ? "Offer closed"
+          : `Respond in ${mins}:${secs.toString().padStart(2, "0")}`}
+      </p>
+      <div className="flex flex-wrap gap-2">
         <button
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[#1c133b] px-5 text-sm font-semibold text-white transition hover:bg-[#312c79] disabled:opacity-50"
+          className="inline-flex h-10 items-center justify-center rounded-full px-5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
           disabled={busy || closed}
           onClick={() => void respond("accepted")}
+          style={pillPrimaryStyle}
           type="button"
         >
           Accept
         </button>
         <button
-          className="inline-flex h-11 items-center justify-center rounded-full border border-[#e6e0f2] bg-white px-5 text-sm font-semibold text-[#1c133b] transition hover:bg-[#f7f2ea] disabled:opacity-50"
+          className="inline-flex h-10 items-center justify-center rounded-full border-2 border-[#524096] bg-white px-5 text-[14px] font-semibold text-[#524096] transition hover:bg-[#ECE8F6] disabled:opacity-50"
           disabled={busy || closed}
           onClick={() => void respond("declined")}
           type="button"
@@ -105,25 +69,17 @@ export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
           Decline
         </button>
         <Link
-          className="inline-flex h-11 items-center justify-center rounded-full px-3 text-sm font-semibold text-[#312c79]"
+          className="inline-flex h-10 items-center justify-center rounded-full px-3 text-[14px] font-semibold text-[#524096] no-underline transition hover:underline"
           href={`/cleaner/job/${job.id}`}
         >
-          See details
+          Details
         </Link>
       </div>
-    </article>
+    </div>
   );
 }
 
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-white px-5 py-3.5 sm:px-6">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#823fb2]">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm font-semibold tracking-tight text-[#1c133b]">
-        {value}
-      </dd>
-    </div>
-  );
+/** @deprecated Prefer CleanerOfferActions with shared dashboard tiles. */
+export function CleanerOfferHighlight({ job }: { job: CleanerJob }) {
+  return <CleanerOfferActions job={job} />;
 }

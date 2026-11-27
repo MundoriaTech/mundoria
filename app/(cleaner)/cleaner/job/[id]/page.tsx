@@ -24,7 +24,7 @@ export default async function CleanerJobPage({
     admin
       .from("bookings")
       .select(
-        "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,phone)",
+        "*,address:addresses(*),customer:profiles!bookings_customer_id_fkey(full_name,phone,avatar_url)",
       )
       .eq("id", params.id)
       .maybeSingle(),
@@ -62,28 +62,24 @@ export default async function CleanerJobPage({
     .from("booking_time_extensions").select("id,minutes,amount_pence,reason,status,created_at,decided_at").eq("booking_id", job.id).order("created_at", { ascending: false });
   const extensionPending = (extraTime ?? []).some((row) => row.status === "pending");
   return (
-    <>
+    <div className="flex flex-col gap-4 sm:gap-5">
       {job.status === "in_progress" ? (
-        <div className="mx-auto mb-6 max-w-3xl px-4 sm:px-0">
-          <CleanCountdown
-            bookingId={job.id}
-            durationHours={job.estimated_duration_hours}
-            extensionPending={extensionPending}
-            role="cleaner"
-            startedAt={job.actual_start_time}
-          />
-        </div>
+        <CleanCountdown
+          bookingId={job.id}
+          durationHours={job.estimated_duration_hours}
+          extensionPending={extensionPending}
+          role="cleaner"
+          startedAt={job.actual_start_time}
+        />
       ) : null}
       <JobDetail initialJob={job} />
       {data.cleaner_id === user!.id ? (
-        <div className="mx-auto mt-6 max-w-3xl px-4 sm:px-0">
-          <CleanerExtraTime
-            bookingId={job.id}
-            inProgress={job.status === "in_progress"}
-            rows={(extraTime ?? []) as ExtraTimeRow[]}
-          />
-        </div>
+        <CleanerExtraTime
+          bookingId={job.id}
+          inProgress={job.status === "in_progress"}
+          rows={(extraTime ?? []) as ExtraTimeRow[]}
+        />
       ) : null}
-    </>
+    </div>
   );
 }

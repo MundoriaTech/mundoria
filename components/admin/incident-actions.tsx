@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useFeedback } from "@/components/shared/feedback-provider";
-import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
+import { SimpleSelect } from "@/components/ui/select";
 
 const STATUSES = [
   { label: "Submitted", value: "submitted" },
@@ -89,11 +90,10 @@ export function IncidentActions({
       />
 
       <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm">
-        <input
+        <RoundCheckbox
           checked={riddor}
-          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#1c133b]"
+          className="mt-0.5"
           onChange={(event) => setRiddor(event.target.checked)}
-          type="checkbox"
         />
         <span>
           <b>RIDDOR reportable</b>

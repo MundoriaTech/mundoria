@@ -1,28 +1,37 @@
 import Link from "next/link";
 
+import { MedallionAvatar } from "@/components/shared/medallion-avatar";
 import {
   cleanerTierLabel,
   isTopMedallionTier,
-  medallionIconSrc,
   nextTier,
   normalizeMedallionTier,
   TIER_REQUIREMENTS,
 } from "@/lib/cleaner/tier";
 import type { CleanerTier } from "@/types/cleaner";
 
-/** Glovo-style activity insights, compact scoring peek. */
+const tileLabel =
+  "m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70";
+
+/** Medallion progress for the cleaner dashboard. */
 export function CleanerMedallionPanel({
   acceptanceRate,
+  avatarUrl,
+  name,
   onTimeRate,
   performanceScore,
   rating,
+  seed,
   tier,
   totalJobs,
 }: {
   acceptanceRate: number;
+  avatarUrl?: string | null;
+  name: string;
   onTimeRate: number;
   performanceScore: number;
   rating: number;
+  seed?: string | null;
   tier: CleanerTier;
   totalJobs: number;
 }) {
@@ -43,81 +52,84 @@ export function CleanerMedallionPanel({
           : 0
         : Math.min(100, Math.max(0, (performanceScore / targetScore) * 100));
 
+  const nextLabel = cleanerTierLabel(next);
   const progressCopy = atTop
     ? "Top of the ladder"
     : !hasCompletedJobs
-      ? `Toward ${cleanerTierLabel(next)}`
+      ? `Progress toward ${nextLabel} starts after completed jobs and ratings.`
       : targetScore > 0
-        ? `${performanceScore}/${targetScore} → ${cleanerTierLabel(next)}`
-        : `Score ${performanceScore}`;
+        ? performanceScore >= targetScore
+          ? `Score ${performanceScore}/100 · ${nextLabel} needs ${targetScore}+ (met)`
+          : `Score ${performanceScore}/100 · ${nextLabel} needs ${targetScore}+`
+        : `Score ${performanceScore}/100`;
 
   return (
-    <section className="overflow-hidden rounded-[1.75rem] bg-white p-5 shadow-[0_12px_32px_rgba(28,19,59,0.08)] ring-1 ring-black/[0.04] sm:p-5">
-      <div className="flex items-center gap-3.5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          alt=""
-          aria-hidden
-          className="h-12 w-12 shrink-0"
-          src={medallionIconSrc(current)}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#6f6a82]">
-              Activity insights
+    <div className="flex flex-col gap-4">
+      <div className="rounded-[18px] bg-[#F3F4F6] p-4 sm:p-5">
+        <div className="flex items-center gap-4">
+          <MedallionAvatar
+            avatarUrl={avatarUrl}
+            name={name}
+            seed={seed}
+            size="lg"
+            tier={tier}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="m-0 text-[18px] font-semibold tracking-[-0.02em] text-[#1E1848]">
+                {label}
+              </p>
+              <Link
+                className="text-[13.5px] font-semibold text-[#524096] no-underline hover:underline"
+                href="/cleaner/performance"
+              >
+                Details
+              </Link>
+            </div>
+            <p className="m-0 mt-1 text-[13.5px] leading-5 text-[#5F5F66]">
+              {progressCopy}
             </p>
-            <span className="rounded-full bg-[#f3f1f7] px-2 py-0.5 text-[11px] font-bold text-[#1c133b]">
-              {label}
-            </span>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
+              <div
+                className="h-full rounded-full bg-[#524096]"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
-          <p className="mt-0.5 text-sm font-bold text-[#1c133b]">
-            {progressCopy}
-          </p>
         </div>
-        <Link
-          className="shrink-0 text-xs font-bold text-[#a8482b]"
-          href="/cleaner/performance"
-        >
-          View
-        </Link>
       </div>
 
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#f0edf5]">
-        <div
-          className="h-full rounded-full bg-[#d4694a] transition-[width] duration-500"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-[#f0edf5] pt-3.5 text-center">
-        <Metric
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <MiniStat
           label="Rating"
-          value={hasCompletedJobs ? `${rating}/5` : "-"}
+          value={hasCompletedJobs ? `${rating}/5` : "No ratings yet"}
         />
-        <Metric
+        <MiniStat
           label="On time"
-          value={hasCompletedJobs ? `${onTimeRate}%` : "-"}
+          value={hasCompletedJobs ? `${onTimeRate}%` : "No jobs yet"}
         />
-        <Metric
-          label="Accept"
+        <MiniStat
+          label="Acceptance"
           value={
             hasCompletedJobs || Number(acceptanceRate) !== 100
               ? `${acceptanceRate}%`
-              : "-"
+              : "No offers yet"
           }
         />
+        <MiniStat
+          label="Jobs"
+          value={hasCompletedJobs ? String(totalJobs) : "None yet"}
+        />
       </div>
-    </section>
+    </div>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#a8a3b5]">
-        {label}
-      </p>
-      <p className="mt-0.5 text-sm font-bold text-[#1c133b]">{value}</p>
+    <div className="rounded-[14px] bg-[#F3F4F6] px-3.5 py-3">
+      <p className={tileLabel}>{label}</p>
+      <p className="m-0 mt-1.5 text-[14px] font-semibold text-[#1E1848]">{value}</p>
     </div>
   );
 }

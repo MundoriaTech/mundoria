@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { DatePickerField } from "@/components/shared/date-picker-field";
 import {
   ClientPagination,
   usePagedItems,
 } from "@/components/shared/pagination-controls";
 import { SimpleSelect } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { PAGE_SIZES } from "@/lib/pagination";
 import type { AdminDispute } from "@/types/admin";
 import { ukDate } from "@/lib/admin/format";
@@ -53,9 +53,9 @@ export function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
           options={["open", "under_review", "resolved", "closed"].map((value) => ({ label: value.replaceAll("_", " "), value }))}
           value={status}
         />
-        <Input
-          onChange={(event) => setDate(event.target.value)}
-          type="date"
+        <DatePickerField
+          onChange={setDate}
+          placeholder="Any date"
           value={date}
         />
       </div>

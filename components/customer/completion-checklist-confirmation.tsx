@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import type { BookingChecklistItem } from "@/types/customer";
 
 export function CompletionChecklistConfirmation({
@@ -82,16 +83,15 @@ export function CompletionChecklistConfirmation({
           return (
             <div className="rounded-lg border p-4" key={item.id}>
               <label className="flex items-start gap-3">
-                <input
+                <RoundCheckbox
                   checked={isChecked}
-                  className="mt-1"
+                  className="mt-0.5"
                   onChange={(event) =>
                     setChecked((current) => ({
                       ...current,
                       [item.item_key]: event.target.checked,
                     }))
                   }
-                  type="checkbox"
                 />
                 <span>
                   <b>{item.label}</b>

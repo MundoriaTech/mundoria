@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
+import { DatePickerField } from "@/components/shared/date-picker-field";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import { SERVICES, SERVICE_ADD_ONS } from "@/lib/customer/services";
 
 const ASSISTED_SERVICES = SERVICES.filter((service) =>
@@ -174,7 +176,10 @@ export function AssistedCustomerForm() {
       </section>
 
       <label className="flex items-center gap-2 text-sm font-medium">
-        <input checked={withBooking} className="h-4 w-4" onChange={(e) => setWithBooking(e.target.checked)} type="checkbox" />
+        <RoundCheckbox
+          checked={withBooking}
+          onChange={(e) => setWithBooking(e.target.checked)}
+        />
         Prepare a booking for them
       </label>
 
@@ -190,7 +195,12 @@ export function AssistedCustomerForm() {
                 <SimpleSelect className={selectClass} emptyLabel="Recommended for this service" onChange={(v) => setB("cleaningStandard", v)} options={[{ label: "Essential", value: "essential" }, { label: "Enhanced", value: "enhanced" }, { label: "Comprehensive", value: "comprehensive" }]} value={booking.cleaningStandard} />
               </Field>
               <Field label="Date">
-                <Input min={tomorrow} onChange={(e) => setB("scheduledDate", e.target.value)} required type="date" value={booking.scheduledDate} />
+                <DatePickerField
+                  min={tomorrow}
+                  onChange={(next) => setB("scheduledDate", next)}
+                  required
+                  value={booking.scheduledDate}
+                />
               </Field>
               <Field label="Start time">
                 <Input onChange={(e) => setB("scheduledTime", e.target.value)} required step={1800} type="time" value={booking.scheduledTime} />
@@ -208,15 +218,15 @@ export function AssistedCustomerForm() {
                 <div className="grid gap-2 sm:grid-cols-2">
                   {availableAddOns.map((addOn) => (
                     <label className="flex items-center gap-2 text-sm" key={addOn.id}>
-                      <input
+                      <RoundCheckbox
                         checked={addOns.includes(addOn.id)}
-                        className="h-4 w-4"
                         onChange={(e) =>
                           setAddOns((current) =>
-                            e.target.checked ? [...current, addOn.id] : current.filter((id) => id !== addOn.id),
+                            e.target.checked
+                              ? [...current, addOn.id]
+                              : current.filter((id) => id !== addOn.id),
                           )
                         }
-                        type="checkbox"
                       />
                       {addOn.label}
                     </label>

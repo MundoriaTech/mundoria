@@ -4,6 +4,7 @@ import { Chat } from "@/components/customer/chat";
 import { isCleanerVisibleToCustomer } from "@/lib/customer/booking-visibility";
 import { bookingServiceName } from "@/lib/customer/services";
 import { createServerClient } from "@/lib/supabase/server";
+import type { CleanerTier } from "@/types/cleaner";
 import type { BookingStatus, Message } from "@/types/customer";
 
 export default async function CustomerMessagesPage({
@@ -45,7 +46,7 @@ export default async function CustomerMessagesPage({
       .single(),
     supabase
       .from("cleaner_public_profiles")
-      .select("full_name")
+      .select("full_name, avatar_url, tier")
       .eq("id", booking.cleaner_id)
       .single(),
   ]);
@@ -67,7 +68,10 @@ export default async function CustomerMessagesPage({
         [booking.customer_id]: customer?.full_name ?? "Customer",
         [booking.cleaner_id]: cleaner?.full_name ?? "Cleaner",
       }}
+      peerAvatarUrl={cleaner?.avatar_url ?? null}
       peerLabel={cleanerName}
+      peerSeed={booking.cleaner_id}
+      peerTier={(cleaner?.tier as CleanerTier | undefined) ?? null}
       safetyHold={Boolean(booking.safety_hold_at)}
       subtitle={`${bookingServiceName(booking)} · ${when}`}
     />

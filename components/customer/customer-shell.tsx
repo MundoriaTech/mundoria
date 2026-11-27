@@ -81,6 +81,8 @@ function isActive(pathname: string, item: (typeof NAV_ITEMS)[number]) {
 function pageContext(pathname: string, firstName: string) {
   if (pathname === "/dashboard") {
     return {
+      /** Short label for the mobile sticky bar — welcome stays in page content. */
+      navTitle: "Dashboard",
       showWave: true,
       subtitle:
         "Keep track of your cleaning services, upcoming bookings and past appointments.",
@@ -89,6 +91,7 @@ function pageContext(pathname: string, firstName: string) {
   }
   if (pathname.startsWith("/booking/")) {
     return {
+      navTitle: null,
       showWave: false,
       subtitle: "Details, payment status and receipt for this visit.",
       title: "Booking",
@@ -96,14 +99,16 @@ function pageContext(pathname: string, firstName: string) {
   }
   if (/^\/messages\/[^/]+/.test(pathname)) {
     return {
+      navTitle: null,
       showWave: false,
       subtitle: "Message your matched cleaner about this booking.",
       title: "Conversation",
     };
   }
   const exact = PAGE_COPY[pathname];
-  if (exact) return { showWave: false, ...exact };
+  if (exact) return { navTitle: null, showWave: false, ...exact };
   return {
+    navTitle: null,
     showWave: false,
     subtitle: "Manage your Mundoria account and bookings.",
     title: "Account",
@@ -235,7 +240,11 @@ export function CustomerShell({
   // "bosoye" → "Bosoye" for the greeting.
   const firstName = rawFirst.charAt(0).toLocaleUpperCase("en-GB") + rawFirst.slice(1);
   const backLink = appParentBackLink(pathname);
-  const { showWave, subtitle, title } = pageContext(pathname, firstName);
+  const { navTitle, showWave, subtitle, title } = pageContext(
+    pathname,
+    firstName,
+  );
+  const mobileBarTitle = navTitle ?? title;
 
   async function logout() {
     setSigningOut(true);
@@ -355,12 +364,7 @@ export function CustomerShell({
                 </button>
                 <div className="min-w-0 flex-1">
                   <p className="m-0 truncate text-[17px] font-semibold tracking-[-0.02em] text-[#1E1848]">
-                    {title}
-                    {showWave ? (
-                      <span aria-label="wave" className="ml-1.5" role="img">
-                        👋
-                      </span>
-                    ) : null}
+                    {mobileBarTitle}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
@@ -455,6 +459,18 @@ export function CustomerShell({
                 href={backLink.href}
                 label={backLink.label}
               />
+            ) : showWave ? (
+              <div className="mb-4">
+                <h1 className="m-0 flex items-center gap-2 text-[24px] font-semibold leading-tight tracking-[-0.02em] text-[#1E1848]">
+                  {title}
+                  <span aria-label="wave" className="text-[22px] leading-none" role="img">
+                    👋
+                  </span>
+                </h1>
+                <p className="m-0 mt-1.5 text-[14px] leading-5 text-[#5F5F66]">
+                  {subtitle}
+                </p>
+              </div>
             ) : (
               <p className="mb-4 m-0 text-[14px] leading-5 text-[#5F5F66]">
                 {subtitle}

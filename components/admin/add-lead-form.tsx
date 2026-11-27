@@ -8,6 +8,7 @@ import { useFeedback } from "@/components/shared/feedback-provider";
 import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 
 const SOURCES = [
   ["phone_call", "Phone call"],
@@ -112,11 +113,14 @@ export function AddLeadForm() {
         <div className="flex flex-wrap gap-4 text-sm">
           {(["email", "sms", "call"] as const).map((channel) => (
             <label className="flex items-center gap-2" key={channel}>
-              <input
+              <RoundCheckbox
                 checked={consent[channel]}
-                className="h-4 w-4"
-                onChange={(e) => setConsent((current) => ({ ...current, [channel]: e.target.checked }))}
-                type="checkbox"
+                onChange={(e) =>
+                  setConsent((current) => ({
+                    ...current,
+                    [channel]: e.target.checked,
+                  }))
+                }
               />
               {channel === "sms" ? "Text" : channel === "call" ? "Phone call" : "Email"}
             </label>

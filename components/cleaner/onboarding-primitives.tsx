@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CalendarDays,
   Check,
   ChevronDown,
   FileUp,
@@ -19,6 +18,7 @@ import {
 } from "react";
 
 import { FieldError, invalidControlClass } from "@/components/shared/action-error";
+import { DatePickerField } from "@/components/shared/date-picker-field";
 import { cn } from "@/lib/utils";
 
 type OnboardingSelectOption = {
@@ -229,22 +229,7 @@ export function OnboardingSelect({
   );
 }
 
-function toIsoDate(year: number, monthIndex: number, day: number) {
-  return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-function formatIsoDateEnGb(iso: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
-  const date = new Date(`${iso}T12:00:00`);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-/** Floating-label date field with a custom Mundoria calendar (no native picker). */
+/** Floating-label date field — uses the shared mobile-first Mundoria calendar. */
 export function OnboardingDateField({
   error,
   id,
@@ -265,204 +250,16 @@ export function OnboardingDateField({
   /** YYYY-MM-DD */
   value: string;
 }) {
-  const autoId = useId();
-  const fieldId = id ?? autoId;
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
-  const today = new Date().toISOString().slice(0, 10);
-  const latest = maxDate ?? today;
-  const earliest = minDate ?? "1990-01-01";
-  // Open on the chosen date, else today kept inside the allowed range (an
-  // expiry field allows dates years ahead; opening there meant ~180 clicks back).
-  const [viewMonth, setViewMonth] = useState(() => {
-    const start = value || (today < earliest ? earliest : today > latest ? latest : today);
-    return new Date(`${start}T12:00:00`);
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
-    setViewMonth(new Date(`${value}T12:00:00`));
-  }, [value]);
-
-  const year = viewMonth.getFullYear();
-  const month = viewMonth.getMonth();
-  const monthLabel = viewMonth.toLocaleString("en-GB", {
-    month: "long",
-    year: "numeric",
-  });
-  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells: Array<number | null> = [
-    ...Array.from({ length: firstWeekday }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-  ];
-  const display = formatIsoDateEnGb(value);
-  const empty = !display;
-
-  function shiftMonth(delta: number) {
-    let next = new Date(year, month + delta, 1);
-    // A whole-year jump past either end lands on the first/last allowed month.
-    if (Math.abs(delta) >= 12) {
-      const earliestMonth = new Date(`${earliest.slice(0, 7)}-01T12:00:00`);
-      const latestMonth = new Date(`${latest.slice(0, 7)}-01T12:00:00`);
-      if (next < earliestMonth) next = new Date(earliestMonth.getFullYear(), earliestMonth.getMonth(), 1);
-      if (next > latestMonth) next = new Date(latestMonth.getFullYear(), latestMonth.getMonth(), 1);
-    }
-    const monthStart = toIsoDate(next.getFullYear(), next.getMonth(), 1);
-    const monthEnd = toIsoDate(
-      next.getFullYear(),
-      next.getMonth(),
-      new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate(),
-    );
-    if (monthEnd < earliest) return;
-    if (monthStart > latest) return;
-    setViewMonth(next);
-  }
-
-  function pickDay(day: number) {
-    const iso = toIsoDate(year, month, day);
-    if (iso < earliest || iso > latest) return;
-    onChange(iso);
-    setOpen(false);
-  }
-
   return (
-    <div className="space-y-1.5" ref={rootRef}>
-      <div className="relative">
-        <button
-          aria-expanded={open}
-          aria-haspopup="dialog"
-          className={cn(
-            "group/field relative h-11 w-full rounded-xl border-2 border-[#1c133b] bg-transparent px-3.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1c133b]",
-            error && "border-[#d4694a] focus-visible:ring-[#d4694a]",
-            open && "ring-2 ring-[#1c133b]",
-          )}
-          id={fieldId}
-          onClick={() => setOpen((current) => !current)}
-          type="button"
-        >
-          <span
-            className={cn(
-              "pointer-events-none absolute left-3.5 right-10 origin-left transition-all duration-150",
-              empty && !open
-                ? "top-1/2 -translate-y-1/2 text-[15px] font-normal text-[#6f6a82]"
-                : "top-1.5 translate-y-0 text-[11px] font-semibold leading-none text-[#5a5470]",
-              open && "text-[#1c133b]",
-              error && "text-[#a8482b]",
-            )}
-          >
-            {label}
-          </span>
-          <span className="block pb-1 pr-8 pt-3.5">
-            <span
-              className={cn(
-                "block h-6 truncate text-[15px] leading-6 text-[#1c133b]",
-                empty && "text-transparent",
-              )}
-            >
-              {display || "Select date"}
-            </span>
-          </span>
-          <CalendarDays
-            aria-hidden
-            className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1c133b]"
-            strokeWidth={2.25}
-          />
-        </button>
-
-        {open ? (
-          <div
-            className="absolute right-0 z-30 mt-1.5 w-[15rem] rounded-xl border-2 border-[#1c133b] bg-[#f9f6ef] p-2 shadow-[0_12px_28px_rgba(28,19,59,0.12)]"
-            role="dialog"
-          >
-            <div className="mb-1.5 flex items-center justify-between gap-1">
-              <button
-                aria-label="Previous year"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
-                onClick={() => shiftMonth(-12)}
-                type="button"
-              >
-                «
-              </button>
-              <button
-                aria-label="Previous month"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
-                onClick={() => shiftMonth(-1)}
-                type="button"
-              >
-                ‹
-              </button>
-              <p className="text-xs font-semibold text-[#1c133b]">{monthLabel}</p>
-              <button
-                aria-label="Next month"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
-                onClick={() => shiftMonth(1)}
-                type="button"
-              >
-                ›
-              </button>
-              <button
-                aria-label="Next year"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1c133b]/35 text-base leading-none text-[#1c133b] transition hover:border-[#1c133b] touch-manipulation"
-                onClick={() => shiftMonth(12)}
-                type="button"
-              >
-                »
-              </button>
-            </div>
-            <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-[#6f6a82]">
-              {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
-                <span key={day}>{day}</span>
-              ))}
-            </div>
-            <div className="mt-0.5 grid grid-cols-7 gap-0.5 text-center text-xs">
-              {cells.map((day, index) => {
-                if (!day) return <span key={`e-${index}`} />;
-                const iso = toIsoDate(year, month, day);
-                const disabled = iso < earliest || iso > latest;
-                const selected = value === iso;
-                return (
-                  <button
-                    className={cn(
-                      "mx-auto flex h-7 w-7 items-center justify-center rounded-full touch-manipulation transition",
-                      selected
-                        ? "bg-[#1c133b] font-semibold text-white"
-                        : "text-[#1c133b] hover:bg-[#1c133b]/10",
-                      disabled && "pointer-events-none opacity-30",
-                    )}
-                    disabled={disabled}
-                    key={iso}
-                    onClick={() => pickDay(day)}
-                    type="button"
-                  >
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
-      </div>
-      {error ? <FieldError message={error} /> : null}
-    </div>
+    <DatePickerField
+      error={error}
+      id={id}
+      label={label}
+      max={maxDate}
+      min={minDate ?? "1990-01-01"}
+      onChange={onChange}
+      value={value}
+    />
   );
 }
 
@@ -488,8 +285,8 @@ export function OnboardingCheckbox({
       <span
         aria-hidden
         className={cn(
-          "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1c133b] transition",
-          checked ? "bg-[#1c133b] text-white" : "bg-transparent",
+          "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#D4CCEA] transition",
+          checked ? "border-[#524096] bg-[#524096] text-white" : "bg-white",
           className,
         )}
       >

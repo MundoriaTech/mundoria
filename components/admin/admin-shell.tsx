@@ -338,6 +338,7 @@ function SidebarFooter({
         <UserAvatar
           className="shrink-0"
           name={admin.full_name}
+          preview={false}
           seed={admin.id}
           size="sm"
           url={admin.avatar_url}
@@ -582,7 +583,13 @@ export function AdminShell({
               className="inline-flex items-center gap-2 rounded-full py-1 pl-1 pr-1.5 transition hover:bg-[#F3F4F6]"
               href="/admin/team"
             >
-              <UserAvatar name={admin.full_name} seed={admin.id} size="sm" url={admin.avatar_url} />
+              <UserAvatar
+                name={admin.full_name}
+                preview={false}
+                seed={admin.id}
+                size="sm"
+                url={admin.avatar_url}
+              />
               <span className="hidden max-w-[7rem] truncate text-sm font-medium sm:inline">
                 {firstName}
               </span>

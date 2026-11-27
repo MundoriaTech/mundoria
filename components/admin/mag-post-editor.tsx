@@ -7,9 +7,10 @@ import { useRef, useState } from "react";
 
 import { EditorialBody } from "@/components/marketing/editorial-body";
 import { FileUpload } from "@/components/shared/file-upload";
-import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
+import { SimpleSelect } from "@/components/ui/select";
 import { renderEditorialBlocks } from "@/lib/content/editorial";
 import {
   DEFAULT_MAG_AUTHOR,
@@ -413,11 +414,10 @@ export function MagPostEditor({
                     className="flex cursor-pointer items-start gap-2 rounded-lg px-1.5 py-1 text-sm text-[#1c133b] hover:bg-[#f7f2fc]"
                     key={service.slug}
                   >
-                    <input
+                    <RoundCheckbox
                       checked={checked}
                       className="mt-0.5"
                       onChange={() => toggleRelatedService(service.slug)}
-                      type="checkbox"
                     />
                     <span>
                       <span className="font-medium">{service.label}</span>

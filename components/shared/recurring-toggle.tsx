@@ -1,5 +1,6 @@
 "use client";
 
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import { SimpleSelect } from "@/components/ui/select";
 import { Repeat2 } from "lucide-react";
 
@@ -23,9 +24,8 @@ export function RecurringToggle({
           <Repeat2 className="h-4 w-4 shrink-0 text-primary" />
           Make this a recurring booking
         </span>
-        <input
+        <RoundCheckbox
           checked={value.enabled}
-          className="h-4 w-4 accent-emerald-700"
           onChange={(event) =>
             onChange({
               ...value,
@@ -34,7 +34,6 @@ export function RecurringToggle({
               preferSameCleaner: false,
             })
           }
-          type="checkbox"
         />
       </label>
       {value.enabled ? (

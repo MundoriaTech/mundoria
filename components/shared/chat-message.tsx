@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCheck } from "lucide-react";
+import { Check, CheckCheck } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { Message } from "@/types/customer";
@@ -16,37 +16,50 @@ export function ChatMessage({
 }) {
   const attachments = message.attachments ?? [];
   const text = message.content?.trim() ?? "";
+  const mediaOnly = attachments.length > 0 && !text;
+  const time = new Date(message.created_at).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const peer = senderName ?? message.sender?.full_name ?? "Cleaner";
 
   return (
     <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
-      <div className="max-w-[85%] sm:max-w-[72%]">
-        <p
-          className={cn(
-            "mb-1 px-1 text-[11px] text-[#6f6a82]",
-            isOwn && "text-right",
-          )}
-        >
-          {isOwn ? "You" : senderName ?? message.sender?.full_name ?? "Cleaner"}
-        </p>
+      <div className={cn("flex max-w-[88%] flex-col sm:max-w-[70%]", isOwn ? "items-end" : "items-start")}>
+        {!isOwn ? (
+          <p className="mb-1.5 px-1 text-[12px] font-semibold tracking-[-0.01em] text-[#524096]">
+            {peer.split(" ")[0] ?? peer}
+          </p>
+        ) : null}
+
         <div
           className={cn(
-            "overflow-hidden rounded-[1.25rem] text-sm",
+            "overflow-hidden text-[14.5px] leading-[1.45]",
             isOwn
-              ? "rounded-br-md bg-[#1c133b] text-white"
-              : "rounded-bl-md bg-white text-[#1c133b] shadow-[0_8px_20px_rgba(28,19,59,0.06)] ring-1 ring-[#ece8f3] dark:bg-card dark:text-foreground dark:ring-border",
+              ? "rounded-[22px] rounded-br-[6px] text-white"
+              : "rounded-[22px] rounded-bl-[6px] bg-white text-[#1E1848] shadow-[0_1px_2px_rgba(30,24,72,0.04)]",
           )}
+          style={
+            isOwn
+              ? {
+                  background:
+                    "linear-gradient(160deg, #6A5BA6 0%, #524096 55%, #46367F 100%)",
+                }
+              : undefined
+          }
         >
           {attachments.length ? (
             <div
               className={cn(
-                "grid gap-1 p-1",
+                "grid gap-0.5",
                 attachments.length > 1 && "grid-cols-2",
+                mediaOnly ? "p-1" : "p-1 pb-0",
               )}
             >
               {attachments.map((attachment) =>
                 attachment.type === "video" ? (
                   <video
-                    className="max-h-64 w-full rounded-[1rem] bg-black object-cover"
+                    className="max-h-64 w-full rounded-[16px] bg-black object-cover"
                     controls
                     key={attachment.url}
                     preload="metadata"
@@ -54,7 +67,7 @@ export function ChatMessage({
                   />
                 ) : (
                   <a
-                    className="relative block overflow-hidden rounded-[1rem]"
+                    className="relative block overflow-hidden rounded-[16px]"
                     href={attachment.url}
                     key={attachment.url}
                     rel="noreferrer"
@@ -75,8 +88,8 @@ export function ChatMessage({
           {text ? (
             <p
               className={cn(
-                "whitespace-pre-wrap break-words px-3.5 py-2.5",
-                attachments.length > 0 && "pt-1.5",
+                "m-0 whitespace-pre-wrap break-words px-3.5 pt-2.5",
+                mediaOnly ? "pt-2" : null,
               )}
             >
               {text}
@@ -85,17 +98,18 @@ export function ChatMessage({
 
           <div
             className={cn(
-              "flex items-center justify-end gap-1 px-3 pb-2 text-[10px]",
-              isOwn ? "text-white/65" : "text-[#6f6a82]",
-              !text && attachments.length > 0 && "pt-1",
+              "flex items-center justify-end gap-1 px-3 pb-2 pt-1",
+              isOwn ? "text-white/65" : "text-[#8B8798]",
+              mediaOnly && "pt-1.5",
             )}
           >
-            {new Date(message.created_at).toLocaleTimeString("en-GB", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-            {isOwn && message.is_read ? (
-              <CheckCheck className="h-3 w-3" />
+            <span className="text-[11px] tabular-nums tracking-wide">{time}</span>
+            {isOwn ? (
+              message.is_read ? (
+                <CheckCheck className="h-3.5 w-3.5" strokeWidth={2.2} />
+              ) : (
+                <Check className="h-3.5 w-3.5 opacity-70" strokeWidth={2.2} />
+              )
             ) : null}
           </div>
         </div>

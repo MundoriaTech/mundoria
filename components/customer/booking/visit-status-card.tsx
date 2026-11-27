@@ -1,71 +1,9 @@
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/customer/dashboard/section-banner";
-import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
-import {
-  cleanerTierLabel,
-  normalizeMedallionTier,
-} from "@/lib/cleaner/tier";
-import type { CleanerTier } from "@/types/cleaner";
+import { MedallionAvatar } from "@/components/shared/medallion-avatar";
+import { cleanerTierLabel } from "@/lib/cleaner/tier";
 import type { Booking } from "@/types/customer";
-
-/** Metal tones for the medallion ring around a cleaner avatar. */
-const MEDALLION_RING: Record<
-  "bronze" | "silver" | "gold" | "rose_gold",
-  { dark: string; light: string; mid: string }
-> = {
-  bronze: { dark: "#6B3F16", light: "#E2B888", mid: "#B87333" },
-  silver: { dark: "#5C616A", light: "#F2F3F5", mid: "#A8ADB6" },
-  gold: { dark: "#8A6508", light: "#F8E59A", mid: "#D4AF37" },
-  rose_gold: { dark: "#7A3D48", light: "#F7D4CA", mid: "#C97984" },
-};
-
-function MedallionAvatar({
-  avatarUrl,
-  name,
-  tier,
-}: {
-  avatarUrl: string | null;
-  name: string;
-  tier: CleanerTier;
-}) {
-  const visual = normalizeMedallionTier(tier) as keyof typeof MEDALLION_RING;
-  const ring = MEDALLION_RING[visual] ?? MEDALLION_RING.silver;
-  const label = cleanerTierLabel(tier);
-
-  return (
-    <div
-      className="relative h-[64px] w-[64px] shrink-0"
-      title={`${label} medallion`}
-    >
-      {/* Outer metal band */}
-      <div
-        className="absolute inset-0 rounded-full p-[3px]"
-        style={{
-          background: `linear-gradient(160deg, ${ring.light} 0%, ${ring.mid} 38%, ${ring.dark} 72%, ${ring.light} 100%)`,
-          boxShadow: `0 2px 6px ${ring.dark}40, inset 0 1px 0 ${ring.light}`,
-        }}
-      >
-        {/* Inner highlight band */}
-        <div
-          className="h-full w-full rounded-full p-[4px]"
-          style={{
-            background: `linear-gradient(320deg, ${ring.dark} 0%, ${ring.light} 45%, ${ring.mid} 100%)`,
-          }}
-        >
-          <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white text-[16px] font-bold text-[#524096] shadow-[inset_0_0_0_2px_rgba(255,255,255,0.9)]">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img alt={name} className={avatarImageClass(avatarUrl)} src={avatarUrl} />
-            ) : (
-              name.charAt(0)
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 type Stage = {
   detail: string;
@@ -208,7 +146,6 @@ export function VisitStatusCard({
   const cleaner = cleanerVisible ? booking.cleaner ?? null : null;
   const first = cleaner?.full_name.trim().split(/\s+/)[0] ?? null;
   const stage = stageFor(booking, first, holdAtLabel);
-  const avatar = cleaner ? resolveAvatarUrl(cleaner.avatar_url, cleaner.id) : null;
   const tierLabel = cleaner ? cleanerTierLabel(cleaner.tier) : null;
 
   return (
@@ -237,8 +174,9 @@ export function VisitStatusCard({
 
             <div className="flex items-center gap-3.5">
               <MedallionAvatar
-                avatarUrl={avatar}
+                avatarUrl={cleaner.avatar_url}
                 name={cleaner.full_name}
+                seed={cleaner.id}
                 tier={cleaner.tier}
               />
 

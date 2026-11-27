@@ -1,15 +1,19 @@
 "use client";
 
-import { ImagePlus, Loader2, Send, Smile, X } from "lucide-react";
+import { ImagePlus, Loader2, MessageCircle, Send, Smile, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ChatEmojiPicker } from "@/components/customer/chat-emoji-picker";
+import { pillPrimaryStyle } from "@/components/customer/dashboard/section-banner";
 import { ActionError } from "@/components/shared/action-error";
 import { ChatMessage } from "@/components/shared/chat-message";
+import { MedallionAvatar } from "@/components/shared/medallion-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { ownStoragePath } from "@/lib/storage/own-object";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import type { CleanerTier } from "@/types/cleaner";
 import type { Message, MessageAttachment } from "@/types/customer";
 
 const MAX_ATTACHMENTS = 4;
@@ -29,7 +33,10 @@ export function Chat({
   currentUserId,
   initialMessages,
   names,
+  peerAvatarUrl,
   peerLabel,
+  peerSeed,
+  peerTier,
   safetyHold = false,
   subtitle,
 }: {
@@ -37,7 +44,11 @@ export function Chat({
   currentUserId: string;
   initialMessages: Message[];
   names: Record<string, string>;
+  peerAvatarUrl?: string | null;
   peerLabel?: string;
+  peerSeed?: string | null;
+  /** When set, peer is a cleaner — show the medallion ring. */
+  peerTier?: CleanerTier | null;
   /** When true, show a safety-review banner above the thread. */
   safetyHold?: boolean;
   subtitle?: string;
@@ -286,24 +297,46 @@ export function Chat({
   const canSend = Boolean(content.trim() || pending.length) && !sending && !uploading;
 
   return (
-    <div className="flex h-[calc(100dvh-11rem-env(safe-area-inset-bottom))] min-h-[18rem] flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-[0_16px_40px_rgba(28,19,59,0.08)] ring-1 ring-[#ece8f3] dark:bg-card dark:ring-border sm:h-[calc(100vh-12rem)] sm:min-h-[28rem]">
-      <div className="border-b border-[#ece8f3] px-4 py-3.5 dark:border-border sm:px-5">
-        <h1 className="text-base font-semibold tracking-tight text-[#1c133b] dark:text-foreground">
-          {peerLabel ?? "Conversation"}
-        </h1>
-        <p className="mt-0.5 text-xs text-[#6f6a82]">
-          {subtitle ?? "Only you and your cleaner can see these messages."}
-        </p>
+    <div className="flex h-[calc(100dvh-11rem-env(safe-area-inset-bottom))] min-h-[18rem] flex-col overflow-hidden rounded-[22px] bg-white sm:h-[calc(100vh-12rem)] sm:min-h-[28rem]">
+      <div className="shrink-0 p-4 sm:p-5">
+        <div className="flex items-center gap-3.5 rounded-[18px] bg-[#F3F4F6] px-4 py-3.5">
+          {peerTier ? (
+            <MedallionAvatar
+              avatarUrl={peerAvatarUrl}
+              name={peerLabel ?? "Cleaner"}
+              seed={peerSeed}
+              size="sm"
+              tier={peerTier}
+            />
+          ) : (
+            <UserAvatar
+              name={peerLabel ?? "Conversation"}
+              seed={peerSeed}
+              size="sm"
+              url={peerAvatarUrl}
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="m-0 truncate text-[15px] font-semibold text-[#1E1848]">
+              {peerLabel ?? "Conversation"}
+            </p>
+            {subtitle ? (
+              <p className="m-0 mt-0.5 truncate text-[13px] text-[#6B6B70]">
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       {safetyHold ? (
-        <div className="border-b border-[#f0c4b8] bg-[#fff7f2] px-4 py-3 text-xs leading-5 text-[#7a3b28] sm:px-5">
-          Safety review in progress, keep messages respectful. Mundoria can see
+        <div className="mx-4 mb-3 rounded-[14px] bg-[#fff7f2] px-4 py-3 text-[13px] leading-5 text-[#7a3b28] sm:mx-5">
+          Safety review in progress — keep messages respectful. Mundoria can see
           this thread.
         </div>
       ) : null}
 
-      <div className="flex-1 space-y-3 overflow-y-auto bg-[#faf8ff] px-3 py-4 dark:bg-background sm:space-y-4 sm:px-5 sm:py-5">
+      <div className="mx-4 flex-1 space-y-2.5 overflow-y-auto rounded-[18px] bg-[#F3F4F6] px-3 py-4 sm:mx-5 sm:space-y-3 sm:px-5 sm:py-5">
         {messages.length ? (
           messages.map((message) => {
             const mine = message.sender_id === currentUserId;
@@ -322,10 +355,16 @@ export function Chat({
           })
         ) : (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a6533]">
-              Messages
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#EAE7F5]">
+              <MessageCircle
+                className="h-5 w-5 text-[#524096]"
+                strokeWidth={1.6}
+              />
+            </div>
+            <p className="m-0 text-[15px] font-semibold text-[#1E1848]">
+              Start the conversation
             </p>
-            <p className="mt-2 text-sm font-light text-[#5a5470] dark:text-muted-foreground">
+            <p className="m-0 mt-1.5 max-w-xs text-[13px] leading-5 text-[#6B6B70]">
               Say hello, share access notes, parking tips, or photos.
             </p>
           </div>
@@ -334,7 +373,7 @@ export function Chat({
       </div>
 
       <form
-        className="relative border-t border-[#ece8f3] bg-white p-3 dark:border-border dark:bg-card sm:p-4"
+        className="relative shrink-0 p-4 sm:p-5"
         onSubmit={sendMessage}
       >
         {emojiOpen ? (
@@ -347,10 +386,10 @@ export function Chat({
         ) : null}
 
         {pending.length ? (
-          <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
             {pending.map((item) => (
               <div
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#f3efe6]"
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[14px] bg-[#F3F4F6]"
                 key={item.id}
               >
                 {item.type === "video" ? (
@@ -382,12 +421,12 @@ export function Chat({
         ) : null}
 
         {error ? (
-          <div className="mb-2">
+          <div className="mb-3">
             <ActionError message={error} title="Couldn’t send that" />
           </div>
         ) : null}
 
-        <div className="flex items-end gap-1.5 sm:gap-2">
+        <div className="flex items-end gap-1.5 rounded-[18px] bg-[#F3F4F6] p-2 sm:gap-2 sm:p-2.5">
           <input
             accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
             className="hidden"
@@ -402,7 +441,7 @@ export function Chat({
           />
           <button
             aria-label="Add photo or video"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#5a5470] transition hover:bg-[#f3efe6] disabled:opacity-50"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#524096] transition hover:bg-white disabled:opacity-50"
             disabled={uploading || pending.length >= MAX_ATTACHMENTS}
             onClick={() => fileRef.current?.click()}
             type="button"
@@ -416,8 +455,8 @@ export function Chat({
           <button
             aria-label="Add emoji"
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#5a5470] transition hover:bg-[#f3efe6]",
-              emojiOpen && "bg-[#f3efe6] text-[#312c79]",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#524096] transition hover:bg-white",
+              emojiOpen && "bg-white text-[#524096]",
             )}
             onClick={() => setEmojiOpen((open) => !open)}
             type="button"
@@ -425,7 +464,7 @@ export function Chat({
             <Smile className="h-5 w-5" />
           </button>
           <textarea
-            className="max-h-28 min-h-11 flex-1 resize-none rounded-[1.1rem] border border-[#e8e4f0] bg-[#faf8ff] px-3.5 py-2.5 text-sm text-[#1c133b] outline-none transition placeholder:text-[#6f6a82] focus:border-[#c4b5e0] dark:border-border dark:bg-background dark:text-foreground"
+            className="max-h-28 min-h-11 flex-1 resize-none rounded-[14px] border-0 bg-transparent px-2 py-2.5 text-[14px] text-[#1E1848] outline-none placeholder:text-[#8B8798]"
             onChange={(event) => setContent(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
@@ -440,8 +479,9 @@ export function Chat({
           />
           <button
             aria-label="Send"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1c133b] text-white transition hover:bg-[#312c79] disabled:opacity-40"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white transition hover:brightness-110 disabled:opacity-40"
             disabled={!canSend}
+            style={pillPrimaryStyle}
             type="submit"
           >
             {sending ? (

@@ -34,6 +34,7 @@ import type { RatingMood } from "@/types/cleaner";
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
 import { ActionError } from "@/components/shared/action-error";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
+import { DatePickerField } from "@/components/shared/date-picker-field";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
@@ -748,19 +749,20 @@ export function BookingDetail({
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-medium">
               Start
-              <input
-                className="mt-1 h-11 w-full rounded-xl border px-3"
-                onChange={(event) => setPauseStart(event.target.value)}
-                type="date"
+              <DatePickerField
+                className="mt-1"
+                onChange={setPauseStart}
+                triggerClassName="h-11 rounded-xl"
                 value={pauseStart}
               />
             </label>
             <label className="text-sm font-medium">
               End
-              <input
-                className="mt-1 h-11 w-full rounded-xl border px-3"
-                onChange={(event) => setPauseEnd(event.target.value)}
-                type="date"
+              <DatePickerField
+                className="mt-1"
+                min={pauseStart || undefined}
+                onChange={setPauseEnd}
+                triggerClassName="h-11 rounded-xl"
                 value={pauseEnd}
               />
             </label>

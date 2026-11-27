@@ -4,19 +4,29 @@ import { CheckCircle2, PhoneCall } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { SimpleSelect } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import {
+  pillPrimary,
+  pillPrimaryStyle,
+  SectionHeading,
+} from "@/components/customer/dashboard/section-banner";
+import { DateTimePickerField } from "@/components/shared/date-picker-field";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
+import { SimpleSelect } from "@/components/ui/select";
 import { INCIDENT_CATEGORIES } from "@/lib/cleaner/onboarding-compliance";
 import { cn } from "@/lib/utils";
 
-const FIELD_CLASS =
-  "border-2 border-[#1c133b] bg-[#f9f6ef] focus-visible:ring-[#1c133b]";
+const fieldClass =
+  "mt-1.5 h-11 w-full rounded-[12px] border-0 bg-[#F3F4F6] px-3.5 text-[14px] text-[#1E1848] outline-none ring-0 placeholder:text-[#8B8798] focus:bg-white focus:ring-2 focus:ring-[#D4CCEA]";
 
 const SEVERITIES = [
   { description: "No immediate risk", label: "Standard", value: "standard" },
   { description: "Needs attention soon", label: "Urgent", value: "urgent" },
-  { description: "Serious or ongoing risk", label: "Emergency", value: "emergency" },
+  {
+    description: "Serious or ongoing risk",
+    label: "Emergency",
+    value: "emergency",
+  },
 ] as const;
 
 type Severity = (typeof SEVERITIES)[number]["value"];
@@ -95,37 +105,42 @@ export function IncidentReportForm({
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-6 text-center sm:p-8">
-        <CheckCircle2 className="mx-auto h-10 w-10 text-[#6a45b8]" />
-        <h2 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-[#1c133b]">
+      <div className="rounded-[22px] bg-white p-6 text-center sm:p-8">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#EAE7F5]">
+          <CheckCircle2 className="h-6 w-6 text-[#524096]" strokeWidth={1.8} />
+        </div>
+        <h2 className="m-0 mt-4 text-[20px] font-semibold tracking-[-0.02em] text-[#1E1848]">
           Report sent
         </h2>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#5a5470]">
+        <p className="mx-auto mt-2 max-w-md text-[14px] leading-5 text-[#5F5F66]">
           Thank you. Our team has been notified and will review your report.
           We’ll contact you if we need anything else. If anyone is in danger,
           call 999 now.
         </p>
-        <Button
-          className="mt-6 h-11 rounded-full bg-[#1c133b] px-6 font-semibold text-white hover:bg-[#312c79]"
+        <button
+          className={cn(pillPrimary, "mt-6")}
           onClick={reset}
+          style={pillPrimaryStyle}
           type="button"
         >
           Report another incident
-        </Button>
+        </button>
       </div>
     );
   }
 
   return (
     <form
-      className="space-y-5 rounded-2xl border-2 border-[#1c133b] bg-[#f9f6ef] p-5 sm:p-7"
+      className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:gap-5 sm:p-5"
       onSubmit={submit}
     >
-      <div className="flex items-start gap-3 rounded-xl border-2 border-[#1c133b] bg-white p-4">
-        <PhoneCall className="mt-0.5 h-5 w-5 shrink-0 text-[#d4694a]" />
-        <div className="text-sm leading-6 text-[#1c133b]">
-          <p className="font-semibold">In danger or someone is hurt? Call 999.</p>
-          <p className="text-[#5a5470]">
+      <SectionHeading title="Report an incident" />
+
+      <div className="flex items-start gap-3 rounded-[18px] bg-[#fff7f2] px-4 py-3.5">
+        <PhoneCall className="mt-0.5 h-5 w-5 shrink-0 text-[#9A2B18]" />
+        <div className="text-[14px] leading-5 text-[#7a3b28]">
+          <p className="m-0 font-semibold">In danger or someone is hurt? Call 999.</p>
+          <p className="m-0 mt-1 text-[#7a3b28]/85">
             For a crime or incident that is not an emergency, call 101. Report
             it here once you are safe.
           </p>
@@ -134,28 +149,31 @@ export function IncidentReportForm({
 
       <Field label="What type of incident?" htmlFor="incident-category">
         <SimpleSelect
-          className={cn("h-11 rounded-md text-[#1c133b]", FIELD_CLASS)}
+          className={cn(fieldClass, "text-[#1E1848]")}
           id="incident-category"
           onChange={setCategory}
-          options={INCIDENT_CATEGORIES.map((item) => ({ label: item.label, value: item.value }))}
+          options={INCIDENT_CATEGORIES.map((item) => ({
+            label: item.label,
+            value: item.value,
+          }))}
           value={category}
         />
       </Field>
 
-      <fieldset>
-        <legend className="text-sm font-semibold text-[#1c133b]">
+      <fieldset className="m-0 min-w-0 border-0 p-0">
+        <legend className="mb-2 px-0 text-[13px] font-semibold text-[#1E1848]">
           How serious is it?
         </legend>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-3">
           {SEVERITIES.map((item) => {
             const active = severity === item.value;
             return (
               <label
                 className={cn(
-                  "cursor-pointer rounded-xl border-2 border-[#1c133b] px-3 py-2.5 text-sm transition",
+                  "cursor-pointer rounded-[14px] px-3.5 py-3 text-[13px] transition",
                   active
-                    ? "bg-[#1c133b] text-white"
-                    : "bg-[#f9f6ef] text-[#1c133b] hover:bg-white",
+                    ? "bg-[#524096] text-white"
+                    : "bg-[#F3F4F6] text-[#1E1848] hover:bg-[#ECE8F6]",
                 )}
                 key={item.value}
               >
@@ -170,8 +188,8 @@ export function IncidentReportForm({
                 <span className="block font-semibold">{item.label}</span>
                 <span
                   className={cn(
-                    "block text-xs",
-                    active ? "text-white/75" : "text-[#5a5470]",
+                    "mt-0.5 block text-[12px] leading-4",
+                    active ? "text-white/75" : "text-[#6B6B70]",
                   )}
                 >
                   {item.description}
@@ -184,21 +202,18 @@ export function IncidentReportForm({
 
       {category === "injury" || severity !== "standard" ? (
         <p
-          className="rounded-xl border-2 border-[#1c133b] bg-white px-4 py-3 text-sm leading-6 text-[#5a5470]"
+          className="m-0 rounded-[14px] bg-[#EAE7F5] px-4 py-3 text-[13px] leading-5 text-[#524096]"
           role="note"
         >
-          <span className="font-semibold text-[#1c133b]">
-            May need RIDDOR reporting.
-          </span>{" "}
-          Some work-related injuries must be reported to the HSE. Our team will
-          review your report and let you know if anything further is needed. You
-          don’t need to do anything extra.
+          <span className="font-semibold">May need RIDDOR reporting.</span> Some
+          work-related injuries must be reported to the HSE. Our team will review
+          your report and let you know if anything further is needed.
         </p>
       ) : null}
 
       <Field label="Short title" htmlFor="incident-title">
         <Input
-          className={FIELD_CLASS}
+          className={fieldClass}
           id="incident-title"
           maxLength={160}
           onChange={(event) => setTitle(event.target.value)}
@@ -211,8 +226,8 @@ export function IncidentReportForm({
       <Field label="What happened?" htmlFor="incident-description">
         <textarea
           className={cn(
-            "min-h-32 w-full rounded-md px-3 py-2 text-sm text-[#1c133b] outline-none placeholder:text-[#6f6a82] focus-visible:ring-2 [color-scheme:light]",
-            FIELD_CLASS,
+            fieldClass,
+            "min-h-32 resize-y py-3 leading-5 [color-scheme:light]",
           )}
           id="incident-description"
           maxLength={4000}
@@ -224,20 +239,20 @@ export function IncidentReportForm({
         />
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="When did it happen? (optional)" htmlFor="incident-when">
-          <Input
-            className={FIELD_CLASS}
+          <DateTimePickerField
+            className="mt-1.5"
             id="incident-when"
             max={toLocalInputValue(new Date())}
-            onChange={(event) => setOccurredAt(event.target.value)}
-            type="datetime-local"
+            onChange={setOccurredAt}
+            triggerClassName={fieldClass.replace("mt-1.5 ", "")}
             value={occurredAt}
           />
         </Field>
         <Field label="Where? (optional)" htmlFor="incident-location">
           <Input
-            className={FIELD_CLASS}
+            className={fieldClass}
             id="incident-location"
             maxLength={500}
             onChange={(event) => setLocationNote(event.target.value)}
@@ -250,42 +265,45 @@ export function IncidentReportForm({
       {bookings.length ? (
         <Field label="Related booking (optional)" htmlFor="incident-booking">
           <SimpleSelect
-            className={cn("h-11 rounded-md text-[#1c133b]", FIELD_CLASS)}
+            className={cn(fieldClass, "text-[#1E1848]")}
             emptyLabel="Not linked to a booking"
             id="incident-booking"
             onChange={setBookingId}
-            options={bookings.map((booking) => ({ label: booking.label, value: booking.id }))}
+            options={bookings.map((booking) => ({
+              label: booking.label,
+              value: booking.id,
+            }))}
             value={bookingId}
           />
         </Field>
       ) : null}
 
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#1c133b]">
-        <input
+      <label className="flex cursor-pointer items-start gap-3 text-[14px] text-[#1E1848]">
+        <RoundCheckbox
           checked={emergencyContacted}
-          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-2 border-[#1c133b] accent-[#1c133b]"
+          className="mt-0.5"
           onChange={(event) => setEmergencyContacted(event.target.checked)}
-          type="checkbox"
         />
         <span>I have contacted the emergency services (999 or 101).</span>
       </label>
 
       {error ? (
         <p
-          className="rounded-xl border-2 border-[#d4694a] bg-white px-4 py-3 text-sm text-[#9b3a1f]"
+          className="m-0 rounded-[14px] bg-[#FEE9E9] px-4 py-3 text-[14px] text-[#C0272D]"
           role="alert"
         >
           {error}
         </p>
       ) : null}
 
-      <Button
-        className="h-12 w-full rounded-full bg-[#1c133b] px-6 text-sm font-semibold text-white hover:bg-[#312c79] sm:w-auto"
+      <button
+        className={cn(pillPrimary, "w-full sm:w-auto")}
         disabled={submitting}
+        style={pillPrimaryStyle}
         type="submit"
       >
         {submitting ? "Sending…" : "Send report"}
-      </Button>
+      </button>
     </form>
   );
 }
@@ -300,8 +318,8 @@ function Field({
   label: string;
 }) {
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-semibold text-[#1c133b]" htmlFor={htmlFor}>
+    <div>
+      <label className="text-[13px] font-semibold text-[#1E1848]" htmlFor={htmlFor}>
         {label}
       </label>
       {children}

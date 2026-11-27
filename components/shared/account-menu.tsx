@@ -2,12 +2,16 @@
 
 import { useFeedback } from "@/components/shared/feedback-provider";
 import {
+  Banknote,
+  BriefcaseBusiness,
   CalendarDays,
   ChevronDown,
   CreditCard,
+  Gauge,
   LayoutDashboard,
   LogOut,
   MapPin,
+  ShieldAlert,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
@@ -15,9 +19,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { MedallionAvatar } from "@/components/shared/medallion-avatar";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { cn } from "@/lib/utils";
 import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
+import { cn } from "@/lib/utils";
+import type { CleanerTier } from "@/types/cleaner";
 
 export type AccountMenuItem = {
   href: string;
@@ -28,6 +34,7 @@ export type AccountMenuItem = {
 export function AccountMenu({
   items,
   profile,
+  tier,
   variant = "compact",
 }: {
   items: AccountMenuItem[];
@@ -37,6 +44,8 @@ export function AccountMenu({
     full_name: string;
     id: string;
   };
+  /** When set, wraps the avatar in the metal medallion ring. */
+  tier?: CleanerTier | null;
   /** `panel` matches the customer dashboard header card. */
   variant?: "compact" | "panel";
 }) {
@@ -154,13 +163,26 @@ export function AccountMenu({
         }}
         type="button"
       >
-        <UserAvatar
-          className="shrink-0"
-          name={profile.full_name}
-          seed={profile.id}
-          size={isPanel ? "md" : "sm"}
-          url={profile.avatar_url}
-        />
+        {tier ? (
+          <MedallionAvatar
+            avatarUrl={profile.avatar_url}
+            className="shrink-0"
+            name={profile.full_name}
+            preview={false}
+            seed={profile.id}
+            size={isPanel ? "md" : "sm"}
+            tier={tier}
+          />
+        ) : (
+          <UserAvatar
+            className="shrink-0"
+            name={profile.full_name}
+            preview={false}
+            seed={profile.id}
+            size={isPanel ? "md" : "sm"}
+            url={profile.avatar_url}
+          />
+        )}
         {isPanel ? (
           <>
             <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
@@ -249,4 +271,9 @@ export const CUSTOMER_ACCOUNT_MENU: AccountMenuItem[] = [
 export const CLEANER_ACCOUNT_MENU: AccountMenuItem[] = [
   { href: "/cleaner/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/cleaner/profile", icon: UserRound, label: "Profile" },
+  { href: "/cleaner/jobs", icon: BriefcaseBusiness, label: "Jobs" },
+  { href: "/cleaner/diary", icon: CalendarDays, label: "Diary" },
+  { href: "/cleaner/earnings", icon: Banknote, label: "Earnings" },
+  { href: "/cleaner/performance", icon: Gauge, label: "Performance" },
+  { href: "/cleaner/incidents", icon: ShieldAlert, label: "Incidents" },
 ];

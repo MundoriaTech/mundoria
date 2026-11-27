@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { TierBadge } from "@/components/cleaner/tier-badge";
+import { MedallionAvatar } from "@/components/shared/medallion-avatar";
 import {
   ClientPagination,
   usePagedItems,
@@ -173,7 +174,17 @@ export function CleanersTable({
               key={cleaner.id}
             >
               <div className="flex items-start gap-3">
-                <UserAvatar name={cleaner.full_name} seed={cleaner.id} size="md" url={cleaner.avatar_url} />
+                {cleaner.cleaner_profiles ? (
+                  <MedallionAvatar
+                    avatarUrl={cleaner.avatar_url}
+                    name={cleaner.full_name}
+                    seed={cleaner.id}
+                    size="md"
+                    tier={cleaner.cleaner_profiles.tier}
+                  />
+                ) : (
+                  <UserAvatar name={cleaner.full_name} seed={cleaner.id} size="md" url={cleaner.avatar_url} />
+                )}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-semibold">{cleaner.full_name}</p>
@@ -221,13 +232,24 @@ export function CleanersTable({
                 style={{ gridTemplateColumns: GRID }}
               >
                 <span className="flex min-w-0 items-center gap-2.5">
-                  <UserAvatar
-                    className="shrink-0"
-                    name={cleaner.full_name}
-                    seed={cleaner.id}
-                    size="sm"
-                    url={cleaner.avatar_url}
-                  />
+                  {cleaner.cleaner_profiles ? (
+                    <MedallionAvatar
+                      avatarUrl={cleaner.avatar_url}
+                      className="shrink-0"
+                      name={cleaner.full_name}
+                      seed={cleaner.id}
+                      size="sm"
+                      tier={cleaner.cleaner_profiles.tier}
+                    />
+                  ) : (
+                    <UserAvatar
+                      className="shrink-0"
+                      name={cleaner.full_name}
+                      seed={cleaner.id}
+                      size="sm"
+                      url={cleaner.avatar_url}
+                    />
+                  )}
                   <span className="min-w-0">
                     <span className="block truncate text-[15px] font-semibold text-black">{cleaner.full_name}</span>
                     <span className="block truncate text-[12.3px] text-[#5F5F66]">{cleaner.email}</span>

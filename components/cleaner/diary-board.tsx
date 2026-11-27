@@ -4,8 +4,18 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import {
+  pillOutline,
+  pillPrimary,
+  pillPrimaryStyle,
+  SectionHeading,
+} from "@/components/customer/dashboard/section-banner";
+import {
+  DatePickerField,
+  DateTimePickerField,
+} from "@/components/shared/date-picker-field";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import { absenceError, diaryPlanError } from "@/lib/cleaner/diary-dates";
 import { bookingServiceName, formatMoney } from "@/lib/customer/services";
 import { cn } from "@/lib/utils";
@@ -54,6 +64,12 @@ const STATUS_LABEL: Record<string, string> = {
   no_show: "Missed",
   pending_match: "Waiting to be confirmed",
 };
+
+const tileLabel =
+  "m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70";
+
+const fieldClass =
+  "mt-1.5 h-11 w-full rounded-[12px] border-0 bg-[#F3F4F6] px-3.5 text-[14px] text-[#1E1848] outline-none ring-0 placeholder:text-[#8B8798] focus:bg-white focus:ring-2 focus:ring-[#D4CCEA]";
 
 function localIso(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -313,157 +329,231 @@ export function DiaryBoard() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
-            Your time
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-            Diary
-          </h1>
-          <p className="mt-1 max-w-xl text-sm leading-6 text-[#5c5670]">
-            Mundoria visits, plans of your own, and days you are away.
-          </p>
-        </div>
+    <div className="flex flex-col gap-4 sm:gap-5">
+      <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:gap-5 sm:p-5">
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => setPanel(panel === "plan" ? null : "plan")} type="button" variant="outline">
+          <button
+            className={cn(
+              pillOutline,
+              "min-h-10 flex-1 px-4 text-[13px] sm:flex-none",
+              panel === "plan" && "bg-[#ECE8F6]",
+            )}
+            onClick={() => setPanel(panel === "plan" ? null : "plan")}
+            type="button"
+          >
             Add a plan
-          </Button>
-          <Button onClick={() => setPanel(panel === "away" ? null : "away")} type="button">
+          </button>
+          <button
+            className={cn(pillPrimary, "min-h-10 flex-1 px-4 text-[13px] sm:flex-none")}
+            onClick={() => setPanel(panel === "away" ? null : "away")}
+            style={pillPrimaryStyle}
+            type="button"
+          >
             Take time off
-          </Button>
+          </button>
         </div>
-      </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Summary
-          label="Visits"
-          value={
-            jobs.length
-              ? `${jobs.length} visit${jobs.length === 1 ? "" : "s"}${hoursBooked ? ` · ${durationLabel(hoursBooked)}` : ""}`
-              : "Nothing booked"
-          }
-        />
-        <Summary
-          label="Your pay"
-          value={payPence > 0 ? formatMoney(payPence) : "Shows once a visit has a price"}
-        />
-        <Summary
-          label="Up next"
-          value={
-            nextJob
-              ? `${bookingServiceName(nextJob)} · ${parseDay(nextJob.scheduled_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} at ${clock(nextJob.scheduled_start_time)}`
-              : "No upcoming visit in view"
-          }
-        />
-      </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Summary
+            label="Visits"
+            value={
+              jobs.length
+                ? `${jobs.length} visit${jobs.length === 1 ? "" : "s"}${hoursBooked ? ` · ${durationLabel(hoursBooked)}` : ""}`
+                : "Nothing booked"
+            }
+          />
+          <Summary
+            label="Your pay"
+            value={payPence > 0 ? formatMoney(payPence) : "Shows once a visit has a price"}
+          />
+          <Summary
+            label="Up next"
+            value={
+              nextJob
+                ? `${bookingServiceName(nextJob)} · ${parseDay(nextJob.scheduled_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} at ${clock(nextJob.scheduled_start_time)}`
+                : "No upcoming visit in view"
+            }
+          />
+        </div>
 
-      {clashes.length ? (
-        <p className="rounded-2xl border border-[#f0a888] bg-[#fff4ee] px-4 py-3 text-sm text-[#7a3b28]">
-          {clashes.length === 1
-            ? "One of your plans overlaps a Mundoria visit."
-            : `${clashes.length} of your plans overlap a Mundoria visit.`}
-        </p>
-      ) : null}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <button
-            aria-label="Earlier"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e4dced] bg-white text-[#1c133b]"
-            onClick={() => shift(-1)}
-            type="button"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            className="h-10 rounded-full border border-[#e4dced] bg-white px-4 text-sm font-semibold text-[#1c133b]"
-            onClick={() => setAnchor(new Date())}
-            type="button"
-          >
-            Today
-          </button>
-          <button
-            aria-label="Later"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e4dced] bg-white text-[#1c133b]"
-            onClick={() => shift(1)}
-            type="button"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-          <p className="ml-1 text-sm font-semibold text-[#1c133b]">
-            {heading(view, range.from, range.to)}
+        {clashes.length ? (
+          <p className="m-0 rounded-[18px] bg-[#FFF5E6] px-4 py-3 text-[14px] leading-5 text-[#8A5200]">
+            {clashes.length === 1
+              ? "One of your plans overlaps a Mundoria visit."
+              : `${clashes.length} of your plans overlap a Mundoria visit.`}
           </p>
-        </div>
-        <div className="flex rounded-full bg-[#f3eefb] p-1">
-          {(["day", "week", "month"] as const).map((option) => (
+        ) : null}
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              className={cn(
-                "rounded-full px-4 py-2 text-sm font-semibold capitalize",
-                view === option ? "bg-white text-[#312c79] shadow-sm" : "text-[#5c5670]",
-              )}
-              key={option}
-              onClick={() => setView(option)}
+              aria-label="Earlier"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#D4CCEA] bg-[#F3F4F6] text-[#524096] transition hover:bg-[#ECE8F6]"
+              onClick={() => shift(-1)}
               type="button"
             >
-              {option}
+              <ChevronLeft className="h-4 w-4" />
             </button>
-          ))}
-        </div>
-      </div>
+            <button
+              className="h-10 rounded-full border border-[#D4CCEA] bg-[#F3F4F6] px-4 text-[13px] font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
+              onClick={() => setAnchor(new Date())}
+              type="button"
+            >
+              Today
+            </button>
+            <button
+              aria-label="Later"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#D4CCEA] bg-[#F3F4F6] text-[#524096] transition hover:bg-[#ECE8F6]"
+              onClick={() => shift(1)}
+              type="button"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <p className="m-0 ml-1 text-[14px] font-semibold text-[#1E1848]">
+              {heading(view, range.from, range.to)}
+            </p>
+          </div>
 
-      <Legend />
+          <div
+            aria-label="Diary view"
+            className="grid grid-cols-3 gap-1 rounded-[12px] bg-[#E7E7EF] p-1"
+            role="tablist"
+          >
+            {(["day", "week", "month"] as const).map((option) => {
+              const active = view === option;
+              return (
+                <button
+                  aria-selected={active}
+                  className="h-9 rounded-[9px] px-3 text-[13px] font-semibold capitalize transition-colors"
+                  key={option}
+                  onClick={() => setView(option)}
+                  role="tab"
+                  style={{
+                    background: active ? "#524096" : "transparent",
+                    border: "none",
+                    color: active ? "#FFFFFF" : "#524096",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                  type="button"
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <Legend />
+      </section>
 
       {panel === "plan" ? (
-        <form className="grid gap-3 rounded-3xl border border-[#e6e0f2] bg-[#fbf8ff] p-4 sm:grid-cols-2" onSubmit={(event) => void addEvent(event)}>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b] sm:col-span-2">
+        <form
+          className="grid gap-3 rounded-[22px] bg-white p-4 sm:grid-cols-2 sm:p-5"
+          onSubmit={(event) => void addEvent(event)}
+        >
+          <SectionHeading className="sm:col-span-2" title="Add a plan" />
+          <label className="text-[13px] font-semibold text-[#1E1848] sm:col-span-2">
             What is it?
-            <Input onChange={(event) => setTitle(event.target.value)} placeholder="School run, dentist, family" value={title} />
+            <Input
+              className={fieldClass}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="School run, dentist, family"
+              value={title}
+            />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="text-[13px] font-semibold text-[#1E1848]">
             Starts
-            <Input min={nowStamp} onChange={(event) => setStartsAt(event.target.value)} type="datetime-local" value={startsAt} />
+            <DateTimePickerField
+              className="mt-1.5"
+              min={nowStamp}
+              onChange={setStartsAt}
+              triggerClassName={fieldClass.replace("mt-1.5 ", "")}
+              value={startsAt}
+            />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="text-[13px] font-semibold text-[#1E1848]">
             Ends
-            <Input min={startsAt || nowStamp} onChange={(event) => setEndsAt(event.target.value)} type="datetime-local" value={endsAt} />
+            <DateTimePickerField
+              className="mt-1.5"
+              min={startsAt || nowStamp}
+              onChange={setEndsAt}
+              triggerClassName={fieldClass.replace("mt-1.5 ", "")}
+              value={endsAt}
+            />
           </label>
-          <Button className="sm:col-span-2" type="submit">Save plan</Button>
+          <button
+            className={cn(pillPrimary, "sm:col-span-2")}
+            style={pillPrimaryStyle}
+            type="submit"
+          >
+            Save plan
+          </button>
         </form>
       ) : null}
 
       {panel === "away" ? (
-        <form className="grid gap-3 rounded-3xl border border-[#e6e0f2] bg-[#fff8f4] p-4 sm:grid-cols-2" onSubmit={(event) => void addAbsence(event)}>
-          <p className="text-sm leading-6 text-[#5c5670] sm:col-span-2">
-            New visits will skip these days. You can also hand back visits already booked, so another cleaner can take them.
+        <form
+          className="grid gap-3 rounded-[22px] bg-white p-4 sm:grid-cols-2 sm:p-5"
+          onSubmit={(event) => void addAbsence(event)}
+        >
+          <SectionHeading className="sm:col-span-2" title="Take time off" />
+          <p className="m-0 text-[14px] leading-5 text-[#5F5F66] sm:col-span-2">
+            New visits will skip these days. You can also hand back visits
+            already booked, so another cleaner can take them.
           </p>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="text-[13px] font-semibold text-[#1E1848]">
             First day
-            <Input min={today} onChange={(event) => setAwayStart(event.target.value)} type="date" value={awayStart} />
+            <DatePickerField
+              className="mt-1.5"
+              min={today}
+              onChange={setAwayStart}
+              triggerClassName={fieldClass.replace("mt-1.5 ", "")}
+              value={awayStart}
+            />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b]">
+          <label className="text-[13px] font-semibold text-[#1E1848]">
             Last day
-            <Input min={awayStart || today} onChange={(event) => setAwayEnd(event.target.value)} type="date" value={awayEnd} />
+            <DatePickerField
+              className="mt-1.5"
+              min={awayStart || today}
+              onChange={setAwayEnd}
+              triggerClassName={fieldClass.replace("mt-1.5 ", "")}
+              value={awayEnd}
+            />
           </label>
-          <label className="space-y-1 text-sm font-medium text-[#1c133b] sm:col-span-2">
+          <label className="text-[13px] font-semibold text-[#1E1848] sm:col-span-2">
             Note, if you want one
-            <Input onChange={(event) => setAwayNote(event.target.value)} placeholder="Holiday, appointment, family" value={awayNote} />
+            <Input
+              className={fieldClass}
+              onChange={(event) => setAwayNote(event.target.value)}
+              placeholder="Holiday, appointment, family"
+              value={awayNote}
+            />
           </label>
-          <label className="flex items-start gap-2 text-sm text-[#1c133b] sm:col-span-2">
-            <input
+          <label className="flex items-start gap-2.5 text-[14px] text-[#1E1848] sm:col-span-2">
+            <RoundCheckbox
               checked={cancelExisting}
-              className="mt-1"
+              className="mt-0.5"
               onChange={(event) => setCancelExisting(event.target.checked)}
-              type="checkbox"
             />
             Hand back visits already booked in this period
           </label>
-          <Button className="sm:col-span-2" type="submit">Save time off</Button>
+          <button
+            className={cn(pillPrimary, "sm:col-span-2")}
+            style={pillPrimaryStyle}
+            type="submit"
+          >
+            Save time off
+          </button>
         </form>
       ) : null}
 
-      {message ? <p className="text-sm text-[#312c79]">{message}</p> : null}
+      {message ? (
+        <p className="m-0 rounded-[18px] bg-[#EAE7F5] px-4 py-3 text-[14px] font-semibold leading-5 text-[#524096]">
+          {message}
+        </p>
+      ) : null}
 
       {view === "month" ? (
         <MonthGrid
@@ -511,19 +601,28 @@ export function DiaryBoard() {
       )}
 
       {absences.length ? (
-        <section className="rounded-3xl border border-[#e6e0f2] bg-white p-4">
-          <h2 className="text-sm font-semibold text-[#1c133b]">Days you are away</h2>
-          <ul className="mt-3 space-y-2">
+        <section className="flex flex-col gap-3 rounded-[22px] bg-white p-4 sm:p-5">
+          <SectionHeading title="Days you are away" />
+          <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
             {absences.map((absence) => (
-              <li className="flex items-center justify-between gap-3 text-sm" key={absence.id}>
-                <span className="text-[#1c133b]">
-                  {parseDay(absence.starts_on).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+              <li
+                className="flex items-center justify-between gap-3 rounded-[18px] bg-[#F3F4F6] px-4 py-3"
+                key={absence.id}
+              >
+                <span className="text-[14px] text-[#1E1848]">
+                  {parseDay(absence.starts_on).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
                   {", "}
-                  {parseDay(absence.ends_on).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                  {parseDay(absence.ends_on).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
                   {absence.note ? ` · ${absence.note}` : ""}
                 </span>
                 <button
-                  className="text-sm font-semibold text-[#312c79]"
+                  className="bg-transparent p-0 text-[13px] font-semibold text-[#9A2B18] underline underline-offset-2 transition hover:text-[#7A1F10]"
                   onClick={() => void remove("/api/cleaner/absence", absence.id)}
                   type="button"
                 >
@@ -540,24 +639,26 @@ export function DiaryBoard() {
 
 function Summary({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-[#e6e0f2] bg-white px-4 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#8a6533]">{label}</p>
-      <p className="mt-1 text-sm font-semibold leading-5 text-[#1c133b]">{value}</p>
+    <div className="rounded-[18px] bg-[#F3F4F6] p-4">
+      <p className={tileLabel}>{label}</p>
+      <p className="m-0 mt-2 text-[14px] font-semibold leading-5 text-[#1E1848]">
+        {value}
+      </p>
     </div>
   );
 }
 
 function Legend() {
   return (
-    <div className="flex flex-wrap gap-4 text-xs font-medium text-[#5c5670]">
+    <div className="flex flex-wrap gap-4 text-[12px] font-medium text-[#5F5F66]">
       <span className="inline-flex items-center gap-2">
-        <span className="h-3 w-3 rounded-full bg-[#312c79]" /> Mundoria visit
+        <span className="h-2.5 w-2.5 rounded-full bg-[#524096]" /> Mundoria visit
       </span>
       <span className="inline-flex items-center gap-2">
-        <span className="h-3 w-3 rounded-full bg-[#f0a888]" /> Your plan
+        <span className="h-2.5 w-2.5 rounded-full bg-[#C17E24]" /> Your plan
       </span>
       <span className="inline-flex items-center gap-2">
-        <span className="h-3 w-3 rounded-full bg-[#e4d7f7]" /> Time off
+        <span className="h-2.5 w-2.5 rounded-full bg-[#A89BC9]" /> Time off
       </span>
     </div>
   );
@@ -578,23 +679,28 @@ function WeekGrid({
 }) {
   const height = (END_HOUR - START_HOUR) * HOUR_PX;
   return (
-    <div className="hidden overflow-x-auto rounded-3xl border border-[#e6e0f2] bg-white md:block">
-      <div className="grid min-w-[820px] grid-cols-[3.25rem_repeat(7,minmax(0,1fr))]">
+    <div className="hidden overflow-x-auto rounded-[22px] bg-white p-3 md:block sm:p-4">
+      <div className="grid min-w-[820px] grid-cols-[3.25rem_repeat(7,minmax(0,1fr))] overflow-hidden rounded-[18px] bg-[#F3F4F6]">
         <div />
         {days.map((date) => {
           const day = parseDay(date);
           return (
             <div
               className={cn(
-                "border-b border-l border-[#f0ebf6] px-2 py-3 text-center",
-                date === today && "bg-[#f7f3ff]",
+                "border-b border-l border-white/70 px-2 py-3 text-center",
+                date === today && "bg-[#EAE7F5]",
               )}
               key={date}
             >
-              <p className="text-[11px] uppercase tracking-[0.14em] text-[#6f6a82]">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8B8798]">
                 {day.toLocaleDateString("en-GB", { weekday: "short" })}
               </p>
-              <p className={cn("text-lg font-semibold", date === today ? "text-[#312c79]" : "text-[#1c133b]")}>
+              <p
+                className={cn(
+                  "m-0 mt-0.5 text-[18px] font-semibold",
+                  date === today ? "text-[#524096]" : "text-[#1E1848]",
+                )}
+              >
                 {day.getDate()}
               </p>
             </div>
@@ -603,7 +709,7 @@ function WeekGrid({
         <div className="relative" style={{ height }}>
           {Array.from({ length: END_HOUR - START_HOUR }, (_, index) => (
             <span
-              className="absolute right-2 -translate-y-2 text-[10px] text-[#6f6a82]"
+              className="absolute right-2 -translate-y-2 text-[10px] text-[#8B8798]"
               key={index}
               style={{ top: index * HOUR_PX }}
             >
@@ -617,19 +723,22 @@ function WeekGrid({
           const dayEvents = events.filter((event) => eventDay(event.starts_at) === date);
           return (
             <div
-              className={cn("relative border-l border-[#f0ebf6]", date === today && "bg-[#fbf9ff]")}
+              className={cn(
+                "relative border-l border-white/70",
+                date === today && "bg-[#EAE7F5]/50",
+              )}
               key={date}
               style={{ height }}
             >
               {Array.from({ length: END_HOUR - START_HOUR }, (_, index) => (
                 <span
-                  className="absolute inset-x-0 border-t border-[#f4f0f8]"
+                  className="absolute inset-x-0 border-t border-white/60"
                   key={index}
                   style={{ top: index * HOUR_PX }}
                 />
               ))}
               {away ? (
-                <div className="absolute inset-1 rounded-xl bg-[#f3e9ff]/80 p-2 text-[11px] font-semibold text-[#5b3d9e]">
+                <div className="absolute inset-1 rounded-[12px] bg-[#D4CCEA]/90 p-2 text-[11px] font-semibold text-[#524096]">
                   Away{away.note ? ` · ${away.note}` : ""}
                 </div>
               ) : null}
@@ -640,27 +749,37 @@ function WeekGrid({
                 const blockHeight = Math.max(28, ((end - start) / 60) * HOUR_PX);
                 return (
                   <div
-                    className="absolute inset-x-1 overflow-hidden rounded-xl bg-[#f0a888] px-2 py-1 text-[#3d241c]"
+                    className="absolute inset-x-1 overflow-hidden rounded-[12px] bg-[#FFF5E6] px-2 py-1 text-[#8A5200]"
                     key={event.id}
                     style={{ height: blockHeight, top: Math.max(0, top) }}
                   >
-                    <p className="truncate text-[11px] font-semibold">{event.title}</p>
+                    <p className="m-0 truncate text-[11px] font-semibold">{event.title}</p>
                   </div>
                 );
               })}
               {dayJobs.map((job) => {
                 const start = minutesOf(job.scheduled_start_time);
                 const top = ((start - START_HOUR * 60) / 60) * HOUR_PX;
-                const blockHeight = Math.max(36, Number(job.estimated_duration_hours ?? 1) * HOUR_PX);
+                const blockHeight = Math.max(
+                  36,
+                  Number(job.estimated_duration_hours ?? 1) * HOUR_PX,
+                );
                 return (
                   <Link
-                    className="absolute inset-x-1 overflow-hidden rounded-xl bg-[#312c79] px-2 py-1 text-white shadow-sm"
+                    className="absolute inset-x-1 overflow-hidden rounded-[12px] px-2 py-1 text-white no-underline"
                     href={`/cleaner/job/${job.id}`}
                     key={job.id}
-                    style={{ height: blockHeight, top: Math.max(0, top) }}
+                    style={{
+                      background:
+                        "linear-gradient(160deg, #6A5BA6 0%, #524096 100%)",
+                      height: blockHeight,
+                      top: Math.max(0, top),
+                    }}
                   >
-                    <p className="truncate text-[11px] font-semibold">{bookingServiceName(job)}</p>
-                    <p className="truncate text-[10px] text-white/80">
+                    <p className="m-0 truncate text-[11px] font-semibold">
+                      {bookingServiceName(job)}
+                    </p>
+                    <p className="m-0 truncate text-[10px] text-white/80">
                       {clock(job.scheduled_start_time)}
                       {job.area ? ` · ${job.area}` : ""}
                     </p>
@@ -695,55 +814,66 @@ function DayAgenda({
   const dayEvents = events.filter((event) => eventDay(event.starts_at) === date);
   const empty = !away && !dayJobs.length && !dayEvents.length;
   return (
-    <section className="rounded-3xl border border-[#e6e0f2] bg-white p-4">
-      <h2 className="text-sm font-semibold text-[#1c133b]">
-        {parseDay(date).toLocaleDateString("en-GB", {
+    <section className="flex flex-col gap-3 rounded-[22px] bg-white p-4 sm:p-5">
+      <SectionHeading
+        title={parseDay(date).toLocaleDateString("en-GB", {
           day: "numeric",
           month: compact ? "short" : "long",
           weekday: "long",
         })}
-      </h2>
+      />
       {away ? (
-        <p className="mt-3 rounded-2xl bg-[#f3e9ff] px-3 py-2 text-sm text-[#5b3d9e]">
-          You are away{away.note ? ` · ${away.note}` : ""}. New visits will skip this day.
+        <p className="m-0 rounded-[14px] bg-[#EAE7F5] px-3.5 py-2.5 text-[14px] text-[#524096]">
+          You are away{away.note ? ` · ${away.note}` : ""}. New visits will skip
+          this day.
         </p>
       ) : null}
       {empty ? (
-        <p className="mt-3 text-sm text-[#6f6a82]">A clear day. New visits will show up here.</p>
+        <p className="m-0 rounded-[18px] bg-[#F3F4F6] px-4 py-8 text-center text-[14px] text-[#6B6B70]">
+          A clear day. New visits will show up here.
+        </p>
       ) : (
-        <ul className="mt-3 space-y-2">
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
           {dayJobs.map((job) => (
             <li key={job.id}>
               <Link
-                className="block rounded-2xl bg-[#f7f3ff] px-3 py-3 transition hover:bg-[#efe7ff]"
+                className="block rounded-[18px] bg-[#F3F4F6] px-4 py-3.5 no-underline transition hover:bg-[#ECE8F6]"
                 href={`/cleaner/job/${job.id}`}
               >
-                <p className="text-sm font-semibold text-[#312c79]">
+                <p className="m-0 text-[14px] font-semibold text-[#524096]">
                   {clock(job.scheduled_start_time)} · {bookingServiceName(job)}
                 </p>
-                <p className="mt-1 text-sm text-[#5c5670]">
+                <p className="m-0 mt-1 text-[13px] leading-5 text-[#5F5F66]">
                   {statusLabel(job.status)}
                   {durationLabel(job.estimated_duration_hours)
                     ? ` · ${durationLabel(job.estimated_duration_hours)}`
                     : ""}
                   {job.area ? ` · ${job.area}` : ""}
                   {job.customer_name ? ` · with ${job.customer_name}` : ""}
-                  {job.amount_cleaner ? ` · ${formatMoney(job.amount_cleaner)} for you` : ""}
+                  {job.amount_cleaner
+                    ? ` · ${formatMoney(job.amount_cleaner)} for you`
+                    : ""}
                 </p>
               </Link>
             </li>
           ))}
           {dayEvents.map((event) => (
-            <li className="flex items-center justify-between gap-3 rounded-2xl bg-[#fff4ee] px-3 py-3" key={event.id}>
+            <li
+              className="flex items-center justify-between gap-3 rounded-[18px] bg-[#FFF5E6] px-4 py-3.5"
+              key={event.id}
+            >
               <div>
-                <p className="text-sm font-semibold text-[#7a3b28]">{event.title}</p>
-                <p className="text-sm text-[#7a3b28]/80">
-                  {clockFromDate(event.starts_at)}-{clockFromDate(event.ends_at)} · your plan
+                <p className="m-0 text-[14px] font-semibold text-[#8A5200]">
+                  {event.title}
+                </p>
+                <p className="m-0 mt-1 text-[13px] text-[#8A5200]/80">
+                  {clockFromDate(event.starts_at)}-{clockFromDate(event.ends_at)}{" "}
+                  · your plan
                   {overlapsJob(event, jobs) ? " · overlaps a visit" : ""}
                 </p>
               </div>
               <button
-                className="text-sm font-semibold text-[#7a3b28]"
+                className="shrink-0 bg-transparent p-0 text-[13px] font-semibold text-[#9A2B18] underline underline-offset-2"
                 onClick={() => void onRemove("/api/cleaner/diary", event.id)}
                 type="button"
               >
@@ -776,43 +906,59 @@ function MonthGrid({
   const lead = (first.getDay() + 6) % 7;
   const cells = [
     ...Array.from({ length: lead }, () => null),
-    ...daysBetween(localIso(first), localIso(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0))),
+    ...daysBetween(
+      localIso(first),
+      localIso(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)),
+    ),
   ];
   return (
-    <div className="rounded-3xl border border-[#e6e0f2] bg-white p-3">
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium uppercase tracking-[0.12em] text-[#6f6a82]">
+    <div className="rounded-[22px] bg-white p-4 sm:p-5">
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8B8798]">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <span key={day}>{day}</span>
         ))}
       </div>
-      <div className="mt-2 grid grid-cols-7 gap-1">
+      <div className="mt-2 grid grid-cols-7 gap-1.5">
         {cells.map((date, index) => {
           if (!date) return <span key={`empty-${index}`} />;
           const count = jobs.filter((job) => job.scheduled_date === date).length;
-          const plans = events.filter((event) => eventDay(event.starts_at) === date).length;
+          const plans = events.filter((event) => eventDay(event.starts_at) === date)
+            .length;
           const away = awayOn(date, absences);
           return (
             <button
               className={cn(
-                "flex min-h-16 flex-col items-start rounded-2xl px-2 py-2 text-left",
-                date === today ? "bg-[#312c79] text-white" : "bg-[#fbf9ff] text-[#1c133b]",
-                away && date !== today && "bg-[#f3e9ff]",
+                "flex min-h-16 flex-col items-start rounded-[14px] px-2 py-2 text-left transition",
+                date === today
+                  ? "bg-[#524096] text-white"
+                  : "bg-[#F3F4F6] text-[#1E1848] hover:bg-[#ECE8F6]",
+                away && date !== today && "bg-[#EAE7F5]",
               )}
               key={date}
               onClick={() => onPick(date)}
               type="button"
             >
-              <span className="text-sm font-semibold">{parseDay(date).getDate()}</span>
+              <span className="text-[14px] font-semibold">
+                {parseDay(date).getDate()}
+              </span>
               <span className="mt-auto flex gap-1">
                 {count ? (
                   <span
-                    className={cn("h-2 w-2 rounded-full", date === today ? "bg-white" : "bg-[#312c79]")}
+                    className={cn(
+                      "h-2 w-2 rounded-full",
+                      date === today ? "bg-white" : "bg-[#524096]",
+                    )}
                   />
                 ) : null}
-                {plans ? <span className="h-2 w-2 rounded-full bg-[#f0a888]" /> : null}
+                {plans ? (
+                  <span className="h-2 w-2 rounded-full bg-[#C17E24]" />
+                ) : null}
                 {away ? (
                   <span
-                    className={cn("h-2 w-2 rounded-full", date === today ? "bg-[#e4d7f7]" : "bg-[#c4b5e8]")}
+                    className={cn(
+                      "h-2 w-2 rounded-full",
+                      date === today ? "bg-[#D4CCEA]" : "bg-[#A89BC9]",
+                    )}
                   />
                 ) : null}
               </span>
@@ -825,5 +971,8 @@ function MonthGrid({
 }
 
 function clockFromDate(iso: string) {
-  return new Date(iso).toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }

@@ -19,7 +19,7 @@ import {
   type UserActivityRow,
 } from "@/components/admin/user-activity-timeline";
 import { TierBadge } from "@/components/cleaner/tier-badge";
-import { UserAvatar } from "@/components/shared/user-avatar";
+import { MedallionAvatar } from "@/components/shared/medallion-avatar";
 import {
   getHardDeleteEligibility,
   hardDeleteBlockMessage,
@@ -205,11 +205,12 @@ export default async function AdminCleanerPage({
   return (
     <div className="space-y-5 sm:space-y-6">
       <div className="flex items-start gap-3 sm:gap-4">
-        <UserAvatar
+        <MedallionAvatar
+          avatarUrl={profile.avatar_url}
           name={profile.full_name}
           seed={profile.id}
           size="lg"
-          url={profile.avatar_url}
+          tier={cleaner.tier as CleanerTier}
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">

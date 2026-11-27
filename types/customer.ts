@@ -98,6 +98,7 @@ export interface KnownCleaner {
   id: string;
   lastVisitDate: string;
   rating: number;
+  tier: CleanerPublicProfile["tier"];
   visitCount: number;
 }
 

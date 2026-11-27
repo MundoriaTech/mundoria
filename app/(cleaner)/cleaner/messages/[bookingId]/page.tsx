@@ -52,12 +52,13 @@ export default async function CleanerMessagesPage({
 
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id,full_name")
+    .select("id,full_name,avatar_url")
     .in("id", Array.from(new Set(participantIds)));
 
-  const customerName =
-    profiles?.find((profile) => profile.id === booking.customer_id)
-      ?.full_name ?? "Customer";
+  const customer = profiles?.find(
+    (profile) => profile.id === booking.customer_id,
+  );
+  const customerName = customer?.full_name ?? "Customer";
   const when = new Date(
     `${booking.scheduled_date}T12:00:00`,
   ).toLocaleDateString("en-GB", {
@@ -73,7 +74,9 @@ export default async function CleanerMessagesPage({
       names={Object.fromEntries(
         (profiles ?? []).map((profile) => [profile.id, profile.full_name]),
       )}
+      peerAvatarUrl={customer?.avatar_url ?? null}
       peerLabel={customerName.split(" ")[0] ?? customerName}
+      peerSeed={booking.customer_id}
       safetyHold={Boolean(booking.safety_hold_at)}
       subtitle={`${bookingServiceName(booking)} · ${when}`}
     />

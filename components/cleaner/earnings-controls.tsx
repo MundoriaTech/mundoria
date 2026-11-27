@@ -6,8 +6,8 @@ import {
   StripeEmbeddedPayouts,
   useStripeEmbeddedPayouts,
 } from "@/components/cleaner/stripe-embedded-payouts";
+import { SectionHeading } from "@/components/customer/dashboard/section-banner";
 import { useFeedback } from "@/components/shared/feedback-provider";
-import { Button } from "@/components/ui/button";
 import { createBrowserClient } from "@/lib/supabase/client";
 
 export function EarningsControls({
@@ -53,37 +53,57 @@ export function EarningsControls({
 
   return (
     <>
-      <div className="mt-6 rounded-2xl border bg-card p-4 sm:p-5">
-        <p className="text-sm font-medium text-foreground">Payout schedule</p>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <section className="flex flex-col gap-3 rounded-[22px] bg-white p-4 sm:p-5">
+        <SectionHeading title="Payout schedule" />
+        <p className="m-0 text-[14px] leading-5 text-[#5F5F66]">
           Completed cleans are held until capture, then paid out on your
           schedule.
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {(["weekly", "monthly"] as const).map((option) => (
-            <Button
-              className="capitalize"
-              disabled={saving}
-              key={option}
-              onClick={() => void change(option)}
-              size="sm"
-              variant={value === option ? "default" : "outline"}
-            >
-              {option}
-            </Button>
-          ))}
-          <Button
+
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <div
+            aria-label="Payout frequency"
+            className="grid w-[11.5rem] grid-cols-2 gap-1 rounded-[12px] bg-[#E7E7EF] p-1"
+            role="tablist"
+          >
+            {(["weekly", "monthly"] as const).map((option) => {
+              const active = value === option;
+              return (
+                <button
+                  aria-selected={active}
+                  className="h-9 rounded-[9px] text-[13px] font-semibold capitalize transition-colors disabled:opacity-50"
+                  disabled={saving}
+                  key={option}
+                  onClick={() => void change(option)}
+                  role="tab"
+                  style={{
+                    background: active ? "#524096" : "transparent",
+                    border: "none",
+                    color: active ? "#FFFFFF" : "#524096",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                  type="button"
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            className="bg-transparent p-0 text-[13px] font-semibold text-[#524096] underline underline-offset-2 transition hover:text-[#3d2f75] disabled:opacity-50"
             disabled={payouts.busy}
             onClick={() => void payouts.start("management")}
-            variant="link"
+            type="button"
           >
             {payouts.busy ? "Loading…" : "Manage payout details"}
-          </Button>
+          </button>
         </div>
         {payouts.error ? (
-          <p className="mt-2 text-sm text-destructive">{payouts.error}</p>
+          <p className="m-0 text-[13px] text-[#9A2B18]">{payouts.error}</p>
         ) : null}
-      </div>
+      </section>
 
       <StripeEmbeddedPayouts
         bankFocused={payouts.bankFocused}

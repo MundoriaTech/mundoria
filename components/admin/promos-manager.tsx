@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
+import { DateTimePickerField } from "@/components/shared/date-picker-field";
 import { SimpleSelect } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,14 +112,15 @@ export function PromosManager({ promos }: { promos: Promo[] }) {
             type="number"
             value={form.max_uses}
           />
-          <Input
-            onChange={(e) => setForm({ ...form, valid_from: e.target.value })}
-            type="datetime-local"
+          <DateTimePickerField
+            onChange={(next) => setForm({ ...form, valid_from: next })}
+            placeholder="Valid from"
             value={form.valid_from}
           />
-          <Input
-            onChange={(e) => setForm({ ...form, valid_until: e.target.value })}
-            type="datetime-local"
+          <DateTimePickerField
+            min={form.valid_from || undefined}
+            onChange={(next) => setForm({ ...form, valid_until: next })}
+            placeholder="Valid until"
             value={form.valid_until}
           />
         </div>

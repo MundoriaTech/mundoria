@@ -5,18 +5,22 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ChangeEmailForm } from "@/components/auth/change-email-form";
-import { PhoneVerifyPanel } from "@/components/cleaner/phone-verify-panel";
 import { ReplaceDocument } from "@/components/cleaner/replace-document";
 import {
   StripeEmbeddedPayouts,
   useStripeEmbeddedPayouts,
 } from "@/components/cleaner/stripe-embedded-payouts";
+import {
+  pillOutline,
+  pillPrimary,
+  pillPrimaryStyle,
+  SectionBanner,
+} from "@/components/customer/dashboard/section-banner";
 import { ActionError, FieldError, invalidControlClass } from "@/components/shared/action-error";
 import { AvatarUpload } from "@/components/shared/avatar-upload";
-import { UserAvatar } from "@/components/shared/user-avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
+import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
 import { normalizePhone } from "@/lib/auth/phone-verify";
 import { isValidUkPhone, storedPhone } from "@/lib/auth/uk-phone";
 import {
@@ -37,7 +41,49 @@ import type {
   CleanerService,
   DocumentReviewStatus,
 } from "@/types/cleaner";
-import { clearPersonalBrowserData } from "@/lib/auth/clear-personal-data";
+
+const tileLabel =
+  "m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70";
+
+const inputClass =
+  "h-12 w-full rounded-[12px] border-[1.5px] border-[#E1E1EA] bg-white px-3.5 text-[16px] text-[#1E1848] outline-none transition focus:border-[#524096] disabled:bg-[#ECEBF1] disabled:text-[#6B6B70]";
+
+const DAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+function FieldTile({
+  children,
+  hint,
+  label,
+}: {
+  children: React.ReactNode;
+  hint?: string;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-[14px] bg-[#F3F4F6] p-4">
+      <span className={tileLabel}>{label}</span>
+      {children}
+      {hint ? (
+        <span className="text-[12.5px] leading-5 text-[#6B6B70]">{hint}</span>
+      ) : null}
+    </div>
+  );
+}
+
+function memberSince(createdAt: string | null | undefined) {
+  if (!createdAt) return null;
+  const date = new Date(createdAt);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+}
 
 export function CleanerProfileForm({
   areas: initialAreas,
@@ -53,15 +99,10 @@ export function CleanerProfileForm({
   services: CleanerService[];
 }) {
   const router = useRouter();
-  const { success } = useFeedback();
+  const { confirm, success } = useFeedback();
   const payouts = useStripeEmbeddedPayouts();
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [profile, setProfile] = useState(initialProfile);
-  const [verifiedPhone, setVerifiedPhone] = useState(() =>
-    initialProfile.phone_verified_at
-      ? normalizePhone(initialProfile.phone ?? "")
-      : "",
-  );
   const [cleaner, setCleaner] = useState(initialCleaner);
   const [services, setServices] = useState(
     initialServices.map((service) => service.service_type),
@@ -77,6 +118,7 @@ export function CleanerProfileForm({
     ),
   );
   const [prefix, setPrefix] = useState("");
+  const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
   async function save() {
@@ -88,11 +130,12 @@ export function CleanerProfileForm({
     }
     const phone = storedPhone(typedPhone);
     setPhoneError(null);
-    setStatus("Saving…");
+    setSaving(true);
+    setStatus(null);
     const supabase = createBrowserClient();
 
     const phoneChanged =
-      normalizePhone(phone) !== verifiedPhone || !profile.phone_verified_at;
+      normalizePhone(phone) !== normalizePhone(initialProfile.phone ?? "");
     await Promise.all([
       supabase
         .from("profiles")
@@ -106,7 +149,6 @@ export function CleanerProfileForm({
         .from("cleaner_profiles")
         .update({
           bio: cleaner.bio,
-          payout_preference: cleaner.payout_preference,
           working_radius_km: Math.round(
             Math.min(15, Math.max(1, radiusMiles)) * 1.609344,
           ),
@@ -153,16 +195,15 @@ export function CleanerProfileForm({
 
     if (phoneChanged) {
       setProfile((current) => ({ ...current, phone_verified_at: null }));
-      // Keep the Zoho CRM lead and Recruit candidate phone in step.
-      void fetch("/api/profile/crm-sync", { method: "POST" }).catch(() => undefined);
+      void fetch("/api/profile/crm-sync", { method: "POST" }).catch(
+        () => undefined,
+      );
     }
-    setStatus(null);
+    setSaving(false);
     success({
       kind: "saved",
       title: "Profile saved",
-      note: phoneChanged
-        ? "Verify your phone below so Mundoria can trust it for jobs."
-        : "Your availability and services are up to date.",
+      note: "Your availability and services are up to date.",
     });
     router.refresh();
   }
@@ -175,6 +216,13 @@ export function CleanerProfileForm({
   }
 
   async function logout() {
+    const confirmed = await confirm({
+      action: "Log out",
+      description: "You will need to sign in again to see your account.",
+      title: "Log out of Mundoria?",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     await createBrowserClient().auth.signOut();
     clearPersonalBrowserData();
     router.replace("/login");
@@ -188,370 +236,441 @@ export function CleanerProfileForm({
     : profile.stripe_account_id
       ? "Setup still to finish"
       : "Not connected";
+  const since = memberSince(profile.created_at);
+  const canManagePayouts =
+    cleaner.status === "certified" || cleaner.status === "active";
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)]">
-      <section className="rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-7">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
-          You
-        </p>
-        <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-          Photo and details
-        </h2>
-        <div className="mt-5">
-          <AvatarUpload
-            currentUrl={profile.avatar_url}
-            keepFiles={[cleaner.headshot_url]}
-            onUpload={(url) => {
-              setProfile((current) => ({ ...current, avatar_url: url }));
-              success({
-                kind: "updated",
-                title: "Look updated",
-                note: "Your new avatar is live.",
-              });
-            }}
-            userId={profile.id}
-          />
-        </div>
-
-        <div className="mt-6 space-y-4">
-          <Field label="Full name">
-            <Input
-              className={fieldClass}
-              disabled
-              readOnly
-              value={profile.full_name}
-            />
-          </Field>
-          <ChangeEmailForm currentEmail={profile.email} />
-          <Field error={phoneError} label="Phone number">
-            <Input
-              className={cn(fieldClass, phoneError && invalidControlClass)}
-              onChange={(event) => {
-                setPhoneError(null);
-                const next = event.target.value;
-                setProfile((current) => ({
-                  ...current,
-                  phone: next,
-                  phone_verified_at:
-                    normalizePhone(next) === verifiedPhone
-                      ? current.phone_verified_at
-                      : null,
-                }));
-              }}
-              required
-              type="tel"
-              value={profile.phone ?? ""}
-            />
-          </Field>
-          <PhoneVerifyPanel
-            onVerified={(verifiedAt) => {
-              const phone = normalizePhone(profile.phone ?? "");
-              setVerifiedPhone(phone);
-              setProfile((current) => ({
-                ...current,
-                phone_verified_at: verifiedAt,
-              }));
-            }}
-            phone={profile.phone ?? ""}
-            phoneVerifiedAt={
-              normalizePhone(profile.phone ?? "") === verifiedPhone
-                ? profile.phone_verified_at
-                : null
-            }
-          />
-          <AboutYou
-            name={profile.full_name}
-            onChange={(bio) =>
-              setCleaner((current) => ({
-                ...current,
-                bio,
-              }))
-            }
-            seed={profile.id}
-            url={profile.avatar_url}
-            value={cleaner.bio ?? ""}
-          />
-          <Field label="Years of experience">
-            <Input
-              className={fieldClass}
-              min={0}
-              onChange={(event) =>
-                setCleaner((current) => ({
-                  ...current,
-                  years_experience: Number(event.target.value),
-                }))
-              }
-              type="number"
-              value={cleaner.years_experience ?? 0}
-            />
-          </Field>
-          <fieldset>
-            <legend className="text-sm font-medium text-[#1c133b]">Pay me</legend>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {(["weekly", "monthly"] as const).map((option) => (
-                <button
-                  className={cn(
-                    "h-11 rounded-2xl border text-sm font-semibold transition",
-                    cleaner.payout_preference === option
-                      ? "border-[#312c79] bg-[#f7f3ff] text-[#312c79]"
-                      : "border-[#e6e0f2] bg-white text-[#5c5670] hover:bg-[#fbf9ff]",
-                  )}
-                  key={option}
-                  onClick={() =>
-                    setCleaner((current) => ({
-                      ...current,
-                      payout_preference: option,
-                    }))
-                  }
-                  type="button"
-                >
-                  {option === "weekly" ? "Each week" : "Each month"}
-                </button>
-              ))}
+    <div className="flex flex-col gap-4 sm:gap-5">
+      <section className="rounded-[22px] bg-white p-4 sm:p-5">
+        <div className="grid gap-4 rounded-[18px] bg-[#F3F4F6] p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-8">
+          <div className="min-w-0 lg:order-2">
+            <p className={tileLabel}>Your account</p>
+            <p className="m-0 mt-1.5 break-words text-[24px] font-semibold leading-tight tracking-[-0.02em] text-[#1E1848] sm:text-[28px]">
+              {profile.full_name}
+            </p>
+            <p className="m-0 mt-1 break-all text-[15px] text-[#5F5F66]">
+              {profile.email}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {since ? (
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[13px] font-medium text-[#5F5F66]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#8B7FC0]" />
+                  Cleaner since {since}
+                </span>
+              ) : null}
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[13px] font-medium capitalize text-[#5F5F66]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#524096]" />
+                {cleaner.tier} · {cleaner.status.replaceAll("_", " ")}
+              </span>
             </div>
-          </fieldset>
+          </div>
+          <div className="min-w-0 lg:order-1">
+            <AvatarUpload
+              currentUrl={profile.avatar_url}
+              keepFiles={[cleaner.headshot_url]}
+              onUpload={(url) => {
+                setProfile((current) => ({ ...current, avatar_url: url }));
+                success({
+                  kind: "updated",
+                  title: "Photo updated",
+                  note: "Your new avatar is live.",
+                });
+              }}
+              userId={profile.id}
+            />
+          </div>
         </div>
       </section>
 
-      <div className="space-y-5">
-        <Panel eyebrow="Work" title="Services you offer">
-          <div className="grid gap-2">
-            {listedServices.map((service) => {
-              const selected = services.includes(service.value);
-              return (
-                <label
-                  className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition",
-                    selected
-                      ? "border-[#312c79] bg-[#f7f3ff] text-[#312c79]"
-                      : "border-[#e6e0f2] bg-white text-[#1c133b] hover:bg-[#fbf9ff]",
-                  )}
-                  key={service.value}
+      <div className="grid items-start gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+        <div className="flex flex-col gap-4 sm:gap-5">
+          <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+            <SectionBanner title="Personal details" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <FieldTile
+                hint="Contact support to change your name."
+                label="Full name"
+              >
+                <input
+                  aria-label="Full name"
+                  className={inputClass}
+                  disabled
+                  readOnly
+                  value={profile.full_name}
+                />
+              </FieldTile>
+              <FieldTile label="Years of experience">
+                <input
+                  aria-label="Years of experience"
+                  className={inputClass}
+                  min={0}
+                  onChange={(event) =>
+                    setCleaner((current) => ({
+                      ...current,
+                      years_experience: Number(event.target.value),
+                    }))
+                  }
+                  type="number"
+                  value={cleaner.years_experience ?? 0}
+                />
+              </FieldTile>
+              <div className="sm:col-span-2">
+                <FieldTile label="Email address">
+                  <ChangeEmailForm currentEmail={profile.email} embedded />
+                </FieldTile>
+              </div>
+              <div className="sm:col-span-2">
+                <FieldTile
+                  hint="For texts about jobs and visits."
+                  label="Phone number"
                 >
                   <input
-                    checked={selected}
-                    className="h-4 w-4 accent-[#312c79]"
-                    onChange={(event) =>
-                      setServices((current) =>
-                        event.target.checked
-                          ? [...current, service.value]
-                          : current.filter((item) => item !== service.value),
-                      )
-                    }
-                    type="checkbox"
+                    aria-label="Phone number"
+                    autoComplete="tel"
+                    className={cn(inputClass, phoneError && invalidControlClass)}
+                    inputMode="tel"
+                    onChange={(event) => {
+                      setPhoneError(null);
+                      setProfile((current) => ({
+                        ...current,
+                        phone: event.target.value,
+                      }));
+                    }}
+                    placeholder="07700 900123"
+                    required
+                    type="tel"
+                    value={profile.phone ?? ""}
                   />
-                  <span className="font-medium">{service.label}</span>
-                </label>
-              );
-            })}
-          </div>
-        </Panel>
+                  {phoneError ? <FieldError message={phoneError} /> : null}
+                </FieldTile>
+              </div>
+            </div>
+          </section>
 
-        <Panel eyebrow="Area" title="Where you work">
-          <Field
-            hint="Offers stay inside this distance, and never beyond 15 miles."
-            label="Working radius, in miles"
-          >
-            <Input
-              className={fieldClass}
-              max={15}
-              min={1}
-              onChange={(event) =>
-                setRadiusMiles(Number(event.target.value) || 1)
+          <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+            <SectionBanner title="About you" />
+            <FieldTile
+              hint={
+                (cleaner.bio ?? "").trim().length === 0
+                  ? "A sentence or two is enough."
+                  : (cleaner.bio ?? "").trim().length < 40
+                    ? "A little more helps someone know you."
+                    : "This is what customers read."
               }
-              type="number"
-              value={radiusMiles}
-            />
-          </Field>
-          <div className="mt-4 flex gap-2">
-            <Input
-              className={fieldClass}
-              onChange={(event) => setPrefix(event.target.value.toUpperCase())}
-              placeholder="Postcode area, such as SW1"
-              value={prefix}
-            />
-            <Button
-              className="h-11 w-11 shrink-0 rounded-2xl bg-[#1c133b] text-white hover:bg-[#312c79]"
-              onClick={() => {
-                const next = prefix.trim().toUpperCase();
-                if (next) {
-                  setAreas((current) => Array.from(new Set([...current, next])));
-                }
-                setPrefix("");
-              }}
-              size="icon"
+              label="Your intro"
             >
-              <Plus />
-            </Button>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {areas.filter(Boolean).map((area) => (
-              <button
-                className="inline-flex items-center rounded-full bg-[#f3efe6] px-3 py-1.5 text-sm font-medium text-[#1c133b]"
-                key={area}
-                onClick={() =>
-                  setAreas((current) => current.filter((item) => item !== area))
+              <textarea
+                aria-label="About you"
+                className="min-h-[7.5rem] w-full resize-y rounded-[12px] border-[1.5px] border-[#E1E1EA] bg-white px-3.5 py-3 text-[15px] leading-6 text-[#1E1848] outline-none placeholder:text-[#8B8798] focus:border-[#524096]"
+                maxLength={2000}
+                onChange={(event) =>
+                  setCleaner((current) => ({
+                    ...current,
+                    bio: event.target.value,
+                  }))
                 }
+                placeholder="I look after homes nearby, and I like leaving a kitchen that feels easy to walk back into."
+                value={cleaner.bio ?? ""}
+              />
+              <p className="m-0 text-right tabular-nums text-[12px] text-[#8A84A0]">
+                {(cleaner.bio ?? "").length}/2000
+              </p>
+            </FieldTile>
+          </section>
+
+          <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+            <SectionBanner title="Services you offer" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {listedServices.map((service) => {
+                const selected = services.includes(service.value);
+                return (
+                  <label
+                    className={cn(
+                      "flex min-h-[64px] cursor-pointer items-center gap-3 rounded-[14px] bg-[#F3F4F6] px-4 py-3 transition hover:bg-[#ECE8F6]",
+                      selected && "ring-2 ring-[#524096]/35",
+                    )}
+                    key={service.value}
+                  >
+                    <RoundCheckbox
+                      checked={selected}
+                      onChange={(event) =>
+                        setServices((current) =>
+                          event.target.checked
+                            ? [...current, service.value]
+                            : current.filter((item) => item !== service.value),
+                        )
+                      }
+                    />
+                    <span className="text-[15px] font-semibold text-[#1E1848]">
+                      {service.label}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+
+        <div className="flex flex-col gap-4 sm:gap-5">
+          <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+            <SectionBanner title="Where you work" />
+            <FieldTile
+              hint="Offers stay inside this distance, and never beyond 15 miles."
+              label="Working radius, in miles"
+            >
+              <input
+                aria-label="Working radius in miles"
+                className={inputClass}
+                max={15}
+                min={1}
+                onChange={(event) =>
+                  setRadiusMiles(Number(event.target.value) || 1)
+                }
+                type="number"
+                value={radiusMiles}
+              />
+            </FieldTile>
+            <FieldTile
+              hint="Add the postcode areas you cover."
+              label="Postcode areas"
+            >
+              <div className="flex gap-2">
+                <input
+                  aria-label="Postcode area"
+                  className={cn(inputClass, "min-w-0 flex-1")}
+                  onChange={(event) =>
+                    setPrefix(event.target.value.toUpperCase())
+                  }
+                  placeholder="e.g. SW1"
+                  value={prefix}
+                />
+                <button
+                  aria-label="Add postcode area"
+                  className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] bg-[#524096] text-white transition hover:bg-[#43357f]"
+                  onClick={() => {
+                    const next = prefix.trim().toUpperCase();
+                    if (next) {
+                      setAreas((current) =>
+                        Array.from(new Set([...current, next])),
+                      );
+                    }
+                    setPrefix("");
+                  }}
+                  type="button"
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
+              </div>
+              {areas.filter(Boolean).length ? (
+                <div className="flex flex-wrap gap-2">
+                  {areas.filter(Boolean).map((area) => (
+                    <button
+                      className="inline-flex items-center rounded-full bg-white px-3.5 py-1.5 text-[13px] font-semibold text-[#524096] ring-1 ring-[#D4CCEA]"
+                      key={area}
+                      onClick={() =>
+                        setAreas((current) =>
+                          current.filter((item) => item !== area),
+                        )
+                      }
+                      type="button"
+                    >
+                      {area}
+                      <X className="ml-1.5 h-3.5 w-3.5" />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </FieldTile>
+          </section>
+
+          <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+            <SectionBanner title="Days you work" />
+            <div className="flex flex-col gap-3">
+              {availability.map((day, index) => (
+                <label
+                  className="flex min-h-[64px] cursor-pointer items-center justify-between gap-4 rounded-[14px] bg-[#F3F4F6] px-4 py-3"
+                  key={day.day_of_week}
+                >
+                  <span className="inline-flex min-w-0 items-center gap-3">
+                    <RoundCheckbox
+                      checked={day.is_available}
+                      onChange={(event) => {
+                        const next = [...availability];
+                        next[index] = {
+                          ...day,
+                          is_available: event.target.checked,
+                        };
+                        setAvailability(next);
+                      }}
+                    />
+                    <span className="text-[15px] font-semibold text-[#1E1848]">
+                      {DAY_NAMES[day.day_of_week]}
+                    </span>
+                  </span>
+                  <span
+                    className={cn(
+                      "shrink-0 text-[13px] tabular-nums",
+                      day.is_available ? "text-[#5F5F66]" : "text-[#A9A3BD]",
+                    )}
+                  >
+                    {day.start_time.slice(0, 5)}–{day.end_time.slice(0, 5)}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+            <SectionBanner title="Documents" />
+            <p className="m-0 text-[13px] leading-[1.45] text-[#6B6B70]">
+              Mundoria reviews each document separately. If one needs another
+              look, you&apos;ll see why here and can upload a new one.
+            </p>
+            <div className="grid gap-3">
+              {CLEANER_DOCUMENT_KINDS.map((kind) => {
+                const docStatus = cleaner[
+                  documentStatusColumn(kind)
+                ] as DocumentReviewStatus;
+                const review = documentReviewNoteFor(
+                  cleaner.verification_flags,
+                  kind,
+                );
+                return (
+                  <div
+                    className="rounded-[14px] bg-[#F3F4F6] px-4 py-3"
+                    key={kind}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="m-0 text-[15px] font-semibold text-[#1E1848]">
+                        {CLEANER_DOCUMENT_LABELS[kind]}
+                      </p>
+                      <p
+                        className={cn(
+                          "m-0 shrink-0 text-[13px] font-semibold",
+                          docStatus === "verified"
+                            ? "text-emerald-700"
+                            : docStatus === "rejected" ||
+                                docStatus === "expired"
+                              ? "text-amber-800"
+                              : "text-[#6B6B70]",
+                        )}
+                      >
+                        {cleanerFacingDocStatus(docStatus)}
+                      </p>
+                    </div>
+                    {review?.note &&
+                    (docStatus === "rejected" ||
+                      review.decision === "rejected") ? (
+                      <p className="m-0 mt-2 text-[13px] leading-5 text-[#6B6B70]">
+                        {review.note}
+                      </p>
+                    ) : null}
+                    {kind !== "headshot" &&
+                    (docStatus === "rejected" ||
+                      docStatus === "missing" ||
+                      docStatus === "expired" ||
+                      docStatus === "pending" ||
+                      !docStatus) ? (
+                      <ReplaceDocument
+                        initial={
+                          kind === "right_to_work"
+                            ? {
+                                date_of_birth: cleaner.date_of_birth,
+                                right_to_work_expires_on:
+                                  cleaner.right_to_work_expires_on,
+                                right_to_work_route: cleaner.right_to_work_route,
+                                right_to_work_share_code:
+                                  cleaner.right_to_work_share_code,
+                                right_to_work_visa_type:
+                                  cleaner.right_to_work_visa_type,
+                              }
+                            : undefined
+                        }
+                        kind={kind}
+                        userId={profile.id}
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+            <SectionBanner title="Payouts" />
+            <div className="flex min-h-[64px] items-center justify-between gap-3 rounded-[14px] bg-[#F3F4F6] px-4 py-3">
+              <span className="text-[15px] text-[#6B6B70]">Stripe</span>
+              <span className="text-[15px] font-semibold text-[#1E1848]">
+                {stripeLabel}
+              </span>
+            </div>
+            <p className="m-0 text-[13px] leading-[1.45] text-[#6B6B70]">
+              {canManagePayouts
+                ? "Pay is sent once payout setup is complete. Bank details stay with Stripe."
+                : "Set up payouts after Mundoria approves your application. You’ll see a payout setup card on your dashboard."}
+            </p>
+            {canManagePayouts ? (
+              <button
+                className={pillOutline}
+                disabled={payouts.busy}
+                onClick={() => void connectStripe()}
                 type="button"
               >
-                {area}
-                <X className="ml-1.5 h-3 w-3" />
+                <CreditCard className="h-4 w-4" />
+                {payouts.busy
+                  ? "Loading…"
+                  : cleaner.stripe_onboarding_complete
+                    ? "Manage payout details"
+                    : profile.stripe_account_id
+                      ? "Finish payout setup"
+                      : "Set up payouts"}
               </button>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel eyebrow="Diary" title="Days you work">
-          <div className="space-y-2">
-            {availability.map((day, index) => (
-              <label
-                className={cn(
-                  "flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-sm",
-                  day.is_available ? "bg-[#f7f3ff] text-[#312c79]" : "bg-[#f7f4f8] text-[#5c5670]",
-                )}
-                key={day.day_of_week}
-              >
-                <span className="font-medium">
-                  <input
-                    checked={day.is_available}
-                    className="mr-2 h-4 w-4 accent-[#312c79]"
-                    onChange={(event) => {
-                      const next = [...availability];
-                      next[index] = { ...day, is_available: event.target.checked };
-                      setAvailability(next);
-                    }}
-                    type="checkbox"
-                  />
-                  {DAY_NAMES[day.day_of_week]}
-                </span>
-                <span className="tabular-nums">
-                  {day.start_time.slice(0, 5)}-{day.end_time.slice(0, 5)}
-                </span>
-              </label>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel eyebrow="Checks" title="Documents">
-          <p className="text-sm leading-6 text-[#5c5670]">
-            Mundoria reviews each document separately. If one needs another
-            look, you&apos;ll see why here and can upload a new one.
-          </p>
-          <div className="mt-3 space-y-3">
-            {CLEANER_DOCUMENT_KINDS.map((kind) => {
-              const status = cleaner[
-                documentStatusColumn(kind)
-              ] as DocumentReviewStatus;
-              const review = documentReviewNoteFor(
-                cleaner.verification_flags,
-                kind,
-              );
-              return (
-                <div
-                  className="rounded-2xl border border-[#ebe4da] bg-[#faf8f5] px-3.5 py-3"
-                  key={kind}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="font-medium text-[#1c133b]">
-                      {CLEANER_DOCUMENT_LABELS[kind]}
-                    </p>
-                    <p
-                      className={cn(
-                        "shrink-0 text-sm font-semibold",
-                        status === "verified"
-                          ? "text-emerald-800"
-                          : status === "rejected" || status === "expired"
-                            ? "text-amber-900"
-                            : "text-[#5c5670]",
-                      )}
-                    >
-                      {cleanerFacingDocStatus(status)}
-                    </p>
-                  </div>
-                  {review?.note &&
-                  (status === "rejected" || review.decision === "rejected") ? (
-                    <p className="mt-2 text-sm leading-5 text-[#5c5670]">
-                      {review.note}
-                    </p>
-                  ) : null}
-                  {kind !== "headshot" &&
-                  (status === "rejected" ||
-                    status === "missing" ||
-                    status === "expired" ||
-                    status === "pending" ||
-                    !status) ? (
-                    <ReplaceDocument
-                      initial={
-                        kind === "right_to_work"
-                          ? {
-                              date_of_birth: cleaner.date_of_birth,
-                              right_to_work_expires_on: cleaner.right_to_work_expires_on,
-                              right_to_work_route: cleaner.right_to_work_route,
-                              right_to_work_share_code: cleaner.right_to_work_share_code,
-                              right_to_work_visa_type: cleaner.right_to_work_visa_type,
-                            }
-                          : undefined
-                      }
-                      kind={kind}
-                      userId={profile.id}
-                    />
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
-
-        <Panel eyebrow="Money" title="Payouts">
-          <StatusRow label="Stripe" value={stripeLabel} />
-          <p className="text-sm leading-6 text-[#5c5670]">
-            {cleaner.status === "certified" || cleaner.status === "active"
-              ? "Pay is sent once payout setup is complete. Bank details stay with Stripe."
-              : "Set up payouts after Mundoria approves your application. You’ll see a payout setup card on your dashboard."}
-          </p>
-          {cleaner.status === "certified" || cleaner.status === "active" ? (
-            <Button
-              className="h-11 w-full rounded-full border-[#e6e0f2] text-[#1c133b]"
-              disabled={payouts.busy}
-              onClick={() => void connectStripe()}
-              variant="outline"
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              {payouts.busy
-                ? "Loading…"
-                : cleaner.stripe_onboarding_complete
-                  ? "Manage payout details"
-                  : profile.stripe_account_id
-                    ? "Finish payout setup"
-                    : "Set up payouts"}
-            </Button>
-          ) : null}
-          {payouts.error ? (
-            <ActionError
-              message={payouts.error}
-              title="Couldn’t open payout setup"
-            />
-          ) : null}
-        </Panel>
-
-        {status ? <p className="text-sm text-[#312c79]">{status}</p> : null}
-
-        <Button
-          className="h-12 w-full rounded-full bg-[#1c133b] text-white hover:bg-[#312c79]"
-          onClick={() => void save()}
-        >
-          Save profile
-        </Button>
-        <Button
-          className="h-11 w-full rounded-full text-[#7a3b28] hover:bg-[#fff4ee] hover:text-[#7a3b28]"
-          onClick={() => void logout()}
-          variant="ghost"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
-        </Button>
+            ) : null}
+            {payouts.error ? (
+              <ActionError
+                message={payouts.error}
+                title="Couldn’t open payout setup"
+              />
+            ) : null}
+          </section>
+        </div>
       </div>
+
+      <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="min-w-0">
+          <p className="m-0 text-[15px] font-semibold text-[#1E1848]">
+            Save your changes
+          </p>
+          <p className="m-0 mt-0.5 text-[13px] text-[#6B6B70]">
+            Updates services, areas, availability and your profile details.
+          </p>
+          {status ? (
+            <p className="m-0 mt-2 rounded-[12px] bg-[#FEE9E9] px-3 py-2 text-sm text-[#C0272D]">
+              {status}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <button
+            className={`${pillPrimary} w-full sm:w-auto sm:min-w-[10.5rem]`}
+            disabled={saving}
+            onClick={() => void save()}
+            style={pillPrimaryStyle}
+            type="button"
+          >
+            {saving ? "Saving…" : "Save profile"}
+          </button>
+          <button
+            className="flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-[#F1C9C6] px-5 text-[15px] font-semibold text-[#C0272D] transition hover:bg-[#FEF0EF]"
+            onClick={() => void logout()}
+            type="button"
+          >
+            <LogOut className="h-[18px] w-[18px]" />
+            Log out
+          </button>
+        </div>
+      </section>
 
       <StripeEmbeddedPayouts
         bankFocused={payouts.bankFocused}
@@ -564,136 +683,6 @@ export function CleanerProfileForm({
             : "Set up your payouts"
         }
       />
-    </div>
-  );
-}
-
-const fieldClass =
-  "rounded-2xl border-[#e6e0f2] bg-white text-[#1c133b] focus-visible:ring-[#312c79]";
-
-const DAY_NAMES = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-
-function AboutYou({
-  name,
-  onChange,
-  seed,
-  url,
-  value,
-}: {
-  name: string;
-  onChange: (value: string) => void;
-  seed: string;
-  url: string | null;
-  value: string;
-}) {
-  const firstName = name.trim().split(/\s+/)[0] || "You";
-  const length = value.trim().length;
-  const guide =
-    length === 0
-      ? "A sentence or two is enough."
-      : length < 20
-        ? "A little more helps someone know you."
-        : "This is what customers read.";
-
-  return (
-    <div className="rounded-[1.35rem] border border-[#e6e0f2] bg-[#fbf8ff] p-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-medium text-[#1c133b]">About you</p>
-        {value ? (
-          <button
-            className="text-xs font-semibold text-[#312c79]"
-            onClick={() => onChange("")}
-            type="button"
-          >
-            Clear
-          </button>
-        ) : null}
-      </div>
-      <p className="mt-1 text-xs leading-5 text-[#5c5670]">
-        Write it the way you would introduce yourself before a visit.
-      </p>
-      <div className="mt-3 rounded-2xl bg-white p-3 shadow-[0_8px_20px_rgba(28,19,59,0.04)]">
-        <div className="flex items-center gap-3">
-          <UserAvatar name={name} seed={seed} url={url} />
-          <div>
-            <p className="text-sm font-semibold text-[#1c133b]">{firstName}</p>
-            <p className="text-[11px] text-[#6f6a82]">How customers see this</p>
-          </div>
-        </div>
-        <label className="mt-3 block">
-          <span className="sr-only">About you</span>
-          <textarea
-            className="min-h-28 w-full resize-y bg-transparent text-sm leading-6 text-[#1c133b] outline-none placeholder:text-[#6f6a82]"
-            maxLength={2000}
-            onChange={(event) => onChange(event.target.value)}
-            placeholder="I look after homes nearby, and I like leaving a kitchen that feels easy to walk back into."
-            value={value}
-          />
-        </label>
-      </div>
-      <p className="mt-2 text-[11px] text-[#6f6a82]">{guide}</p>
-    </div>
-  );
-}
-
-function Field({
-  children,
-  error,
-  hint,
-  label,
-}: {
-  children: React.ReactNode;
-  error?: string | null;
-  hint?: string;
-  label: string;
-}) {
-  return (
-    <label className="block space-y-2 text-sm font-medium text-[#1c133b]">
-      <span>{label}</span>
-      {children}
-      {hint ? <span className="block text-xs font-normal leading-5 text-[#5c5670]">{hint}</span> : null}
-      {error ? <FieldError message={error} /> : null}
-    </label>
-  );
-}
-
-function Panel({
-  children,
-  eyebrow,
-  title,
-}: {
-  children: React.ReactNode;
-  eyebrow: string;
-  title: string;
-}) {
-  return (
-    <section className="space-y-3 rounded-[1.75rem] border border-[#e6e0f2] bg-white p-5 shadow-[0_12px_28px_rgba(28,19,59,0.05)] sm:p-6">
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a6533]">
-          {eyebrow}
-        </p>
-        <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#1c133b]">
-          {title}
-        </h2>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function StatusRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl bg-[#f7f4f8] px-3 py-2.5">
-      <span className="text-sm text-[#5c5670]">{label}</span>
-      <span className="text-sm font-semibold text-[#1c133b]">{value}</span>
     </div>
   );
 }
