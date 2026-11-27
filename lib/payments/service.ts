@@ -5,6 +5,7 @@ import { sendBrandedEmail } from "@/lib/email/send-email";
 import { alertAdmins } from "@/lib/notifications/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
+import { cleanerPayOverride } from "@/lib/payments/pay-overrides";
 
 export async function createManualPaymentIntent({
   amount,
@@ -72,7 +73,7 @@ export async function scheduleCleanerPayout(
       ...((team ?? []).map((row) => row.cleaner_id as string)),
     ]),
   );
-  const share = Math.floor(
+  const normalShare = Math.floor(
     Number(booking.amount_cleaner ?? 0) / Math.max(1, cleanerIds.length),
   );
   const grossShare = Math.floor(
@@ -92,8 +93,12 @@ export async function scheduleCleanerPayout(
   let lastPayoutId: string | null = null;
   for (const cleanerId of cleanerIds) {
     const isPrimary = cleanerId === booking.cleaner_id;
-    const extraGross = isPrimary ? waiting : 0;
-    const extra = isPrimary ? waitingCleanerShare : 0;
+    // An admin-set pay is this cleaner's whole pay for the booking.
+    const override = await cleanerPayOverride(bookingId, cleanerId);
+    const share = override ?? normalShare;
+    const extraGross = isPrimary && override === null ? waiting : 0;
+    const extra = isPrimary && override === null ? waitingCleanerShare : 0;
+    if (share + extra <= 0) continue;
     const { data: cleaner } = await admin
       .from("cleaner_profiles")
       .select("payout_preference")
@@ -549,6 +554,8 @@ export async function addPayoutAmount({
   netPence: number;
 }) {
   if (netPence <= 0) return null;
+  // An admin-set pay already covers everything for this booking.
+  if ((await cleanerPayOverride(bookingId, cleanerId)) !== null) return null;
   const admin = createAdminClient();
   const { data: cleaner } = await admin
     .from("cleaner_profiles")
