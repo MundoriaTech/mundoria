@@ -81,6 +81,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
     reason: "Added to move a booking",
   });
   return NextResponse.json({
-    address: { id: address.id, label: [address.address_line_1, address.postcode].filter(Boolean).join(", ") },
+    address: { id: address.id, label: address.address_line_1 },
   });
 }

@@ -143,7 +143,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
     editable || notesOnly
       ? await admin
           .from("addresses")
-          .select("id,address_line_1,postcode")
+          .select("id,address_line_1,address_line_2,city,postcode")
           .eq("customer_id", booking.customer_id)
       : { data: null };
   const editCategory = serviceDefinition(booking.service_type).category;
@@ -193,9 +193,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       }`,
     })),
     ...(actionRows ?? []).map((row) => {
-      const meta = (row.metadata ?? {}) as { status?: string | null };
+      const meta = (row.metadata ?? {}) as { changes?: HistoryEntry["changes"]; status?: string | null };
       return {
-        changes: [],
+        changes: row.action === "correct_address" && Array.isArray(meta.changes) ? meta.changes : [],
         createdAt: row.created_at as string,
         id: row.id as string,
         kind: "action" as const,
@@ -203,7 +203,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
         title:
           row.action === "status" && meta.status
             ? `Status set to ${humanize(meta.status)}`
-            : humanize(String(row.action)),
+            : row.action === "correct_address"
+              ? "Address corrected"
+              : humanize(String(row.action)),
         undoneAt: null,
         who: `${(row.admin_id && historyNames[row.admin_id as string]) || "Unknown"} (admin)`,
       };
@@ -617,8 +619,16 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
               (addOn) => !addOn.categories || addOn.categories.includes(editCategory),
             ).map((addOn) => ({ id: addOn.id, label: addOn.label }))}
             addresses={(customerAddresses ?? []).map((address) => ({
+              city: address.city ?? "",
               id: address.id,
-              label: [address.address_line_1, address.postcode].filter(Boolean).join(", "),
+              label:
+                address.postcode &&
+                !String(address.address_line_1 ?? "").toUpperCase().includes(String(address.postcode).toUpperCase())
+                  ? `${address.address_line_1}, ${address.postcode}`
+                  : String(address.address_line_1 ?? ""),
+              line1: address.address_line_1 ?? "",
+              line2: address.address_line_2 ?? "",
+              postcode: address.postcode ?? "",
             }))}
             bookingId={params.id}
             customerId={booking.customer_id}

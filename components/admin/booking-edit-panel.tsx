@@ -34,6 +34,14 @@ type Preview = {
   oldTotalPence: number;
 };
 
+type SavedAddress = { city?: string; id: string; label: string; line1?: string; line2?: string; postcode?: string };
+
+type CorrectionPreview = {
+  changes: Array<{ field: string; from: string; to: string }>;
+  totalBookings: number;
+  upcoming: Array<{ date: string; hasCleaner: boolean; id: string; status: string; time: string }>;
+};
+
 const EMPTY_ADDRESS = { city: "", house: "", postcode: "", street: "" };
 const labelText = "text-xs font-medium text-muted-foreground";
 const textArea =
@@ -90,7 +98,7 @@ export function BookingEditPanel({
   notesOnly,
 }: {
   addOnOptions: Array<{ id: string; label: string }>;
-  addresses: Array<{ id: string; label: string }>;
+  addresses: SavedAddress[];
   bookingId: string;
   customerId: string;
   hasCleaner: boolean;
@@ -110,6 +118,9 @@ export function BookingEditPanel({
   const [message, setMessage] = useState("");
   const [addressList, setAddressList] = useState(addresses);
   const [addingAddress, setAddingAddress] = useState(false);
+  const [correcting, setCorrecting] = useState(false);
+  const [correction, setCorrection] = useState({ city: "", line1: "", line2: "", note: "", postcode: "" });
+  const [correctionPreview, setCorrectionPreview] = useState<CorrectionPreview | null>(null);
   const [newAddress, setNewAddress] = useState(EMPTY_ADDRESS);
   const [addressBusy, setAddressBusy] = useState(false);
   const [addressError, setAddressError] = useState("");
@@ -241,6 +252,88 @@ export function BookingEditPanel({
     }
   }
 
+  function startCorrection() {
+    const current = addressList.find((address) => address.id === values.addressId);
+    setCorrection({
+      city: current?.city ?? "",
+      line1: current?.line1 ?? current?.label ?? "",
+      line2: current?.line2 ?? "",
+      note: "",
+      postcode: current?.postcode ?? "",
+    });
+    setCorrectionPreview(null);
+    setAddressError("");
+    setAddingAddress(false);
+    setCorrecting(true);
+  }
+
+  function updateCorrection(key: keyof typeof correction, value: string) {
+    setCorrection((current) => ({ ...current, [key]: value }));
+    setCorrectionPreview(null);
+  }
+
+  async function sendCorrection(previewOnly: boolean) {
+    setAddressBusy(true);
+    setAddressError("");
+    try {
+      const response = await fetch(`/api/admin/addresses/${values.addressId}`, {
+        body: JSON.stringify({
+          addressLine1: correction.line1,
+          addressLine2: correction.line2 || null,
+          city: correction.city,
+          note: correction.note,
+          postcode: correction.postcode,
+          preview: previewOnly,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "PATCH",
+      });
+      const result = (await response.json().catch(() => ({}))) as CorrectionPreview & {
+        address?: { id: string; label: string };
+        error?: string;
+      };
+      if (!response.ok) {
+        setAddressError(result.error ?? "Couldn't correct the address.");
+        return null;
+      }
+      return result;
+    } finally {
+      setAddressBusy(false);
+    }
+  }
+
+  async function checkCorrection() {
+    const result = await sendCorrection(true);
+    if (result) setCorrectionPreview(result);
+  }
+
+  async function saveCorrection() {
+    if (!correctionPreview?.changes.length) return;
+    const others = correctionPreview.totalBookings;
+    const ok = await confirm({
+      action: "Correct address",
+      description: `This changes the saved address itself, for all ${others} booking${
+        others === 1 ? "" : "s"
+      } that use it, past ones included. The customer and the cleaners on upcoming visits are told.`,
+      title: "Correct this address?",
+    });
+    if (!ok) return;
+    const result = await sendCorrection(false);
+    if (!result?.address) return;
+    const label = result.address.label;
+    setAddressList((list) =>
+      list.map((address) =>
+        address.id === values.addressId
+          ? { ...address, city: correction.city, label, line1: correction.line1, line2: correction.line2, postcode: correction.postcode.toUpperCase() }
+          : address,
+      ),
+    );
+    setCorrecting(false);
+    setCorrectionPreview(null);
+    success({ kind: "updated", note: "The customer and any cleaners on upcoming visits have been told.", title: "Address corrected" });
+    router.refresh();
+  }
+
   function close() {
     setOpen(false);
     setValues(initial);
@@ -250,6 +343,8 @@ export function BookingEditPanel({
     setPriceOverride("");
     setCleanerAgreed(false);
     setAddingAddress(false);
+    setCorrecting(false);
+    setCorrectionPreview(null);
   }
 
   if (!open) {
@@ -373,14 +468,142 @@ export function BookingEditPanel({
                   </Button>
                 </div>
               </div>
+            ) : correcting ? (
+              <div className="mt-3 rounded-lg bg-muted/40 p-3">
+                <p className="text-sm font-medium">Correct this address</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  For fixing a mistake, like a wrong house number. It changes the saved address for every
+                  booking that uses it. If the customer has moved, add a new address instead.
+                </p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <Input
+                    aria-label="Address line 1"
+                    className="sm:col-span-2"
+                    onChange={(event) => updateCorrection("line1", event.target.value)}
+                    placeholder="Address line 1"
+                    value={correction.line1}
+                  />
+                  <Input
+                    aria-label="Address line 2"
+                    className="sm:col-span-2"
+                    onChange={(event) => updateCorrection("line2", event.target.value)}
+                    placeholder="Address line 2 (optional)"
+                    value={correction.line2}
+                  />
+                  <Input
+                    aria-label="Town or city"
+                    onChange={(event) => updateCorrection("city", event.target.value)}
+                    placeholder="Town or city"
+                    value={correction.city}
+                  />
+                  <Input
+                    aria-label="Postcode"
+                    onChange={(event) => updateCorrection("postcode", event.target.value)}
+                    placeholder="Postcode"
+                    value={correction.postcode}
+                  />
+                  <Input
+                    aria-label="Reason for the correction"
+                    className="sm:col-span-2"
+                    onChange={(event) => updateCorrection("note", event.target.value)}
+                    placeholder="Reason for the correction (required)"
+                    value={correction.note}
+                  />
+                </div>
+                {correctionPreview ? (
+                  <div className="mt-3 rounded-lg border bg-card p-3 text-sm">
+                    {correctionPreview.changes.length ? (
+                      <>
+                        <dl className="divide-y">
+                          {correctionPreview.changes.map((change) => (
+                            <div className="grid grid-cols-[110px_1fr] gap-2 py-1.5" key={change.field}>
+                              <dt className="text-muted-foreground">{change.field}</dt>
+                              <dd>
+                                <span className="text-muted-foreground line-through">{change.from}</span>{" "}
+                                <span className="font-medium">{change.to}</span>
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                        <p className="mt-2 text-amber-800">
+                          {correctionPreview.totalBookings} booking
+                          {correctionPreview.totalBookings === 1 ? " uses" : "s use"} this address
+                          {correctionPreview.upcoming.length
+                            ? `, ${correctionPreview.upcoming.length} upcoming:`
+                            : ", none upcoming."}
+                        </p>
+                        {correctionPreview.upcoming.length ? (
+                          <ul className="mt-1 space-y-0.5 text-muted-foreground">
+                            {correctionPreview.upcoming.map((row) => (
+                              <li key={row.id}>
+                                {new Date(`${row.date}T12:00:00`).toLocaleDateString("en-GB", {
+                                  day: "numeric",
+                                  month: "short",
+                                  weekday: "short",
+                                })}{" "}
+                                {row.time}
+                                {row.id === bookingId ? " (this booking)" : ""}
+                                {row.hasCleaner ? " · cleaner is told" : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </>
+                    ) : (
+                      <p>Nothing has changed yet.</p>
+                    )}
+                  </div>
+                ) : null}
+                {addressError ? <p className="mt-2 text-sm text-destructive">{addressError}</p> : null}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    disabled={addressBusy || correction.note.trim().length < 3}
+                    onClick={() => void checkCorrection()}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Check correction
+                  </Button>
+                  <Button
+                    disabled={addressBusy || !correctionPreview?.changes.length}
+                    onClick={() => void saveCorrection()}
+                    size="sm"
+                  >
+                    Correct address
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setCorrecting(false);
+                      setCorrectionPreview(null);
+                      setAddressError("");
+                    }}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <button
-                className="mt-2 text-sm font-medium text-[#6a45b8] hover:underline"
-                onClick={() => setAddingAddress(true)}
-                type="button"
-              >
-                + Add a new address
-              </button>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                <button
+                  className="text-sm font-medium text-[#6a45b8] hover:underline"
+                  onClick={startCorrection}
+                  type="button"
+                >
+                  Edit this address
+                </button>
+                <button
+                  className="text-sm font-medium text-[#6a45b8] hover:underline"
+                  onClick={() => {
+                    setCorrecting(false);
+                    setAddingAddress(true);
+                  }}
+                  type="button"
+                >
+                  + Add a new address
+                </button>
+              </div>
             )}
           </Group>
         ) : null}
