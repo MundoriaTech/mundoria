@@ -81,7 +81,7 @@ function pageContext(pathname: string, firstName: string) {
       showWave: true,
       subtitle:
         "Keep track of your cleaning services, upcoming bookings and past appointments.",
-      title: `Welcome back ${firstName}`,
+      title: `Welcome back, ${firstName}!`,
     };
   }
   if (pathname.startsWith("/booking/")) {
@@ -228,7 +228,9 @@ export function CustomerShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
-  const firstName = profile.full_name.trim().split(/\s+/)[0] || "there";
+  const rawFirst = profile.full_name.trim().split(/\s+/)[0] || "there";
+  // "bosoye" → "Bosoye" for the greeting.
+  const firstName = rawFirst.charAt(0).toLocaleUpperCase("en-GB") + rawFirst.slice(1);
   const backLink = appParentBackLink(pathname);
   const { showWave, subtitle, title } = pageContext(pathname, firstName);
 
@@ -351,6 +353,11 @@ export function CustomerShell({
                 <div className="min-w-0 flex-1">
                   <p className="m-0 truncate text-[17px] font-semibold tracking-[-0.02em] text-[#1E1848]">
                     {title}
+                    {showWave ? (
+                      <span aria-label="wave" className="ml-1.5" role="img">
+                        👋
+                      </span>
+                    ) : null}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
