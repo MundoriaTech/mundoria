@@ -6,6 +6,7 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/middleware";
 import { ROLE_DASHBOARDS, type UserRole } from "@/types/auth";
 
+const TWO_FACTOR_PATH = "/admin/two-factor";
 const AUTH_ROUTES = ["/login", "/admin/login", "/signup", "/forgot-password"];
 
 const CUSTOMER_PREFIXES = [
@@ -164,8 +165,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { phone, response, user, role } = await updateSession(request);
+  const { aal, phone, response, user, role } = await updateSession(request);
   const protectedRole = requiredRole(pathname);
+
+  // Admin APIs need a session that passed the authenticator-app check.
+  if (user && role === "admin" && aal !== "aal2" && pathname.startsWith("/api/admin/")) {
+    return NextResponse.json(
+      { error: "Two-factor sign-in required. Reload the page and enter your authenticator code." },
+      { status: 403 },
+    );
+  }
 
   // Cleaners cannot book as customers, keep /booking/new open for guests only.
   if (
@@ -227,6 +236,19 @@ export async function middleware(request: NextRequest) {
     const completionUrl = new URL("/complete-profile", request.url);
     completionUrl.searchParams.set("next", pathname);
     return redirectWithSession(completionUrl, response);
+  }
+
+  // Admin pages: set up or enter the authenticator code first.
+  if (
+    user &&
+    role === "admin" &&
+    protectedRole === "admin" &&
+    aal !== "aal2" &&
+    pathname !== TWO_FACTOR_PATH
+  ) {
+    const twoFactorUrl = new URL(TWO_FACTOR_PATH, request.url);
+    twoFactorUrl.searchParams.set("redirectTo", `${pathname}${request.nextUrl.search}`);
+    return redirectWithSession(twoFactorUrl, response);
   }
 
   if (user && protectedRole && role !== protectedRole) {

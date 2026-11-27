@@ -5,6 +5,7 @@ import {
   type AdminInvitationRow,
 } from "@/components/admin/admin-invitations-manager";
 import { AdminProfileForm } from "@/components/admin/admin-profile-form";
+import { ResetTwoFactorButton } from "@/components/admin/reset-two-factor-button";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
@@ -41,6 +42,15 @@ export default async function AdminTeamPage() {
       .order("created_at", { ascending: false })
       .limit(25),
   ]);
+
+  // Who has an authenticator app set up (a verified TOTP factor).
+  const twoFactorOn = new Set<string>();
+  await Promise.all(
+    (admins ?? []).map(async (member) => {
+      const { data } = await admin.auth.admin.mfa.listFactors({ userId: member.id });
+      if ((data?.factors ?? []).some((factor) => factor.status === "verified")) twoFactorOn.add(member.id);
+    }),
+  );
 
   return (
     <div className="space-y-7">
@@ -91,10 +101,24 @@ export default async function AdminTeamPage() {
                     {member.phone ? ` · ${member.phone}` : ""}
                   </p>
                 </div>
-                <p className="hidden text-xs text-muted-foreground sm:block">
-                  Joined{" "}
-                  {ukDate(member.created_at)}
-                </p>
+                <div className="flex shrink-0 flex-col items-end gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      twoFactorOn.has(member.id)
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-amber-50 text-amber-800"
+                    }`}
+                  >
+                    {twoFactorOn.has(member.id) ? "Two-factor on" : "Two-factor not set up"}
+                  </span>
+                  {!isYou && twoFactorOn.has(member.id) ? (
+                    <ResetTwoFactorButton adminId={member.id} name={member.full_name ?? "This admin"} />
+                  ) : null}
+                  <p className="hidden text-xs text-muted-foreground sm:block">
+                    Joined{" "}
+                    {ukDate(member.created_at)}
+                  </p>
+                </div>
               </li>
             );
           })}

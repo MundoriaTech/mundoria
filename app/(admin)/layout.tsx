@@ -37,6 +37,8 @@ export default async function AdminLayout({
       .limit(15),
   ]);
   if (profile?.role !== "admin") redirect("/");
+  const { data: assurance } = await session.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance?.currentLevel !== "aal2") redirect("/admin/two-factor");
   const access = await adminAccessFor(profile.email as string | null);
   return (
     <AdminShell

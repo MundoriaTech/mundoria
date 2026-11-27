@@ -13,6 +13,12 @@ export async function requireAdmin() {
     return null;
   }
 
+  // An admin session must have passed the authenticator-app check.
+  const { data: assurance } = await sessionClient.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance?.currentLevel !== "aal2") {
+    return null;
+  }
+
   const admin = createAdminClient();
   const { data: profile } = await admin
     .from("profiles")
