@@ -7,6 +7,14 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { ROLE_DASHBOARDS, type UserRole } from "@/types/auth";
 
 const TWO_FACTOR_PATH = "/admin/two-factor";
+/** Pages a signed-in admin can still reach before their authenticator code. */
+const TWO_FACTOR_EXEMPT = [
+  TWO_FACTOR_PATH,
+  "/admin-invite",
+  "/auth",
+  "/complete-profile",
+  "/update-password",
+];
 const AUTH_ROUTES = ["/login", "/admin/login", "/signup", "/forgot-password"];
 
 const CUSTOMER_PREFIXES = [
@@ -176,6 +184,21 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  // A signed-in admin goes nowhere else until they've entered their
+  // authenticator code (or set one up), whichever page they land on.
+  if (
+    user &&
+    role === "admin" &&
+    aal !== "aal2" &&
+    !pathname.startsWith("/api/") &&
+    !TWO_FACTOR_EXEMPT.some((path) => pathname === path || pathname.startsWith(`${path}/`))
+  ) {
+    const twoFactorUrl = new URL(TWO_FACTOR_PATH, request.url);
+    const wanted = protectedRole === "admin" ? `${pathname}${request.nextUrl.search}` : "/admin/dashboard";
+    twoFactorUrl.searchParams.set("redirectTo", wanted);
+    return redirectWithSession(twoFactorUrl, response);
+  }
+
   // Cleaners cannot book as customers, keep /booking/new open for guests only.
   if (
     user &&
@@ -236,19 +259,6 @@ export async function middleware(request: NextRequest) {
     const completionUrl = new URL("/complete-profile", request.url);
     completionUrl.searchParams.set("next", pathname);
     return redirectWithSession(completionUrl, response);
-  }
-
-  // Admin pages: set up or enter the authenticator code first.
-  if (
-    user &&
-    role === "admin" &&
-    protectedRole === "admin" &&
-    aal !== "aal2" &&
-    pathname !== TWO_FACTOR_PATH
-  ) {
-    const twoFactorUrl = new URL(TWO_FACTOR_PATH, request.url);
-    twoFactorUrl.searchParams.set("redirectTo", `${pathname}${request.nextUrl.search}`);
-    return redirectWithSession(twoFactorUrl, response);
   }
 
   if (user && protectedRole && role !== protectedRole) {
