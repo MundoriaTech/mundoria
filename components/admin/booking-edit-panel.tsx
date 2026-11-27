@@ -6,7 +6,9 @@ import { useState } from "react";
 import { ActionError } from "@/components/shared/action-error";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
+import { dayWindowSlots } from "@/components/shared/time-slot-picker";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import { SimpleSelect } from "@/components/ui/select";
 
 export type BookingEditValues = {
@@ -37,6 +39,37 @@ const textArea =
   "min-h-[72px] w-full rounded-md border border-[#e8e8eb] bg-white px-3 py-2 text-sm text-[#1c133b] outline-none focus:border-[#524096]";
 
 const LENGTHS = Array.from({ length: 31 }, (_, i) => 1 + i * 0.5);
+const selectClass = "h-11 w-full rounded-md border-[#e8e8eb] text-[#1c133b]";
+
+/** YYYY-MM-DD for a local date. */
+function dateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+/** The next 90 days, plus the booking's current date if it falls outside them. */
+function dateOptions(current: string) {
+  const today = new Date();
+  const keys = Array.from({ length: 90 }, (_, i) =>
+    dateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() + i)),
+  );
+  if (current && !keys.includes(current)) keys.push(current);
+  return keys.sort().map((key) => {
+    const [year, month, day] = key.split("-").map(Number);
+    const label = new Date(year, month - 1, day).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      weekday: "short",
+      ...(year !== today.getFullYear() ? { year: "numeric" } : {}),
+    });
+    return { label: key === dateKey(today) ? `Today, ${label}` : label, value: key };
+  });
+}
+
+/** Half-hour start times, plus the booking's current time if it's off the grid. */
+function timeOptions(current: string) {
+  const slots = Array.from(new Set([...dayWindowSlots, ...(current ? [current] : [])])).sort();
+  return slots.map((slot) => ({ label: slot, value: slot }));
+}
 
 const money = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
@@ -215,28 +248,31 @@ export function BookingEditPanel({
 
       {!notesOnly ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <label className={field}>
+          <div className={field}>
             <span className={labelText}>Date</span>
-            <Input
-              onChange={(event) => set("scheduledDate", event.target.value)}
-              type="date"
+            <SimpleSelect
+              aria-label="Date"
+              className={selectClass}
+              onChange={(value) => set("scheduledDate", value)}
+              options={dateOptions(values.scheduledDate)}
               value={values.scheduledDate}
             />
-          </label>
-          <label className={field}>
+          </div>
+          <div className={field}>
             <span className={labelText}>Start time</span>
-            <Input
-              onChange={(event) => set("scheduledTime", event.target.value)}
-              step={900}
-              type="time"
+            <SimpleSelect
+              aria-label="Start time"
+              className={selectClass}
+              onChange={(value) => set("scheduledTime", value)}
+              options={timeOptions(values.scheduledTime)}
               value={values.scheduledTime}
             />
-          </label>
+          </div>
           <div className={`${field} sm:col-span-2`}>
             <span className={labelText}>Address (customer&apos;s saved addresses)</span>
             <SimpleSelect
               aria-label="Address"
-              className="h-11 w-full rounded-md border-[#e8e8eb] text-[#1c133b]"
+              className={selectClass}
               onChange={(value) => set("addressId", value)}
               options={addresses.map((address) => ({ label: address.label, value: address.id }))}
               value={values.addressId}
@@ -248,7 +284,7 @@ export function BookingEditPanel({
                 <span className={labelText}>Length on site</span>
                 <SimpleSelect
                   aria-label="Length"
-                  className="h-11 w-full rounded-md border-[#e8e8eb] text-[#1c133b]"
+                  className={selectClass}
                   onChange={(value) => set("durationHours", Number(value))}
                   options={Array.from(new Set([...LENGTHS, values.durationHours]))
                     .sort((a, b) => a - b)
@@ -260,7 +296,7 @@ export function BookingEditPanel({
                 <span className={labelText}>Cleaning standard</span>
                 <SimpleSelect
                   aria-label="Cleaning standard"
-                  className="h-11 w-full rounded-md border-[#e8e8eb] text-[#1c133b]"
+                  className={selectClass}
                   onChange={(value) => set("cleaningStandard", value)}
                   options={[
                     { label: "Essential", value: "essential" },
@@ -297,9 +333,8 @@ export function BookingEditPanel({
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {addOnOptions.map((addOn) => (
                       <label className="flex items-center gap-2 text-sm" key={addOn.id}>
-                        <input
+                        <RoundCheckbox
                           checked={values.addOns.includes(addOn.id)}
-                          className="accent-primary"
                           onChange={() =>
                             set(
                               "addOns",
@@ -308,7 +343,6 @@ export function BookingEditPanel({
                                 : [...values.addOns, addOn.id],
                             )
                           }
-                          type="checkbox"
                         />
                         {addOn.label}
                       </label>
@@ -358,14 +392,13 @@ export function BookingEditPanel({
         ) : null}
         {hasCleaner && !notesOnly ? (
           <label className="flex items-start gap-2 text-sm">
-            <input
+            <RoundCheckbox
               checked={cleanerAgreed}
-              className="mt-0.5 accent-primary"
+              className="mt-0.5"
               onChange={(event) => {
                 setCleanerAgreed(event.target.checked);
                 setPreview(null);
               }}
-              type="checkbox"
             />
             <span>
               I&apos;ve already agreed the new time or address with the cleaner. Leave unticked to ask them

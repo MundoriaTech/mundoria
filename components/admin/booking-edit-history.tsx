@@ -8,6 +8,7 @@ import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 
 export type HistoryEntry = {
   /** "edit" rows can be undone; "action" rows are other admin actions. */
@@ -211,14 +212,13 @@ export function BookingEditHistory({
             />
             {hasCleaner ? (
               <label className="flex items-start gap-2">
-                <input
+                <RoundCheckbox
                   checked={cleanerAgreed}
-                  className="mt-0.5 accent-primary"
+                  className="mt-0.5"
                   onChange={(event) => {
                     setCleanerAgreed(event.target.checked);
                     setPreview(null);
                   }}
-                  type="checkbox"
                 />
                 <span>
                   If the time or address goes back, I&apos;ve already agreed it with the cleaner (otherwise they&apos;re

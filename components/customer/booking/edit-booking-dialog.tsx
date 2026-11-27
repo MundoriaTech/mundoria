@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { pillPrimary, pillPrimaryStyle } from "@/components/customer/dashboard/section-banner";
 import { AppModal } from "@/components/shared/app-modal";
 import { useFeedback } from "@/components/shared/feedback-provider";
+import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import { cn } from "@/lib/utils";
 
 export type EditFocus = "requirements" | "duration" | "address";
@@ -362,9 +363,9 @@ export function EditBookingDialog({
                       className="flex cursor-pointer items-start gap-3 border-b border-[#E4E3EA] py-2.5 last:border-0"
                       key={addOn.id}
                     >
-                      <input
+                      <RoundCheckbox
                         checked={values.addOns.includes(addOn.id)}
-                        className="mt-1 h-4 w-4 accent-[#524096]"
+                        className="mt-0.5"
                         onChange={() =>
                           set(
                             "addOns",
@@ -373,7 +374,6 @@ export function EditBookingDialog({
                               : [...values.addOns, addOn.id],
                           )
                         }
-                        type="checkbox"
                       />
                       <span className="min-w-0">
                         <span className="block text-[14.5px] font-medium text-[#1E1848]">{addOn.label}</span>
