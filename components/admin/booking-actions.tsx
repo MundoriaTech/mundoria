@@ -93,6 +93,17 @@ export function BookingActions({
     router.refresh();
   }
 
+  async function checkInForCleaner() {
+    const ok = await confirm({
+      action: "Check in",
+      description:
+        "Only do this once you've confirmed the cleaner is at the address (for example by phone). It records their arrival without a location so they can start the clean.",
+      title: "Check the cleaner in?",
+    });
+    if (!ok) return;
+    await act("approve_checkin");
+  }
+
   async function markNoShow() {
     const ok = await confirm({
       action: "Mark as no-show",
@@ -238,6 +249,17 @@ export function BookingActions({
             {checkinOverrideRequested ? "Accept arrival" : "Accept finish"}
           </Button>
         </div>
+      ) : null}
+      {(currentStatus === "confirmed" || currentStatus === "cleaner_en_route") &&
+      !checkinOverrideRequested ? (
+        <Button
+          className="mt-3 min-h-11 w-full"
+          disabled={note.length < 3}
+          onClick={() => void checkInForCleaner()}
+          variant="outline"
+        >
+          Check in for the cleaner
+        </Button>
       ) : null}
       {currentStatus === "confirmed" || currentStatus === "cleaner_en_route" ? (
         <Button
