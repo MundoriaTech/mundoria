@@ -1,19 +1,30 @@
 import Link from "next/link";
 
+import {
+  pillOutline,
+  pillPrimary,
+  pillPrimaryStyle,
+  SectionBanner,
+} from "@/components/customer/dashboard/section-banner";
 import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
 import { cleanerTierLabel, medallionIconSrc } from "@/lib/cleaner/tier";
 import type { Booking } from "@/types/customer";
 
 type Stage = {
-  /** Background of the card: navy for live stages, purple for planned ones. */
-  bg: string;
   detail: string;
-  /** Show the pulsing dot for stages that are happening right now. */
+  /** Pulsing dot for stages happening right now. */
   live: boolean;
   pill: string;
-  pillTone: string;
+  /** Chip colours, light-ground versions of the dashboard status chips. */
+  tone: string;
   title: string;
 };
+
+const AMBER = "bg-[#FFF1DB] text-[#8A5200]";
+const PURPLE = "bg-[#ECE8F6] text-[#524096]";
+const GREEN = "bg-[#E3F5EA] text-[#13693A]";
+const GREY = "bg-[#ECEBF1] text-[#4A4560]";
+const RED = "bg-[#FFE6E1] text-[#9A2B18]";
 
 function clock(time: string | null | undefined) {
   return String(time ?? "").slice(0, 5);
@@ -33,9 +44,6 @@ function endTime(start: string, hours: number | null | undefined) {
   return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
-const NAVY = "#1E1848";
-const PURPLE = "linear-gradient(135deg,#7F71B1 0%,#524096 100%)";
-
 /** Where the visit is now, in words the customer can act on. */
 function stageFor(booking: Booking, cleanerFirst: string | null, holdAtLabel: string | null): Stage {
   const when = `${dayLabel(booking.scheduled_date)} at ${clock(booking.scheduled_start_time)}`;
@@ -44,102 +52,94 @@ function stageFor(booking: Booking, cleanerFirst: string | null, holdAtLabel: st
     case "pending_match":
     case "matched":
       return {
-        bg: PURPLE,
-        detail: "We're finding the right cleaner for you. We'll email you as soon as they're confirmed.",
+        detail: "We're finding the right cleaner for you and will email you as soon as they're confirmed.",
         live: false,
         pill: "Finding your cleaner",
-        pillTone: "bg-[#FFF1DB] text-[#8A5200]",
         title: "Arranging your clean",
+        tone: AMBER,
       };
     case "awaiting_payment":
       return {
-        bg: PURPLE,
         detail: holdAtLabel
           ? `We'll confirm your visit when we place the card hold on ${holdAtLabel}. Nothing to do.`
           : "We're placing the card hold now to confirm your visit.",
         live: false,
         pill: "Cleaner accepted",
-        pillTone: "bg-white/20 text-white",
         title: `${name} has accepted`,
+        tone: PURPLE,
       };
     case "confirmed":
       return {
-        bg: PURPLE,
         detail: `${name} will arrive ${when}.`,
         live: false,
         pill: "Confirmed",
-        pillTone: "bg-[#E3F5EA] text-[#13693A]",
         title: "You're all set",
+        tone: GREEN,
       };
     case "cleaner_en_route":
       return booking.arrived_at
         ? {
-            bg: NAVY,
             detail: `${name} has arrived and is getting ready to start.`,
             live: true,
             pill: "Arrived",
-            pillTone: "bg-[#E3F5EA] text-[#13693A]",
-            title: `${name} is at your door`,
+            title: `${name} has arrived`,
+            tone: GREEN,
           }
         : {
-            bg: NAVY,
-            detail: "You'll see them on the map below as they travel.",
+            detail: "Follow them on the map as they travel to you.",
             live: true,
             pill: "On the way",
-            pillTone: "bg-[#FFC9A3] text-[#1C133B]",
             title: `${name} is on the way`,
+            tone: PURPLE,
           };
     case "in_progress":
       return {
-        bg: NAVY,
-        detail: `Booked until ${endTime(booking.scheduled_start_time, booking.estimated_duration_hours)}. The countdown above shows the time left.`,
+        detail: `Booked until ${endTime(booking.scheduled_start_time, booking.estimated_duration_hours)}. The countdown shows the time left.`,
         live: true,
         pill: "Cleaning now",
-        pillTone: "bg-[#E3F5EA] text-[#13693A]",
         title: `${name} is cleaning`,
+        tone: GREEN,
       };
     case "awaiting_customer_confirmation":
       return {
-        bg: NAVY,
         detail: "Have a look round and confirm the clean, or tell us if something isn't right.",
         live: false,
         pill: "Please review",
-        pillTone: "bg-[#FFC9A3] text-[#1C133B]",
         title: `${name} has finished`,
+        tone: AMBER,
       };
     case "completed":
       return {
-        bg: PURPLE,
-        detail: "Thanks for booking with Mundoria. Your invoice is ready below.",
+        detail: "Thanks for booking with Mundoria. Your invoice is ready on this page.",
         live: false,
         pill: "Completed",
-        pillTone: "bg-[#E3F5EA] text-[#13693A]",
         title: "Clean complete",
+        tone: GREEN,
       };
     case "cancelled":
       return {
-        bg: "linear-gradient(135deg,#6B6680 0%,#4A4560 100%)",
         detail: booking.cancellation_reason ?? "This visit was cancelled.",
         live: false,
         pill: "Cancelled",
-        pillTone: "bg-white/20 text-white",
         title: "Visit cancelled",
+        tone: GREY,
       };
     default:
       return {
-        bg: NAVY,
         detail: "Our team is looking into this visit and will be in touch.",
         live: false,
         pill: "Under review",
-        pillTone: "bg-[#FFE6E1] text-[#9A2B18]",
         title: "We're on it",
+        tone: RED,
       };
   }
 }
 
+const tileLabel = "m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70";
+
 /**
- * The booking's status card: what's happening now, and who is cleaning.
- * Replaces the plain "Your cleaner" box.
+ * The booking's status, in the dashboard's format: a striped banner naming
+ * the stage, then grey tiles for where things stand and who is cleaning.
  */
 export function VisitStatusCard({
   booking,
@@ -156,36 +156,28 @@ export function VisitStatusCard({
   const avatar = cleaner ? resolveAvatarUrl(cleaner.avatar_url, cleaner.id) : null;
 
   return (
-    <section
-      aria-live="polite"
-      className="relative overflow-hidden rounded-[22px] p-5 text-white"
-      style={{ background: stage.bg }}
-    >
-      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <pattern height="22" id="visit-dots" patternUnits="userSpaceOnUse" width="22">
-            <circle cx="1.5" cy="1.5" fill="rgba(255,255,255,0.07)" r="1.5" />
-          </pattern>
-        </defs>
-        <rect fill="url(#visit-dots)" height="100%" width="100%" />
-      </svg>
+    <section aria-live="polite" className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+      <SectionBanner title={stage.title} />
 
-      <div className="relative">
-        <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[12.5px] font-semibold ${stage.pillTone}`}>
+      <div className="rounded-[18px] bg-[#F3F4F6] p-4">
+        <p className={tileLabel}>Status</p>
+        <span className={`mt-2.5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[13px] font-semibold ${stage.tone}`}>
           {stage.live ? (
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60 motion-reduce:animate-none" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-50 motion-reduce:animate-none" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
             </span>
           ) : null}
           {stage.pill}
         </span>
-        <h2 className="m-0 mt-3 text-[21px] font-bold leading-tight tracking-[-0.01em]">{stage.title}</h2>
-        <p className="m-0 mt-1.5 text-[14px] leading-[1.5] text-white/80">{stage.detail}</p>
+        <p className="m-0 mt-2.5 text-[14.5px] leading-[1.5] text-[#3d3a48]">{stage.detail}</p>
+      </div>
 
-        {cleaner ? (
-          <div className="mt-4 flex items-center gap-3 rounded-[14px] bg-white/10 p-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 text-lg font-bold">
+      {cleaner ? (
+        <div className="rounded-[18px] bg-[#F3F4F6] p-4">
+          <p className={tileLabel}>Your cleaner</p>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#ECE8F6] text-lg font-bold text-[#524096]">
               {avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img alt={cleaner.full_name} className={avatarImageClass(avatar)} src={avatar} />
@@ -194,35 +186,28 @@ export function VisitStatusCard({
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="m-0 truncate text-[15px] font-semibold">{cleaner.full_name}</p>
-              <p className="m-0 mt-1 flex items-center gap-1.5 text-[12.5px] text-white/75">
+              <p className="m-0 truncate text-[16px] font-semibold text-[#1E1848]">{cleaner.full_name}</p>
+              <p className="m-0 mt-1 flex items-center gap-1.5 text-[13px] text-[#5F5F66]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img alt="" aria-hidden className="h-4 w-4" src={medallionIconSrc(cleaner.tier)} />
                 {cleanerTierLabel(cleaner.tier)} medallion
               </p>
             </div>
           </div>
-        ) : null}
-
-        {cleaner && booking.status !== "cancelled" ? (
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-[14px] font-semibold text-[#524096] transition hover:bg-[#ECE8F6]"
-              href={`/messages/${booking.id}`}
-            >
-              Message {first}
-            </Link>
-            {booking.status === "completed" ? (
-              <Link
-                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white/50 px-4 text-[14px] font-semibold text-white transition hover:bg-white/10"
-                href={`/booking/new?rebook=${booking.id}&keep=1`}
-              >
-                Book {first} again
+          {booking.status !== "cancelled" ? (
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+              <Link className={pillPrimary} href={`/messages/${booking.id}`} style={pillPrimaryStyle}>
+                Message {first}
               </Link>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+              {booking.status === "completed" ? (
+                <Link className={pillOutline} href={`/booking/new?rebook=${booking.id}&keep=1`}>
+                  Book {first} again
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }

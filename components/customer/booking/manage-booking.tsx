@@ -3,6 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
+import { SectionBanner } from "@/components/customer/dashboard/section-banner";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { cn } from "@/lib/utils";
 
@@ -74,23 +75,31 @@ export function ManageBooking({
   }
 
   return (
-    <section className="rounded-[22px] bg-white p-4 sm:p-5">
-      <button
-        aria-controls={`manage-${bookingId}`}
-        aria-expanded={open}
-        className="flex min-h-11 w-full items-center justify-between gap-3 text-left"
-        onClick={() => setOpen((value) => !value)}
-        type="button"
-      >
-        <span>
-          <span className="block text-[18px] font-bold text-[#1c133b]">Manage booking</span>
-          <span className="block text-[13px] text-[#6B6B70]">Change, update or cancel this visit</span>
-        </span>
-        <ChevronDown aria-hidden className={cn("h-5 w-5 shrink-0 text-[#524096] transition", open && "rotate-180")} />
-      </button>
+    <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+      <SectionBanner title="Manage booking">
+        <button
+          aria-controls={`manage-${bookingId}`}
+          aria-expanded={open}
+          aria-label={open ? "Hide booking options" : "Show booking options"}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+          onClick={() => setOpen((value) => !value)}
+          type="button"
+        >
+          <ChevronDown aria-hidden className={cn("h-5 w-5 transition", open && "rotate-180")} />
+        </button>
+      </SectionBanner>
+      {!open ? (
+        <button
+          className="m-0 px-1 text-left text-[13.5px] text-[#5F5F66] underline-offset-2 hover:text-[#524096] hover:underline"
+          onClick={() => setOpen(true)}
+          type="button"
+        >
+          Change, update or cancel this visit.
+        </button>
+      ) : null}
 
       {open ? (
-        <div className="mt-4 flex flex-col gap-2.5" id={`manage-${bookingId}`}>
+        <div className="flex flex-col gap-2.5" id={`manage-${bookingId}`}>
           {rows.map((row) =>
             row.key === "access" ? (
               <div className="rounded-[14px] bg-[#F3F4F6]" key={row.key}>

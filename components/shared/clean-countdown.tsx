@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
-import { Button } from "@/components/ui/button";
 
 const EXTENSION_OPTIONS = [30, 60, 90] as const;
 const WARNING_MS = 10 * 60 * 1000;
@@ -96,88 +95,124 @@ export function CleanCountdown({
     router.refresh();
   }
 
-  const tone = timeUp
-    ? "border-red-200 bg-red-50"
-    : remaining <= WARNING_MS
-      ? "border-amber-200 bg-amber-50"
-      : "border-[#e4daf5] bg-white";
+  const warning = !timeUp && remaining <= WARNING_MS;
+  // Ring colours follow the dashboard: purple running, amber near the end, red over.
+  const ringColour = timeUp ? "#E8452C" : warning ? "#F0A93B" : "#8B7FC0";
+  const labelColour = timeUp ? "#FF9A85" : warning ? "#F6C66F" : "#C69C66";
+  const R = 62;
+  const C = 2 * Math.PI * R;
+  // The ring empties as time runs down; when time is up it is full red.
+  const shown = timeUp ? 1 : 1 - elapsedShare;
 
   return (
-    <section className={`rounded-2xl border p-5 ${tone}`} aria-live="polite">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f6a82]">
-            {timeUp ? "Booked time is up" : "Time remaining"}
-          </p>
-          <p className="mt-1 font-mono text-4xl font-bold tabular-nums text-[#1c133b]">
-            {timeUp ? `+${clock(-remaining)}` : clock(remaining)}
-          </p>
-        </div>
-        <p className="text-sm text-[#5a5470]">
-          Started {ukTime(startMs)} · booked until {ukTime(endMs)}
-        </p>
-      </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#efe9f8]">
-        <div
-          className={`h-full rounded-full ${timeUp ? "bg-red-500" : remaining <= WARNING_MS ? "bg-amber-500" : "bg-[#6a45b8]"}`}
-          style={{ width: `${elapsedShare * 100}%` }}
-        />
-      </div>
+    <section
+      className="relative overflow-hidden rounded-[18px] p-5 text-white"
+      style={{ background: "#1E1848" }}
+    >
+      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern height="22" id="countdown-dots" patternUnits="userSpaceOnUse" width="22">
+            <circle cx="1.5" cy="1.5" fill="rgba(255,255,255,0.07)" r="1.5" />
+          </pattern>
+        </defs>
+        <rect fill="url(#countdown-dots)" height="100%" width="100%" />
+      </svg>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute rounded-full"
+        style={{ width: "220px", height: "220px", left: "-50px", top: "-70px", background: "radial-gradient(circle,rgba(130,113,177,0.35) 0%,transparent 70%)" }}
+      />
 
-      {role === "cleaner" && !timeUp && remaining <= WARNING_MS && !extensionPending ? (
-        <p className="mt-3 text-sm text-amber-900">
-          Less than 10 minutes left. If you won&apos;t finish, ask the customer for more
-          time now.
-        </p>
-      ) : null}
-
-      {role === "cleaner" && timeUp ? (
-        extensionPending ? (
-          <p className="mt-3 text-sm text-[#5a5470]">
-            Waiting for the customer to approve more time. Wrap up unless they approve.
-          </p>
-        ) : !dismissed ? (
-          <div className="mt-4 rounded-xl border border-red-200 bg-white p-4">
-            <p className="font-semibold text-[#1c133b]">Do you need more time?</p>
-            <p className="mt-1 text-sm text-[#5a5470]">
-              The customer sees the price and approves it in their app. You&apos;re only
-              paid for time they approve.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {EXTENSION_OPTIONS.map((minutes) => (
-                <Button
-                  disabled={busy}
-                  key={minutes}
-                  onClick={() => void askForMore(minutes)}
-                  type="button"
-                  variant="outline"
-                >
-                  +{minutesLabel(minutes)}
-                </Button>
-              ))}
-              <Button
-                disabled={busy}
-                onClick={() => setDismissed(true)}
-                type="button"
-                variant="ghost"
-              >
-                No, I&apos;m finishing up
-              </Button>
-            </div>
-            {error ? (
-              <div className="mt-3">
-                <ActionError message={error} title="Couldn’t ask for more time" />
-              </div>
-            ) : null}
+      <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-7">
+        <div className="relative h-[150px] w-[150px] shrink-0">
+          <svg aria-hidden className="absolute inset-0 h-full w-full" viewBox="0 0 150 150">
+            <circle cx="75" cy="75" fill="none" r={R} stroke="rgba(255,255,255,0.12)" strokeWidth="12" />
+            <circle
+              cx="75"
+              cy="75"
+              fill="none"
+              r={R}
+              stroke={ringColour}
+              strokeDasharray={`${Math.max(0.001, shown) * C} ${C}`}
+              strokeLinecap="round"
+              strokeWidth="12"
+              style={{ transition: "stroke-dasharray 1s linear, stroke 0.4s" }}
+              transform="rotate(-90 75 75)"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center" role="timer">
+            <span className="font-semibold tabular-nums tracking-[-0.02em]" style={{ fontSize: "28px", lineHeight: 1 }}>
+              {timeUp ? `+${clock(-remaining)}` : clock(remaining)}
+            </span>
+            <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-white/60">
+              {timeUp ? "over" : "left"}
+            </span>
           </div>
-        ) : null
-      ) : null}
+        </div>
 
-      {role === "customer" && timeUp ? (
-        <p className="mt-3 text-sm text-[#5a5470]">
-          Your booked time has finished. If your cleaner needs longer, they&apos;ll ask
-          and you can approve or decline here.
-        </p>
+        <div className="min-w-0 flex-1 text-center sm:text-left">
+          <p aria-live="polite" className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em]" style={{ color: labelColour }}>
+            {timeUp ? "Booked time is up" : warning ? "Nearly finished" : "Cleaning now"}
+          </p>
+          <p className="m-0 mt-2 text-[17px] font-semibold leading-snug">
+            Started {ukTime(startMs)} · booked until {ukTime(endMs)}
+          </p>
+          {role === "cleaner" && warning && !extensionPending ? (
+            <p className="m-0 mt-2 text-[14px] leading-[1.45] text-white/75">
+              Less than 10 minutes left. If you won&apos;t finish, ask for more time now.
+            </p>
+          ) : null}
+          {role === "customer" && timeUp ? (
+            <p className="m-0 mt-2 text-[14px] leading-[1.45] text-white/75">
+              Your booked time has finished. If your cleaner needs longer, they&apos;ll ask and you can approve or decline here.
+            </p>
+          ) : null}
+          {role === "customer" && !timeUp ? (
+            <p className="m-0 mt-2 text-[14px] leading-[1.45] text-white/75">
+              Any extra time you approve is added here.
+            </p>
+          ) : null}
+          {role === "cleaner" && timeUp && extensionPending ? (
+            <p className="m-0 mt-2 text-[14px] leading-[1.45] text-white/75">
+              Waiting for the customer to approve more time. Wrap up unless they approve.
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      {role === "cleaner" && timeUp && !extensionPending && !dismissed ? (
+        <div className="relative mt-5 rounded-[14px] bg-white/10 p-4">
+          <p className="m-0 text-[16px] font-semibold">Do you need more time?</p>
+          <p className="m-0 mt-1 text-[13.5px] leading-[1.45] text-white/75">
+            The customer sees the price and approves it in their app. You&apos;re only paid for time they approve.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {EXTENSION_OPTIONS.map((minutes) => (
+              <button
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-[14px] font-semibold text-[#524096] transition hover:bg-[#ECE8F6] disabled:opacity-60"
+                disabled={busy}
+                key={minutes}
+                onClick={() => void askForMore(minutes)}
+                type="button"
+              >
+                +{minutesLabel(minutes)}
+              </button>
+            ))}
+            <button
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/40 px-4 text-[14px] font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
+              disabled={busy}
+              onClick={() => setDismissed(true)}
+              type="button"
+            >
+              No, I&apos;m finishing up
+            </button>
+          </div>
+          {error ? (
+            <div className="mt-3">
+              <ActionError message={error} title="Couldn’t ask for more time" />
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </section>
   );

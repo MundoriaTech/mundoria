@@ -9,11 +9,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { BookingSummaryCard } from "@/components/customer/booking-basket";
 import { CleanerMap } from "@/components/customer/cleaner-map";
 import { CompletionChecklistConfirmation } from "@/components/customer/completion-checklist-confirmation";
 import { FollowOnPayModal } from "@/components/customer/follow-on-pay-modal";
+import { BookingOverview } from "@/components/customer/booking/booking-overview";
 import { ManageBooking } from "@/components/customer/booking/manage-booking";
+import {
+  pillOutline,
+  pillPrimary,
+  pillPrimaryStyle,
+  SectionBanner,
+} from "@/components/customer/dashboard/section-banner";
 import { NeedAHand } from "@/components/customer/booking/need-a-hand";
 import { VisitStatusCard } from "@/components/customer/booking/visit-status-card";
 import { TipPanel } from "@/components/customer/tip-panel";
@@ -26,17 +32,12 @@ import { useFeedback } from "@/components/shared/feedback-provider";
 import { GuidedDisputeForm } from "@/components/shared/guided-dispute-form";
 import { SafetyAlertSheet } from "@/components/shared/safety-alert-sheet";
 import { Button } from "@/components/ui/button";
-import {
-  formatBookingDate,
-  frequencyLabelForBooking,
-  petsFromNotes,
-} from "@/lib/customer/booking-flow";
+import { formatBookingDate } from "@/lib/customer/booking-flow";
 import {
   formatConfirmByDeadline,
   isCleanerVisibleToCustomer,
   isWaitingForCleanerAcceptance,
 } from "@/lib/customer/booking-visibility";
-import { hourlyRatePence } from "@/lib/customer/rate-card";
 import {
   bookingServiceName,
   formatMoney,
@@ -429,53 +430,39 @@ export function BookingDetail({
     ["confirmed", "cleaner_en_route"].includes(booking.status);
 
   return (
-    <div className="min-w-0 space-y-6 sm:space-y-8">
-      <header className="space-y-4 rounded-[18px] bg-white p-5">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="min-w-0 space-y-4 sm:space-y-5">
+      <header className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
+        <SectionBanner title={bookingServiceName(booking)}>
           {!waitingForCleaner && booking.status !== "cancelled" ? (
             <BookingStatusBadge status={booking.status} />
           ) : null}
-        </div>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
-            <h2 className="m-0 break-words text-xl font-semibold tracking-[-0.02em] text-[#1E1848] sm:text-2xl">
-              {bookingServiceName(booking)}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[#5F5F66]">
-              {[whenLabel, placeLabel, `#${booking.id.slice(0, 8)}`]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            {needsPayment ? (
-              <Button
-                className="min-h-11 rounded-full bg-[#524096] hover:bg-[#43357f]"
-                onClick={() => setShowPay(true)}
-              >
-                Authorise payment
-              </Button>
-            ) : null}
-            {needsStartConfirm ? (
-              <Button
-                className="min-h-11 rounded-full bg-[#524096] hover:bg-[#43357f]"
-                onClick={() => void confirmStart()}
-              >
-                Start cleaning
-              </Button>
-            ) : null}
-            {canMessage ? (
-              <Button
-                asChild
-                className="min-h-11 rounded-full bg-[#524096] hover:bg-[#43357f]"
-              >
-                <Link href={`/messages/${booking.id}`}>
-                  <MessageCircle className="mr-2 h-4 w-4" />
+        </SectionBanner>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <p className="m-0 px-1 text-[14.5px] leading-6 text-[#5F5F66]">
+            {[whenLabel, placeLabel, `#${booking.id.slice(0, 8)}`]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          {needsPayment || needsStartConfirm || canMessage ? (
+            <div className="grid gap-2.5 sm:flex sm:flex-wrap">
+              {needsPayment ? (
+                <button className={pillPrimary} onClick={() => setShowPay(true)} style={pillPrimaryStyle} type="button">
+                  Authorise payment
+                </button>
+              ) : null}
+              {needsStartConfirm ? (
+                <button className={pillPrimary} onClick={() => void confirmStart()} style={pillPrimaryStyle} type="button">
+                  Start cleaning
+                </button>
+              ) : null}
+              {canMessage ? (
+                <Link className={pillOutline} href={`/messages/${booking.id}`}>
+                  <MessageCircle aria-hidden className="h-4 w-4" />
                   Message cleaner
                 </Link>
-              </Button>
-            ) : null}
-          </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </header>
 
@@ -633,61 +620,13 @@ export function BookingDetail({
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.85fr)] lg:gap-6">
         <div className="space-y-4">
-          <BookingSummaryCard
-            addOns={(booking.add_ons ?? []).map((addOn) => ({
-              amount: addOn.amount,
-              label: addOn.label,
-            }))}
-            address={booking.address ?? null}
-            amount={
-              booking.amount_total != null ? Number(booking.amount_total) : null
-            }
-            bathrooms={booking.address?.num_bathrooms ?? null}
-            bedrooms={booking.address?.num_bedrooms ?? null}
-            durationHint={
-              booking.service_type === "office" && booking.cleaner_hours != null
-                ? `${Number(booking.cleaner_hours).toFixed(1).replace(/\.0$/, "")} cleaner-hours`
-                : null
-            }
-            durationHours={booking.estimated_duration_hours}
-            frequencyLabel={frequencyLabelForBooking(booking)}
-            hasPets={petsFromNotes(booking.special_instructions)}
-            hourlyRatePence={hourlyRatePence(
-              booking.service_type,
-              booking.cleaning_standard,
-            )}
-            labourAmountPence={
-              booking.amount_total != null
-                ? Math.max(
-                    0,
-                    Number(booking.amount_total) -
-                      (booking.add_ons ?? []).reduce(
-                        (sum, addOn) => sum + Number(addOn.amount ?? 0),
-                        0,
-                      ),
-                  )
-                : null
-            }
-            priorityAreas={booking.special_attention_areas ?? []}
-            scheduledDate={booking.scheduled_date}
-            scheduledTime={booking.scheduled_start_time}
-            serviceLabel={bookingServiceName(booking)}
-            standardLabel={null}
-            title="Booking details"
-          />
+          <BookingOverview booking={booking} />
 
           {receiptAvailable(booking) ? (
             <div>
-              <Button
-                asChild
-                className="w-full rounded-full sm:w-auto"
-                size="sm"
-                variant="outline"
-              >
-                <a download href={`/api/bookings/${booking.id}/invoice`}>
-                  Download invoice
-                </a>
-              </Button>
+              <a className={`${pillOutline} w-full sm:w-auto`} download href={`/api/bookings/${booking.id}/invoice`}>
+                Download invoice
+              </a>
             </div>
           ) : null}
         </div>
