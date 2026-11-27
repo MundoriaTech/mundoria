@@ -61,21 +61,25 @@ export function BookingEditHistory({
   const router = useRouter();
   const { success } = useFeedback();
   const [undoing, setUndoing] = useState<HistoryEntry | null>(null);
+  const [resetting, setResetting] = useState(false);
   const [note, setNote] = useState("");
   const [cleanerAgreed, setCleanerAgreed] = useState(false);
   const [preview, setPreview] = useState<UndoPreview | null>(null);
   const [error, setError] = useState("");
 
   async function call(previewOnly: boolean) {
-    if (!undoing) return null;
-    const res = await fetch(`/api/admin/bookings/${bookingId}/edits/${undoing.id}/undo`, {
+    if (!undoing && !resetting) return null;
+    const url = resetting
+      ? `/api/admin/bookings/${bookingId}/reset`
+      : `/api/admin/bookings/${bookingId}/edits/${undoing?.id}/undo`;
+    const res = await fetch(url, {
       body: JSON.stringify({ cleanerAgreed, note, preview: previewOnly }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
     const json = (await res.json().catch(() => ({}))) as UndoPreview & { error?: string };
     if (!res.ok) {
-      setError(json.error ?? "Couldn't undo this edit.");
+      setError(json.error ?? (resetting ? "Couldn't reset this booking." : "Couldn't undo this edit."));
       return null;
     }
     setError("");
@@ -84,6 +88,7 @@ export function BookingEditHistory({
 
   function close() {
     setUndoing(null);
+    setResetting(false);
     setPreview(null);
     setNote("");
     setCleanerAgreed(false);
@@ -92,10 +97,27 @@ export function BookingEditHistory({
 
   return (
     <section className="rounded-xl border bg-card p-5">
-      <h2 className="font-semibold">Edit history</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Changes made after booking, by admins or the customer, and other admin actions with their notes.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="font-semibold">Edit history</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Changes made after booking, by admins or the customer, and other admin actions with their notes.
+          </p>
+        </div>
+        {undoableId ? (
+          <Button
+            onClick={() => {
+              setUndoing(null);
+              setResetting(true);
+              setPreview(null);
+            }}
+            size="sm"
+            variant="outline"
+          >
+            Reset to original booking
+          </Button>
+        ) : null}
+      </div>
       {entries.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">Nothing has been changed since this was booked.</p>
       ) : (
@@ -149,11 +171,15 @@ export function BookingEditHistory({
         </ol>
       )}
 
-      {undoing ? (
+      {undoing || resetting ? (
         <ConfirmModal
-          action={preview ? "Undo edit" : "Check undo"}
+          action={resetting ? (preview ? "Reset booking" : "Check reset") : preview ? "Undo edit" : "Check undo"}
           confirmDisabled={note.trim().length < 3}
-          description="The booking goes back to how it was before this edit. The customer, the cleaner and admins are told."
+          description={
+            resetting
+              ? "Every change still in force is reversed, so the booking goes back to what was originally booked. The customer, the cleaner and admins are told."
+              : "The booking goes back to how it was before this edit. The customer, the cleaner and admins are told."
+          }
           onCancel={close}
           onConfirm={async () => {
             if (!preview) {
@@ -163,11 +189,15 @@ export function BookingEditHistory({
             }
             const result = await call(false);
             if (!result) return;
-            success({ kind: "updated", note: "Everyone affected has been told.", title: "Edit undone" });
+            success({
+              kind: "updated",
+              note: "Everyone affected has been told.",
+              title: resetting ? "Booking reset to the original" : "Edit undone",
+            });
             close();
             router.refresh();
           }}
-          title="Undo this edit?"
+          title={resetting ? "Reset to the original booking?" : "Undo this edit?"}
           variant={preview ? "destructive" : "default"}
         >
           <div className="space-y-3 text-sm">
@@ -176,7 +206,7 @@ export function BookingEditHistory({
                 setNote(event.target.value);
                 setPreview(null);
               }}
-              placeholder="Why are you undoing it? (required)"
+              placeholder={resetting ? "Why are you resetting it? (required)" : "Why are you undoing it? (required)"}
               value={note}
             />
             {hasCleaner ? (
@@ -218,9 +248,13 @@ export function BookingEditHistory({
                 ) : null}
               </div>
             ) : (
-              <p className="text-muted-foreground">Click &ldquo;Check undo&rdquo; to see exactly what changes back.</p>
+              <p className="text-muted-foreground">
+                Click &ldquo;{resetting ? "Check reset" : "Check undo"}&rdquo; to see exactly what changes back.
+              </p>
             )}
-            {error ? <ActionError message={error} title="Couldn’t undo this edit" /> : null}
+            {error ? (
+              <ActionError message={error} title={resetting ? "Couldn’t reset this booking" : "Couldn’t undo this edit"} />
+            ) : null}
           </div>
         </ConfirmModal>
       ) : null}

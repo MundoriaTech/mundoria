@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { BookingActions } from "@/components/admin/booking-actions";
 import { BookingEditPanel } from "@/components/admin/booking-edit-panel";
 import { BookingEditHistory, type HistoryEntry } from "@/components/admin/booking-edit-history";
-import { undoableEditId } from "@/lib/bookings/undo-booking-edit";
+import { RESET_REASON_PREFIX, undoableEditId } from "@/lib/bookings/undo-booking-edit";
 import {
   FULLY_EDITABLE_STATUSES,
   NOTES_ONLY_STATUSES,
@@ -159,7 +159,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       .eq("entity_type", "booking")
       .eq("entity_id", params.id)
       // Edits and undos are shown from booking_edits, with their changes.
-      .not("action", "in", "(edit_booking,undo_booking_edit)")
+      .not("action", "in", "(edit_booking,undo_booking_edit,reset_booking)")
       .order("created_at", { ascending: false }),
   ]);
   const historyNames = await loadCleanerNames(
@@ -181,7 +181,9 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
       kind: (row.undo_of ? "undo" : "edit") as HistoryEntry["kind"],
       reason: row.actor_type === "customer" ? null : (row.reason as string | null),
       title: row.undo_of
-        ? "Edit undone"
+        ? String(row.reason ?? "").startsWith(RESET_REASON_PREFIX)
+          ? "Reset to the original booking"
+          : "Edit undone"
         : row.actor_type === "customer"
           ? "Customer changed the booking"
           : "Admin edited the booking",

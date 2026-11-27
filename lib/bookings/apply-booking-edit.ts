@@ -36,6 +36,7 @@ export async function applyBookingEdit({
   actor,
   actorId,
   admin,
+  adminTitle,
   booking,
   plan,
   reason,
@@ -44,6 +45,8 @@ export async function applyBookingEdit({
   actor: "admin" | "customer";
   actorId: string;
   admin: Admin;
+  /** Subject of the admin alert, when the default doesn't fit. */
+  adminTitle?: string;
   booking: EditableBooking;
   plan: BookingEditPlan;
   reason: string;
@@ -230,11 +233,12 @@ export async function applyBookingEdit({
     // Admins hear about every change, whoever made it.
     alertAdmins(
       "booking_updated",
-      undoOf
-        ? "A booking edit was undone"
+      adminTitle ??
+        (undoOf
+          ? "A booking edit was undone"
         : actor === "customer"
           ? "A customer changed their booking"
-          : "An admin changed a booking",
+          : "An admin changed a booking"),
       `${summary(plan.changes)}.${actor === "admin" ? ` Reason: ${reason}` : ""}${
         plan.cleanerMustReconfirm ? " The cleaner has been asked to accept the new details." : ""
       }`,
