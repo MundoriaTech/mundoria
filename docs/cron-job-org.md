@@ -34,7 +34,7 @@ seconds.
 | Title | URL | Schedule | Purpose |
 | --- | --- | --- | --- |
 | Mundoria Admin Alerts | `https://www.mundoria.co.uk/api/cron/admin-alerts` | `*/5 * * * *` | Sends queued admin alerts. |
-| Mundoria Check No-Shows | `https://www.mundoria.co.uk/api/cron/check-no-shows` | `*/15 * * * *` | Detects no-show bookings and starts replacement matching. |
+| Mundoria Check No-Shows | `https://www.mundoria.co.uk/api/cron/check-no-shows` | `*/15 * * * *` | Alerts admins (once) when a cleaner has not checked in 30 min after the start; the cleaner stays assigned. Admins use Mark as no-show to start replacement. Also closes expired replacements. |
 | Mundoria Expire Job Offers | `https://www.mundoria.co.uk/api/cron/expire-job-offers` | `*/5 * * * *` | Cascades expired cleaner offers onto the Emergency List. |
 | Mundoria Confirmation Gates | `https://www.mundoria.co.uk/api/cron/confirmation-gates` | `*/10 * * * *` | Opens T−24/T−6/T−1 confirmations (a missed one alerts admins; the cleaner stays), prunes reserves, closes lists at start, and chases cleans not checked out (cleaner reminder at +30 min, admin alert at +2 h). |
 | Mundoria Apply Rating Holds | `https://www.mundoria.co.uk/api/cron/apply-rating-holds` | `0 * * * *` | Applies held low ratings after the dispute window expires. |

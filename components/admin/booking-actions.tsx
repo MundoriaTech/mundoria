@@ -93,6 +93,30 @@ export function BookingActions({
     router.refresh();
   }
 
+  async function markNoShow() {
+    const ok = await confirm({
+      action: "Mark as no-show",
+      description:
+        "The cleaner is taken off this visit, it counts against their record, the customer is told, and we start finding a replacement.",
+      title: "The cleaner isn't coming?",
+      variant: "destructive",
+    });
+    if (!ok) return;
+    const response = await fetch(`/api/bookings/${bookingId}/no-show`, {
+      body: JSON.stringify({ note }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const result = (await response.json().catch(() => ({}))) as { error?: string };
+    if (!response.ok) {
+      setMessage(result.error ?? "Couldn't mark this as a no-show.");
+      return;
+    }
+    setMessage("");
+    success({ kind: "updated", title: "Marked as no-show", note: "Finding a replacement now." });
+    router.refresh();
+  }
+
   function toggleTeamMember(id: string) {
     setTeamIds((current) =>
       current.includes(id)
@@ -214,6 +238,16 @@ export function BookingActions({
             {checkinOverrideRequested ? "Accept arrival" : "Accept finish"}
           </Button>
         </div>
+      ) : null}
+      {currentStatus === "confirmed" || currentStatus === "cleaner_en_route" ? (
+        <Button
+          className="mt-3 min-h-11 w-full"
+          disabled={note.length < 3}
+          onClick={() => void markNoShow()}
+          variant="destructive"
+        >
+          Mark as no-show
+        </Button>
       ) : null}
       <Button
         className="mt-3 min-h-11 w-full"
