@@ -417,7 +417,7 @@ function PickerShell({
   style,
   triggerClassName,
   value,
-}: SharedProps & {
+}: Omit<SharedProps, "onChange"> & {
   display: string;
   mode: "date" | "datetime";
   minuteStep?: number;
