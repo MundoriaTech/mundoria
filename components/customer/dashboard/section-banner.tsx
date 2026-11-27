@@ -39,6 +39,29 @@ export function SectionBanner({
   );
 }
 
+/**
+ * Lighter section title for detail pages — same hierarchy as SectionBanner
+ * without the heavy striped purple band.
+ */
+export function SectionHeading({
+  children,
+  className,
+  title,
+}: {
+  children?: ReactNode;
+  className?: string;
+  title: string;
+}) {
+  return (
+    <div className={cn("flex items-center justify-between gap-3", className)}>
+      <h2 className="m-0 text-[18px] font-semibold tracking-[-0.02em] text-[#1E1848] sm:text-[20px]">
+        {title}
+      </h2>
+      {children ? <div className="shrink-0">{children}</div> : null}
+    </div>
+  );
+}
+
 /** Pill buttons that sit with a section banner. */
 export const pillPrimary =
   "inline-flex min-h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 text-[15px] sm:px-5 font-semibold text-white transition hover:brightness-110 xl:min-h-[52px] xl:px-6 xl:text-[16px]";

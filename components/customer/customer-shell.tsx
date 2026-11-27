@@ -19,9 +19,12 @@ import {
   DashboardBackLink,
   appParentBackLink,
 } from "@/components/shared/dashboard-back-link";
+import {
+  AccountMenu,
+  CUSTOMER_ACCOUNT_MENU,
+} from "@/components/shared/account-menu";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { OneSignalEnroll } from "@/components/shared/onesignal-enroll";
-import { UserAvatar } from "@/components/shared/user-avatar";
 import { trackCrmEvent } from "@/lib/analytics/crm-events";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -362,11 +365,9 @@ export function CustomerShell({
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <NotificationBell userId={profile.id} />
-                  <UserAvatar
-                    name={profile.full_name}
-                    seed={profile.id}
-                    size="sm"
-                    url={profile.avatar_url}
+                  <AccountMenu
+                    items={CUSTOMER_ACCOUNT_MENU}
+                    profile={profile}
                   />
                 </div>
               </div>
@@ -425,25 +426,13 @@ export function CustomerShell({
                   />
                 </div>
 
-                <div
-                  className="flex h-[98px] shrink-0 items-center gap-[19px] rounded-[22px] bg-[#F3F4F6] px-[21px]"
-                >
+                <div className="flex h-[98px] shrink-0 items-center gap-4 rounded-[22px] bg-[#F3F4F6] px-4">
                   <NotificationBell userId={profile.id} />
-                  <UserAvatar
-                    className="shrink-0"
-                    name={profile.full_name}
-                    seed={profile.id}
-                    size="md"
-                    url={profile.avatar_url}
+                  <AccountMenu
+                    items={CUSTOMER_ACCOUNT_MENU}
+                    profile={profile}
+                    variant="panel"
                   />
-                  <div className="flex flex-col gap-[3px]">
-                    <span className="whitespace-nowrap text-[17.4px] font-semibold leading-5 text-[#000]">
-                      {profile.full_name}
-                    </span>
-                    <span className="whitespace-nowrap text-[17.4px] leading-5 text-[#5F5F66]">
-                      {profile.email}
-                    </span>
-                  </div>
                 </div>
               </div>
 

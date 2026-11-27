@@ -11,6 +11,7 @@ import {
 } from "@/lib/customer/booking-visibility";
 import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { createServerClient } from "@/lib/supabase/server";
+import type { RatingMood } from "@/types/cleaner";
 import type {
   Booking,
   BookingChecklistItem,
@@ -38,7 +39,7 @@ export default async function CustomerBookingPage({
       .single(),
     supabase
       .from("ratings")
-      .select("id")
+      .select("id, mood, comment")
       .eq("booking_id", params.id)
       .maybeSingle(),
     supabase
@@ -117,7 +118,14 @@ export default async function CustomerBookingPage({
       holdOpenHours={paymentTiming.payment_auth_open_hours_before}
       checklistItems={(checklist ?? []) as BookingChecklistItem[]}
       hasCompletionConfirmation={Boolean(confirmation)}
-      hasRating={Boolean(rating)}
+      existingRating={
+        rating?.mood
+          ? {
+              comment: (rating.comment as string | null) ?? null,
+              mood: rating.mood as RatingMood,
+            }
+          : null
+      }
       initialBooking={booking}
       offerExpiresAt={offerExpiresAt}
     />

@@ -48,12 +48,9 @@ export function BookingCard({
 
   return (
     <li className="mb-[6px] list-none">
-      <div
-        className="group flex items-stretch rounded-[14px] bg-[#F3F4F6] transition-colors hover:bg-white hover:shadow-sm"
-        style={{ overflow: "hidden" }}
-      >
+      <div className="group flex flex-col overflow-hidden rounded-[14px] bg-[#F3F4F6] transition-colors hover:bg-white hover:shadow-sm sm:flex-row sm:items-stretch">
         <CrmLink
-          className="flex min-w-0 flex-1 items-center gap-4 p-4"
+          className="flex min-w-0 flex-1 items-start gap-3 p-3.5 sm:items-center sm:gap-4 sm:p-4"
           crmEvent="booking_request_view"
           crmPayload={{
             action: "View request",
@@ -72,48 +69,66 @@ export function BookingCard({
           style={{ textDecoration: "none" }}
         >
           {/* Date block */}
-          <div
-            className="flex shrink-0 flex-col items-center justify-center rounded-[10px] bg-white"
-            style={{ width: "52px", minHeight: "56px", padding: "8px 4px" }}
-          >
-            <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8B8798" }}>{month}</span>
-            <span style={{ fontSize: "24px", fontWeight: 700, lineHeight: "26px", letterSpacing: "-0.02em", color: "#1E1848" }}>{day}</span>
-            <span style={{ fontSize: "10px", color: "#8B8798", letterSpacing: "0.04em" }}>{weekday}</span>
+          <div className="flex h-[52px] w-[46px] shrink-0 flex-col items-center justify-center rounded-[10px] bg-white px-1 py-1.5 sm:h-auto sm:min-h-[56px] sm:w-[52px] sm:px-1 sm:py-2">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[#8B8798] sm:text-[10px]">
+              {month}
+            </span>
+            <span className="text-[20px] font-bold leading-[22px] tracking-[-0.02em] text-[#1E1848] sm:text-[24px] sm:leading-[26px]">
+              {day}
+            </span>
+            <span className="text-[9px] tracking-[0.04em] text-[#8B8798] sm:text-[10px]">
+              {weekday}
+            </span>
           </div>
 
           {/* Content */}
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span style={{ fontSize: "15px", fontWeight: 700, color: "#1E1848", whiteSpace: "nowrap" }}>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+              <span className="text-[14.5px] font-bold leading-snug text-[#1E1848] sm:text-[15px]">
                 {bookingServiceName(booking)}
               </span>
               <span
                 className="inline-flex items-center gap-1.5 rounded-full"
-                style={{ height: "24px", padding: "0 10px", fontSize: "12px", fontWeight: 600, background: pill.bg, color: pill.color, whiteSpace: "nowrap" }}
+                style={{
+                  height: "24px",
+                  padding: "0 10px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  background: pill.bg,
+                  color: pill.color,
+                  whiteSpace: "nowrap",
+                }}
               >
-                <span className="rounded-full" style={{ width: "5px", height: "5px", background: pill.color, flexShrink: 0 }} />
+                <span
+                  className="shrink-0 rounded-full"
+                  style={{ width: "5px", height: "5px", background: pill.color }}
+                />
                 {pill.label}
               </span>
             </div>
-            <p style={{ fontSize: "13.5px", color: "#5F5F66", marginTop: "3px", marginBottom: 0 }}>
-              {timeFormatted}{person ? ` · ${person}` : ""}{place ? ` · ${place}` : ""}
+            <p className="m-0 mt-1 truncate text-[13px] text-[#5F5F66] sm:text-[13.5px]">
+              {timeFormatted}
+              {person ? ` · ${person}` : ""}
+              {place ? ` · ${place}` : ""}
             </p>
             {booking.amount_total ? (
-              <p style={{ fontSize: "14.5px", fontWeight: 700, color: "#524096", marginTop: "4px", marginBottom: 0 }}>
+              <p className="m-0 mt-1 text-[14px] font-bold text-[#524096] sm:text-[14.5px]">
                 {formatMoney(booking.amount_total)}
               </p>
             ) : null}
           </div>
 
-          <ChevronRight className="ml-2 shrink-0" style={{ width: "18px", height: "18px", color: "#C4BFD4" }} />
+          <ChevronRight
+            className="mt-1.5 shrink-0 sm:ml-2 sm:mt-0"
+            style={{ width: "18px", height: "18px", color: "#C4BFD4" }}
+          />
         </CrmLink>
 
         {showRebook ? (
-          <div className="flex items-center pr-4">
+          <div className="flex border-t border-black/[0.04] px-3.5 pb-3.5 pt-0 sm:items-center sm:border-t-0 sm:p-0 sm:pr-4">
             <Link
-              className="inline-flex items-center gap-1.5 rounded-full font-semibold transition hover:bg-[#ECE8F6]"
+              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border-[1.5px] border-[#D4CCEA] text-[13px] font-semibold text-[#524096] no-underline transition hover:bg-[#ECE8F6] sm:w-auto sm:px-3.5"
               href={`/booking/new?rebook=${booking.id}`}
-              style={{ height: "36px", padding: "0 14px", fontSize: "13px", color: "#524096", border: "1.5px solid #D4CCEA", whiteSpace: "nowrap", textDecoration: "none" }}
             >
               <RotateCcw style={{ width: "13px", height: "13px" }} />
               Rebook

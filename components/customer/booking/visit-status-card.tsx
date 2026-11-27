@@ -1,14 +1,71 @@
 import Link from "next/link";
 
-import {
-  pillOutline,
-  pillPrimary,
-  pillPrimaryStyle,
-  SectionBanner,
-} from "@/components/customer/dashboard/section-banner";
+import { SectionHeading } from "@/components/customer/dashboard/section-banner";
 import { avatarImageClass, resolveAvatarUrl } from "@/lib/avatars/default-pack";
-import { cleanerTierLabel, medallionIconSrc } from "@/lib/cleaner/tier";
+import {
+  cleanerTierLabel,
+  normalizeMedallionTier,
+} from "@/lib/cleaner/tier";
+import type { CleanerTier } from "@/types/cleaner";
 import type { Booking } from "@/types/customer";
+
+/** Metal tones for the medallion ring around a cleaner avatar. */
+const MEDALLION_RING: Record<
+  "bronze" | "silver" | "gold" | "rose_gold",
+  { dark: string; light: string; mid: string }
+> = {
+  bronze: { dark: "#6B3F16", light: "#E2B888", mid: "#B87333" },
+  silver: { dark: "#5C616A", light: "#F2F3F5", mid: "#A8ADB6" },
+  gold: { dark: "#8A6508", light: "#F8E59A", mid: "#D4AF37" },
+  rose_gold: { dark: "#7A3D48", light: "#F7D4CA", mid: "#C97984" },
+};
+
+function MedallionAvatar({
+  avatarUrl,
+  name,
+  tier,
+}: {
+  avatarUrl: string | null;
+  name: string;
+  tier: CleanerTier;
+}) {
+  const visual = normalizeMedallionTier(tier) as keyof typeof MEDALLION_RING;
+  const ring = MEDALLION_RING[visual] ?? MEDALLION_RING.silver;
+  const label = cleanerTierLabel(tier);
+
+  return (
+    <div
+      className="relative h-[64px] w-[64px] shrink-0"
+      title={`${label} medallion`}
+    >
+      {/* Outer metal band */}
+      <div
+        className="absolute inset-0 rounded-full p-[3px]"
+        style={{
+          background: `linear-gradient(160deg, ${ring.light} 0%, ${ring.mid} 38%, ${ring.dark} 72%, ${ring.light} 100%)`,
+          boxShadow: `0 2px 6px ${ring.dark}40, inset 0 1px 0 ${ring.light}`,
+        }}
+      >
+        {/* Inner highlight band */}
+        <div
+          className="h-full w-full rounded-full p-[4px]"
+          style={{
+            background: `linear-gradient(320deg, ${ring.dark} 0%, ${ring.light} 45%, ${ring.mid} 100%)`,
+          }}
+        >
+          <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white text-[16px] font-bold text-[#524096] shadow-[inset_0_0_0_2px_rgba(255,255,255,0.9)]">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img alt={name} className={avatarImageClass(avatarUrl)} src={avatarUrl} />
+            ) : (
+              name.charAt(0)
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 type Stage = {
   detail: string;
@@ -88,7 +145,7 @@ function stageFor(booking: Booking, cleanerFirst: string | null, holdAtLabel: st
         : {
             detail: "Follow them on the map as they travel to you.",
             live: true,
-            pill: "On the way",
+            pill: "En route",
             title: `${name} is on the way`,
             tone: PURPLE,
           };
@@ -135,11 +192,9 @@ function stageFor(booking: Booking, cleanerFirst: string | null, holdAtLabel: st
   }
 }
 
-const tileLabel = "m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70";
-
 /**
- * The booking's status, in the dashboard's format: a striped banner naming
- * the stage, then grey tiles for where things stand and who is cleaning.
+ * Visit stage + cleaner in one panel — status, person, and actions
+ * share one surface so proportions stay even.
  */
 export function VisitStatusCard({
   booking,
@@ -154,60 +209,69 @@ export function VisitStatusCard({
   const first = cleaner?.full_name.trim().split(/\s+/)[0] ?? null;
   const stage = stageFor(booking, first, holdAtLabel);
   const avatar = cleaner ? resolveAvatarUrl(cleaner.avatar_url, cleaner.id) : null;
+  const tierLabel = cleaner ? cleanerTierLabel(cleaner.tier) : null;
 
   return (
     <section aria-live="polite" className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
-      <SectionBanner title={stage.title} />
+      <SectionHeading title={stage.title} />
 
-      <div className="rounded-[18px] bg-[#F3F4F6] p-4">
-        <p className={tileLabel}>Status</p>
-        <span className={`mt-2.5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[13px] font-semibold ${stage.tone}`}>
-          {stage.live ? (
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-50 motion-reduce:animate-none" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
-            </span>
-          ) : null}
-          {stage.pill}
-        </span>
-        <p className="m-0 mt-2.5 text-[14.5px] leading-[1.5] text-[#3d3a48]">{stage.detail}</p>
-      </div>
+      <div className="rounded-[18px] bg-[#F3F4F6] p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <p className="m-0 text-[14.5px] leading-[1.5] text-[#3d3a48]">{stage.detail}</p>
+          <span
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-semibold ${stage.tone}`}
+          >
+            {stage.live ? (
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-50 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-current" />
+              </span>
+            ) : null}
+            {stage.pill}
+          </span>
+        </div>
 
-      {cleaner ? (
-        <div className="rounded-[18px] bg-[#F3F4F6] p-4">
-          <p className={tileLabel}>Your cleaner</p>
-          <div className="mt-3 flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#ECE8F6] text-lg font-bold text-[#524096]">
-              {avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img alt={cleaner.full_name} className={avatarImageClass(avatar)} src={avatar} />
-              ) : (
-                cleaner.full_name.charAt(0)
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="m-0 truncate text-[16px] font-semibold text-[#1E1848]">{cleaner.full_name}</p>
-              <p className="m-0 mt-1 flex items-center gap-1.5 text-[13px] text-[#5F5F66]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img alt="" aria-hidden className="h-4 w-4" src={medallionIconSrc(cleaner.tier)} />
-                {cleanerTierLabel(cleaner.tier)} medallion
-              </p>
-            </div>
-          </div>
-          {booking.status !== "cancelled" ? (
-            <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
-              <Link className={pillPrimary} href={`/messages/${booking.id}`} style={pillPrimaryStyle}>
-                Message {first}
-              </Link>
-              {booking.status === "completed" ? (
-                <Link className={pillOutline} href={`/booking/new?rebook=${booking.id}&keep=1`}>
-                  Book {first} again
+        {cleaner ? (
+          <>
+            <div className="my-4 h-px bg-[#E4E3EA]" />
+
+            <div className="flex items-center gap-3.5">
+              <MedallionAvatar
+                avatarUrl={avatar}
+                name={cleaner.full_name}
+                tier={cleaner.tier}
+              />
+
+              <div className="min-w-0 flex-1">
+                <p className="m-0 truncate text-[15px] font-semibold text-[#1E1848]">
+                  {cleaner.full_name}
+                </p>
+                <p className="m-0 mt-0.5 text-[13px] text-[#6B6B70]">
+                  {tierLabel} medallion
+                </p>
+              </div>
+
+              {booking.status !== "cancelled" ? (
+                <Link
+                  className="inline-flex h-9 shrink-0 items-center rounded-full border border-[#D4CCEA] bg-white px-3.5 text-[13px] font-semibold text-[#524096] no-underline transition hover:bg-[#ECE8F6]"
+                  href={`/messages/${booking.id}`}
+                >
+                  Message
                 </Link>
               ) : null}
             </div>
-          ) : null}
-        </div>
-      ) : null}
+
+            {booking.status === "completed" ? (
+              <Link
+                className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-full border border-[#D4CCEA] bg-white text-[13px] font-semibold text-[#524096] no-underline transition hover:bg-[#ECE8F6]"
+                href={`/booking/new?rebook=${booking.id}&keep=1`}
+              >
+                Book {first} again
+              </Link>
+            ) : null}
+          </>
+        ) : null}
+      </div>
     </section>
   );
 }

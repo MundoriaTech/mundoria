@@ -3,7 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-import { SectionBanner } from "@/components/customer/dashboard/section-banner";
+import { SectionHeading } from "@/components/customer/dashboard/section-banner";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { cn } from "@/lib/utils";
 
@@ -76,18 +76,18 @@ export function ManageBooking({
 
   return (
     <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
-      <SectionBanner title="Manage booking">
+      <SectionHeading title="Manage booking">
         <button
           aria-controls={`manage-${bookingId}`}
           aria-expanded={open}
           aria-label={open ? "Hide booking options" : "Show booking options"}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3F4F6] text-[#524096] transition hover:bg-[#ECE8F6]"
           onClick={() => setOpen((value) => !value)}
           type="button"
         >
           <ChevronDown aria-hidden className={cn("h-5 w-5 transition", open && "rotate-180")} />
         </button>
-      </SectionBanner>
+      </SectionHeading>
       {!open ? (
         <button
           className="m-0 px-1 text-left text-[13.5px] text-[#5F5F66] underline-offset-2 hover:text-[#524096] hover:underline"

@@ -52,62 +52,51 @@ export function LocationTile({ booking }: { booking: Booking | null }) {
   const hasAddress = !!(line1 || city);
 
   return (
-    <div
-      className="relative flex h-full min-h-[210px] flex-col overflow-hidden rounded-[18px] p-5"
-      style={{ background: "#1E1848" }}
-    >
-      <svg aria-hidden className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <pattern id="dot-grid" width="22" height="22" patternUnits="userSpaceOnUse">
-            <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(255,255,255,0.07)" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dot-grid)" />
-      </svg>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute rounded-full"
-        style={{ width: "200px", height: "200px", left: "-40px", top: "-60px", background: "radial-gradient(circle,rgba(130,113,177,0.35) 0%,transparent 70%)" }}
-      />
-      <svg aria-hidden className="absolute opacity-10" fill="none" height={120} style={{ right: "-18px", bottom: "-18px" }} viewBox="0 0 100 120" width={100}>
-        <path d="M50 10C31.2 10 16 25.2 16 44c0 24 34 66 34 66s34-42 34-66c0-18.8-15.2-34-34-34z" fill="#ffffff" />
-        <circle cx="50" cy="44" fill="#1E1848" r="13" />
-      </svg>
-
-      <div className="relative flex items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-[6px]" style={{ background: "rgba(255,255,255,0.12)" }}>
-          <svg fill="none" height={14} stroke="#C69C66" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}>
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-        </span>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#C69C66]">Service location</span>
-      </div>
+    <div className="flex h-full min-h-[210px] flex-col rounded-[18px] bg-[#F3F4F6] p-5">
+      <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70">
+        Service location
+      </p>
 
       {hasAddress ? (
-        <div className="relative mt-4 max-w-[90%]">
-          {line1 ? (
-            <p className="m-0 line-clamp-3 break-words text-[17px] font-bold leading-[1.3] tracking-[-0.01em] text-white">{line1}</p>
-          ) : null}
-          {postcode ? (
-            <p className="m-0 mt-1 text-[16px] leading-[1.35] text-white/70">{postcode}</p>
-          ) : null}
+        <>
+          <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#544694]">
+            <svg fill="none" height={22} stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={22}>
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+
+          <div className="mt-auto pt-3 text-center">
+            {line1 ? (
+              <p className="m-0 line-clamp-3 break-words text-[18px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#523F97] sm:text-[20px]">
+                {line1}
+              </p>
+            ) : null}
+            {postcode ? (
+              <p className="m-0 mt-1.5 text-[13.5px] font-medium text-[#5F5F66]">{postcode}</p>
+            ) : null}
+          </div>
+
           {city ? (
-            <span
-              className="mt-3 inline-flex items-center gap-2 rounded-full"
-              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", padding: "5px 12px 5px 8px" }}
-            >
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8B7FC0]" />
-              <span className="text-[13.5px] font-semibold text-white/85">{city}</span>
-            </span>
+            <div className="mt-3 flex justify-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8B7FC0]" />
+                <span className="text-[13px] font-semibold text-[#3D335F]">{city}</span>
+              </span>
+            </div>
           ) : null}
-        </div>
+        </>
       ) : (
-        <div className="relative mt-4">
-          <p className="m-0 text-[17px] font-bold text-white/40">No address set</p>
-          <a className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-[#C69C66] no-underline" href="/addresses">
+        <div className="my-auto text-center">
+          <p className="m-0 text-[17px] font-semibold text-[#5F5F66]">No address set</p>
+          <a
+            className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#524096] no-underline"
+            href="/addresses"
+          >
             Add a location
-            <svg fill="none" height={14} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            <svg fill="none" height={14} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={14}>
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </a>
         </div>
       )}

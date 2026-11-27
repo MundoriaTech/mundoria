@@ -3,7 +3,7 @@ import Link from "next/link";
 import {
   pillPrimary,
   pillPrimaryStyle,
-  SectionBanner,
+  SectionHeading,
 } from "@/components/customer/dashboard/section-banner";
 import { ContactSupportButton } from "@/components/shared/contact-support-button";
 import { faqItemPath } from "@/lib/seo/faq-paths";
@@ -32,7 +32,7 @@ export const NEED_A_HAND_QUESTIONS: Array<{
 export function NeedAHand() {
   return (
     <section className="flex flex-col gap-4 rounded-[22px] bg-white p-4 sm:p-5">
-      <SectionBanner title="Need a hand?" />
+      <SectionHeading title="Need a hand?" />
       <p className="m-0 px-1 text-[14px] leading-[1.5] text-[#5F5F66]">
         Whether you have a question about your booking or something has changed, we&apos;re here to help.
       </p>

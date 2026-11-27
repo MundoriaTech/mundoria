@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bell,
   Check,
   MessageCircle,
   X,
@@ -27,8 +28,9 @@ import {
 import { NeedAHand } from "@/components/customer/booking/need-a-hand";
 import { VisitStatusCard } from "@/components/customer/booking/visit-status-card";
 import { TipPanel } from "@/components/customer/tip-panel";
-import { RatingForm } from "@/components/customer/rating-form";
+import { moodMeta, RatingForm } from "@/components/customer/rating-form";
 import { RescheduleModal } from "@/components/customer/reschedule-modal";
+import type { RatingMood } from "@/types/cleaner";
 import { BookingStatusBadge } from "@/components/shared/booking-status-badge";
 import { ActionError } from "@/components/shared/action-error";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
@@ -70,7 +72,7 @@ export function BookingDetail({
   checklistItems,
   customerId,
   hasCompletionConfirmation,
-  hasRating,
+  existingRating = null,
   freeCancelHours = 24,
   holdOpenHours,
   initialBooking,
@@ -79,7 +81,7 @@ export function BookingDetail({
   checklistItems: BookingChecklistItem[];
   customerId: string;
   hasCompletionConfirmation: boolean;
-  hasRating: boolean;
+  existingRating?: { comment: string | null; mood: RatingMood } | null;
   /** Admin "Free-cancel deadline"; cancel and reschedule rules use it. */
   freeCancelHours?: number;
   /** Admin "Auth window opens" hours, for payment status wording. */
@@ -90,13 +92,18 @@ export function BookingDetail({
   const router = useRouter();
   const { success } = useFeedback();
   const [booking, setBooking] = useState(initialBooking);
+  const [rating, setRating] = useState(existingRating);
+  useEffect(() => {
+    setRating(existingRating);
+  }, [existingRating]);
   const [showCancel, setShowCancel] = useState(false);
   const [showDispute, setShowDispute] = useState(false);
   const [showPay, setShowPay] = useState(false);
   const [showReschedule, setShowReschedule] = useState(false);
   const [showRating, setShowRating] = useState(
-    booking.status === "completed" && !hasRating,
+    booking.status === "completed" && !existingRating,
   );
+  const ratedMood = rating ? moodMeta(rating.mood) : null;
   const [reason, setReason] = useState("");
   const [cancelScope, setCancelScope] = useState<"visit" | "series">("visit");
   const [pauseStart, setPauseStart] = useState("");
@@ -151,7 +158,6 @@ export function BookingDetail({
     (!booking.is_recurring || Boolean(booking.parent_booking_id));
   const tipOpen = useMemo(() => {
     if (Number(booking.tip_pence ?? 0) > 0) return false;
-    if ((booking as { tip_declined_at?: string | null }).tip_declined_at) return false;
     if (!["completed", "awaiting_customer_confirmation"].includes(booking.status)) {
       return false;
     }
@@ -160,6 +166,9 @@ export function BookingDetail({
     ).getTime();
     return Date.now() - finished < 24 * 60 * 60 * 1000;
   }, [booking]);
+  const tipStartsCollapsed = Boolean(
+    (booking as { tip_declined_at?: string | null }).tip_declined_at,
+  );
 
   const waitingForCleaner = isWaitingForCleanerAcceptance(booking.status);
   // When the card hold is due, in UK time; null once it's due now.
@@ -493,41 +502,19 @@ export function BookingDetail({
         </div>
       ) : null}
 
-      {booking.status === "cancelled" ? (
-        <div
-          className={
-            booking.payment_preauth_failed_at
-              ? "rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950"
-              : "rounded-[1.25rem] bg-[#f3f3f5] px-5 py-4 text-sm text-[#3d3654]"
-          }
-        >
-          {booking.payment_preauth_failed_at ? (
-            <>
-              <p className="font-semibold">Cancelled: payment hold failed</p>
-              <p className="mt-1 leading-6">
-                {booking.cancellation_reason ??
-                  "We could not place a payment hold on your card, so this booking was cancelled free of charge. Update your payment method and book again when you are ready."}
-              </p>
-              <Link
-                className="mt-3 inline-flex font-semibold underline-offset-2 hover:underline"
-                href="/booking/new"
-              >
-                Book again
-              </Link>
-            </>
-          ) : (
-            <>
-              This booking was cancelled.
-              {booking.payment_status === "refunded"
-                ? " Any payment taken has been refunded."
-                : booking.payment_status === "held"
-                  ? " The card hold has been released where applicable."
-                  : ""}
-              {booking.cancellation_reason ? (
-                <p className="mt-2 leading-6">{booking.cancellation_reason}</p>
-              ) : null}
-            </>
-          )}
+      {booking.status === "cancelled" && booking.payment_preauth_failed_at ? (
+        <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+          <p className="font-semibold">Cancelled: payment hold failed</p>
+          <p className="mt-1 leading-6">
+            {booking.cancellation_reason ??
+              "We could not place a payment hold on your card, so this booking was cancelled free of charge. Update your payment method and book again when you are ready."}
+          </p>
+          <Link
+            className="mt-3 inline-flex font-semibold underline-offset-2 hover:underline"
+            href="/booking/new"
+          >
+            Book again
+          </Link>
         </div>
       ) : waitingForCleaner ? (
         <LookingForCleanerCard
@@ -689,31 +676,60 @@ export function BookingDetail({
       ) : null}
 
       {booking.status === "completed" && booking.cleaner_id ? (
-        <section className="rounded-xl border bg-background p-4 sm:p-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold">How was your clean?</h2>
-              <p className="text-sm text-muted-foreground">
-                Share a simple mood rating. Mundoria uses this internally for
-                fair medallion scoring.
+        <section className="rounded-[22px] bg-white p-4 sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+            <div className="min-w-0">
+              <h2 className="m-0 text-[18px] font-semibold tracking-[-0.02em] text-[#1E1848] sm:text-[20px]">
+                How was your clean?
+              </h2>
+              <p className="m-0 mt-1 text-[14px] leading-5 text-[#5F5F66]">
+                Share a simple mood rating. Mundoria uses this internally for fair medallion scoring.
               </p>
             </div>
-            {!hasRating ? (
-              <Button
-                className="min-h-11 w-full sm:w-auto"
+            {!rating ? (
+              <button
+                className="inline-flex h-10 shrink-0 items-center justify-center rounded-full px-5 text-[14px] font-semibold text-white transition hover:brightness-110"
                 onClick={() => setShowRating(true)}
+                style={{ background: "linear-gradient(90deg,#524096 0%,#8072B1 100%)" }}
+                type="button"
               >
                 Leave a rating
-              </Button>
-            ) : (
-              <span className="text-sm font-medium text-primary">Rated</span>
-            )}
+              </button>
+            ) : null}
           </div>
+
+          {ratedMood ? (
+            <div className="mt-4 rounded-[18px] bg-[#F3F4F6] p-4">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#524096]/70">
+                Your rating
+              </p>
+              <div className="mt-2.5 flex items-start gap-3">
+                <span className="text-[28px] leading-none">{ratedMood.emoji}</span>
+                <div className="min-w-0">
+                  <p className="m-0 text-[16px] font-semibold text-[#1E1848]">
+                    {ratedMood.label}
+                  </p>
+                  <p className="m-0 mt-0.5 text-[13.5px] leading-5 text-[#5F5F66]">
+                    {ratedMood.description}
+                  </p>
+                  {rating?.comment ? (
+                    <p className="m-0 mt-2 text-[13.5px] leading-5 text-[#3d3a48]">
+                      “{rating.comment}”
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ) : null}
         </section>
       ) : null}
 
       {tipOpen ? (
-        <TipPanel bookingId={booking.id} onTipped={() => router.refresh()} />
+        <TipPanel
+          bookingId={booking.id}
+          initiallyCollapsed={tipStartsCollapsed}
+          onTipped={() => router.refresh()}
+        />
       ) : null}
 
       {editing ? (
@@ -874,7 +890,8 @@ export function BookingDetail({
             bookingId={booking.id}
             cleanerId={booking.cleaner_id}
             customerId={customerId}
-            onSubmitted={() => {
+            onSubmitted={(submitted) => {
+              setRating(submitted);
               setShowRating(false);
               success({
                 kind: "sent",
@@ -1012,9 +1029,9 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
-      <div className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-background p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl sm:rounded-2xl sm:p-6 sm:pb-6">
+      <div className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-[22px] bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl sm:rounded-[22px] sm:p-6 sm:pb-6">
         <div className="mb-5 flex items-center justify-between gap-3">
-          <h2 className="min-w-0 break-words text-lg font-semibold sm:text-xl">
+          <h2 className="m-0 min-w-0 break-words text-[18px] font-semibold tracking-[-0.02em] text-[#1E1848] sm:text-[20px]">
             {title}
           </h2>
           <Button
@@ -1048,15 +1065,25 @@ function Notice({
   }, [storageKey]);
   if (hidden) return null;
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-emerald-100 p-4 text-emerald-950">
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold">{title}</p>
-        <p className="mt-1 text-sm">{body}</p>
+    <div
+      className="flex items-start gap-3 rounded-[14px] px-4 py-3.5"
+      role="status"
+      style={{ background: "#ECE8F6" }}
+    >
+      <span
+        aria-hidden
+        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#524096] text-white"
+      >
+        <Bell className="h-4 w-4" strokeWidth={2} />
+      </span>
+      <div className="min-w-0 flex-1 pt-0.5">
+        <p className="m-0 text-[14.5px] font-semibold leading-snug text-[#1E1848]">{title}</p>
+        <p className="m-0 mt-1 text-[13.5px] leading-5 text-[#5F5F66]">{body}</p>
       </div>
       {storageKey ? (
         <button
           aria-label="Dismiss"
-          className="rounded-full p-1 text-emerald-900/70 hover:bg-emerald-200"
+          className="-mr-1 -mt-0.5 rounded-full p-1.5 text-[#6B6B70] transition hover:bg-white/70 hover:text-[#524096]"
           onClick={() => {
             window.localStorage.setItem(storageKey, "1");
             setHidden(true);

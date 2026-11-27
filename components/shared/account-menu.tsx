@@ -28,13 +28,17 @@ export type AccountMenuItem = {
 export function AccountMenu({
   items,
   profile,
+  variant = "compact",
 }: {
   items: AccountMenuItem[];
   profile: {
     avatar_url?: string | null;
+    email?: string | null;
     full_name: string;
     id: string;
   };
+  /** `panel` matches the customer dashboard header card. */
+  variant?: "compact" | "panel";
 }) {
   const { confirm } = useFeedback();
   const pathname = usePathname();
@@ -45,6 +49,7 @@ export function AccountMenu({
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstName = profile.full_name.trim().split(/\s+/)[0] || "Account";
+  const isPanel = variant === "panel";
 
   useEffect(() => {
     const media = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -126,7 +131,7 @@ export function AccountMenu({
 
   return (
     <div
-      className="relative"
+      className={cn("relative", isPanel && "min-w-0")}
       onMouseEnter={openFromHover}
       onMouseLeave={scheduleClose}
       ref={rootRef}
@@ -134,7 +139,11 @@ export function AccountMenu({
       <button
         aria-expanded={open}
         aria-haspopup="menu"
-        className="inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-1.5 transition hover:bg-[#f3eef8] dark:hover:bg-muted sm:pr-2.5"
+        className={
+          isPanel
+            ? "flex min-w-0 items-center gap-3 rounded-[16px] py-1.5 pl-1 pr-2 text-left transition hover:bg-white/60"
+            : "inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-1.5 transition hover:bg-[#f3eef8] dark:hover:bg-muted sm:pr-2.5"
+        }
         onClick={() => {
           if (canHover) {
             if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -146,20 +155,44 @@ export function AccountMenu({
         type="button"
       >
         <UserAvatar
+          className="shrink-0"
           name={profile.full_name}
           seed={profile.id}
-          size="sm"
+          size={isPanel ? "md" : "sm"}
           url={profile.avatar_url}
         />
-        <span className="hidden max-w-[7rem] truncate text-sm font-medium tracking-tight text-[#1c133b] sm:inline dark:text-foreground">
-          {firstName}
-        </span>
-        <ChevronDown
-          className={cn(
-            "hidden h-3.5 w-3.5 text-[#6f6a82] transition sm:block",
-            open && "rotate-180",
-          )}
-        />
+        {isPanel ? (
+          <>
+            <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+              <span className="truncate text-[17.4px] font-semibold leading-5 text-[#000]">
+                {profile.full_name}
+              </span>
+              {profile.email ? (
+                <span className="truncate text-[15px] leading-5 text-[#5F5F66]">
+                  {profile.email}
+                </span>
+              ) : null}
+            </span>
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 shrink-0 text-[#6B6B70] transition",
+                open && "rotate-180",
+              )}
+            />
+          </>
+        ) : (
+          <>
+            <span className="hidden max-w-[7rem] truncate text-sm font-medium tracking-tight text-[#1c133b] sm:inline dark:text-foreground">
+              {firstName}
+            </span>
+            <ChevronDown
+              className={cn(
+                "hidden h-3.5 w-3.5 text-[#6f6a82] transition sm:block",
+                open && "rotate-180",
+              )}
+            />
+          </>
+        )}
       </button>
 
       {open ? (
@@ -168,34 +201,36 @@ export function AccountMenu({
             className="w-56 overflow-hidden rounded-2xl border border-[#e8e0f4] bg-white py-1.5 shadow-[0_18px_40px_rgba(28,19,59,0.16)] dark:border-border dark:bg-card"
             role="menu"
           >
-          <div className="border-b border-[#efe8f8] px-3.5 py-2.5 dark:border-border">
-            <p className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground">
-              {profile.full_name}
-            </p>
-            <p className="mt-0.5 text-[11px] text-[#6f6a82]">Your account</p>
-          </div>
-          {items.map((item) => (
-            <Link
-              className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-[#1c133b] transition hover:bg-[#f7f4fb] dark:text-foreground dark:hover:bg-muted"
-              href={item.href}
-              key={item.href}
-              onClick={() => setOpen(false)}
+            <div className="border-b border-[#efe8f8] px-3.5 py-2.5 dark:border-border">
+              <p className="truncate text-sm font-semibold text-[#1c133b] dark:text-foreground">
+                {profile.full_name}
+              </p>
+              <p className="mt-0.5 truncate text-[11px] text-[#6f6a82]">
+                {profile.email || "Your account"}
+              </p>
+            </div>
+            {items.map((item) => (
+              <Link
+                className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-[#1c133b] transition hover:bg-[#f7f4fb] dark:text-foreground dark:hover:bg-muted"
+                href={item.href}
+                key={item.href}
+                onClick={() => setOpen(false)}
+                role="menuitem"
+              >
+                <item.icon className="h-4 w-4 text-[#823fb2]" />
+                {item.label}
+              </Link>
+            ))}
+            <button
+              className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-destructive transition hover:bg-destructive/5"
+              disabled={signingOut}
+              onClick={() => void logout()}
               role="menuitem"
+              type="button"
             >
-              <item.icon className="h-4 w-4 text-[#823fb2]" />
-              {item.label}
-            </Link>
-          ))}
-          <button
-            className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-destructive transition hover:bg-destructive/5"
-            disabled={signingOut}
-            onClick={() => void logout()}
-            role="menuitem"
-            type="button"
-          >
-            <LogOut className="h-4 w-4" />
-            {signingOut ? "Signing out…" : "Log out"}
-          </button>
+              <LogOut className="h-4 w-4" />
+              {signingOut ? "Signing out…" : "Log out"}
+            </button>
           </div>
         </div>
       ) : null}
