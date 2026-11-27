@@ -12,7 +12,7 @@ export const RoundCheckbox = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <span className={cn("relative inline-flex h-5 w-5 shrink-0", className)}>
     <input
-      className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-[#d9d2ea] bg-white transition checked:border-[#524096] checked:bg-[#524096] hover:border-[#524096]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#524096]/30 disabled:cursor-not-allowed disabled:opacity-50"
+      className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-[#d9d2ea] bg-white transition checked:border-[#6a45b8] checked:bg-[#6a45b8] hover:border-[#6a45b8]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6a45b8]/30 disabled:cursor-not-allowed disabled:opacity-50"
       ref={ref}
       type="checkbox"
       {...props}

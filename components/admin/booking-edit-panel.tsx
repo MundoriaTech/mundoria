@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type React from "react";
 import { useState } from "react";
 
 import { ActionError } from "@/components/shared/action-error";
@@ -33,7 +34,7 @@ type Preview = {
   oldTotalPence: number;
 };
 
-const field = "flex flex-col gap-1 text-sm";
+const EMPTY_ADDRESS = { city: "", house: "", postcode: "", street: "" };
 const labelText = "text-xs font-medium text-muted-foreground";
 const textArea =
   "min-h-[72px] w-full rounded-md border border-[#e8e8eb] bg-white px-3 py-2 text-sm text-[#1c133b] outline-none focus:border-[#524096]";
@@ -82,6 +83,7 @@ export function BookingEditPanel({
   addOnOptions,
   addresses,
   bookingId,
+  customerId,
   hasCleaner,
   initial,
   isOffice,
@@ -90,6 +92,7 @@ export function BookingEditPanel({
   addOnOptions: Array<{ id: string; label: string }>;
   addresses: Array<{ id: string; label: string }>;
   bookingId: string;
+  customerId: string;
   hasCleaner: boolean;
   initial: BookingEditValues;
   isOffice: boolean;
@@ -105,6 +108,12 @@ export function BookingEditPanel({
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [addressList, setAddressList] = useState(addresses);
+  const [addingAddress, setAddingAddress] = useState(false);
+  const [newAddress, setNewAddress] = useState(EMPTY_ADDRESS);
+  const [addressBusy, setAddressBusy] = useState(false);
+  const [addressError, setAddressError] = useState("");
+  const [showPrice, setShowPrice] = useState(false);
 
   function set<K extends keyof BookingEditValues>(key: K, value: BookingEditValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -201,6 +210,48 @@ export function BookingEditPanel({
     router.refresh();
   }
 
+  async function saveNewAddress() {
+    setAddressBusy(true);
+    setAddressError("");
+    try {
+      const response = await fetch(`/api/admin/customers/${customerId}/addresses`, {
+        body: JSON.stringify({
+          ...newAddress,
+          bathrooms: values.bathrooms,
+          bedrooms: values.bedrooms,
+          otherRooms: values.otherRooms,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        address?: { id: string; label: string };
+        error?: string;
+      };
+      if (!response.ok || !result.address) {
+        setAddressError(result.error ?? "Couldn't save the address.");
+        return;
+      }
+      setAddressList((list) => [...list, result.address!]);
+      set("addressId", result.address.id);
+      setAddingAddress(false);
+      setNewAddress(EMPTY_ADDRESS);
+    } finally {
+      setAddressBusy(false);
+    }
+  }
+
+  function close() {
+    setOpen(false);
+    setValues(initial);
+    setPreview(null);
+    setMessage("");
+    setNote("");
+    setPriceOverride("");
+    setCleanerAgreed(false);
+    setAddingAddress(false);
+  }
+
   if (!open) {
     return (
       <section className="rounded-xl border bg-card p-5">
@@ -219,257 +270,354 @@ export function BookingEditPanel({
     );
   }
 
+  const roomFields = [
+    ["bedrooms", "Bedrooms"],
+    ["bathrooms", "Bathrooms"],
+    ["otherRooms", "Other rooms"],
+  ] as const;
+
   return (
-    <section className="rounded-xl border bg-card p-5">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="font-semibold">Edit booking</h2>
-        <Button
-          onClick={() => {
-            setOpen(false);
-            setValues(initial);
-            setPreview(null);
-            setMessage("");
-          }}
-          size="sm"
-          variant="ghost"
-        >
+    <section className="overflow-hidden rounded-xl border bg-card">
+      <header className="flex items-start justify-between gap-3 border-b px-5 py-4">
+        <div>
+          <h2 className="font-semibold">Edit booking</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {notesOnly
+              ? "The cleaner is on the way or cleaning, so only the notes can change."
+              : isOffice
+                ? "Office visits are priced from their spaces, so length and extras stay as booked."
+                : "Change what you need, then check the changes before saving."}
+          </p>
+        </div>
+        <Button onClick={close} size="sm" variant="ghost">
           Close
         </Button>
-      </div>
-      {notesOnly ? (
-        <p className="mt-2 text-sm text-muted-foreground">
-          The cleaner is on the way or cleaning, so only the notes can change.
-        </p>
-      ) : isOffice ? (
-        <p className="mt-2 text-sm text-muted-foreground">
-          Office visits are priced from their spaces: their length and extras can&apos;t change here.
-        </p>
-      ) : null}
+      </header>
 
-      {!notesOnly ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div className={field}>
-            <span className={labelText}>Date</span>
-            <SimpleSelect
-              aria-label="Date"
-              className={selectClass}
-              onChange={(value) => set("scheduledDate", value)}
-              options={dateOptions(values.scheduledDate)}
-              value={values.scheduledDate}
-            />
-          </div>
-          <div className={field}>
-            <span className={labelText}>Start time</span>
-            <SimpleSelect
-              aria-label="Start time"
-              className={selectClass}
-              onChange={(value) => set("scheduledTime", value)}
-              options={timeOptions(values.scheduledTime)}
-              value={values.scheduledTime}
-            />
-          </div>
-          <div className={`${field} sm:col-span-2`}>
-            <span className={labelText}>Address (customer&apos;s saved addresses)</span>
+      <div className="divide-y">
+        {!notesOnly ? (
+          <Group title="When">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SimpleSelect
+                aria-label="Date"
+                className={selectClass}
+                onChange={(value) => set("scheduledDate", value)}
+                options={dateOptions(values.scheduledDate)}
+                value={values.scheduledDate}
+              />
+              <SimpleSelect
+                aria-label="Start time"
+                className={selectClass}
+                onChange={(value) => set("scheduledTime", value)}
+                options={timeOptions(values.scheduledTime)}
+                value={values.scheduledTime}
+              />
+            </div>
+          </Group>
+        ) : null}
+
+        {!notesOnly ? (
+          <Group title="Where">
             <SimpleSelect
               aria-label="Address"
               className={selectClass}
               onChange={(value) => set("addressId", value)}
-              options={addresses.map((address) => ({ label: address.label, value: address.id }))}
+              options={addressList.map((address) => ({ label: address.label, value: address.id }))}
               value={values.addressId}
             />
-          </div>
-          {!isOffice ? (
-            <>
-              <div className={field}>
-                <span className={labelText}>Length on site</span>
-                <SimpleSelect
-                  aria-label="Length"
-                  className={selectClass}
-                  onChange={(value) => set("durationHours", Number(value))}
-                  options={Array.from(new Set([...LENGTHS, values.durationHours]))
-                    .sort((a, b) => a - b)
-                    .map((hours) => ({ label: `${hours} hours`, value: String(hours) }))}
-                  value={String(values.durationHours)}
-                />
+            {addingAddress ? (
+              <div className="mt-3 rounded-lg bg-muted/40 p-3">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Input
+                    aria-label="House number or name"
+                    onChange={(event) => setNewAddress((a) => ({ ...a, house: event.target.value }))}
+                    placeholder="House number or name"
+                    value={newAddress.house}
+                  />
+                  <Input
+                    aria-label="Street"
+                    onChange={(event) => setNewAddress((a) => ({ ...a, street: event.target.value }))}
+                    placeholder="Street"
+                    value={newAddress.street}
+                  />
+                  <Input
+                    aria-label="Town or city"
+                    onChange={(event) => setNewAddress((a) => ({ ...a, city: event.target.value }))}
+                    placeholder="Town or city"
+                    value={newAddress.city}
+                  />
+                  <Input
+                    aria-label="Postcode"
+                    onChange={(event) => setNewAddress((a) => ({ ...a, postcode: event.target.value }))}
+                    placeholder="Postcode"
+                    value={newAddress.postcode}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Saved to the customer&apos;s addresses, then selected for this booking.
+                </p>
+                {addressError ? <p className="mt-2 text-sm text-destructive">{addressError}</p> : null}
+                <div className="mt-3 flex gap-2">
+                  <Button disabled={addressBusy} onClick={() => void saveNewAddress()} size="sm">
+                    {addressBusy ? "Saving…" : "Save address"}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setAddingAddress(false);
+                      setAddressError("");
+                    }}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
-              <div className={field}>
-                <span className={labelText}>Cleaning standard</span>
-                <SimpleSelect
-                  aria-label="Cleaning standard"
-                  className={selectClass}
-                  onChange={(value) => set("cleaningStandard", value)}
-                  options={[
-                    { label: "Essential", value: "essential" },
-                    { label: "Enhanced", value: "enhanced" },
-                    { label: "Comprehensive", value: "comprehensive" },
-                  ]}
-                  value={values.cleaningStandard}
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-3 sm:col-span-2">
-                {(
-                  [
-                    ["bedrooms", "Bedrooms"],
-                    ["bathrooms", "Bathrooms"],
-                    ["otherRooms", "Other rooms"],
-                  ] as const
-                ).map(([key, label]) => (
-                  <label className={field} key={key}>
-                    <span className={labelText}>{label}</span>
-                    <Input
-                      inputMode="numeric"
-                      max={20}
-                      min={0}
-                      onChange={(event) => set(key, Math.max(0, Number(event.target.value) || 0))}
-                      type="number"
-                      value={values[key]}
-                    />
-                  </label>
-                ))}
-              </div>
-              {addOnOptions.length ? (
-                <fieldset className="sm:col-span-2">
-                  <legend className={labelText}>Extras</legend>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                    {addOnOptions.map((addOn) => (
-                      <label className="flex items-center gap-2 text-sm" key={addOn.id}>
-                        <RoundCheckbox
-                          checked={values.addOns.includes(addOn.id)}
-                          onChange={() =>
-                            set(
-                              "addOns",
-                              values.addOns.includes(addOn.id)
-                                ? values.addOns.filter((id) => id !== addOn.id)
-                                : [...values.addOns, addOn.id],
-                            )
-                          }
-                        />
-                        {addOn.label}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              ) : null}
-            </>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className="mt-3 grid gap-3">
-        <label className={field}>
-          <span className={labelText}>Customer notes</span>
-          <textarea
-            className={textArea}
-            maxLength={2000}
-            onChange={(event) => set("specialInstructions", event.target.value)}
-            value={values.specialInstructions}
-          />
-        </label>
-        <label className={field}>
-          <span className={labelText}>Access instructions (keys, door codes, parking)</span>
-          <textarea
-            className={textArea}
-            maxLength={1000}
-            onChange={(event) => set("accessInstructions", event.target.value)}
-            value={values.accessInstructions}
-          />
-        </label>
-        {!notesOnly ? (
-          <label className={field}>
-            <span className={labelText}>
-              Set the price yourself (optional, £). Leave empty to use the recalculated price.
-            </span>
-            <Input
-              inputMode="decimal"
-              onChange={(event) => {
-                setPriceOverride(event.target.value);
-                setPreview(null);
-              }}
-              placeholder="e.g. 65.00"
-              value={priceOverride}
-            />
-          </label>
+            ) : (
+              <button
+                className="mt-2 text-sm font-medium text-[#6a45b8] hover:underline"
+                onClick={() => setAddingAddress(true)}
+                type="button"
+              >
+                + Add a new address
+              </button>
+            )}
+          </Group>
         ) : null}
+
+        {!notesOnly && !isOffice ? (
+          <Group title="The clean">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SimpleSelect
+                aria-label="Length"
+                className={selectClass}
+                onChange={(value) => set("durationHours", Number(value))}
+                options={Array.from(new Set([...LENGTHS, values.durationHours]))
+                  .sort((a, b) => a - b)
+                  .map((hours) => ({ label: `${hours} hours on site`, value: String(hours) }))}
+                value={String(values.durationHours)}
+              />
+              <SimpleSelect
+                aria-label="Cleaning standard"
+                className={selectClass}
+                onChange={(value) => set("cleaningStandard", value)}
+                options={[
+                  { label: "Essential clean", value: "essential" },
+                  { label: "Enhanced clean", value: "enhanced" },
+                  { label: "Comprehensive clean", value: "comprehensive" },
+                ]}
+                value={values.cleaningStandard}
+              />
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {roomFields.map(([key, label]) => (
+                <div className="rounded-lg border border-[#e8e8eb] px-3 py-2" key={key}>
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <div className="mt-1 flex items-center justify-between">
+                    <StepButton
+                      disabled={values[key] <= 0}
+                      label={`Fewer ${label.toLowerCase()}`}
+                      onClick={() => set(key, Math.max(0, values[key] - 1))}
+                    >
+                      −
+                    </StepButton>
+                    <span className="text-base font-semibold tabular-nums text-[#1c133b]">{values[key]}</span>
+                    <StepButton
+                      disabled={values[key] >= 20}
+                      label={`More ${label.toLowerCase()}`}
+                      onClick={() => set(key, Math.min(20, values[key] + 1))}
+                    >
+                      +
+                    </StepButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {addOnOptions.length ? (
+              <div className="mt-4">
+                <p className={labelText}>Extras</p>
+                <div className="mt-2 grid gap-x-4 gap-y-2.5 sm:grid-cols-2">
+                  {addOnOptions.map((addOn) => (
+                    <label className="flex cursor-pointer items-center gap-2.5 text-sm" key={addOn.id}>
+                      <RoundCheckbox
+                        checked={values.addOns.includes(addOn.id)}
+                        onChange={() =>
+                          set(
+                            "addOns",
+                            values.addOns.includes(addOn.id)
+                              ? values.addOns.filter((id) => id !== addOn.id)
+                              : [...values.addOns, addOn.id],
+                          )
+                        }
+                      />
+                      {addOn.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </Group>
+        ) : null}
+
+        <Group title="Notes">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <textarea
+              aria-label="Customer notes"
+              className={textArea}
+              maxLength={2000}
+              onChange={(event) => set("specialInstructions", event.target.value)}
+              placeholder="Notes for the cleaner"
+              value={values.specialInstructions}
+            />
+            <textarea
+              aria-label="Access instructions"
+              className={textArea}
+              maxLength={1000}
+              onChange={(event) => set("accessInstructions", event.target.value)}
+              placeholder="Access: keys, door codes, parking"
+              value={values.accessInstructions}
+            />
+          </div>
+        </Group>
+      </div>
+
+      <footer className="space-y-3 border-t bg-muted/30 px-5 py-4">
+        <Input
+          aria-label="Reason for the change"
+          onChange={(event) => {
+            setNote(event.target.value);
+            setPreview(null);
+          }}
+          placeholder="Reason for the change (required)"
+          value={note}
+        />
         {hasCleaner && !notesOnly ? (
-          <label className="flex items-start gap-2 text-sm">
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm">
             <RoundCheckbox
               checked={cleanerAgreed}
-              className="mt-0.5"
               onChange={(event) => {
                 setCleanerAgreed(event.target.checked);
                 setPreview(null);
               }}
             />
-            <span>
-              I&apos;ve already agreed the new time or address with the cleaner. Leave unticked to ask them
-              to accept it again in the app.
-            </span>
+            <span>Already agreed a new time or address with the cleaner</span>
           </label>
         ) : null}
-        <Input
-          onChange={(event) => {
-            setNote(event.target.value);
-            setPreview(null);
-          }}
-          placeholder="Reason for the change (required, kept in the audit trail)"
-          value={note}
-        />
-      </div>
-
-      {preview ? (
-        <div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 text-sm">
-          {preview.changes.length ? (
-            <>
-              <p className="font-semibold">What will change</p>
-              <ul className="mt-2 space-y-1">
-                {preview.changes.map((change) => (
-                  <li key={change.field}>
-                    <span className="text-muted-foreground">{change.field}:</span> {change.from} →{" "}
-                    <span className="font-medium">{change.to}</span>
-                  </li>
-                ))}
-              </ul>
-              {preview.cleanerMustReconfirm ? (
-                <p className="mt-2 text-amber-800">
-                  The cleaner will be asked to accept the new details. Until they do, the booking shows as
-                  matched, not confirmed.
-                </p>
-              ) : null}
-              {preview.holdNeedsReplacing ? (
-                <p className="mt-2 text-amber-800">
-                  The card is already held for {money(preview.oldTotalPence)}. It will be held for{" "}
-                  {money(preview.newTotalPence)} instead; if the bank refuses, nothing changes.
-                </p>
-              ) : null}
-            </>
+        {!notesOnly ? (
+          showPrice ? (
+            <div className="flex items-center gap-2">
+              <Input
+                aria-label="Set the price yourself"
+                className="max-w-[180px]"
+                inputMode="decimal"
+                onChange={(event) => {
+                  setPriceOverride(event.target.value);
+                  setPreview(null);
+                }}
+                placeholder="Price, e.g. 65.00"
+                value={priceOverride}
+              />
+              <span className="text-xs text-muted-foreground">Leave empty to use the recalculated price.</span>
+            </div>
           ) : (
-            <p>Nothing has changed yet.</p>
-          )}
-        </div>
-      ) : null}
+            <button
+              className="text-sm font-medium text-[#6a45b8] hover:underline"
+              onClick={() => setShowPrice(true)}
+              type="button"
+            >
+              Set the price yourself
+            </button>
+          )
+        ) : null}
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <Button
-          className="min-h-11 w-full sm:w-auto"
-          disabled={busy || note.trim().length < 3}
-          onClick={() => void check()}
-          variant="outline"
-        >
-          Check changes
-        </Button>
-        <Button
-          className="min-h-11 w-full sm:w-auto"
-          disabled={busy || !preview?.changes.length || note.trim().length < 3}
-          onClick={() => void save()}
-        >
-          Save changes
-        </Button>
-      </div>
-      {message ? (
-        <div className="mt-3">
-          <ActionError message={message} title="Couldn’t edit this booking" />
+        {preview ? (
+          <div className="rounded-lg border bg-card p-3 text-sm">
+            {preview.changes.length ? (
+              <>
+                <p className="font-semibold">What will change</p>
+                <dl className="mt-2 divide-y">
+                  {preview.changes.map((change) => (
+                    <div className="grid grid-cols-[110px_1fr] gap-2 py-1.5" key={change.field}>
+                      <dt className="text-muted-foreground">{change.field}</dt>
+                      <dd>
+                        <span className="text-muted-foreground line-through">{change.from}</span>{" "}
+                        <span className="font-medium">{change.to}</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                {preview.cleanerMustReconfirm ? (
+                  <p className="mt-2 text-amber-800">
+                    The cleaner will be asked to accept the new details. Until they do, the booking shows as
+                    matched, not confirmed.
+                  </p>
+                ) : null}
+                {preview.holdNeedsReplacing ? (
+                  <p className="mt-2 text-amber-800">
+                    The card hold moves from {money(preview.oldTotalPence)} to {money(preview.newTotalPence)}. If
+                    the bank refuses, nothing changes.
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p>Nothing has changed yet.</p>
+            )}
+          </div>
+        ) : null}
+
+        {message ? <ActionError message={message} title="Couldn’t edit this booking" /> : null}
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button
+            className="min-h-11 w-full sm:w-auto"
+            disabled={busy || note.trim().length < 3}
+            onClick={() => void check()}
+            variant="outline"
+          >
+            Check changes
+          </Button>
+          <Button
+            className="min-h-11 w-full sm:w-auto"
+            disabled={busy || !preview?.changes.length || note.trim().length < 3}
+            onClick={() => void save()}
+          >
+            Save changes
+          </Button>
         </div>
-      ) : null}
+      </footer>
     </section>
+  );
+}
+
+function Group({ children, title }: { children: React.ReactNode; title: string }) {
+  return (
+    <div className="px-5 py-4">
+      <h3 className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function StepButton({
+  children,
+  disabled,
+  label,
+  onClick,
+}: {
+  children: React.ReactNode;
+  disabled: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-label={label}
+      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#efe6ff] text-base font-semibold text-[#6a45b8] transition hover:bg-[#e3d6fb] disabled:opacity-40"
+      disabled={disabled}
+      onClick={onClick}
+      type="button"
+    >
+      {children}
+    </button>
   );
 }

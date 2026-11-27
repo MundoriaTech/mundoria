@@ -621,6 +621,7 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
               label: [address.address_line_1, address.postcode].filter(Boolean).join(", "),
             }))}
             bookingId={params.id}
+            customerId={booking.customer_id}
             hasCleaner={Boolean(booking.cleaner_id)}
             initial={{
               accessInstructions: booking.access_instructions ?? "",

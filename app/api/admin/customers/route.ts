@@ -18,6 +18,7 @@ import {
   SERVICE_ADD_ONS,
 } from "@/lib/customer/services";
 import { sendBrandedEmail } from "@/lib/email/send-email";
+import { geocodeAddress } from "@/lib/geo/geocode";
 import { syncSignupToZoho } from "@/lib/zoho/crm";
 import type { BookingDraft, ServiceType } from "@/types/customer";
 
@@ -55,27 +56,6 @@ const schema = z.object({
   lastName: z.string().trim().max(80).optional().default(""),
   phone: z.string().trim().min(7, "Enter a phone number.").max(30),
 });
-
-/** Best-effort coordinates for matching; matching falls back to the postcode. */
-async function geocode(text: string) {
-  const key = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
-  if (!key) return null;
-  try {
-    const url = new URL("https://api.geoapify.com/v1/geocode/search");
-    url.searchParams.set("text", text);
-    url.searchParams.set("filter", "countrycode:gb");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("format", "json");
-    url.searchParams.set("apiKey", key);
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) return null;
-    const data = (await response.json()) as { results?: Array<{ lat?: number; lon?: number }> };
-    const hit = data.results?.[0];
-    return hit?.lat != null && hit?.lon != null ? { lat: hit.lat, lon: hit.lon } : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Create a customer account for someone who needs help (phone, in person),
@@ -173,7 +153,7 @@ export async function POST(request: Request) {
     if (!addressHasStreet({ address_line_1: line1, city: booking.city, postcode })) {
       return NextResponse.json({ error: ADDRESS_NEEDS_STREET_MESSAGE }, { status: 400 });
     }
-    const point = await geocode(line1);
+    const point = await geocodeAddress(line1);
     const { count: addressCount } = await admin
       .from("addresses")
       .select("id", { count: "exact", head: true })
