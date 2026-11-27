@@ -46,6 +46,12 @@ const CLEAR_CONFIRMATION_GATE = {
   confirmation_due_at: null,
   confirmation_gate: "none",
   confirmation_responded_at: null,
+  // A cleaner is on the job again, so any earlier no-show is over. A leftover
+  // replacement deadline would otherwise let the expired-replacement clean-up
+  // cancel the booking later if it ever went back to matching.
+  no_show_cleaner_id: null,
+  no_show_recorded_at: null,
+  replacement_deadline: null,
 } as const;
 
 export async function POST(
