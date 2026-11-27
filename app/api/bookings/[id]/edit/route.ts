@@ -131,7 +131,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "Nothing has changed." }, { status: 400 });
   }
 
-  const saved = await applyBookingEdit({ actor: "customer", admin, booking, plan });
+  const saved = await applyBookingEdit({
+    actor: "customer",
+    actorId: booking.customer_id,
+    admin,
+    booking,
+    plan,
+    reason: "Changed by the customer",
+  });
   if ("error" in saved) return NextResponse.json({ error: saved.error }, { status: saved.status });
   return NextResponse.json({
     changes: visible,

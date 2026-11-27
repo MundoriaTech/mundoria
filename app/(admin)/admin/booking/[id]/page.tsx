@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 
 import { BookingActions } from "@/components/admin/booking-actions";
 import { BookingEditPanel } from "@/components/admin/booking-edit-panel";
+import { BookingEditHistory, type HistoryEntry } from "@/components/admin/booking-edit-history";
+import { undoableEditId } from "@/lib/bookings/undo-booking-edit";
 import {
   FULLY_EDITABLE_STATUSES,
   NOTES_ONLY_STATUSES,
@@ -145,6 +147,76 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
           .eq("customer_id", booking.customer_id)
       : { data: null };
   const editCategory = serviceDefinition(booking.service_type).category;
+  const [{ data: editRows }, { data: actionRows }] = await Promise.all([
+    admin
+      .from("booking_edits")
+      .select("id,actor_type,actor_id,reason,changes,undo_of,undone_at,created_at")
+      .eq("booking_id", params.id)
+      .order("created_at", { ascending: false }),
+    admin
+      .from("admin_action_logs")
+      .select("id,admin_id,action,reason,metadata,created_at")
+      .eq("entity_type", "booking")
+      .eq("entity_id", params.id)
+      // Edits and undos are shown from booking_edits, with their changes.
+      .not("action", "in", "(edit_booking,undo_booking_edit)")
+      .order("created_at", { ascending: false }),
+  ]);
+  const historyNames = await loadCleanerNames(
+    admin,
+    Array.from(
+      new Set(
+        [
+          ...(editRows ?? []).map((row) => row.actor_id as string | null),
+          ...(actionRows ?? []).map((row) => row.admin_id as string | null),
+        ].filter((id): id is string => Boolean(id)),
+      ),
+    ),
+  );
+  const historyEntries: HistoryEntry[] = [
+    ...(editRows ?? []).map((row) => ({
+      changes: (row.changes ?? []) as HistoryEntry["changes"],
+      createdAt: row.created_at as string,
+      id: row.id as string,
+      kind: (row.undo_of ? "undo" : "edit") as HistoryEntry["kind"],
+      reason: row.actor_type === "customer" ? null : (row.reason as string | null),
+      title: row.undo_of
+        ? "Edit undone"
+        : row.actor_type === "customer"
+          ? "Customer changed the booking"
+          : "Admin edited the booking",
+      undoneAt: row.undone_at as string | null,
+      who: `${(row.actor_id && historyNames[row.actor_id as string]) || "Unknown"}${
+        row.actor_type === "customer" ? " (customer)" : " (admin)"
+      }`,
+    })),
+    ...(actionRows ?? []).map((row) => {
+      const meta = (row.metadata ?? {}) as { status?: string | null };
+      return {
+        changes: [],
+        createdAt: row.created_at as string,
+        id: row.id as string,
+        kind: "action" as const,
+        reason: row.reason as string | null,
+        title:
+          row.action === "status" && meta.status
+            ? `Status set to ${humanize(meta.status)}`
+            : humanize(String(row.action)),
+        undoneAt: null,
+        who: `${(row.admin_id && historyNames[row.admin_id as string]) || "Unknown"} (admin)`,
+      };
+    }),
+  ].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const undoableId =
+    editable || notesOnly
+      ? undoableEditId(
+          (editRows ?? []).map((row) => ({
+            id: row.id as string,
+            undo_of: row.undo_of as string | null,
+            undone_at: row.undone_at as string | null,
+          })),
+        )
+      : null;
   // Prefer the rooms captured when this booking was made; older bookings
   // (before the snapshot) fall back to the address as it is today.
   const hasSnapshot = booking.booked_num_bedrooms != null || booking.booked_num_bathrooms != null;
@@ -565,6 +637,12 @@ export default async function AdminBookingPage({ params }: { params: { id: strin
             notesOnly={notesOnly}
           />
         ) : null}
+        <BookingEditHistory
+          bookingId={params.id}
+          entries={historyEntries}
+          hasCleaner={Boolean(booking.cleaner_id)}
+          undoableId={undoableId}
+        />
         <BookingActions
           allocatedCleaners={booking.allocated_cleaners ?? 1}
           bookingId={params.id}

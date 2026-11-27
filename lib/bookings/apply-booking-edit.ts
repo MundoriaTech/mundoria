@@ -34,15 +34,22 @@ export function holdNeedsReplacing(booking: EditableBooking, plan: BookingEditPl
  */
 export async function applyBookingEdit({
   actor,
+  actorId,
   admin,
   booking,
   plan,
+  reason,
+  undoOf,
 }: {
   actor: "admin" | "customer";
+  actorId: string;
   admin: Admin;
   booking: EditableBooking;
   plan: BookingEditPlan;
-}): Promise<{ error: string; status: number } | { newIntentId: string | null }> {
+  reason: string;
+  /** The edit this one reverses, when it's an undo. */
+  undoOf?: string;
+}): Promise<{ error: string; status: number } | { editId: string | null; newIntentId: string | null }> {
   const stripe = getStripe();
   let newIntentId: string | null = null;
   if (holdNeedsReplacing(booking, plan)) {
@@ -98,6 +105,15 @@ export async function applyBookingEdit({
     updates.payment_auth_next_attempt_at = null;
   }
 
+  // What the booking looked like before, so the edit can be shown and undone.
+  const beforeValues: Record<string, unknown> = {};
+  for (const key of Object.keys(plan.updates)) {
+    beforeValues[key] = (booking as unknown as Record<string, unknown>)[key] ?? null;
+  }
+  const { data: addOnsBefore } = plan.addOnRows
+    ? await admin.from("booking_add_ons").select("add_on_id,amount,label").eq("booking_id", booking.id)
+    : { data: null };
+
   const { data: saved, error: saveError } = await admin
     .from("bookings")
     .update(updates)
@@ -124,6 +140,26 @@ export async function applyBookingEdit({
         .insert(plan.addOnRows.map((row) => ({ ...row, booking_id: booking.id })));
     }
   }
+
+  const { data: editRow } = await admin
+    .from("booking_edits")
+    .insert({
+      actor_id: actorId,
+      actor_type: actor,
+      add_ons_after: plan.addOnRows,
+      add_ons_before: plan.addOnRows ? (addOnsBefore ?? []) : null,
+      after_values: plan.updates,
+      before_values: beforeValues,
+      booking_id: booking.id,
+      changes: plan.changes,
+      cleaner_must_reconfirm: plan.cleanerMustReconfirm,
+      new_payment_intent_id: newIntentId,
+      previous_payment_intent_id: newIntentId ? booking.stripe_payment_intent_id : null,
+      reason,
+      undo_of: undoOf ?? null,
+    })
+    .select("id")
+    .maybeSingle();
 
   if (plan.cleanerMustReconfirm && booking.cleaner_id) {
     await offerAdminAssignedJob(booking.id, booking.cleaner_id).catch(() => undefined);
@@ -191,16 +227,20 @@ export async function applyBookingEdit({
           title: "Your job was updated",
         })
       : null,
-    // Ops sees every change a customer makes to a booking.
-    actor === "customer"
-      ? alertAdmins(
-          "booking_updated",
-          "A customer changed their booking",
-          `${summary(plan.changes)}.${plan.cleanerMustReconfirm ? " The cleaner has been asked to accept the new details." : ""}`,
-          { booking_id: booking.id },
-        ).catch(() => undefined)
-      : null,
+    // Admins hear about every change, whoever made it.
+    alertAdmins(
+      "booking_updated",
+      undoOf
+        ? "A booking edit was undone"
+        : actor === "customer"
+          ? "A customer changed their booking"
+          : "An admin changed a booking",
+      `${summary(plan.changes)}.${actor === "admin" ? ` Reason: ${reason}` : ""}${
+        plan.cleanerMustReconfirm ? " The cleaner has been asked to accept the new details." : ""
+      }`,
+      { booking_id: booking.id, edited_by: actorId },
+    ).catch(() => undefined),
   ]);
 
-  return { newIntentId };
+  return { editId: editRow?.id ?? null, newIntentId };
 }

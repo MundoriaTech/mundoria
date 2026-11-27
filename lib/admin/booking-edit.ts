@@ -56,7 +56,7 @@ export const bookingEditSchema = z.object({
 export type BookingEditInput = z.infer<typeof bookingEditSchema>;
 
 export const EDIT_BOOKING_SELECT =
-  "id,status,payment_status,customer_id,cleaner_id,service_type,is_recurring,cleaning_standard,estimated_duration_hours,offer_free_hours,offer_kind,discount_pence,promo_code_id,amount_total,amount_cleaner,allocated_cleaners,cleaner_hours,commercial_spaces,booked_num_bedrooms,booked_num_bathrooms,booked_num_other_rooms,scheduled_date,scheduled_start_time,address_id,special_instructions,access_instructions,stripe_payment_intent_id,stripe_payment_method_id,address:addresses(*)";
+  "id,status,payment_status,customer_id,cleaner_id,service_type,is_recurring,cleaning_standard,estimated_duration_hours,offer_free_hours,offer_kind,discount_pence,promo_code_id,amount_total,amount_cleaner,amount_platform,allocated_cleaners,cleaner_hours,commercial_spaces,booked_num_bedrooms,booked_num_bathrooms,booked_num_other_rooms,scheduled_date,scheduled_start_time,address_id,special_instructions,access_instructions,stripe_payment_intent_id,stripe_payment_method_id,address:addresses(*)";
 
 export type EditableBooking = {
   access_instructions: string | null;
@@ -64,6 +64,7 @@ export type EditableBooking = {
   address_id: string;
   allocated_cleaners: number | null;
   amount_cleaner: number | null;
+  amount_platform: number | null;
   amount_total: number | null;
   booked_num_bathrooms: number | null;
   booked_num_bedrooms: number | null;
