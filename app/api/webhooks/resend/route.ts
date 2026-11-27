@@ -19,6 +19,8 @@ const EVENTS: Record<string, string> = {
   "email.complained": "complained",
   "email.delivered": "delivered",
   "email.delivery_delayed": "delivery_delayed",
+  // Resend won't send to an address that bounced or complained before.
+  "email.suppressed": "bounced",
 };
 
 /** Resend signs webhooks the Svix way: HMAC-SHA256 of "id.timestamp.body". */
@@ -66,7 +68,14 @@ export async function POST(request: Request) {
       .update({
         status,
         updated_at: new Date().toISOString(),
-        ...(status === "bounced" ? { error: event.data?.bounce?.message?.slice(0, 500) ?? "Bounced" } : {}),
+        ...(status === "bounced"
+          ? {
+              error:
+                event.type === "email.suppressed"
+                  ? "Not sent: this address is on Resend's suppression list (it bounced or complained before)."
+                  : (event.data?.bounce?.message?.slice(0, 500) ?? "Bounced"),
+            }
+          : {}),
       })
       .in(
         "id",
