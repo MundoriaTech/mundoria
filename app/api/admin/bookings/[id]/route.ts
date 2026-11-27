@@ -42,6 +42,12 @@ const schema = z.object({
 
 const REMATCHABLE_PAYMENTS = new Set(["unpaid", "held", "released"]);
 
+const CLEAR_CONFIRMATION_GATE = {
+  confirmation_due_at: null,
+  confirmation_gate: "none",
+  confirmation_responded_at: null,
+} as const;
+
 export async function POST(
   request: Request,
   { params }: { params: { id: string } },
@@ -187,7 +193,7 @@ export async function POST(
       return NextResponse.json({ error: teamError.message }, { status: 400 });
     }
     if (!booking.cleaner_id) {
-      updates = { cleaner_id: primary, status: "matched" };
+      updates = { cleaner_id: primary, status: "matched", ...CLEAR_CONFIRMATION_GATE };
     }
     await auth.admin.from("matching_decisions").insert({
       booking_id: params.id,
@@ -199,7 +205,10 @@ export async function POST(
     if (!cleanerId) {
       return NextResponse.json({ error: "Choose a cleaner" }, { status: 400 });
     }
-    updates = { cleaner_id: cleanerId, status: "matched" };
+    // A fresh assignment starts with no confirmation check pending. Without
+    // this, a check the previous cleaner missed stays failed and the next
+    // confirmation-gates run removes the new cleaner straight away.
+    updates = { cleaner_id: cleanerId, status: "matched", ...CLEAR_CONFIRMATION_GATE };
     await auth.admin.from("matching_decisions").insert({
       booking_id: params.id,
       cleaner_id: cleanerId,
