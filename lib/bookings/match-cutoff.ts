@@ -13,6 +13,7 @@ import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ServiceType } from "@/types/customer";
 import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 /**
  * If no cleaner has accepted by the cutoff, the visit is cancelled at no
@@ -190,6 +191,7 @@ async function cancelForNoCleaner(booking: Row, now: Date) {
     .eq("booking_id", booking.id)
     .is("responded_at", null);
   await closeEmergencyList(booking.id).catch(() => undefined);
+  await noteBookingInZoho(booking.id, "Cancelled: no cleaner available", "Cancelled automatically before the visit. The customer was not charged.");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const rebookUrl = `${appUrl}/booking/new?rebook=${booking.id}`;

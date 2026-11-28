@@ -16,8 +16,32 @@ Recruit is the hiring record (Candidates). CRM is sales follow-up.
 
 `Additional_Info` keeps the user id and reference as text. If the org rejects
 any of these fields, the upsert is retried with name, email and phone only
-and Sentry gets a warning naming the field. Document statuses, assessment and
-activation stay with the team in Recruit.
+and Sentry gets a warning naming the field.
+
+### Snapshot after every change (Mundoria is the source of truth)
+
+Any admin decision (approve, hold, suspend, remove, interview done or failed,
+document approved or rejected, skills, tier), an application submit, a profile
+save and the insurance-expiry cron send the cleaner's whole picture in one
+upsert (`lib/zoho/cleaner-snapshot.ts`) through the retry queue
+(`zoho_sync_jobs`). A field the org rejects is dropped and the rest is sent
+again. Deleting a cleaner account in admin sets the candidate to `Rejected`,
+Activation `On Hold`, with "Account deleted in Mundoria: reason".
+
+| Recruit field | From Mundoria |
+| --- | --- |
+| `Cleaner_Lifecycle_Stage` | Removed or interview failed → `Rejected`; suspended / on hold → `On Hold`; approved → `Active Cleaner`; application unfinished → `Application Incomplete` (`Account Created` if nothing started); a document rejected or expired → `Documents Pending`; call done and every document approved → `Onboarding Completed`; documents waiting for review → `Documents Under Review`; documents missing → `Documents Pending`; documents approved, call not yet → `Onboarding Call`; else `Application Submitted` |
+| `Government_ID_Status`, `Right_to_Work_Status`, `Photograph_Status`, `DBS_Status`, `Insurance_Status`, `UTR_Status` | verified → `Approved`, rejected → `Rejected`, expired → `Expired`, uploaded and waiting → `Under Review`, nothing → `Not Uploaded`. A UTR number with no document → `Uploaded` |
+| `Onboarding_Call_Status`, `Onboarding_Call_At` | `Completed` (done or failed), `Scheduled` with the time, or `Not Scheduled` |
+| `Activation_Review` | Approved → `Approved by Operations`; suspended / on hold / removed → `On Hold`; ready → `Ready for Operations Review`; else `Not Ready` |
+| `Onboarding_Completion_Status` | `Completed`, `On Hold`, `In Progress` or `Not Started` |
+| `Assessment_Result`, `Assessment_Score` | Skills test passed → `Passed`; taken and failed → `Retake Required`; else `Not Taken` |
+| `Outstanding_Documents`, `Outstanding_Document_Count`, `Documents_Awaiting_Approval`, `Document_Replacement_Instructions` | Missing / rejected / expired documents, the review queue, and the admin's rejection notes |
+| `Next_Operations_Action` | What happens next, in words ("Review Photo ID in Mundoria admin", "Hold the onboarding call", "Approve for live jobs"...) |
+| `Service_Areas`, `Cleaning_Specialities`, `Cleaner_Bio`, `Cleaner_Availability`, `Equipment_and_Products` | The application and profile answers |
+| `Insurance_Expiry`, `Application_Reference`, `Mundoria_User_ID`, `Secure_Cleaner_Record` (admin link) | As stored |
+
+`Candidate_Status` (Recruit's own pipeline) is left to the team.
 
 ## Env vars (server-only)
 

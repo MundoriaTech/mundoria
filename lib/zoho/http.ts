@@ -41,6 +41,26 @@ export async function readZohoRecordResult(response: Response): Promise<ZohoReco
   return body?.data?.[0] ?? body ?? {};
 }
 
+/**
+ * A Zoho refusal that retrying will not fix (missing scope, field or value
+ * the org rejects). The sync queue stops retrying these and keeps the reason.
+ */
+export class ZohoPermanentError extends Error {}
+
+const PERMANENT_CODES = new Set([
+  "OAUTH_SCOPE_MISMATCH",
+  "INVALID_DATA",
+  "MANDATORY_NOT_FOUND",
+  "INVALID_MODULE",
+  "NO_PERMISSION",
+  "NOT_SUPPORTED",
+  "DUPLICATE_DATA",
+]);
+
+export function isPermanentZohoCode(code: unknown) {
+  return typeof code === "string" && PERMANENT_CODES.has(code);
+}
+
 export function zohoErrorCode(code: unknown) {
   return typeof code === "string" && /^[A-Z0-9_]{1,64}$/.test(code) ? code : "UNKNOWN";
 }

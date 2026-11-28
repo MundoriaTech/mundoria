@@ -27,6 +27,8 @@ import {
   type LeadRow,
 } from "@/lib/outreach/leads";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { CRM_ENQUIRY_STATUS, CRM_LEAD_STATUS } from "@/lib/zoho/mapping";
+import { noteSalesLeadInZoho, setSalesLeadStatusInZoho } from "@/lib/zoho/sync-jobs";
 
 const VAPI_API = "https://api.vapi.ai";
 
@@ -214,6 +216,34 @@ export async function handleVapiEvent(body: { message?: VapiMessage }) {
         .update({ context: { ...(row.context as object), callConnected: true } })
         .eq("id", row.id);
     }
+  }
+
+  // Zoho: the call's result goes on the person's Sales lead.
+  await noteSalesLeadInZoho(
+    lead.id,
+    `AI call: ${outcome ? outcome.replaceAll("_", " ") : connected ? "spoke" : "no answer"}`,
+    [
+      `Duration: ${duration ?? 0}s.${endedReason ? ` Ended: ${endedReason}.` : ""}`,
+      analysis.summary ? `Summary: ${analysis.summary}` : null,
+      analysis.structuredData?.callback_time ? `Callback time: ${analysis.structuredData.callback_time}` : null,
+      analysis.structuredData?.notes ? `Notes: ${analysis.structuredData.notes}` : null,
+      `${appUrl()}/admin/leads/${lead.id}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  );
+  if (outcome === "not_interested" || outcome === "do_not_contact") {
+    await setSalesLeadStatusInZoho(lead.id, CRM_LEAD_STATUS.nurtureClosed, CRM_ENQUIRY_STATUS.unqualified);
+  } else if (connected) {
+    await setSalesLeadStatusInZoho(
+      lead.id,
+      outcome === "wants_to_book" || outcome === "booking_link_requested"
+        ? CRM_LEAD_STATUS.readyToBook
+        : outcome === "callback_requested"
+          ? CRM_LEAD_STATUS.callbackAgreed
+          : CRM_LEAD_STATUS.connectedQualifying,
+      CRM_ENQUIRY_STATUS.contacted,
+    );
   }
 
   const name = leadName(lead) || lead.phone || "A lead";

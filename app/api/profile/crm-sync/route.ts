@@ -4,11 +4,13 @@ import { toE164 } from "@/lib/outreach/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getRequestUser } from "@/lib/supabase/request-client";
 import { syncProfileToZoho } from "@/lib/zoho/crm";
+import { syncCleanerToZoho } from "@/lib/zoho/sync-jobs";
 
 /**
  * Called after the account settings form saves. Reads the saved profile
  * server-side (the body is ignored) and pushes name and phone to Zoho and to
  * the person's lead row, so the admin Leads page shows the number they use.
+ * For cleaners it also refreshes the Recruit candidate (bio, areas, hours).
  */
 export async function POST(request: Request) {
   const { user } = await getRequestUser(request);
@@ -40,6 +42,8 @@ export async function POST(request: Request) {
       userId: user.id,
     });
   }
+  // A cleaner's bio, areas, services and hours live on the Recruit candidate.
+  if (profile?.role === "cleaner") await syncCleanerToZoho(user.id);
 
   return NextResponse.json({ ok: true });
 }

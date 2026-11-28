@@ -12,6 +12,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 const PREAUTH_STATUSES = [
   "awaiting_payment",
@@ -631,6 +632,7 @@ export async function markPreauthFailure(
     })
     .eq("id", bookingId)
     .neq("status", "cancelled");
+  await noteBookingInZoho(bookingId, "Cancelled: card payment failed", `The card hold could not be taken. ${reason}`);
 
   const intentId =
     options?.intentId ?? (booking.stripe_payment_intent_id as string | null);
@@ -787,5 +789,8 @@ export async function autoCompleteFinishedVisits(limit = 100) {
     .lte("cleaner_marked_complete_at", cutoff)
     .select("id")
     .limit(limit);
+  for (const row of data ?? []) {
+    await noteBookingInZoho(row.id as string, "Completed", "Marked complete automatically 48 hours after the cleaner finished.");
+  }
   return { completed: data?.length ?? 0 };
 }

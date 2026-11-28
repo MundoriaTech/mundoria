@@ -2,7 +2,9 @@ import * as Sentry from "@sentry/nextjs";
 
 import { normalizeEmail, toE164 } from "@/lib/outreach/config";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { markZohoEnquiryBooked, markZohoProspectOptOut } from "@/lib/zoho/sales-intake";
+import { CRM_ENQUIRY_STATUS, CRM_LEAD_STATUS } from "@/lib/zoho/mapping";
+import { markZohoProspectOptOut } from "@/lib/zoho/sales-intake";
+import { setSalesLeadStatusInZoho } from "@/lib/zoho/sync-jobs";
 
 export type LeadStatus = "new" | "contacted" | "engaged" | "booked" | "lost" | "unsubscribed";
 export type Channel = "email" | "sms" | "call";
@@ -176,7 +178,10 @@ export async function updateLead(
   if (event) {
     await logLeadEvent(lead.id, event.type, event.summary, event.payload ?? {}, event.actorId ?? null);
   }
-  if (patch.status === "booked" && lead.status !== "booked") await markZohoEnquiryBooked(lead.id);
+  if (patch.status === "booked" && lead.status !== "booked") {
+    // Booked: the Sales lead shows it (Lead Status Booked, enquiry Converted).
+    await setSalesLeadStatusInZoho(lead.id, CRM_LEAD_STATUS.booked, CRM_ENQUIRY_STATUS.converted);
+  }
   return next;
 }
 

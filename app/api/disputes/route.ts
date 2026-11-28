@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { findDisputeOption } from "@/lib/disputes/options";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 const schema = z.object({
   booking_id: z.string().uuid(),
@@ -94,6 +95,17 @@ export async function POST(request: Request) {
       .update({ application_status: "disputed" })
       .eq("id", value.rating_id)
       .eq("application_status", "pending_hold");
+  }
+
+  // Booking disputes (not a cleaner challenging a rating) go on the customer's Contact.
+  if (!value.rating_id) {
+    await noteBookingInZoho(
+      booking.id,
+      "Dispute opened",
+      `${user.id === booking.customer_id ? "The customer" : "The cleaner"} raised a dispute: ${value.category_path.join(" > ")}.${
+        description ? ` ${description}` : ""
+      }`,
+    );
   }
 
   return NextResponse.json({ success: true });

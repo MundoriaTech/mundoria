@@ -9,6 +9,7 @@ import {
 import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 export async function handleNoShow(bookingId: string) {
   const admin = createAdminClient();
@@ -61,6 +62,7 @@ export async function handleNoShow(bookingId: string) {
   const match = await runMatchingEngine(bookingId, {
     excludeCleanerIds: cleanerId ? [cleanerId] : [],
   });
+  await noteBookingInZoho(bookingId, "Cleaner did not arrive", "Marked as a no-show; Mundoria is finding a replacement.");
   return { deadline, match };
 }
 
@@ -99,6 +101,7 @@ export async function cancelExpiredReplacement(bookingId: string) {
     .select("id")
     .maybeSingle();
   if (!cancelledRow) return false;
+  await noteBookingInZoho(bookingId, "Cancelled: no replacement cleaner", "No replacement was found within one hour. The customer was not charged.");
   await sendPushNotification(
     booking.customer_id,
     "Booking cancelled",

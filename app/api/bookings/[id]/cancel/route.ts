@@ -13,6 +13,7 @@ import { getPaymentTimingSettings } from "@/lib/payments/lifecycle";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 const schema = z.object({
   reason: z.string().trim().min(3).max(500),
@@ -244,6 +245,18 @@ export async function POST(
       });
     }
   }
+
+  await noteBookingInZoho(
+    params.id,
+    "Cancelled by the customer",
+    [
+      parsed.data.reason ? `Reason: ${parsed.data.reason}` : null,
+      fee > 0 ? `Cancellation fee £${(fee / 100).toFixed(2)}.` : null,
+      refundAmount > 0 && booking.stripe_payment_intent_id ? `Refunded £${(refundAmount / 100).toFixed(2)}.` : null,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
 
   return NextResponse.json({
     cancellationFeePence: fee,

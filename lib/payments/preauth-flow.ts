@@ -23,6 +23,7 @@ import { sendZohoBookingEmailPreview, usesZohoBookingEmailPreview } from "@/lib/
 import { upsertZohoContact } from "@/lib/zoho/crm";
 import { getStripe } from "@/lib/stripe/server";
 import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 /** Free-cancel / payment-fail deadline before the visit (policy). */
 export const PAYMENT_CANCEL_HOURS_BEFORE = 24;
@@ -760,6 +761,7 @@ export async function cancelUnpaidAwaitingPayment(
     })
     .eq("id", bookingId)
     .neq("status", "cancelled");
+  await noteBookingInZoho(bookingId, "Cancelled: payment not completed", reason);
 
   if (booking.stripe_payment_intent_id) {
     try {

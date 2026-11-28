@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/auth";
 import { sendBrandedEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { syncCleanerToZoho } from "@/lib/zoho/sync-jobs";
 
 /**
  * Mark Public Liability insurance as expired once the policy date has passed.
@@ -39,6 +40,7 @@ export async function GET(request: Request) {
       continue;
     }
     expired += 1;
+    await syncCleanerToZoho(cleaner.id);
 
     const { data: profile } = await admin
       .from("profiles")

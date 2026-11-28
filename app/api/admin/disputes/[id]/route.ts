@@ -10,6 +10,7 @@ import {
   sendPushNotification,
 } from "@/lib/notifications/send";
 import { getStripe } from "@/lib/stripe/server";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 const schema = z.object({
   action: z.enum([
@@ -160,6 +161,13 @@ export async function POST(
     metadata: { amount },
     reason: notes,
   });
+  if (!dispute.rating_id && dispute.booking_id) {
+    await noteBookingInZoho(
+      dispute.booking_id as string,
+      action === "refund" ? "Dispute resolved with a refund" : action === "close" ? "Dispute closed" : "Dispute resolved",
+      `${outcomeLine(action, "customer", amount ?? null)} Mundoria's note: ${notes}`,
+    );
+  }
   return NextResponse.json({ success: true });
 }
 

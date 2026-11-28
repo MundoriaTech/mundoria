@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 import { activateEmergencyList } from "@/lib/matching/emergency-list";
 import { isAutoCancelProtected } from "@/lib/bookings/auto-cancel-test";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 function visitStart(date: string, time: string) {
   return new Date(`${date}T${String(time).slice(0, 5)}:00`);
@@ -77,7 +78,10 @@ export async function settleOutstandingOffers(scope?: {
       })
       .eq("id", booking.id)
       .in("status", ["pending_match", "matched"]);
-    if (!error) closedPast += 1;
+    if (!error) {
+      closedPast += 1;
+      await noteBookingInZoho(booking.id, "Cancelled: no cleaner confirmed", "No cleaner confirmed before the visit time.");
+    }
   }
 
   let offerQuery = admin

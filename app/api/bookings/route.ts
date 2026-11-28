@@ -29,6 +29,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { splitBookingAmount } from "@/lib/payments/cleaner-pay";
 import { getStripe } from "@/lib/stripe/server";
 import { sendZohoBookingEmailPreview, usesZohoBookingEmailPreview } from "@/lib/zoho/booking-email";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 import { upsertZohoContact } from "@/lib/zoho/crm";
 
 export async function POST(request: Request) {
@@ -492,6 +493,7 @@ export async function POST(request: Request) {
   } catch (zohoError) {
     Sentry.captureException(zohoError);
   }
+  await noteBookingInZoho(booking.id, "Booked", parsed.data.isRecurring ? "A regular clean." : null);
 
   return NextResponse.json({
     bookingId: booking.id,

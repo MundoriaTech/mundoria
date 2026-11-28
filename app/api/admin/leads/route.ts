@@ -10,6 +10,7 @@ import {
   upsertLead,
   type Channel,
 } from "@/lib/outreach/leads";
+import { createSalesLeadInZoho, noteSalesLeadInZoho } from "@/lib/zoho/sync-jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -113,6 +114,13 @@ export async function POST(request: Request) {
       { channels },
       auth.profile.id,
     );
+  }
+
+  // Zoho: a new hand-added lead becomes a Sales lead; a repeat adds a note.
+  if (created) {
+    await createSalesLeadInZoho({ addedBy: who, leadId: lead.id, notes: input.notes || null, source: input.source });
+  } else if (input.notes) {
+    await noteSalesLeadInZoho(lead.id, "Mundoria lead note", `${who} added a note: ${input.notes}`);
   }
 
   await logAdminAction({

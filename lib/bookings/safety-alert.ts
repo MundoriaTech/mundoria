@@ -20,6 +20,7 @@ export {
   type SafetyAlertReason,
   type SafetyAlertStatus,
 } from "@/lib/bookings/safety-alert-shared";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 const LIVE_STATUSES = ["confirmed", "cleaner_en_route", "in_progress"] as const;
 const WITHDRAW_WINDOW_MS = 15 * 60 * 1000;
@@ -316,6 +317,7 @@ export async function adminUpdateSafetyAlert({
         })
         .eq("id", alert.booking_id)
         .in("status", ["confirmed", "cleaner_en_route", "in_progress", "matched"]);
+      await noteBookingInZoho(alert.booking_id as string, "Cancelled after a safety review", notes);
     }
 
     for (const partyId of [alert.customer_id, alert.cleaner_id]) {

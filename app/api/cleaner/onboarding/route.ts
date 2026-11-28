@@ -45,6 +45,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import { upsertZohoLead } from "@/lib/zoho/crm";
 import { upsertZohoCandidate } from "@/lib/zoho/recruit";
+import { syncCleanerToZoho } from "@/lib/zoho/sync-jobs";
 
 const requiredString = (label: string) =>
   z.string().trim().min(1, `${label} is required`);
@@ -949,6 +950,8 @@ export async function POST(request: Request) {
   } catch (zohoError) {
     Sentry.captureException(zohoError);
   }
+  // Then the full picture: documents, answers, areas, availability.
+  await syncCleanerToZoho(user.id);
 
   return NextResponse.json({
     application_reference: applicationReference,
