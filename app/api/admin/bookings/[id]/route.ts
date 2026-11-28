@@ -287,6 +287,11 @@ export async function POST(
       updates.cancelled_by = auth.user.id;
       updates.cancellation_reason = note;
     }
+    // Bringing a cancelled visit back: count it as just set, so the
+    // no-cleaner cutoff gives it until 2 hours before if it's soon.
+    if (booking.status === "cancelled" && (status === "pending_match" || status === "matched")) {
+      updates.schedule_changed_at = nowIso;
+    }
   }
 
   if (Object.keys(updates).length) {
