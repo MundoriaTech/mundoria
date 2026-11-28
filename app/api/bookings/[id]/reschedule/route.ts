@@ -101,6 +101,7 @@ export async function POST(
       confirmation_gate: "none",
       confirmation_responded_at: null,
       previous_cleaner_id: previousCleanerId,
+      schedule_changed_at: new Date().toISOString(),
       scheduled_date: parsed.data.scheduledDate,
       scheduled_start_time: time,
       status: "pending_match",

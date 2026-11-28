@@ -33,6 +33,7 @@ export function matchCutoffAt(booking: {
   created_at?: string | null;
   payment_status?: string | null;
   previous_cleaner_id?: string | null;
+  schedule_changed_at?: string | null;
   scheduled_date: string;
   scheduled_start_time: string;
 }) {
@@ -48,8 +49,12 @@ export function matchCutoffAt(booking: {
     return short;
   }
   const standard = new Date(start.getTime() - MATCH_CUTOFF_HOURS * HOUR);
-  const created = booking.created_at ? new Date(booking.created_at) : null;
-  if (created && created.getTime() > standard.getTime()) return short;
+  // Booked, or last moved, less than 24 hours before the visit.
+  const lastSet = Math.max(
+    booking.created_at ? new Date(booking.created_at).getTime() : 0,
+    booking.schedule_changed_at ? new Date(booking.schedule_changed_at).getTime() : 0,
+  );
+  if (lastSet > standard.getTime()) return short;
   return standard;
 }
 
@@ -75,6 +80,7 @@ type Row = {
   id: string;
   payment_status: string;
   previous_cleaner_id: string | null;
+  schedule_changed_at: string | null;
   scheduled_date: string;
   scheduled_start_time: string;
   service_type: ServiceType;
@@ -95,7 +101,7 @@ export async function enforceMatchCutoffs(now: Date = new Date()) {
   const { data } = await admin
     .from("bookings")
     .select(
-      "id,customer_id,status,payment_status,previous_cleaner_id,stripe_payment_intent_id,service_type,is_recurring,scheduled_date,scheduled_start_time,created_at,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
+      "id,customer_id,status,payment_status,previous_cleaner_id,stripe_payment_intent_id,service_type,is_recurring,scheduled_date,scheduled_start_time,created_at,schedule_changed_at,address:addresses(postcode),customer:profiles!bookings_customer_id_fkey(email,full_name,phone,notification_preferences)",
     )
     .in("status", UNACCEPTED)
     .lte("scheduled_date", horizon)

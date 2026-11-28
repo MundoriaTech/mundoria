@@ -97,7 +97,10 @@ export async function applyBookingEdit({
   }
 
   const updates: Record<string, unknown> = { ...plan.updates };
-  if (plan.timeChanged) Object.assign(updates, RESET_CONFIRMATION_GATE);
+  if (plan.timeChanged) {
+    Object.assign(updates, RESET_CONFIRMATION_GATE);
+    updates.schedule_changed_at = new Date().toISOString();
+  }
   if (newIntentId) {
     updates.stripe_payment_intent_id = newIntentId;
     updates.payment_authorized_at = new Date().toISOString();
