@@ -17,6 +17,7 @@ import {
 } from "@/lib/cleaner/onboarding-compliance";
 import { parseDocumentUrls } from "@/lib/cleaner/document-urls";
 import { sendBrandedEmail } from "@/lib/email/send-email";
+import { syncCleanerToZoho } from "@/lib/zoho/sync-jobs";
 import {
   createInAppNotification,
   sendOneSignalNotification,
@@ -394,6 +395,8 @@ export async function POST(
     },
     reason,
   });
+  // Recruit mirrors the decision: lifecycle stage, documents, call, activation.
+  await syncCleanerToZoho(params.id);
 
   const documentLabel =
     document_kind && isCleanerDocumentKind(document_kind)

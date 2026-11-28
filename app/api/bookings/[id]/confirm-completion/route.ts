@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { maybeRewardReferrer } from "@/lib/customer/referrals";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 const uncheckedItemSchema = z.object({
   item_key: z.string().trim().min(1),
@@ -82,6 +83,7 @@ export async function POST(
   } catch {
     // Non-blocking.
   }
+  await noteBookingInZoho(params.id, "Completed", "The customer confirmed the clean was done.");
 
   return NextResponse.json({ success: true });
 }

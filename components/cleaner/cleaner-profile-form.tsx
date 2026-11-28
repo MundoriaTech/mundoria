@@ -195,10 +195,11 @@ export function CleanerProfileForm({
 
     if (phoneChanged) {
       setProfile((current) => ({ ...current, phone_verified_at: null }));
-      void fetch("/api/profile/crm-sync", { method: "POST" }).catch(
-        () => undefined,
-      );
     }
+    // Zoho: name/phone on the CRM lead, bio/areas/hours on the Recruit candidate.
+    void fetch("/api/profile/crm-sync", { method: "POST" }).catch(
+      () => undefined,
+    );
     setSaving(false);
     success({
       kind: "saved",

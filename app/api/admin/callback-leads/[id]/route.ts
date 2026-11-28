@@ -19,6 +19,8 @@ import { notifyCallbackDeskChange } from "@/lib/admin/notify-callback-desk";
 import { stopEnrollments } from "@/lib/outreach/engine";
 import { findLead, updateLead } from "@/lib/outreach/leads";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { zohoStageForDesk } from "@/lib/zoho/lead-status";
+import { noteSalesLeadInZoho, setSalesLeadStatusInZoho } from "@/lib/zoho/sync-jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -208,6 +210,33 @@ export async function PATCH(
       source: existing.source as string,
       summary: bits.join(". "),
     });
+  }
+
+  // Zoho: the Sales lead's stage follows the desk, and every change is noted.
+  const notesChanged =
+    ((saved.notes as string | null) ?? null) !== ((existing.notes as string | null) ?? null);
+  if (callChanged || outcomeChanged || notesChanged || areaChanged) {
+    const automation = await findLead({ email: saved.email as string, phone: saved.phone as string });
+    if (automation) {
+      if (callChanged || outcomeChanged) {
+        const stage = zohoStageForDesk(parseCallStatus(saved.call_status), parseOutcome(saved.outcome));
+        await setSalesLeadStatusInZoho(automation.id, stage.leadStatus, stage.enquiryStatus);
+      }
+      const outcome = parseOutcome(saved.outcome);
+      await noteSalesLeadInZoho(
+        automation.id,
+        "Mundoria call desk update",
+        [
+          `Updated by ${auth.profile.full_name ?? auth.profile.email ?? "the team"}.`,
+          `Call: ${CALLBACK_CALL_LABELS[parseCallStatus(saved.call_status)]}.`,
+          `Outcome: ${outcome ? CALLBACK_OUTCOME_LABELS[outcome] : "none yet"}.`,
+          `Area: ${CALLBACK_AREA_LABELS[parseArea(saved.area)]}${saved.town ? ` (${saved.town as string})` : ""}.`,
+          saved.notes ? `Notes: ${saved.notes as string}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      );
+    }
   }
 
   return NextResponse.json({ ok: true, row: saved });

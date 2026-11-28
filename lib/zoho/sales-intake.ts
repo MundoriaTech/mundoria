@@ -248,20 +248,6 @@ async function zohoLeadIdFor(leadId: string) {
   return (data?.zoho_lead_id as string | null | undefined) ?? null;
 }
 
-/**
- * The prospect booked: mark the Sales lead's enquiry as converted. Lead
- * Status is the salesperson's, so it is not changed. Soft-fails.
- */
-export async function markZohoEnquiryBooked(leadId: string) {
-  if (!salesIntakeConfig()) return;
-  try {
-    const zohoLeadId = await zohoLeadIdFor(leadId);
-    if (zohoLeadId) await updateZohoCrmRecord("Leads", zohoLeadId, { Enquiry_Status: CRM_ENQUIRY_STATUS.converted });
-  } catch (error) {
-    Sentry.captureException(error);
-  }
-}
-
 /** Email opt-out from the website: tick Email Opt Out on their CRM records. */
 export async function markZohoProspectOptOut(leadId: string, email: string | null) {
   if (!isZohoCrmConfigured()) return;

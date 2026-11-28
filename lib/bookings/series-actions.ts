@@ -2,6 +2,7 @@ import { refundBookingPayment } from "@/lib/payments/service";
 import { runMatchingEngine } from "@/lib/matching/engine";
 import { sendPushNotification } from "@/lib/notifications/send";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -80,6 +81,11 @@ export async function pauseRegularClean({
       .eq("id", visit.id);
   }
 
+  await noteBookingInZoho(
+    bookingId,
+    "Regular clean paused",
+    `Holiday pause from ${startsOn} to ${endsOn}: ${(visits ?? []).length} visit(s) skipped.`,
+  );
   return { paused: (visits ?? []).length };
 }
 
@@ -175,6 +181,7 @@ export async function changePro({
   await runMatchingEngine(booking.id, {
     excludeCleanerIds: previousCleanerId ? [previousCleanerId] : [],
   });
+  await noteBookingInZoho(booking.id, "Cleaner change requested", "The customer asked for a different cleaner; Mundoria is matching a new one.");
   return { success: true };
 }
 
@@ -229,5 +236,6 @@ export async function cancelSeriesVisits({
     })
     .in("id", ids);
   if (error) throw new Error(error.message);
+  await noteBookingInZoho(bookingId, "Regular clean cancelled", `${ids.length} upcoming visit(s) cancelled. Reason: ${reason}`);
   return { cancelled: ids.length };
 }

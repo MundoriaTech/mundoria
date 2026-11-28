@@ -1,6 +1,13 @@
 import * as Sentry from "@sentry/nextjs";
 
-import { readZohoRecordResult, zohoErrorCode, zohoFetch, zohoOrigin } from "@/lib/zoho/http";
+import {
+  isPermanentZohoCode,
+  readZohoRecordResult,
+  ZohoPermanentError,
+  zohoErrorCode,
+  zohoFetch,
+  zohoOrigin,
+} from "@/lib/zoho/http";
 import {
   CRM_ENQUIRY_TYPE,
   CRM_LEAD_SOURCE,
@@ -382,6 +389,85 @@ export async function updateZohoCrmRecord(moduleName: SearchModule, id: string, 
   if (!response.ok || result.status !== "success") {
     throw new Error(`Zoho ${moduleName} update failed (${response.status}, ${zohoErrorCode(result.code)})`);
   }
+}
+
+/**
+ * Upsert a Contact or Lead by Email and return its id. Unlike the soft-fail
+ * helpers above this throws, so the Zoho sync queue can retry or record why.
+ */
+export async function upsertZohoCrmRecordStrict(moduleName: SearchModule, record: Record<string, unknown>) {
+  const token = await getAccessToken();
+  if (!token) throw new ZohoPermanentError("Zoho CRM credentials are missing");
+  const response = await zohoFetch(`${token.apiDomain}/crm/v8/${moduleName}/upsert`, {
+    body: JSON.stringify({ data: [record], duplicate_check_fields: ["Email"] }),
+    headers: {
+      Authorization: `Zoho-oauthtoken ${token.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+  const result = await readZohoRecordResult(response);
+  if (response.status === 401) cachedToken = null;
+  if (!response.ok || result.status !== "success" || !result.details?.id) {
+    const message = `Zoho ${moduleName} upsert failed (${response.status}, ${zohoErrorCode(result.code)}${
+      result.details?.api_name ? `, ${result.details.api_name}` : ""
+    })`;
+    throw isPermanentZohoCode(result.code) ? new ZohoPermanentError(message) : new Error(message);
+  }
+  return result.details.id;
+}
+
+/** Update fields on one record, throwing a permanent error for refusals. */
+export async function updateZohoCrmRecordStrict(moduleName: SearchModule, id: string, fields: Record<string, unknown>) {
+  const token = await getAccessToken();
+  if (!token) throw new ZohoPermanentError("Zoho CRM credentials are missing");
+  const response = await zohoFetch(`${token.apiDomain}/crm/v8/${moduleName}/${encodeURIComponent(id)}`, {
+    body: JSON.stringify({ data: [fields] }),
+    headers: {
+      Authorization: `Zoho-oauthtoken ${token.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    method: "PUT",
+  });
+  const result = await readZohoRecordResult(response);
+  if (response.status === 401) cachedToken = null;
+  if (!response.ok || result.status !== "success") {
+    const message = `Zoho ${moduleName} update failed (${response.status}, ${zohoErrorCode(result.code)})`;
+    throw isPermanentZohoCode(result.code) ? new ZohoPermanentError(message) : new Error(message);
+  }
+}
+
+/**
+ * Add a note to a Contact or Lead. Needs the Notes CREATE scope; without it
+ * Zoho answers OAUTH_SCOPE_MISMATCH, which is permanent (no retries).
+ */
+export async function addZohoCrmNote(moduleName: SearchModule, id: string, title: string, content: string) {
+  const token = await getAccessToken();
+  if (!token) throw new ZohoPermanentError("Zoho CRM credentials are missing");
+  const response = await zohoFetch(`${token.apiDomain}/crm/v8/${moduleName}/${encodeURIComponent(id)}/Notes`, {
+    body: JSON.stringify({
+      data: [{ Note_Content: content.slice(0, 2000), Note_Title: title.slice(0, 120) }],
+    }),
+    headers: {
+      Authorization: `Zoho-oauthtoken ${token.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+  const result = await readZohoRecordResult(response);
+  if (response.status === 401) cachedToken = null;
+  if (!response.ok || (result.status && result.status !== "success")) {
+    const message = `Zoho ${moduleName} note failed (${response.status}, ${zohoErrorCode(result.code)})`;
+    throw isPermanentZohoCode(result.code) || response.status === 403
+      ? new ZohoPermanentError(message)
+      : new Error(message);
+  }
+}
+
+/** First name / last name the way Contacts and Leads expect them. */
+export function zohoNameFields(fullName: string) {
+  const { firstName, lastName } = splitName(fullName);
+  return { First_Name: firstName || undefined, Last_Name: lastName };
 }
 
 /**

@@ -12,6 +12,7 @@ import { runMatchingEngine } from "@/lib/matching/engine";
 import { refundBookingPayment } from "@/lib/payments/service";
 import { filterCleanersForBooking } from "@/lib/matching/seed-accounts";
 import { maybeAuthorizeBookingIfDue } from "@/lib/payments/lifecycle";
+import { noteBookingInZoho } from "@/lib/zoho/booking-notes";
 
 const schema = z.object({
   action: z.enum([
@@ -368,5 +369,24 @@ export async function POST(
     metadata: { cleanerId, status, matchResult },
     reason: note,
   });
+  const adminName = auth.profile?.full_name ?? "Mundoria admin";
+  await noteBookingInZoho(
+    params.id,
+    action === "status" && status === "cancelled"
+      ? "Cancelled by Mundoria"
+      : action === "status" && status === "completed"
+        ? "Completed"
+        : "Changed by Mundoria",
+    [
+      action === "status" && status ? `${adminName} set the status to ${status.replaceAll("_", " ")}.` : null,
+      action === "reassign" ? `${adminName} ${cleanerId ? "assigned a new cleaner" : "removed the cleaner"}.` : null,
+      action === "assignTeam" ? `${adminName} assigned the cleaning team.` : null,
+      action === "rematch" ? `${adminName} started matching again.` : null,
+      action === "status" && status === "cancelled" && booking.payment_status === "held" ? "The card hold was released." : null,
+      `Note: ${note}`,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
   return NextResponse.json({ success: true, matchResult });
 }

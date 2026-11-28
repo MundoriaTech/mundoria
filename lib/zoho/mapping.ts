@@ -10,8 +10,16 @@ export const CRM_LEAD_SOURCE = {
   website: "OnlineStore",
 } as const;
 
+/** The Sales pipeline statuses (the org's current set, not the legacy stock ones). */
 export const CRM_LEAD_STATUS = {
+  attemptingContact: "Attempting Contact",
+  booked: "Booked",
+  callbackAgreed: "Callback Agreed",
+  connectedQualifying: "Connected — Qualifying",
   newUntouched: "New — Untouched",
+  nurtureClosed: "Nurture / Closed",
+  quoteSent: "Quote Sent",
+  readyToBook: "Ready to Book",
 } as const;
 
 /** Stock statuses the old website sync wrote; Sales never set these by hand. */
@@ -30,8 +38,11 @@ export const CRM_ENQUIRY_TYPE = {
 } as const;
 
 export const CRM_ENQUIRY_STATUS = {
+  contacted: "Contacted",
   converted: "Converted",
   new: "New",
+  qualifies: "Qualifies",
+  unqualified: "Unqualified",
 } as const;
 
 export const CRM_USER_TYPE = {
@@ -44,7 +55,54 @@ export const RECRUIT_ORIGIN = "Applied";
 
 export const RECRUIT_LIFECYCLE = {
   accountCreated: "Account Created",
+  activeCleaner: "Active Cleaner",
+  applicationIncomplete: "Application Incomplete",
   applicationSubmitted: "Application Submitted",
+  documentsApproved: "Documents Approved",
+  documentsPending: "Documents Pending",
+  documentsUnderReview: "Documents Under Review",
+  onHold: "On Hold",
+  onboardingCall: "Onboarding Call",
+  onboardingCompleted: "Onboarding Completed",
+  rejected: "Rejected",
+} as const;
+
+/** Values of the per-document *_Status picklists on Candidates. */
+export const RECRUIT_DOCUMENT_STATUS = {
+  approved: "Approved",
+  expired: "Expired",
+  notUploaded: "Not Uploaded",
+  rejected: "Rejected",
+  underReview: "Under Review",
+  uploaded: "Uploaded",
+} as const;
+
+export const RECRUIT_CALL_STATUS = {
+  completed: "Completed",
+  notScheduled: "Not Scheduled",
+  reviewRequired: "Review Required",
+  scheduled: "Scheduled",
+} as const;
+
+export const RECRUIT_ACTIVATION = {
+  approved: "Approved by Operations",
+  notReady: "Not Ready",
+  onHold: "On Hold",
+  ready: "Ready for Operations Review",
+} as const;
+
+export const RECRUIT_ONBOARDING = {
+  completed: "Completed",
+  inProgress: "In Progress",
+  notStarted: "Not Started",
+  onHold: "On Hold",
+} as const;
+
+export const RECRUIT_ASSESSMENT = {
+  notTaken: "Not Taken",
+  passed: "Passed",
+  retake: "Retake Required",
+  review: "Review Required",
 } as const;
 
 /** The ads landing page; other website forms count as the website. */

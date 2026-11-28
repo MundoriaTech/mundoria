@@ -8,6 +8,7 @@ import {
   hardDeleteBlockMessage,
   hardDeleteUnusedUser,
 } from "@/lib/admin/delete-user";
+import { closeAccountInZoho } from "@/lib/zoho/sync-jobs";
 
 const deleteSchema = z.object({
   reason: z.string().trim().min(3).max(500),
@@ -106,6 +107,12 @@ export async function DELETE(
       role: eligibility.role,
     },
     reason: parsed.data.reason,
+  });
+  await closeAccountInZoho({
+    email: eligibility.email,
+    fullName: eligibility.fullName,
+    reason: parsed.data.reason,
+    role: eligibility.role,
   });
 
   revalidatePath("/admin/dashboard");

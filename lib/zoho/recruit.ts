@@ -1,6 +1,13 @@
 import * as Sentry from "@sentry/nextjs";
 
-import { readZohoRecordResult, zohoErrorCode, zohoFetch, zohoOrigin } from "@/lib/zoho/http";
+import {
+  isPermanentZohoCode,
+  readZohoRecordResult,
+  ZohoPermanentError,
+  zohoErrorCode,
+  zohoFetch,
+  zohoOrigin,
+} from "@/lib/zoho/http";
 import {
   RECRUIT_LIFECYCLE,
   RECRUIT_ORIGIN,
@@ -231,4 +238,40 @@ export async function upsertZohoCandidate(
   } catch (error) {
     Sentry.captureException(error);
   }
+}
+
+/**
+ * Upsert a candidate with the given hiring fields and return its id. Throws
+ * (for the sync queue). A field or value the org rejects is dropped and the
+ * rest is sent again, so one bad field never blocks the others.
+ */
+export async function upsertZohoCandidateStrict(
+  person: ZohoCandidate,
+  fields: Record<string, unknown>,
+) {
+  if (!isZohoRecruitConfigured()) throw new ZohoPermanentError("Zoho Recruit credentials are missing");
+  const email = person.email.trim().toLowerCase();
+  const identity = identityRecord({ ...person, email });
+  let record: Record<string, unknown> = { ...identity, ...fields };
+  const dropped: string[] = [];
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const outcome = await upsertCandidate(record);
+    if (!outcome) throw new ZohoPermanentError("Zoho Recruit credentials are missing");
+    const { response, result } = outcome;
+    if (response.ok && result.status === "success" && result.details?.id) {
+      if (dropped.length) Sentry.captureMessage(`Zoho Recruit rejected candidate fields: ${dropped.join(", ")}`, "warning");
+      return result.details.id;
+    }
+    const rejected = result.details?.api_name;
+    if (result.status === "error" && rejected && rejected in record && !(rejected in identity)) {
+      dropped.push(rejected);
+      const { [rejected]: _omit, ...rest } = record;
+      void _omit;
+      record = rest;
+      continue;
+    }
+    const message = `Zoho Recruit Candidates upsert failed (${response.status}, ${zohoErrorCode(result.code)})`;
+    throw isPermanentZohoCode(result.code) ? new ZohoPermanentError(message) : new Error(message);
+  }
+  throw new ZohoPermanentError(`Zoho Recruit kept rejecting candidate fields: ${dropped.join(", ")}`);
 }

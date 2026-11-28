@@ -10,6 +10,8 @@ import { appUrl } from "@/lib/outreach/config";
 import { enrollLead, runDueEnrollments, stopEnrollments } from "@/lib/outreach/engine";
 import { JOURNEYS, type JourneyId } from "@/lib/outreach/journeys";
 import { getLead, leadName, logLeadEvent, recordConsent, updateLead } from "@/lib/outreach/leads";
+import { zohoStageForLead } from "@/lib/zoho/lead-status";
+import { noteSalesLeadInZoho, setSalesLeadStatusInZoho } from "@/lib/zoho/sync-jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +77,24 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   });
   if (input.status === "lost" || input.status === "booked" || input.doNotContact) {
     await stopEnrollments(lead.id, `admin_${input.status ?? "do_not_contact"}`);
+  }
+  // Zoho: the Sales lead's stage follows the status set here, with a note.
+  if (input.status && input.status !== lead.status) {
+    const stage = zohoStageForLead(input.status);
+    await setSalesLeadStatusInZoho(lead.id, stage.leadStatus, stage.enquiryStatus);
+  }
+  const zohoNote = [
+    input.status && input.status !== lead.status ? `Status set to ${input.status}.` : null,
+    input.doNotContact === true ? "Marked do not contact." : null,
+    input.doNotContact === false ? "Do not contact removed." : null,
+    input.notes !== undefined && input.notes !== lead.notes ? `Notes: ${input.notes || "(cleared)"}` : null,
+  ].filter(Boolean);
+  if (zohoNote.length) {
+    await noteSalesLeadInZoho(
+      lead.id,
+      "Mundoria lead update",
+      `Updated by ${auth.profile.full_name ?? auth.profile.email ?? "the team"}.\n${zohoNote.join("\n")}`,
+    );
   }
   await logAdminAction({
     action: "lead.update",
@@ -183,6 +203,22 @@ export async function POST(request: Request, { params }: { params: { id: string 
         auth.profile.id,
       );
       break;
+  }
+
+  if (result.ok) {
+    const zohoNote =
+      input.action === "send_message"
+        ? { content: `${who} sent a ${input.channel === "email" ? "email" : "text"}${input.channel === "email" && input.subject ? ` (“${input.subject}”)` : ""}:\n${input.body}`, title: "Message sent from Mundoria" }
+        : input.action === "approve_draft"
+          ? { content: `${who} approved and sent the AI reply:\n${input.reply}`, title: "Message sent from Mundoria" }
+          : input.action === "call_now"
+            ? { content: `${who} started an AI call. The result is added when the call ends.`, title: "AI call started" }
+            : input.action === "start_journey"
+              ? { content: `${who} started the ${input.journey.replaceAll("_", " ")} follow-up.`, title: "Follow-up started" }
+              : input.action === "stop_journeys"
+                ? { content: `${who} stopped all automatic follow-ups.`, title: "Follow-ups stopped" }
+                : { content: `${who} recorded ${input.channel} consent: ${input.granted ? "yes" : "no"}. ${input.note}`, title: "Consent recorded" };
+    await noteSalesLeadInZoho(lead.id, zohoNote.title, zohoNote.content);
   }
 
   await logAdminAction({
