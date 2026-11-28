@@ -7,6 +7,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import { cleanerPayOverride } from "@/lib/payments/pay-overrides";
 
+/** Off: customers are never charged for a cleaner waiting at the door. */
+const WAITING_CHARGES_ENABLED = false;
+
 export async function createManualPaymentIntent({
   amount,
   bookingId,
@@ -278,7 +281,8 @@ export async function captureBookingPayment(bookingId: string) {
 
   // Waiting charge: its own payment, so the main hold amount never changes.
   let waitingChargeId: string | null = null;
-  const penalty = Number(booking.access_penalty_pence ?? 0);
+  // Waiting charges are switched off; a stored amount is never taken.
+  const penalty = WAITING_CHARGES_ENABLED ? Number(booking.access_penalty_pence ?? 0) : 0;
   if (penalty > 0 && !booking.access_penalty_payment_intent_id) {
     try {
       const waiting = await chargeSavedCard({

@@ -60,7 +60,9 @@ export async function confirmCleanStart({
   // The cleaner can start alone once they've arrived (the customer may not
   // be home: key safe, Airbnb, office). The customer's tap is optional.
   if (cleanerConfirmed) {
-    const penalty = accessPenaltyPence(booking.access_grace_ends_at, now);
+    // Waiting charges are switched off: the cleaner reports a wait with
+    // "Customer not answering" instead, and nothing is charged.
+    const penalty = 0;
     await admin
       .from("bookings")
       .update({
@@ -74,9 +76,7 @@ export async function confirmCleanStart({
     await sendPushNotification(
       booking.customer_id,
       "Cleaning has started",
-      penalty > 0
-        ? `Your clean has started. A waiting charge of £${(penalty / 100).toFixed(2)} applies for the wait after the 5-minute grace.`
-        : customerConfirmed
+      customerConfirmed
           ? "You both confirmed, so the clean has started."
           : "Your cleaner has started the clean.",
       { booking_id: bookingId },

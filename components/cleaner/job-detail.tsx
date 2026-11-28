@@ -115,6 +115,8 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     scheduledStartTime: job.scheduled_start_time,
   });
   const [working, setWorking] = useState(false);
+  const [waitingReportedAt, setWaitingReportedAt] = useState<string | null>(null);
+  const [waitingNotice, setWaitingNotice] = useState<string | null>(null);
   const [showSafety, setShowSafety] = useState(false);
   const [locationFailed, setLocationFailed] = useState(false);
   const [overrideCoords, setOverrideCoords] = useState<{
@@ -286,6 +288,28 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
     }
   }
 
+  async function reportNotAnswering() {
+    setWorking(true);
+    setError(null);
+    const response = await fetch(`/api/cleaner/jobs/${job.id}/not-answering`, { method: "POST" });
+    const result = (await response.json().catch(() => ({}))) as {
+      alreadyReported?: boolean;
+      error?: string;
+      reportedAt?: string;
+    };
+    setWorking(false);
+    if (!response.ok) {
+      setError(result.error ?? "Couldn't send that. Try again, or call the Mundoria team.");
+      return;
+    }
+    setWaitingReportedAt(result.reportedAt ?? new Date().toISOString());
+    setWaitingNotice(
+      result.alreadyReported
+        ? "Already sent. The customer and the Mundoria team know you're waiting. You can tap again in a few minutes."
+        : "Sent. The customer has been told you're at the door and the Mundoria team has been alerted.",
+    );
+  }
+
   async function confirmGate(confirmed: boolean) {
     setWorking(true);
     setError(null);
@@ -439,6 +463,19 @@ export function JobDetail({ initialJob }: { initialJob: CleanerJob }) {
                 >
                   Start cleaning
                 </button>
+              ) : null}
+              {job.status === "cleaner_en_route" && job.arrived_at ? (
+                <button
+                  className={`${actionOutline} w-full`}
+                  disabled={working}
+                  onClick={() => void reportNotAnswering()}
+                  type="button"
+                >
+                  {waitingReportedAt ? "Still waiting: tell them again" : "Customer not answering"}
+                </button>
+              ) : null}
+              {waitingNotice && job.status === "cleaner_en_route" ? (
+                <p className="text-center text-sm text-[#5a5470]">{waitingNotice}</p>
               ) : null}
               {job.status === "in_progress" ? (
                 <button

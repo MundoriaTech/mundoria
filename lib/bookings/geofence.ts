@@ -197,7 +197,7 @@ export async function recordArrival({
   await sendPushNotification(
     visit.customer_id,
     "Your cleaner has arrived",
-    "They are outside. You have 5 minutes to let them in, then a £0.50 per minute waiting charge can apply (up to £15).",
+    "They are outside. Please let them in.",
     { booking_id: bookingId },
   );
   await sendVisitEmail(bookingId, visit, "customer.cleaner_checked_in");
